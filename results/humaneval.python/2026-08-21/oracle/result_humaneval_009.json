@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_009",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List, Tuple\\n\\n\\ndef rolling_max(numbers: List[int]) -> List[int]:\\n    \\\"\\\"\\\" From a given list of integers, generate a list of rolling maximum element found until given moment\\n    in the sequence.\\n    >>> rolling_max([1, 2, 3, 2, 3, 4, 2])\\n    [1, 2, 3, 3, 3, 4, 4]\\n    \\\"\\\"\\\"\\n    running_max = None\\n    result = []\\n\\n    for n in numbers:\\n        if running_max is None:\\n            running_max = n\\n        else:\\n            running_max = max(running_max, n)\\n\\n        result.append(running_max)\\n\\n    return result\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 0.051,
+    "setup_s": 0.0,
+    "grade_s": 0.051
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

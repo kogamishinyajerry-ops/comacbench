@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_074",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef total_match(lst1, lst2):\\n    '''\\n    Write a function that accepts two lists of strings and returns the list that has \\n    total number of chars in the all strings of the list less than the other list.\\n\\n    if the two lists have the same number of chars, return the first list.\\n\\n    Examples\\n    total_match([], []) ➞ []\\n    total_match(['hi', 'admin'], ['hI', 'Hi']) ➞ ['hI', 'Hi']\\n    total_match(['hi', 'admin'], ['hi', 'hi', 'admin', 'project']) ➞ ['hi', 'admin']\\n    total_match(['hi', 'admin'], ['hI', 'hi', 'hi']) ➞ ['hI', 'hi', 'hi']\\n    total_match(['4'], ['1', '2', '3', '4', '5']) ➞ ['4']\\n    '''\\n    l1 = 0\\n    for st in lst1:\\n        l1 += len(st)\\n    \\n    l2 = 0\\n    for st in lst2:\\n        l2 += len(st)\\n    \\n    if l1 <= l2:\\n        return lst1\\n    else:\\n        return lst2\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 11, \"cases_total\": 11, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.043,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

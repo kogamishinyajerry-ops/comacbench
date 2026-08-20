@@ -1,0 +1,53 @@
+id: gsm8k_q0015
+registry_id: gsm8k.math_reasoning
+domain: knowledge
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: gsm8k@openai-master+test.jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/gsm8k.math_reasoning/gsm8k_q0015.md
+  prompt_sha256: 422d11d14b855c2cbc3bc8f9bcec9ca7411bdba25b7c1d8b3d5fb34b816ee700
+  assets:
+  - path: data/gsm8k/math_reasoning/test.jsonl
+    digest: 3730d312f6e3440559ace48831e51066acaca737f6eabec99bccb9e4b3c39d14
+output_contract:
+- answer
+reference:
+  source: GSM8K test.jsonl（MIT, openai/grade-school-math）
+  revision: gsm8k@openai-master+test.jsonl_20260821
+  question_index: 15
+  reference_number: 125.0
+  refusal_expected: false
+  uncertainty_note: '参考数为官方 #### 标注，唯一确定；容差 1e-6 等效精确匹配'
+grader:
+  answer_format: math_answer
+  validity_gate: true
+  objective_layer: numeric_exact
+  parse_rule: hash_hash_hash_then_answer_is_then_last_number
+  numeric_rel_tol: 1.0e-06
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯数值答案：physics/objective/robustness 不适用（result.json 标注 N/A），权重经 YAML 覆写塌缩到
+    requirements
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: openai/grade-school-math
+  license: MIT
+  status: confirmed-repo
+  revision: gsm8k@openai-master+test.jsonl_20260821
+  mirror_allowed: true

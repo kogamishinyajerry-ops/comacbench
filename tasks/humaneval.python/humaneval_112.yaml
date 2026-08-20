@@ -1,0 +1,67 @@
+id: humaneval_112
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_112.md
+  prompt_sha256: 44534bbaf3662abc63aacf16b739473a9ebcaf2e984a5ed6e1500e547cd1e383
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_112.py
+    digest: 16fa8766a7d3390df48a298a4cf39b91b691c344a12d299b7c60df7a8b4bf23a
+output_contract:
+- function:reverse_delete
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/112
+  entry_point: reverse_delete
+  n_test_cases: 9
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: reverse_delete
+  tests:
+  - assert reverse_delete('abcde', 'ae') == ('bcd', False)
+  - assert reverse_delete('abcdef', 'b') == ('acdef', False)
+  - assert reverse_delete('abcdedcba', 'ab') == ('cdedc', True)
+  - assert reverse_delete('dwik', 'w') == ('dik', False)
+  - assert reverse_delete('a', 'a') == ('', True)
+  - assert reverse_delete('abcdedcba', '') == ('abcdedcba', True)
+  - assert reverse_delete('abcdedcba', 'v') == ('abcdedcba', True)
+  - assert reverse_delete('vabba', 'v') == ('abba', True)
+  - assert reverse_delete('mamma', 'mia') == ('', True)
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_112.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

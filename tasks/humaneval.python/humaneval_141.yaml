@@ -1,0 +1,84 @@
+id: humaneval_141
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_141.md
+  prompt_sha256: b17ee463326e1ded8844b8ab29b58438674e4b64f157b9bcfea5748ef49bc538
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_141.py
+    digest: 53782b100ecf907c0ac96968a2ba466ce5ac80110d9858f31af913a399357894
+output_contract:
+- function:file_name_check
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/141
+  entry_point: file_name_check
+  n_test_cases: 26
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: file_name_check
+  tests:
+  - assert file_name_check('example.txt') == 'Yes'
+  - assert file_name_check('1example.dll') == 'No'
+  - assert file_name_check('s1sdf3.asd') == 'No'
+  - assert file_name_check('K.dll') == 'Yes'
+  - assert file_name_check('MY16FILE3.exe') == 'Yes'
+  - assert file_name_check('His12FILE94.exe') == 'No'
+  - assert file_name_check('_Y.txt') == 'No'
+  - assert file_name_check('?aREYA.exe') == 'No'
+  - assert file_name_check('/this_is_valid.dll') == 'No'
+  - assert file_name_check('this_is_valid.wow') == 'No'
+  - assert file_name_check('this_is_valid.txt') == 'Yes'
+  - assert file_name_check('this_is_valid.txtexe') == 'No'
+  - assert file_name_check('#this2_i4s_5valid.ten') == 'No'
+  - assert file_name_check('@this1_is6_valid.exe') == 'No'
+  - assert file_name_check('this_is_12valid.6exe4.txt') == 'No'
+  - assert file_name_check('all.exe.txt') == 'No'
+  - assert file_name_check('I563_No.exe') == 'Yes'
+  - assert file_name_check('Is3youfault.txt') == 'Yes'
+  - assert file_name_check('no_one#knows.dll') == 'Yes'
+  - assert file_name_check('1I563_Yes3.exe') == 'No'
+  - assert file_name_check('I563_Yes3.txtt') == 'No'
+  - assert file_name_check('final..txt') == 'No'
+  - assert file_name_check('final132') == 'No'
+  - assert file_name_check('_f4indsartal132.') == 'No'
+  - assert file_name_check('.txt') == 'No'
+  - assert file_name_check('s.') == 'No'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_141.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

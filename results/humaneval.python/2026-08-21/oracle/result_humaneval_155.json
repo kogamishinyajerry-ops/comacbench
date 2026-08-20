@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_155",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef even_odd_count(num):\\n    \\\"\\\"\\\"Given an integer. return a tuple that has the number of even and odd digits respectively.\\n\\n     Example:\\n        even_odd_count(-12) ==> (1, 1)\\n        even_odd_count(123) ==> (1, 2)\\n    \\\"\\\"\\\"\\n    even_count = 0\\n    odd_count = 0\\n    for i in str(abs(num)):\\n        if int(i)%2==0:\\n            even_count +=1\\n        else:\\n            odd_count +=1\\n    return (even_count, odd_count)\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.048,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

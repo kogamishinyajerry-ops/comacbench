@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_153",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef Strongest_Extension(class_name, extensions):\\n    \\\"\\\"\\\"You will be given the name of a class (a string) and a list of extensions.\\n    The extensions are to be used to load additional classes to the class. The\\n    strength of the extension is as follows: Let CAP be the number of the uppercase\\n    letters in the extension's name, and let SM be the number of lowercase letters \\n    in the extension's name, the strength is given by the fraction CAP - SM. \\n    You should find the strongest extension and return a string in this \\n    format: ClassName.StrongestExtensionName.\\n    If there are two or more extensions with the same strength, you should\\n    choose the one that comes first in the list.\\n    For example, if you are given \\\"Slices\\\" as the class and a list of the\\n    extensions: ['SErviNGSliCes', 'Cheese', 'StuFfed'] then you should\\n    return 'Slices.SErviNGSliCes' since 'SErviNGSliCes' is the strongest extension \\n    (its strength is -1).\\n    Example:\\n    for Strongest_Extension('my_class', ['AA', 'Be', 'CC']) == 'my_class.AA'\\n    \\\"\\\"\\\"\\n    strong = extensions[0]\\n    my_val = len([x for x in extensions[0] if x.isalpha() and x.isupper()]) - len([x for x in extensions[0] if x.isalpha() and x.islower()])\\n    for s in extensions:\\n        val = len([x for x in s if x.isalpha() and x.isupper()]) - len([x for x in s if x.isalpha() and x.islower()])\\n        if val > my_val:\\n            strong = s\\n            my_val = val\\n\\n    ans = class_name + \\\".\\\" + strong\\n    return ans\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

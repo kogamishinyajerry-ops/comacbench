@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_093",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef encode(message):\\n    \\\"\\\"\\\"\\n    Write a function that takes a message, and encodes in such a \\n    way that it swaps case of all letters, replaces all vowels in \\n    the message with the letter that appears 2 places ahead of that \\n    vowel in the english alphabet. \\n    Assume only letters. \\n    \\n    Examples:\\n    >>> encode('test')\\n    'TGST'\\n    >>> encode('This is a message')\\n    'tHKS KS C MGSSCGG'\\n    \\\"\\\"\\\"\\n    vowels = \\\"aeiouAEIOU\\\"\\n    vowels_replace = dict([(i, chr(ord(i) + 2)) for i in vowels])\\n    message = message.swapcase()\\n    return ''.join([vowels_replace[i] if i in vowels else i for i in message])\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.048,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

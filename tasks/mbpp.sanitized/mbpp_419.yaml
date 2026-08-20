@@ -1,0 +1,58 @@
+id: mbpp_419
+registry_id: mbpp.sanitized
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbpp@sanitized_test+hf_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized/mbpp_419.md
+  prompt_sha256: c4ae260bc72e4319b1a524c24e4e1388f01e0bd5689ded0a714b590c5aaab7f9
+  assets:
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized/oracle/mbpp_419.py
+    digest: 285b3b41bf8a26eeb3f7b0d98ce0ff933e3833ccb3192e2783be2d3739eaf0a3
+output_contract:
+- script
+reference:
+  source: MBPP sanitized test（CC BY 4.0, google-research-datasets/mbpp）
+  revision: mbpp@sanitized_test+hf_20260821
+  mbpp_task_id: 419
+  n_test_cases: 3
+  uncertainty_note: 断言二值判定无比对不确定度
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - assert round_and_sum([22.4, 4.0, -16.22, -9.10, 11.00, -12.22, 14.20, -5.20, 17.50])==243
+  - assert round_and_sum([5,2,9,24.3,29])==345
+  - assert round_and_sum([25.0,56.7,89.2])==513
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized/oracle/mbpp_419.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: google-research-datasets/mbpp（HF sanitized test split）
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: mbpp@sanitized_test+hf_20260821
+  mirror_allowed: true

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_049",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\n\\ndef modp(n: int, p: int):\\n    \\\"\\\"\\\"Return 2^n modulo p (be aware of numerics).\\n    >>> modp(3, 5)\\n    3\\n    >>> modp(1101, 101)\\n    2\\n    >>> modp(0, 101)\\n    1\\n    >>> modp(3, 11)\\n    8\\n    >>> modp(100, 101)\\n    1\\n    \\\"\\\"\\\"\\n    ret = 1\\n    for i in range(n):\\n        ret = (2 * ret) % p\\n    return ret\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.045,
+    "setup_s": 0.0,
+    "grade_s": 0.045
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

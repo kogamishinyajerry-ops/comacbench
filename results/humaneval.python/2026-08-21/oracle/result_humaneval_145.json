@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_145",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef order_by_points(nums):\\n    \\\"\\\"\\\"\\n    Write a function which sorts the given list of integers\\n    in ascending order according to the sum of their digits.\\n    Note: if there are several items with similar sum of their digits,\\n    order them based on their index in original list.\\n\\n    For example:\\n    >>> order_by_points([1, 11, -1, -11, -12]) == [-1, -11, 1, -12, 11]\\n    >>> order_by_points([]) == []\\n    \\\"\\\"\\\"\\n    def digits_sum(n):\\n        neg = 1\\n        if n < 0: n, neg = -1 * n, -1 \\n        n = [int(i) for i in str(n)]\\n        n[0] = n[0] * neg\\n        return sum(n)\\n    return sorted(nums, key=digits_sum)\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.042,
+    "setup_s": 0.0,
+    "grade_s": 0.041
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

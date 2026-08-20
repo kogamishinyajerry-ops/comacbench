@@ -1,0 +1,78 @@
+id: humaneval_076
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_076.md
+  prompt_sha256: 3c3b8af1de48c00396a5f70af7dcc1ac8bbe90800fee5606459dbb797848036a
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_076.py
+    digest: 2f7a60ed39a50c4939b68bbd052a66d7319811e3a2b497d53231ebbc4852a32d
+output_contract:
+- function:is_simple_power
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/76
+  entry_point: is_simple_power
+  n_test_cases: 10
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: is_simple_power
+  tests:
+  - assert is_simple_power(16, 2) == True, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(143214, 16) == False, 'This prints if this assert fails
+    1 (good for debugging!)'
+  - assert is_simple_power(4, 2) == True, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(9, 3) == True, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(16, 4) == True, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(24, 2) == False, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(128, 4) == False, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(12, 6) == False, 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert is_simple_power(1, 1) == True, 'This prints if this assert fails 2 (also
+    good for debugging!)'
+  - assert is_simple_power(1, 12) == True, 'This prints if this assert fails 2 (also
+    good for debugging!)'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_076.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

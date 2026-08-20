@@ -1,0 +1,65 @@
+id: humaneval_083
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_083.md
+  prompt_sha256: 3d2bdafedb466c4cf6215c6ef37628df73c21d5b076ef9cf29a2f8378ad150f0
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_083.py
+    digest: 6beb958c2846db681063abaaf06799deace6f12faed535673309dbb5b2cea70e
+output_contract:
+- function:starts_one_ends
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/83
+  entry_point: starts_one_ends
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: starts_one_ends
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert starts_one_ends(1) == 1
+  - assert starts_one_ends(2) == 18
+  - assert starts_one_ends(3) == 180
+  - assert starts_one_ends(4) == 1800
+  - assert starts_one_ends(5) == 18000
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_083.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

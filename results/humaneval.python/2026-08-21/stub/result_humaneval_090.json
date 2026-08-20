@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_090",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.125,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5625,
+  "artifacts": {
+    "code": "\"pass\\n\"",
+    "model_meta": "{\"provider\": \"stub\", \"seed\": 0}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 1, \"cases_total\": 8, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}, {\"case\": 2, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}, {\"case\": 3, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}, {\"case\": 4, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}, {\"case\": 5, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}, {\"case\": 6, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}, {\"case\": 7, \"pass\": false, \"err\": \"NameError: name 'next_smallest' is not defined\"}], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.042,
+    "setup_s": 0.0,
+    "grade_s": 0.042
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

@@ -1,0 +1,58 @@
+id: mbpp_409
+registry_id: mbpp.sanitized
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbpp@sanitized_test+hf_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized/mbpp_409.md
+  prompt_sha256: 48dc39bf742b3bb87cec8ae205a474c3d9ad6f3b33c0ffadb1c91782e3bc0f8c
+  assets:
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized/oracle/mbpp_409.py
+    digest: 9ebca0050f4c852f605352c3f3026ad49f4e6182aca3c890767c511c6629eef7
+output_contract:
+- script
+reference:
+  source: MBPP sanitized test（CC BY 4.0, google-research-datasets/mbpp）
+  revision: mbpp@sanitized_test+hf_20260821
+  mbpp_task_id: 409
+  n_test_cases: 3
+  uncertainty_note: 断言二值判定无比对不确定度
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - assert min_product_tuple([(2, 7), (2, 6), (1, 8), (4, 9)] )==8
+  - assert min_product_tuple([(10,20), (15,2), (5,10)] )==30
+  - assert min_product_tuple([(11,44), (10,15), (20,5), (12, 9)] )==100
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized/oracle/mbpp_409.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: google-research-datasets/mbpp（HF sanitized test split）
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: mbpp@sanitized_test+hf_20260821
+  mirror_allowed: true

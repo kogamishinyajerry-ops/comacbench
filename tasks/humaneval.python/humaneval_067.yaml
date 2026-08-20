@@ -1,0 +1,65 @@
+id: humaneval_067
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_067.md
+  prompt_sha256: 6378ccbdcf08a00c373f8241cbd6ce1e3570f54bb65ee4e17a67a76773ab1413
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_067.py
+    digest: b179b99c82cb124f6f09c266dedc4e153b448288be0b178318574eb5c7517700
+output_contract:
+- function:fruit_distribution
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/67
+  entry_point: fruit_distribution
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: fruit_distribution
+  tests:
+  - assert fruit_distribution('5 apples and 6 oranges', 19) == 8
+  - assert fruit_distribution('5 apples and 6 oranges', 21) == 10
+  - assert fruit_distribution('0 apples and 1 oranges', 3) == 2
+  - assert fruit_distribution('1 apples and 0 oranges', 3) == 2
+  - assert fruit_distribution('2 apples and 3 oranges', 100) == 95
+  - assert fruit_distribution('2 apples and 3 oranges', 5) == 0
+  - assert fruit_distribution('1 apples and 100 oranges', 120) == 19
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_067.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

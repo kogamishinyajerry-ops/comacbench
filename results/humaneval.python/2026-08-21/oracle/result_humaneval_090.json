@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_090",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef next_smallest(lst):\\n    \\\"\\\"\\\"\\n    You are given a list of integers.\\n    Write a function next_smallest() that returns the 2nd smallest element of the list.\\n    Return None if there is no such element.\\n    \\n    next_smallest([1, 2, 3, 4, 5]) == 2\\n    next_smallest([5, 1, 4, 3, 2]) == 2\\n    next_smallest([]) == None\\n    next_smallest([1, 1]) == None\\n    \\\"\\\"\\\"\\n    lst = sorted(set(lst))\\n    return None if len(lst) < 2 else lst[1]\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

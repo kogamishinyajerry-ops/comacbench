@@ -1,0 +1,60 @@
+id: mbpp_111
+registry_id: mbpp.sanitized
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbpp@sanitized_test+hf_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized/mbpp_111.md
+  prompt_sha256: 040bff735fb1094bed2f047ab29897da3f3cce4f0f0755d4e7f7e6e80c77465d
+  assets:
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized/oracle/mbpp_111.py
+    digest: 2624873fc040fd26f8d262ce7f443946d6d2aa927cac850052db82ec697796bc
+output_contract:
+- script
+reference:
+  source: MBPP sanitized test（CC BY 4.0, google-research-datasets/mbpp）
+  revision: mbpp@sanitized_test+hf_20260821
+  mbpp_task_id: 111
+  n_test_cases: 3
+  uncertainty_note: 断言二值判定无比对不确定度
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - assert set(common_in_nested_lists([[12, 18, 23, 25, 45], [7, 12, 18, 24, 28],
+    [1, 5, 8, 12, 15, 16, 18]]))==set([18, 12])
+  - assert set(common_in_nested_lists([[12, 5, 23, 25, 45], [7, 11, 5, 23, 28], [1,
+    5, 8, 18, 23, 16]]))==set([5,23])
+  - assert set(common_in_nested_lists([[2, 3,4, 1], [4, 5], [6,4, 8],[4, 5], [6, 8,4]]))==set([4])
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized/oracle/mbpp_111.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: google-research-datasets/mbpp（HF sanitized test split）
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: mbpp@sanitized_test+hf_20260821
+  mirror_allowed: true

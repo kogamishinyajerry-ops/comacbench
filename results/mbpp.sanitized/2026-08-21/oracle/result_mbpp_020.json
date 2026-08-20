@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_020",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def is_woodall(x): \\n\\tif (x % 2 == 0): \\n\\t\\treturn False\\n\\tif (x == 1): \\n\\t\\treturn True\\n\\tx = x + 1 \\n\\tp = 0\\n\\twhile (x % 2 == 0): \\n\\t\\tx = x/2\\n\\t\\tp = p + 1\\n\\t\\tif (p == x): \\n\\t\\t\\treturn True\\n\\treturn False\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

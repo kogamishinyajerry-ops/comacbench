@@ -89,6 +89,12 @@ _SYSTEM_PROMPT_JSON = (
     "Do not wrap it in code fences or add commentary."
 )
 
+_SYSTEM_PROMPT_MATH = (
+    "You are an expert mathematician.\n"
+    "Solve the problem step by step, then end your response with the final "
+    "numeric answer on its own last line in the exact format:\n#### <number>"
+)
+
 _CODE_FENCE_RE = re.compile(r"```(?:python|py)?\s*\n(.*?)```", re.S)
 
 
@@ -147,6 +153,14 @@ def _stub_free_text(task: TaskSpec, seed: int, prompt: str) -> str:
     return f"ANSWER: {' '.join(words)}\nBASIS: report\nCITATION: [1]"
 
 
+def _stub_math(task: TaskSpec, seed: int, prompt: str) -> str:
+    """确定性 math stub：伪 CoT + 确定性错误数（0..9999）。
+    数值路径全链路打通（抽取/比对/汇总），答案本身无意义。"""
+    h = int(hashlib.sha256(
+        f"{seed}|{task.id}|{prompt[:64]}".encode()).hexdigest(), 16)
+    return f"Let me compute step by step (stub).\n#### {h % 10000}"
+
+
 # ---------------------------------------------------------------- chat/completions
 
 _SYSTEM_PROMPT = (
@@ -165,7 +179,8 @@ def _chat_completions_answer(
     system = {"mcq": _SYSTEM_PROMPT,
               "free_text": _SYSTEM_PROMPT_FREE_TEXT,
               "code": _SYSTEM_PROMPT_CODE,
-              "json": _SYSTEM_PROMPT_JSON}[expect]
+              "json": _SYSTEM_PROMPT_JSON,
+              "math_answer": _SYSTEM_PROMPT_MATH}[expect]
 
     def make_body(patch: dict[str, Any] | None) -> bytes:
         req_body: dict[str, Any] = {
@@ -182,7 +197,7 @@ def _chat_completions_answer(
         return json.dumps(req_body).encode()
 
     def accept(raw: str) -> int | None | str:
-        """mcq: 选项号；code: python 围栏块；json: dict；其余: 剥思考原文。"""
+        """mcq: 选项号；code: python 围栏块；json: dict；math/free_text: 剥思考原文。"""
         if expect == "mcq":
             return parse_answer(raw)
         if expect == "code":
@@ -408,6 +423,10 @@ def get_answer(
             raw = _stub_free_text(task, seed, prompt)
             return {"answer": raw, "raw": raw, "attempts": 1,
                     "meta": {"provider": "stub", "seed": seed}}
+        if expect == "math_answer":
+            raw = _stub_math(task, seed, prompt)
+            return {"answer": raw, "raw": raw, "attempts": 1,
+                    "meta": {"provider": "stub", "seed": seed}}
         a = _stub_answer(task, seed, prompt)
         return {"answer": a, "raw": str(a), "attempts": 1,
                 "meta": {"provider": "stub", "seed": seed}}
@@ -436,6 +455,11 @@ def get_answer(
                     "meta": {"provider": "oracle"}}
         if expect == "free_text":
             raw = _oracle_free_text(task)
+            return {"answer": raw, "raw": raw, "attempts": 1,
+                    "meta": {"provider": "oracle"}}
+        if expect == "math_answer":
+            ref = task["reference"]["reference_number"]
+            raw = f"The answer is computed from the reference solution.\n#### {ref}"
             return {"answer": raw, "raw": raw, "attempts": 1,
                     "meta": {"provider": "oracle"}}
         ref = task["reference"]["correct_option_index"]

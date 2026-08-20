@@ -1,0 +1,66 @@
+id: humaneval_064
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_064.md
+  prompt_sha256: 58b72f2b4b76bd8896d7f25cfbc026c4ede59622aa021844008ec8d77b4c15a5
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_064.py
+    digest: 590d534f0cb8d0c44f84d5bcef7a9aefc4666dc789add0ea203de7df81e30391
+output_contract:
+- function:vowels_count
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/64
+  entry_point: vowels_count
+  n_test_cases: 8
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: vowels_count
+  tests:
+  - assert vowels_count('abcde') == 2, 'Test 1'
+  - assert vowels_count('Alone') == 3, 'Test 2'
+  - assert vowels_count('key') == 2, 'Test 3'
+  - assert vowels_count('bye') == 1, 'Test 4'
+  - assert vowels_count('keY') == 2, 'Test 5'
+  - assert vowels_count('bYe') == 1, 'Test 6'
+  - assert vowels_count('ACEDY') == 3, 'Test 7'
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_064.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

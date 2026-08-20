@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_096",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef count_up_to(n):\\n    \\\"\\\"\\\"Implement a function that takes an non-negative integer and returns an array of the first n\\n    integers that are prime numbers and less than n.\\n    for example:\\n    count_up_to(5) => [2,3]\\n    count_up_to(11) => [2,3,5,7]\\n    count_up_to(0) => []\\n    count_up_to(20) => [2,3,5,7,11,13,17,19]\\n    count_up_to(1) => []\\n    count_up_to(18) => [2,3,5,7,11,13,17]\\n    \\\"\\\"\\\"\\n    primes = []\\n    for i in range(2, n):\\n        is_prime = True\\n        for j in range(2, i):\\n            if i % j == 0:\\n                is_prime = False\\n                break\\n        if is_prime:\\n            primes.append(i)\\n    return primes\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

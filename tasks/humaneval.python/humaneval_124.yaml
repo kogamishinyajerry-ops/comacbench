@@ -1,0 +1,74 @@
+id: humaneval_124
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_124.md
+  prompt_sha256: e54df369d865522f8b2fb8fb5785a0d29b304fcd66f37c2db70b6f75958eda7c
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_124.py
+    digest: 9ca67ca1f3ffbae3aaaab3e0db1766ea33842e74f39a8c59f9675d1db65385fb
+output_contract:
+- function:valid_date
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/124
+  entry_point: valid_date
+  n_test_cases: 16
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: valid_date
+  tests:
+  - assert valid_date('03-11-2000') == True
+  - assert valid_date('15-01-2012') == False
+  - assert valid_date('04-0-2040') == False
+  - assert valid_date('06-04-2020') == True
+  - assert valid_date('01-01-2007') == True
+  - assert valid_date('03-32-2011') == False
+  - assert valid_date('') == False
+  - assert valid_date('04-31-3000') == False
+  - assert valid_date('06-06-2005') == True
+  - assert valid_date('21-31-2000') == False
+  - assert valid_date('04-12-2003') == True
+  - assert valid_date('04122003') == False
+  - assert valid_date('20030412') == False
+  - assert valid_date('2003-04') == False
+  - assert valid_date('2003-04-12') == False
+  - assert valid_date('04-2003') == False
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_124.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

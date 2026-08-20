@@ -1,0 +1,61 @@
+id: mbpp_391
+registry_id: mbpp.sanitized
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbpp@sanitized_test+hf_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized/mbpp_391.md
+  prompt_sha256: 4054e01938c0d7b141c0b2854bd1e49f816cc669d1cfd2b1e050fd133683855b
+  assets:
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized/oracle/mbpp_391.py
+    digest: a8f0f50d4e5402caa09c0e467d4081e1874128b3d652534757d0ba739c8e2297
+output_contract:
+- script
+reference:
+  source: MBPP sanitized test（CC BY 4.0, google-research-datasets/mbpp）
+  revision: mbpp@sanitized_test+hf_20260821
+  mbpp_task_id: 391
+  n_test_cases: 3
+  uncertainty_note: 断言二值判定无比对不确定度
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - 'assert convert_list_dictionary(["S001", "S002", "S003", "S004"],["Adina Park",
+    "Leyton Marsh", "Duncan Boyle", "Saim Richards"] ,[85, 98, 89, 92])==[{''S001'':
+    {''Adina Park'': 85}}, {''S002'': {''Leyton Marsh'': 98}}, {''S003'': {''Duncan
+    Boyle'': 89}}, {''S004'': {''Saim Richards'': 92}}]'
+  - assert convert_list_dictionary(["abc","def","ghi","jkl"],["python","program","language","programs"],[100,200,300,400])==[{'abc':{'python':100}},{'def':{'program':200}},{'ghi':{'language':300}},{'jkl':{'programs':400}}]
+  - assert convert_list_dictionary(["A1","A2","A3","A4"],["java","C","C++","DBMS"],[10,20,30,40])==[{'A1':{'java':10}},{'A2':{'C':20}},{'A3':{'C++':30}},{'A4':{'DBMS':40}}]
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized/oracle/mbpp_391.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: google-research-datasets/mbpp（HF sanitized test split）
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: mbpp@sanitized_test+hf_20260821
+  mirror_allowed: true

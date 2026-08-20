@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_142",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\n\\n\\ndef sum_squares(lst):\\n    \\\"\\\"\\\"\\\"\\n    This function will take a list of integers. For all entries in the list, the function shall square the integer entry if its index is a \\n    multiple of 3 and will cube the integer entry if its index is a multiple of 4 and not a multiple of 3. The function will not \\n    change the entries in the list whose indexes are not a multiple of 3 or 4. The function shall then return the sum of all entries. \\n    \\n    Examples:\\n    For lst = [1,2,3] the output should be 6\\n    For lst = []  the output should be 0\\n    For lst = [-1,-5,2,-1,-5]  the output should be -126\\n    \\\"\\\"\\\"\\n    result =[]\\n    for i in range(len(lst)):\\n        if i %3 == 0:\\n            result.append(lst[i]**2)\\n        elif i % 4 == 0 and i%3 != 0:\\n            result.append(lst[i]**3)\\n        else:\\n            result.append(lst[i])\\n    return sum(result)\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 11, \"cases_total\": 11, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

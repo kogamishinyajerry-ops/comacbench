@@ -1,0 +1,66 @@
+id: humaneval_025
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_025.md
+  prompt_sha256: 861885edbe4da99695a81bec6568c2c2a6d70d02b0e8bc5865121e73415fc672
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_025.py
+    digest: 4ae1d5cb63a89561886a089eb478b3813aedf158208b735cd544993e0288eac2
+output_contract:
+- function:factorize
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/25
+  entry_point: factorize
+  n_test_cases: 8
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: factorize
+  tests:
+  - assert factorize(2) == [2]
+  - assert factorize(4) == [2, 2]
+  - assert factorize(8) == [2, 2, 2]
+  - assert factorize(3 * 19) == [3, 19]
+  - assert factorize(3 * 19 * 3 * 19) == [3, 3, 19, 19]
+  - assert factorize(3 * 19 * 3 * 19 * 3 * 19) == [3, 3, 3, 19, 19, 19]
+  - assert factorize(3 * 19 * 19 * 19) == [3, 19, 19, 19]
+  - assert factorize(3 * 2 * 3) == [2, 3, 3]
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_025.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

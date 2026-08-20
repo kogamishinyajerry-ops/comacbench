@@ -1,0 +1,65 @@
+id: humaneval_084
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_084.md
+  prompt_sha256: 0af47ea9913fac4521ad31c4914f8a112ed4c69aa3d81b32bd2bc8a38715e3f5
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_084.py
+    digest: 389b77d5d7af8b9311d7a6f34267396f3f1d7b73c2123bc73fa904600fccb530
+output_contract:
+- function:solve
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/84
+  entry_point: solve
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: solve
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert solve(1000) == '1', 'Error'
+  - assert solve(150) == '110', 'Error'
+  - assert solve(147) == '1100', 'Error'
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - assert solve(333) == '1001', 'Error'
+  - assert solve(963) == '10010', 'Error'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_084.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

@@ -1,0 +1,68 @@
+id: humaneval_150
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_150.md
+  prompt_sha256: 391ee1831bd1a6adfd8ea19caf84f0fc3ae51718e25b5a23974c7e232f899559
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_150.py
+    digest: 5c7da3497301f87fd40db35eeed7012d164172d30d0505d70390e8b0a4417ab1
+output_contract:
+- function:x_or_y
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/150
+  entry_point: x_or_y
+  n_test_cases: 10
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: x_or_y
+  tests:
+  - assert x_or_y(7, 34, 12) == 34
+  - assert x_or_y(15, 8, 5) == 5
+  - assert x_or_y(3, 33, 5212) == 33
+  - assert x_or_y(1259, 3, 52) == 3
+  - assert x_or_y(7919, -1, 12) == -1
+  - assert x_or_y(3609, 1245, 583) == 583
+  - assert x_or_y(91, 56, 129) == 129
+  - assert x_or_y(6, 34, 1234) == 1234
+  - assert x_or_y(1, 2, 0) == 0
+  - assert x_or_y(2, 2, 0) == 2
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_150.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

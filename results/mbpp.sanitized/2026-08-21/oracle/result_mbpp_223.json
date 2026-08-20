@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_223",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def is_majority(arr, n, x):\\n\\ti = binary_search(arr, 0, n-1, x)\\n\\tif i == -1:\\n\\t\\treturn False\\n\\tif ((i + n//2) <= (n -1)) and arr[i + n//2] == x:\\n\\t\\treturn True\\n\\telse:\\n\\t\\treturn False\\ndef binary_search(arr, low, high, x):\\n\\tif high >= low:\\n\\t\\tmid = (low + high)//2 \\n\\t\\tif (mid == 0 or x > arr[mid-1]) and (arr[mid] == x):\\n\\t\\t\\treturn mid\\n\\t\\telif x > arr[mid]:\\n\\t\\t\\treturn binary_search(arr, (mid + 1), high, x)\\n\\t\\telse:\\n\\t\\t\\treturn binary_search(arr, low, (mid -1), x)\\n\\treturn -1\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.045,
+    "setup_s": 0.0,
+    "grade_s": 0.045
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

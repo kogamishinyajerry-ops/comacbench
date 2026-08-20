@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_087",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef get_row(lst, x):\\n    \\\"\\\"\\\"\\n    You are given a 2 dimensional data, as a nested lists,\\n    which is similar to matrix, however, unlike matrices,\\n    each row may contain a different number of columns.\\n    Given lst, and integer x, find integers x in the list,\\n    and return list of tuples, [(x1, y1), (x2, y2) ...] such that\\n    each tuple is a coordinate - (row, columns), starting with 0.\\n    Sort coordinates initially by rows in ascending order.\\n    Also, sort coordinates of the row by columns in descending order.\\n    \\n    Examples:\\n    get_row([\\n      [1,2,3,4,5,6],\\n      [1,2,3,4,1,6],\\n      [1,2,3,4,5,1]\\n    ], 1) == [(0, 0), (1, 4), (1, 0), (2, 5), (2, 0)]\\n    get_row([], 1) == []\\n    get_row([[], [1], [1, 2, 3]], 3) == [(2, 2)]\\n    \\\"\\\"\\\"\\n    coords = [(i, j) for i in range(len(lst)) for j in range(len(lst[i])) if lst[i][j] == x]\\n    return sorted(sorted(coords, key=lambda x: x[1], reverse=True), key=lambda x: x[0])\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.047,
+    "setup_s": 0.0,
+    "grade_s": 0.047
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

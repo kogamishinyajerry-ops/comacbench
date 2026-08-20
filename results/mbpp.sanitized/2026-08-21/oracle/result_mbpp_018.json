@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_018",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"NO_OF_CHARS = 256\\ndef str_to_list(string): \\n\\ttemp = [] \\n\\tfor x in string: \\n\\t\\ttemp.append(x) \\n\\treturn temp \\ndef lst_to_string(List): \\n\\treturn ''.join(List) \\ndef get_char_count_array(string): \\n\\tcount = [0] * NO_OF_CHARS \\n\\tfor i in string: \\n\\t\\tcount[ord(i)] += 1\\n\\treturn count \\ndef remove_dirty_chars(string, second_string): \\n\\tcount = get_char_count_array(second_string) \\n\\tip_ind = 0\\n\\tres_ind = 0\\n\\ttemp = '' \\n\\tstr_list = str_to_list(string) \\n\\twhile ip_ind != len(str_list): \\n\\t\\ttemp = str_list[ip_ind] \\n\\t\\tif count[ord(temp)] == 0: \\n\\t\\t\\tstr_list[res_ind] = str_list[ip_ind] \\n\\t\\t\\tres_ind += 1\\n\\t\\tip_ind+=1\\n\\treturn lst_to_string(str_list[0:res_ind]) \\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.043,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

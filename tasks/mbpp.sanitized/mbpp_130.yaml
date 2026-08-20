@@ -1,0 +1,58 @@
+id: mbpp_130
+registry_id: mbpp.sanitized
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbpp@sanitized_test+hf_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized/mbpp_130.md
+  prompt_sha256: 0785cd9f36bc0ab404d0abe7a9ef459d441e4ee67854a8d64c011c944f37b089
+  assets:
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized/oracle/mbpp_130.py
+    digest: 5342bef50f1ec8fa6586bae695bb2072958e86f26905884aa2bbabfc34eb7b68
+output_contract:
+- script
+reference:
+  source: MBPP sanitized test（CC BY 4.0, google-research-datasets/mbpp）
+  revision: mbpp@sanitized_test+hf_20260821
+  mbpp_task_id: 130
+  n_test_cases: 3
+  uncertainty_note: 断言二值判定无比对不确定度
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - assert max_occurrences([2,3,8,4,7,9,8,2,6,5,1,6,1,2,3,2,4,6,9,1,2])==2
+  - assert max_occurrences([2,3,8,4,7,9,8,7,9,15,14,10,12,13,16,18])==8
+  - assert max_occurrences([10,20,20,30,40,90,80,50,30,20,50,10])==20
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized/oracle/mbpp_130.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: google-research-datasets/mbpp（HF sanitized test split）
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: mbpp@sanitized_test+hf_20260821
+  mirror_allowed: true

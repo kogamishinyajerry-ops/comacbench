@@ -1,0 +1,69 @@
+id: humaneval_120
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_120.md
+  prompt_sha256: c231cd526ed9ba92ed5437edb4fefc1678b8330564af1ac88ed40ce4e27f7577
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_120.py
+    digest: 16fa6bd666ee55e447553c245e4fe4e89a3659bae26a9fdeddb007acca76fac7
+output_contract:
+- function:maximum
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/120
+  entry_point: maximum
+  n_test_cases: 11
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: maximum
+  tests:
+  - assert maximum([-3, -4, 5], 3) == [-4, -3, 5]
+  - assert maximum([4, -4, 4], 2) == [4, 4]
+  - assert maximum([-3, 2, 1, 2, -1, -2, 1], 1) == [2]
+  - assert maximum([123, -123, 20, 0, 1, 2, -3], 3) == [2, 20, 123]
+  - assert maximum([-123, 20, 0, 1, 2, -3], 4) == [0, 1, 2, 20]
+  - assert maximum([5, 15, 0, 3, -13, -8, 0], 7) == [-13, -8, 0, 0, 3, 5, 15]
+  - assert maximum([-1, 0, 2, 5, 3, -10], 2) == [3, 5]
+  - assert maximum([1, 0, 5, -7], 1) == [5]
+  - assert maximum([4, -4], 2) == [-4, 4]
+  - assert maximum([-10, 10], 2) == [-10, 10]
+  - assert maximum([1, 2, 3, -23, 243, -400, 0], 0) == []
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_120.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

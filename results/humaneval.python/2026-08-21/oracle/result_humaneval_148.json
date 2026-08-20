@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_148",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef bf(planet1, planet2):\\n    '''\\n    There are eight planets in our solar system: the closerst to the Sun \\n    is Mercury, the next one is Venus, then Earth, Mars, Jupiter, Saturn, \\n    Uranus, Neptune.\\n    Write a function that takes two planet names as strings planet1 and planet2. \\n    The function should return a tuple containing all planets whose orbits are \\n    located between the orbit of planet1 and the orbit of planet2, sorted by \\n    the proximity to the sun. \\n    The function should return an empty tuple if planet1 or planet2\\n    are not correct planet names. \\n    Examples\\n    bf(\\\"Jupiter\\\", \\\"Neptune\\\") ==> (\\\"Saturn\\\", \\\"Uranus\\\")\\n    bf(\\\"Earth\\\", \\\"Mercury\\\") ==> (\\\"Venus\\\")\\n    bf(\\\"Mercury\\\", \\\"Uranus\\\") ==> (\\\"Venus\\\", \\\"Earth\\\", \\\"Mars\\\", \\\"Jupiter\\\", \\\"Saturn\\\")\\n    '''\\n    planet_names = (\\\"Mercury\\\", \\\"Venus\\\", \\\"Earth\\\", \\\"Mars\\\", \\\"Jupiter\\\", \\\"Saturn\\\", \\\"Uranus\\\", \\\"Neptune\\\")\\n    if planet1 not in planet_names or planet2 not in planet_names or planet1 == planet2:\\n        return ()\\n    planet1_index = planet_names.index(planet1)\\n    planet2_index = planet_names.index(planet2)\\n    if planet1_index < planet2_index:\\n        return (planet_names[planet1_index + 1: planet2_index])\\n    else:\\n        return (planet_names[planet2_index + 1 : planet1_index])\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

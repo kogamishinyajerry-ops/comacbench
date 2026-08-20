@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_123",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def amicable_numbers_sum(limit):\\n    if not isinstance(limit, int):\\n        return \\\"Input is not an integer!\\\"\\n    if limit < 1:\\n        return \\\"Input must be bigger than 0!\\\"\\n    amicables = set()\\n    for num in range(2, limit+1):\\n        if num in amicables:\\n            continue\\n        sum_fact = sum([fact for fact in range(1, num) if num % fact == 0])\\n        sum_fact2 = sum([fact for fact in range(1, sum_fact) if sum_fact % fact == 0])\\n        if num == sum_fact2 and num != sum_fact:\\n            amicables.add(num)\\n            amicables.add(sum_fact2)\\n    return sum(amicables)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 2.0}"
+  },
+  "timings": {
+    "agent_s": 3.975,
+    "setup_s": 0.0,
+    "grade_s": 3.975
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 2.0s"
+  ]
+}

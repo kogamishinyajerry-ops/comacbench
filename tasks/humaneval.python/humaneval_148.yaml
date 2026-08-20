@@ -1,0 +1,69 @@
+id: humaneval_148
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_148.md
+  prompt_sha256: a0f8651e33370328a6ef8fef5af83d7458dfdc157652f2590d4144af14e14d70
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_148.py
+    digest: 769692dfcf2d133253ceb50c3e10f4e084b7e964e7209ceda8eb2a9bd374c73c
+output_contract:
+- function:bf
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/148
+  entry_point: bf
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: bf
+  tests:
+  - 'assert bf(''Jupiter'', ''Neptune'') == (''Saturn'', ''Uranus''), ''First test
+    error: '' + str(len(bf(''Jupiter'', ''Neptune'')))'
+  - 'assert bf(''Earth'', ''Mercury'') == (''Venus'',), ''Second test error: '' +
+    str(bf(''Earth'', ''Mercury''))'
+  - 'assert bf(''Mercury'', ''Uranus'') == (''Venus'', ''Earth'', ''Mars'', ''Jupiter'',
+    ''Saturn''), ''Third test error: '' + str(bf(''Mercury'', ''Uranus''))'
+  - 'assert bf(''Neptune'', ''Venus'') == (''Earth'', ''Mars'', ''Jupiter'', ''Saturn'',
+    ''Uranus''), ''Fourth test error: '' + str(bf(''Neptune'', ''Venus''))'
+  - assert bf('Earth', 'Earth') == ()
+  - assert bf('Mars', 'Earth') == ()
+  - assert bf('Jupiter', 'Makemake') == ()
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_148.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

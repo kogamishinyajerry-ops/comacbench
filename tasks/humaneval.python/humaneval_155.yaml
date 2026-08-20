@@ -1,0 +1,67 @@
+id: humaneval_155
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_155.md
+  prompt_sha256: d151e49fe4736f36a2c935397b572d66113376a7b453c0e6d2ab338e7ce221bb
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_155.py
+    digest: 6dd28bb54f449b66cd3800763236da290ce896fe2784ab6eb9c2813b2b9d93e8
+output_contract:
+- function:even_odd_count
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/155
+  entry_point: even_odd_count
+  n_test_cases: 9
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: even_odd_count
+  tests:
+  - assert even_odd_count(7) == (0, 1)
+  - assert even_odd_count(-78) == (1, 1)
+  - assert even_odd_count(3452) == (2, 2)
+  - assert even_odd_count(346211) == (3, 3)
+  - assert even_odd_count(-345821) == (3, 3)
+  - assert even_odd_count(-2) == (1, 0)
+  - assert even_odd_count(-45347) == (2, 3)
+  - assert even_odd_count(0) == (1, 0)
+  - assert True
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_155.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

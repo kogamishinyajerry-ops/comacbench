@@ -345,6 +345,61 @@ entries:
     status: integrated
     integrated_note: 2026-08-19 field_prediction 跑通（与 superwing 同款 adapter）；oracle 100/100；stub + M3 基线（gate 100/100，physics 内插 0.186/几何外推 0.124——CM 误差 ~200-350%，LLM 高升力系数回归不可行同 superwing 结论）
 
+  # ---------- 批次 3: 数学与编程公共可比层（2026-08-21 扩充） ----------
+  - id: gsm8k.math_reasoning
+    name: GSM8K 数学推理（test 子集）
+    source: https://github.com/openai/grade-school-math
+    tier: A
+    order: 19
+    batch: batch-3
+    adapter: qa_grounded
+    env_class: qa
+    license: MIT
+    license_status: confirmed-repo
+    content: 1319 道小学数学应用题 test split 中确定性抽 250 题（seed=20260821）；数学推理维度公共可比层
+    scoring: 最终答案数值精确匹配（math_answer 判分：#### 抽取 + 容差归一化）；无 LLM judge
+    env: 无执行环境要求
+    assets_revision: gsm8k@openai-master+test.jsonl_20260821   # 2026-08-21 镜像（1319 题全量 + LICENSE），sha256 见 data/gsm8k/math_reasoning/PROVENANCE.md
+    risks: [题目大概率已入训练语料 -> 仅作可比基线，不用于选型（同 cfdquery 口径）]
+    status: staged
+    staged_note: 2026-08-21 镜像完成（MIT 核验，1319 题全量）；qa_grounded math_answer 判分与基线进行中
+
+  - id: humaneval.python
+    name: HumanEval Python 函数合成（全量）
+    source: https://github.com/openai/human-eval
+    tier: A
+    order: 20
+    batch: batch-3
+    adapter: code_exec
+    env_class: python_sandbox
+    license: MIT
+    license_status: confirmed-repo
+    content: 164 道 Python 函数合成题全量（pass@1 口径与社区直接可比）；提示=官方 prompt 含 docstring，隐藏=官方 test 块全量断言
+    scoring: 沙箱执行 + 隐藏单元测试（unit_tests_problem：逐断言 pass 率 + 两次执行确定性）
+    env: Python 沙箱（纯标准库可测；少数题需官方依赖已按数据集原样拼装）
+    assets_revision: humaneval@openai-master+jsonl_20260821   # 2026-08-21 镜像，sha256 见 data/humaneval/python/PROVENANCE.md
+    risks: [题目大概率已入训练语料 -> 仅作可比基线，不用于选型]
+    status: staged
+    staged_note: 2026-08-21 镜像完成（MIT 核验，164 题全量）；code_exec unit_tests_problem 判分与基线进行中
+
+  - id: mbpp.sanitized
+    name: MBPP sanitized test（全量）
+    source: https://huggingface.co/datasets/google-research-datasets/mbpp
+    tier: A
+    order: 21
+    batch: batch-3
+    adapter: code_exec
+    env_class: python_sandbox
+    license: CC BY 4.0
+    license_status: confirmed-dataset
+    content: sanitized 配置 test split 257 题全量；基础 Python 编程任务（官方提示口径：题面+示例测试，判分隐藏全量 test_list）
+    scoring: 沙箱执行 + 隐藏单元测试（unit_tests_problem 同 humaneval）
+    env: Python 沙箱（纯标准库；13 题 test_imports 按数据集原样拼装）
+    assets_revision: mbpp@sanitized_test+hf_20260821   # 2026-08-21 镜像，sha256 见 data/mbpp/sanitized/PROVENANCE.md
+    risks: [题目大概率已入训练语料 -> 仅作可比基线；BY 归属义务随 PROVENANCE 履行]
+    status: staged
+    staged_note: 2026-08-21 镜像完成（CC BY 4.0 核验，sanitized test 257 题全量）；code_exec unit_tests_problem 判分与基线进行中
+
   # ---------- 条件纳入（不进入排期，满足条件后重审） ----------
   - id: cadbench.cadquery
     name: CADBench

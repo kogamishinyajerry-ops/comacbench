@@ -1,0 +1,67 @@
+id: humaneval_113
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_113.md
+  prompt_sha256: 11cd18b2f461500b87e9bc8c071f65e241054e6210a99900f751300d8008da88
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_113.py
+    digest: 9458d2a6b9cb3ef085b3e58e9efda7d7fa6747a324351051767c0b317f84b02c
+output_contract:
+- function:odd_count
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/113
+  entry_point: odd_count
+  n_test_cases: 4
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: odd_count
+  tests:
+  - assert odd_count(['1234567']) == ['the number of odd elements 4n the str4ng 4
+    of the 4nput.'], 'Test 1'
+  - assert odd_count(['3', '11111111']) == ['the number of odd elements 1n the str1ng
+    1 of the 1nput.', 'the number of odd elements 8n the str8ng 8 of the 8nput.'],
+    'Test 2'
+  - assert odd_count(['271', '137', '314']) == ['the number of odd elements 2n the
+    str2ng 2 of the 2nput.', 'the number of odd elements 3n the str3ng 3 of the 3nput.',
+    'the number of odd elements 2n the str2ng 2 of the 2nput.']
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_113.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

@@ -1,0 +1,66 @@
+id: humaneval_078
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_078.md
+  prompt_sha256: 7d9f13ef89765e8036815df2f97e13dd3f485d62d7cfefebde8e6224db74c8dd
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_078.py
+    digest: c9a62937482fec586bd89f8668e8d2d17713f7d7768fe6989e8f54ddb3fda9ab
+output_contract:
+- function:hex_key
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/78
+  entry_point: hex_key
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: hex_key
+  tests:
+  - 'assert hex_key(''AB'') == 1, ''First test error: '' + str(hex_key(''AB''))'
+  - 'assert hex_key(''1077E'') == 2, ''Second test error: '' + str(hex_key(''1077E''))'
+  - 'assert hex_key(''ABED1A33'') == 4, ''Third test error: '' + str(hex_key(''ABED1A33''))'
+  - 'assert hex_key(''2020'') == 2, ''Fourth test error: '' + str(hex_key(''2020''))'
+  - 'assert hex_key(''123456789ABCDEF0'') == 6, ''Fifth test error: '' + str(hex_key(''123456789ABCDEF0''))'
+  - 'assert hex_key(''112233445566778899AABBCCDDEEFF00'') == 12, ''Sixth test error:
+    '' + str(hex_key(''112233445566778899AABBCCDDEEFF00''))'
+  - assert hex_key([]) == 0
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_078.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

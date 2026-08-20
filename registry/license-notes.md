@@ -47,6 +47,9 @@
 | pdebench.compressive_ns | 待核对 | needs-verification | 核对仓库许可 |
 | camb.selective | 数据 CC BY-NC-SA 4.0（表述有差异） | blocked-license-ambiguity | 法务确认 NC 条款公司内部边界 + 澄清仓库表述差异 |
 | airfrans.level1 | ODbL-1.0 | confirmed-dataset | 注意 ODbL 共享要求 |
+| gsm8k.math_reasoning | MIT（GitHub openai/grade-school-math 根 LICENSE） | confirmed-repo | —（2026-08-21 已镜像；test.jsonl 1319 题全量 + LICENSE.MIT 随镜像，证据链见 data/gsm8k/math_reasoning/PROVENANCE.md） |
+| humaneval.python | MIT（GitHub openai/human-eval 根 LICENSE + HF 数据集卡 license=mit 双证） | confirmed-repo | —（2026-08-21 已镜像；HumanEval.jsonl 164 题全量，PROVENANCE 见 data/humaneval/python/） |
+| mbpp.sanitized | CC BY 4.0（HF google-research-datasets/mbpp 数据集卡 cardData.license=cc-by-4.0 + API 元数据双证） | confirmed-dataset | —（2026-08-21 已镜像；sanitized test 257 题全量；BY 归属义务：再分发须署名 Google Research，PROVENANCE 随附，见 data/mbpp/sanitized/） |
 
 ## 许可证巡检节奏
 

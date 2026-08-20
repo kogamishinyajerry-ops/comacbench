@@ -1,0 +1,67 @@
+id: humaneval_088
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_088.md
+  prompt_sha256: 7ea01635837c7ec740b6e0da2bd27902a68badde0b5eb805e314c51f932cd1dc
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_088.py
+    digest: 1f670f4bd80eb52ebfda882a9570dee6b0ef8c54bff9ffd6bd26dbdd66e4ffa3
+output_contract:
+- function:sort_array
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/88
+  entry_point: sort_array
+  n_test_cases: 9
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: sort_array
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert sort_array([]) == [], 'Error'
+  - assert sort_array([5]) == [5], 'Error'
+  - assert sort_array([2, 4, 3, 0, 1, 5]) == [0, 1, 2, 3, 4, 5], 'Error'
+  - assert sort_array([2, 4, 3, 0, 1, 5, 6]) == [6, 5, 4, 3, 2, 1, 0], 'Error'
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - assert sort_array([2, 1]) == [1, 2], 'Error'
+  - assert sort_array([15, 42, 87, 32, 11, 0]) == [0, 11, 15, 32, 42, 87], 'Error'
+  - assert sort_array([21, 14, 23, 11]) == [23, 21, 14, 11], 'Error'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_088.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

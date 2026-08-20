@@ -1,0 +1,70 @@
+id: humaneval_074
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_074.md
+  prompt_sha256: 400de6e96d19bdaf872024ac9e548bf39536d3659a41e34c49ea6578fd5b807b
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_074.py
+    digest: bf9012be5806b5a99613b6b2385084000d534cadc377882a63e0dc14468b1e96
+output_contract:
+- function:total_match
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/74
+  entry_point: total_match
+  n_test_cases: 11
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: total_match
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert total_match([], []) == []
+  - assert total_match(['hi', 'admin'], ['hi', 'hi']) == ['hi', 'hi']
+  - assert total_match(['hi', 'admin'], ['hi', 'hi', 'admin', 'project']) == ['hi',
+    'admin']
+  - assert total_match(['4'], ['1', '2', '3', '4', '5']) == ['4']
+  - assert total_match(['hi', 'admin'], ['hI', 'Hi']) == ['hI', 'Hi']
+  - assert total_match(['hi', 'admin'], ['hI', 'hi', 'hi']) == ['hI', 'hi', 'hi']
+  - assert total_match(['hi', 'admin'], ['hI', 'hi', 'hii']) == ['hi', 'admin']
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - assert total_match([], ['this']) == []
+  - assert total_match(['this'], []) == []
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_074.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_067",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def bell_number(n):   \\n    bell = [[0 for i in range(n+1)] for j in range(n+1)] \\n    bell[0][0] = 1\\n    for i in range(1, n+1): \\n        bell[i][0] = bell[i-1][i-1]  \\n        for j in range(1, i+1): \\n            bell[i][j] = bell[i-1][j-1] + bell[i][j-1]   \\n    return bell[n][0] \\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.045,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

@@ -1,0 +1,100 @@
+id: humaneval_151
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_151.md
+  prompt_sha256: 96819b2a49243a5b0dfa6be260eb83531e18987124af9232c3ebc4f0aeccf97e
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_151.py
+    digest: 5861f90f4725b54d4b76a43342714f53eeaab60d4ac05f04d97eab183b8c105f
+output_contract:
+- function:double_the_difference
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/151
+  entry_point: double_the_difference
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: double_the_difference
+  tests:
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference([]) == 0, ''This prints if this assert fails 1 (good
+    for debugging!)'''
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference([5, 4]) == 25, ''This prints if this assert fails
+    2 (good for debugging!)'''
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference([0.1, 0.2, 0.3]) == 0, ''This prints if this assert
+    fails 3 (good for debugging!)'''
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference([-10, -20, -30]) == 0, ''This prints if this assert
+    fails 4 (good for debugging!)'''
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference([-1, -2, 8]) == 0, ''This prints if this assert fails
+    5 (also good for debugging!)'''
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference([0.2, 3, 5]) == 34, ''This prints if this assert
+    fails 6 (also good for debugging!)'''
+  - 'lst = list(range(-99, 100, 2))
+
+    odd_sum = sum([i ** 2 for i in lst if i % 2 != 0 and i > 0])
+
+    assert double_the_difference(lst) == odd_sum, ''This prints if this assert fails
+    7 (good for debugging!)'''
+  test_split_mode: split
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_151.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

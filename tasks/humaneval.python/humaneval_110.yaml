@@ -1,0 +1,65 @@
+id: humaneval_110
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_110.md
+  prompt_sha256: 1cde4d93ee7e936455269ef27943ebb8b44fafd44aaa300698d99063d90be91d
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_110.py
+    digest: e031251f9026ba4d3cfdddc65d57397b70dce5fe564a06c28ecde345dbf4568c
+output_contract:
+- function:exchange
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/110
+  entry_point: exchange
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: exchange
+  tests:
+  - assert exchange([1, 2, 3, 4], [1, 2, 3, 4]) == 'YES'
+  - assert exchange([1, 2, 3, 4], [1, 5, 3, 4]) == 'NO'
+  - assert exchange([1, 2, 3, 4], [2, 1, 4, 3]) == 'YES'
+  - assert exchange([5, 7, 3], [2, 6, 4]) == 'YES'
+  - assert exchange([5, 7, 3], [2, 6, 3]) == 'NO'
+  - assert exchange([3, 2, 6, 1, 8, 9], [3, 5, 5, 1, 1, 1]) == 'NO'
+  - assert exchange([100, 200], [200, 200]) == 'YES'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_110.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

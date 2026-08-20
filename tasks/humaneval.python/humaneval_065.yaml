@@ -1,0 +1,65 @@
+id: humaneval_065
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_065.md
+  prompt_sha256: f673545d1ac718f62e945665f7092ced37b280f6f591a1523bddb880a6fca1f0
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_065.py
+    digest: 42ffbfb464f92566778bf9ce6d3e76cd4527b8fcd5dff9d8268d95359abcd37b
+output_contract:
+- function:circular_shift
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/65
+  entry_point: circular_shift
+  n_test_cases: 5
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: circular_shift
+  tests:
+  - assert circular_shift(100, 2) == '001'
+  - assert circular_shift(12, 2) == '12'
+  - assert circular_shift(97, 8) == '79'
+  - assert circular_shift(12, 1) == '21', 'This prints if this assert fails 1 (good
+    for debugging!)'
+  - assert circular_shift(11, 101) == '11', 'This prints if this assert fails 2 (also
+    good for debugging!)'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_065.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

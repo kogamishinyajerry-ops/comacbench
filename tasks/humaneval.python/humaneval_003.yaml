@@ -1,0 +1,64 @@
+id: humaneval_003
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_003.md
+  prompt_sha256: e09763f6ef9407dc2524d12661b7789746de3c140c3e2063fbf81caa930e5c0c
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_003.py
+    digest: 08de1116ff05c09e198654719e035c64c3d211ef70abe1ad543497327a856491
+output_contract:
+- function:below_zero
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/3
+  entry_point: below_zero
+  n_test_cases: 6
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: below_zero
+  tests:
+  - assert below_zero([]) == False
+  - assert below_zero([1, 2, -3, 1, 2, -3]) == False
+  - assert below_zero([1, 2, -4, 5, 6]) == True
+  - assert below_zero([1, -1, 2, -2, 5, -5, 4, -4]) == False
+  - assert below_zero([1, -1, 2, -2, 5, -5, 4, -5]) == True
+  - assert below_zero([1, -2, 2, -2, 5, -5, 4, -4]) == True
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_003.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

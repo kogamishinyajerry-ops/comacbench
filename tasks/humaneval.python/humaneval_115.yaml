@@ -1,0 +1,66 @@
+id: humaneval_115
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_115.md
+  prompt_sha256: 33a89ea16782ff333be51762cb660dc6eeac364c24acdd18ec67a8758f035d28
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_115.py
+    digest: 33b5d615b02e2fa3e08279cbc4d73cc325160464648f7be3354fda1977fd2f94
+output_contract:
+- function:max_fill
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/115
+  entry_point: max_fill
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: max_fill
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert max_fill([[0, 0, 1, 0], [0, 1, 0, 0], [1, 1, 1, 1]], 1) == 6, 'Error'
+  - assert max_fill([[0, 0, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1], [0, 1, 1, 1]], 2) ==
+    5, 'Error'
+  - assert max_fill([[0, 0, 0], [0, 0, 0]], 5) == 0, 'Error'
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - assert max_fill([[1, 1, 1, 1], [1, 1, 1, 1]], 2) == 4, 'Error'
+  - assert max_fill([[1, 1, 1, 1], [1, 1, 1, 1]], 9) == 2, 'Error'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_115.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

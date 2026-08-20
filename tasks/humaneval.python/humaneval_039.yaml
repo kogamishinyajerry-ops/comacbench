@@ -1,0 +1,68 @@
+id: humaneval_039
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_039.md
+  prompt_sha256: c1e1892052db2fc70a04363d3c8ea8291754cb5c71277ba45cf0a9bebd21a21f
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_039.py
+    digest: 798a95f7fbdfa35979009a6f62939243111895c996d5a5e5b550db1a9f308454
+output_contract:
+- function:prime_fib
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/39
+  entry_point: prime_fib
+  n_test_cases: 10
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: prime_fib
+  tests:
+  - assert prime_fib(1) == 2
+  - assert prime_fib(2) == 3
+  - assert prime_fib(3) == 5
+  - assert prime_fib(4) == 13
+  - assert prime_fib(5) == 89
+  - assert prime_fib(6) == 233
+  - assert prime_fib(7) == 1597
+  - assert prime_fib(8) == 28657
+  - assert prime_fib(9) == 514229
+  - assert prime_fib(10) == 433494437
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_039.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

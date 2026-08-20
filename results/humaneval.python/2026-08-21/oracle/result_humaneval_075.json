@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_075",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef is_multiply_prime(a):\\n    \\\"\\\"\\\"Write a function that returns true if the given number is the multiplication of 3 prime numbers\\n    and false otherwise.\\n    Knowing that (a) is less then 100. \\n    Example:\\n    is_multiply_prime(30) == True\\n    30 = 2 * 3 * 5\\n    \\\"\\\"\\\"\\n    def is_prime(n):\\n        for j in range(2,n):\\n            if n%j == 0:\\n                return False\\n        return True\\n\\n    for i in range(2,101):\\n        if not is_prime(i): continue\\n        for j in range(2,101):\\n            if not is_prime(j): continue\\n            for k in range(2,101):\\n                if not is_prime(k): continue\\n                if i*j*k == a: return True\\n    return False\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.12}"
+  },
+  "timings": {
+    "agent_s": 0.239,
+    "setup_s": 0.0,
+    "grade_s": 0.239
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.12s"
+  ]
+}

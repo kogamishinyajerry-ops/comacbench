@@ -1,0 +1,72 @@
+id: humaneval_114
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_114.md
+  prompt_sha256: 225938e8f0e021f88f181139c3f32cc241ae3f7519c552a1aa89d7f36e01c7ce
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_114.py
+    digest: 0748e0ae3bc19536d616d68752ea909da3a0867dd93b71f577a48780d2ff4250
+output_contract:
+- function:minSubArraySum
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/114
+  entry_point: minSubArraySum
+  n_test_cases: 12
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: minSubArraySum
+  tests:
+  - assert minSubArraySum([2, 3, 4, 1, 2, 4]) == 1, 'This prints if this assert fails
+    1 (good for debugging!)'
+  - assert minSubArraySum([-1, -2, -3]) == -6
+  - assert minSubArraySum([-1, -2, -3, 2, -10]) == -14
+  - assert minSubArraySum([-9999999999999999]) == -9999999999999999
+  - assert minSubArraySum([0, 10, 20, 1000000]) == 0
+  - assert minSubArraySum([-1, -2, -3, 10, -5]) == -6
+  - assert minSubArraySum([100, -1, -2, -3, 10, -5]) == -6
+  - assert minSubArraySum([10, 11, 13, 8, 3, 4]) == 3
+  - assert minSubArraySum([100, -33, 32, -1, 0, -2]) == -33
+  - assert minSubArraySum([-10]) == -10, 'This prints if this assert fails 2 (also
+    good for debugging!)'
+  - assert minSubArraySum([7]) == 7
+  - assert minSubArraySum([1, -1]) == -1
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_114.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

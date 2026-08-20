@@ -1,0 +1,71 @@
+id: humaneval_157
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_157.md
+  prompt_sha256: 3f50ee80c55ed0057744e7bbc9480db3707d4f710364040ff260f7841983d512
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_157.py
+    digest: ad1a81ae0694ec957aef524db1b7780d5ca8a449d4568cb5ce980f9246b929d5
+output_contract:
+- function:right_angle_triangle
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/157
+  entry_point: right_angle_triangle
+  n_test_cases: 11
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: right_angle_triangle
+  tests:
+  - assert right_angle_triangle(3, 4, 5) == True, 'This prints if this assert fails
+    1 (good for debugging!)'
+  - assert right_angle_triangle(1, 2, 3) == False
+  - assert right_angle_triangle(10, 6, 8) == True
+  - assert right_angle_triangle(2, 2, 2) == False
+  - assert right_angle_triangle(7, 24, 25) == True
+  - assert right_angle_triangle(10, 5, 7) == False
+  - assert right_angle_triangle(5, 12, 13) == True
+  - assert right_angle_triangle(15, 8, 17) == True
+  - assert right_angle_triangle(48, 55, 73) == True
+  - assert right_angle_triangle(1, 1, 1) == False, 'This prints if this assert fails
+    2 (also good for debugging!)'
+  - assert right_angle_triangle(2, 2, 10) == False
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_157.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

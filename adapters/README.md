@@ -47,15 +47,15 @@
 
 ## 1. qa_grounded（有据问答）
 
-**适用**：aeroengqa.gold、cfdllm.cfdquery、mechvqa.public_eval、camb.selective（若放行）
+**适用**：aeroengqa.gold、cfdllm.cfdquery、gsm8k.math_reasoning、mechvqa.public_eval、camb.selective（若放行）
 
 **输入契约**：题目（文本或图文）、可选证据文档集（RAG 目标语料）、参考答案 + 参考证据定位、是否"应拒答"标记。
 
-**模型输出**：答案字段（选择题=选项；问答=自由文本+引用列表）。
+**模型输出**：答案字段（选择题=选项；问答=自由文本+引用列表；数学题=CoT+最终数 `#### <number>`）。
 
 **判分管线**：
 
-1. **客观层**：选择题精确匹配；自由文本按 Exact/F1/关键字数值容差（数值题 ±ε）。
+1. **客观层**：选择题精确匹配；自由文本按 Exact/F1/关键字数值容差（数值题 ±ε）；数学题（`answer_format: math_answer`，GSM8K 型）最终数抽取（`####` 优先 → `answer is`/`答案` → 全文末数）后数值精确匹配，gate=最终数可解析。
 2. **证据层**（仅提供证据语料的任务）：
    - `evidence_support`：引用的段落是否真实存在且支持结论（段落级匹配，规则判）；
    - `fabrication_rate`：引用不存在段落的比例。
@@ -70,7 +70,7 @@
 
 ## 2. code_exec（科学代码执行）
 
-**适用**：scicode.physics、cfdllm.cfdcode
+**适用**：scicode.physics、cfdllm.cfdcode、humaneval.python、mbpp.sanitized
 
 **输入契约**：自然语言任务 + 函数签名/模板 + 隐藏测试集（模型不可见）+ 每测试的数值容差。
 
@@ -79,7 +79,7 @@
 **判分管线**：
 
 1. `executability`：代码可导入、可调用入口（0/1）；
-2. `hidden_tests`：隐藏单元测试通过率（每测独立计）；
+2. `hidden_tests`：隐藏单元测试通过率（每测独立计）；`unit_tests_problem`（humaneval/mbpp）= 官方断言逐条执行（humaneval 由 `check(candidate)` 块 AST 拆分为逐断言 case，helper 逐 case 前置），summary 另报 pass@1（全断言通过任务占比，社区口径）；
 3. `numerical_tolerance`：数值断言按 相对/绝对 容差判定，非布尔；
 4. `stability`：边界输入、退化输入不崩溃（如奇点、零向量、空数组）；
 5. `determinism`：同输入重复运行结果一致（捕获未固定种子/迭代顺序问题）。
@@ -167,8 +167,8 @@
 
 | 基准 | adapter |
 | --- | --- |
-| cfdllm.cfdquery / aeroengqa.gold / mechvqa / camb | qa_grounded |
-| scicode.physics / cfdllm.cfdcode | code_exec |
+| cfdllm.cfdquery / aeroengqa.gold / gsm8k.math_reasoning / mechvqa / camb | qa_grounded |
+| scicode.physics / cfdllm.cfdcode / humaneval.python / mbpp.sanitized | code_exec |
 | cfdllm.foam_basic（paused-env）/ aviary / pycycle / gtm / nasa_tmr / crm_dpw_hlpw / bscw（paused-env） | simulation_agent |
 | cadgen.local_validity / simjeb / openvsp（paused-env） | design_artifact |
 | superwing.coeff_lite / hilift_aeroml.lite / airfrans / pdebench-NS | field_prediction |

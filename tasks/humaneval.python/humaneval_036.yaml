@@ -1,0 +1,66 @@
+id: humaneval_036
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_036.md
+  prompt_sha256: 95bccbd4447cbc226c89042d7fbe99fa5763f7063b94ce486efdd7df96d8a4b6
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_036.py
+    digest: 9d3498d16aa162483c0e12b196e150b1b7550af5206719b80ebb217bdfaf2611
+output_contract:
+- function:fizz_buzz
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/36
+  entry_point: fizz_buzz
+  n_test_cases: 8
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: fizz_buzz
+  tests:
+  - assert fizz_buzz(50) == 0
+  - assert fizz_buzz(78) == 2
+  - assert fizz_buzz(79) == 3
+  - assert fizz_buzz(100) == 3
+  - assert fizz_buzz(200) == 6
+  - assert fizz_buzz(4000) == 192
+  - assert fizz_buzz(10000) == 639
+  - assert fizz_buzz(100000) == 8026
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_036.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

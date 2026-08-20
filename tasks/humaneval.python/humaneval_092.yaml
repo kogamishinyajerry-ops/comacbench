@@ -1,0 +1,78 @@
+id: humaneval_092
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_092.md
+  prompt_sha256: 16cedc418045b424b651f7a67894df1cf2459c1f12afee161a4a3ed2a6424501
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_092.py
+    digest: 4ca06b8599b19ace5f9e4f5e3eb937cf1f5b828d67bba3fb45c083b6fecb2504
+output_contract:
+- function:any_int
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/92
+  entry_point: any_int
+  n_test_cases: 10
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: any_int
+  tests:
+  - assert any_int(2, 3, 1) == True, 'This prints if this assert fails 1 (good for
+    debugging!)'
+  - assert any_int(2.5, 2, 3) == False, 'This prints if this assert fails 2 (good
+    for debugging!)'
+  - assert any_int(1.5, 5, 3.5) == False, 'This prints if this assert fails 3 (good
+    for debugging!)'
+  - assert any_int(2, 6, 2) == False, 'This prints if this assert fails 4 (good for
+    debugging!)'
+  - assert any_int(4, 2, 2) == True, 'This prints if this assert fails 5 (good for
+    debugging!)'
+  - assert any_int(2.2, 2.2, 2.2) == False, 'This prints if this assert fails 6 (good
+    for debugging!)'
+  - assert any_int(-4, 6, 2) == True, 'This prints if this assert fails 7 (good for
+    debugging!)'
+  - assert any_int(2, 1, 1) == True, 'This prints if this assert fails 8 (also good
+    for debugging!)'
+  - assert any_int(3, 4, 7) == True, 'This prints if this assert fails 9 (also good
+    for debugging!)'
+  - assert any_int(3.0, 4, 7) == False, 'This prints if this assert fails 10 (also
+    good for debugging!)'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_092.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

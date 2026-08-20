@@ -192,6 +192,64 @@ def grade_distinction(basis: str | None) -> float:
     return 1.0 if (basis or "").lower() in _BASIS_VALID else 0.0
 
 
+# ---------------------------------------------------------------- math layer
+# GSM8K 类任务：自由文本 CoT + 最终数值答案（#### <num> 官方口径）。
+# 判分：抽取模型最终数 -> 与参考数数值比对（容差由任务 YAML numeric_rel_tol 覆写，
+# 缺省 1e-6——GSM8K 参考为整数/短小数，等效精确匹配但不受字面格式影响）。
+
+def _parse_number(tok: str) -> float | None:
+    """数字 token 归一：去千分位逗号/货币符/百分号尾缀，转 float；失败 None。"""
+    import re as _re
+    s = tok.strip().rstrip("%").lstrip("$€£¥").replace(",", "").replace(" ", "")
+    if _re.fullmatch(r"-?\d+(\.\d+)?", s):
+        return float(s)
+    return None
+
+
+def parse_math_answer(text: str) -> float | None:
+    """模型输出 -> 最终数值。优先级（GSM8K 官方 #### 口径优先）：
+    1) 最后一个 '####' 之后的首个数字 token；
+    2) 'answer is/is:' / '答案是' 等显式标记后的首个数字；
+    3) 全文最后一个数字（兜底，长 CoT 的最终数通常在末尾）。
+    """
+    import re as _re
+    s = strip_think_inline(text)
+    if "####" in s:
+        tail = s.rsplit("####", 1)[1]
+        for tok in _re.findall(r"-?\$?\d[\d,]*(?:\.\d+)?%?", tail):
+            v = _parse_number(tok)
+            if v is not None:
+                return v
+    m = _re.search(
+        r"(?:final answer|answer)\s*(?:is|:|=)\s*(-?\$?\d[\d,]*(?:\.\d+)?)"
+        r"|(?:最终答案|答案)(?:是|为|：|:)?\s*(-?\$?\d[\d,]*(?:\.\d+)?)",
+        s, _re.I)
+    if m:
+        v = _parse_number(next(g for g in m.groups() if g))
+        if v is not None:
+            return v
+    nums = _re.findall(r"-?\$?\d[\d,]*(?:\.\d+)?%?", s)
+    for tok in reversed(nums):
+        v = _parse_number(tok)
+        if v is not None:
+            return v
+    return None
+
+
+def strip_think_inline(text: str) -> str:
+    """math 路径独立剥 <think>（不 import providers，保持单向依赖）。"""
+    import re as _re
+    return _re.sub(r"<think>.*?</think>", "", text or "", flags=_re.S).strip()
+
+
+def grade_math_answer(ref_num: float, ans_num: float | None,
+                      rel_tol: float) -> float:
+    """数值比对：|a-b| <= max(rel_tol*|ref|, 1e-9)。ans None 由 gate 拦截（此处不达）。"""
+    if ans_num is None:
+        return 0.0
+    return 1.0 if abs(ans_num - ref_num) <= max(rel_tol * abs(ref_num), 1e-9) else 0.0
+
+
 # ---------------------------------------------------------------- per-task run
 
 def run_task(
@@ -215,6 +273,8 @@ def run_task(
     applicability["requirements"] = ("free_text_obj" if answer_format == "free_text"
                                      else "mcq_exact")
     applicability["robustness"] = f"samples={n_samples}" if n_samples > 1 else "N/A"
+    applicability["requirements"] = ("math_numeric" if answer_format == "math_answer"
+                                      else applicability["requirements"])
 
     # --- 模型调用（含采样一致性 robustness，未启用时 1 次） ---
     outs = []
@@ -229,7 +289,23 @@ def run_task(
 
     layer_details: dict[str, Any] = {}
 
-    if answer_format == "mcq":
+    if answer_format == "math_answer":
+        # ---------- math（GSM8K 型）：gate=数值可解析，客观层=数值精确匹配 ----------
+        raw = str(outs[0]["answer"])
+        ans_num = parse_math_answer(raw)
+        if ans_num is None:                     # CoT 有无无所谓，最终数抽不出=缺产物
+            gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+        else:
+            gate, gate_failures, failure_mode = 1, [], None
+        ref_num = float(task["reference"]["reference_number"])
+        rel_tol = float(task["grader"].get("numeric_rel_tol", 1e-6))
+        req_score = grade_math_answer(ref_num, ans_num, rel_tol) if gate else 0.0
+        subscores = {"physics": None, "requirements": req_score,
+                     "objective": None, "robustness": 0.0}
+        layer_details = {"parsed_answer": ans_num, "reference_number": ref_num,
+                         "raw_tail": raw[-160:]}
+
+    elif answer_format == "mcq":
         gate, gate_failures, failure_mode = validity_gate(task, outs[0])
         req_score = grade_objective(task, outs[0]["answer"]) if gate else 0.0
         subscores = {"physics": None, "requirements": req_score,
@@ -307,6 +383,47 @@ def run_task(
 
 # ---------------------------------------------------------------- summary
 
+def _write_math_summary(out_dir: Path, results: list[dict[str, Any]],
+                        provider: str, model_label: str, seed: int) -> Path:
+    """GSM8K 型 math_answer 报告：accuracy + 抽取失败分布 + 每题 parsed/ref 对照。"""
+    import json as _json
+    dist = gate_distribution(results)
+    scored = [r for r in results if r.get("failure_mode") not in common.VOIDED_FAILURE_MODES]
+    lines = []
+    a = lines.append
+    a(f"# qa_grounded(math_answer) 结果汇总（provider={provider}, model={model_label}, seed={seed}）")
+    a("")
+    a("## ValidityGate 分布（先看 gate，再看子分）")
+    a("")
+    a(f"- 任务总数: {dist['n_tasks']}")
+    a(f"- gate 通过（最终数可解析）: {dist['gate_passed']}")
+    a(f"- gate 失败（CoT 后无数值=missing_output）: {dist['gate_failed']}（直接 0 分）")
+    a(f"- 作废（不计分）: {dist['voided']}")
+    a(f"- gate 失败原因分布: {dist['gate_failure_reasons'] or '无'}")
+    a("")
+    n_correct = sum(1 for r in scored if r["subscores"]["requirements"] == 1.0)
+    a("## 客观层（requirements = 数值精确匹配）")
+    a("")
+    a(f"- 正确: {n_correct}/{len(scored)}"
+      f"（accuracy = {n_correct / max(1, len(scored)):.4f}，分母=计分任务数）")
+    a("- 子分适用性: physics=N/A（无证据/拒答层）；objective=N/A（并入 requirements）；"
+      "robustness=N/A（样本=1）")
+    a("- 权重（任务 YAML 覆写）: score = gate × 1.0×requirements")
+    a("- 抽取口径: #### 优先 -> 显式 answer is/答案 -> 全文末数（parse_math_answer）")
+    a("")
+    a("## 每题明细")
+    a("")
+    a("| task | gate | parsed | reference | correct | score |")
+    a("| --- | --- | --- | --- | --- | --- |")
+    for r in results:
+        det = _json.loads(r["artifacts"].get("layer_details") or "{}")
+        ok = r["subscores"]["requirements"] == 1.0
+        a(f"| {r['task_id']} | {r['validity_gate']} | {det.get('parsed_answer')} "
+          f"| {det.get('reference_number')} | {int(ok)} | {r['score']} |")
+    p = out_dir / "summary.md"
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return p
+
 def write_summary(out_dir: Path, results: list[dict[str, Any]],
                   provider: str, model_label: str, seed: int) -> Path:
     dist = gate_distribution(results)
@@ -326,8 +443,11 @@ def write_summary(out_dir: Path, results: list[dict[str, Any]],
     a("")
 
     if layered:
-        # ---------- free_text 多层报告（aeroengqa 型） ----------
+        # ---------- free_text 多层报告（aeroengqa 型）/ math 数值报告（GSM8K 型） ----------
         import json as _json
+        if any("parsed_answer" in _json.loads(r["artifacts"]["layer_details"])
+               for r in layered):
+            return _write_math_summary(out_dir, results, provider, model_label, seed)
         det = [(r, _json.loads(r["artifacts"]["layer_details"])) for r in layered]
         ans_tasks = [(r, d) for r, d in det if r["subscores"]["requirements"] is not None]
         unans_tasks = [(r, d) for r, d in det if r["subscores"]["requirements"] is None]
@@ -413,6 +533,9 @@ def main() -> int:
     ap.add_argument("--model", default=None,
                     help="覆写 provider 预设模型名（缺省用 PROVIDER_PRESETS 默认）")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--resume", action="store_true",
+                    help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
+                         "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -459,7 +582,16 @@ def main() -> int:
 
     results = []
     crash = 0
+    resumed = 0
     for t in tasks:
+        rp = out_dir / f"result_{t.id}.json"
+        if args.resume and rp.exists():
+            try:
+                results.append(json.loads(rp.read_text(encoding="utf-8")))
+                resumed += 1
+                continue
+            except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
+                pass
         try:
             r = run_task(t, provider=args.provider, model=args.model,
                          seed=args.seed, env_digest=env_digest,
@@ -484,7 +616,7 @@ def main() -> int:
         out_dir, registry_id=registry_id, adapter=ADAPTER,
         provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
         env_digest=env_digest, assets=asset_hashes, rerun_command=rerun,
-        extra={"crash_tasks": crash, "model": model_label})
+        extra={"crash_tasks": crash, "model": model_label, "resumed_tasks": resumed})
     sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
 
     dist = gate_distribution(results)

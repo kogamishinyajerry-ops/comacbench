@@ -1,0 +1,68 @@
+id: humaneval_053
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_053.md
+  prompt_sha256: 41d32174f3496493e3bde097c2efcf8aeef9e09d9cefe1d0b60d6b06dc7d7646
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_053.py
+    digest: 2f8477ed52318faa25881cf488ca2e2be4413f3b83de7d3ae0d2af62e3dfc8c0
+output_contract:
+- function:add
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/53
+  entry_point: add
+  n_test_cases: 5
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: add
+  tests:
+  - "import random\nfor i in range(100):\n    x, y = (random.randint(0, 1000), random.randint(0,\
+    \ 1000))\n    assert add(x, y) == x + y\nassert add(0, 1) == 1"
+  - "import random\nfor i in range(100):\n    x, y = (random.randint(0, 1000), random.randint(0,\
+    \ 1000))\n    assert add(x, y) == x + y\nassert add(1, 0) == 1"
+  - "import random\nfor i in range(100):\n    x, y = (random.randint(0, 1000), random.randint(0,\
+    \ 1000))\n    assert add(x, y) == x + y\nassert add(2, 3) == 5"
+  - "import random\nfor i in range(100):\n    x, y = (random.randint(0, 1000), random.randint(0,\
+    \ 1000))\n    assert add(x, y) == x + y\nassert add(5, 7) == 12"
+  - "import random\nfor i in range(100):\n    x, y = (random.randint(0, 1000), random.randint(0,\
+    \ 1000))\n    assert add(x, y) == x + y\nassert add(7, 5) == 12"
+  test_split_mode: split
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_053.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

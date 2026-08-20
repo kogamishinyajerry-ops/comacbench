@@ -1,0 +1,70 @@
+id: humaneval_153
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_153.md
+  prompt_sha256: d3c18ef012eb6a531bbb91e49e4066d96ecba1b62b7b1f0d2ea0ce25af5de258
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_153.py
+    digest: 1cb40dcbb5d448ba423593892c09051db4af7191420451d84864d775193c2510
+output_contract:
+- function:Strongest_Extension
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/153
+  entry_point: Strongest_Extension
+  n_test_cases: 9
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: Strongest_Extension
+  tests:
+  - assert Strongest_Extension('Watashi', ['tEN', 'niNE', 'eIGHt8OKe']) == 'Watashi.eIGHt8OKe'
+  - assert Strongest_Extension('Boku123', ['nani', 'NazeDa', 'YEs.WeCaNe', '32145tggg'])
+    == 'Boku123.YEs.WeCaNe'
+  - assert Strongest_Extension('__YESIMHERE', ['t', 'eMptY', 'nothing', 'zeR00', 'NuLl__',
+    '123NoooneB321']) == '__YESIMHERE.NuLl__'
+  - assert Strongest_Extension('K', ['Ta', 'TAR', 't234An', 'cosSo']) == 'K.TAR'
+  - assert Strongest_Extension('__HAHA', ['Tab', '123', '781345', '-_-']) == '__HAHA.123'
+  - assert Strongest_Extension('YameRore', ['HhAas', 'okIWILL123', 'WorkOut', 'Fails',
+    '-_-']) == 'YameRore.okIWILL123'
+  - assert Strongest_Extension('finNNalLLly', ['Die', 'NowW', 'Wow', 'WoW']) == 'finNNalLLly.WoW'
+  - assert Strongest_Extension('_', ['Bb', '91245']) == '_.Bb'
+  - assert Strongest_Extension('Sp', ['671235', 'Bb']) == 'Sp.671235'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_153.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

@@ -1,0 +1,72 @@
+id: humaneval_117
+registry_id: humaneval.python
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humaneval@openai-master+jsonl_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python/humaneval_117.md
+  prompt_sha256: 76bf6d858892d5f9f961aa00ae7898f114cca3c541ead736a98246027699ac68
+  assets:
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python/oracle/humaneval_117.py
+    digest: 3273e6dad157830502be2ff6c7b59d470897e20950bf91f8d022433f0cf33256
+output_contract:
+- function:select_words
+reference:
+  source: HumanEval 官方 test 块（MIT, openai/human-eval）
+  revision: humaneval@openai-master+jsonl_20260821
+  task_id: HumanEval/117
+  entry_point: select_words
+  n_test_cases: 7
+  uncertainty_note: 断言二值判定无比对不确定度；doctest 属公开提示面不计隐藏层
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: select_words
+  tests:
+  - 'assert select_words(''Mary had a little lamb'', 4) == [''little''], ''First test
+    error: '' + str(select_words(''Mary had a little lamb'', 4))'
+  - 'assert select_words(''Mary had a little lamb'', 3) == [''Mary'', ''lamb''], ''Second
+    test error: '' + str(select_words(''Mary had a little lamb'', 3))'
+  - 'assert select_words(''simple white space'', 2) == [], ''Third test error: ''
+    + str(select_words(''simple white space'', 2))'
+  - 'assert select_words(''Hello world'', 4) == [''world''], ''Fourth test error:
+    '' + str(select_words(''Hello world'', 4))'
+  - 'assert select_words(''Uncle sam'', 3) == [''Uncle''], ''Fifth test error: ''
+    + str(select_words(''Uncle sam'', 3))'
+  - 'assert select_words('''', 4) == [], ''1st edge test error: '' + str(select_words('''',
+    4))'
+  - 'assert select_words(''a b c d e f'', 1) == [''b'', ''c'', ''d'', ''f''], ''2nd
+    edge test error: '' + str(select_words(''a b c d e f'', 1))'
+  test_split_mode: split_pure
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python/oracle/humaneval_117.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（无边界输入测试）权重 0；robustness=两次执行确定性；summary 另报 pass@1（=官方口径）
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: openai/human-eval（HF openai/openai_humaneval 同源）
+  license: MIT
+  status: confirmed-repo
+  revision: humaneval@openai-master+jsonl_20260821
+  mirror_allowed: true

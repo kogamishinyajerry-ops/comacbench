@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_103",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef rounded_avg(n, m):\\n    \\\"\\\"\\\"You are given two positive integers n and m, and your task is to compute the\\n    average of the integers from n through m (including n and m). \\n    Round the answer to the nearest integer and convert that to binary.\\n    If n is greater than m, return -1.\\n    Example:\\n    rounded_avg(1, 5) => \\\"0b11\\\"\\n    rounded_avg(7, 5) => -1\\n    rounded_avg(10, 20) => \\\"0b1111\\\"\\n    rounded_avg(20, 33) => \\\"0b11010\\\"\\n    \\\"\\\"\\\"\\n    if m < n:\\n        return -1\\n    summation = 0\\n    for i in range(n, m+1):\\n        summation += i\\n    return bin(round(summation/(m - n + 1)))\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 12, \"cases_total\": 12, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.046,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}
