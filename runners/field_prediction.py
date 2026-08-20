@@ -197,7 +197,7 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--provider", default="stub",
                     choices=["stub", "oracle", "openai_compat", "glm", "minimax",
-                             "ml_superwing"])
+                             "ml_superwing", "ml_hilift"])
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()

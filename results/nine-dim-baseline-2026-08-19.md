@@ -48,6 +48,8 @@ scicode：42 过 gate 的题中 14 满分、28 部分分（physics 均值 0.54�
 | --- | --- | --- | --- | --- |
 | superwing.coeff_lite | 100 | 100/100 | 0.4415 | physics 均值 0.080（几何外推）/0.044（内插）——**LLM 无法直接系数回归**（CL rel_err ~240%） |
 | superwing（ML 参照） | 100 | 100/100 | 0.7525 | RandomForest(100)：**physics 内插 0.828 / 几何外推 0.485**——同一管线 ML vs LLM 差一个数量级（正例参照，`ml-superwing/`） |
+| hilift_aeroml.lite | 100 | 100/100 | 0.4855 | physics 内插 0.186 / 几何外推 0.124；**CM rel_err 218-353%**（高升力俯仰力矩对 LLM 最难），与 superwing 互证 |
+| hilift（ML 参照） | 100 | 100/100 | 0.904 | RandomForest(100)：**physics 内插 0.883 / 几何外推 0.821**（1410 训练行，36 保留构型全剔除）——正例参照，`ml-hilift/`（2026-08-20 补） |
 | cfdllm.foam_basic | 110 | 0/110 | 0.000 | gate 全败：**87 code_not_executable + 23 simulation_failed**（脚本崩溃 / Allrun 用 `source` bashism 而非 POSIX `.`）——M3 写不出可运行 OpenFOAM 算例 |
 
 > foam_basic 判分器已修：`os.chmod` 曾误列沙箱黑名单（33 例误判 sandbox_escape），移除后

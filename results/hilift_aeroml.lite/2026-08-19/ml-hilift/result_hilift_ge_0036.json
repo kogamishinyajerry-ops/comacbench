@@ -1,0 +1,37 @@
+{
+  "task_id": "hilift_ge_0036",
+  "registry_id": "hilift_aeroml.lite",
+  "adapter": "field_prediction",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "coefficient_rel_err_band",
+    "requirements": "coeff 字段完备",
+    "objective": "N/A(coeff_lite 基础题)",
+    "robustness": "split=ge"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "prediction": "{\"cl\": 1.8672638099999994, \"cd\": 0.47696257999999986, \"cm\": -0.9550954899999989}",
+    "model_meta": "{\"provider\": \"ml_hilift\", \"model\": \"RandomForestRegressor(100 trees, seed=0, split=任务YAML反推：ge构型整体保留+it测试行剔除)\"}",
+    "grade_details": "{\"kind\": \"field_prediction\", \"hits\": {\"cl\": {\"rel_err\": 0.034862, \"pred\": 1.8672638099999994, \"true\": 1.934712, \"band\": 1.0}, \"cd\": {\"rel_err\": 0.061487, \"pred\": 0.47696257999999986, \"true\": 0.508211, \"band\": 1.0}, \"cm\": {\"rel_err\": 0.010839, \"pred\": -0.9550954899999989, \"true\": -0.965561, \"band\": 1.0}}, \"split_group\": \"ge\", \"wing_shape_idx\": \"LHC008\"}"
+  },
+  "timings": {
+    "agent_s": 0.042,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b2c91a4513ee8230b081178d08b04d29c128f78a4421b218b194b6a36c81b267",
+  "assets_revision": "hilift@hf-lite-2026-08-19",
+  "logs": [
+    "pred={'cl': 1.8672638099999994, 'cd': 0.47696257999999986, 'cm': -0.9550954899999989}",
+    "gate=1 failures=[]"
+  ]
+}

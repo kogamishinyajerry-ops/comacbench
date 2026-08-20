@@ -22,7 +22,7 @@
 | --- | --- |
 | cfdllm.cfdcode | **gate 11/15，均分 0.586**（过 gate 题 physics 0.598）——GLM 通过率高于 M3（11 vs 8），精度低于 M3（0.598 vs 0.937）：画像分化 |
 | scicode.physics | **gate 29/52，均分 0.477，满分 11**（23 code_not_executable——通过率低于 M3 42/52，画像分化） |
-| foam_basic / superwing / hilift / pycycle | 串行链运行中（/tmp/glm_chain.sh，scicode 完成后自动接续 foam 18:48 启动） |
+| foam_basic / superwing / hilift / pycycle | 串行链（/tmp/glm_chain.sh）**已中断**（2026-08-20 核对：foam 停在 14/110，最后落盘 19:45 后进程消失；脚本 cwd 指向迁移前旧路径且 `.venv` 已删——见 §8.1）|
 
 ## 3. superwing ML 基线（正例参照）
 
@@ -42,7 +42,12 @@ RandomForest(100 trees, sklearn) on 25985 训练样本（38 几何参数 + aoa +
   hub snapshot 批量下载——直连被限流）；
 - 任务 100 = 几何外推 70（36 保留构型）+ 内插 30；
 - M3：gate 100/100、physics 内插 0.186/外推 0.124——**CM 相对误差 218-353%**（高升力
-  俯仰力矩对 LLM 最难），与 superwind 同结论互相印证。
+  俯仰力矩对 LLM 最难），与 superwind 同结论互相印证；
+- **ML 正例基线（ml-hilift，2026-08-20 补齐）**：RF 同款（1410 训练行 = 36 保留构型
+  全剔除 + 30 内插测试行剔除），gate 100/100，physics 内插 **0.883** / 几何外推
+  **0.821**（CL 2-3%/CD 3-4%/CM 16-17%）——与 LLM 差 ~4.7×/6.6×；几何外推衰减远小于
+  superwing（0.82 vs 0.49）；CM 对 RF 也最难但低一个数量级（或近 WMLES 真值噪声地板），
+  详见 `results/hilift_aeroml.lite/2026-08-19/ml-hilift/README.md`。
 
 ## 5. pycycle.engine_cycle（新增 integrated）
 
@@ -68,8 +73,13 @@ RandomForest(100 trees, sklearn) on 25985 训练样本（38 几何参数 + aoa +
 
 ## 8. 待议清单（本轮新增）
 
-1. GLM scicode 在跑、foam/superwing/hilift/pycycle 的 GLM 基线待串行补齐；
-2. hilift ML 正例基线（RF 同款）待跑（几何参数已就绪）；
+1. **GLM 串行链遗留（2026-08-20 审计）**：链已死——scicode 52/52 ✓、foam **14/110**
+   中断（最后落盘 19:45，其后无进程）、superwing/hilift/pycycle 未启动。两重不可原地
+   续跑因素：脚本 `cd` 迁移前旧路径 `JerryDSH/benchmarks`（结果靠 inode 跟随迁移落进
+   新仓库，进程本身已消失）；`.venv/` 已按「环境不迁移」策略删除（foam/pycycle 步骤
+   引用 `.venv/bin/python`，重启即失败）。续跑需以新仓库路径 + 系统 python3（或重建
+   venv）重写链，并注意 foam GLM 429 补跑约 4 min/题 × 余 96 题；
+2. ~~hilift ML 正例基线（RF 同款）待跑~~ **已补齐**（ml-hilift，见 §4）；
 3. mechvqa 多模态 provider（expect="vlm"）+ 规则判分口径评审；
 4. cadgen 三重前置（design_artifact adapter / 多模态 / GT 私有边界声明）；
 5. pycycle 高度权衡任务（需参数化 OD 点序列避免发散）；
@@ -79,13 +89,13 @@ RandomForest(100 trees, sklearn) on 25985 训练样本（38 几何参数 + aoa +
 
 ```
 benchmarks/
-├── runners/gen_tasks_{hilift,pycycle}.py + providers.py（ml_superwing + json 模式）
+├── runners/gen_tasks_{hilift,pycycle}.py + providers.py（ml_superwing / ml_hilift + json 模式）
 ├── tasks/hilift_aeroml.lite/     100 yaml + 100 md
 ├── tasks/pycycle.engine_cycle/   7 yaml + 7 md
 ├── data/hilift/lite/             系数层镜像 + PROVENANCE + sha256
 ├── data/pycycle/engine_cycle/    vendored 引擎 + gold + references + hidden + PROVENANCE
 ├── data/mechvqa/public_eval/     镜像（1185 题 + 图纸，383MB）+ PROVENANCE
-├── results/hilift_aeroml.lite/2026-08-19/{README.md, oracle/, stub/, minimax-m3/}
+├── results/hilift_aeroml.lite/2026-08-19/{README.md, oracle/, stub/, minimax-m3/, ml-hilift/}
 ├── results/pycycle.engine_cycle/2026-08-19/{README.md, oracle/, stub/, minimax-m3/}
 ├── results/superwing.coeff_lite/2026-08-19/ml-superwing/（ML 正例基线）
 ├── results/cfdllm.cfdcode/2026-08-19/glm-4.6/（GLM 补跑完成 11/15）

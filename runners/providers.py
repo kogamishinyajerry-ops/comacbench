@@ -14,6 +14,9 @@
                 base 读 GLM_BASE_URL（缺省 coding 端点），模型缺省 glm-4.6。
   minimax       MiniMax（api.minimaxi.com/v1，OpenAI 兼容）。key 依次读
                 MINIMAX_M3_API_KEY / MINIMAX_API_KEY，模型缺省 MiniMax-M3。
+  ml_superwing  superwing ML 正例基线（RF，几何+工况→系数），非被测 LLM。
+  ml_hilift     hilift ML 正例基线（RF 同款；保留集由任务 YAML 反推，见
+                _train_hilift_ml docstring）。
 
 推理模型差异（2026-08-19 实测）：
   GLM-4.6   最终答案在 message.content，思考在 message.reasoning_content；
@@ -310,6 +313,77 @@ def _ml_superwing_predict(task: TaskSpec) -> dict[str, float]:
             "cm": float(ml["models"]["cm_solver"].predict(x)[0])}
 
 
+def _train_hilift_ml(tasks_dir: Path) -> dict[str, Any]:
+    """hilift ML 基线：随机森林回归（8 高升力几何参数 + AoA → cl/cd/cm）。
+
+    与 ml_superwing 同款（RF 100 trees, seed=0），作 field_prediction 正例参照。
+    划分纪律（与生成器 gen_tasks_hilift.py 同口径）：
+      - 保留集 = 生成器 RNG（seed 20260819）抽的 36 构型，整体剔除出训练
+        （注意：70 道 ge 题只实际覆盖其中 32 个——其余 4 个未被抽样但同样保留）；
+      - it 组（内插）的 (构型, 迎角) 测试行剔除，构型其余迎角保留；
+      - 双保险：从任务 YAML 反推 ge 构型集，必须 ⊆ RNG 保留集，否则报错防漂移；
+      训练行数 = 1800 - 36×10 - 30 = 1410（144 训练构型）。
+    """
+    import numpy as _np
+    import pandas as _pd
+    import yaml as _yaml
+    from sklearn.ensemble import RandomForestRegressor
+
+    bench = Path(__file__).resolve().parent.parent
+    d = bench / "data/hilift/lite"
+    geo_params = ["IB_Flap_Deflection", "OB_Flap_Deflection",
+                  "IB_Flap_Gap_Multiplier", "OB_Flap_Gap_Multiplier",
+                  "IB_Slat_Deflection", "OB_Slat_Deflection",
+                  "IB_Slat_Gap_Multiplier", "OB_Slat_Gap_Multiplier"]
+
+    fm = _pd.read_csv(d / "force_mom_all.csv")
+    geo = _pd.read_csv(d / "geo_values_all.csv").set_index("GeoID")
+    # 生成器同款保留集（gen_tasks_hilift.py: rng=default_rng(20260819), size=36）
+    holdout = set(_np.random.default_rng(20260819).choice(
+        sorted(fm["GeoID"].unique()), size=36, replace=False).tolist())
+
+    # 双保险：任务 YAML 反推的 ge 构型必须 ⊆ 保留集（生成器换 seed 时立刻暴露）
+    ge_in_tasks: set[str] = set()
+    it_rows: set[tuple[str, float]] = set()
+    for yp in sorted(tasks_dir.glob("*.yaml")):
+        ref = (_yaml.safe_load(yp.read_text(encoding="utf-8")) or {}).get("reference") or {}
+        gid, aoa = ref.get("wing_shape_idx"), ref.get("aoa")
+        if gid is None or aoa is None:
+            continue
+        if ref.get("split_group") == "ge":
+            ge_in_tasks.add(gid)
+        elif ref.get("split_group") == "it":
+            it_rows.add((gid, round(float(aoa), 6)))
+    if not ge_in_tasks <= holdout:
+        raise ProviderError(
+            f"hilift 划分漂移: 任务 YAML 的 ge 构型 {sorted(ge_in_tasks - holdout)} "
+            "不在 RNG 保留集内——生成器与 ML 基线口径需人工复核")
+    tr = fm[~fm["GeoID"].isin(holdout)]
+    tr = tr[~tr.apply(lambda r: (r["GeoID"], round(float(r["AoA"]), 6)) in it_rows, axis=1)]
+    X = _np.array([[float(v) for v in geo.loc[g, geo_params]] + [float(a)]
+                   for g, a in zip(tr["GeoID"], tr["AoA"])])
+    models = {}
+    for c in ("cl", "cd", "cm"):
+        m = RandomForestRegressor(n_estimators=100, random_state=0, n_jobs=-1)
+        m.fit(X, tr[c].values)
+        models[c] = m
+    return {"models": models, "geo": geo, "geo_params": geo_params,
+            "n_train": len(tr), "n_holdout": len(holdout)}
+
+
+def _ml_hilift_predict(task: TaskSpec) -> dict[str, float]:
+    bench = Path(__file__).resolve().parent.parent
+    tasks_dir = (bench / Path(task["input"]["prompt_file"]).parent).resolve()
+    if "hilift" not in _ML_MODELS:
+        _ML_MODELS["hilift"] = _train_hilift_ml(tasks_dir)
+    ml = _ML_MODELS["hilift"]
+    ref = task["reference"]
+    import numpy as _np
+    row = ml["geo"].loc[ref["wing_shape_idx"], ml["geo_params"]]
+    x = _np.array([[float(v) for v in row] + [float(ref["aoa"])]])
+    return {c: float(ml["models"][c].predict(x)[0]) for c in ("cl", "cd", "cm")}
+
+
 # ---------------------------------------------------------------- entry
 
 def get_answer(
@@ -344,6 +418,14 @@ def get_answer(
         return {"answer": pred, "raw": json.dumps(pred), "attempts": 1,
                 "meta": {"provider": "ml_superwing",
                          "model": "RandomForestRegressor(100 trees, seed=0)"}}
+    if provider == "ml_hilift":
+        if expect != "json":
+            raise ProviderError("ml_hilift 仅支持 expect=json（field_prediction）")
+        pred = _ml_hilift_predict(task)
+        return {"answer": pred, "raw": json.dumps(pred), "attempts": 1,
+                "meta": {"provider": "ml_hilift",
+                         "model": "RandomForestRegressor(100 trees, seed=0, "
+                                  "split=任务YAML反推：ge构型整体保留+it测试行剔除)"}}
     if provider == "oracle":
         if expect == "code":
             raise ProviderError("oracle code 由 adapter 从 grader.oracle_source 读取，不走 provider")
