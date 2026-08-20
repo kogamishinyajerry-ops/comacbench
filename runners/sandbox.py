@@ -2,7 +2,11 @@
 
 设计边界（如实声明，写入 M2 报告）：
 - dev 终端无容器运行时；本沙箱 = **静态检查（AST）+ 隔离子进程执行**：
-  * `python -I`（isolated mode：忽略用户 site/环境变量 PYTHONPATH、不插入 cwd）；
+  * `python -E -s`（忽略环境变量 PYTHONPATH 等 + 禁 user-site）。
+    2026-08-20：原为 `-I`——Python 3.11+ 起 `-I` 隐含 `-P`（脚本目录不进
+    sys.path），vendored gold 的 `import turbojet_engine`（同目录伴随模块）
+    随新 venv（3.12）失败；`-E -s` 恢复 ≤3.10 时代 `-I` 的实际语义，
+    隔离强度声明不变（仍无环境变量/无 user-site/独立 cwd/墙钟超时）；
   * 独立临时工作目录（读写仅限该目录），墙钟超时硬杀；
   * 静态检查禁止 网络/子进程/系统调用 类导入与调用，命中即
     `sandbox_escape_attempt`（score=0 并单独告警，adapters/README.md code_exec 失败模式）。
@@ -89,7 +93,7 @@ class IsolatedRun:
         t0 = time.time()
         try:
             r = subprocess.run(
-                [sys.executable, "-I", str(script)],
+                [sys.executable, "-E", "-s", str(script)],
                 cwd=self.dir, capture_output=True, text=True, timeout=timeout_s,
                 env={"PATH": "/usr/bin:/bin", "HOME": str(self.dir),
                      "MPLCONFIGDIR": str(self.dir)},

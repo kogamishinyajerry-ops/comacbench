@@ -73,12 +73,13 @@ RandomForest(100 trees, sklearn) on 25985 训练样本（38 几何参数 + aoa +
 
 ## 8. 待议清单（本轮新增）
 
-1. **GLM 串行链遗留（2026-08-20 审计）**：链已死——scicode 52/52 ✓、foam **14/110**
-   中断（最后落盘 19:45，其后无进程）、superwing/hilift/pycycle 未启动。两重不可原地
-   续跑因素：脚本 `cd` 迁移前旧路径 `JerryDSH/benchmarks`（结果靠 inode 跟随迁移落进
-   新仓库，进程本身已消失）；`.venv/` 已按「环境不迁移」策略删除（foam/pycycle 步骤
-   引用 `.venv/bin/python`，重启即失败）。续跑需以新仓库路径 + 系统 python3（或重建
-   venv）重写链，并注意 foam GLM 429 补跑约 4 min/题 × 余 96 题；
+1. **GLM 串行链遗留（2026-08-20 审计 + 同日重建）**：v1 链已死——scicode 52/52 ✓、
+   foam **14/110** 中断（最后落盘 19:45，其后无进程）、superwing/hilift/pycycle 未启动。
+   死因：脚本 `cd` 迁移前旧路径 `JerryDSH/benchmarks`（结果靠 inode 跟随迁移落进
+   新仓库）+ `.venv/` 已删。**v2 已于 20:32 重启**（/tmp/glm_chain2.sh，nohup 脱离）：
+   新仓库路径 + runner 新增 `--resume` 断点续跑（foam 已有 14 件保留）+ venv 重建
+   （om-pycycle 4.4.0 兼容栈，oracle pycycle 7/7 自检通过）；顺序 foam(余96) →
+   superwing → hilift → pycycle，预计隔夜完成；
 2. ~~hilift ML 正例基线（RF 同款）待跑~~ **已补齐**（ml-hilift，见 §4）；
 3. mechvqa 多模态 provider（expect="vlm"）+ 规则判分口径评审；
 4. cadgen 三重前置（design_artifact adapter / 多模态 / GT 私有边界声明）；

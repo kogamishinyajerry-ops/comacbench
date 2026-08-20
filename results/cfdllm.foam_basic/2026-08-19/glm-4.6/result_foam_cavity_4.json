@@ -1,0 +1,40 @@
+{
+  "task_id": "foam_cavity_4",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.8571,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Helper to write file content, creating directories if necessary.\\\"\\\"\\\"\\n    directory = os.path.dirname(path)\\n    if directory:\\n        os.makedirs(directory, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- 0/ Files ---\\n\\nu_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    movingWall\\n    {\\n        type            fixedValue;\\n        value           uniform (1.5 0 0);\\n    }\\n\\n    fixedWalls\\n    {\\n        type            noSlip;\\n    }\\n\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\np_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 2 -2 0 0 0 0];\\n\\ninternalField   uniform 0;\\n\\nboundaryField\\n{\\n    movingWall\\n    {\\n        type            zeroGradient;\\n    }\\n\\n    fixedWalls\\n    {\\n        type            zeroGradient;\\n    }\\n\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\n# --- constant/ Files ---\\n\\ntransport_properties_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"constant\\\";\\n    object      transportProperties;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ntransportModel  Newtonian;\\n\\nnu              [0 2 -1 0 0 0 0] 1e-03;\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\nturbulence_properties_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A \"",
+    "grade_details": "{\"missing\": [\"system/blockMeshDict\"]}"
+  },
+  "timings": {
+    "agent_s": 221.819,
+    "setup_s": 0.0,
+    "grade_s": 0.037
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=6/7 missing=['system/blockMeshDict']"
+  ]
+}

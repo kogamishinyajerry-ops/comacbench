@@ -54,12 +54,20 @@ _SCRIPT_FAIL = "code_not_executable"
 def _run_aviary_task(
     task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
     logs: list[str], applicability: dict[str, str],
+    companions: list[tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
-    """aviary_mission：模型脚本在沙箱内用 aviary 分析模式算出 result.json，对参考判分。"""
+    """aviary_mission / pycycle_cycle：模型脚本在沙箱内求解 result.json，对参考判分。
+
+    companions：伴随模块（文件名, 源码）——仅 oracle gold 需要（vendored 引擎
+    turbojet_engine.py 与 gold 同目录依赖）；被测模型按题面自建循环，不提供。
+    """
     grade_t0 = time.time()
     timeout = float(task["limits"]["wall_clock_s"])
     iso = IsolatedRun()
     script = iso.write("solve.py", code)
+    for name, content in (companions or []):
+        iso.write(name, content)
+        logs.append(f"companion written: {name} ({len(content)}B)")
     rr = iso.run(script, timeout)
     logs.append(f"solve exit={rr['exit']} {rr['duration_s']}s")
 
@@ -138,6 +146,7 @@ def run_task(
     task: TaskSpec, *, provider: str, model: str | None, seed: int,
     env_digest: str, prompt_cache: dict[str, str], assets_root: Path,
     oracle_cache: dict[str, str] | None,
+    companions: list[tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
     from .foam_nmse import evaluate_nmse, nmse_to_score
     t0 = time.time()
@@ -188,7 +197,8 @@ def run_task(
 
     # ---- exec_kind 分派 ----
     if kind in ("aviary_mission", "pycycle_cycle"):
-        return _run_aviary_task(task, code, meta, t0, env_digest, logs, applicability)
+        return _run_aviary_task(task, code, meta, t0, env_digest, logs,
+                                applicability, companions=companions)
 
     # ---- 1) 沙箱跑脚本 → 算例目录 ----
     grade_t0 = time.time()
@@ -334,6 +344,9 @@ def main() -> int:
                     choices=["stub", "oracle", "openai_compat", "glm", "minimax"])
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--resume", action="store_true",
+                    help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
+                         "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -366,6 +379,7 @@ def main() -> int:
             prompt_cache[t.id] = f.read()
 
     oracle_cache: dict[str, str] = {}
+    companions: list[tuple[str, str]] = []
     if args.provider == "oracle":
         for t in tasks:
             src = t["grader"].get("oracle_source")
@@ -375,6 +389,17 @@ def main() -> int:
             if not p.is_absolute():
                 p = (assets_root / src).resolve()
             oracle_cache[t.id] = p.read_text(encoding="utf-8")
+            # gold 的同目录/父目录伴随模块（如 vendored turbojet_engine.py，位于
+            # gold/ 上层）：gold 里 import 了才随行——被测模型按题面自建，不提供
+            seen: set[Path] = set()
+            for cand in sorted(list(p.parent.glob("*.py")) + list(p.parent.parent.glob("*.py"))):
+                if cand in seen or cand == p or cand.stem == "__init__":
+                    continue
+                seen.add(cand)
+                if f"import {cand.stem}" in oracle_cache[t.id] and \
+                        (cand.stem, cand.read_text(encoding="utf-8")) not in companions:
+                    companions.append((cand.stem + ".py",
+                                       cand.read_text(encoding="utf-8")))
 
     from .providers import PROVIDER_PRESETS
     model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get("model_default", "n/a")
@@ -383,14 +408,24 @@ def main() -> int:
              f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
              f"--provider {args.provider}"
              + (f" --model {args.model}" if args.model else "")
-             + f" --seed {args.seed}")
+             + f" --seed {args.seed}"
+             + (" --resume" if args.resume else ""))
 
-    results, crash = [], 0
+    results, crash, resumed = [], 0, 0
     for t in tasks:
+        rp = out_dir / f"result_{t.id}.json"
+        if args.resume and rp.exists():
+            try:
+                results.append(json.loads(rp.read_text(encoding="utf-8")))
+                resumed += 1
+                continue
+            except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
+                pass
         try:
             r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
                          env_digest=env_digest, prompt_cache=prompt_cache,
-                         assets_root=assets_root, oracle_cache=oracle_cache or None)
+                         assets_root=assets_root, oracle_cache=oracle_cache or None,
+                         companions=companions or None)
         except ProviderError as e:
             raise SystemExit(f"[终止] provider 失败: {e}")
         except Exception as e:  # noqa: BLE001
@@ -410,7 +445,8 @@ def main() -> int:
                             provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
                             env_digest=env_digest, assets=asset_hashes,
                             rerun_command=rerun,
-                            extra={"crash_tasks": crash, "model": model_label})
+                            extra={"crash_tasks": crash, "model": model_label,
+                                   "resumed_tasks": resumed})
     sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
     dist = gate_distribution(results)
     print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "

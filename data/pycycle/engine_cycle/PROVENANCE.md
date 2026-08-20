@@ -15,10 +15,16 @@
 - **隐藏动态**：`hidden/answers.b64`（参数空间 Fn∈{10k..14k}/T4∈{2300,2450,2600}/
   OPR∈{12,13.5,15}，种子 20260819，试点 1 例隔离）。
 
-## 环境事实（2026-08-19）
+## 环境事实（2026-08-19；2026-08-20 venv 重建并钉版本）
 
-- **PyPI `pycycle` 是抢注空壳包**（仅 cli/utils，无发动机模型）——真包须源码安装：
-  `pip install -e /path/to/pycycle`（setup 名 `om-pycycle`）。已装 venv；
+- **PyPI `pycycle` 是抢注空壳包**（仅 cli/utils，无发动机模型）——真包 2026-08-20
+  起可直接 `pip install om-pycycle`（4.4.0 已上架，本次 venv 即用）；旧文档的
+  `pip install -e /path/to/pycycle` 源码装法仅作历史记录；
+- **兼容栈钉子（Python 3.12.13）**：`om-pycycle==4.4.0` + `openmdao==3.34.2` +
+  `numpy==1.26.4` + `scipy==1.13.1`——om-pycycle 4.4.0 的 `ThermoAdd.compute` 在
+  numpy≥2 下抛 "setting an array element with a sequence"，而 openmdao≥3.35 /
+  scipy≥1.14 又要求 numpy≥2，故整套钉在 2024 时代组合（oracle 7/7 实测通过；
+  参考解重算勿盲目升级）；
 - 收敛域：SL（alt≈0, MN≈0.000001）设计点 + 官方初值 → Fn_target∈[9k,16k]、
   T4∈[2200,2900]、OPR∈[11,16] 稳定收敛（实测 3 组参数全部精确命中 Fn_target）；
   **巡航高度参数化会使 OD 点发散**（官方 od_Fn/od_MN 固定 SL 相邻点）——高度权衡类

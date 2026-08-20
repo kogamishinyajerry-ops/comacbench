@@ -200,6 +200,9 @@ def main() -> int:
                              "ml_superwing", "ml_hilift"])
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--resume", action="store_true",
+                    help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
+                         "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -238,10 +241,19 @@ def main() -> int:
              f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
              f"--provider {args.provider}"
              + (f" --model {args.model}" if args.model else "")
-             + f" --seed {args.seed}")
+             + f" --seed {args.seed}"
+             + (" --resume" if args.resume else ""))
 
-    results, crash = [], 0
+    results, crash, resumed = [], 0, 0
     for t in tasks:
+        rp = out_dir / f"result_{t.id}.json"
+        if args.resume and rp.exists():
+            try:
+                results.append(json.loads(rp.read_text(encoding="utf-8")))
+                resumed += 1
+                continue
+            except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
+                pass
         try:
             r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
                          env_digest=env_digest, prompt_cache=prompt_cache,
@@ -265,7 +277,8 @@ def main() -> int:
                             provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
                             env_digest=env_digest, assets=asset_hashes,
                             rerun_command=rerun,
-                            extra={"crash_tasks": crash, "model": model_label})
+                            extra={"crash_tasks": crash, "model": model_label,
+                                   "resumed_tasks": resumed})
     sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
     dist = gate_distribution(results)
     print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
