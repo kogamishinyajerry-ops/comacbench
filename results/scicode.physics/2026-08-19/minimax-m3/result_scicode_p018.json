@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p018",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.58335,
+  "artifacts": {
+    "code": "\"def Bspline(xi, i, p, Xi):\\n    '''Inputs:\\n    xi : knot index, integer\\n    i : polynomial index , integer\\n    p : polynomial degree of basis function , integer\\n    Xi : knot vector, 1d array of arbitrary size\\n    Outputs:\\n    1d array of size 1,2 or 3\\n    '''\\n    # Cox-de Boor recursion for a single B-spline basis function\\n    if p == 0:\\n        if Xi[i] <= xi < Xi[i+1]:\\n            return np.array([1.0])\\n        else:\\n            return np.array([0.0])\\n    else:\\n        # Left term\\n        if Xi[i+p] == Xi[i]:\\n            left = 0.0\\n        else:\\n            left = (xi - Xi[i]) / (Xi[i+p] - Xi[i]) * Bspline(xi, i, p-1, Xi)[0]\\n        # Right term\\n        if Xi[i+p+1] == Xi[i+1]:\\n            right = 0.0\\n        else:\\n            right = (Xi[i+p+1] - xi) / (Xi[i+p+1] - Xi[i+1]) * Bspline(xi, i+1, p-1, Xi)[0]\\n        return np.array([left + right])\\n\\ndef NURBS_2D(xi_1, xi_2, i_1, i_2, p_1, p_2, n_1, n_2, Xi_1, Xi_2, w):\\n    '''Inputs:\\n    xi_1 : parameter coordinate at the first dof, float\\n    xi_2 : parameter coordinate at the second dof, float\\n    i_1 : index of the basis function to be evaluated at the first dof, integer\\n    i_2 : index of the basis function to be evaluated at the second dof, integer\\n    p_1 : polynomial degree of the basis function to be evaluated at the first dof, integer\\n    p_2 : polynomial degree of the basis function to be evaluated at the second dof, integer\\n    n_1 : total number of basis function at the first dof, integer\\n    n_2 : total number of basis function at the second dof, integer\\n    Xi_1 : knot vector of arbitrary size , 1d array\\n    Xi_2 : knot vector of arbitrary size , 1d array\\n    w : array storing NURBS weights, 1d array\\n    Outputs:\\n    N : value of the basis functions evaluated at the given paramter coordinates, 1d array of size 1 or 2\\n    '''\\n    # Compute 1D basis functions\\n    N1 = np.array([Bspline(xi_1, j, p_1, Xi_1)[0] for j in range(n_1)])\\n    N2 = np.array([Bspline(xi_2, j, p_2, Xi_2)[0] for j in range(n_2)])\\n    \\n    # Reshape weights to 2D (row-major)\\n    W = w.reshape(n_1, n_2)\\n    \\n    # Compute denominator\\n    denominator = np.sum(np.outer(N1, N2) * W)\\n    \\n    # Compute numerator\\n    numerator = N1[i_1] * N2[i_2] * W[i_1, i_2]\\n    \\n    # Compute rational basis function\\n    if denominator == 0:\\n        R = 0.0\\n    else:\\n        R = numerator / denominator\\n    \\n    return np.array([R])\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 1, \"cases_total\": 6, \"steps_all_pass\": 0, \"steps_total\": 2, \"per_step\": {\"18.1\": {\"pass\": 1, \"total\": 3}, \"18.2\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 234.686,
+    "setup_s": 0.0,
+    "grade_s": 0.986
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.49s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p029",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def normalize(v):\\n    '''Normalize the input vector.\\n    Input:\\n    v (N*1 numpy array): The input vector.\\n    Output:\\n    n (N*1 numpy array): The normalized vector.\\n    '''\\n    norm = np.linalg.norm(v)\\n    if norm == 0:\\n        raise ValueError(\\\"Cannot normalize zero vector\\\")\\n    return v / norm\\n\\ndef inner_product(u, v):\\n    '''Calculates the inner product of two vectors.\\n    Input:\\n    u (numpy array): Vector 1.\\n    v (numpy array): Vector 2.\\n    Output:\\n    p (float): Inner product of the vectors.\\n    '''\\n    return np.sum(u * v)\\n\\ndef orthogonalize(A):\\n    '''Perform Gram-Schmidt orthogonalization on the input vectors to produce orthogonal and normalized vectors.\\n    Input:\\n    A (N*N numpy array): N linearly independent vectors in the N-dimension space.\\n    Output:\\n    B (N*N numpy array): The collection of the orthonomal vectors.\\n    '''\\n    N = A.shape[0]\\n    epsilons = []\\n    for i in range(N):\\n        v = A[:, i].reshape(-1, 1)   # extract column as a column vector\\n        epsilon = v.copy()\\n        for e in epsilons:\\n            coeff = inner_product(v, e) / inner_product(e, e)\\n            epsilon = epsilon - coeff * e\\n        epsilons.append(epsilon)\\n    orthonormal = [normalize(e) for e in epsilons]\\n    B = np.hstack(orthonormal)\\n    return B\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 10, \"cases_total\": 10, \"steps_all_pass\": 3, \"steps_total\": 3, \"per_step\": {\"29.1\": {\"pass\": 3, \"total\": 3}, \"29.2\": {\"pass\": 3, \"total\": 3}, \"29.3\": {\"pass\": 4, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 100.643,
+    "setup_s": 0.0,
+    "grade_s": 0.837
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.43s"
+  ]
+}

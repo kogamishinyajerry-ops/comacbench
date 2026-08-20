@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p007",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def apply_band_pass_filter(image_array, bandmin, bandmax):\\n    '''\\n    Applies a band pass filter to the given image array based on the frequency threshold.\\n    Input:\\n    image_array: 2D numpy array of float, the input image.\\n    bandmin: float, inner radius of the frequency band\\n    bandmax: float, outer radius of the frequency band\\n    Output:\\n    T: float, 2D numpy array, The spatial filter used.\\n    output_image: float, 2D numpy array, the filtered image in the original domain.\\n    '''\\n    # Get image dimensions\\n    m, n = image_array.shape\\n\\n    # Create coordinate grids\\n    y = np.arange(m)\\n    x = np.arange(n)\\n    Y, X = np.meshgrid(y, x, indexing='ij')\\n\\n    # Compute distance from the center (after fftshift)\\n    center_y = m // 2\\n    center_x = n // 2\\n    dist = np.sqrt((X - center_x)**2 + (Y - center_y)**2)\\n\\n    # Build band-pass mask (1 inside the band, 0 outside)\\n    # Exclude the exact boundary frequencies\\n    T = np.zeros((m, n), dtype=float)\\n    mask_condition = (dist > bandmin) & (dist < bandmax)\\n    T[mask_condition] = 1.0\\n\\n    # Forward Fourier transform and shift zero frequency to center\\n    F = fftshift(fft2(image_array))\\n\\n    # Apply the band-pass filter in the frequency domain\\n    F_filtered = F * T\\n\\n    # Inverse shift and inverse Fourier transform\\n    filtered = ifftshift(F_filtered)\\n    output_image = ifft2(filtered)\\n\\n    # Return real part (imaginary part should be near zero)\\n    output_image = np.real(output_image)\\n\\n    return T, output_image\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 4, \"cases_total\": 4, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"7.1\": {\"pass\": 4, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 67.947,
+    "setup_s": 0.0,
+    "grade_s": 0.935
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.47s"
+  ]
+}

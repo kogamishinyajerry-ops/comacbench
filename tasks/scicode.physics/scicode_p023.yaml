@@ -1,0 +1,146 @@
+id: scicode_p023
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p023.md
+  prompt_sha256: 5b0a5edd90d3d8e44d0491738a6cfb49370c0e1b89a648b37c466c028d45a93f
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '23'
+  problem_name: Blahut_Arimoto
+  split: test
+  n_steps: 3
+  n_cases: 13
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: import numpy as np
+  steps:
+  - step_id: '23.1'
+    n_cases: 3
+    test_cases:
+    - 'p = [1/2,1/2,0,0]
+
+      q = [1/4,1/4,1/4,1/4]
+
+      assert np.allclose(KL_divergence(p,q), target)'
+    - 'p = [1/2,1/2]
+
+      q = [1/2,1/2]
+
+      assert np.allclose(KL_divergence(p,q), target)'
+    - 'p = [1,0]
+
+      q = [1/4,3/4]
+
+      assert np.allclose(KL_divergence(p,q), target)'
+  - step_id: '23.2'
+    n_cases: 3
+    test_cases:
+    - 'channel = np.eye(2)
+
+      prior = [0.5,0.5]
+
+      assert np.allclose(mutual_info(channel, prior), target)'
+    - 'channel = np.array([[1/2,1/2],[1/2,1/2]])
+
+      prior = [3/8,5/8]
+
+      assert np.allclose(mutual_info(channel, prior), target)'
+    - 'channel = np.array([[0.8,0],[0,0.8],[0.2,0.2]])
+
+      prior = [1/2,1/2]
+
+      assert np.allclose(mutual_info(channel, prior), target)'
+  - step_id: '23.3'
+    n_cases: 7
+    test_cases:
+    - 'np.random.seed(0)
+
+      channel = np.array([[1,0,1/4],[0,1,1/4],[0,0,1/2]])
+
+      e = 1e-8
+
+      assert np.allclose(blahut_arimoto(channel,e), target)'
+    - 'np.random.seed(0)
+
+      channel = np.array([[0.1,0.6],[0.9,0.4]])
+
+      e = 1e-8
+
+      assert np.allclose(blahut_arimoto(channel,e), target)'
+    - 'np.random.seed(0)
+
+      channel = np.array([[0.8,0.5],[0.2,0.5]])
+
+      e = 1e-5
+
+      assert np.allclose(blahut_arimoto(channel,e), target)'
+    - 'np.random.seed(0)
+
+      bsc = np.array([[0.8,0.2],[0.2,0.8]])
+
+      assert np.allclose(blahut_arimoto(bsc,1e-8), target)'
+    - 'np.random.seed(0)
+
+      bec = np.array([[0.8,0],[0,0.8],[0.2,0.2]])
+
+      assert np.allclose(blahut_arimoto(bec,1e-8), target)'
+    - 'np.random.seed(0)
+
+      channel = np.array([[1,0,1/4],[0,1,1/4],[0,0,1/2]])
+
+      e = 1e-8
+
+      assert np.allclose(blahut_arimoto(channel,e), target)'
+    - 'np.random.seed(0)
+
+      bsc = np.array([[0.8,0.2],[0.2,0.8]])
+
+      assert np.allclose(blahut_arimoto(bsc,1e-8), target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

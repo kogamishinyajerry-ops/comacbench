@@ -1,0 +1,175 @@
+id: scicode_p045
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p045.md
+  prompt_sha256: 0b1dd152c653fa859a87d037e434e74ed78cdec2e09095b5d23ab5f13892df23
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '45'
+  problem_name: finite_difference_heat_equation
+  split: test
+  n_steps: 4
+  n_cases: 12
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: import numpy as np
+  steps:
+  - step_id: '45.1'
+    n_cases: 3
+    test_cases:
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      assert cmp_tuple_or_list(init_grid(2, 10, 5, 2, 100, 1, 50, 2), target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      assert cmp_tuple_or_list(init_grid(3, 3, 3, 1, 100, 1, 50, 2), target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      assert cmp_tuple_or_list(init_grid(3, 5, 5, 1, 100, 1, 50, 2), target)'
+  - step_id: '45.2'
+    n_cases: 3
+    test_cases:
+    - assert np.allclose(add_dirichlet_bc(init_grid(2, 10, 5, 2, 100, 1, 50, 2)[0],
+      0, [[1, 0, 20]]), target)
+    - assert np.allclose(add_dirichlet_bc(init_grid(2, 10, 5, 2, 100, 1, 50, 2)[0],
+      0, np.array([[0, j, 40] for j in range(0, 10)])), target)
+    - assert np.allclose(add_dirichlet_bc(init_grid(2, 10, 5, 2, 10, 1, 20, 2)[0],
+      0, np.array([[i, 0, 100] for i in range(0, 5)])), target)
+  - step_id: '45.3'
+    n_cases: 3
+    test_cases:
+    - assert np.allclose(add_neumann_bc(init_grid(2, 10, 5, 2, 100, 1, 50, 2)[0],
+      0, [[1, 0, 20]]), target)
+    - assert np.allclose(add_neumann_bc(init_grid(2, 10, 5, 2, 100, 1, 50, 2)[0],
+      0, np.array([[0, j, 40] for j in range(0, 10)])), target)
+    - assert np.allclose(add_neumann_bc(init_grid(2, 10, 5, 2, 10, 1, 20, 2)[0], 0,
+      np.array([[i, 0, 100] for i in range(0, 5)])), target)
+  - step_id: '45.4'
+    n_cases: 3
+    test_cases:
+    - 'Nt = 200
+
+      Nx = 20
+
+      Ny = 20
+
+      x_split = Nx//3
+
+      T1 = 100
+
+      alpha1 = 20
+
+      T2 = 100
+
+      alpha2 = 20
+
+      bc_dirichlet = np.array([[3, 3, 200], [3, 4, 200], [4, 3, 200], [4, 4, 200]])
+
+      bc_neumann = np.concatenate((np.array([[0, j, 10] for j in range(0, Nx)]),np.array([[i,
+      0, 10] for i in range(0, Ny)]), np.array([[i, Nx-1, 0] for i in range(0, Ny)]),
+      np.array([[Ny-1, j, 0] for j in range(0, Nx)])), axis=0)
+
+      result = heat_equation(Nt, Nx, Ny, x_split, T1, alpha1, T2, alpha2, bc_dirichlet,
+      bc_neumann)
+
+      assert np.allclose(result[190], target)'
+    - 'Nt = 200
+
+      Nx = 20
+
+      Ny = 20
+
+      x_split = Nx//2
+
+      T1 = 80
+
+      alpha1 = 10
+
+      T2 = 100
+
+      alpha2 = 20
+
+      bc_dirichlet = np.array([])
+
+      bc_neumann = np.concatenate((np.array([[0, j, -10] for j in range(0, Nx)]),np.array([[i,
+      0, -10] for i in range(0, Ny)]), np.array([[i, Nx-1, 10] for i in range(0, Ny)]),
+      np.array([[Ny-1, j, 10] for j in range(0, Nx)])), axis=0)
+
+      result = heat_equation(Nt, Nx, Ny, x_split, T1, alpha1, T2, alpha2, bc_dirichlet,
+      bc_neumann)
+
+      assert np.allclose(result[190], target)'
+    - 'Nt = 200
+
+      Nx = 20
+
+      Ny = 20
+
+      x_split = Nx//3
+
+      T1 = 100
+
+      alpha1 = 20
+
+      T2 = 50
+
+      alpha2 = 10
+
+      bc_dirichlet = np.concatenate((np.array([[0, j, 10] for j in range(0, Nx)]),np.array([[i,
+      0, 10] for i in range(0, Ny)]), np.array([[i, Nx-1, 20] for i in range(0, Ny)]),
+      np.array([[Ny-1, j, 20] for j in range(0, Nx)])), axis=0)
+
+      bc_neumann = np.array([])
+
+      result = heat_equation(Nt, Nx, Ny, x_split, T1, alpha1, T2, alpha2, bc_dirichlet,
+      bc_neumann)
+
+      assert np.allclose(result[190], target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

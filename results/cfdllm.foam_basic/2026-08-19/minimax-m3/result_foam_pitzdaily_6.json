@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_pitzdaily_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Geometry parameters\\nL = 0.03  # 30 mm channel length\\nH_chan = 0.003  # 3 mm channel height\\nnx = 30\\nny = 6\\n\\n# Output directory\\ncase_dir = os.path.abspath(\\\".\\\")\\n\\n# Helper to write a file\\ndef write_file(path, content):\\n    full_path = os.path.join(case_dir, path)\\n    os.makedirs(os.path.dirname(full_path), exist_ok=True)\\n    with open(full_path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# blockMeshDict\\nblock_mesh_dict = f\\\"\\\"\\\"FoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({L} 0 0)\\n    ({L} {H_chan} 0)\\n    (0 {H_chan} 0)\\n    (0 0 0.001)\\n    ({L} 0 0.001)\\n    ({L} {H_chan} 0.001)\\n    (0 {H_chan} 0.001)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }}\\n    outlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            (1 2 6 5)\\n        );\\n    }}\\n    lowerWall\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }}\\n    upperWall\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }}\\n    frontAndBack\\n    {{\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }}\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\nwrite_file(\\\"system/blockMeshDict\\\", block_mesh_dict)\\n\\n# controlDict\\ncontrol_dict = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format\""
+  },
+  "timings": {
+    "agent_s": 129.132,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

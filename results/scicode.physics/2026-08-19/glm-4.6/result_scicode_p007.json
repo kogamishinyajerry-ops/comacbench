@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p007",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"def apply_band_pass_filter(image_array, bandmin, bandmax):\\n    '''Applies a band pass filter to the given image array based on the frequency threshold.\\n    Input:\\n    image_array: 2D numpy array of float, the input image.\\n    bandmin: float, inner radius of the frequency band\\n    bandmax: float, outer radius of the frequency band\\n    Ouput:\\n    T: float,2D numpy array, The spatial filter used.\\n    output_image: float,2D numpy array, the filtered image in the original domain.\\n    '''\\n    m, n = image_array.shape\\n\\n    # Fourier transform and shift to center zero frequency\\n    F = fft2(image_array)\\n    F_shift = fftshift(F)\\n\\n    # Create frequency coordinate grid (cycles per pixel)\\n    u = fftshift(np.fft.fftfreq(n))\\n    v = fftshift(np.fft.fftfreq(m))\\n    U, V = np.meshgrid(u, v)\\n    R = np.sqrt(U**2 + V**2)\\n\\n    # Band-pass mask: strictly between bandmin and bandmax\\n    T = ((R > bandmin) & (R < bandmax)).astype(float)\\n\\n    # Apply filter in frequency domain\\n    F_filtered_shift = F_shift * T\\n    F_filtered = ifftshift(F_filtered_shift)\\n\\n    # Inverse transform to spatial domain (real part)\\n    output_image = np.real(ifft2(F_filtered))\\n\\n    return T, output_image\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 0, \"cases_total\": 4, \"steps_all_pass\": 0, \"steps_total\": 1, \"per_step\": {\"7.1\": {\"pass\": 0, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 70.183,
+    "setup_s": 0.0,
+    "grade_s": 0.996
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.5s"
+  ]
+}

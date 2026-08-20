@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p037",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef calculate_paraxial(h1, r1, r2, r3, d1, d2, n1, n2, n3, n_total):\\n    '''Computes the axial parameters for spherical aberration calculation.\\n    Parameters:\\n    - h1 (array of floats): Aperture heights, in range (0.01, hm)\\n    - r1 (float): Radius of curvature for the first lens surface\\n    - r2 (float): Radius of curvature for the second lens surface\\n    - r3 (float): Radius of curvature for the third lens surface\\n    - d1 (float): Separation distance between first and second surfaces\\n    - d2 (float): Separation distance between second and third surfaces\\n    - n1 (float): Refractive index of the first lens material\\n    - n2 (float): Refractive index of the second lens material\\n    - n3 (float): Refractive index of the third lens material\\n    - n_total (float): Refractive index of the surrounding medium (air)\\n    Returns:\\n    - l31 (array of floats): Axial image locations for the third surface\\n    '''\\n    # Use numpy operations for array inputs\\n    h1 = np.asarray(h1)\\n    \\n    # Surface 1\\n    # Medium before surface 1: n_total (air), Medium after: n1\\n    # Object is at infinity (collimated light), so l1 = infinity\\n    # For paraxial, u1 = h1 / l1. If l1 -> inf, u1 = 0.\\n    # However, incidence angle i = (l-r)/r * u = 0. This gives 0 refraction.\\n    # We use finite approximation or the standard ray trace formula for collimated light.\\n    # For collimated rays (L=inf), U = h/R (approx) or handle directly.\\n    # Standard paraxial refraction formula: n' / l' - n / l = (n' - n) / r\\n    # For l = inf, n / l = 0 => l' = n' * r / (n' - n)\\n    \\n    # Surface 1: Air to n1\\n    l1_prime = n1 * r1 / (n1 - n_total)\\n    \\n    # Surface 2\\n    # Transfer: l2 = l1_prime - d1\\n    l\""
+  },
+  "timings": {
+    "agent_s": 454.27,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

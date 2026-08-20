@@ -1,0 +1,37 @@
+{
+  "task_id": "superwing_ge_0065",
+  "registry_id": "superwing.coeff_lite",
+  "adapter": "field_prediction",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "coefficient_rel_err_band",
+    "requirements": "coeff 字段完备",
+    "objective": "N/A(coeff_lite 基础题)",
+    "robustness": "split=ge"
+  },
+  "score": 0.50002,
+  "artifacts": {
+    "prediction": "{\"cl\": 0.5671681432562409, \"cd\": 0.021440873160764214, \"cm\": 0.7175001104855713}",
+    "model_meta": "{\"provider\": \"ml_superwing\", \"model\": \"RandomForestRegressor(100 trees, seed=0)\"}",
+    "grade_details": "{\"kind\": \"field_prediction\", \"hits\": {\"cl\": {\"rel_err\": 0.162325, \"pred\": 0.5671681432562409, \"true\": 0.4879598405921897, \"band\": 0.25}, \"cd\": {\"rel_err\": 0.203612, \"pred\": 0.021440873160764214, \"true\": 0.01781377328628031, \"band\": 0.25}, \"cm\": {\"rel_err\": 0.229441, \"pred\": 0.7175001104855713, \"true\": 0.5835985875388625, \"band\": 0.0}}, \"split_group\": \"ge\", \"wing_shape_idx\": 1798}"
+  },
+  "timings": {
+    "agent_s": 0.04,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:6f1d0934970b2ea364dfc381c117ec77fa93014cf33e8a73d1e6abde2cad89f1",
+  "assets_revision": "superwing@hf-coeff-lite-2026-08-19",
+  "logs": [
+    "pred={'cl': 0.5671681432562409, 'cd': 0.021440873160764214, 'cm': 0.7175001104855713}",
+    "gate=1 failures=[]"
+  ]
+}

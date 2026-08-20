@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_shallowwaterwithsquarebump_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\n# Domain and discretization\\nLX, LY, LZ = 1.0, 1.0, 0.1\\nNX, NY, NZ = 20, 20, 1\\n\\n# Simulation parameters\\nH0 = 0.06          # initial water depth [m]\\nUMOM = 0.001       # initial x-momentum (h*U) [m^2/s]\\nEND_TIME = 100.0\\nDT = 0.1\\nWRITE_INTERVAL = 1.0\\n\\n# Bump geometry (square bump in the middle)\\nBUMP_CENTER = 0.5\\nBUMP_HALF = 0.2\\nBUMP_HEIGHT = 0.05\\n\\ndef bump_height(x, y):\\n    if abs(x - BUMP_CENTER) <= BUMP_HALF and abs(y - BUMP_CENTER) <= BUMP_HALF:\\n        return BUMP_HEIGHT\\n    return 0.0\\n\\n# ---------------------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------------------\\ndef make_block_mesh_dict():\\n    # A simple rectangular block with evenly spaced cells.\\n    # Generate vertices for the unit cube of size (LX, LY, LZ).\\n    # vertices: 8 corners of the block\\n    # (for the bump we'll use a non-uniform grading toward the center is not\\n    # needed; the solver handles the bump via the initial field / geometry\\n    # through the surface). BlockMesh creates a flat box; the bump is encoded\\n    # via the initial bathymetry in the h field.\\n    lines = []\\n    lines.append(\\\"FoamFile\\\")\\n    lines.append(\\\"{\\\")\\n    lines.append(\\\"    version     2.0;\\\")\\n    lines.append(\\\"    format      ascii;\\\")\\n    lines.append(\\\"    class       dictionary;\\\")\\n    lines.append(\\\"    object      blockMeshDict;\\\")\\n    lines.append(\\\"}\\\")\\n    lines.append(\\\"\\\")\\n    lines.append(\\\"convertToMeters 1.0;\\\")\\n    lines.append(\\\"\\\")\\n    lines.append(\\\"vertices\\\")\\n    lines.append(\\\"(\\\")\\n    lines.append(f\\\"    (0 0 0)\\\")\\n    lines.append(f\\\"    ({LX} 0 0)\\\")\\n    lines.append(f\\\"    ({LX} {LY} 0)\\\")\\n    lines.append(f\\\"    (0 {LY} 0)\\\")\\n    lines.append(f\\\"    (0 0 {LZ})\\\")\\n    lines.append(f\\\"    ({LX} 0 {LZ})\""
+  },
+  "timings": {
+    "agent_s": 269.486,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

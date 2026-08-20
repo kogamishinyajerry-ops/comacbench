@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p043",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.7,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.85,
+  "artifacts": {
+    "code": "\"import numpy as np\\nfrom scipy.integrate import solve_bvp\\n\\ndef f(z, y, Pssat, Ppsat, N, sigma_ap, sigma_ep, sigma_as, sigma_es, gamma_p, alpha_p, gamma_s, alpha_s):\\n    '''System of differential equations representing the rate equations of the fiber laser.\\n    Parameters:\\n    z : float\\n        Spatial variable along the fiber's length, representing the position.\\n    y : ndarray\\n        Array containing the power values of [forward pump, backward pump, forward signal, backward signal].\\n    Pssat : float\\n        Saturation power for the signal.\\n    Ppsat : float\\n        Saturation power for the pump.\\n    N : float\\n        Total ion population in the fiber.\\n    sigma_ap : float\\n        Absorption cross-section for the pump.\\n    sigma_ep : float\\n        Emission cross-section for the pump.\\n    sigma_as : float\\n        Absorption cross-section for the signal.\\n    sigma_es : float\\n        Emission cross-section for the signal.\\n    gamma_p : float\\n        Gain coefficient for the pump.\\n    alpha_p : float\\n        Loss coefficient for the pump.\\n    gamma_s : float\\n        Gain coefficient for the signal.\\n    alpha_s : float\\n        Loss coefficient for the signal.\\n    Returns: ndarray\\n    The rate of change of the power values for the pump and signal along the fiber:\\n        dydz[0]: Rate of change of forward pump power.\\n        dydz[1]: Rate of change of backward pump power.\\n        dydz[2]: Rate of change of forward signal power.\\n        dydz[3]: Rate of change of backward signal power.\\n    '''\\n    Pp_plus = y[0]\\n    Pp_minus = y[1]\\n    Ps_plus = y[2]\\n    Ps_minus = y[3]\\n\\n    Pp_tot = Pp_plus + Pp_minus\\n    Ps_tot = Ps_plus + Ps_minus\\n\\n    # Normalized population inversion N2/N\\n    factor1 = sigma_ap / (sigma_ap + sigma_ep)\\n    factor2 = sigma_as / (sigma_as + sigma_es)\\n    numerator = factor1 * (Pp_tot / Ppsat) + factor2 * (Ps_tot / Pssat)\\n    denominator = (Pp_tot / Ppsat) + 1.0 + (Ps_tot / Pssat)\\n    N2_over_N = numerator / denominator\\n    N2 = N * N2_over_N\\n\\n    # Derivatives\\n    term_p = sigma_ap * N - (sigma_ap + sigma_ep) * N2\\n    dPp_plus = -gamma_p * term_p * Pp_plus - alpha_p * Pp_plus\\n    dPp_minus = gamma_p * term_p * Pp_minus + alpha_p * Pp_minus\\n\\n    term_s = (sigma_es + sigma_as) * N2 - sigma_as * N\\n    dPs_plus = gamma_s * term_s * Ps_plus - alpha_s * Ps_plus\\n    dPs_minus = -gamma_s * term_s * Ps_minus + alpha_s * Ps_minus\\n\\n    return np.array([dPp_plus, dPp_minus, dPs_plus, dPs_minus])\\n\\ndef bc(ya, yb, Ppl, Ppr, R1, R2):\\n    '''Define the boundary conditions for the fiber laser.\\n    Parameters:\\n    ya : ndarray\\n        Array of power values at the start of the fiber. Contains values corresponding to:\\n        ya[0] - Power of the forward pump at the fiber input.\\n        ya[1] - Power of the backward pump at the fiber input.\\n        ya[2] - Power of the forward signal at the fiber input.\\n        ya[3] - Power of the backward signal at the fiber input.\\n    yb : ndarray\\n        Array of power values at the end of the fiber. Contains values corresponding to:\\n        yb[0] - Power of the forward pump at the fiber output.\\n        yb[1] - Power of the backward pump at the fiber output.\\n        yb[2] - Power of the forward signal at the fiber output.\\n        yb[3] - Power of the backward signal at the fiber output.\\n    Ppl : float\\n        Input power for the left pump, affecting the starting boundary of the laser.\\n    Ppr : float\\n        Input power for the right pump, affecting the ending boundary of the laser.\\n    R1 : float\\n        Reflectivity of the input mirror, modifying the behavior of the light at the fiber's start.\\n    R2 : float\\n        Reflectivity of the output mirror, modifying the behavior of the light at the fiber's end.\\n    Returns:\\n    ndarray\\n        An array of four boundary conditions calculated as follows:\\n        bc[0]: boundary condition for rate of change of forward pump power.\\n        bc[1]: boundary condition for rate of change of backward pump power.\\n        bc[2]: boundary condition for rate of ch\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 7, \"cases_total\": 10, \"steps_all_pass\": 2, \"steps_total\": 3, \"per_step\": {\"43.1\": {\"pass\": 3, \"total\": 3}, \"43.2\": {\"pass\": 3, \"total\": 3}, \"43.3\": {\"pass\": 1, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 308.533,
+    "setup_s": 0.0,
+    "grade_s": 1.142
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.59s"
+  ]
+}

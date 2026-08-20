@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p055",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.4,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.7,
+  "artifacts": {
+    "code": "\"def solve_SH(u, dt, T, N, epsilon, q0):\\n    '''Run a 2D simulation of Swift-Hohenberg equation\\n    Input\\n    u: initial condition of the order parameter, 2D array of floats\\n    dt: time step size, float\\n    T: total time of the ecolution, float\\n    N: system size where the 2D system is of dimension N*N, int\\n    epsilon: control parameter, float\\n    q0: critical mode, float\\n    Output\\n    u: final state of the system at the end time T.\\n    '''\\n    # Compute k-space coordinates assuming domain [0, 2pi)\\n    k = 2 * np.pi * np.fft.fftfreq(N)\\n    kx, ky = np.meshgrid(k, k, indexing='ij')\\n    k2 = kx**2 + ky**2\\n    \\n    # Linear operator in Fourier space: L(k) = 2/q0^2 * k^2 - 1/q0^4 * k^4\\n    L = 2.0 * k2 / (q0**2) - (k2**2) / (q0**4)\\n    \\n    # Number of time steps\\n    n_steps = int(T / dt)\\n    \\n    # Time stepping loop\\n    for _ in range(n_steps):\\n        # Step 1: Update nonlinear part in real space\\n        u1 = u + dt * (epsilon * u - u - u**3)\\n        \\n        # Step 2: Update linear part in Fourier space\\n        U1 = fft2(u1)\\n        U_new = U1 * (1.0 + dt * L)\\n        \\n        # Transform back to real space\\n        u = np.real(ifft2(U_new))\\n    \\n    return u\\n\\n\\ndef structure_factor(u):\\n    '''Calculate the structure factor of a 2D real spatial distribution and the Fourier coordinates, shifted to center around k = 0\\n    Input\\n    u: order parameter in real space, 2D N*N array of floats\\n    Output\\n    Kx: coordinates in k space conjugate to x in real space, 2D N*N array of floats\\n    Ky: coordinates in k space conjugate to y in real space, 2D N*N array of floats\\n    Sk: 2D structure factor, 2D array of floats\\n    '''\\n    N = u.shape[0]\\n    \\n    # Compute Fourier transform\\n    U = fft2(u)\\n    Sk = np.abs(U)**2\\n    \\n    # Shift to center around k=0\\n    Sk = fftshift(Sk)\\n    \\n    # Compute k-space coordinates\\n    k = 2 * np.pi * np.fft.fftfreq(N)\\n    kx, ky = np.meshgrid(k, k, indexing='ij')\\n    Kx = fftshift(kx)\\n    Ky = fftshift(ky)\\n    \\n    return Kx, Ky, Sk\\n\\n\\ndef analyze_structure_factor(Sk, Kx, Ky, q0, min_height):\\n    '''Analyze the structure factor to identify peak near q0\\n    Input:\\n    Sk: 2D structure factor, 2D array of floats\\n    Kx: coordinates in k space conjugate to x in real space, 2D N*N array of floats\\n    Ky: coordinates in k space conjugate to y in real space, 2D N*N array of floats\\n    q0: critical mode, float\\n    min_height: threshold height of the peak in the structure factor to be considered, float\\n    Output:\\n    peak_found_near_q0: if a peak is found in the structure factor near q0 (meets combined proximity, narrowness, and height criteria), boolean\\n    peak_near_q0_location: location of the peak near q0 in terms of radial k, float; set to 0 if no peak is found near q0\\n    '''\\n    # Compute radial coordinate\\n    kr = np.sqrt(Kx**2 + Ky**2)\\n    \\n    # Flatten arrays for binning\\n    kr_flat = kr.ravel()\\n    Sk_flat = Sk.ravel()\\n    \\n    # Create bins for radial averaging\\n    N = Sk.shape[0]\\n    n_bins = N // 2\\n    bins = np.linspace(0, kr.max(), n_bins + 1)\\n    bin_centers = 0.5 * (bins[:-1] + bins[1:])\\n    \\n    # Compute radial average (mean of Sk in each bin)\\n    Sk_binned, _ = np.histogram(kr_flat, bins=bins, weights=Sk_flat)\\n    counts, _ = np.histogram(kr_flat, bins=bins)\\n    mask = counts > 0\\n    Sk_binned[mask] = Sk_binned[mask] / counts[mask]\\n    Sk_binned[~mask] = 0\\n    \\n    # Find peaks in the radial distribution\\n    peaks, properties = find_peaks(Sk_binned, height=min_height)\\n    \\n    if len(peaks) == 0:\\n        return False, 0.0\\n    \\n    # Get peak properties\\n    peak_heights = properties['peak_heights']\\n    peak_locations = bin_centers[peaks]\\n    \\n    # Calculate widths (narrowness criterion)\\n    widths, _, _, _ = peak_widths(Sk_binned, peaks, rel_height=0.5)\\n    \\n    # Define tolerance for proximity to q0\\n    tolerance = max(0.1, 0.1 * q0) if q0 > 0 else 0.1\\n    \\n    # Check criteria for each peak\\n    valid_peaks = []\\n    for i, peak_idx in enumerate(peaks):\\n        loc = peak_locations[i]\\n   \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 6, \"cases_total\": 15, \"steps_all_pass\": 1, \"steps_total\": 4, \"per_step\": {\"55.1\": {\"pass\": 2, \"total\": 3}, \"55.2\": {\"pass\": 3, \"total\": 3}, \"55.3\": {\"pass\": 1, \"total\": 3}, \"55.4\": {\"pass\": 0, \"total\": 6}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 195.122,
+    "setup_s": 0.0,
+    "grade_s": 84.84
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 39.69s"
+  ]
+}

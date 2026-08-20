@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p017",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.25,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.625,
+  "artifacts": {
+    "code": "\"def init_eji_array(energy, energy_vertices):\\n    import sympy as sp\\n    symbols = {}\\n    value_map = {}\\n    energies = [energy] + energy_vertices  # e0 is energy, e1-e4 are vertices\\n    # Create symbols for energies e0, e1, e2, e3, e4\\n    for i in range(5):\\n        name = f\\\"e{i}\\\"\\n        sym = sp.Symbol(name)\\n        symbols[name] = sym\\n        value_map[sym] = energies[i]\\n    # Create 5x5 array of symbols for e_ji = e_j - e_i\\n    eji_array = [[None]*5 for _ in range(5)]\\n    for i in range(5):\\n        for j in range(5):\\n            name = f\\\"e{j}{i}\\\"  # e_ji means e_j - e_i\\n            sym = sp.Symbol(name)\\n            eji_array[j][i] = sym\\n            symbols[name] = sym\\n            value_map[sym] = energies[j] - energies[i]\\n    return symbols, value_map\\n\\ndef integrate_DOS(energy, energy_vertices):\\n    # Order the vertex energies: e1 < e2 < e3 < e4\\n    sorted_energies = sorted(energy_vertices)\\n    e1, e2, e3, e4 = sorted_energies\\n    E = energy\\n    \\n    # Check if E is outside the range [e1, e4]\\n    if E <= e1 or E >= e4:\\n        return 0.0\\n    \\n    # Calculate energy differences\\n    e21 = e2 - e1\\n    e31 = e3 - e1\\n    e41 = e4 - e1\\n    e43 = e4 - e3\\n    e42 = e4 - e2\\n    e32 = e3 - e2\\n    \\n    # Gradient magnitude |∇ε| = sqrt(ε21^2 + ε31^2 + ε41^2)\\n    grad = np.sqrt(e21**2 + e31**2 + e41**2)\\n    \\n    # Case 1: e1 < E <= e2 (triangle from vertex 1)\\n    if E <= e2:\\n        # Vertices on edges (1,2), (1,3), (1,4)\\n        t1 = (E - e1) / e21\\n        t2 = (E - e1) / e31\\n        t3 = (E - e1) / e41\\n        # Area in (e,u,v) space: 0.5 * |t1*t2 * e3_hat + t2*t3 * e1_hat + t3*t1 * e2_hat|\\n        area_euv = 0.5 * (E - e1)**2 * grad / (e21 * e31 * e41)\\n        result = area_euv / grad\\n        return float(result)\\n    \\n    # Case 2: e2 < E <= e3 (quadrilateral)\\n    elif E <= e3:\\n        # Vertices on edges (1,3), (1,4), (2,3), (2,4)\\n        # Coordinates in (e,u,v) space\\n        p13 = np.array([0, (E - e1)/(e3 - e1), 0])\\n        p14 = np.array([0, 0, (E - e1)/(e4 - e1)])\\n        p23 = np.array([(e3 - E)/e32, (E - e2)/e32, 0])\\n        p24 = np.array([(e4 - E)/e42, 0, (E - e2)/e42])\\n        \\n        # Quadrilateral area via triangulation (P13-P24 diagonal)\\n        def tri_area(p1, p2, p3):\\n            v1 = p2 - p1\\n            v2 = p3 - p1\\n            return 0.5 * np.linalg.norm(np.cross(v1, v2))\\n        \\n        area1 = tri_area(p13, p14, p24)\\n        area2 = tri_area(p13, p23, p24)\\n        area_euv = area1 + area2\\n        \\n        # The physical area is related to euv area by the same scaling as in Case 1\\n        # For Case 1, area_phys = 6 * V_T * area_euv / |∇ε|? No.\\n        # From dimensional analysis: result = area_euv / |∇ε| (as in Case 1)\\n        result = area_euv / grad\\n        return float(result)\\n    \\n    # Case 3: e3 < E <= e4 (triangle from vertex 4)\\n    else:\\n        # Vertices on edges (1,4), (2,4), (3,4)\\n        t1 = (e4 - E) / e41\\n        t2 = (e4 - E) / e42\\n        t3 = (e4 - E) / e43\\n        area_euv = 0.5 * (e4 - E)**2 * grad / (e41 * e42 * e43)\\n        result = area_euv / grad\\n        return float(result)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 2, \"cases_total\": 8, \"steps_all_pass\": 0, \"steps_total\": 2, \"per_step\": {\"17.1\": {\"pass\": 0, \"total\": 3}, \"17.2\": {\"pass\": 2, \"total\": 5}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 255.302,
+    "setup_s": 0.0,
+    "grade_s": 1.083
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.54s"
+  ]
+}

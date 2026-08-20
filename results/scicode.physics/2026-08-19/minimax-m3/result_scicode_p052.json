@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p052",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5833,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.79165,
+  "artifacts": {
+    "code": "\"def Schroed_deriv(y, r, l, En):\\n    '''Calculate the derivative of y given r, l and En\\n    Input \\n    y=[u,u'], an list of float where u is the wave function at r, u' is the first derivative of u at r\\n    r: radius, float\\n    l: angular momentum quantum number, int\\n    En: energy, float\\n    Output\\n    Schroed: dy/dr=[u',u''] , an 1D array of float where u is the wave function at r, u' is the first derivative of u at r, u'' is the second derivative of u at r\\n    '''\\n    u, up = y\\n    Z = 1\\n    # Handle r=0 to avoid division by zero\\n    if r == 0:\\n        # For r=0, use limit; regular solution u ~ r^(l+1), so u'' ~ r^(l-1)\\n        term = 0.0\\n    else:\\n        # u'' = (l(l+1)/r^2 - 2Z/r - En) * u\\n        term = (l*(l+1)/r**2 - 2*Z/r - En) * u\\n    return np.array([up, term])\\n\\ndef SolveSchroedinger(y0, En, l, R):\\n    '''Integrate the derivative of y within a certain radius\\n    Input \\n    y0: Initial guess for function and derivative, list of floats: [u0, u0']\\n    En: energy, float\\n    l:  angular momentum quantum number, int\\n    R:  an 1d array (linespace) of radius (float)\\n    Output\\n    ur: the integration result, float\\n    '''\\n    # Start integration from large r to small r\\n    # R is from small to large, so reverse for integration\\n    r_span = R[::-1]\\n    \\n    # Integrate using Schroed_deriv\\n    sol = integrate.odeint(Schroed_deriv, y0, r_span, args=(l, En))\\n    \\n    # Reverse back to original order (small to large)\\n    sol = sol[::-1]\\n    u = sol[:, 0]\\n    \\n    # Normalize using Simpson's rule: integral of u^2 dr = 1\\n    norm = np.sqrt(integrate.simpson(u**2, R))\\n    \\n    if norm == 0:\\n        return u\\n    return u / norm\\n\\ndef Shoot(En, R, l, y0):\\n    '''Extrapolate u(0) based on results from SolveSchroedinger function\\n    Input \\n    y0: Initial guess for function and derivative, list of floats: [u0, u0']\\n    En: energy, float\\n    R: an 1D array of (logspace) of radius; each element is a float\\n    l: angular momentum quantum number, int\\n    Output \\n    f_at_0: Extrapolate u(0), float\\n    '''\\n    # Get normalized wavefunction\\n    u = SolveSchroedinger(y0, En, l, R)\\n    \\n    # Extract first two points\\n    r0, r1 = R[0], R[1]\\n    u0, u1 = u[0], u[1]\\n    \\n    # Divide by r^l (for l=0, r^0 = 1)\\n    r0l = r0**l\\n    r1l = r1**l\\n    \\n    # Avoid division by zero (should not happen with logspace grid)\\n    if r0l == 0 or r1l == 0:\\n        return 0.0\\n    \\n    y0_div = u0 / r0l\\n    y1_div = u1 / r1l\\n    \\n    # Linear extrapolation to r=0\\n    # f(0) = y0_div + (y1_div - y0_div)/(r1 - r0) * (0 - r0)\\n    # = (y0_div * r1 - y1_div * r0) / (r1 - r0)\\n    f_at_0 = (y0_div * r1 - y1_div * r0) / (r1 - r0)\\n    \\n    return f_at_0\\n\\ndef FindBoundStates(y0, R, l, nmax, Esearch):\\n    '''Input\\n    y0: Initial guess for function and derivative, list of floats: [u0, u0']\\n    R: an 1D array of (logspace) of radius; each element is a float\\n    l: angular momentum quantum number, int\\n    nmax: maximum number of bounds states wanted, int\\n    Esearch: energy mesh used for search, an 1D array of float\\n    Output\\n    Ebnd: a list, each element is a tuple containing the angular momentum quantum number (int) and energy (float) of all bound states found\\n    '''\\n    Ebnd = []\\n    \\n    # Compute Shoot values for the energy mesh\\n    f_vals = np.array([Shoot(En, R, l, y0) for En in Esearch])\\n    \\n    # Find sign changes indicating bound states\\n    for i in range(len(Esearch) - 1):\\n        if f_vals[i] * f_vals[i+1] < 0:\\n            # Root found in this interval\\n            E1, E2 = Esearch[i], Esearch[i+1]\\n            try:\\n                # Refine root using Brent's method\\n                root = optimize.brentq(lambda E: Shoot(E, R, l, y0), E1, E2)\\n                Ebnd.append((l, root))\\n                if len(Ebnd) >= nmax:\\n                    break\\n            except:\\n                pass\\n    \\n    return Ebnd\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 7, \"cases_total\": 12, \"steps_all_pass\": 1, \"steps_total\": 4, \"per_step\": {\"52.1\": {\"pass\": 3, \"total\": 3}, \"52.2\": {\"pass\": 1, \"total\": 3}, \"52.3\": {\"pass\": 2, \"total\": 3}, \"52.4\": {\"pass\": 1, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 57.791,
+    "setup_s": 0.0,
+    "grade_s": 10.926
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 5.44s"
+  ]
+}

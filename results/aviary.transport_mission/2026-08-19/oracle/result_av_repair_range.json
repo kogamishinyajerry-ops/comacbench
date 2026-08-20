@@ -1,0 +1,38 @@
+{
+  "task_id": "av_repair_range",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold 解（aviary 分析模式）。判分参考预计算用；模型不可见。\\\"\\\"\\\"\\nimport json\\nimport os\\nimport warnings\\nfrom copy import deepcopy\\n\\nwarnings.filterwarnings(\\\"ignore\\\")\\n\\nfrom aviary.interface.run_aviary import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info\\nfrom aviary.variable_info.variables import Mission\\n\\nBASE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_range_clean.csv'\\n\\n\\ndef solve(csv_path: str, mach: float):\\n    pi = deepcopy(phase_info)\\n    pi[\\\"cruise\\\"][\\\"user_options\\\"][\\\"mach_cruise\\\"] = mach\\n    prob = run_aviary(csv_path, pi, optimizer=\\\"SLSQP\\\", run_driver=False,\\n                      verbosity=0, make_plots=False)\\n    fuel = float(prob.get_val(Mission.TOTAL_FUEL_MASS, units=\\\"lbm\\\")[0])\\n    final = float(prob.get_val(Mission.FINAL_MASS, units=\\\"lbm\\\")[0])\\n    return {\\\"fuel_burn_lbm\\\": fuel, \\\"final_mass_lbm\\\": final}\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    # repair 参考：gold 直接给出真值（模型侧需通过 Aviary 实验识别）\\n    r = {\\\"corrupted_param\\\": 'aircraft:design:range', \\\"restored_value\\\": float('3200')}\\n    json.dump(r, open(\\\"result.json\\\", \\\"w\\\"), indent=1)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": true, \"got\": \"aircraft:design:range\", \"ref\": \"aircraft:design:range\"}, \"restored_value\": {\"status\": \"exact\", \"ok\": true, \"got\": 3200.0, \"ref\": 3200.0}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 0.161,
+    "setup_s": 0.0,
+    "grade_s": 0.161
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 0.16s"
+  ]
+}

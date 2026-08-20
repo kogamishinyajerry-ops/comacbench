@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p073",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\n\\ndef Bmat(pa):\\n    '''Calculate the B matrix.'''\\n    a, b, c, alpha, beta, gamma = pa\\n    alpha_rad = np.radians(alpha)\\n    beta_rad = np.radians(beta)\\n    gamma_rad = np.radians(gamma)\\n\\n    cos_alpha = np.cos(alpha_rad)\\n    cos_beta = np.cos(beta_rad)\\n    cos_gamma = np.cos(gamma_rad)\\n    sin_alpha = np.sin(alpha_rad)\\n    sin_beta = np.sin(beta_rad)\\n    sin_gamma = np.sin(gamma_rad)\\n\\n    volume = a * b * c * np.sqrt(1 - cos_alpha**2 - cos_beta**2 - cos_gamma**2 + 2 * cos_alpha * cos_beta * cos_gamma)\\n    \\n    B11 = b * c * sin_alpha / volume\\n    B22 = a * c * sin_beta / volume\\n    B33 = a * b * sin_gamma / volume\\n    B12 = a * b * cos_gamma * sin_alpha / volume - (a * cos_beta / (b * sin_beta)) * B22  # Simplification from formula\\n    B13 = (a / c) * ((cos_beta * cos_gamma - cos_alpha) / (sin_beta * sin_gamma))\\n    B23 = (b / c) * ((cos_alpha * cos_gamma - cos_beta) / (sin_alpha * sin_gamma))\\n    \\n    # Using explicit cross product definitions for robustness\\n    # a_vec\\n    ax = a\\n    ay = 0\\n    az = 0\\n    # b_vec\\n    bx = b * np.cos(gamma_rad)\\n    by = b * np.sin(gamma_rad)\\n    bz = 0\\n    # c_vec\\n    cx = c * np.cos(beta_rad)\\n    cy = c * (np.cos(alpha_rad) - np.cos(beta_rad)*np.cos(gamma_rad)) / np.sin(gamma_rad)\\n    cz = c * volume / (a * b * np.sin(gamma_rad)) # height\\n\\n    a_vec = np.array([ax, ay, az])\\n    b_vec = np.array([bx, by, bz])\\n    c_vec = np.array([cx, cy, cz])\\n\\n    vol = np.dot(a_vec, np.cross(b_vec, c_vec))\\n    b1 = np.cross(b_vec, c_vec) / vol\\n    b2 = np.cross(c_vec, a_vec) / vol\\n    b3\""
+  },
+  "timings": {
+    "agent_s": 351.111,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

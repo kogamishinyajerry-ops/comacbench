@@ -1,0 +1,36 @@
+{
+  "task_id": "cfdcode_flow_past_circular_cylinder",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nfrom scipy.sparse import lil_matrix, csr_matrix\\nfrom scipy.sparse.linalg import spsolve\\nimport os\\n\\n# Domain\\nr_min, r_max = 0.5, 10.0\\nNr = 128\\nNtheta = 128\\nr = np.linspace(r_min, r_max, Nr)\\ntheta = np.linspace(0, 2*np.pi, Ntheta, endpoint=False)\\ndr = r[1] - r[0]\\ndtheta = theta[1] - theta[0]\\n\\nv_inf = 1.0\\nnu = 0.005\\npsi_inner = 20.0\\n\\n# Time\\nt_start = 0.0\\nt_end = 10.0\\ndt = 0.005\\nNt = int((t_end - t_start) / dt)\\n\\n# Initialize fields\\npsi = np.zeros((Nr, Ntheta))\\nomega = np.zeros((Nr, Ntheta))\\n\\n# Initial psi from outer boundary condition\\ny_outer = r * np.sin(theta)\\npsi = v_inf * y_outer + psi_inner\\n\\n# Apply inner boundary\\npsi[0, :] = psi_inner\\n# Apply outer boundary\\npsi[-1, :] = v_inf * r[-1] * np.sin(theta) + psi_inner\\n\\n\\ndef solve_poisson_psi(omega, psi):\\n    \\\"\\\"\\\"Solve Poisson equation for streamfunction with vorticity source.\\\"\\\"\\\"\\n    # Build linear system for psi: Laplacian(psi) = -omega\\n    # In polar coords: (1/r) d/dr(r dpsi/dr) + (1/r^2) d^2psi/dtheta^2 = -omega\\n    \\n    N = Nr * Ntheta\\n    \\n    # Create mapping\\n    def idx(i, j):\\n        return i * Ntheta + j\\n    \\n    A = lil_matrix((N, N))\\n    rhs = np.zeros(N)\\n    \\n    for i in range(Nr):\\n        for j in range(Ntheta):\\n            k = idx(i, j)\\n            \\n            # Inner boundary (Dirichlet)\\n            if i == 0:\\n                A[k, k] = 1.0\\n                rhs[k] = psi_inner\\n            # Outer boundary (Dirichlet)\\n            elif i == Nr - 1:\\n                A[k, k] = 1.0\\n                rhs[k] = v_inf * r[-1] * np.sin(theta[j]) + psi_inner\\n            else:\\n                #\""
+  },
+  "timings": {
+    "agent_s": 354.658,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

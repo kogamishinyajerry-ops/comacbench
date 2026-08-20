@@ -1,0 +1,74 @@
+id: hilift_ge_0057
+registry_id: hilift_aeroml.lite
+domain: cfd
+task_type: field_prediction
+model_profile: plain_llm
+assets_revision: hilift@hf-lite-2026-08-19
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/hilift_aeroml.lite/hilift_ge_0057.md
+  prompt_sha256: 9c9f5fcc49fa5dc6c70623fd327a502e1b4242aae287c9a102db6d9cb7d7672b
+  assets:
+  - path: data/hilift/lite/force_mom_all.csv
+    digest: f06527cca7d50ddbabb4c4ae59aa119117803f54bb91c927f3e0a3dd0687aabb
+  - path: data/hilift/lite/geo_values_all.csv
+    digest: eecc7a7ab3dcbc5dd033a8b98aedfdb26229f45dbd84d9519f2d4a19c85fa9d4
+output_contract:
+- prediction
+reference:
+  source: HiLiftAeroML-Lite 系数层（WMLES 真值，force_mom_all.csv）
+  revision: hilift@hf-lite-2026-08-19
+  wing_shape_idx: LHC002
+  aoa: 10.0
+  mach: null
+  'true':
+    cl: 1.677344
+    cd: 0.172536
+    cm: -0.143566
+  tol: &id001
+    cl: 0.05
+    cd: 0.1
+    cm: 0.05
+  envelope: &id002
+    cl:
+    - 0.0
+    - 5.0
+    cd:
+    - 0.05
+    - 0.8
+    cm:
+    - -2.0
+    - 0.5
+  split_group: ge
+  uncertainty_note: WMLES 带统计不确定度（csv 含 stdev/ci95）；首批用点值+相对容差
+grader:
+  answer_format: json
+  exec_kind: field_prediction
+  validity_gate: true
+  coefficients:
+  - cl
+  - cd
+  - cm
+  band_tol: *id001
+  envelope: *id002
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=系数相对误差带（cl/cm 5%/cd 10%）；requirements=字段完备；objective=N/A；robustness=划分纪律（聚合层分组报告）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: HuggingFace nvidia/HiLiftAeroML（Lite 系数层子集）
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: hilift@hf-lite-2026-08-19
+  mirror_allowed: true
+  attribution: Neil Ashton (contact@caemldatasets.org)

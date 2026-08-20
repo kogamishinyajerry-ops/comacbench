@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_pitzdaily_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# --- Case parameters ---------------------------------------------------------\\nsolver = \\\"pimpleFoam\\\"\\nend_time = 0.3\\ndelta_t = 1e-4\\nwrite_interval = 0.01\\nnu = 1e-5\\n\\n# 2D millimetre-scale channel (pitzDaily-inspired). All dimensions in metres.\\nx_min, x_max = 0.0, 0.203     # streamwise length  ~203 mm\\ny_min, y_max = 0.0, 0.058     # wall-normal height ~58 mm\\n\\n# \\\"Backward-facing step\\\" geometry by removing a small block near the inlet,\\n# mimicking the classic pitzDaily geometry in 2D.\\nstep_x = 0.020                 # step x-extent\\nstep_h = 0.010                 # step height (removed near bottom)\\n\\n# blockMesh vertices (in metres). Eight points for the two blocks.\\n# Block 0: upper region (full length)\\n# Block 1: lower region downstream of the step\\nverts = [\\n    (x_min,        y_min),         # 0 bottom-left\\n    (step_x,       y_min),         # 1 step-corner bottom\\n    (x_max,        y_min),         # 2 bottom-right\\n    (x_min,        step_h),        # 3 inlet-step top\\n    (step_x,       step_h),        # 4 step corner top\\n    (x_max,        step_h),        # 5\\n    (x_min,        y_max),         # 6 top-left\\n    (step_x,       y_max),         # 7 top of step block\\n    (x_max,        y_max),         # 8 top-right\\n]\\n\\ndef fmt(p):\\n    return f\\\"({p[0]:.6f} {p[1]:.6f} 0.0)\\\"\\n\\n# Block 0: upper channel block (0..step_x .. y)\\nb0 = \\\"hex (0 1 4 3 6 7 8 6) simpleGrading (1 1 1)\\\"\\n\\n# Two blocks: upper (above step) and lower (downstream of step)\\n# Upper block: vertices 0,1,4,3,6,7,8,6 -- but we need a proper hex. Use:\\n#   lower-x face: 0\""
+  },
+  "timings": {
+    "agent_s": 134.108,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

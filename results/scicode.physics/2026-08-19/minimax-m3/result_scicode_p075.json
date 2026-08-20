@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p075",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5714,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.7857,
+  "artifacts": {
+    "code": "\"def hopping_mk(d, dz, v_p0=-2.7, v_s0=0.48, b=1.17, a0=2.68, d0=6.33):\\n    \\\"\\\"\\\"Parameterization from Moon and Koshino, Phys. Rev. B 85, 195458 (2012).\\n    Args:\\n        d: distance between two atoms (unit b,a.u.), float\\n        dz: out-of-plane distance between two atoms (unit b,a.u.), float\\n        v_p0: transfer integral between the nearest-neighbor atoms of monolayer graphene, MK parameter, float,unit eV\\n        v_s0: interlayer transfer integral between vertically located atoms, MK parameter, float,unit eV\\n        b: 1/b is the decay length of the transfer integral, MK parameter, float, unit (b,a.u.)^-1\\n        a0: nearest-neighbor atom distance of the monolayer graphene, MK parameter, float, unit (b,a.u.)\\n        d0: interlayer distance, MK parameter, float, (b,a.u.)\\n    Return:\\n        hopping: -t, float, eV\\n    \\\"\\\"\\\"\\n    # Transfer integrals with exponential decay\\n    V_pp_pi = v_p0 * np.exp(-b * (d - a0))\\n    V_pp_sigma = v_s0 * np.exp(-b * (d - d0))\\n    # Moon‑Koshino hopping formula\\n    hopping = V_pp_pi * (1 - (dz / d) ** 2) + V_pp_sigma * (dz / d) ** 2\\n    return hopping\\n\\n\\ndef mk(latvecs, basis, di, dj, ai, aj):\\n    \\\"\\\"\\\"Evaluate the Moon and Koshino hopping parameters Phys. Rev. B 85, 195458 (2012).\\n    Args:\\n        latvecs (np.array): lattice vectors of shape (3, 3) in bohr\\n        basis (np.array): atomic positions of shape (natoms, 3) in bohr; natoms: number of atoms within a unit cell\\n        di, dj (np.array): list of displacement indices for the hopping\\n        ai, aj (np.array): list of atomic basis indices for the hopping\\n    Return\\n        hopping (np.array): a list with the same length as di\\n    \\\"\\\"\\\"\\n    # Convert to integer arrays\\n    di = np.asarray(di, dtype=int)\\n    dj = np.asarray(dj, dtype=int)\\n    ai = np.asarray(ai, dtype=int)\\n    aj = np.asarray(aj, dtype=int)\\n\\n    # Lattice translation vectors: R = di * a1 + dj * a2\\n    R = di[:, None] * latvecs[0] + dj[:, None] * latvecs[1]  # shape (n, 3)\\n\\n    # Vector connecting the two atoms\\n    delta = R + (basis[aj] - basis[ai])  # shape (n, 3)\\n\\n    # Distances\\n    d = np.linalg.norm(delta, axis=1)\\n    dz = delta[:, 2]\\n\\n    # Compute hopping for each pair\\n    hops = np.empty(d.shape[0], dtype=float)\\n    for i in range(d.shape[0]):\\n        hops[i] = hopping_mk(d[i], dz[i])\\n    return hops\\n\\n\\ndef ham_eig(k_input, latvecs, basis):\\n    \\\"\\\"\\\"Calculate the eigenvalues for a given k-point (k-point is in reduced coordinates)\\n    Args:\\n        k_input (np.array): (kx, ky)\\n        latvecs (np.array): lattice vectors of shape (3, 3) in bohr\\n        basis (np.array): atomic positions of shape (natoms, 3) in bohr\\n    Returns:\\n        eigval: numpy array of floats, sorted array of eigenvalues\\n    \\\"\\\"\\\"\\n    # Reciprocal lattice vectors for a 2D system (a3 = z‑hat)\\n    a1 = latvecs[0]\\n    a2 = latvecs[1]\\n    a3 = np.array([0.0, 0.0, 1.0])\\n    denom = np.dot(a1, np.cross(a2, a3))\\n    b1 = 2.0 * np.pi * np.cross(a2, a3) / denom\\n    b2 = 2.0 * np.pi * np.cross(a3, a1) / denom\\n\\n    # Convert k from reduced to Cartesian\\n    k_cart = k_input[0] * b1 + k_input[1] * b2\\n\\n    # Number of atoms in the unit cell\\n    natoms = basis.shape[0]\\n\\n    # Initialize Hamiltonian matrix\\n    H = np.zeros((natoms, natoms), dtype=complex)\\n\\n    # --- Define neighbor list for AA‑stacked bilayer graphene ---\\n    # Offsets for the three in‑plane nearest‑neighbor vectors\\n    offsets = [(0, 0), (1, -1), (0, -1)]\\n\\n    di_list, dj_list, ai_list, aj_list = [], [], [], []\\n\\n    # Intralayer hoppings: layer 1 (A1→B1) and layer 2 (A2→B2)\\n    for off in offsets:\\n        di_list.append(off[0]); dj_list.append(off[1])\\n        ai_list.append(0); aj_list.append(1)  # A1 → B1\\n        di_list.append(off[0]); dj_list.append(off[1])\\n        ai_list.append(2); aj_list.append(3)  # A2 → B2\\n\\n    # Vertical interlayer hoppings: A1→A2 and B1→B2\\n    di_list.append(0); dj_list.append(0)\\n    ai_list.append(0); aj_list.append(2)  # A1 → A2\\n    di_list.append(0); dj_list.append(0)\\n    ai_list.append(1); aj_list.append(3)  # B1 → B2\\n\\n    \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 4, \"cases_total\": 7, \"steps_all_pass\": 2, \"steps_total\": 3, \"per_step\": {\"75.1\": {\"pass\": 3, \"total\": 3}, \"75.2\": {\"pass\": 1, \"total\": 1}, \"75.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 238.17,
+    "setup_s": 0.0,
+    "grade_s": 0.779
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.41s"
+  ]
+}

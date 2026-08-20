@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_grossmass",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport os\\nimport tempfile\\nimport pandas as pd\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Configuration\\nCORRUPTED_CSV_PATH = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_grossmass_corrupt.csv'\\nTARGET_FUEL_BURN = 43389.55  # Reference fuel burn in lbm\\nTOLERANCE = 0.1  # Tolerance for float comparison\\n\\n# Candidates for restoration: (parameter_name, true_value)\\n# The prompt implies one of these is the source of corruption.\\nCANDIDATES = [\\n    ('aircraft:design:range', 3200.0),\\n    ('aircraft:design:gross_mass', 175400.0)\\n]\\n\\ndef run_aviary_test(csv_path):\\n    \\\"\\\"\\\"\\n    Runs Aviary analysis with the given CSV file and returns the total fuel mass.\\n    \\\"\\\"\\\"\\n    # Setup phase_info with the required cruise Mach\\n    # deepcopy is required as per prompt instructions\\n    phase_info = deepcopy(default_phase_info)\\n    \\n    # Ensure cruise phase exists and set mach\\n    if 'cruise' in phase_info and 'user_options' in phase_info['cruise']:\\n        phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    else:\\n        # Fallback if structure differs, though unlikely for standard two_dof\\n        pass\\n\\n    try:\\n        # Run Aviary with specified constraints\\n        prob = run_aviary(\\n            csv_path,\\n            phase_info=phase_info,\\n            run_driver=False,\\n            optimizer=\\\"SLSQP\\\",\\n            verbosity=0,\\n            make_plots=False\\n        )\\n        \\n        # Retrieve the fuel burn\\n        fuel_burn = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n        return fuel_burn\\n    except Exception as e:\\n        print(f\\\"Error running Aviary: {e}\\\")\\n        return None\\n\\ndef main():\\n    # Load the corrupted CSV\\n    if not os.path.exists(CORRUPTED_CSV_PATH):\\n        print(f\\\"Error: Corrupted CSV not found at {CORRUPTED_CSV_PATH}\\\")\\n        return\\n\\n    df = pd.read_csv(CORRUPTED_CSV_PATH)\\n    \\n    result = {}\\n\\n    # Identify the correct parameter by testing each candidate\\n    for param_name, true_value in CANDIDATES:\\n        # Create a temporary copy of the dataframe\\n        temp_df = df.copy()\\n        \\n        # Check if the column exists to avoid KeyErrors\\n        if 'Name' not in temp_df.columns or 'Value' not in temp_df.columns:\\n            print(\\\"CSV missing 'Name' or 'Value' columns.\\\")\\n            continue\\n            \\n        # Update the candidate value to the \\\"true\\\" value\\n        # We use a mask to find the row where Name matches the candidate\\n        mask = temp_df['Name'] == param_name\\n        \\n        if not mask.any():\\n            print(f\\\"Parameter {param_name} not found in CSV.\\\")\\n            continue\\n            \\n        temp_df.loc[mask, 'Value'] = true_value\\n        \\n        # Write to a temporary file for Aviary to read\\n        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp_file:\\n            temp_df.to_csv(tmp_file.name, index=False)\\n            tmp_path = tmp_file.name\\n            \\n        try:\\n            # Run simulation\\n            fuel_burn = run_aviary_test(tmp_path)\\n            \\n            if fuel_burn is not None:\\n                # Check if this restoration produces the reference fuel burn\\n                if abs(fuel_burn - TARGET_FUEL_BURN) < TOLERANCE:\\n                    print(f\\\"Match found! Fixing {param_name} to {true_value} yields {fuel_burn:.2f} lbm (Target: {TARGET_FUEL_BURN:.2f})\\\")\\n                    result['corrupted_param'] = param_name\\n                    result['restored_value'] = float(true_value)\\n                    break\\n                else:\\n                    print(f\\\"Test: {param_name} = {true_value} -> Fuel: {fuel_burn:.2f} (No match)\\\")\\n        finally:\\n            # Clean up temporary file\\n            if os.path.exists(tmp_path):\\n                os.remove(tmp_path)\\n\\n    # Write results to result.json\\n    if result:\\n        with open('result.json', 'w') as f:\\n            jso\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ts/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/pandas/io/parsers/c_parser_wrapper.py\\\", line 215, in read\\n    chunks = self._reader.read_low_memory(nrows)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 832, in pandas._libs.parsers.TextReader.read_low_memory\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 897, in pandas._libs.parsers.TextReader._read_rows\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 868, in pandas._libs.parsers.TextReader._tokenize_rows\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 885, in pandas._libs.parsers.TextReader._check_tokenize_status\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 2084, in pandas._libs.parsers.raise_parser_error\\npandas.errors.ParserError: Error tokenizing data. C error: Expected 3 fields in line 215, saw 5\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 146.723,
+    "setup_s": 0.0,
+    "grade_s": 1.281
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.28s"
+  ]
+}

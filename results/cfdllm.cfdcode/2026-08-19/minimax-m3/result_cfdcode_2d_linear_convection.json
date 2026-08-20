@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_linear_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9345,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.96725,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Parameters\\nc = 1.0\\nLx, Ly = 2.0, 2.0\\nT = 0.5\\nNx, Ny = 41, 41\\ndx = Lx / (Nx - 1)\\ndy = Ly / (Ny - 1)\\ndt = 0.01\\nNt = int(T / dt)\\n\\n# Grid\\nx = np.linspace(0, Lx, Nx)\\ny = np.linspace(0, Ly, Ny)\\nX, Y = np.meshgrid(x, y, indexing='ij')\\n\\n# Initial condition\\nu = np.ones((Nx, Ny))\\nmask = (X >= 0.5) & (X <= 1.0) & (Y >= 0.5) & (Y <= 1.0)\\nu[mask] = 2.0\\n\\n# Time stepping using upwind scheme\\nfor n in range(Nt):\\n    u_new = u.copy()\\n    u_new[1:-1, 1:-1] = (u[1:-1, 1:-1] \\n                        - c * dt / dx * (u[1:-1, 1:-1] - u[:-2, 1:-1]) \\n                        - c * dt / dy * (u[1:-1, 1:-1] - u[1:-1, :-2]))\\n    # Enforce Dirichlet boundary conditions\\n    u_new[0, :] = 1.0\\n    u_new[-1, :] = 1.0\\n    u_new[:, 0] = 1.0\\n    u_new[:, -1] = 1.0\\n    u = u_new\\n\\n# Save final solution\\nnp.save('u.npy', u)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.00594505792366333, \"MAE\": 0.034635977668951545, \"RMSE\": 0.07710420172508974, \"Cosine\": 0.9974971827545558, \"R2\": 0.8714174426116603, \"NMSE\": 0.005048293924227116, \"score01\": 0.9345}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.05}"
+  },
+  "timings": {
+    "agent_s": 43.002,
+    "setup_s": 0.0,
+    "grade_s": 0.111
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.05s",
+    "missing=[] nonfinite=[]"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "task_id": "cfdquery_q029",
+  "registry_id": "cfdllm.cfdquery",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "3",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}"
+  },
+  "timings": {
+    "agent_s": 8.14,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:159fb7f37a366330964fec492184442aa6fa3fb8d2321d9b470e2ca1ba1e3a96",
+  "assets_revision": "cfdquery@3b46d30+kaggle_v4",
+  "logs": [
+    "answer=3 raw='<think>The question asks about the number of numerical diffusion terms in the second-order upwind Euler scheme for a linear advection equation.\\n\\nFor a linear advection equation, the second-order upwind scheme introduces one numerical diffusion term. This is because the truncation error of the second-order upwind scheme contains a term proportional to the second derivative (diffusion-like term) with a coefficient involving the mesh size squared.\\n\\nActually, let me think more carefully. The second-order upwind scheme for the linear advection equation ∂u/∂t + a∂u/∂x = 0 can be written as:\\nu_j^{n+1} = u_j^n - (aΔt/Δx)(u_{j+1}^n - u_j^n) + (aΔt/Δx)(u_{j+1}^n - 2u_j^n + u_{j-1}^n)/2... \\n\\nWait, let me reconsider. The standard second-order upwind scheme is:\\nu_j^{n+1} = u_j^n - (aΔt/2Δx)(3u_j^n - 4u_{j-1}^n + u_{j-2}^n) for a > 0\\n\\nThe modified equation (truncation error analysis) shows that this scheme has numerical diffusion but no numerical dispersion... actually it has both.\\n\\nFor second-order upwind, the modified equation contains:\\n- A second-derivative (diffusion) term\\n- A third-derivative (dispersion) term\\n\\nSo numerically, the second-order upwind scheme has one numerical diffusion term (from the second derivative in the truncation error).\\n\\nThe answer should be 3: One term.</think>\\n\\n3' attempts=1"
+  ]
+}

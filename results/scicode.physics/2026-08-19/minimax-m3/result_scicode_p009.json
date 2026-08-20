@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p009",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def WJ(A, b, eps, x_true, x0, omega):\\n    '''Solve a given linear system Ax=b with weighted Jacobi iteration method\\n    Input\\n    A:      N by N matrix, 2D array\\n    b:      N by 1 right hand side vector, 1D array\\n    eps:    Float number indicating error tolerance\\n    x_true: N by 1 true solution vector, 1D array\\n    x0:     N by 1 zero vector, 1D array\\n    omega:  float number shows weight parameter\\n    Output\\n    residuals: Float number shows L2 norm of residual (||Ax - b||_2)\\n    errors:    Float number shows L2 norm of error vector (||x-x_true||_2)\\n    '''\\n    x = x0.copy()\\n    d = np.diag(A)\\n    \\n    # Iterate until convergence: ||x_k - x_{k-1}||_2 < eps\\n    for _ in range(10000):\\n        x_old = x.copy()\\n        \\n        # Weighted Jacobi iteration:\\n        # x_i^{k+1} = (b_i - sum_{j!=i} a_ij * x_j^k) / (a_ii / omega)\\n        #           = omega * (b_i - sum_{j!=i} a_ij * x_j^k) / a_ii\\n        # Vectorized form: x = omega * (b - A @ x_old) / d + omega * x_old\\n        x = omega * (b - A @ x_old) / d + omega * x_old\\n        \\n        # Check convergence: norm of increment\\n        if np.linalg.norm(x - x_old) < eps:\\n            break\\n    \\n    # Compute residual: ||Ax - b||_2\\n    residual = np.linalg.norm(A @ x - b)\\n    # Compute error: ||x - x_true||_2\\n    error = np.linalg.norm(x - x_true)\\n    \\n    return residual, error\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 3, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"9.1\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 119.089,
+    "setup_s": 0.0,
+    "grade_s": 0.79
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.4s"
+  ]
+}

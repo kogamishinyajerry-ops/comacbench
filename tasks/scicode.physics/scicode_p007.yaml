@@ -1,0 +1,110 @@
+id: scicode_p007
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p007.md
+  prompt_sha256: 5536761c9e123f31321c61c4d021eb3b89cb34706e2c64d4cd4b2ad23a20769f
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '7'
+  problem_name: Spatial_filters_II
+  split: dev
+  n_steps: 1
+  n_cases: 4
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    from numpy.fft import fft2, ifft2, fftshift, ifftshift'
+  steps:
+  - step_id: '7.1'
+    n_cases: 4
+    test_cases:
+    - 'matrix = np.array([[1, 0,0,0], [0,0, 0,1]])
+
+      bandmin,bandmax = 20,50
+
+      image_array = np.tile(matrix, (400, 200))
+
+      assert np.allclose(apply_band_pass_filter(image_array, bandmin,bandmax), target)'
+    - 'matrix = np.array([[1, 0,0,0], [0,0, 0,1]])
+
+      bandmin,bandmax = 40,80
+
+      image_array = np.tile(matrix, (400, 200))
+
+      assert np.allclose(apply_band_pass_filter(image_array, bandmin,bandmax), target)'
+    - 'matrix = np.array([[1, 0,0,0], [0,0, 0,1]])
+
+      bandmin,bandmax = 80,100
+
+      image_array = np.tile(matrix, (400, 200))
+
+      assert np.allclose(apply_band_pass_filter(image_array, bandmin,bandmax), target)'
+    - 'matrix = np.array([[1, 0,0,0], [0,0, 0,1]])
+
+      frequency_threshold = 100
+
+      bandmin,bandmax = 40,80
+
+      T1, filtered_image1 = apply_band_pass_filter(image_array, bandmin,bandmax)
+
+      matrix = np.array([[1, 0,0,0], [0,0, 0,1]])
+
+      bandmin,bandmax = 60, 80
+
+      image_array = np.tile(matrix, (400, 200))
+
+      T2, filtered_image = apply_band_pass_filter(image_array, bandmin,bandmax)
+
+      MaskAreaDiff = T1.sum()-T2.sum()
+
+      assert (MaskAreaDiff > 0) == target'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/scicode/physics/gold_dev/p007_gold.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

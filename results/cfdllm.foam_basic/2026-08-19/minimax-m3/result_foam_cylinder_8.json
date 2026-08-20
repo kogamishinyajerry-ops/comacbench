@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cylinder_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Create directory structure\\ndirs = [\\n    \\\"system\\\",\\n    \\\"constant\\\",\\n    \\\"0\\\"\\n]\\nfor d in dirs:\\n    os.makedirs(d, exist_ok=True)\\n\\n# -------------------- system/blockMeshDict --------------------\\n# Geometry: 2D channel with a cylinder (offset cylinder)\\n# Channel: x in [0, 2.2], y in [0, 0.41]\\n# Cylinder: radius 0.05, center at (0.2, 0.2)\\n# Build mesh using simpleGrading with hex blocks, cylinder cut out via inner cylinder block\\n# For simplicity, use a single block mesh with refined region around cylinder approximated\\n# via graded hex block split into 4 O-grid-like quadrants.\\n\\nblock_mesh_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    (0.0  0.0    0.0)   // 0\\n    (0.15 0.0    0.0)   // 1\\n    (0.25 0.0    0.0)   // 2\\n    (2.05 0.0    0.0)   // 3\\n    (2.2  0.0    0.0)   // 4\\n    (0.0  0.0    0.005)  // 5\\n    (0.15 0.0    0.005)  // 6\\n    (0.25 0.0    0.005)  // 7\\n    (2.05\""
+  },
+  "timings": {
+    "agent_s": 317.5,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

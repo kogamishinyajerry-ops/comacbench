@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_1d_nonlinear_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1765,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.58825,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_burgers_equation():\\n    \\\"\\\"\\\"\\n    Solves the inviscid Burgers' equation: du/dt + u * du/dx = 0\\n    using the Lax-Friedrichs finite difference method with periodic boundary conditions.\\n    \\\"\\\"\\\"\\n    # Parameters\\n    L = 2.0 * np.pi          # Length of the domain\\n    T_final = 5.0            # Final time\\n    N = 400                  # Number of spatial grid points\\n    CFL = 0.8                # Courant-Friedrichs-Lewy number for stability\\n    \\n    # Spatial grid\\n    dx = L / N\\n    # endpoint=False ensures the domain is [0, 2pi) for periodic boundary conditions\\n    x = np.linspace(0, L, N, endpoint=False)\\n    \\n    # Initial Condition: u(x, 0) = sin(x) + 0.5 sin(0.5x)\\n    u = np.sin(x) + 0.5 * np.sin(0.5 * x)\\n    \\n    # Time integration\\n    t = 0.0\\n    while t < T_final:\\n        # Calculate max velocity for adaptive time-stepping (CFL condition)\\n        u_max = np.max(np.abs(u))\\n        \\n        # Safety check to avoid division by zero if u is zero everywhere\\n        if u_max < 1e-10:\\n            dt = 0.01\\n        else:\\n            dt = CFL * dx / u_max\\n            \\n        # Adjust dt to ensure we land exactly on T_final at the last step\\n        if t + dt > T_final:\\n            dt = T_final - t\\n            \\n        # Lax-Friedrichs Scheme\\n        # PDE in conservative form: du/dt + dF(u)/dx = 0, where F(u) = 0.5 * u^2\\n        # Discretization: u_new[i] = 0.5*(u[i+1] + u[i-1]) - 0.5*(dt/dx)*(F[i+1] - F[i-1])\\n        \\n        F = 0.5 * u**2\\n        \\n        # Periodic boundary conditions using np.roll\\n        u_left = np.roll(u, -1)   # u[i+1]\\n        u_right = np.roll(u, 1)   # u[i-1]\\n        F_left = np.roll(F, -1)   # F[i+1]\\n        F_right = np.roll(F, 1)   # F[i-1]\\n        \\n        u = 0.5 * (u_left + u_right) - 0.5 * (dt / dx) * (F_left - F_right)\\n        \\n        t += dt\\n\\n    # Save the final solution\\n    # The variable name specified in the problem is 'u'\\n    np.save('u.npy', u)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_burgers_equation()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.5483057006998211, \"MAE\": 0.5950212232873002, \"RMSE\": 0.7404766712731882, \"Cosine\": 0.35300597830813585, \"R2\": -0.11111037491499731, \"NMSE\": 0.9216414469460213, \"score01\": 0.1765}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 132.211,
+    "setup_s": 0.0,
+    "grade_s": 0.151
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s",
+    "missing=[] nonfinite=[]"
+  ]
+}

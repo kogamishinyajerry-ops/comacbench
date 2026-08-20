@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_lid_driven_cavity",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Parameters\\nrho = 1.0\\nnu = 0.1\\nNx = 65\\nNy = 65\\ndx = 1.0 / (Nx - 1)\\ndy = 1.0 / (Ny - 1)\\ndt = 0.001\\nnt = 500  # until t=0.5\\n\\n# Initialize fields\\nu = np.zeros((Ny, Nx))\\nv = np.zeros((Ny, Nx))\\np = np.zeros((Ny, Nx))\\n\\ndef apply_uv_bc(u, v):\\n    u[-1, :] = 1.0  # top lid (y=1)\\n    v[-1, :] = 0.0\\n    u[0, :] = 0.0   # bottom\\n    v[0, :] = 0.0\\n    u[:, 0] = 0.0   # left\\n    v[:, 0] = 0.0\\n    u[:, -1] = 0.0  # right\\n    v[:, -1] = 0.0\\n\\napply_uv_bc(u, v)\\n\\n# Precompute red-black masks for interior points (j=1:Ny-2, i=1:Nx-2)\\nred_mask = np.zeros((Ny-2, Nx-2), dtype=bool)\\nblack_mask = np.zeros((Ny-2, Nx-2), dtype=bool)\\nfor j in range(Ny-2):\\n    for i in range(Nx-2):\\n        if (i + j) % 2 == 0:\\n            red_mask[j, i] = True\\n        else:\\n            black_mask[j, i] = True\\n\\n# Time-stepping loop\\nfor n in range(nt):\\n    # Intermediate velocities\\n    u_star = u.copy()\\n    v_star = v.copy()\\n    \\n    # Compute convective and diffusive terms for interior points\\n    u_star[1:-1, 1:-1] = u[1:-1, 1:-1] + dt * (\\n        - (u[1:-1, 1:-1] * (u[1:-1, 2:] - u[1:-1, :-2]) / (2 * dx)\\n        + v[1:-1, 1:-1] * (u[2:, 1:-1] - u[:-2, 1:-1]) / (2 * dy))\\n        + nu * ((u[1:-1, 2:] - 2 * u[1:-1, 1:-1] + u[1:-1, :-2]) / dx**2\\n                + (u[2:, 1:-1] - 2 * u[1:-1, 1:-1] + u[:-2, 1:-1]) / dy**2)\\n    )\\n    v_star[1:-1, 1:-1] = v[1:-1, 1:-1] + dt * (\\n        - (u[1:-1, 1:-1] * (v[1:-1, 2:] - v[1:-1, :-2]) / (2 * dx)\\n        + v[1:-1, 1:-1] * (v[2:, 1:-1] - v[:-2, 1:-1]) / (2 * dy))\\n        + nu * ((v[1:-1, 2:] - 2 * v[1:-1, 1:-1] + v[1:-1, :-2]) / dx**2\\n                + (v[2:, 1:-1] - 2 * v[1:-1, 1:-1] + v[:-2, 1:-1]) / dy**2)\\n    )\\n    \\n    apply_uv_bc(u_star, v_star)\\n    \\n    # Compute divergence of u_star for pressure Poisson RHS\\n    div_u_star = np.zeros_like(u)\\n    div_u_star[1:-1, 1:-1] = (\\n        (u_star[1:-1, 2:] - u_star[1:-1, :-2]) / (2 * dx)\\n        + (v_star[2:, 1:-1] - v_star[:-2, 1:-1]) / (2 * dy)\\n    )\\n    f = (rho / dt) * div_u_star\\n    \\n    # Solve pressure Poisson equation: ∇²p = f with homogeneous Neumann BC\\n    # Using Red-Black Gauss-Seidel with SOR\\n    omega = 1.5\\n    n_poisson = 50\\n    \\n    f_padded = np.pad(f, 1, mode='constant', constant_values=0)\\n    \\n    for it in range(n_poisson):\\n        p_padded = np.pad(p, 1, mode='edge')\\n        # Update red points\\n        p_new = 0.25 * (p_padded[2:, 1:-1] + p_padded[:-2, 1:-1] + \\n                        p_padded[1:-1, 2:] + p_padded[1:-1, :-2] - \\n                        f_padded[1:-1, 1:-1] * dx**2)\\n        p_int = (1 - omega) * p[1:-1, 1:-1] + omega * p_new\\n        p[1:-1, 1:-1] = np.where(red_mask, p_int, p[1:-1, 1:-1])\\n        \\n        # Update black points\\n        p_padded = np.pad(p, 1, mode='edge')\\n        p_new = 0.25 * (p_padded[2:, 1:-1] + p_padded[:-2, 1:-1] + \\n                        p_padded[1:-1, 2:] + p_padded[1:-1, :-2] - \\n                        f_padded[1:-1, 1:-1] * dx**2)\\n        p_int = (1 - omega) * p[1:-1, 1:-1] + omega * p_new\\n        p[1:-1, 1:-1] = np.where(black_mask, p_int, p[1:-1, 1:-1])\\n    \\n    # Fix pressure reference (set p=0 at bottom-left corner)\\n    p -= p[0, 0]\\n    \\n    # Velocity correction\\n    u[1:-1, 1:-1] = u_star[1:-1, 1:-1] - (dt / rho) * (p[1:-1, 2:] - p[1:-1, :-2]) / (2 * dx)\\n    v[1:-1, 1:-1] = v_star[1:-1, 1:-1] - (dt / rho) * (p[2:, 1:-1] - p[:-2, 1:-1]) / (2 * dy)\\n    \\n    apply_uv_bc(u, v)\\n    \\n    if n % 100 == 0:\\n        print(f\\\"Step {n}, t={n*dt:.3f}\\\")\\n\\n# Save final solution\\nnp.save('u.npy', u)\\nnp.save('v.npy', v)\\nnp.save('p.npy', p)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [\"u\", \"v\", \"p\"], \"nonfinite\": [], \"fields\": {}, \"determinism\": null, \"run1_exit\": 1, \"run1_s\": 0.05}"
+  },
+  "timings": {
+    "agent_s": 191.93,
+    "setup_s": 0.0,
+    "grade_s": 0.054
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=1 0.05s",
+    "missing=['u', 'v', 'p'] nonfinite=[]"
+  ]
+}

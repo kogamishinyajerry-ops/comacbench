@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cylinder_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"Generate an OpenFOAM 10 case for laminar flow over an offset cylinder\\nusing PIMPLE + generalized Newtonian (Cross-Power-Law) viscosity.\\\"\\\"\\\"\\n\\nimport os\\n\\nCASE_NAME = \\\"offsetCylinder\\\"\\nSOLVER = \\\"pimpleFoam\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Geometry parameters (m)\\n# ---------------------------------------------------------------------------\\nLX = 4.0            # domain length in x\\nLY = 2.0            # domain height in y\\nCXC = 1.0           # cylinder centre x\\nCYC = 1.0           # cylinder centre y (offset from centre 1.0 -> y=1.0)\\nCR  = 0.15          # cylinder radius\\n\\nNI = 80             # cells in x\\nNJ = 40             # cells in y\\nGRAD = 0.04         # grading towards cylinder\\n\\n# ---------------------------------------------------------------------------\\n# Numerics\\n# ---------------------------------------------------------------------------\\nDT       = 0.0025\\nEND_TIME = 0.5\\nWRITE    = 0.05\\nU_IN     = 1.5\\n\\n# Cross-Power-Law parameters\\nNU_INF = 10.0\\nM      = 0.4\\nN_EXP  = 3.0\\n\\n# Constant viscosity used as transport model base / physicalProperties.nu\\nNU_CONST = 1e-2\\n\\n# ---------------------------------------------------------------------------\\n# Helpers\\n# ---------------------------------------------------------------------------\\n\\ndef w(path, txt):\\n    with open(path, \\\"w\\\") as f:\\n        f.write(txt)\\n\\n# Block mesh description helpers ------------------------------------------------\\n\\ndef cell_hex_block(p0, p1, p2, p3, p4, p5, p6, p7,\\n                   nx, ny, nz, grading):\\n    return (\\n        f\\\"    hex ({p0} {p1} {p2} {p3} {p4} {p5} {p6} {p7}) \\\"\\n        f\\\"({nx} {ny} {nz}) simpleGrading (1 1 {grading})\\\\n\\\"\\n    )\\n\\n# ---------------------------------------------------------------------------\\n# Directory structure\\n# ---------------------------------------------------------------------------\\nDIRS = [\\n    \\\"system\\\", \\\"constant\\\", \\\"0\\\", \\\"0.orig\\\",\\n    \\\"constant/polyMesh\\\",\\n]\\nfor d in DIRS:\\n    os.makedirs(d, exist_ok=True)\\n\\n# ---------------------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------------------\\n# We build an O-grid block around the cylinder using a hex block with\\n# internal faces\""
+  },
+  "timings": {
+    "agent_s": 261.426,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

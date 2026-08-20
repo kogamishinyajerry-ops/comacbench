@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# Create problem\\nprob = om.Problem()\\n\\n# Add thermodynamic package (TABULAR AIR_JETA_TAB_SPEC)\\nprob.model.add_subsystem('thermo', pyc.Thermo(thermo_method='TABULAR', thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n\\n# Add cycle group\\ncycle = prob.model.add_subsystem('cycle', om.Group())\\n\\n# Add components: Inlet + AXI5 Compressor + Combustor + LPT2269 Turbine + CD Nozzle + Shaft\\ncycle.add_subsystem('inlet', pyc.Inlet())\\ncycle.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\ncycle.add_subsystem('comb', pyc.Combustor())\\ncycle.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\ncycle.add_subsystem('noz', pyc.Nozzle(nozzType='CD'))\\ncycle.add_subsystem('shaft', pyc.Shaft())\\n\\n# Connect flow stations\\ncycle.connect('inlet.Fl_O', 'comp.Fl_I')\\ncycle.connect('comp.Fl_O', 'comb.Fl_I')\\ncycle.connect('comb.Fl_O', 'turb.Fl_I')\\ncycle.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n# Connect shaft work\\ncycle.connect('comp.trq', 'shaft.trq_in')\\ncycle.connect('turb.trq', 'shaft.trq_out')\\n\\n# Inner Newton solver for cycle convergence\\ncycle.nonlinear_solver = om.NewtonSolver()\\ncycle.linear_solver = om.DirectSolver()\\ncycle.nonlinear_solver.options['iprint'] = 2\\ncycle.nonlinear_solver.options['maxiter'] = 50\\ncycle.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\n\\n# Outer design point solve: find air flow W for Fn=15000 lbf\\nprob.model.add_design_var('cycle.inlet.W', lower=10, upper=2000)\\nprob.model.add_constraint('cycle.noz.Fn', equals=15000.0)\\n\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.linear_solver = om.DirectSolver()\\nprob.model.nonlinear_solver.options['iprint'] = 2\\nprob.model.nonlinear_solver.options['maxiter'] = 50\\n\\nprob.setup()\\n\\n# Operating conditions: SL, alt=0 ft, MN~0\\nprob['cycle.inlet.MN'] = 0.0001\\nprob['cycle.inlet.alt'] = 0.0\\n\\n# Component performance and design targets\\nprob['cycle.comp.PR'] = 15.0     # OPR = 15.0\\nprob['cycle.comp.eff'] = 0.9\\nprob['cycle.turb.eff'] = 0.9\\nprob['cycle.comb.Tt4'] = 2800.0  # T4 = 2800 degR\\nprob['cycle.comb.dPqP'] = 0.0    # No combustor pressure drop\\n\\n# Initial guess for air flow\\nprob['cycle.inlet.W'] = 400.0\\n\\n# Solve the design point\\nprob.run_model()\\n\\n# Extract results\\nFn_lbf = float(prob['cycle.noz.Fn'][0])\\nWfuel_lbm_s = float(prob['cycle.comb.Wfuel'][0])\\nOPR = float(prob['cycle.comp.PR'][0])\\nTSFC = Wfuel_lbm_s / Fn_lbf  # (lbm/s)/lbf\\n\\n# Write result.json\\nresult = {\\n    'Fn_lbf': Fn_lbf,\\n    'TSFC': TSFC,\\n    'OPR': OPR,\\n    'Wfuel_lbm_s': Wfuel_lbm_s\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_wzu8rne1/solve.py\\\", line 9, in <module>\\n    prob.model.add_subsystem('thermo', pyc.Thermo(thermo_method='TABULAR', thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n                                       ^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Thermo'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 107.602,
+    "setup_s": 0.0,
+    "grade_s": 1.228
+  },
+  "environment_digest": "sha256:1542aec1c75ffe8bbbbbe5a8c9723f831ded55f9c89c457c16ccb57779ee16a4",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.23s"
+  ]
+}

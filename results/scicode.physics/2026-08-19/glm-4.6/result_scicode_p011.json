@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p011",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nimport itertools\\nimport scipy.linalg\\n\\n# Step 1\\ndef ket(dim, args):\\n    '''Input:\\n    dim: int or list, dimension of the ket\\n    args: int or list, the i-th basis vector\\n    Output:\\n    out: dim dimensional array of float, the matrix representation of the ket\\n    '''\\n    # Handle args as a list of indices\\n    if isinstance(args, (list, tuple, np.ndarray)):\\n        indices = list(args)\\n    else:\\n        indices = [args]\\n    \\n    # Handle dim as a list or int\\n    if isinstance(dim, (list, tuple, np.ndarray)):\\n        dims = list(dim)\\n    else:\\n        dims = [dim] * len(indices)\\n        \\n    # Construct the individual basis vectors\\n    vecs = []\\n    for i, d in zip(indices, dims):\\n        v = np.zeros(d, dtype=float)\\n        v[i] = 1.0\\n        vecs.append(v)\\n        \\n    # Compute tensor product\\n    out = vecs[0]\\n    for v in vecs[1:]:\\n        out = np.kron(out, v)\\n        \\n    return out\\n\\n# Step 2\\ndef multi_rail_encoding_state(rails):\\n    '''Returns the density matrix of the multi-rail encoding state\\n    Input:\\n    rails: int, number of rails\\n    Output:\\n    state: 2**(2*rails) x 2**(2*rails) dimensional array of numpy.float64 type\\n    '''\\n    # The state is (1/sqrt(m)) sum_{k=0}^{m-1} |e_k>_A |e_k>_B\\n    # where |e_k> = |0...010...0> with 1 at position k.\\n    # The subsystem ordering is A then B. Each has dimension 2^rails.\\n    # The basis index for |e_k>_A is k.\\n    # The basis index for |e_k>_B is k + (2^rails) * k = k * (1 + 2^rails).\\n    # This index logic holds because A and B are tensored. \\n    # Index = (idx_A * dim_B) + idx_B = k * 2^rails + k = k*(2^rails + 1)\\n    \\n    dim_A = 2 ** rails\\n    dim_total = dim_A * dim_A # 2**(2*rails)\""
+  },
+  "timings": {
+    "agent_s": 359.576,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

@@ -1,0 +1,305 @@
+id: scicode_p032
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p032.md
+  prompt_sha256: de37b85fb27b40bba7d8a2a840bb6c696f40c087c34a4bcdf4ba9d714f40bce9
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '32'
+  problem_name: Multiparticle_dynamics_in_the_optical_tweezer_array
+  split: test
+  n_steps: 3
+  n_cases: 10
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    import scipy
+
+    from scipy.constants import epsilon_0, c'
+  steps:
+  - step_id: '32.1'
+    n_cases: 3
+    test_cases:
+    - 'P = [10000000, 100000000]
+
+      phi = 0
+
+      R = 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      assert np.allclose(binding_force(P, phi, R, l, w, a, n), target)'
+    - 'P = [10000000, 100000000]
+
+      phi = np.pi/2
+
+      R = 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      assert np.allclose(binding_force(P, phi, R, l, w, a, n), target)'
+    - 'P = [1000000000, 1000000000]
+
+      phi = np.pi/4
+
+      R = 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      assert np.allclose(binding_force(P, phi, R, l, w, a, n), target)'
+  - step_id: '32.2'
+    n_cases: 3
+    test_cases:
+    - 'P = [100e-3, 100e-3, 100e-3, 100e-3, 100e-3]
+
+      phi = np.pi / 2
+
+      R = 0.99593306197 * 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      h = 1e-6
+
+      N = np.size(P)
+
+      rho = 2.648e3
+
+      assert np.allclose(generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho), target)'
+    - 'P = [100e-3, 100e-3, 100e-3, 100e-3, 100e-3]
+
+      phi = np.pi / 2
+
+      R = 2 * 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      h = 1e-6
+
+      N = np.size(P)
+
+      rho = 2.648e3
+
+      assert np.allclose(generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho), target)'
+    - 'P = [100e-3, 100e-3, 100e-3, 100e-3, 100e-3]
+
+      phi = 0
+
+      R = 1 * 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      h = 1e-6
+
+      N = np.size(P)
+
+      rho = 2.648e3
+
+      assert np.allclose(generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho), target)'
+  - step_id: '32.3'
+    n_cases: 4
+    test_cases:
+    - 'n0 = [39549953.17, 197.25, 197.25, 197.25, 197.25]
+
+      Gamma = 0.001
+
+      P = [100e-3, 100e-3, 100e-3, 100e-3, 100e-3]
+
+      phi = np.pi / 2
+
+      R = 0.99593306197 * 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      h = 1e-6
+
+      N = np.size(P)
+
+      rho = 2.648e3
+
+      C0 = np.diag(n0)
+
+      H = generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho)
+
+      L = - Gamma * np.identity(N) / 2
+
+      M = 197.25 * Gamma * np.identity(N) / 2
+
+      t0 = 0.02
+
+      steps = 100000
+
+      assert np.allclose(runge_kutta(C0, H, L, M, t0, steps), target)'
+    - 'n0 = [197.25, 39549953.17, 39549953.17, 39549953.17, 39549953.17]
+
+      Gamma = 0.001
+
+      P = [100e-3, 100e-3, 100e-3, 100e-3, 100e-3]
+
+      phi = np.pi / 2
+
+      R = 0.99593306197 * 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      h = 1e-6
+
+      N = np.size(P)
+
+      rho = 2.648e3
+
+      C0 = np.diag(n0)
+
+      H = generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho)
+
+      L = - Gamma * np.identity(N) / 2
+
+      M = 197.25 * Gamma * np.identity(N) / 2
+
+      t0 = 0.05
+
+      steps = 100000
+
+      assert np.allclose(runge_kutta(C0, H, L, M, t0, steps), target)'
+    - 'n0 = [39549953.17, 197.25, 197.25, 197.25, 197.25]
+
+      Gamma = 0.001
+
+      P = [100e-3, 100e-3, 100e-3, 100e-3, 100e-3]
+
+      phi = np.pi / 2
+
+      R = 0.99593306197 * 1550e-9
+
+      l = 1550e-9
+
+      w = 600e-9
+
+      a = 100e-9
+
+      n = 1.444
+
+      h = 1e-6
+
+      N = np.size(P)
+
+      rho = 2.648e3
+
+      C0 = np.diag(n0)
+
+      H = generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho)
+
+      L = - Gamma * np.identity(N) / 2
+
+      M = 197.25 * Gamma * np.identity(N) / 2
+
+      t0 = 0.05
+
+      steps = 100000
+
+      assert np.allclose(runge_kutta(C0, H, L, M, t0, steps), target)'
+    - "n0 = [197.25, 197.25, 39549953.17, 197.25, 197.25]\nGamma = 0\nP = [100e-3,\
+      \ 100e-3, 100e-3, 100e-3, 100e-3]\nphi = np.pi / 2\nR = 0.99593306197 * 1550e-9\n\
+      l = 1550e-9\nw = 600e-9\na = 100e-9\nn = 1.444\nh = 1e-6\nN = np.size(P)\nrho\
+      \ = 2.648e3\nC0 = np.diag(n0)\nH = generate_Hamiltonian(P, phi, R, l, w, a,\
+      \ n, h, N, rho)\nL = - Gamma * np.identity(N) / 2\nM = 197.25 * Gamma * np.identity(N)\
+      \ / 2\nt0 = 0.02\nsteps = 100000\nnf = runge_kutta(C0, H, L, M, t0, steps)\n\
+      diff = sum(nf) - sum(n0)\ndef is_symmetric(array, rtol=1e-05, atol=1e-08):\n\
+      \    return np.all(np.isclose(array, array[::-1], rtol=rtol, atol=atol))\nassert\
+      \ (abs(diff)<1e-6, is_symmetric(nf)) == target"
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

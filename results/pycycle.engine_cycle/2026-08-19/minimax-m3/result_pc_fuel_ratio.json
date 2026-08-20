@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef run_turbojet(T4_val, Fn_target=11800.0, OPR=13.5):\\n    prob = om.Problem()\\n\\n    prob.model = pyc.Turbojet()\\n\\n    prob.setup()\\n\\n    # Design inputs\\n    prob.set_val('fc.MN', 0.8)\\n    prob.set_val('fc.alt', 35000.0, units='ft')\\n    prob.set_val('inlet.ram_recovery', 1.0)\\n\\n    prob.set_val('comp.map.active', 1.0)\\n    prob.set_val('comp.map.RlineMap', 2.0)\\n    prob.set_val('comp.polEffMap', 0.90)\\n    prob.set_val('comp.MNmap', 0.0)\\n\\n    prob.set_val('turb.map.active', 1.0)\\n    prob.set_val('turb.map.RlineMap', 2.0)\\n    prob.set_val('turb.polEffMap', 0.90)\\n    prob.set_val('turb.MNmap', 0.0)\\n\\n    # Design point constraints / inputs\\n    prob.set_val('OD_p.design.Fn_target', Fn_target, units='lbf')\\n    prob.set_val('OD_p.design.OPR_target', OPR)\\n    prob.set_val('OD_p.design.T4_target', T4_val, units='degR')\\n\\n    prob.set_val('OD_no_des.Fn_target', Fn_target, units='lbf')\\n    prob.set_val('OD_no_des.OPR_target', OPR)\\n    prob.set_val('OD_no_des.T4_target', T4_val, units='degR')\\n\\n    # Initial guesses\\n    prob['OD_p.initial_balance.W'] = 100.0\\n    prob['OD_p.initial_balance.BPR'] = 1.0\\n    prob['OD_p.initial_balance.turb_PR'] = 4.0\\n    prob['OD_p.initial_balance.fc.alt'] = 35000.0\\n    prob['OD_p.initial_balance.fc.MN'] = 0.8\\n    prob['OD_p.initial_balance.balance.Ps'] = 10.0\\n\\n    prob['OD_no_des.initial_balance.W'] = 100.0\\n    prob['OD_no_des.initial_balance.BPR'] = 1.0\\n    prob['OD_no_des.initial_balance.turb_PR'] = 4.0\\n    prob['OD_no_des.initial_balance.fc.alt'] = 35000.0\\n    prob['OD_no_des.initial_balance.fc.MN'] = 0.8\\n    prob['OD_no_des.initial_balance.balance.Ps'] = 10.0\\n\\n    prob.run_mode()\\n\\n    # Get fuel flow\\n    Wfuel = prob.get_val('OD_p.weight_ratio.fuel_weight', units='lbm/s') * 3600.0  # convert to lbm/hr if needed\\n    # Actually let's use the fuel flow rate directly\\n    Wfuel = prob.get_val('fuel_in.flow_in', units='lbm/s')\\n\\n    return Wfuel\\n\\n\\ndef main():\\n    Wfuel_2200 = run_turbojet(2200.0)\\n    Wfuel_2600 = run_turbojet(2600.0)\\n\\n    ratio = Wfuel_2600 / Wfuel_2200\\n\\n    result = {\\n        \\\"fuel_ratio_t2600_over_t2200\\\": ratio,\\n        \\\"Wfuel_2200_lbm_s\\\": Wfuel_2200,\\n        \\\"Wfuel_2600_lbm_s\\\": Wfuel_2600,\\n        \\\"T4_2200_degR\\\": 2200.0,\\n        \\\"T4_2600_degR\\\": 2600.0,\\n        \\\"Fn_target_lbf\\\": 11800.0,\\n        \\\"OPR\\\": 13.5,\\n    }\\n\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=2)\\n\\n    print(json.dumps(result, indent=2))\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_n12jks1y/solve.py\\\", line 85, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_n12jks1y/solve.py\\\", line 63, in main\\n    Wfuel_2200 = run_turbojet(2200.0)\\n                 ^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_n12jks1y/solve.py\\\", line 9, in run_turbojet\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 9.86,
+    "setup_s": 0.0,
+    "grade_s": 1.242
+  },
+  "environment_digest": "sha256:1542aec1c75ffe8bbbbbe5a8c9723f831ded55f9c89c457c16ccb57779ee16a4",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.24s"
+  ]
+}

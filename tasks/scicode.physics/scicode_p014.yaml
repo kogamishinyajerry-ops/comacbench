@@ -1,0 +1,169 @@
+id: scicode_p014
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p014.md
+  prompt_sha256: 9d85390046d6e3498c57bdf92b00e2c0f96d14fa637668861c381649cf1fe87f
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '14'
+  problem_name: Brownian_motion_in_the_optical_tweezer
+  split: test
+  n_steps: 2
+  n_cases: 6
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: import numpy as np
+  steps:
+  - step_id: '14.1'
+    n_cases: 3
+    test_cases:
+    - 'x0 = 0
+
+      v0 = 0
+
+      t0 = 1e-4
+
+      steps = 200000
+
+      taup = 48.5e-6
+
+      omega0 = 2 * np.pi * 3064
+
+      vrms = 1.422e-2
+
+      np.random.seed(0)
+
+      assert np.allclose(harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0,
+      vrms), target)'
+    - 'x0 = 0
+
+      v0 = 1.422e-2
+
+      t0 = 2e-4
+
+      steps = 200000
+
+      taup = 48.5e-6
+
+      omega0 = 2 * np.pi * 3064
+
+      vrms = 1.422e-2
+
+      np.random.seed(1)
+
+      assert np.allclose(harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0,
+      vrms), target)'
+    - 'x0 = 0
+
+      v0 = 0
+
+      t0 = 4e-4
+
+      steps = 200000
+
+      taup = 147.3e-6
+
+      omega0 = 2 * np.pi * 3168
+
+      vrms = 1.422e-2
+
+      np.random.seed(1)
+
+      assert np.allclose(harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0,
+      vrms), target)'
+  - step_id: '14.2'
+    n_cases: 3
+    test_cases:
+    - "def analytical_msd(t0, taup, omega0, vrms):\n    \"\"\"\n    Analytically calculate\
+      \ the mean-square displacement (MSD) of an optically trapped microsphere in\
+      \ a gas.\n    Input:\n    t0 : float\n        The time point at which to calculate\
+      \ the MSD.\n    taup : float\n        Momentum relaxation time of the microsphere.\n\
+      \    omega0 : float\n        Resonant frequency of the optical trap.\n    vrms\
+      \ : float\n        Root mean square velocity of the thermal fluctuations.\n\
+      \    Output:\n    t_MSD : float\n        The computed MSD at time point `t0`.\n\
+      \    \"\"\"\n    omega1 = np.sqrt(omega0 ** 2 - 1 / (4 * taup ** 2))\n    t_MSD\
+      \ = 2 * vrms ** 2 / (omega0 ** 2) * (1 - np.exp(-t0 / (2 * taup)) * (np.cos(omega1\
+      \ * t0) + np.sin(omega1 * t0) / (2 * omega1 * (taup))))\n    return t_MSD\n\
+      t0 = 5e-6\nsteps = 5000 #step-size in Mannella's leapfrog method\ntaup = 48.5e-6\n\
+      omega0 = 2 * np.pi * 3064\nvrms = 0.422e-3\nNavg = 4000 #simulation number\n\
+      x_MSD = calculate_msd(t0, steps, taup, omega0, vrms, Navg)\nt_MSD = analytical_msd(t0,\
+      \ taup, omega0, vrms)\neta = x_MSD / t_MSD\nassert (eta>0.95 and eta<1.05) ==\
+      \ target"
+    - "def analytical_msd(t0, taup, omega0, vrms):\n    \"\"\"\n    Analytically calculate\
+      \ the mean-square displacement (MSD) of an optically trapped microsphere in\
+      \ a gas.\n    Input:\n    t0 : float\n        The time point at which to calculate\
+      \ the MSD.\n    taup : float\n        Momentum relaxation time of the microsphere.\n\
+      \    omega0 : float\n        Resonant frequency of the optical trap.\n    vrms\
+      \ : float\n        Root mean square velocity of the thermal fluctuations.\n\
+      \    Output:\n    t_MSD : float\n        The computed MSD at time point `t0`.\n\
+      \    \"\"\"\n    omega1 = np.sqrt(omega0 ** 2 - 1 / (4 * taup ** 2))\n    t_MSD\
+      \ = 2 * vrms ** 2 / (omega0 ** 2) * (1 - np.exp(-t0 / (2 * taup)) * (np.cos(omega1\
+      \ * t0) + np.sin(omega1 * t0) / (2 * omega1 * (taup))))\n    return t_MSD\n\
+      t0 = 1e-5\nsteps = 5000 #step-size in Mannella's leapfrog method\ntaup = 48.5e-6\n\
+      omega0 = 2 * np.pi * 3064\nvrms = 0.422e-3\nNavg = 4000 #simulation number\n\
+      x_MSD = calculate_msd(t0, steps, taup, omega0, vrms, Navg)\nt_MSD = analytical_msd(t0,\
+      \ taup, omega0, vrms)\neta = x_MSD / t_MSD\nassert (eta>0.95 and eta<1.05) ==\
+      \ target"
+    - "def analytical_msd(t0, taup, omega0, vrms):\n    \"\"\"\n    Analytically calculate\
+      \ the mean-square displacement (MSD) of an optically trapped microsphere in\
+      \ a gas.\n    Input:\n    t0 : float\n        The time point at which to calculate\
+      \ the MSD.\n    taup : float\n        Momentum relaxation time of the microsphere.\n\
+      \    omega0 : float\n        Resonant frequency of the optical trap.\n    vrms\
+      \ : float\n        Root mean square velocity of the thermal fluctuations.\n\
+      \    Output:\n    t_MSD : float\n        The computed MSD at time point `t0`.\n\
+      \    \"\"\"\n    omega1 = np.sqrt(omega0 ** 2 - 1 / (4 * taup ** 2))\n    t_MSD\
+      \ = 2 * vrms ** 2 / (omega0 ** 2) * (1 - np.exp(-t0 / (2 * taup)) * (np.cos(omega1\
+      \ * t0) + np.sin(omega1 * t0) / (2 * omega1 * (taup))))\n    return t_MSD\n\
+      t0 = 1e-5\nsteps = 5000 #step-size in Mannella's leapfrog method\ntaup = 147.3e-6\n\
+      omega0 = 2 * np.pi * 3168\nvrms = 0.425e-3\nNavg = 4000 #simulation number\n\
+      x_MSD = calculate_msd(t0, steps, taup, omega0, vrms, Navg)\nt_MSD = analytical_msd(t0,\
+      \ taup, omega0, vrms)\neta = x_MSD / t_MSD\nassert (eta>0.95 and eta<1.05) ==\
+      \ target"
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

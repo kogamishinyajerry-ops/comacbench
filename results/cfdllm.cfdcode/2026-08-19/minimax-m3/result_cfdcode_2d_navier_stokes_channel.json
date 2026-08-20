@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_2d_navier_stokes_channel",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "non_physical_values"
+  ],
+  "failure_mode": "non_physical_values",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Physical parameters\\nLx = 2.0\\nLy = 2.0\\nrho = 1.0\\nnu = 0.1\\nF = 1.0\\nT = 5.0\\n\\n# Grid\\nNx = 64\\nNy = 64\\ndx = Lx / Nx\\ndy = Ly / (Ny - 1)\\n\\n# Allocate fields\\nu = np.zeros((Ny, Nx), dtype=np.float64)\\nv = np.zeros((Ny, Nx), dtype=np.float64)\\np = np.zeros((Ny, Nx), dtype=np.float64)\\n\\n# Time step\\ndt = 0.001\\nNsteps = int(T / dt)\\n\\n# Wavenumbers for periodic x-direction\\nkx = 2 * np.pi * np.fft.rfftfreq(Nx, d=dx)   # length Nx//2+1\\nn_modes = len(kx)\\n\\n# Tridiagonal matrices for pressure Poisson (Neumann in y)\\ndy2 = dy * dy\\n# Sub-diagonal a (length Ny-1)\\na = np.full(Ny-1, 1.0 / dy2)\\na[-1] = 2.0 / dy2          # top boundary\\n# Super-diagonal c (length Ny-1)\\nc = np.full(Ny-1, 1.0 / dy2)\\nc[0] = 2.0 / dy2           # bottom boundary\\n\\n# Diagonal coefficients for each Fourier mode (include -kx^2)\\nb_modes = [np.full(Ny, -2.0 / dy2 - kx[k]**2) for k in range(n_modes)]\\n\\n# Thomas algorithm for tridiagonal systems (complex RHS)\\ndef solve_tridiag(a, b, c, d):\\n    n = len(b)\\n    c_ = c.astype(np.complex128)\\n    d_ = d.astype(np.complex128)\\n    b_ = b.astype(np.complex128)\\n    # Forward elimination\\n    for i in range(1, n):\\n        m = a[i-1] / b_[i-1]\\n        b_[i] = b_[i] - m * c_[i-1]\\n        d_[i] = d_[i] - m * d_[i-1]\\n    # Back substitution\\n    x = np.empty(n, dtype=np.complex128)\\n    x[-1] = d_[-1] / b_[-1]\\n    for i in range(n-2, -1, -1):\\n        x[i] = (d_[i] - c_[i] * x[i+1]) / b_[i]\\n    return x\\n\\n# First and second derivative operators (periodic x, Dirichlet y)\\ndef deriv(u):\\n    ux = (np.roll(u, -1, axis=1) - np.roll(u, 1, axis=1)) / (2 * dx)\\n    uy = (np.roll(u, -1, axis=0) - np.roll(u, 1, axis=0)) / (2 * dy)\\n    uxx = (np.roll(u, -1, axis=1) - 2 * u + np.roll(u, 1, axis=1)) / (dx ** 2)\\n    uyy = (np.roll(u, -1, axis=0) - 2 * u + np.roll(u, 1, axis=0)) / (dy ** 2)\\n    return ux, uy, uxx, uyy\\n\\n# Time integration loop\\nfor step in range(Nsteps):\\n    # Derivatives of current fields\\n    ux, uy, uxx, uyy = deriv(u)\\n    vx, vy, vxx, vyy = deriv(v)\\n    px, py, _, _ = deriv(p)\\n\\n    # Intermediate velocities (explicit Euler)\\n    rhs_u = -u * ux - v * uy - (1.0 / rho) * px + nu * (uxx + uyy) + F\\n    rhs_v = -u * vx - v * vy - (1.0 / rho) * py + nu * (vxx + vyy)\\n\\n    u_star = u.copy()\\n    v_star = v.copy()\\n    u_star[1:-1, :] = u[1:-1, :] + dt * rhs_u[1:-1, :]\\n    v_star[1:-1, :] = v[1:-1, :] + dt * rhs_v[1:-1, :]\\n\\n    # Enforce Dirichlet BC at y walls\\n    u_star[0, :] = 0.0\\n    u_star[-1, :] = 0.0\\n    v_star[0, :] = 0.0\\n    v_star[-1, :] = 0.0\\n\\n    # Pressure Poisson RHS using intermediate velocities\\n    ux_star, uy_star, _, _ = deriv(u_star)\\n    vx_star, vy_star, _, _ = deriv(v_star)\\n    rhs_p = -rho * (ux_star**2 + 2 * uy_star * vx_star + vy_star**2)\\n\\n    # Solve Poisson in Fourier space (periodic x)\\n    rhs_hat = np.fft.rfft(rhs_p, axis=1)\\n    p_hat = np.empty_like(rhs_hat, dtype=np.complex128)\\n    for k in range(n_modes):\\n        p_hat[:, k] = solve_tridiag(a, b_modes[k], c, rhs_hat[:, k])\\n    p = np.fft.irfft(p_hat, n=Nx, axis=1)\\n\\n    # Enforce Neumann BC (dp/dy = 0) at y walls\\n    p[0, :] = p[1, :]\\n    p[-1, :] = p[-2, :]\\n\\n    # Pressure gradient\\n    px = (np.roll(p, -1, axis=1) - np.roll(p, 1, axis=1)) / (2 * dx)\\n    py = (np.roll(p, -1, axis=0) - np.roll(p, 1, axis=0)) / (2 * dy)\\n    py[0, :] = 0.0\\n    py[-1, :] = 0.0\\n\\n    # Velocity correction\\n    u = u_star - dt * (1.0 / rho) * px\\n    v = v_star - dt * (1.0 / rho) * py\\n\\n    # Reapply Dirichlet BC\\n    u[0, :] = 0.0\\n    u[-1, :] = 0.0\\n    v[0, :] = 0.0\\n    v[-1, :] = 0.0\\n\\n# Save final solutions\\nnp.save('u.npy', u)\\nnp.save('v.npy', v)\\nnp.save('p.npy', p)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [\"u\", \"v\", \"p\"], \"fields\": {}, \"determinism\": null, \"run1_exit\": 0, \"run1_s\": 9.64}"
+  },
+  "timings": {
+    "agent_s": 344.714,
+    "setup_s": 0.0,
+    "grade_s": 9.638
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 9.64s",
+    "missing=[] nonfinite=['u', 'v', 'p']"
+  ]
+}

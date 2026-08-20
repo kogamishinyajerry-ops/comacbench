@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCreate an OpenFOAM 10 (Foundation) case for a 2D supersonic flow\\nover a wedge using rhoCentralFoam.\\n\\nGeometry\\n--------\\n  x: -0.15242  -> 0.3048   m\\n  y:  0.00000  -> 0.15240  m\\n  z: -0.005    -> 0.005    m   (thin slab -> quasi-2D)\\n\\nSolver: rhoCentralFoam\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Case layout helpers\\n# ---------------------------------------------------------------------------\\nCASE_DIR = os.getcwd()\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Write `content` to `path`, creating parent dirs if needed.\\\"\\\"\\\"\\n    full = os.path.join(CASE_DIR, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with open(full, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\n# ---------------------------------------------------------------------------\\n# Numerical / physical parameters\\n# ---------------------------------------------------------------------------\\nX0, X1 = -0.15242, 0.3048\\nY0, Y1 = 0.0,      0.1524\\nZ0, Z1 = -0.005,   0.005\\n\\nNX, NY, NZ = 80, 40, 1\\n\\nSTART_TIME = 0.0\\nEND_TIME   = 0.2\\nDELTA_T    = 5.0e-5\\nWRITE_INT  = 0.02      # write every 0.02 s -> 10 output directories\\n\\nU_IN  = 20.0\\nT_IN  = 3.0\\nP_IN  = 1.0\\nR     = 0.7143\\nGAMMA = 1.4\\nCP    = GAMMA * R / (GAMMA - 1.0)   # = 2.5\\nMW    = 11640.3                     # normalized molWeight\\nMU    = 0.0                         # inviscid\\nPR    = 1.0\\n\\n\\n# ---------------------------------------------------------------------------\\n# 1. system/blockMeshDict\\n# ---------------------------------------------------------------------------\\nblock_mesh_dict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10\""
+  },
+  "timings": {
+    "agent_s": 226.479,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:4e7c4e53ed2f00e635b19e111a87c01850b90b2a28b5d78cd597eb982f2029d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

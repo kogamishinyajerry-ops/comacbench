@@ -1,0 +1,10 @@
+Context [1]:
+According to still another aspect, an aircraft wing is provided with a wing body, a flap movably mounted on the wing body via a flap mounting assembly, and a flap operating device configured to move the flap relative to the wing body between a retracted position and at least one extended position. The flap operating device includes a drive arm, an actuator, and a drive link. The drive arm is mounted to the wing body so as to be rotatable about a drive axis relative to the wing body. The actuator includes a linearly displaceable actuator rod operatively connected to the drive arm such that movement of the actuator rod in a first linear direction causes the drive arm to rotate about the drive axis in a first rotational direction, and movement of the actuator rod in a second linear direction causes the drive arm to rotate about the drive axis in a second rotational direction, the second linear direction and second rotational direction being opposite to the first linear direction and first rotational direction. The drive link has a control end connected to the control surface mounting assembly, and a driven end connected to the drive arm via a drive bearing joint. The drive link connects the drive arm and the control surface mounting assembly such that rotation of the drive arm in the first direction about the drive axis causes the drive link to exert a retracting force on the control surface mounting assembly, and rotation of the drive arm in the second direction about the drive axis causes the drive link to exert an extending force on the control surface mounting assembly.
+
+Question: What component translates rotation in the drive arm into retraction and extension of the control surface mounting assembly?
+
+Answer using ONLY the information in the contexts above.
+Respond EXACTLY in this three-line format:
+ANSWER: <your answer in one short sentence; write REFUSED if the contexts do not contain the answer>
+BASIS: <report | computed | inferred>  (report = stated in the contexts; computed = derived by calculation; inferred = your own inference)
+CITATION: <the context number(s) you used or checked, e.g. [1] or [1,2]>

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# OpenFOAM version 10 dict syntax\\n# 3D squarebend flow simulation\\n\\n# Domain vertices\\ninlet_left_top = (-50.0, 25.0, 25.0)\\ninlet_left_bottom = (-50.0, 25.0, -25.0)\\nmidbend_left_top = (25.0, 0.0, 25.0)\\nmidbend_left_bottom = (25.0, 0.0, -25.0)\\nmidbend_right_top = (50.0, 0.0, 25.0)\\nmidbend_right_bottom = (50.0, 0.0, -25.0)\\noutlet_right_top = (-500.0, -75.0, 25.0)\\noutlet_right_bottom = (-500.0, -75.0, -25.0)\\n\\n# blockMesh parameters\\nnx1 = 30\\nnx2 = 30\\nnx3 = 60\\nny = 20\\nnz = 20\\n\\n# Create main directories\\ndirs = [\\n    \\\"0\\\",\\n    \\\"constant\\\",\\n    \\\"system\\\",\\n]\\n\\nfor d in dirs:\\n    os.makedirs(d, exist_ok=True)\\n\\n# Create polyMesh directory for blockMesh\\nos.makedirs(\\\"constant/polyMesh\\\", exist_ok=True)\\n\\n# blockMeshDict\\nblockMeshDict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    ({v_ilt_x} {v_ilt_y} {v_ilt_z})   // 0 inlet left top\\n    ({v_ilb_x} {v_ilb_y} {v_ilb\""
+  },
+  "timings": {
+    "agent_s": 188.533,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

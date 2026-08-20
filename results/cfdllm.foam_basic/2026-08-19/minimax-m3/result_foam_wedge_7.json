@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_7",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# -----------------------------------------------------------------------------\\n# OpenFOAM 2D supersonic flow over a wedge case generator\\n# -----------------------------------------------------------------------------\\n\\n# Domain extents\\nX_MIN = -0.15242\\nX_MAX = 0.3048\\nY_MIN = 0.0\\nY_MAX = 0.1524\\nZ_MIN = -0.005\\nZ_MAX = 0.005\\n\\n# Cells per direction\\nNX = 80\\nNY = 40\\nNZ = 1\\n\\n# Wedge geometry\\nWEDGE_THETA_DEG = 15.0\\nWEDGE_LENGTH = 0.1\\nWEDGE_X_START = 0.0\\nWEDGE_X_END = WEDGE_X_START + WEDGE_LENGTH\\nWEDGE_HEIGHT = WEDGE_LENGTH * math.tan(math.radians(WEDGE_THETA_DEG))\\n\\n# Time controls\\nSTART_TIME = 0.0\\nEND_TIME = 0.2\\nDELTA_T = 0.00005\\nWRITE_INTERVAL = 0.02\\n\\n# Inlet conditions\\nINLET_VELOCITY = 15.0\\nINLET_TEMPERATURE = 2.0\\nINLET_PRESSURE = 1.0\\n\\n# Thermodynamic properties (normalized)\\nMOL_WEIGHT = 11640.3\\nCP = 2.5\\nPR = 1.0\\nMU = 0.0\\nGAS_CONSTANT = 0.7143\\nGAMMA = 1.4\\n\\nSOLVER = \\\"rhoCentralFoam\\\"\\n\\ncase_dir = os.path.abspath(\\\".\\\")\\n\\nsubdirs = [\\\"0\\\", \\\"constant\\\", \\\"system\\\"]\\nfor d in subdirs:\\n    os.makedirs(os.path.join(case_dir, d), exist_ok=True)\\n\\n\\ndef write(path, content):\\n    with open(os.path.join(case_dir, path), \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\n# -----------------------------------------------------------------------------\\n# system/blockMeshDict\\n# -----------------------------------------------------------------------------\\nblock_mesh_dict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFo\""
+  },
+  "timings": {
+    "agent_s": 255.773,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

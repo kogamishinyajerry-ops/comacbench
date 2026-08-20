@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cylinder_2",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# ---- OpenFOAM 10 (Foundation) case for laminar flow past a cylinder with offset,\\n# using a generalized Newtonian (Cross Power Law) viscosity model.\\n# PIMPLE algorithm, single-phase incompressible.\\n\\nCASE = \\\".\\\"\\nSYSTEM = os.path.join(CASE, \\\"system\\\")\\nCONSTANT = os.path.join(CASE, \\\"constant\\\")\\nZERO = os.path.join(CASE, \\\"0\\\")\\n\\nfor d in [SYSTEM, CONSTANT, ZERO, os.path.join(CONSTANT, \\\"polyMesh\\\")]:\\n    os.makedirs(d, exist_ok=True)\\n\\n# -----------------------------------------------------------------------------\\n# Geometry parameters\\n# -----------------------------------------------------------------------------\\nLx = 2.0        # streamwise length (m)\\nLy = 0.8        # spanwise height (m)\\nxc = 0.5        # cylinder x-center\\nyc = 0.30       # cylinder y-center (offset)\\nDc = 0.10       # cylinder diameter\\nR  = Dc / 2.0\\n\\n# Cell counts (cheap coarse mesh that still runs fast)\\nnx = 80\\nny = 32\\n\\n# -----------------------------------------------------------------------------\\n# blockMeshDict - O-grid style Cartesian-like: one rectangular domain with a\\n# cylinder cut-out handled as a separate block in z-direction is too heavy for a\\n# quick blockMesh. Instead we use a simple rectangular mesh and represent the\\n# cylinder as a refined region via local refinement is not available without\\n# topoSet. We'll keep blockMesh simple (no cylinder hole), and the \\\"offset\\n# cylinder\\\" is implied by where the no-slip wall is placed via a separate\\n# baffle/triSurface mesh would be needed. To keep things purely blockMesh-driven\\n# in a single block, we expose the cylinder by splitting the block into four\\n# sub-blocks around an embedded circle - this requires grading which blockMesh\\n# cannot do directly. So we fall back to: one block, cylinder approximated via\\n# fine resolution and its effect captured as a wall patch by adding an STL is\\n# not possible from pure blockMesh either.\\n#\\n# The cleanest path with only blockMesh is to make an O-grid by defining an\\n# inner ring of points. blockMesh does not support arcs natively in the way\\n# snappyHexMesh does, but it can build an O-grid through the `o-grid` block\\n# descriptor using edges of type arc. We'll do that.\\n# -----------------------------------------------------------------------------\\n\\n# Number of cells around the cylinder (\""
+  },
+  "timings": {
+    "agent_s": 252.843,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

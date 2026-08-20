@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_bernardcells_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Create directory structure\\nos.makedirs('system', exist_ok=True)\\nos.makedirs('constant', exist_ok=True)\\nos.makedirs('0', exist_ok=True)\\n\\n# system/blockMeshDict\\nblock_mesh_dict = \\\"\\\"\\\"FoamFile\\n{\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (9 0 0)\\n    (9 1 0)\\n    (0 1 0)\\n    (0 0 2)\\n    (9 0 2)\\n    (9 1 2)\\n    (0 1 2)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (15 10 10) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\npatches\\n(\\n    patch bottom\\n    {\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    patch top\\n    {\\n        faces\\n        (\\n            (3 2 6 7)\\n        );\\n    }\\n    patch front\\n    {\\n        faces\\n        (\\n            (0 1 2 3)\\n        );\\n    }\\n    patch back\\n    {\\n        faces\\n        (\\n            (4 5 6 7)\\n        );\\n    }\\n    cyclic left\\n    {\\n        faces\\n        (\\n            (0 3 7 4)\\n        );\\n        neighbourPatch right;\\n    }\\n    cyclic right\\n    {\\n        faces\\n        (\\n            (1 2 6 5)\\n        );\\n        neighbourPatch left;\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\nwith open('system/blockMeshDict', 'w') as f:\\n    f.write(block_mesh_dict)\\n\\n# system/controlDict\\ncontrol_dict = \\\"\\\"\\\"FoamFile\\n{\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n\\napplication     buoyantFoam;\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         1000;\\ndeltaT          1;\\nwriteControl    timeStep;\\nwriteInterval   50;\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\ntimeFormat      general;\\ntimePrecision   6;\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n\\nwith open('system/controlDict', 'w') as f:\\n    f.write(control_dict)\\n\\n# system/fvSchemes\\nfv_schemes = \\\"\\\"\\\"FoamFile\\n{\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default Euler;\\n}\\n\\ngradSchemes\\n{\\n    default Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default none;\\n    div(phi,U) Gauss linearUpwind grad(U);\\n    div(phi,T) Gauss linearUpwind;\\n    div(phi,he) Gauss linearUpwind;\\n}\\n\\nlaplacianSchemes\\n{\\n    default Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default corrected;\\n}\\n\\\"\\\"\\\"\\n\\nwith open('system/fvSchemes', 'w') as f:\\n    f.write(fv_schemes)\\n\\n# system/fvSolution\\nfv_solution = \\\"\\\"\\\"FoamFile\\n{\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    p_rgh\\n    {\\n        solver          GAMG;\\n        tolerance       1e-7;\\n        relTol          0.01;\\n    }\\n    U\\n    {\\n        solver          smoothSolver;\\n        smoother        symGaussSeidel;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n    T\\n    {\\n        solver          smoothSolver;\\n        smoother        symGaussSeidel;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n}\\n\\nSIMPLE\\n{\\n    nNonOrthogonalCorrectors 0;\\n    residualControl\\n    {\\n        p_rgh 1e-3;\\n        U 1e-3;\\n        T 1e-3;\\n    }\\n}\\n\\nrelaxationFactors\\n{\\n    fields\\n    {\\n        p_rgh 0.7;\\n    }\\n    equations\\n    {\\n        U 0.3;\\n        T 0.5;\\n    }\\n}\\n\\\"\\\"\\\"\\n\\nwith open('system/fvSolution', 'w') as f:\\n    f.write(fv_solution)\\n\\n# constant/thermophysicalProperties\\nthermophysical_properties = \\\"\\\"\\\"FoamFile\\n{\\n    format      ascii;\\n    class       dictionary;\\n    object      thermophysicalProperties;\\n}\\n\\nthermoType\\n{\\n    type            heRhoThermo;\\n    mixture         pureMixture;\\n    transport       const;\\n    thermo          eConst;\\n    equationOfState rhoConst;\\n    specie          specie;\\n    energy          sensibleEnthalpy;\\n}\\n\\nmixture\\n{\\n    specie\\n    {\\n        molWeight   28.9;\\n    }\\n    equationOfState\\n    {\\n        rho         1.0;\\n    }\\n    thermodynamics\\n    {\\n        Cp          1000;\\n        Hf          0;\\n    }\\n    transport\\n    {\\n        mu          1.8e-05;\\n        Pr          0.7;\\n    }\\n}\\n\\\"\\\"\\\"\\n\\nwith open('constant/thermophysicalProperties', 'w') as f:\\n    f.write(thermophysical_properties)\\n\\n# constant/momentumTrans\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 150.743,
+    "setup_s": 0.0,
+    "grade_s": 2.414
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.4s last_time=0"
+  ]
+}

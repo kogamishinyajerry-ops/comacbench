@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\nCASE_DIR = os.getcwd()\\n\\ndef write_file(path, content):\\n    full_path = os.path.join(CASE_DIR, path)\\n    os.makedirs(os.path.dirname(full_path), exist_ok=True)\\n    with open(full_path, 'w') as f:\\n        f.write(content)\\n\\n# Domain dimensions\\nxmin, xmax = -0.15242, 0.3048\\nymin, ymax = 0.0, 0.1524\\nzmin, zmax = -0.005, 0.005\\n\\n# Wedge geometry: wedge with half-angle, top surface from x=0 inclined at 5 degrees\\n# Wedge top surface: y = tan(5 deg) * x for x >= 0\\n# Wedge bottom: y = 0\\n# Inlet is left boundary (xmin), outlet is right boundary (xmax)\\n\\n# blockMesh geometry definition\\nnx_inlet = 80\\nnx_wedge = 40\\nnx_outlet = 80\\nny = 40\\nnz = 4\\n\\nnxtotal = nx_inlet + nx_wedge + nx_outlet\\n\\n# Simple grading: expand from wedge\\nxgr = \\\" \\\".join([f\\\"({nx_inlet} {nx_wedge} {nx_outlet} simpleGrading (1 1 1))\\\"])\\n\\nblockmesh_content = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    // 0: bottom-left-bottom\\n    ({xmin} {ymin} {zmin})\\n    // 1: top-left-bottom (inlet top = ymax)\\n    ({xmin} {ymax} {zmin})\\n    // 2: bottom-left-top\\n    ({xmin} {ymin} {zmax})\\n    // 3:\""
+  },
+  "timings": {
+    "agent_s": 200.979,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

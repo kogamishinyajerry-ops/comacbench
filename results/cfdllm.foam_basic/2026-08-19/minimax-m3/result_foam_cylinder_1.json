@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cylinder_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\n# Create directory structure\\ndirs = [\\n    \\\"system\\\",\\n    \\\"constant\\\",\\n    \\\"0\\\",\\n]\\nfor d in dirs:\\n    os.makedirs(d, exist_ok=True)\\n\\n# system/blockMeshDict\\nblock_mesh_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    (-3 -3 0)\\n    (12 -3 0)\\n    (12  3 0)\\n    (-3  3 0)\\n    (-3 -3 0.5)\\n    (12 -3 0.5)\\n    (12  3 0.5)\\n    (-3  3 0.5)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (60 30 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 5 4 0)\\n        );\\n    }\\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (2 6 5 1)\\n        );\\n    }\\n    top\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    bottom\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 1 2 3)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergeType none;\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/blockMeshDict\\\", \\\"w\\\") as f:\\n    f.write(block_mesh_dict)\\n\\n# system/controlDict\\ncontrol_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\""
+  },
+  "timings": {
+    "agent_s": 201.397,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

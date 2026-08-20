@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p074",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def householder(A):\\n    '''Inputs:\\n    A : Matrix of size m*n, m>=n\\n    Outputs:\\n    A : Matrix of size m*n\\n    '''\\n    m, n = A.shape\\n    for k in range(n):\\n        x = A[k:, k]\\n        norm_x = np.linalg.norm(x)\\n        if norm_x == 0:\\n            continue\\n        s = 1.0 if x[0] >= 0 else -1.0\\n        v = -x.copy()\\n        v[0] -= s * norm_x\\n        norm_v_sq = np.dot(v, v)\\n        factor = 2.0 / norm_v_sq\\n        dots = np.dot(v, A[k:, k:])\\n        A[k:, k:] -= factor * np.outer(v, dots)\\n    return A\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 3, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"74.1\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 295.873,
+    "setup_s": 0.0,
+    "grade_s": 0.895
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.54s"
+  ]
+}

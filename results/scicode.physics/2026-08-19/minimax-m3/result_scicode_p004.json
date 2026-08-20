@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p004",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def ichol(A):\\n    '''Inputs:\\n    A : Matrix, 2d array M * M\\n    Outputs:\\n    A : Matrix, 2d array M * M\\n    '''\\n    n = A.shape[0]\\n    # Create a copy to work with, preserving sparsity pattern\\n    K = np.zeros_like(A)\\n    \\n    for i in range(n):\\n        # Compute diagonal element L[i,i]\\n        sum_val = 0.0\\n        for k in range(i):\\n            sum_val += K[i, k] ** 2\\n        K[i, i] = np.sqrt(A[i, i] - sum_val)\\n        \\n        # Compute off-diagonal elements L[j,i] for j > i\\n        for j in range(i + 1, n):\\n            # Only compute if A[j,i] is non-zero (preserve sparsity pattern)\\n            if A[j, i] != 0:\\n                sum_val = 0.0\\n                for k in range(i):\\n                    sum_val += K[i, k] * K[j, k]\\n                K[j, i] = (A[j, i] - sum_val) / K[i, i]\\n            else:\\n                K[j, i] = 0.0\\n    \\n    # Set upper triangular part to zero to maintain lower triangular structure\\n    for i in range(n):\\n        for j in range(i + 1, n):\\n            K[i, j] = 0.0\\n    \\n    return K\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 3, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"4.1\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 18.937,
+    "setup_s": 0.0,
+    "grade_s": 0.826
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.41s"
+  ]
+}

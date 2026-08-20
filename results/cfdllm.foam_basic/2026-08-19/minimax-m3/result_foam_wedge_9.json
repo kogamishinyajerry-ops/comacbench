@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCreate an OpenFOAM 10 case for a 2D supersonic flow over a wedge\\nusing the rhoCentralFoam solver.\\n\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\n# ---------------------------------------------------------------------------\\n# Case configuration\\n# ---------------------------------------------------------------------------\\n\\nCASE_DIR = os.getcwd()\\n\\n# Geometry extents [m]\\nX_MIN, X_MAX = -0.15242, 0.3048\\nY_MIN, Y_MAX = 0.0,     0.1524\\nZ_MIN, Z_MAX = -0.005,  0.005\\n\\n# Time controls\\nSTART_TIME = 0.0\\nEND_TIME   = 0.2\\nDELTA_T    = 5.0e-5\\nWRITE_INT  = 0.02\\n\\n# Inlet / freestream thermodynamic state\\nINLET_U    = 20.0   # m/s\\nINLET_T    = 3.0    # K\\nINLET_P    = 1.0    # Pa\\n\\n# Normalized gas properties (rhoCentralFoam uses normalized/caloric forms)\\nMOL_WEIGHT = 11640.3\\nCP         = 2.5\\nPRANDTL    = 1.0\\nMU         = 0.0\\n# Recovered constants: R = 1/molWeight, gamma = Cp/(Cp - R)\\nR_GAS      = 1.0 / MOL_WEIGHT\\nGAMMA      = CP / (CP - R_GAS)\\n\\n# Mesh divisions (must give a sensible resolution for the wedge shock)\\nNX_UPSTREAM = 12\\nNX_WEDGE    = 18\\nNX_DOWNST   = 30\\nNY          = 40\\nNZ          = 1\\n\\n# Wedge geometry parameters\\nWEDGE_X_START = 0.0       # leading edge of wedge\\nWEDGE_X_END   = 0.1524    # end of wedge top surface\\nWEDGE_HEIGHT  = 0.0762    # half-height of wedge (= 15 degrees slope tan*run)\\nTAN_THETA     = WEDGE_HEIGHT / (WEDGE_X_END - WEDGE_X_START)\\n\\n# ---------------------------------------------------------------------------\\n# Helper: file writer\\n# ---------------------------------------------------------------------------\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Write a text file, creating parent directories as required.\\\"\\\"\\\"\\n    full = os.path.join(CASE_DIR, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with\""
+  },
+  "timings": {
+    "agent_s": 203.727,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

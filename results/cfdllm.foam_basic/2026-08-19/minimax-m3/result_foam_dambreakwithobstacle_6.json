@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_dambreakwithobstacle_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a complete OpenFOAM 10 (Foundation) case for a laminar dam-break\\nwith obstacle simulation using interFoam.\\n\\nDomain: 1 x 1 x 1 m, 32 cells in each direction.\\nFluids: air (rho=1, mu=0.001) and water (rho=1000, mu=0.0001).\\nSimulation: t=0 to t=0.1 s, dt=0.001 s, writeInterval=0.02 s.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Case-wide parameters\\n# ---------------------------------------------------------------------------\\nNX = NY = NZ = 32\\nLX = LY = LZ = 1.0\\n\\nDX = LX / NX\\nDY = LY / NY\\nDZ = LZ / NZ\\n\\n# Obstacle (small box placed on the floor near the centre)\\nOBST_X0 = 0.45\\nOBST_Y0 = 0.0\\nOBST_Z0 = 0.45\\nOBST_X1 = 0.55\\nOBST_Y1 = 0.10\\nOBST_Z1 = 0.55\\n\\n# Water column (left half of the domain)\\nWATER_X0 = 0.0\\nWATER_X1 = 0.5\\nWATER_Y0 = 0.0\\nWATER_Y1 = 0.5\\nWATER_Z0 = 0.0\\nWATER_Z1 = 1.0\\n\\nEND_TIME = 0.1\\nDT = 0.001\\nWRITE_INTERVAL = 0.02\\n\\nSOLVER = \\\"interFoam\\\"\\n\\n\\n# ---------------------------------------------------------------------------\\n# Helper functions\\n# ---------------------------------------------------------------------------\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Create the directory tree and write a text file.\\\"\\\"\\\"\\n    directory = os.path.dirname(path)\\n    if directory:\\n        os.makedirs(directory, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\ndef hex_block_mesh():\\n    \\\"\\\"\\\"Return the vertices and blocks for the background mesh.\\\"\\\"\\\"\\n    n = 1\\n    verts = []\\n    for k in range(2):\\n        for j in range(2):\\n            for i in range(2):\\n                verts.append((i * LX, j * LY, k * LZ))\\n    return verts\\n\\n\\n# ---------------------------------------------------------------------------\\n# 0/ - initial and boundary fields\\n# ---------------------------------------------------------------------------\\nALPHA_WATER = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------\""
+  },
+  "timings": {
+    "agent_s": 256.832,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

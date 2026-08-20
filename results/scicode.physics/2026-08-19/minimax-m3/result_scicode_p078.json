@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p078",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"def pendulum_derivs(state, t, g, L, beta, A, alpha):\\n    '''Calculate the derivatives for the pendulum motion.\\n    Inputs:\\n    state: Current state vector [theta, omega], 1D numpy array of length 2.\\n    t: Current time, float.\\n    g: Acceleration due to gravity, float.\\n    L: Length of the pendulum, float.\\n    beta: Damping coefficient, float.\\n    A: Amplitude of driving force, float.\\n    alpha: Frequency of driving force, float.\\n    Outputs:\\n    state_matrix: Derivatives [dtheta_dt, domega_dt], 1D numpy array of length 2.\\n    '''\\n    theta = state[0]\\n    omega = state[1]\\n    \\n    dtheta_dt = omega\\n    domega_dt = -(g / L) * np.sin(theta) - (beta / L) * omega + (A / (L**2)) * np.cos(alpha * t)\\n    \\n    state_matrix = np.array([dtheta_dt, domega_dt])\\n    return state_matrix\\n\\n\\ndef runge_kutta_4th_order(f, state, t0, dt, n, g, L, beta, A, alpha):\\n    '''Run the RK4 integrator to solve the pendulum motion.\\n    Inputs:\\n    f: Derivatives function, which in general can be any ODE. In this context, it is defined as the pendulum_derivs function.\\n    state: Initial state vector [theta(t0), omega(t0)], 1D numpy array of length 2.\\n    t0: Initial time, float.\\n    dt: Time step, float.\\n    n: Number of steps, int.\\n    g: Acceleration due to gravity, float.\\n    L: Length of the pendulum, float.\\n    beta: Damping coefficient, float.\\n    A: Amplitude of driving force, float.\\n    alpha: Frequency of driving force, float.\\n    Outputs:\\n    trajectory: Array of state vectors, 2D numpy array of shape (n+1, 2).\\n    '''\\n    trajectory = np.zeros((n+1, 2))\\n    trajectory[0] = state\\n    \\n    t = t0\\n    current_state = state.copy()\\n    \\n    for i in range(1, n+1):\\n        k1 = f(current_state, t, g, L, beta, A, alpha)\\n        k2 = f(current_state + k1 * dt / 2.0, t + dt / 2.0, g, L, beta, A, alpha)\\n        k3 = f(current_state + k2 * dt / 2.0, t + dt / 2.0, g, L, beta, A, alpha)\\n        k4 = f(current_state + k3 * dt, t + dt, g, L, beta, A, alpha)\\n        \\n        current_state = current_state + (dt / 6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4)\\n        trajectory[i] = current_state\\n        t = t + dt\\n    \\n    return trajectory\\n\\n\\ndef pendulum_analysis(g, L, beta, A, alpha, initial_state, t0, tf, min_dt, max_dt, num_timesteps):\\n    '''Analyze a damped, driven pendulum system under various conditions.\\n    Inputs:\\n    g: Acceleration due to gravity, float.\\n    L: Length of the pendulum, float.\\n    beta: Damping coefficient, float.\\n    A: Amplitude of driving force, float.\\n    alpha: Frequency of driving force, float.\\n    initial_state: Initial state vector [theta, omega], list of floats.\\n    t0: Initial time, float.\\n    tf: Final time, float.\\n    min_dt: Smallest timestep, float.\\n    max_dt: Largest timestep, float.\\n    num_timesteps: Number of timesteps to generate, int.\\n    Outputs:\\n    optimized_trajectory: numpy array of floats, The trajectory of the pendulum system using the optimized timestep.\\n    '''\\n    initial_state = np.array(initial_state)\\n    total_time = tf - t0\\n    \\n    # Generate timesteps logarithmically spaced between min_dt and max_dt\\n    timesteps = np.logspace(np.log10(min_dt), np.log10(max_dt), num_timesteps)\\n    \\n    best_metric = np.inf\\n    optimized_trajectory = None\\n    \\n    for dt in timesteps:\\n        # Calculate number of steps for this dt to cover [t0, tf]\\n        n_h = int(np.round(total_time / dt))\\n        if n_h == 0:\\n            n_h = 1\\n        actual_dt_h = total_time / n_h\\n        \\n        # Compute trajectory with timestep dt and measure computation time\\n        start_time = time.time()\\n        traj_h = runge_kutta_4th_order(pendulum_derivs, initial_state, t0, actual_dt_h, n_h, g, L, beta, A, alpha)\\n        elapsed_time = time.time() - start_time\\n        \\n        # Compute trajectory with 2*dt for GTE estimation using step-doubling\\n        n_2h = int(np.round(total_time / (2.0 * dt)))\\n        if n_2h == 0:\\n            n_2h = 1\\n        actual_dt_2h = total_time / n_2h\\n        \\n        traj_2h = runge_kutta_4th_order(pendulum_deri\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 6, \"cases_total\": 9, \"steps_all_pass\": 2, \"steps_total\": 3, \"per_step\": {\"78.1\": {\"pass\": 3, \"total\": 3}, \"78.2\": {\"pass\": 3, \"total\": 3}, \"78.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 49.403,
+    "setup_s": 0.0,
+    "grade_s": 2.347
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 1.17s"
+  ]
+}

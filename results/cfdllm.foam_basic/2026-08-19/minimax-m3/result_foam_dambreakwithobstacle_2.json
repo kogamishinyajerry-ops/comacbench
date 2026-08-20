@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_dambreakwithobstacle_2",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"Create an OpenFOAM 10 interFoam dam-break-with-obstacle case.\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Case-wide parameters\\n# ---------------------------------------------------------------------------\\nNX = NY = NZ = 32\\nDOMAIN = 1.0\\nDX = DOMAIN / NX\\n\\nDX_STR = f\\\"{DX:.6f}\\\"\\n\\nEND_TIME = 0.1\\nDELTA_T = 0.001\\nWRITE_INTERVAL = 0.02\\n\\nRHO_AIR = 1.0\\nRHO_WATER = 1000.0\\nMU_AIR = 0.0001\\nMU_WATER = 0.001\\n\\n# Column of water occupies the left half of the domain, height 0.5.\\nWATER_LEFT_X = 0.5\\nWATER_HEIGHT = 0.5\\n\\n# Obstacle (small cube) sitting on the bottom near the centre of the domain.\\nOBS_CX = 0.45\\nOBS_CY = 0.25\\nOBS_CZ = 0.15\\nOBS_HALF = 0.05  # half side length -> 0.1 x 0.1 x 0.1 obstacle\\n\\n# ---------------------------------------------------------------------------\\n# Helpers\\n# ---------------------------------------------------------------------------\\ndef w(path, text):\\n    with open(path, \\\"w\\\") as f:\\n        f.write(text)\\n\\n\\n# ---------------------------------------------------------------------------\\n# Directory layout\\n# ---------------------------------------------------------------------------\\nfor d in (\\n    \\\"system\\\",\\n    \\\"constant\\\",\\n    \\\"constant/geometry\\\",\\n    \\\"0\\\",\\n    \\\"0.orig\\\",\\n):\\n    os.makedirs(d, exist_ok=True)\\n\\n# ---------------------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------------------\\nblock_mesh_dict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\""
+  },
+  "timings": {
+    "agent_s": 225.794,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

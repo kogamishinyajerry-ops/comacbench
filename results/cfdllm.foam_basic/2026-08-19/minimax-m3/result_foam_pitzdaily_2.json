@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_pitzdaily_2",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Case parameters\\ncase_name = \\\"pitzDailyRAS\\\"\\nsolver = \\\"pimpleFoam\\\"\\n\\n# Geometry parameters (2D millimeter-scale channel)\\n# A simple 2D channel with a small backward-facing step\\nx_min, x_max = 0.0, 0.012  # 12 mm long\\ny_min, y_max = 0.0, 0.003  # 3 mm tall\\n# Step at x = 0.003, step height = 0.001 (1 mm)\\nstep_x = 0.003\\nstep_height = 0.001\\n\\n# Mesh parameters\\nnx = 60  # cells in x\\nny = 20  # cells in y\\n\\n# Simulation parameters\\nU_inlet = 15.0  # m/s\\nnu = 1e-05      # kinematic viscosity\\ndt = 0.0001     # timestep\\nendTime = 0.3   # final time\\nwriteInterval = 0.01  # output interval\\n\\n# Create base directories\\ndirs = [\\\"0\\\", \\\"constant\\\", \\\"system\\\"]\\nfor d in dirs:\\n    os.makedirs(d, exist_ok=True)\\n\\n# Create Allrun\\nallrun_content = f\\\"\\\"\\\"#!/bin/sh\\ncd \\\"${{0%/*}}\\\" || exit  # Run from this directory\\n. $WM_PROJECT_DIR/bin/tools/RunFunctions\\n\\nrunApplication blockMesh\\nrunApplication {solver}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"Allrun\\\", \\\"w\\\") as f:\\n    f.write(allrun_content)\\nos.chmod(\\\"Allrun\\\", 0o755)\\n\\n# system/blockMeshDict\\n# Simple 2D channel with a step\\n# We define vertices for a channel with a backward-facing step\\n# Lower wall: y = 0\\n# Upper wall: y = 0.003\\n# Step at x = 0.003, step goes from y=0 to y=0.001\\n# Inlet at x = 0, outlet at x = 0.012\\n\\n# Vertices for the geometry\\n# Bottom left corner (inlet bottom)\\nv00 = (x_min, y_min, 0.0)\\n# Bottom at step (before step)\\nv10 = (step_x, y_min, 0.0)\\n# Bottom after step\\nv20 = (x_max, y_min, 0.0)\\n# Inlet top\\nv01 =\""
+  },
+  "timings": {
+    "agent_s": 170.393,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:4e7c4e53ed2f00e635b19e111a87c01850b90b2a28b5d78cd597eb982f2029d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_2",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\n# Domain dimensions\\nx_min, x_max = -0.15242, 0.3048\\ny_min, y_max = 0.0, 0.1524\\nz_min, z_max = -0.005, 0.005\\n\\n# Wedge angle (degrees)\\nwedge_angle = 15.0\\n\\n# Simulation parameters\\nendTime = 0.2\\ndeltaT = 0.0001\\nwriteInterval = 0.02\\n\\n# Inlet conditions\\nU_inlet = 10.0\\nT_inlet = 1.0\\np_inlet = 1.0\\n\\n# Thermodynamic properties\\nmolWeight = 11640.3\\nCp = 2.5\\nPr = 1.0\\nmu = 0.0\\nR = 0.7143\\ngamma = 1.4\\n\\n# Cell counts\\nnx = 80\\nny = 40\\nnz = 1\\n\\n\\ndef write_file(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n\\n# system/blockMeshDict\\nblock_mesh_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    ({x_min} {y_min} {z_min})\\n    ({x_max} {y_min} {z_min})\\n    ({x_max} {y_max} {z_min})\\n    ({x_min} {y_max} {z_min})\\n    ({x_min} {y_min} {z_max})\\n    ({x_max} {y_min} {z_max})\\n    ({x_max} {\""
+  },
+  "timings": {
+    "agent_s": 141.47,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

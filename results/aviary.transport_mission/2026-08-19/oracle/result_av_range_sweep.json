@@ -1,0 +1,38 @@
+{
+  "task_id": "av_range_sweep",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold 解（aviary 分析模式）。判分参考预计算用；模型不可见。\\\"\\\"\\\"\\nimport json\\nimport os\\nimport warnings\\nfrom copy import deepcopy\\n\\nwarnings.filterwarnings(\\\"ignore\\\")\\n\\nfrom aviary.interface.run_aviary import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info\\nfrom aviary.variable_info.variables import Mission\\n\\nBASE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_3200.csv'\\n\\n\\ndef solve(csv_path: str, mach: float):\\n    pi = deepcopy(phase_info)\\n    pi[\\\"cruise\\\"][\\\"user_options\\\"][\\\"mach_cruise\\\"] = mach\\n    prob = run_aviary(csv_path, pi, optimizer=\\\"SLSQP\\\", run_driver=False,\\n                      verbosity=0, make_plots=False)\\n    fuel = float(prob.get_val(Mission.TOTAL_FUEL_MASS, units=\\\"lbm\\\")[0])\\n    final = float(prob.get_val(Mission.FINAL_MASS, units=\\\"lbm\\\")[0])\\n    return {\\\"fuel_burn_lbm\\\": fuel, \\\"final_mass_lbm\\\": final}\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    fuels = {}\\n    for rg, csv in [(2400, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_2400.csv'), (2800, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_2800.csv'), (3200, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_3200.csv'), (3600, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_3600.csv')]:\\n        fuels[rg] = solve(csv, 0.80)[\\\"fuel_burn_lbm\\\"]\\n    xs = [2400, 2800, 3200, 3600]\\n    ys = [fuels[x] for x in xs]\\n    n = len(xs)\\n    slope = (n * sum(x * y for x, y in zip(xs, ys)) - sum(xs) * sum(ys)) / (\\n        n * sum(x * x for x in xs) - sum(xs) ** 2)\\n    r = {f\\\"fuel_{rg}_lbm\\\": fuels[rg] for rg in (2400, 2800, 3200, 3600)}\\n    r[\\\"dfuel_drange_lbm_per_nm\\\"] = slope\\n    json.dump(r, open(\\\"result.json\\\", \\\"w\\\"), indent=1)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"fuel_2400_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357572943, \"ref\": 43389.55357572943}, \"fuel_2800_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357572943, \"ref\": 43389.55357572943}, \"fuel_3200_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357572943, \"ref\": 43389.55357572943}, \"fuel_3600_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357572943, \"ref\": 43389.55357572943}, \"dfuel_drange_lbm_per_nm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.0, \"ref\": 0.0}}, \"physics_hits\": \"5/5\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 12.876,
+    "setup_s": 0.0,
+    "grade_s": 12.876
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 12.88s"
+  ]
+}

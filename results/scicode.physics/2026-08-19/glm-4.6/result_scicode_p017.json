@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p017",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef init_eji_array(energy, energy_vertices):\\n    '''Initialize and populate a 5x5 array for storing e_ji variables, and map e_ji values\\n    to sympy symbols for later evaluation.\\n    Inputs:\\n    - energy: A float representing the energy level for density of states integration.\\n    - energy_vertices: A list of floats representing energy values at tetrahedron vertices.\\n    Outputs:\\n    - symbols: A dictionary mapping sympy symbol names to symbols.\\n    - value_map: A dictionary mapping symbols to their actual values (float).\\n    '''\\n    # Energy list where index 0 is the iso-surface energy E, and 1-4 are vertex energies\\n    energies = [energy] + list(energy_vertices)\\n    num_energies = 5\\n    \\n    symbols = {}\\n    value_map = {}\\n    \\n    # Iterate through all pairs (j, i) to define e_ji = energy_j - energy_i\\n    for j in range(num_energies):\\n        for i in range(num_energies):\\n            # Create symbol name\\n            name = f\\\"e_{j}{i}\\\"\\n            sym = sp.Symbol(name)\\n            symbols[name] = sym\\n            # Calculate value\\n            val = energies[j] - energies[i]\\n            value_map[sym] = val\\n            \\n    return symbols, value_map\\n\\ndef integrate_DOS(energy, energy_vertices):\\n    '''Input:\\n    energy: a float number representing the energy value at which the density of states will be integrated\\n    energy_vertices: a list of float numbers representing the energy values at the four vertices of a tetrahedron when implementing the linear tetrahedron method\\n    Output:\\n    result: a float number representing the integration results of the density of states\\n    '''\\n    # Get the sympy symbols and the corresponding float values\\n    symbols, value_map = init_eji_array(energy, energy_vertices)\\n    \\n    # Helper to retrieve the float value for a given symbol name\\n    def get_val(name):\\n        return value_map[symbols[name]]\\n        \\n    # Ordered vertex energies are required for the analytical formulas\\n    eps = list(energy_vertices)\\n    eps.sort()\\n    e0, e1, e2, e3 = eps\\n    \\n    # Calculate energy differences based on the sorted order\\n    # Note: These are physical values, not symbolic, used to determine the case\\n    E01 = e0 - e1\\n    E02 = e\""
+  },
+  "timings": {
+    "agent_s": 412.286,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

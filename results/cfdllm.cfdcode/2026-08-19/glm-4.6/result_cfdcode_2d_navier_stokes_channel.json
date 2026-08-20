@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_navier_stokes_channel",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3362,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.6681,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_cfd():\\n    # Simulation parameters\\n    nx = 41\\n    ny = 41\\n    nt = 5000\\n    nit = 50  # Iterations for Poisson equation\\n    c = 1     # Dummy parameter (not used in calculations, kept for structure)\\n    \\n    Lx = 2.0\\n    Ly = 2.0\\n    dx = Lx / (nx - 1)\\n    dy = Ly / (ny - 1)\\n    \\n    rho = 1.0\\n    nu = 0.1\\n    F = 1.0\\n    \\n    dt = 0.001\\n    \\n    # Initialize fields\\n    u = np.zeros((ny, nx))\\n    v = np.zeros((ny, nx))\\n    p = np.zeros((ny, nx))\\n    b = np.zeros((ny, nx))\\n    \\n    X, Y = np.meshgrid(np.linspace(0, Lx, nx), np.linspace(0, Ly, ny))\\n\\n    for n in range(nt):\\n        un = u.copy()\\n        vn = v.copy()\\n        \\n        # --- Calculate Derivatives (Time Step n) ---\\n        \\n        # x-derivatives (Periodic BC)\\n        # Central difference: (f[i+1] - f[i-1]) / 2dx\\n        u_x = (np.roll(un, -1, axis=1) - np.roll(un, 1, axis=1)) / (2 * dx)\\n        v_x = (np.roll(vn, -1, axis=1) - np.roll(vn, 1, axis=1)) / (2 * dx)\\n        \\n        u_xx = (np.roll(un, -1, axis=1) - 2 * un + np.roll(un, 1, axis=1)) / dx**2\\n        v_xx = (np.roll(vn, -1, axis=1) - 2 * vn + np.roll(vn, 1, axis=1)) / dx**2\\n        \\n        # y-derivatives (No-slip BC at boundaries, calculate interior)\\n        # We initialize to 0 and fill interior [1:-1]\\n        u_y = np.zeros_like(un)\\n        v_y = np.zeros_like(vn)\\n        u_yy = np.zeros_like(un)\\n        v_yy = np.zeros_like(vn)\\n        \\n        u_y[1:-1, :] = (un[2:, :] - un[:-2, :]) / (2 * dy)\\n        v_y[1:-1, :] = (vn[2:, :] - vn[:-2, :]) / (2 * dy)\\n        \\n        u_yy[1:-1, :] = (un[2:, :] - 2 * un[1:-1, :] + un[:-2, :]) / dy**2\\n        v_yy[1:-1, :] = (vn[2:, :] - 2 * vn[1:-1, :] + vn[:-2, :]) / dy**2\\n        \\n        # --- Pressure Poisson Equation ---\\n        # Source term b = -rho * ( (du/dx)^2 + 2*(du/dy)*(dv/dx) + (dv/dy)^2 )\\n        b = -rho * (u_x**2 + 2 * u_y * v_x + v_y**2)\\n        \\n        # Jacobi Iteration\\n        for k in range(nit):\\n            pn = p.copy()\\n            # p_new = 0.25 * (p_left + p_right + p_up + p_down - b * dx^2)\\n            # Using np.roll for periodic x-neighbors\\n            p[1:-1, :] = 0.25 * (pn[2:, :] + pn[:-2, :] + \\n                                 np.roll(pn, -1, axis=1)[1:-1, :] + \\n                                 np.roll(pn, 1, axis=1)[1:-1, :] - \\n                                 b[1:-1, :] * dx**2)\\n            \\n            # Boundary Conditions for Pressure\\n            # y: dp/dy = 0 -> p[0] = p[1], p[-1] = p[-2]\\n            p[0, :] = p[1, :]\\n            p[-1, :] = p[-2, :]\\n            # x: Periodic (Implicitly handled by np.roll in stencil)\\n            \\n        # --- Momentum Equations ---\\n        # Calculate pressure gradients\\n        p_x = (np.roll(p, -1, axis=1) - np.roll(p, 1, axis=1)) / (2 * dx)\\n        p_y = np.zeros_like(p)\\n        p_y[1:-1, :] = (p[2:, :] - p[:-2, :]) / (2 * dy)\\n        \\n        # Update u\\n        # du/dt = -u*du/dx - v*du/dy - 1/rho*dp/dx + nu*(d2u/dx2 + d2u/dy2) + F\\n        u[1:-1, :] = un[1:-1, :] + dt * (\\n            -un[1:-1, :] * u_x[1:-1, :] - vn[1:-1, :] * u_y[1:-1, :] \\n            - (1/rho) * p_x[1:-1, :] \\n            + nu * (u_xx[1:-1, :] + u_yy[1:-1, :]) \\n            + F\\n        )\\n        \\n        # Update v\\n        # dv/dt = -u*dv/dx - v*dv/dy - 1/rho*dp/dy + nu*(d2v/dx2 + d2v/dy2)\\n        v[1:-1, :] = vn[1:-1, :] + dt * (\\n            -un[1:-1, :] * v_x[1:-1, :] - vn[1:-1, :] * v_y[1:-1, :] \\n            - (1/rho) * p_y[1:-1, :] \\n            + nu * (v_xx[1:-1, :] + v_yy[1:-1, :])\\n        )\\n        \\n        # --- Boundary Conditions for Velocity ---\\n        # No-slip in y-direction\\n        u[0, :] = 0\\n        u[-1, :] = 0\\n        v[0, :] = 0\\n        v[-1, :] = 0\\n        # Periodic in x-direction is maintained by update logic using np.roll\\n\\n    # Save results\\n    np.save('u.npy', u)\\n    np.save('v.npy', v)\\n    np.save('p.npy', p)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_cfd()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 7.250009417348828, \"MAE\": 2.491655680798156, \"RMSE\": 2.6925841523244594, \"Cosine\": 0.016922474051756887, \"R2\": -10.059503066806004, \"NMSE\": 11.059498706309737, \"score01\": 0.0085}, \"v\": {\"MSE\": 0.0, \"MAE\": 0.0, \"RMSE\": 0.0, \"Cosine\": 1.0, \"R2\": 1.0, \"NMSE\": Infinity, \"score01\": 1.0}, \"p\": {\"MSE\": 1.0, \"MAE\": 1.0, \"RMSE\": 1.0, \"Cosine\": 0.0, \"R2\": 0.0, \"NMSE\": 1.0, \"score01\": 0.0}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 4.09}"
+  },
+  "timings": {
+    "agent_s": 313.062,
+    "setup_s": 0.0,
+    "grade_s": 8.243
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 4.09s",
+    "missing=[] nonfinite=[]"
+  ]
+}

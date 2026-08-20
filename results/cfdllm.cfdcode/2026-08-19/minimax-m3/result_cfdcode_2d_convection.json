@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.979,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.9895,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Domain parameters\\nLx = 2.0\\nLy = 2.0\\nT = 0.32\\n\\n# Grid parameters\\nNx = 101\\nNy = 101\\n\\nx = np.linspace(0, Lx, Nx)\\ny = np.linspace(0, Ly, Ny)\\nX, Y = np.meshgrid(x, y)\\n\\ndx = x[1] - x[0]\\ndy = y[1] - y[0]\\n\\n# Time parameters based on CFL condition\\nu_max = 2.0\\nv_max = 2.0\\nCFL = 0.4\\ndt = CFL * min(dx / u_max, dy / v_max)\\nNt = int(np.ceil(T / dt))\\n\\n# Initialize fields\\nu = np.ones((Ny, Nx))\\nv = np.ones((Ny, Nx))\\n\\n# Initial condition: u = v = 2 in [0.5, 1] x [0.5, 1]\\nmask = (X >= 0.5) & (X <= 1.0) & (Y >= 0.5) & (Y <= 1.0)\\nu[mask] = 2.0\\nv[mask] = 2.0\\n\\n# Apply boundary conditions\\nu[0, :] = 1.0\\nu[-1, :] = 1.0\\nu[:, 0] = 1.0\\nu[:, -1] = 1.0\\nv[0, :] = 1.0\\nv[-1, :] = 1.0\\nv[:, 0] = 1.0\\nv[:, -1] = 1.0\\n\\n# Time integration using upwind finite difference scheme\\nfor n in range(Nt):\\n    u_old = u.copy()\\n    v_old = v.copy()\\n    \\n    # Compute spatial derivatives using upwind (backward difference for positive velocity)\\n    du_dx = np.zeros_like(u_old)\\n    du_dy = np.zeros_like(u_old)\\n    dv_dx = np.zeros_like(v_old)\\n    dv_dy = np.zeros_like(v_old)\\n    \\n    # x-derivative: backward difference\\n    du_dx[:, 1:] = (u_old[:, 1:] - u_old[:, :-1]) / dx\\n    dv_dx[:, 1:] = (v_old[:, 1:] - v_old[:, :-1]) / dx\\n    \\n    # y-derivative: backward difference\\n    du_dy[1:, :] = (u_old[1:, :] - u_old[:-1, :]) / dy\\n    dv_dy[1:, :] = (v_old[1:, :] - v_old[:-1, :]) / dy\\n    \\n    # Update interior points\\n    u[1:-1, 1:-1] = u_old[1:-1, 1:-1] - dt * (\\n        u_old[1:-1, 1:-1] * du_dx[1:-1, 1:-1] + \\n        v_old[1:-1, 1:-1] * du_dy[1:-1, 1:-1]\\n    )\\n    \\n    v[1:-1, 1:-1] = v_old[1:-1, 1:-1] - dt * (\\n        u_old[1:-1, 1:-1] * dv_dx[1:-1, 1:-1] + \\n        v_old[1:-1, 1:-1] * dv_dy[1:-1, 1:-1]\\n    )\\n    \\n    # Enforce boundary conditions\\n    u[0, :] = 1.0\\n    u[-1, :] = 1.0\\n    u[:, 0] = 1.0\\n    u[:, -1] = 1.0\\n    v[0, :] = 1.0\\n    v[-1, :] = 1.0\\n    v[:, 0] = 1.0\\n    v[:, -1] = 1.0\\n\\n# Save final solution\\nnp.save('u.npy', u)\\nnp.save('v.npy', v)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.0015258324819222022, \"MAE\": 0.010744735939340694, \"RMSE\": 0.0390619057640843, \"Cosine\": 0.99933922787887, \"R2\": 0.9587009465077173, \"NMSE\": 0.00132537551422771, \"score01\": 0.979}, \"v\": {\"MSE\": 0.0015258324819222022, \"MAE\": 0.010744735939340694, \"RMSE\": 0.0390619057640843, \"Cosine\": 0.99933922787887, \"R2\": 0.9587009465077173, \"NMSE\": 0.00132537551422771, \"score01\": 0.979}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 95.304,
+    "setup_s": 0.0,
+    "grade_s": 0.146
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s",
+    "missing=[] nonfinite=[]"
+  ]
+}

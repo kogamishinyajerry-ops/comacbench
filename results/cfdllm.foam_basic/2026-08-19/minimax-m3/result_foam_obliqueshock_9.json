@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_obliqueshock_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Create directory structure\\nfor d in [\\\"system\\\", \\\"constant\\\", \\\"0\\\"]:\\n    os.makedirs(d, exist_ok=True)\\n\\n# system/blockMeshDict\\nblockMeshDict = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (4.1 0 0)\\n    (4.1 1.0 0)\\n    (0 1.0 0)\\n    (0 0 0.1)\\n    (4.1 0 0.1)\\n    (4.1 1.0 0.1)\\n    (0 1.0 0.1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (100 25 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }\\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 2 6 5)\\n        );\\n    }\\n    top\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    bottom\\n    {\\n        type symmetryPlane;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/blockMeshDict\\\", \\\"w\\\") as f:\\n    f.write(blockMeshDict)\\n\\n# system/controlDict\\ncontrolDict = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n\\napplication     rhoCentralFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         10;\\n\\ndeltaT          0.0025;\\n\\nwriteControl    runTime;\\n\\nwriteInterval   1.0;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/controlDict\\\", \\\"w\\\") as f:\\n    f.write(controlDict)\\n\\n# system/fvSchemes\\nfvSchemes = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(tauMC)      Gauss linear;\\n    div(phi,U)      Gauss linearUpwind cellLimited 1.0;\\n    div(phi,K)      Gauss linearUpwind cellLimited 1.0;\\n    div(phi,h)      Gauss linearUpwind cellLimited 1.0;\\n    div(phiv,p)     Gauss linearUpwind cellLimited 1.0;\\n    div((phi*rho),p) Gauss linearUpwind cellLimited 1.0;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/fvSchemes\\\", \\\"w\\\") as f:\\n    f.write(fvSchemes)\\n\\n# system/fvSolution\\nfvSolution = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    \\\"(rho|U|p|h|e|k|epsilon|omega)\\\"\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-07;\\n        relTol          0.01;\\n    }\\n}\\n\\nPIMPLE\\n{\\n    nOuterCorrectors 1;\\n    nCorrectors      1;\\n    nNonOrthogonalCorrectors 0;\\n}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/fvSolution\\\", \\\"w\\\") as f:\\n    f.write(fvSolution)\\n\\n# constant/thermophysicalProperties\\nthermophysicalProperties = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      thermophysicalProperties;\\n}\\n\\nthermoType\\n{\\n    type            hePsiThermo;\\n    mixture         pureMixture;\\n    transport       const;\\n    thermo          hConst;\\n    equationOfState perfectGas;\\n    specie          specie;\\n    energy          sensibleInternalEnergy;\\n}\\n\\nmixture\\n{\\n    specie\\n    {\\n        molWeight   11640.3;\\n    }\\n    equationOfState\\n    {\\n        R           0.7143;\\n    }\\n    thermodynamics\\n    {\\n        Cp          2.5;\\n        Hf          0;\\n    }\\n    transport\\n    {\\n        mu          0;\\n        Pr          1.0;\\n    }\\n}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"constant/thermophysicalProperties\\\", \\\"w\\\") as f:\\n    f.write(thermophysicalProperties)\\n\\n# constant/momentumTransport\\nmomentumTransport = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format     \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 355.43,
+    "setup_s": 0.0,
+    "grade_s": 2.711
+  },
+  "environment_digest": "sha256:4e7c4e53ed2f00e635b19e111a87c01850b90b2a28b5d78cd597eb982f2029d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.7s last_time=0"
+  ]
+}

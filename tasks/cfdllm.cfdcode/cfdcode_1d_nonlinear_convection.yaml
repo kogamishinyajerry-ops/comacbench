@@ -1,0 +1,65 @@
+id: cfdcode_1d_nonlinear_convection
+registry_id: cfdllm.cfdcode
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: cfdcode@3b46d30+kaggle_v1
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/cfdllm.cfdcode/cfdcode_1d_nonlinear_convection.md
+  prompt_sha256: 678d2ea8d909368626375627429317bb2d63e9e3f2e787bc918e54baa171d80e
+  assets:
+  - path: data/cfdllm/cfdcode/prompt/PDE_TASK_QUESTION_ONLY.json
+    digest: d76d2c59806213c45113e77c11fad29228ea58350ceeb931d19e6a752bbee65f
+  - path: data/cfdllm/cfdcode/gold_outputs/u_1D_Nonlinear_Convection.npy
+    digest: 8a9cdded02c5faab4a56153f93bbda6f204a3ff7d23fe6f6a08abf870aac8585
+output_contract:
+- u.npy
+reference:
+  source: CFDCodeBench gold solution 预计算输出（本 harness 离线锁定）
+  revision: cfdcode@3b46d30+kaggle_v1
+  solution_script: solution/1D_Nonlinear_Convection.py
+  metrics:
+  - MSE
+  - MAE
+  - RMSE
+  - Cosine
+  - R2
+  - NMSE
+  uncertainty_note: 参考场为单一确定性数值解，无比对不确定度；形状不一致时按官方 scipy.zoom 一阶插值对齐
+grader:
+  answer_format: code
+  exec_kind: cfdcode_problem
+  validity_gate: true
+  save_values:
+  - u
+  gold_dir: data/cfdllm/cfdcode/gold_outputs
+  gold_prefix: 1D_Nonlinear_Convection
+  field_compare: official_interpolate+cos_r2
+  stability_layer: false
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/cfdllm/cfdcode/solution/1D_Nonlinear_Convection.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（数据集无边界输入测试）权重 0；robustness=两次执行确定性
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: NREL-Theseus/cfdllmbench + Kaggle nithinsekhar/cfdcodebench
+  license: BSD-3-Clause
+  status: confirmed-repo
+  revision: cfdcode@3b46d30+kaggle_v1
+  mirror_allowed: true

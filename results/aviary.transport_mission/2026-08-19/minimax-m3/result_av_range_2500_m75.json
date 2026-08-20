@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_2500_m75",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nfrom copy import deepcopy\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\nfrom aviary.interface.methods_for_level1 import run_aviary\\n\\n# Deepcopy the default phase info and override cruise Mach\\nphase_info = deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.75\\n\\n# Aircraft model CSV (absolute path, read-only)\\naircraft_csv = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_2500_m75.csv'\\n\\n# Run forward mission analysis (run_driver=False)\\nprob = run_aviary(\\n    aircraft_csv,\\n    phase_info=phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\n# Extract results (OpenMDAO promoted names, colon style)\\nfuel_burn_lbm = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\nfinal_mass_lbm = float(prob.get_val('mission:final_mass', units='lbm')[0])\\nrange_nm = float(prob.get_val('mission:range', units='NM')[0])\\n\\n# Write result.json to the current working directory\\nresult = {\\n    'fuel_burn_lbm': fuel_burn_lbm,\\n    'final_mass_lbm': final_mass_lbm,\\n}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(f\\\"fuel_burn_lbm = {fuel_burn_lbm}\\\")\\nprint(f\\\"final_mass_lbm = {final_mass_lbm}\\\")\\nprint(f\\\"range_nm = {range_nm}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_544d_pp4/solve.py\\\", line 4, in <module>\\n    from aviary.interface.methods_for_level1 import run_aviary\\nModuleNotFoundError: No module named 'aviary.interface.methods_for_level1'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 9.352,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.04s"
+  ]
+}

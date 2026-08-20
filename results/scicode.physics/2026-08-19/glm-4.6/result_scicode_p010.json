@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p010",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef get_alpha(recvec, alpha_scaling=5):\\n    '''Calculate the alpha value for the Ewald summation, scaled by a specified factor.\\n    Parameters:\\n        recvec (np.ndarray): A 3x3 array representing the reciprocal lattice vectors.\\n        alpha_scaling (float): A scaling factor applied to the alpha value. Default is 5.\\n    Returns:\\n        float: The calculated alpha value.\\n    '''\\n    # Determine the smallest cutoff distance in reciprocal space based on the shortest vector\\n    shortest_reciprocal_vec = np.min(np.linalg.norm(recvec, axis=1))\\n    alpha = alpha_scaling * shortest_reciprocal_vec / (2 * np.pi)\\n    return alpha\\n\\ndef get_lattice_coords(latvec, nlatvec=1):\\n    '''Generate lattice coordinates based on the provided lattice vectors.\\n    Parameters:\\n        latvec (np.ndarray): A 3x3 array representing the lattice vectors.\\n        nlatvec (int): The number of lattice coordinates to generate in each direction.\\n    Returns:\\n        np.ndarray: An array of shape ((2 * nlatvec + 1)^3, 3) containing the lattice coordinates.\\n    '''\\n    # Generate indices from -nlatvec to nlatvec inclusive\\n    r = np.arange(-nlatvec, nlatvec + 1)\\n    # Create a meshgrid of indices\\n    nx, ny, nz = np.meshgrid(r, r, r, indexing='ij')\\n    # Stack and reshape to (Ncells, 3)\\n    indices = np.vstack([nx.ravel(), ny.ravel(), nz.ravel()]).T\\n    # Multiply by lattice vectors to get coordinates\\n    lattice_coords = np.dot(indices, latvec)\\n    return lattice_coords\\n\\ndef distance_matrix(configs):\\n    '''Args:\\n        configs (np.array): (nparticles, 3)\\n    Returns:\\n        distances (np.array): distance vector for each particle pair. Shape (npairs, 3), where npairs = (nparticles choose 2)\\n        pair_idxs (list of tuples): list of pair indices\\n    '''\\n    nparticles = configs.shape[0]\\n    pair_idxs = [(i, j) for i in range(nparticles) for j in range(i + 1, nparticles)]\\n    dist_vecs = []\\n    for i, j in pair_idxs:\\n        dist_vecs.append(configs[j] - configs[i])\\n    return np.array(dist_vecs), pair_idxs\\n\\ndef real\""
+  },
+  "timings": {
+    "agent_s": 383.302,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

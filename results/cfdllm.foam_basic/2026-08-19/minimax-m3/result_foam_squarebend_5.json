@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_5",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Case name and base directory\\nCASE_DIR = os.getcwd()\\n\\n# Create directory structure\\ndef make_dir(path):\\n    full = os.path.join(CASE_DIR, path)\\n    os.makedirs(full, exist_ok=True)\\n\\nfor d in ['0', 'constant', 'constant/region0', 'system', 'system/region0']:\\n    make_dir(d)\\n\\n# =====================\\n# Geometry parameters (squareBend tutorial style)\\n# =====================\\n# Vertices (multi-region hex block mesh)\\n# We'll define points for blockMeshDict\\n# Points for outer arc region and inner region\\n\\n# Inlet center at z=0, y=0, x=0; radius to mid points etc.\\n# Simplified squareBend: two regions, an inner square and outer arc shell.\\n# Use 4 vertices forming the bend with inner radius 25, outer 75.\\n\\n# blockMeshDict for region \\\"region0\\\" with 8 vertices and a single hex block\\n# Following the squareBend tutorial: two regions - solidBody and fluid?\\n# For simplicity, single fluid region matching the bend.\\n\\nvertices = [\\n    (-50, 25, 25),    # 0  inlet-top-inner\\n    (-50, 25, -25),   # 1  inlet-top-outer? wait - let's re-do\\n]\\n\\n# Actually let's follow a proper squareBend layout.\\n# Points (from OpenFOAM squareBend tutorial):\\n# Region 0 (bend): 8 points\\n# 0: (-50, 25, 25)     inlet inner-top\\n# 1: (-50, 75, 25)     inlet outer-top\\n# 2: (-500, -75, 25)   outlet inner-bottom? Actually let's follow tutorial carefully\\n\\n# OpenFOAM squareBend tutorial vertices:\\n# pts\\n# 0 (-50 25 25)\\n# 1 (-50 75 25)\\n# 2 (-500 -75 25)\\n# 3 (-500 -25 25)\\n# 4 (-50 25 -25)\\n# 5 (-50 75 -25)\\n# 6 (-500 -75 -25)\\n# 7 (-500 -25 -25)\\n# mid-pts?\\n# 8 (25 0 25)\\n# 9 (25 0 -25)\\n\\n# Region 0: curved bend\\nverts = [\\n    (-50,\""
+  },
+  "timings": {
+    "agent_s": 186.716,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

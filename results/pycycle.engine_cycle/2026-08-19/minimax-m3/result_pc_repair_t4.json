@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_t4",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\ndef build_turbojet(t4_target):\\n    prob = om.Problem()\\n    prob.model = om.Group()\\n\\n    prob.model.add_subsystem('flow', pyc.FlowStation())\\n    prob.model.add_subsystem('fc', pyc.FlightConditions())\\n    prob.model.add_subsystem('inlet', pyc.Inlet())\\n    prob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.LMAPData))\\n    prob.model.add_subsystem('burner', pyc.Combustor())\\n    prob.model.add_subsystem('turb', pyc.Turbine())\\n    prob.model.add_subsystem('noz', pyc.Nozzle())\\n    prob.model.add_subsystem('shaft', pyc.Shaft())\\n    prob.model.add_subsystem('perf', pyc.Performance())\\n\\n    prob.model.connect('flow.Fl_O', 'inlet.Fl_I')\\n    prob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\n    prob.model.connect('comp.Fl_O', 'burner.Fl_I')\\n    prob.model.connect('burner.Fl_O', 'turb.Fl_I')\\n    prob.model.connect('turb.Fl_O', 'noz.Fl_I')\\n    prob.model.connect('noz.Fl_O', 'perf.Fl_I')\\n    prob.model.connect('fc.FlightConditions', 'flow.Fl_I')\\n    prob.model.connect('inlet.Fl_O:tot:P', 'perf.Pt2')\\n    prob.model.connect('comp.Fl_O:tot:P', 'perf.Pt3')\\n    prob.model.connect('burner.Fl_O:tot:P', 'perf.Pt4')\\n    prob.model.connect('turb.Fl_O:tot:P', 'perf.Pt5')\\n    prob.model.connect('comp.power', 'shaft.power_in')\\n    prob.model.connect('turb.power', 'shaft.power_out')\\n    prob.model.connect('inlet.Fl_O:stat:W', 'perf.w_in')\\n    prob.model.connect('noz.Fl_O:stat:W', 'perf.w_out')\\n    prob.model.connect('perf.Fn', 'fc.Fn')\\n\\n    prob.model.set_input_defaults('fc.alt', 0.0, units='ft')\\n    prob.model.set_input_defaults('fc.MN', 0.8)\\n    prob.model.set_input_defaults('inlet.ram_recovery', 1.0)\\n    prob.model.set_input_defaults('comp.map.Tt', 518.0, units='degR')\\n    prob.model.set_input_defaults('comp.map.Pt', 14.696, units='psi')\\n    prob.model.set_input_defaults('comp.map.W', 100.0, units='lbm/s')\\n    prob.model.set_input_defaults('comp.map.Nmech', 8000.0, units='rpm')\\n    prob.model.set_input_defaults('comp.polytropic.eff', 0.9)\\n    prob.model.set_input_defaults('comp.mech_eff', 1.0)\\n    prob.model.set_input_defaults('burner.dPqP', 0.05)\\n    prob.model.set_input_defaults('burner.Tt', t4_target, units='degR')\\n    prob.model.set_input_defaults('turb.eff', 0.9)\\n    prob.model.set_input_defaults('turb.mech_eff', 1.0)\\n    prob.model.set_input_defaults('noz.Cv', 1.0)\\n\\n    prob.model.pyc_connect_flow('flow.Fl_O', 'inlet.Fl_I')\\n    prob.model.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n    prob.model.pyc_connect_flow('comp.Fl_O', 'burner.Fl_I')\\n    prob.model.pyc_connect_flow('burner.Fl_O', 'turb.Fl_I')\\n    prob.model.pyc_connect_flow('turb.Fl_O', 'noz.Fl_I')\\n    prob.model.pyc_connect_flow('noz.Fl_O', 'perf.Fl_I')\\n    prob.model.pyc_connect_flow('fc.Fl_O', 'flow.Fl_I')\\n\\n    prob.setup(check=False)\\n    prob.set_val('fc.Fn', 1000.0, units='lbf')\\n    prob.set_solver_print(level=-1)\\n    prob.run_model()\\n    return prob\\n\\ntarget_tsfc = 0.79852\\ncandidates = [3000.0, 3100.0, 3200.0, 3300.0, 3400.0, 3500.0, 3600.0, 3700.0, 3800.0, 3900.0, 4000.0]\\n\\nbest = None\\nfor t4 in candidates:\\n    try:\\n        prob = build_turbojet(t4)\\n        fn = float(prob.get_val('fc.Fn', units='lbf')[0])\\n        w_in = float(prob.get_val('perf.w_in', units='lbm/s')[0])\\n        tsfc = w_in / fn * 3600.0\\n        err = abs(tsfc - target_tsfc)\\n        if best is None or err < best[1]:\\n            best = (t4, err, tsfc)\\n    except Exception as e:\\n        pass\\n\\n# Also test with balanced approach using OPR constraint\\n# Try fine search around best\\nif best is not None:\\n    base = best[0]\\n    for fine_offset in [i*5 for i in range(-20, 21)]:\\n        t4 = base + fine_offset\\n        try:\\n            prob = build_turbojet(t4)\\n            fn = float(prob.get_val('fc.Fn', units='lbf')[0])\\n            w_in = float(prob.get_val('perf.w_in', units='lbm/s')[0])\\n            tsfc = w_in / fn * 3600.0\\n            err = abs(tsfc - target_tsfc)\\n            if err < best[1]:\\n                best = (t4, err, tsfc)\\n        except Exception:\\n\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_modi5o7o/solve.py\\\", line 100, in <module>\\n    \\\"restored_value\\\": float(best[0])\\n                            ~~~~^^^\\nTypeError: 'NoneType' object is not subscriptable\\n\"}"
+  },
+  "timings": {
+    "agent_s": 10.195,
+    "setup_s": 0.0,
+    "grade_s": 1.143
+  },
+  "environment_digest": "sha256:1542aec1c75ffe8bbbbbe5a8c9723f831ded55f9c89c457c16ccb57779ee16a4",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.14s"
+  ]
+}

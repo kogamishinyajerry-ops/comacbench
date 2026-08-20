@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_dambreakwithobstacle_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\ndef write_file(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# Domain\\nLx, Ly, Lz = 1.0, 1.0, 1.0\\nN = 32\\n\\n# Time\\nendTime = 0.1\\ndeltaT = 0.001\\nwriteInterval = 0.02\\n\\n# Physical properties\\nrho_air = 1.0\\nrho_water = 1000.0\\nmu_air = 1.48e-05\\nmu_water = 0.001\\n\\n# Water column on the left\\nwater_x = 0.5  # water initially fills x in [0, 0.5]\\n\\n# Obstacle (small block near the bottom, right of the water column center)\\n# Represented by a small alpha field hole\\nobstacle_x0, obstacle_x1 = 0.6, 0.7\\nobstacle_y0, obstacle_y1 = 0.0, 0.2\\nobstacle_z0, obstacle_z1 = 0.0, 0.5\\n\\n# ---------------- system/blockMeshDict ----------------\\nblockMeshDict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({Lx} 0 0)\\n    ({Lx} {Ly} 0)\\n    (0 {Ly} 0)\\n    (0 0 {Lz})\\n    ({Lx} 0 {Lz})\\n    ({Lx} {Ly} {Lz})\\n    (0 {Ly} {Lz})\\n);\\n\\nedges\\n(\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({N} {N} {N}) simpleGr\""
+  },
+  "timings": {
+    "agent_s": 463.154,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

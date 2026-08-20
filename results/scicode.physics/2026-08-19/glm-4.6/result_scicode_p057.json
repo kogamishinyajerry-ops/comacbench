@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p057",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nfrom scipy import integrate, optimize\\n\\ndef f_x(x, En):\\n    '''Return the value of f(x) with energy En\\n    Input\\n    x: coordinate x; a float or a 1D array of float\\n    En: energy; a float\\n    Output\\n    f_x: the value of f(x); a float or a 1D array of float\\n    '''\\n    return x**2 - En\\n\\ndef Numerov(f_in, u_b, up_b, step):\\n    '''Given precomputed function f(x), solve the differential equation u''(x) = f(x)*u(x)\\n    using the Numerov method.\\n    Inputs:\\n    - f_in: input function f(x); a 1D array of float representing the function values at discretized points\\n    - u_b: the value of u at boundary; a float\\n    - up_b: the derivative of u at boundary; a float\\n    - step: step size; a float.\\n    Output:\\n    - u: u(x); a 1D array of float representing the solution.\\n    '''\\n    N = len(f_in)\\n    u = np.zeros(N)\\n    \\n    # Boundary conditions\\n    u[0] = u_b\\n    \\n    # Taylor expansion for the second point\\n    # u[1] = u[0] + h*u'[0] + h^2/2 * u''[0]\\n    # u''[0] = f_in[0] * u[0]\\n    u[1] = u[0] + step * up_b + (step**2 / 2.0) * f_in[0] * u[0]\\n    \\n    # Precompute the terms (1 - h^2/12 * f(x)) to optimize the loop\\n    k = (step**2) / 12.0\\n    C = 1.0 - k * f_in\\n    \\n    # Numerov iteration\\n    for i in range(1, N - 1):\\n        u[i+1] = (2.0 * u[i] * C[i] - u[i-1] * C[i-1] + (step**2) * f_in[i] * u[i]) / C[i+1]\\n        \\n    return u\\n\\ndef Solve_Schrod(x, En, u_b, up_b, step):\\n    '''Input\\n    x: coordinate x; a\""
+  },
+  "timings": {
+    "agent_s": 392.587,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

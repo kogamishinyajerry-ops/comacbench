@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p006",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def apply_low_pass_filter(image_array, frequency_threshold):\\n    \\\"\\\"\\\"\\n    Applies a low‑pass filter to the given image array based on the frequency threshold.\\n\\n    Parameters\\n    ----------\\n    image_array : 2D numpy.ndarray\\n        Input image (float values).\\n    frequency_threshold : float\\n        Radius (in frequency units) of the low‑pass filter.\\n        Frequencies strictly less than this radius are preserved; the\\n        threshold itself is excluded.\\n\\n    Returns\\n    -------\\n    T : 2D numpy.ndarray\\n        The binary low‑pass mask (spatial filter) used in the frequency domain.\\n    output_image : 2D numpy.ndarray\\n        The filtered image, returned to the original spatial domain.\\n    \\\"\\\"\\\"\\n    # shape of the input\\n    m, n = image_array.shape\\n\\n    # create coordinate grids centered at zero (the location of the\\n    # zero‑frequency after fftshift)\\n    y = np.arange(m) - m // 2\\n    x = np.arange(n) - n // 2\\n    X, Y = np.meshgrid(x, y, indexing='ij')\\n\\n    # radial distance from the centre in the frequency domain\\n    radius = np.sqrt(X**2 + Y**2)\\n\\n    # binary mask: 1 where radius is strictly less than the threshold,\\n    # 0 otherwise (threshold frequency itself is not included)\\n    T = (radius < frequency_threshold).astype(float)\\n\\n    # forward Fourier transform and shift zero‑frequency to centre\\n    F = fftshift(fft2(image_array))\\n\\n    # apply the low‑pass mask\\n    F_filtered = F * T\\n\\n    # inverse shift and inverse Fourier transform\\n    output_image = np.real(ifft2(ifftshift(F_filtered)))\\n\\n    return T, output_image\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 4, \"cases_total\": 4, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"6.1\": {\"pass\": 4, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 21.429,
+    "setup_s": 0.0,
+    "grade_s": 0.919
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.46s"
+  ]
+}

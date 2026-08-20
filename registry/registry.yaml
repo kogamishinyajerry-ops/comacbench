@@ -1,0 +1,480 @@
+# DeepSeek Harness 民机设计 Benchmark Registry（v0.1 草案）
+#
+# 本文件是机器可读的接入清单单一事实源（SSOT）。
+# status 流转: proposed -> staged(数据镜像+环境可复现) -> integrated(adapter 跑通+首份基线报告) -> active(进入常规评测)
+#              任意状态可进入 paused-env(内网无启动评测环境)，条件满足后回到 proposed。
+# tier: S(必须纳入) / A(强烈建议) / B(选择性) / C(外围)
+# 依据: 2026-08-19 调研报告 + 2026-08-19 内网环境策略（见 env-matrix.md）。
+#
+# ===== 内网环境策略（2026-08-19 决策）=====
+# 1. 内网工程仿真栈为商业工具: ANSYS 系、StarCCM+、CATIA、Amesim、FENSAP、MATLAB（均有许可）。
+# 2. Python 开源包无内部镜像，由验收人手工批量导入内网（按 env-matrix.md 分阶段清单，一次导入覆盖一批）。
+# 3. OpenFOAM 不引入: FoamBench 暂缓; 端到端 CFD 仿真任务改用 Fluent/StarCCM 无界面批处理。
+# 4. env_class 判定规则: 评测所需环境在内网不可启动 => status: paused-env，不进入任何排期。
+#    env_class 取值: qa | python_sandbox | data_only | commercial_cfd | commercial_fea | matlab | missing
+# 所有 license 字段必须与 license-notes.md 保持一致。
+
+registry_version: 0.2
+created: 2026-08-19
+env_policy: 见 env-matrix.md（OpenFOAM 放弃；Python 手工导入；商业求解器走批处理）
+report_source: benchmarks/report/2026-08-19-benchmark-survey.md
+
+defaults:
+  record_gap: false          # registry 本身不触发知识底座缺口记录
+  public_comparable: true    # 公共可比层
+  hidden_dynamic: false      # 受控隐藏层（动态生成题），逐任务覆盖
+
+entries:
+  # ---------- 批次 1: v0.1 核心（打通用 registry/评测/报告链路；7 项） ----------
+  - id: cfdllm.cfdquery
+    name: CFDQuery (CFDLLMBench 子基准)
+    source: https://github.com/NREL-Theseus/cfdllmbench
+    tier: S
+    order: 1
+    batch: v0.1-core
+    adapter: qa_grounded
+    env_class: qa
+    license: BSD-3-Clause
+    license_status: confirmed-repo
+    content: 90 道研究生层级 CFD 选择题
+    scoring: 客观判分（选项匹配），无 LLM judge
+    env: 无执行环境要求
+    assets_revision: cfdquery@3b46d30+kaggle_v4   # 2026-08-19 镜像，sha256 见 data/cfdllm/cfdquery/PROVENANCE.md
+    risks: [题目可能已进入训练语料 -> 仅作可比基线，不用于选型]
+    status: integrated
+    integrated_note: 2026-08-19 qa_grounded adapter 跑通（dev 终端）；oracle 判分自检 90/90；基线三份——stub 25/90、GLM-4.6 78/90（0.8667）、MiniMax-M3 73/90（0.8111），gate 全 90/90（分布见 results/cfdllm.cfdquery/2026-08-19/{stub,glm-4.6,minimax-m3}/）
+
+  - id: aeroengqa.gold
+    name: AeroEngQA 金标集
+    source: https://www.southampton.ac.uk/~sem03/aiaa-2025-preprint.pdf (数据见 Zenodo)
+    tier: S
+    order: 2
+    batch: v0.1-core
+    adapter: qa_grounded
+    env_class: qa
+    license: CC BY 4.0（Zenodo 记录 license 字段已核实）
+    license_status: confirmed-dataset
+    content: 80 个专家验证问题；平衡 可回答/不可回答、简单/复杂、短/长上下文
+    scoring: 事实正确性 + 证据引用支持度 + 拒答正确率 + 事实/计算/推断区分
+    env: 无执行环境要求（RAG 检索目标文档随数据集提供）
+    license_evidence: Zenodo DOI 10.5281/zenodo.14215677 v1.0（2024-11-25），metadata.license=id=cc-by-4.0，access_right=open；论文 arXiv/Southampton AIAA-2025 preprint 声明 open source release。核验日期 2026-08-19
+    assets_revision: aeroengqa@zenodo.14215677-v1.0   # 2026-08-19 镜像（4 JSON 权威 80 题 + xlsx 溯源超集），md5 见 data/aeroengqa/gold/PROVENANCE.md
+    risks: [BY 归属义务（再分发须署名）]
+    status: integrated
+    integrated_note: 2026-08-19 qa_grounded free_text 四层判分跑通（dev 终端，规则判无 LLM judge）；oracle 自检 80/80；基线三份——stub 0.6354、GLM-4.6 0.8797、MiniMax-M3 0.8852（gate 全 80/80，四层指标见 results/aeroengqa.gold/2026-08-19/README.md）
+
+  - id: scicode.physics
+    name: SciCode 物理/数值子集
+    source: https://github.com/scicode-bench/SciCode
+    tier: A
+    order: 3
+    batch: v0.1-core
+    adapter: code_exec
+    env_class: python_sandbox
+    license: Apache-2.0
+    license_status: confirmed-repo
+    content: 80 主问题/338 子问题中先取物理与数值计算相关子集
+    scoring: 隐藏单元测试 + 数值容差；已有 inspect_ai 集成与 DeepSeek 模型配置
+    env: Python 沙箱（Phase-A 导入清单，见 env-matrix.md）
+    assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712   # 2026-08-19 镜像（80 主问题+341 步 h5 期望；M2 子集 52 题由 subject_map.md 划定，AI 辅助标注待人工复核）
+    risks: [子集划定需人工标注 subject 映射（已做初版，见 data/scicode/physics/subject_map.md）]
+    status: integrated
+    integrated_note: 2026-08-19 code_exec 跑通（dev 终端，52 任务 207 步可判分）；oracle dev 10/12（2 题环境依赖偏差已知）；stub + M3 真实基线（GLM 429 限流待补）；gate 分布见 results/scicode.physics/2026-08-19/{oracle,stub,minimax-m3}/
+
+  - id: cfdllm.cfdcode
+    name: CFDCodeBench (CFDLLMBench 子基准)
+    source: https://github.com/NREL-Theseus/cfdllmbench
+    tier: S
+    order: 4
+    batch: v0.1-core
+    adapter: code_exec
+    env_class: python_sandbox
+    license: BSD-3-Clause
+    license_status: confirmed-repo
+    content: 24 个自然语言科学编程任务（2026-08-19 gold 预计算后可用 15，9 个排除原因见 data/cfdllm/cfdcode/PROVENANCE.md）
+    scoring: 沙箱执行 + 隐藏单元测试 + 数值容差 + 稳定性
+    env: Python 沙箱（Phase-A 导入清单，见 env-matrix.md）
+    assets_revision: cfdcode@3b46d30+kaggle_v1   # 2026-08-19 镜像 + gold_outputs 离线预计算锁定
+    risks: []
+    status: integrated
+    integrated_note: 2026-08-19 code_exec 五层判分跑通（dev 终端，15 任务 9 排除）；oracle 自检 15/15；stub + M3 真实基线（GLM 429 限流待补）；gate 分布见 results/cfdllm.cfdcode/2026-08-19/{oracle,stub,minimax-m3}/
+
+  - id: engdesign.open
+    name: EngDesign-OPEN 开源子集（收窄）
+    source: https://agi4engineering.github.io/Eng-Design/
+    tier: A
+    order: 5
+    batch: v0.1-core
+    adapter: code_exec        # 部分任务可能落 simulation_agent，接入时逐任务重判
+    env_class: python_sandbox
+    license: 题库 JSON MIT（HF）；逐任务软件依赖已清点（audit 2026-08-19）
+    license_status: confirmed-split   # 仅题库 JSON；官方评测脚本未发布
+    content: 收窄子集 28 任务（机械 7/结构 7/控制 14，无专有软件×自包含；audit 表见 data/engdesign/open/task_audit.csv）
+    scoring: 仿真与工程结果分项评分（官方 473 评分项体系未随 HF 发布，本地不可复现）
+    env: 任务级固定容器（依赖不可用仿真器的任务在清点阶段直接剔除）
+    assets_revision: engdesign@hf-mit+audit_2026-08-19   # 题库已镜像；见 data/engdesign/open/PROVENANCE.md
+    risks: [官方评测脚本/参考设计未发布 -> 判分不可本地复现，集成 blocked（M4 待议）]
+    status: proposed
+    audit_note: 2026-08-19 逐任务清点完成（101 任务：专有软件 20+HDL 10+非目标域 63，收窄 28）；adapter 集成 blocked 待官方 eval 发布或自建判分口径裁定
+
+  - id: aviary.transport_mission
+    name: Aviary-Mini（自建）
+    source: https://github.com/openmdao/Aviary
+    tier: S
+    order: 7
+    batch: v0.1-core
+    adapter: simulation_agent
+    env_class: python_sandbox
+    license: Apache-2.0 (Aviary 本体)
+    license_status: confirmed-repo
+    self_built: true
+    content: 总体设计与航程任务包：尺寸设计/约束优化/权衡分析/模型修复/方案对比
+    scoring: 可执行模型 + 约束满足 + 目标函数阈值 + 单位与审计记录
+    env: Python + OpenMDAO/Aviary 固定版本（Phase-B 导入清单，见 env-matrix.md；手工导入离线 wheel）
+    hidden_dynamic: true     # 隐藏商载-航程-跑道组合动态出题
+    assets_revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1   # 2026-08-19 自建 8 静态任务 + 隐藏生成器试点 3 例（base64 隔离），见 data/aviary/transport_mission/PROVENANCE.md
+    risks: [参考答案需预计算并锁版本（已做：references/ 锁定，rel_tol 1%）]
+    status: integrated
+    integrated_note: 2026-08-19 simulation_agent（aviary_mission 分支）跑通（dev 终端 venv）；oracle 8/8；stub + GLM（3/8，0.375）+ M3（2/8，0.250）双基线落盘；隐藏动态题生成器评审件交付（hidden/，试点 3 例隔离）
+
+  - id: superwing.coeff_lite
+    name: SuperWing-Coeff-Lite（自建子集）
+    source: https://huggingface.co/datasets/yunplus/SuperWing
+    tier: S-
+    order: 10
+    batch: v0.1-core
+    adapter: field_prediction
+    env_class: data_only     # 被测对象是模型/Agent，判分只需数值比对；ML 基线才需要 torch(可选)
+    license: CC BY-SA 4.0
+    license_status: confirmed-dataset
+    self_built: true
+    content: 4,239 构型/28,856 样本中仅取总体系数层（CL/CD/CM + 关键截面 + 激波位置标签），不下载 3.49TB 体流场
+    scoring: 系数误差 + 非物理结果检出；数据划分必须按几何构型划分
+    env: 系数层数据在外网机下载后手工导入内网；判分纯数值比对（pandas 即可）
+    assets_revision: superwing@hf-coeff-lite-2026-08-19   # 2026-08-19 系数层镜像（~10MB，不含体数据），见 data/superwing/coeff_lite/PROVENANCE.md
+    risks: [禁止按迎角随机划分 train/test -> 高估泛化（已按构型零交集划分验证）；CRMpert 迁移测试待议]
+    status: integrated
+    integrated_note: 2026-08-19 field_prediction adapter 跑通（dev 终端）；oracle 100/100；stub + M3 基线（gate 100/100，physics 均值 0.08，LLM 无法直接系数回归——能力边界如实记录）；ML 基线待后续
+
+  # ---------- v0.1 核心（2026-08-19 二次决策恢复：开发终端装有 OpenFOAM + FoamAgent） ----------
+  - id: cfdllm.foam_basic
+    name: FoamBench-Basic (CFDLLMBench 子基准)
+    source: https://github.com/NREL-Theseus/cfdllmbench
+    tier: S
+    order: 6
+    batch: v0.1-core
+    adapter: simulation_agent
+    env_class: openfoam_dev
+    license: BSD-3-Clause
+    license_status: confirmed-repo
+    content: 110 个基础 OpenFOAM 任务（16 个高级任务留批次 2）
+    scoring: "端到端: 算例创建/运行/后处理 + 残差收敛 + 守恒性 + 场变量范围 + 目标量"
+    env: 开发终端 OpenFOAM + FoamAgent；内网最终移植改 Fluent journal / StarCCM macro（见 env-matrix.md §0）
+    port_note: grader 只认 result.json + 残差/守恒/目标量，不绑定求解器 CLI；内网移植仅替换 runner 求解器调用层
+    assets_revision: foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19   # 2026-08-19 镜像（110 任务 JSON 解包 + docker v10 GT 预计算），见 data/cfdllm/foam_basic/PROVENANCE.md
+    risks: [内网无 OpenFOAM——内网上线前此基准只在开发终端出分，报告须标注运行环境]
+    status: integrated
+    integrated_note: 2026-08-19 simulation_agent 跑通（dev 终端 docker v10）；oracle 110/110；stub + M3 基线（0/110 gate：87 code_not_executable + 23 simulation_failed——LLM 写不出可运行 OpenFOAM 算例，真实能力边界）；沙箱 os.chmod 过度封禁缺陷已修
+
+  - id: openvsp.geometry_aero
+    name: OpenVSP-Mini（自建）
+    source: https://github.com/openvsp/openvsp
+    tier: A
+    order: 8
+    batch: paused-env
+    adapter: design_artifact
+    env_class: missing
+    license: NASA Open Source Agreement 1.3
+    license_status: needs-legal-review
+    self_built: true
+    content: 参数化几何生成/包络约束/VSPAERO 低阶气动/错误模型修复/STEP-STL 导出检查
+    env: 依赖 OpenVSP 原生二进制 + VSPAERO —— 内网无此工具
+    paused_env_reason: 原生非 Python 工具，无许可亦无部署
+    resume_condition: 验收人愿意手工导入 OpenVSP 发行包 且 NOSA 法务放行；CAD/几何能力在此期间由 cadgen.local_validity（pythonocc）承接
+    hidden_dynamic: true
+    status: paused-env
+
+  - id: bscw.aeroelastic
+    name: BSCW / AePW 精选（自建）
+    source: https://nescacademy.nasa.gov/workshops/AePW2/public/BSCW/publications
+    tier: B+
+    order: 18
+    batch: paused-env
+    adapter: simulation_agent
+    env_class: missing
+    license: NASA 公开发布（逐案例核对）
+    license_status: needs-verification
+    content: 稳态/非定常/颤振边界
+    env: 需气弹耦合工具链（CFD+CSD 耦合）—— 内网无可用气弹环境，ANSYS FSI 自动化成本过高
+    paused_env_reason: 无启动环境
+    resume_condition: 出现可用气弹工具链（或 ANSYS FSI 自动化预算获批）
+    risks: []
+    status: paused-env
+
+  # ---------- 批次 2: 强烈建议（环境均已确认可启动） ----------
+  - id: pycycle.engine_cycle
+    name: pyCycle Pack（自建）
+    source: https://github.com/openmdao/pycycle
+    tier: A
+    order: 9
+    batch: batch-2
+    adapter: simulation_agent
+    env_class: python_sandbox
+    license: Apache-2.0
+    license_status: confirmed-repo
+    self_built: true
+    content: 设计点/非设计点匹配、最小耗油率、模型修复、喘振裕度等约束判断、与 Aviary 回传联算
+    env: Python + OpenMDAO/pyCycle 固定版本（Phase-B 导入清单，见 env-matrix.md）
+    assets_revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src   # 2026-08-19 自建 7 任务（SL 设计点收敛域）+ vendored 官方 turbojet 引擎 + 隐藏试点 1 例，见 data/pycycle/engine_cycle/PROVENANCE.md
+    hidden_dynamic: true
+    status: integrated
+    integrated_note: 2026-08-19 simulation_agent（pycycle_cycle 分支）跑通（dev venv om-pycycle 源码装）；oracle 7/7；stub + M3 基线（0/7：5 code_not_executable + 2 missing_output——M3 幻觉 pycycle API，真实能力边界）；沙箱裸 system( 子串误封 add_subsystem 已修
+
+  - id: cadgen.local_validity
+    name: CADGenBench 本地可复现子集
+    source: https://github.com/huggingface/cadgenbench
+    tier: A-
+    order: 11
+    batch: batch-2
+    adapter: design_artifact
+    env_class: python_sandbox   # pythonocc/cadquery 离线 wheel，不依赖 CATIA
+    license: 代码 Apache-2.0 / 输入数据 ODC-BY；完整分数依赖私有 GT（不纳入）
+    license_status: confirmed-split
+    content: STEP 解析/B-Rep 有效性/自交与开放壳体/接口尺寸/体积质量包络截面/代码可重复执行
+    env: Python + OCCT (cadquery/OCP wheel，Phase-D 导入清单)
+    risks: [私有 GT 相似度分数不得伪装成本地可复现结果]
+    paused_env_note: 2026-08-19 探查——代码 Apache-2.0/输入 ODC-BY 可镜像；GT 私有持有（cadgenbench-data-gt 空仓）+ 输入含 text+image（多模态通道缺失同 mechvqa）；本地可复现子集（B-Rep 有效性/接口尺寸检查器，pythonocc）需 design_artifact adapter——batch-2 末位待排
+    status: proposed
+
+  - id: simjeb.structure
+    name: SimJEB
+    source: https://simjeb.github.io/
+    tier: A-
+    order: 12
+    batch: batch-2
+    adapter: design_artifact
+    env_class: commercial_fea   # 隐藏复算层用内网已授权 ANSYS Mechanical APDL
+    license: ODC Attribution 类
+    license_status: confirmed-dataset
+    content: 支架 CAD 清理/网格/边界条件/位移应力预测/轻量化排序/质量-刚度-强度 Pareto
+    env: "判分复算: ANSYS MAPDL（PyMAPDL，gRPC，占用 Mechanical APDL 许可座席）；CAD 处理 pythonocc"
+    risks: [需与 IT 确认批处理占用许可座席的调度窗口]
+    paused_env_note: dev 终端无 ANSYS MAPDL（commercial 类）——batch-2 会话核验，intranet 层可启动后接入；许可亦未完成（needs-verification/version-lock）
+    status: proposed
+
+  - id: gtm.transport_control
+    name: GTM / JSBSim 飞控包（自建）
+    source: https://github.com/nasa/GTM_DesignSim ; https://github.com/JSBSim-Team/jsbsim
+    tier: A
+    order: 13
+    batch: batch-2
+    adapter: simulation_agent
+    env_class: matlab          # GTM_DesignSim 为 MATLAB 工程；JSBSim 侧纯 Python wheel
+    license: GTM 待核对 / JSBSim LGPL-2.1
+    license_status: needs-verification
+    self_built: true
+    content: 配平线性化/静稳定与模态/控制器设计/发动机失效与舵面故障/包线鲁棒性/错误气动表修复
+    env: "GTM 层: MATLAB + matlabengine-for-python（内网已有 MATLAB 许可）；JSBSim 快层: 纯 Python wheel"
+    hidden_dynamic: true
+    paused_env_note: dev 终端无 MATLAB（matlabengine 不可用）——GTM 层 blocked；JSBSim 快层（python_sandbox）可先行，许可 needs-verification 未核
+    status: proposed
+
+  - id: mechvqa.public_eval
+    name: MechVQA 公开评测集
+    source: https://github.com/xiaofengShi/MechVQA
+    tier: B+
+    order: 14
+    batch: batch-2
+    adapter: qa_grounded
+    env_class: qa
+    license: Apache-2.0
+    license_status: confirmed-repo
+    content: 工程图/装配图理解（尺寸标注、零部件关系、剖视图、视觉推理）
+    constraints: multimodal_only（纯文本模型不进入主分）；客观题规则判分优先，LLM judge 仅评解释质量
+    status: staged
+    staged_note: 2026-08-19 仓库镜像完成（Apache-2.0 核验，1185 题 benchmark_data 含图纸）；**多模态接入 blocked**——现 provider 层无图片输入通道（GLM-4.6 不支持图、M3 需 multimodal 扩展），qa_grounded 需扩展图文混合 expect 模式；进待议
+
+  - id: nasa_tmr.verification
+    name: NASA TMR 精选案例（求解器自适应改造）
+    source: https://turbmodels.larc.nasa.gov/
+    tier: A-
+    order: 15
+    batch: batch-2
+    adapter: simulation_agent
+    env_class: commercial_cfd  # 参考数据公开；求解改用内网 Fluent/StarCCM，不依赖 OpenFOAM
+    license: NASA 公开发布（逐案例核对）
+    license_status: needs-verification
+    content: 湍流模型/近壁处理/边界条件/y+/收敛与离散化验证，作为 CRM/HLPW 前置门槛
+    env: Fluent(journal 批处理)/StarCCM+(macro 批处理) 跑 TMR 标准网格(CGNS)，与公开参考数据比对
+    risks: [需许可座席调度窗口；连 TMR 都不过的 Agent 不得进入整机 CFD 分数]
+    paused_env_note: dev 终端无 Fluent/StarCCM+（commercial 类）——batch-2 会话核验，intranet 层可启动后接入；许可亦未完成（needs-verification/version-lock）
+    status: proposed
+
+  - id: crm_dpw_hlpw.coarse
+    name: CivilTransportCFD-Pack 粗网格层（自建，Fluent/StarCCM 版）
+    source: https://commonresearchmodel.larc.nasa.gov/ ; DPW/HLPW 各届
+    tier: S
+    order: 16
+    batch: batch-2
+    adapter: simulation_agent
+    env_class: commercial_cfd
+    license: NASA 公开发布（锁定明确 Workshop 版本与 geometry revision）
+    license_status: needs-version-lock
+    self_built: true
+    content: L1 构型识别 -> L6 约束下重求解 六层任务；日常 CI 用粗网格+预计算结果，中高精度进 HPC 周期评测
+    env: Fluent/StarCCM 无界面批处理（journal/macro），网格 CGNS 导入；替代原 OpenFOAM/SU2 方案
+    hidden_dynamic: true
+    risks: [不得使用已归档/废弃的旧 DPW 几何充当最新标准；批处理自动化与许可座席需 IT 配合]
+    paused_env_note: dev 终端无 Fluent/StarCCM+（commercial 类）——batch-2 会话核验，intranet 层可启动后接入；许可亦未完成（needs-verification/version-lock）
+    status: proposed
+
+  - id: hilift_aeroml.lite
+    name: HiLiftAeroML-Lite（自建子集）
+    source: https://huggingface.co/datasets/nvidia/HiLiftAeroML
+    tier: S(价值)/A-(优先级)
+    order: 17
+    batch: batch-2
+    adapter: field_prediction
+    env_class: data_only
+    license: CC BY 4.0
+    license_status: confirmed-dataset
+    self_built: true
+    content: 180 构型 x 10 迎角、1,800 WMLES 样本中仅取 几何参数/工况/总体气动力/少量表面采样/关键截面/分离涡标签；66.9TB 体数据不进日常 Harness
+    env: Lite 数据外网机下载后手工导入内网；判分纯数值比对
+    assets_revision: hilift@hf-lite-2026-08-19   # 2026-08-19 系数层镜像（force_mom_all.csv 1800 样本 + geo_values_all.csv 180 构型几何参数，~280KB），见 data/hilift/lite/PROVENANCE.md
+    status: integrated
+    integrated_note: 2026-08-19 field_prediction 跑通（与 superwing 同款 adapter）；oracle 100/100；stub + M3 基线（gate 100/100，physics 内插 0.186/几何外推 0.124——CM 误差 ~200-350%，LLM 高升力系数回归不可行同 superwing 结论）
+
+  # ---------- 条件纳入（不进入排期，满足条件后重审） ----------
+  - id: cadbench.cadquery
+    name: CADBench
+    source: https://github.com/anniedoris/CADBench
+    tier: B+
+    batch: conditional
+    adapter: design_artifact
+    env_class: python_sandbox   # CadQuery 代码生成+执行，OCP wheel
+    license: 代码 MIT / 组成数据集保留各自原始许可（需维护数据级许可证矩阵）
+    license_status: needs-per-task-audit
+    condition: 完成 CADGenBench 接入后重审；数据级许可矩阵建立后放行
+    status: deferred
+
+  - id: afbench.airfoil
+    name: AFBench
+    source: https://github.com/hitcslj/AFBench
+    tier: B+
+    batch: conditional
+    adapter: field_prediction
+    env_class: python_sandbox   # 判分走数据比对；若需 XFOIL 复算则手工导入 wheel 版 xfoil
+    license: 仓库 MIT 与 Apache-2.0 表述不一致，需向作者澄清
+    license_status: blocked-license-ambiguity
+    condition: 许可澄清 + 复算路径确认（或降级为纯数据比对）后方可纳入
+    status: deferred
+
+  - id: designqa.fsae
+    name: DesignQA（任务设计借鉴）
+    source: https://github.com/anniedoris/design_qa/
+    tier: A-(能力)/暂缓(接入)
+    batch: conditional
+    adapter: qa_grounded
+    env_class: qa
+    license: 当前仓库未见清晰 LICENSE
+    license_status: blocked-no-license
+    condition: 仅借鉴"条款-证据-合规判断"任务设计；许可证明确前数据不得镜像
+    status: deferred
+
+  - id: aircraftverse.selective
+    name: AircraftVerse 选择性子集
+    source: https://arxiv.org/abs/2306.05562
+    tier: B
+    batch: conditional
+    adapter: design_artifact
+    env_class: data_only
+    license: 待核对
+    license_status: needs-verification
+    condition: 与大型运输机领域距离较远（多为电动 UAV/eVTOL），仅取可迁移任务
+    status: deferred
+
+  - id: openconcept.hybrid_electric
+    name: OpenConcept
+    source: https://github.com/mdolab/openconcept
+    tier: B+
+    batch: conditional
+    adapter: simulation_agent
+    env_class: python_sandbox
+    license: 待核对 (mdolab)
+    license_status: needs-verification
+    condition: 排在 Aviary 与 pyCycle 之后；电动/混动/热管理概念设计需求出现时启动（随 Phase-B 一并导入）
+    status: deferred
+
+  - id: pdebench.compressive_ns
+    name: PDEBench 可压缩 NS 子集
+    source: https://github.com/pdebench/PDEBench
+    tier: B
+    batch: conditional
+    adapter: field_prediction
+    env_class: data_only       # 判分数据比对；ML 基线需 torch(可选导入)
+    license: 待核对
+    license_status: needs-verification
+    condition: 仅取可压缩 Navier-Stokes 子集作基础 PDE/代理模型测试
+    status: deferred
+
+  - id: camb.selective
+    name: CAMB 精选子集（中文民航）
+    source: https://github.com/CamLLM/CamBenchmark
+    tier: C+
+    batch: conditional
+    adapter: qa_grounded
+    env_class: qa
+    license: 数据集 CC BY-NC-SA 4.0（与仓库其他位置许可表述存在差异，需澄清）
+    license_status: blocked-license-ambiguity
+    condition: 法务确认 NC 条款公司内部使用边界后，仅取 术语/系统分类/故障树推理/部分技术问答；不进核心总分
+    status: deferred
+
+  - id: airfrans.level1
+    name: AirfRANS（CFD surrogate level-1）
+    source: https://github.com/Extrality/airfrans_lib
+    tier: B+
+    batch: conditional
+    adapter: field_prediction
+    env_class: data_only       # 数据集判分；ML 基线需 torch(可选导入)
+    license: ODbL-1.0
+    license_status: confirmed-dataset
+    condition: 作为代理模型 Harness 验证层，不作民机气动主分
+    status: deferred
+
+  # ---------- 明确排除 ----------
+  - id: excluded.alue_preflight
+    name: ALUE / Pre-Flight
+    batch: excluded
+    reason: 偏航空安全/运行/常识，非飞机设计；最多作外围语言能力测试
+    status: excluded
+
+  - id: excluded.repospace
+    name: RepoSpace
+    batch: excluded
+    reason: 面向航天器设备代码，公开数据可获取性不足
+    status: excluded
+
+  - id: excluded.cfdbench
+    name: CFDBench (luo-yining)
+    batch: excluded
+    reason: 数据有用但公开仓库许可证信息不明确
+    status: excluded
+
+  - id: excluded.blendednet
+    name: BlendedNet / BlendedNet++
+    batch: excluded
+    reason: BWB 数据有价值但公开发布状态与许可证不稳定
+    status: excluded
+
+  - id: excluded.hilift_full
+    name: HiLiftAeroML 全量体数据
+    batch: excluded
+    reason: 66.9TB 高保真体数据成本过高，仅保留 Lite 子集
+    status: excluded
+
+  - id: excluded.runtime_commonsense
+    name: 运行/飞行员常识类 benchmark、大规模合成航空 QA
+    batch: excluded
+    reason: 与民机设计能力无关或噪声过大
+    status: excluded

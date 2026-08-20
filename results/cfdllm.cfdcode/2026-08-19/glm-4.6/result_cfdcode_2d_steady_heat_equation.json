@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_steady_heat_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1091,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.55455,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef main():\\n    # Parameters\\n    Lx = 5.0\\n    Ly = 4.0\\n    Nx = 51\\n    Ny = 41\\n    dx = Lx / (Nx - 1)\\n    dy = Ly / (Ny - 1)\\n    \\n    # Thermal diffusivity (arbitrary for steady-state convergence, alpha=1)\\n    alpha = 1.0\\n    \\n    # Time step based on stability condition for explicit 2D FDM\\n    # Condition: dt <= (dx^2 * dy^2) / (2 * alpha * (dx^2 + dy^2))\\n    dt = 0.8 * (dx**2 * dy**2) / (2 * alpha * (dx**2 + dy**2))\\n\\n    # Initialize Temperature Field T(y, x)\\n    # Initial Condition: T = 0 everywhere\\n    T = np.zeros((Ny, Nx))\\n\\n    # Apply Boundary Conditions (Dirichlet)\\n    # Left (x=0): T = 10\\n    T[:, 0] = 10.0\\n    # Right (x=5): T = 40\\n    T[:, -1] = 40.0\\n    # Bottom (y=0): T = 20\\n    T[0, :] = 20.0\\n    # Top (y=4): T = 0\\n    T[-1, :] = 0.0\\n    \\n    # Handle corners (average of adjacent boundaries for smoothness)\\n    T[0, 0] = (10.0 + 20.0) / 2.0     # Bottom-Left\\n    T[0, -1] = (40.0 + 20.0) / 2.0    # Bottom-Right\\n    T[-1, 0] = (10.0 + 0.0) / 2.0     # Top-Left\\n    T[-1, -1] = (40.0 + 0.0) / 2.0    # Top-Right\\n\\n    # Iteration parameters (Time-marching to steady state)\\n    tolerance = 1e-6\\n    max_iter = 100000\\n    error = 1.0\\n    iteration = 0\\n    \\n    # Coefficients for the update equation\\n    rx = alpha * dt / dx**2\\n    ry = alpha * dt / dy**2\\n\\n    # Solver loop\\n    while error > tolerance and iteration < max_iter:\\n        T_old = T.copy()\\n        \\n        # Finite Difference Update (Explicit)\\n        # T_new = T_old + rx * (d2T/dx2) + ry * (d2T/dy2)\\n        # Slicing: [1:-1, 1:-1] refers to interior points\\n        T[1:-1, 1:-1] = (T_old[1:-1, 1:-1] + \\n                         rx * (T_old[1:-1, 2:] - 2*T_old[1:-1, 1:-1] + T_old[1:-1, :-2]) + \\n                         ry * (T_old[2:, 1:-1] - 2*T_old[1:-1, 1:-1] + T_old[:-2, 1:-1]))\\n        \\n        # Re-enforce Dirichlet Boundary Conditions\\n        T[:, 0] = 10.0\\n        T[:, -1] = 40.0\\n        T[0, :] = 20.0\\n        T[-1, :] = 0.0\\n        \\n        # Calculate convergence error\\n        error = np.linalg.norm(T - T_old)\\n        iteration += 1\\n\\n    # Save the final solution for variable T\\n    np.save('T.npy', T)\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"T\": {\"MSE\": 356.79046838990354, \"MAE\": 16.20366111262157, \"RMSE\": 18.888898019469096, \"Cosine\": 0.21816632196792618, \"R2\": -4.774775113487773, \"NMSE\": 4.2740287219039415, \"score01\": 0.1091}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.23}"
+  },
+  "timings": {
+    "agent_s": 103.895,
+    "setup_s": 0.0,
+    "grade_s": 0.464
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.23s",
+    "missing=[] nonfinite=[]"
+  ]
+}

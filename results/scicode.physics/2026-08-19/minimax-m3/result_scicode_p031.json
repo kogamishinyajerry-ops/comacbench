@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p031",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.65,
+  "artifacts": {
+    "code": "\"def center(X, divide_sd=True):\\n    \\\"\\\"\\\"Center the input matrix X and optionally scale it by the standard deviation.\\n    Args:\\n        X (np.ndarray): The input matrix of shape (nmix, time).\\n        divide_sd (bool): If True, divide by the standard deviation. Defaults to True.\\n    Returns:\\n        np.ndarray: The centered (and optionally scaled) matrix of the same shape as the input.\\n    \\\"\\\"\\\"\\n    X = np.asarray(X, dtype=float)\\n    # Compute mean across time (axis=1) for each mixture\\n    mean = X.mean(axis=1, keepdims=True)\\n    D = X - mean\\n    if divide_sd:\\n        std = X.std(axis=1, ddof=0, keepdims=True)\\n        # Avoid division by zero\\n        std[std == 0] = 1.0\\n        D = D / std\\n    return D\\n\\n\\ndef whiten(X):\\n    \\\"\\\"\\\"Whiten matrix X\\n    Args: \\n        X (np.array): mixture matrix. Shape (nmix, time)\\n    Return:\\n        Z (np.array): whitened matrix. Shape (nmix, time)\\n    \\\"\\\"\\\"\\n    # Center the data (no scaling by SD)\\n    X_centered = center(X, divide_sd=False)\\n    n = X_centered.shape[1]\\n    # Covariance matrix (unbiased estimator)\\n    C = np.dot(X_centered, X_centered.T) / (n - 1)\\n    # Eigen-decomposition of covariance\\n    eig_vals, eig_vecs = np.linalg.eigh(C)\\n    # Ensure positive eigenvalues for numerical stability\\n    eig_vals = np.maximum(eig_vals, 1e-12)\\n    # Inverse square root of eigenvalues\\n    inv_sqrt = 1.0 / np.sqrt(eig_vals)\\n    # Apply whitening transformation: Z = diag(inv_sqrt) @ eig_vecs.T @ X_centered\\n    Z = np.dot(np.diag(inv_sqrt), np.dot(eig_vecs.T, X_centered))\\n    return Z\\n\\n\\ndef ica(X, cycles, tol):\\n    \\\"\\\"\\\"Perform independent component analysis \\n    Args:\\n        X (np.array): mixture matrix. Shape (nmix, time)\\n        cycles (int): number of max possible iterations \\n        tol (float): convergence tolerance\\n    Returns:\\n        S_hat (np.array): predicted independent sources. Shape (nmix, time)\\n    \\\"\\\"\\\"\\n    # Whiten the data\\n    Z = whiten(X)\\n    nmix = Z.shape[0]\\n    # Initialize unmixing matrix\\n    W = np.zeros((nmix, nmix))\\n    # Iterative FastICA for each component\\n    for i in range(nmix):\\n        # Random initial unit vector\\n        w = np.random.randn(nmix)\\n        w = w / np.linalg.norm(w)\\n        for _ in range(cycles):\\n            # Projection of whitened data onto current vector\\n            w_dot = w @ Z  # shape (time,)\\n            # Nonlinear functions\\n            g = np.tanh(w_dot)\\n            dg = 1 - g**2\\n            # Update rule: w_new = E[x g(w . x)] - w * E[dg(w . x)]\\n            term1 = np.mean(Z * g, axis=1)  # E[x * g]\\n            term2 = np.mean(dg)              # E[dg]\\n            w_new = term1 - w * term2\\n            # Orthogonalize against previously found components (deflation)\\n            if i > 0:\\n                proj = W[:i].T @ (W[:i] @ w_new)\\n                w_new = w_new - proj\\n            # Normalize\\n            w_new_norm = np.linalg.norm(w_new)\\n            if w_new_norm < 1e-12:\\n                # Re‑initialize if norm collapsed\\n                w_new = np.random.randn(nmix)\\n                w_new = w_new / np.linalg.norm(w_new)\\n            else:\\n                w_new = w_new / w_new_norm\\n            # Convergence check\\n            if np.abs(np.abs(w @ w_new) - 1) < tol:\\n                w = w_new\\n                break\\n            w = w_new\\n        W[i] = w\\n    # Estimated sources: S = W @ Z\\n    S_hat = W @ Z\\n    return S_hat\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 10, \"steps_all_pass\": 1, \"steps_total\": 3, \"per_step\": {\"31.1\": {\"pass\": 3, \"total\": 3}, \"31.2\": {\"pass\": 0, \"total\": 3}, \"31.3\": {\"pass\": 0, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 100.388,
+    "setup_s": 0.0,
+    "grade_s": 1.53
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.8s"
+  ]
+}

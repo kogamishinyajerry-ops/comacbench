@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p061",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\n\\ndef Bmat(pa):\\n    '''Calculate the B matrix.\\n    Input\\n    pa = (a,b,c,alpha,beta,gamma)\\n    a,b,c: the lengths a, b, and c of the three cell edges meeting at a vertex, float in the unit of angstrom\\n    alpha,beta,gamma: the angles alpha, beta, and gamma between those edges, float in the unit of degree\\n    Output\\n    B: a 3*3 matrix, float\\n    '''\\n    a, b, c, alpha, beta, gamma = pa\\n    \\n    # Convert angles to radians\\n    alpha_rad = np.radians(alpha)\\n    beta_rad = np.radians(beta)\\n    gamma_rad = np.radians(gamma)\\n    \\n    # Cosines and Sines\\n    ca = np.cos(alpha_rad)\\n    cb = np.cos(beta_rad)\\n    cg = np.cos(gamma_rad)\\n    sg = np.sin(gamma_rad)\\n    \\n    # Volume of the unit cell\\n    vol = a * b * c * np.sqrt(1 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg)\\n    \\n    # Calculate metric tensor components for reciprocal lattice\\n    # a* = (b c sin(alpha)) / V etc.\\n    # Using the dot product convention a_i . b_j = delta_ij\\n    \\n    # b1 = (a2 x a3) / (a1 . (a2 x a3))\\n    # We construct B such that Q = B * h (column vector h)\\n    # B transforms reciprocal lattice coordinates to Cartesian coordinates\\n    \\n    # Using the standard B-matrix formulation\\n    # B = [ [a*_x, b*_x, c*_x],\\n    #       [a*_y, b*_y, c*_y],\\n    #       [a*_z, b*_z, c*_z] ]\\n    # Assuming a is along x, c is in xy plane, b is somewhere.\\n    # With convention: x* // a*, z* // (a* x b*)\\n    \\n    # The matrix given by Busing and Levy (1967) or similar standard crystallography texts:\\n    # B11 = 1 / a\\n    # B12 = -cos(gamma) / (a * sin(gamma))\\n    # B13 = (cos(alpha)*cos(gamma) - cos(beta)) / (a * vol * sin\""
+  },
+  "timings": {
+    "agent_s": 388.133,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

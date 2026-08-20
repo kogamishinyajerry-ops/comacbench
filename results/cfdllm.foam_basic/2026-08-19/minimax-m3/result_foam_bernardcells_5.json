@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_bernardcells_5",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCreate a 3D Bénard cell (Rayleigh-Bénard convection) OpenFOAM case\\nfor the buoyantFoam solver (OpenFOAM Foundation v10 syntax).\\nDomain: 9 m (x) x 1 m (y) x 2 m (z)\\nHot wall (y=1): 305 K\\nCold wall (y=0): 295 K\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Geometry parameters\\n# ---------------------------------------------------------------------------\\nLX = 9.0\\nLY = 1.0\\nLZ = 2.0\\nNX = 90\\nNY = 10\\nNZ = 20\\n\\nT_HOT = 305.0\\nT_COLD = 295.0\\nT_REF = (T_HOT + T_COLD) / 2.0  # 300 K\\n\\n# ---------------------------------------------------------------------------\\n# Time controls (fast run: finishes within a few seconds)\\n# ---------------------------------------------------------------------------\\nDT = 1.0\\nEND_TIME = 50.0\\nWRITE_INTERVAL = 10\\n\\n\\ndef write(path, content):\\n    \\\"\\\"\\\"Create file (and parent dirs) with the given text content.\\\"\\\"\\\"\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\n# ---------------------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------------------\\nblock_mesh_dict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  v10                                   |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0   0   0)\\n    ({LX} 0   0)\\n    ({LX} {LY} 0)\\n    (0   {LY} 0)\\n    (0\""
+  },
+  "timings": {
+    "agent_s": 331.925,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

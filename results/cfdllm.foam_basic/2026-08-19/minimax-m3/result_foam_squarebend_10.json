@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# =====================================================================\\n# Squarebend 3D flow simulation case generator for rhoSimpleFoam\\n# OpenFOAM v10 (Foundation) dict syntax\\n# =====================================================================\\n\\nCASE_DIR = os.path.abspath(\\\"squarebend\\\")\\nSUBDIRS = [\\\"0\\\", \\\"constant\\\", \\\"system\\\"]\\n\\nfor sd in SUBDIRS:\\n    os.makedirs(os.path.join(CASE_DIR, sd), exist_ok=True)\\n\\n# ---------------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------------\\nblockMeshDict = r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Website:  www.openfoam.com                      |\\n|   \\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    (-50 25 25)         // 0  - inlet1 a (bottom)\\n    (-50 25 -25)        // 1  - inlet1 b\\n    (-50 75 25)         // 2  - inlet1 c\\n    (-50 75 -25)        // 3  - inlet1 d\\n    // mid-bend region\\n    (25 -75 25)         // 4  - mid-bend inlet face a\\n    (25 -75 -25)        // 5  - mid-bend inlet face b\\n    (75 -75 25)         // 6\\n    (75 -75 -25)        // 7\\n    (25 0 25)           // 8  - inner bend\\n    (25 0 -25)          // 9\\n    (-50 0 25)          // 10 - upstream inner\\n    (-50 0 -25)         // 11\\n    (-25 75 25)         // 12\\n    (-25 75 -25)        // 13\""
+  },
+  "timings": {
+    "agent_s": 173.123,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

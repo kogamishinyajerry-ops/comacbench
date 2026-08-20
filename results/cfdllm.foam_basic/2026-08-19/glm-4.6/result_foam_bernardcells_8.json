@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_bernardcells_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef main():\\n    # Create directory structure\\n    directories = [\\n        \\\"0\\\",\\n        \\\"system\\\",\\n        \\\"constant\\\",\\n        \\\"constant/polyMesh\\\"  # blockMesh will write here, but good to ensure existence or just let blockMesh handle it\\n    ]\\n    for d in directories:\\n        os.makedirs(d, exist_ok=True)\\n\\n    # --- 0/ files ---\\n\\n    # 0/U\\n    u_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    bottom\\n    {\\n        type            noSlip;\\n    }\\n    top\\n    {\\n        type            noSlip;\\n    }\\n    left\\n    {\\n        type            noSlip;\\n    }\\n    right\\n    {\\n        type            noSlip;\\n    }\\n    front\\n    {\\n        type            noSlip;\\n    }\\n    back\\n    {\\n        type            noSlip;\\n    }\\n}\\n\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n    with open(\\\"0/U\\\", \\\"w\\\") as f:\\n        f.write(u_content)\\n\\n    # 0/T\\n    t_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    location    \\\"0\\\";\\n    object      T;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 0 0 1 0 0 0];\\n\\ninternalField   uniform 300;\\n\\nboundaryField\\n{\\n    bottom\\n    {\\n        type            fixedValue;\\n        value           uniform 310;\\n    }\\n    top\\n    {\\n        type            fixedValue;\\n        value           uniform 290;\\n    }\\n    left\\n    {\\n        type            zeroGradient;\\n    }\\n    right\\n    {\\n        type            zeroGradient;\\n    }\\n    front\\n    {\\n        type            zeroGradient;\\n    }\\n    back\\n    {\\n        type            zeroGradient;\\n    }\\n}\\n\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n    with open(\\\"0/T\\\", \\\"w\\\") as f:\\n        f.write(t_content)\\n\\n    # 0/p_rgh\\n    p_rgh_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p_rgh;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [1 -1 -2 0 0 0 0];\\n\\nin\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 303.538,
+    "setup_s": 0.0,
+    "grade_s": 3.14
+  },
+  "environment_digest": "sha256:805799ebd833d705cf0a4c4ffe9786841a7d1ef8f5889ae6a4ece71f348bd588",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 3.1s last_time=0"
+  ]
+}

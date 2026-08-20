@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p072",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8125,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.90625,
+  "artifacts": {
+    "code": "\"def neighbor_list(site, N):\\n    '''Return all nearest neighbors of site (i, j).\\n    Args:\\n        site (Tuple[int, int]): site indices\\n        N (int): number of sites along each dimension\\n    Return:\\n        list: a list of 2-tuples, [(i_left, j_left), (i_above, j_above), (i_right, j_right), (i_below, j_below)]\\n    '''\\n    i, j = site\\n    return [((i-1) % N, j),\\n            (i, (j+1) % N),\\n            ((i+1) % N, j),\\n            (i, (j-1) % N)]\\n\\ndef energy_site(i, j, lattice):\\n    '''Calculate the energy of site (i, j)\\n    Args:\\n        i (int): site index along x\\n        j (int): site index along y\\n        lattice (np.array): shape (N, N), a 2D array +1 and -1\\n    Return:\\n        float: energy of site (i, j)\\n    '''\\n    N = lattice.shape[0]\\n    s = lattice[i, j]\\n    sum_nn = 0\\n    for ni, nj in neighbor_list((i, j), N):\\n        sum_nn += lattice[ni, nj]\\n    return -s * sum_nn\\n\\ndef energy(lattice):\\n    '''calculate the total energy for the site (i, j) of the periodic Ising model with dimension (N, N)\\n    Args: lattice (np.array): shape (N, N), a 2D array +1 and -1\\n    Return:\\n        float: energy\\n    '''\\n    N = lattice.shape[0]\\n    total = 0.0\\n    for i in range(N):\\n        for j in range(N):\\n            total += energy_site(i, j, lattice)\\n    return total / 2.0\\n\\ndef magnetization(spins):\\n    '''total magnetization of the periodic Ising model with dimension (N, N)\\n    Args: spins (np.array): shape (N, N), a 2D array +1 and -1\\n    Return:\\n        float:\\n    '''\\n    return np.sum(spins)\\n\\ndef get_flip_probability_magnetization(lattice, i, j, beta):\\n    '''Calculate spin flip probability and change in total magnetization.\\n    Args:\\n        lat (np.array): shape (N, N), 2D lattice of 1 and -1\\n        i (int): site index along x\\n        j (int): site index along y\\n        beta (float): inverse temperature\\n    Return:\\n        A (float): acceptance ratio\\n        dM (int): change in magnetization after the spin flip\\n    '''\\n    N = lattice.shape[0]\\n    s = lattice[i, j]\\n    sum_nn = 0\\n    for ni, nj in neighbor_list((i, j), N):\\n        sum_nn += lattice[ni, nj]\\n    delta_E = 2.0 * s * sum_nn\\n    A = min(1.0, np.exp(-beta * delta_E))\\n    dM = -2 * s\\n    return A, dM\\n\\ndef flip(spins, beta):\\n    '''Goes through each spin in the 2D lattice and flip it.\\n    Args:\\n        spins (np.array): shape (N, N), 2D lattice of 1 and -1        \\n        beta (float): inverse temperature\\n    Return:\\n        lattice (np.array): final spin configurations\\n    '''\\n    N = spins.shape[0]\\n    for i in range(N):\\n        for j in range(N):\\n            A, dM = get_flip_probability_magnetization(spins, i, j, beta)\\n            if np.random.rand() < A:\\n                spins[i, j] *= -1\\n    return spins\\n\\ndef run(T, N, nsweeps):\\n    '''Performs Metropolis to flip spins for nsweeps times and collect iteration, temperature, energy, and magnetization^2 in a dataframe\\n    Args: \\n        T (float): temperature\\n        N (int): system size along an axis\\n        nsweeps: number of iterations to go over all spins\\n    Return:\\n        mag2: (numpy array) magnetization^2\\n    '''\\n    beta = 1.0 / T\\n    spins = np.random.choice([1, -1], size=(N, N))\\n    mag2 = np.zeros(nsweeps)\\n    for sweep in range(nsweeps):\\n        spins = flip(spins, beta)\\n        M = magnetization(spins)\\n        mag2[sweep] = M * M\\n    return mag2\\n\\ndef scan_T(Ts, N, nsweeps):\\n    '''Run over several given temperatures.\\n    Args:\\n        Ts: list of temperature\\n        N: system size in one axis\\n        nsweeps: number of iterations to go over all spins\\n    Return:\\n        mag2_avg: list of magnetization^2 / N^4, each element is the value for each temperature\\n    '''\\n    mag2_avg = []\\n    for T in Ts:\\n        mag2_vals = run(T, N, nsweeps)\\n        avg = np.mean(mag2_vals) / (N ** 4)\\n        mag2_avg.append(avg)\\n    return mag2_avg\\n\\ndef calc_transition(T_list, mag2_list):\\n    '''Calculates the transition temperature by taking derivative\\n    Args:\\n        T_list: list of temperatures\\n        mag2_list: list o\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 26, \"cases_total\": 32, \"steps_all_pass\": 6, \"steps_total\": 9, \"per_step\": {\"72.1\": {\"pass\": 4, \"total\": 4}, \"72.2\": {\"pass\": 4, \"total\": 4}, \"72.3\": {\"pass\": 4, \"total\": 4}, \"72.4\": {\"pass\": 3, \"total\": 3}, \"72.5\": {\"pass\": 3, \"total\": 4}, \"72.6\": {\"pass\": 3, \"total\": 3}, \"72.7\": {\"pass\": 0, \"total\": 3}, \"72.8\": {\"pass\": 3, \"total\": 3}, \"72.9\": {\"pass\": 2, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 2802.243,
+    "setup_s": 0.0,
+    "grade_s": 79.897
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 40.41s"
+  ]
+}

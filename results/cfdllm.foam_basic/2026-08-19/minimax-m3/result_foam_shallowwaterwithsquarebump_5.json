@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_shallowwaterwithsquarebump_5",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\nCASE_DIR = os.getcwd()\\n\\nDIRS = [\\n    \\\"system\\\",\\n    \\\"constant\\\",\\n    \\\"0\\\",\\n    \\\"constant/geometry\\\",\\n    \\\"constant/polyMesh\\\",  # placeholder; blockMesh will populate\\n]\\n\\nfor d in DIRS:\\n    os.makedirs(d, exist_ok=True)\\n\\n# ---------------- domain geometry ----------------\\n# domain 1 x 1 x 0.1, grid 20 x 20 x 1\\nX0, X1 = 0.0, 1.0\\nY0, Y1 = 0.0, 1.0\\nZ0, Z1 = 0.0, 0.1\\n\\nNX, NY, NZ = 20, 20, 1\\n\\n# square bump parameters: smooth Gaussian bump centered at (0.5, 0.5)\\nBUMP_CX = 0.5\\nBUMP_CY = 0.5\\nBUMP_AMP = 0.02        # peak height (m)\\nBUMP_W   = 0.08        # standard deviation (m)\\n# Subtract bump from the bottom (so bathymetry rises in the middle)\\n\\n# ---------------- blockMeshDict ----------------\\nblockMeshDict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    ({X0} {Y0} {Z0})\\n    ({X1} {Y0} {Z0})\\n    ({X1} {Y1} {Z0})\\n    ({X0} {Y1} {Z0})\\n    ({X0} {Y0} {Z1})\\n    ({X1} {Y0}\""
+  },
+  "timings": {
+    "agent_s": 223.781,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

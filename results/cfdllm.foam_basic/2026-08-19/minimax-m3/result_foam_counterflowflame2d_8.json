@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_counterflowflame2d_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\n# Domain\\nWIDTH = 0.02\\nHEIGHT = 0.02\\nNX = 40\\nNY = 40\\n\\n# Velocities\\nU_FUEL = 0.4\\nU_AIR = -0.2\\n\\n# Time\\nDELTA_T = 1e-6\\nEND_TIME = 0.05\\nWRITE_INTERVAL = 0.01\\n\\n# Solver\\nSOLVER = \\\"reactingFoam\\\"\\n\\nCASE_NAME = \\\".\\\"\\n\\ndef write(path, content):\\n    full = os.path.join(CASE_NAME, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with open(full, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# ------------------ system files ------------------\\n\\n# blockMeshDict\\nblock_mesh = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd            | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation   |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({WIDTH} 0 0)\\n    ({WIDTH} {HEIGHT} 0)\\n    (0 {HEIGHT} 0)\\n    (0 0 0.001)\\n    ({WIDTH} 0 0.001)\\n    ({WIDTH} {HEIGHT} 0.001)\\n    (0 {HEIGHT} 0.001)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({NX} {NY} 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    fuelInlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            ((1 5 4 0))\\n        );\\n    }}\\n    air\""
+  },
+  "timings": {
+    "agent_s": 247.402,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

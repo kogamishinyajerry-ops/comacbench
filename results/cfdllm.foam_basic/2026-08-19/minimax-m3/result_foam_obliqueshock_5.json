@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_obliqueshock_5",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"Generate OpenFOAM 10 case for 2D oblique shock using rhoCentralFoam.\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Case parameters\\n# ---------------------------------------------------------------------------\\nDOMAIN_X = 4.1\\nDOMAIN_Y = 1.0\\nDOMAIN_Z = 0.1\\nCELLS_X = 200\\nCELLS_Y = 50\\nCELLS_Z = 1\\n\\nINLET_VEL = (3.5, 0.0, 0.0)\\nTOP_VEL = (2.61933, -0.50632, 0.0)\\nINLET_T = 1.0\\nTOP_T = 2.0\\nINLET_P = 1.0\\n\\nMOL_WEIGHT = 11640.3\\nCP = 2.5\\nPR = 1.0\\nMU = 0.0\\nR_SPEC = 0.7143   # gas constant\\nGAMMA = 1.4       # specific heat ratio\\n\\nDT = 0.0025\\nWRITE_INT = 1.0\\nEND_TIME = 10.0\\n\\nSOLVER = \\\"rhoCentralFoam\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Helper to write files\\n# ---------------------------------------------------------------------------\\ndef w(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# ---------------------------------------------------------------------------\\n# 0/  initial & boundary fields\\n# ---------------------------------------------------------------------------\\nw(\\\"0/U\\\", f\\\"\\\"\\\"/*-----------------------------------*-C++-*-----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Website:  www.openfoam.org                      |\\n|   \\\\\\\\\\\\\\\\  /    A nd            | Version:  10                                    |\\n|    \\\\\\\\\\\\\\\\/     M anipulation   |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform ({INLET_VEL\""
+  },
+  "timings": {
+    "agent_s": 220.267,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p069",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef f_V(q, d, bg_eps, l1, l2):\\n    '''Write down the form factor f(q;l1,l2)\\n    Input\\n    q, in-plane momentum, float in the unit of inverse angstrom\\n    d, layer spacing, float in the unit of angstrom\\n    bg_eps: LEG dielectric constant, float, dimensionless\\n    l1,l2: layer number where z = l*d, integer\\n    Output\\n    form_factor: form factor, float\\n    '''\\n    # Distance between layers\\n    z_diff = abs(l1 - l2) * d\\n    # Image charge factor from vacuum interface\\n    # q' = (bg_eps - 1)/(bg_eps + 1) * q, treating epsilon_0 = 1 for vacuum normalization\\n    # Actually need to use bg_eps (relative dielectric constant)\\n    # Image charge coefficient: alpha = (bg_eps - 1)/(bg_eps + 1)\\n    alpha = (bg_eps - 1.0) / (bg_eps + 1.0)\\n    # Form factor: direct + image contribution\\n    # Direct: exp(-q*|z-z'|)\\n    # Image: alpha * exp(-q*(z+z'+2*d)) for z,l>=0 with image at z=-d\\n    # Actually image is at -d for l=0\\n    direct = np.exp(-q * z_diff)\\n    image = alpha * np.exp(-q * (l1 + l2 + 2) * d)\\n    form_factor = direct + image\\n    return form_factor\\n\\ndef D_2DEG(q, omega, gamma, n_eff, e_F, k_F, v_F):\\n    '''Write down the exact form of density-density correlation function\\n    Input\\n    q, in-plane momentum, float in the unit of inverse angstrom\\n    omega, energy, real part, float in the unit of meV\\n    gamma, energy, imaginary part, float in the unit of meV\\n    n_eff, electron density, float in the unit of per square angstrom\\n    e_F, Fermi energy, float in the unit of meV\\n    k_F, Fermi momentum, float in the unit of inverse angstrom\\n    v_F, hbar * Fermi velocity, float in the unit of meV times angstrom\\n    Output\\n    D0:\""
+  },
+  "timings": {
+    "agent_s": 233.178,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

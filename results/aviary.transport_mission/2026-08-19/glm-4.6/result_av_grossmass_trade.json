@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_trade",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nimport numpy as np\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Define the three design gross masses to analyze\\nmass_cases = [165400, 175400, 185400]\\n\\nresults = {}\\n\\nfor mass in mass_cases:\\n    # Construct the expected filename based on the mass\\n    # (Assuming files are named '165400.csv', '175400.csv', etc. in the current directory)\\n    filename = f\\\"{mass}.csv\\\"\\n    \\n    # Deepcopy the default phase info to avoid modifying the global import\\n    phase_info = copy.deepcopy(default_phase_info)\\n    \\n    # Set the cruise Mach to 0.80 as specified\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Run the Aviary mission analysis\\n    # run_driver=False: Performs a forward run (analysis) without optimization\\n    # optimizer=\\\"SLSQP\\\": Explicitly set to avoid pyoptsparse/IPOPT dependency issues\\n    prob = run_aviary(\\n        vehicle_file=filename,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Extract the total fuel mass using the specified promoted name and units\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    \\n    # Store the result\\n    results[f'fuel_{mass}_lbm'] = float(fuel_mass)\\n\\n# Determine the gross mass corresponding to the minimum fuel consumption\\n# Find the key with the minimum value\\nmin_fuel_key = min(\\n    [k for k in results.keys() if k.startswith('fuel_')],\\n    key=lambda k: results[k]\\n)\\n\\n# Extract the gross mass from the key name (e.g., 'fuel_165400_lbm' -> 165400)\\nmin_mass = int(min_fuel_key.split('_')[1])\\nresults['min_fuel_grossmass_lbm'] = min_mass\\n\\n# Write the results to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_csfuk63c/solve.py\\\", line 27, in <module>\\n    prob = run_aviary(\\n           ^^^^^^^^^^^\\nTypeError: run_aviary() got an unexpected keyword argument 'vehicle_file'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 208.422,
+    "setup_s": 0.0,
+    "grade_s": 1.029
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

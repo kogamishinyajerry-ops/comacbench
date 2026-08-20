@@ -1,0 +1,36 @@
+{
+  "task_id": "cfdcode_2d_burgers_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\n\\n# Domain\\nLx, Ly = 2.0, 2.0\\nT = 0.027\\nnu = 0.01\\n\\n# Grid\\nnx, ny = 101, 101\\ndx = Lx / (nx - 1)\\ndy = Ly / (ny - 1)\\n\\n# Time step based on CFL condition\\n# dt chosen for stability with diffusion and convection\\ndt_cfl = 0.25 * dx / 1.0  # based on max velocity ~1\\ndt_diff = 0.25 * dx * dy / (nu * (1 + 1))  # based on diffusion\\ndt = min(dt_cfl, dt_diff, 1e-4)\\nnt = int(T / dt)\\n\\n# Initialize\\nu = np.ones((nx, ny))\\nv = np.ones((nx, ny))\\n\\nx = np.linspace(0, Lx, nx)\\ny = np.linspace(0, Ly, ny)\\nX, Y = np.meshgrid(x, y, indexing='ij')\\n\\n# Initial condition: u = v = 2 in [0.5, 1] x [0.5, 1]\\nmask = (X >= 0.5) & (X <= 1.0) & (Y >= 0.5) & (Y <= 1.0)\\nu[mask] = 2.0\\nv[mask] = 2.0\\n\\n# Apply boundary conditions\\ndef apply_bc(u, v):\\n    u[0, :] = 1.0; u[-1, :] = 1.0; u[:, 0] = 1.0; u[:, -1] = 1.0\\n    v[0, :] = 1.0; v[-1, :] = 1.0; v[:, 0] = 1.0; v[:, -1] = 1.0\\n\\napply_bc(u, v)\\n\\n# Time stepping using explicit finite differences\\nfor n in range(nt):\\n    un = u.copy()\\n    vn = v.copy()\\n    \\n    # Interior points\\n    # Convection terms (upwind scheme for stability)\\n    # Diffusion terms (central difference)\\n    \\n    u_int = un[1:-1, 1:-1]\\n    v_int = vn[1:-1, 1:-1]\\n    \\n    # ∂u/∂x\""
+  },
+  "timings": {
+    "agent_s": 217.144,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_cavity_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\n# Create directory structure\\nos.makedirs('system', exist_ok=True)\\nos.makedirs('constant', exist_ok=True)\\nos.makedirs('0', exist_ok=True)\\n\\n# Domain: scaled by 0.1, so 0.1 x 0.1 x 0.01 m\\n# Grid: 20 x 20 x 1\\n\\n# system/blockMeshDict\\nblock_mesh_dict = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nvertices\\n(\\n    (0 0 0)\\n    (0.1 0 0)\\n    (0.1 0.1 0)\\n    (0 0.1 0)\\n    (0 0 0.01)\\n    (0.1 0 0.01)\\n    (0.1 0.1 0.01)\\n    (0 0.1 0.01)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (20 20 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    movingWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    fixedWalls\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n            (0 4 7 3)\\n            (1 2 6 5)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\\"\\\"\\\"\\n\\n# system/controlDict\\ncontrol_dict = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n\\napplication     pisoFoam;\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         10;\\ndeltaT          0.005;\\nwriteControl    timeStep;\\nwriteInterval   100;\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\ntimeFormat      general;\\ntimePrecision   6;\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n\\n# system/fvSchemes\\nfv_schemes = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\\"\\\"\\\"\\n\\n# system/fvSolution\\nfv_solution = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    p\\n    {\\n        solver          GAMG;\\n        tolerance       1e-6;\\n        relTol          0.01;\\n        smoother        DICGaussSeidel;\\n    }\\n\\n    U\\n    {\\n        solver          smoothSolver;\\n        smoother        symGaussSeidel;\\n        tolerance       1e-6;\\n        relTol          0.01;\\n    }\\n}\\n\\nPISO\\n{\\n    nCorrectors     2;\\n    nNonOrthogonalCorrectors 0;\\n    pRefCell        0;\\n    pRefValue       0;\\n}\\n\\\"\\\"\\\"\\n\\n# constant/physicalProperties\\nphysical_properties = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      physicalProperties;\\n}\\n\\ntransportModel  Newtonian;\\nnu              [0 2 -1 0 0 0 0] 1e-04;\\n\\\"\\\"\\\"\\n\\n# constant/momentumTransport\\nmomentum_transport = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      momentumTransport;\\n}\\n\\ntype            laminar;\\n\\\"\\\"\\\"\\n\\n# 0/U\\nu_field = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n\\ndimensions      [0 1 -1 0 0 0 0];\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    movingWall\\n    {\\n        type            fixedValue;\\n        value           uniform (2 0 0);\\n    }\\n\\n    fixedWalls\\n    {\\n        type            noSlip;\\n    }\\n\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\\"\\\"\\\"\\n\\n# 0/p\\np_field = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p;\\n}\\n\\ndimensions      [0 2 -2 0 0 0 0];\\ninternalField   uniform 0;\\n\\nboundaryField\\n{\\n    movingWall\\n    {\\n        type            zeroGradient;\\n    }\\n\\n    fixedWalls\\n    {\\n        type            zeroGradient;\\n    }\\n\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\\"\\\"\\\"\\n\\n# Allrun\\nallrun = \\\"\\\"\\\"#!/bin/sh\\ncd ${0%/*} || exit 1\\nsource $WM_PROJECT_DIR/bin/tools/RunFunctions\\nrunApplication blo\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 127, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"./Allrun: 3: source: not found\\n./Allrun: 4: runApplication: not found\\n./Allrun: 5: runApplication: not found\\n\"}"
+  },
+  "timings": {
+    "agent_s": 85.493,
+    "setup_s": 0.0,
+    "grade_s": 1.422
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=127 1.4s last_time=0"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_forwardstep_4",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# ---------------------------------------------------------------------------\\n# Helper functions\\n# ---------------------------------------------------------------------------\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Write content to a file, creating parent directories if needed.\\\"\\\"\\\"\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n\\n# ---------------------------------------------------------------------------\\n# Geometry definition: forward-facing step\\n# Domain: x in [-0.5, 3.0], y in [0, 1.0]\\n# Step located at x = 0.0, height = 0.2 (from y=0 to y=0.2)\\n# Inlet on left (x = -0.5), outlet on right (x = 3.0)\\n# Top wall (y = 1.0), bottom wall (y = 0, but step present at x in [0,3])\\n# Step face (x = 0, y in [0,0.2]) is a slip wall (obstacle)\\n# ---------------------------------------------------------------------------\\n\\n# Block vertices (z is single cell, 1 layer)\\n# Vertex numbering (z = 0 plane):\\n#  0: (-0.5, 0, 0)\\n#  1: ( 0.0, 0, 0)\\n#  2: ( 3.0, 0, 0)\\n#  3: (-0.5, 0.2, 0)\\n#  4: ( 0.0, 0.2, 0)\\n#  5: ( 3.0, 0.2, 0)\\n#  6: (-0.5, 1.0, 0)\\n#  7: ( 0.0, 1.0, 0)\\n#  8: ( 3.0, 1.0, 0)\\n\\nv0 = (-0.5, 0.0, 0.0)\\nv1 = (0.0, 0.0, 0.0)\\nv2 = (3.0, 0.0, 0.0)\\nv3 = (-0.5, 0.2, 0.0)\\nv4 = (0.0, 0.2, 0.0)\\nv5 = (3.0, 0.2, 0.0)\\nv6 =\""
+  },
+  "timings": {
+    "agent_s": 365.328,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2200",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nprob = om.Problem()\\n\\n# --- Add cycle components ---\\nprob.model.add_subsystem('fc', pyc.FlightConditions())\\nprob.model.add_subsystem('inlet', pyc.Inlet())\\nprob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, design=True))\\nprob.model.add_subsystem('burn', pyc.Combustor(design=True))\\nprob.model.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, design=True))\\nprob.model.add_subsystem('nozz', pyc.Nozzle(nozzType='CD', design=True))\\nprob.model.add_subsystem('shaft', pyc.Shaft())\\nprob.model.add_subsystem('perf', pyc.Performance())\\n\\n# --- Thermodynamics (TABULAR, AIR_JETA_TAB_SPEC) ---\\nprob.model.options['thermo_method'] = 'TABULAR'\\nprob.model.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\nprob.model.options['user_options'] = {'speed_type': 'Nmech'}\\n\\n# --- Inputs: SL static design ---\\nprob.model.set_input_defaults('fc.alt', 0.0, units='ft')\\nprob.model.set_input_defaults('fc.MN', 0.0)\\nprob.model.set_input_defaults('inlet.ram_recovery', 1.0)\\nprob.model.set_input_defaults('comp.map.PRdes', 13.5)\\nprob.model.set_input_defaults('comp.map.effDes', 0.9)\\nprob.model.set_input_defaults('burn.dPqP', 0.05)\\nprob.model.set_input_defaults('turb.map.effDes', 0.9)\\nprob.model.set_input_defaults('nozz.Cv', 0.99)\\nprob.model.set_input_defaults('shaft.Nmech', 8070.0, units='rpm')\\n\\n# --- Flow path connections ---\\nprob.model.connect('fc.Fl_O', 'inlet.Fl_I')\\nprob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\nprob.model.connect('comp.Fl_O', 'burn.Fl_I')\\nprob.model.connect('burn.Fl_O', 'turb.Fl_I')\\nprob.model.connect('turb.Fl_O', 'nozz.Fl_I')\\nprob.model.connect('nozz.Fl_O', 'fc.Fl_I')\\n\\n# --- Shaft connections ---\\nprob.model.connect('comp.trq', 'shaft.trq_0')\\nprob.model.connect('turb.trq', 'shaft.trq_1')\\n\\n# --- Performance connections ---\\nprob.model.connect('nozz.Fg', 'perf.Fn')\\nprob.model.connect('inlet.F_ram', 'perf.Fram')\\nprob.model.connect('burn.Wfuel', 'perf.Wfuel')\\nprob.model.connect('fc.alt', 'perf.alt')\\nprob.model.connect('fc.MN', 'perf.MN')\\n\\n# --- Design balances ---\\n# T4 balance: balance FAR to hit T4_target = 2200 degR\\nprob.model.add_subsystem('T4_target', om.IndepVarComp('T4', val=2200.0, units='degR'))\\nbal = prob.model.add_subsystem('bal', om.BalanceComp())\\nbal.add_balance('FAR', val=0.02, eq_units='degR',\\n                lhs_name='T4_target', rhs_name='burn.Fl_O:tot:T')\\nprob.model.connect('bal.FAR', 'burn.Fl_I:FAR')\\nprob.model.connect('T4_target.T4', 'bal.lhs:T4_target')\\n\\n# W balance: balance W to hit Fn_target = 11800 lbf\\nprob.model.add_subsystem('Fn_target', om.IndepVarComp('Fn', val=11800.0, units='lbf'))\\nbal_W = prob.model.add_subsystem('bal_W', om.BalanceComp())\\nbal_W.add_balance('W', val=100.0, units='lbm/s', eq_units='lbf',\\n                  lhs_name='Fn_target', rhs_name='Fn')\\nprob.model.connect('bal_W.W', 'fc.W')\\nprob.model.connect('nozz.Fg', 'bal_W.rhs:FN')\\nprob.model.connect('Fn_target.Fn', 'bal_W.lhs:Fn_target')\\n\\n# --- Setup and solve ---\\nprob.setup()\\nprob.run_model()\\n\\n# --- Extract design point results ---\\nFn_lbf = float(prob.get_val('nozz.Fg', units='lbf')[0])\\nWfuel_lbm_s = float(prob.get_val('burn.Wfuel', units='lbm/s')[0])\\nTSFC = float(prob.get_val('perf.TSFC')[0])\\nOPR = float(prob.get_val('comp.map.PR')[0])\\n\\nresult = {\\n    'Fn_lbf': Fn_lbf,\\n    'TSFC': TSFC,\\n    'OPR': OPR,\\n    'Wfuel_lbm_s': Wfuel_lbm_s,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(\\\"Design point results:\\\")\\nfor k, v in result.items():\\n    print(f\\\"  {k}: {v}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ption, another exception occurred:\\n\\nTraceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_6ctd3vpd/solve.py\\\", line 18, in <module>\\n    prob.model.options['thermo_method'] = 'TABULAR'\\n    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 510, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 240, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Group: Option 'thermo_method' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 145.822,
+    "setup_s": 0.0,
+    "grade_s": 1.281
+  },
+  "environment_digest": "sha256:1542aec1c75ffe8bbbbbe5a8c9723f831ded55f9c89c457c16ccb57779ee16a4",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.28s"
+  ]
+}

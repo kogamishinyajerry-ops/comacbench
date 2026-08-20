@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p070",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.72,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.86,
+  "artifacts": {
+    "code": "\"def get_gell_mann_matrices():\\n    \\\"\\\"\\\"Returns the 8 Gell-Mann matrices as numpy arrays.\\\"\\\"\\\"\\n    lam = [\\n        np.array([[0, 1, 0], [1, 0, 0], [0, 0, 0]], dtype=complex),\\n        np.array([[0, -1j, 0], [1j, 0, 0], [0, 0, 0]], dtype=complex),\\n        np.array([[1, 0, 0], [0, -1, 0], [0, 0, 0]], dtype=complex),\\n        np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], dtype=complex),\\n        np.array([[0, 0, -1j], [0, 0, 0], [1j, 0, 0]], dtype=complex),\\n        np.array([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=complex),\\n        np.array([[0, 0, 0], [0, 0, -1j], [0, 1j, 0]], dtype=complex),\\n        np.array([[1, 0, 0], [0, 1, 0], [0, 0, -2]], dtype=complex) / np.sqrt(3)\\n    ]\\n    return lam\\n\\n# Global variable to store the d tensor\\nD_TENSOR = None\\n\\ndef precompute_d_tensor():\\n    global D_TENSOR\\n    if D_TENSOR is None:\\n        lam = get_gell_mann_matrices()\\n        D_TENSOR = np.zeros((8, 8, 8), dtype=complex)\\n        for i in range(1, 9):\\n            for j in range(1, 9):\\n                for k in range(1, 9):\\n                    li = lam[i-1]\\n                    lj = lam[j-1]\\n                    lk = lam[k-1]\\n                    anticomm = li @ lj + lj @ li\\n                    prod = anticomm @ lk\\n                    d_val = (1/4) * np.trace(prod)\\n                    D_TENSOR[i-1, j-1, k-1] = d_val\\n    return D_TENSOR\\n\\ndef pmns_mixing_matrix(s12, s23, s13, dCP):\\n    '''Returns the 3x3 PMNS mixing matrix.\\n    Computes and returns the 3x3 complex PMNS mixing matrix\\n    parameterized by three rotation angles: theta_12, theta_23, theta_13,\\n    and one CP-violation phase, delta_CP.\\n    Input\\n    s12 : Sin(theta_12); float\\n    s23 : Sin(theta_23); float\\n    s13 : Sin(theta_13); float\\n    dCP : delta_CP in radians; float\\n    Output\\n    pmns: numpy array of floats with shape (3,3) containing the 3x3 PMNS mixing matrix\\n    '''\\n    c12 = np.sqrt(1 - s12**2)\\n    c23 = np.sqrt(1 - s23**2)\\n    c13 = np.sqrt(1 - s13**2)\\n    \\n    phase = np.exp(1j * dCP)\\n    phase_conj = np.exp(-1j * dCP)\\n    \\n    pmns = np.array([\\n        [c12*c13, s12*c13, s13*phase_conj],\\n        [-s12*c23 - c12*s23*s13*phase, c12*c23 - s12*s23*s13*phase, s23*c13],\\n        [s12*s23 - c12*c23*s13*phase, -c12*s23 - s12*c23*s13*phase, c23*c13]\\n    ], dtype=complex)\\n    \\n    return pmns\\n\\ndef hamiltonian_3nu(s12, s23, s13, dCP, D21, D31):\\n    '''Returns the energy-independent three-neutrino Hamiltonian for vacuum oscillations.\\n    Input\\n    s12 : Sin(theta_12); float\\n    s23 : Sin(theta_23); float\\n    s13 : Sin(theta_13); float\\n    dCP : delta_CP in radians; float\\n    D21 : Mass-squared difference Delta m^2_21; float\\n    D31 : Mass-squared difference Delta m^2_31; float\\n    Output\\n    hamiltonian: a list of lists containing the 3x3 Hamiltonian matrix; each inner list contains three complex numbers\\n    '''\\n    U = pmns_mixing_matrix(s12, s23, s13, dCP)\\n    D = np.diag([0, D21, D31])\\n    H = 0.5 * U @ D @ U.conj().T\\n    \\n    return H.tolist()\\n\\ndef hamiltonian_3nu_su3_coefficients(hamiltonian):\\n    '''Returns the h_k of the SU(3)-expansion of the 3nu Hamiltonian.\\n    Input\\n    hamiltonian: a list of lists containing the 3x3 Hamiltonian matrix; each inner list contains three complex numbers\\n    Output\\n    hks: a list containing the h_k coefficients of the 3nu Hamiltonian in the expansion using the Gell-Mann matrices (k=1 to k=8); a list of floats (possibly complex)\\n    '''\\n    H = np.array(hamiltonian, dtype=complex)\\n    \\n    h1 = np.real(H[0, 1])\\n    h2 = -np.imag(H[0, 1])\\n    h3 = 0.5 * (H[0, 0] - H[1, 1])\\n    h4 = np.real(H[0, 2])\\n    h5 = -np.imag(H[0, 2])\\n    h6 = np.real(H[1, 2])\\n    h7 = -np.imag(H[1, 2])\\n    h8 = (np.sqrt(3)/6) * (H[0, 0] + H[1, 1] - 2*H[2, 2])\\n    \\n    hks = [h1, h2, h3, h4, h5, h6, h7, h8]\\n    return hks\\n\\ndef tensor_d(i, j, k):\\n    '''Returns the tensor d_ijk of the SU(3) algebra.\\n    Input\\n    i: the first index; int\\n    j: the second index; int\\n    k: the third index; int\\n    Output\\n    result: the value of d_ijk for given indices i, j, and k; float\\n    '''\\n    \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 18, \"cases_total\": 25, \"steps_all_pass\": 6, \"steps_total\": 8, \"per_step\": {\"70.1\": {\"pass\": 3, \"total\": 3}, \"70.2\": {\"pass\": 3, \"total\": 3}, \"70.3\": {\"pass\": 3, \"total\": 3}, \"70.4\": {\"pass\": 3, \"total\": 3}, \"70.5\": {\"pass\": 3, \"total\": 3}, \"70.6\": {\"pass\": 3, \"total\": 3}, \"70.7\": {\"pass\": 0, \"total\": 3}, \"70.8\": {\"pass\": 0, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 51.452,
+    "setup_s": 0.0,
+    "grade_s": 1.215
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.67s"
+  ]
+}

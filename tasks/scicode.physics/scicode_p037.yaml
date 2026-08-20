@@ -1,0 +1,441 @@
+id: scicode_p037
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p037.md
+  prompt_sha256: 1750a2cc7e7f22ec1ad292b067d19b681077ca8808f7d7dced1a0fd54ba6bcd4
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '37'
+  problem_name: ray_optics_spherical_aberration
+  split: test
+  n_steps: 3
+  n_cases: 10
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: import numpy as np
+  steps:
+  - step_id: '37.1'
+    n_cases: 3
+    test_cases:
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(calculate_paraxial(h1, r1, r2, r3, d1, d2, nD1, nD1, nD3,
+      n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(calculate_paraxial(h1, r1, r2, r3, d1, d2, nF1, nF1, nF3,
+      n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(calculate_paraxial(h1, r1, r2, r3, d1, d2, nC1, nC1, nC3,
+      n), target)'
+  - step_id: '37.2'
+    n_cases: 3
+    test_cases:
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(calculate_non_paraxial(h1, r1, r2, r3, d1, d2, nD1, nD1,
+      nD3, n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(calculate_non_paraxial(h1, r1, r2, r3, d1, d2, nF1, nF1,
+      nF3, n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(calculate_non_paraxial(h1, r1, r2, r3, d1, d2, nC1, nC1,
+      nC3, n), target)'
+  - step_id: '37.3'
+    n_cases: 4
+    test_cases:
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(compute_LC(h1, r1, r2, r3, d1, d2, nD1, nD1, nD3, n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(compute_LC(h1, r1, r2, r3, d1, d2, nF1, nF1, nF3, n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      assert np.allclose(compute_LC(h1, r1, r2, r3, d1, d2, nC1, nC1, nC3, n), target)'
+    - 'n = 1.000       # (float) Refractive index of air
+
+      nD1 = 1.51470   # (float) Refractive index of the first lens material for D
+      light
+
+      nD3 = 1.67270   # (float) Refractive index of the third lens material for D
+      light
+
+      nF1 = 1.52067   # (float) Refractive index of the first lens material for F
+      light
+
+      nF3 = 1.68749   # (float) Refractive index of the third lens material for F
+      light
+
+      nC1 = 1.51218   # (float) Refractive index of the first lens material for C
+      light
+
+      nC3 = 1.66662   # (float) Refractive index of the third lens material for C
+      light
+
+      r1 = 61.857189  # (float) Radius of curvature of the first lens surface
+
+      r2 = -43.831719 # (float) Radius of curvature of the second lens surface
+
+      r3 = -128.831547 # (float) Radius of curvature of the third lens surface
+
+      d1 = 1.9433     # (float) Separation distance between first and second surfaces
+      (lens thickness)
+
+      d2 = 1.1        # (float) Separation distance between second and third surfaces
+
+      hm = 20         # (float) Maximum aperture height
+
+      h1 = np.linspace(0.01, hm, 1000)
+
+      LCC= compute_LC(h1, r1, r2, r3, d1, d2, nC1, nC1, nC3, n)
+
+      assert (LCC[0]<LCC[-1]) == target'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

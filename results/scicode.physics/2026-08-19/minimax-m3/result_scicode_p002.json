@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p002",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.25,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.625,
+  "artifacts": {
+    "code": "\"def simulate_light_diffraction(n, d, RL, R0, lambda_):\\n    '''\\n    Function to simulate light diffraction through a lens and plot the intensity distribution.\\n    Inputs:\\n    n (float): Refractive index of the lens material, e.g., 1.5062 for K9 glass.\\n    d (float): Center thickness of the lens in millimeters (mm).\\n    RL (float): Radius of curvature of the lens in millimeters (mm), positive for convex surfaces.\\n    R0 (float): Radius of the incident light beam in millimeters (mm).\\n    lambda_ (float): Wavelength of the incident light in millimeters (mm), e.g., 1.064e-3 mm for infrared light.\\n    Outputs:\\n    Ie (numpy.ndarray): A 2D array of intensity values of the diffraction pattern where Ie[i][j] is the ith x and jth y.\\n    '''\\n    # Discretization parameters\\n    mr2 = 51   # radial points for output grid\\n    ne2 = 61   # angular points for output grid\\n    mr0 = 81   # radial points for initial field integration\\n\\n    # Compute focal length of the symmetric biconvex lens using thick lens formula\\n    # 1/f = (n-1)*(2/RL - (n-1)*d/(n*RL^2))\\n    term = (n - 1.0) * (2.0 / RL - (n - 1.0) * d / (n * RL**2))\\n    f = 1.0 / term\\n\\n    # Incident Gaussian beam parameters (waist at lens, Z1 = 0)\\n    w0 = R0\\n    b1 = 2.0 * np.pi * w0**2 / lambda_\\n\\n    # Position of the new waist after the lens (Z2)\\n    Z1 = 0.0\\n    Z2 = f - f**2 * (f - Z1) / ((f - Z1)**2 + (b1 / 2.0)**2)\\n\\n    # New waist radius\\n    b2 = b1 * f**2 / ((f - Z1)**2 + (b1 / 2.0)**2)\\n    w20 = np.sqrt(lambda_ * b2 / (2.0 * np.pi))\\n\\n    # Wave number\\n    k = 2.0 * np.pi / lambda_\\n\\n    # Propagation distance (to the new waist)\\n    z = Z2\\n\\n    # Integration grids\\n    r_prime = np.linspace(0.0, R0, mr0)                     # radial points for initial field\\n    theta_prime = np.linspace(0.0, 2.0 * np.pi, ne2, endpoint=False)  # angular points for integration\\n\\n    # Incident Gaussian field amplitude at lens plane (z=0)\\n    E_inc = (1.0 / R0) * np.exp(-r_prime**2 / R0**2)\\n\\n    # Lens thickness profile for a symmetric biconvex lens\\n    # t(r) = d - 2*(RL - sqrt(RL^2 - r^2)) for r <= RL, else 0\\n    t = np.where(r_prime <= RL,\\n                 d - 2.0 * (RL - np.sqrt(RL**2 - r_prime**2)),\\n                 0.0)\\n\\n    # Phase shift imparted by the lens\\n    phi = k * (n - 1.0) * t\\n    T_lens = np.exp(1j * phi)\\n\\n    # Precompute quadratic phase factor for propagation\\n    exp_term = np.exp(1j * k * r_prime**2 / (2.0 * z))\\n\\n    # Fresnel propagation factor\\n    factor = np.exp(1j * k * z) / (1j * lambda_ * z)\\n\\n    # Output grid\\n    r_out = np.linspace(0.0, R0, mr2)\\n    theta_out = np.linspace(0.0, 2.0 * np.pi, ne2, endpoint=False)\\n\\n    # Initialize intensity array\\n    Ie = np.zeros((mr2, ne2), dtype=float)\\n\\n    # Loop over output radial and angular points\\n    for i in range(mr2):\\n        r_i = r_out[i]\\n        # Factor including the quadratic phase for the output radius\\n        factor2 = factor * np.exp(1j * k * r_i**2 / (2.0 * z))\\n\\n        for j in range(ne2):\\n            theta_j = theta_out[j]\\n\\n            # Compute angular integral for each r' point\\n            # Integrand: exp(-i k r_i r' cos(theta' - theta_j) / z)\\n            cos_term = np.cos(theta_prime - theta_j)\\n            exponent = -1j * k * r_i * r_prime[:, None] * cos_term / z\\n            integrand = np.exp(exponent)\\n\\n            # Integrate over theta' using Simpson's rule\\n            angular_int = simps(integrand, theta_prime, axis=1)  # shape (mr0,)\\n\\n            # Outer integrand: E_inc * T_lens * exp_term * angular_int * r'\\n            outer = E_inc * T_lens * exp_term * angular_int * r_prime\\n\\n            # Integrate over r' using Simpson's rule\\n            E_out = simps(outer, r_prime)\\n\\n            # Apply remaining quadratic phase factor\\n            E_out_total = factor2 * E_out\\n\\n            # Intensity (modulus squared)\\n            Ie[i, j] = np.abs(E_out_total)**2\\n\\n    return Ie\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 1, \"cases_total\": 4, \"steps_all_pass\": 0, \"steps_total\": 1, \"per_step\": {\"2.1\": {\"pass\": 1, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 240.212,
+    "setup_s": 0.0,
+    "grade_s": 4.597
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 2.31s"
+  ]
+}

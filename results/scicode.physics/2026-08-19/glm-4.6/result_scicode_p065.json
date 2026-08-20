@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p065",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef tensor(*args):\\n    '''Takes the tensor product of an arbitrary number of matrices/vectors.\\n    Input:\\n    args: any number of nd arrays of floats, corresponding to input matrices\\n    Output:\\n    M: the tensor product (kronecker product) of input matrices, 2d array of floats\\n    '''\\n    result = np.array([[1.0]])\\n    for arg in args:\\n        if arg.ndim == 1:\\n            arg = arg[:, np.newaxis]\\n        result = np.kron(result, arg)\\n    return result\\n\\ndef apply_channel(K, rho, sys=None, dim=None):\\n    '''Applies the channel with Kraus operators in K to the state rho on\\n    systems specified by the list sys. The dimensions of the subsystems of\\n    rho are given by dim.\\n    Inputs:\\n    K: list of 2d array of floats, list of Kraus operators\\n    rho: 2d array of floats, input density matrix\\n    sys: list of int or None, list of subsystems to apply the channel, None means full system\\n    dim: list of int or None, list of dimensions of each subsystem, None means full system\\n    Output:\\n    matrix: output density matrix of floats\\n    '''\\n    if sys is None:\\n        out = np.zeros_like(rho)\\n        for Ki in K:\\n            out += Ki @ rho @ Ki.T\\n        return out\\n    else:\\n        N = len(dim)\\n        I_list = [np.eye(d, dtype=float) for d in dim]\\n        out = np.zeros_like(rho)\\n        for combo in itertools.product(K, repeat=len(sys)):\\n            ops = [I_list[i] for i in range(N)]\\n            for idx, sub in enumerate(sys):\\n                ops[sub] = combo[idx]\\n            O = tensor(*ops)\\n            out += O @ rho @ O.T\\n        return out\\n\\ndef channel_output(input_state, channel1, channel2=None):\\n    '''Returns the channel output\\n    Inputs:\\n        input_state: density matrix of the input 2n qubit state, ( 2**(2n), 2**(2n) ) array of floats\\n        channel1: kruas operators of the first channel, list of (2,2) array of floats\\n        channel2: kruas operators of the second channel, list of (2,2) array of floats\\n    Output:\\n        output: the channel output, ( 2**(2n), 2**(2n) ) array of floats\\n    '''\\n    if channel2 is None:\\n        channel2 = channel1\\n    total_qubits = int(np.log2(input_state.shape[0]))\\n    n = total_qubits // 2\\n    dim = [2] * total_qubits\\n    state = apply_channel(channel1, input_state, sys=list(range(n)), dim=dim)\\n    state = apply_channel(channel2, state, sys=list(range(n, total_qubits)), dim=dim)\\n    return state\\n\\ndef ghz_protocol(state):\\n    '''Returns the output state of the protocol\\n    Input:\\n    state: 2n qubit input state, 2^2n by 2^2n array of floats, where n is determined from the size of the input state\\n    Output:\\n    post_selected: the output state\\n    '''\\n    total_qubits = int(np.log2(state.shape[0]))\\n    n = total_qubits // 2\\n    d = 2**n\\n    V = np.zeros\""
+  },
+  "timings": {
+    "agent_s": 361.658,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

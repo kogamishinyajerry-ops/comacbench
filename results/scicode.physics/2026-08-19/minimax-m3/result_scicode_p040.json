@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p040",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.66665,
+  "artifacts": {
+    "code": "\"def second_diff(target, u, dx):\\n    \\\"\\\"\\\"\\n    Inputs:\\n    target : Target cell index, int\\n    u      : Approximated solution value, array of floats with minimum length of 5\\n    dx     : Spatial interval, float\\n    Outputs:\\n    deriv  : Second order derivative of the given target cell, float\\n    \\\"\\\"\\\"\\n    # Use ghost cells with values equal to the nearest cell (Neumann boundary condition)\\n    u_padded = np.pad(u, (1, 1), mode='edge')\\n    idx = target + 1\\n    deriv = (u_padded[idx + 1] - 2 * u_padded[idx] + u_padded[idx - 1]) / dx**2\\n    return deriv\\n\\n\\ndef Strang_splitting(u, dt, dx, alpha):\\n    \\\"\\\"\\\"\\n    Inputs:\\n    u : solution, array of float\\n    dt: time interval , float\\n    dx: sptial interval, float\\n    alpha: diffusive coefficient, float\\n    Outputs:\\n    u : solution, array of float\\n    \\\"\\\"\\\"\\n    # Half-step diffusion\\n    diff = np.array([second_diff(i, u, dx) for i in range(len(u))])\\n    u = u + (dt / 2) * alpha * diff\\n\\n    # Full-step reaction\\n    u = u + dt * (u**2)\\n\\n    # Half-step diffusion again\\n    diff = np.array([second_diff(i, u, dx) for i in range(len(u))])\\n    u = u + (dt / 2) * alpha * diff\\n\\n    return u\\n\\n\\ndef solve(CFL, T, dt, alpha):\\n    \\\"\\\"\\\"\\n    Inputs:\\n    CFL : Courant-Friedrichs-Lewy condition number\\n    T   : Max time, float\\n    dt  : Time interval, float\\n    alpha : diffusive coefficient , float\\n    Outputs:\\n    u   : solution, array of float\\n    \\\"\\\"\\\"\\n    # Compute spatial step from CFL condition: CFL = alpha * dt / dx^2\\n    dx = np.sqrt(alpha * dt / CFL)\\n\\n    # Create spatial grid from -1 to 1\\n    x = np.arange(-1, 1 + dx, dx)\\n\\n    # Initial condition: u = -1 for x < 0, u = 1 for x > 0, u = 0 at x = 0\\n    u = np.where(x < 0, -1.0, np.where(x > 0, 1.0, 0.0))\\n\\n    # Time integration\\n    t = 0.0\\n    while t < T:\\n        # Ensure final step does not exceed T\\n        step = dt\\n        if t + step > T:\\n            step = T - t\\n        u = Strang_splitting(u, step, dx, alpha)\\n        t += step\\n\\n    return u\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 9, \"steps_all_pass\": 1, \"steps_total\": 3, \"per_step\": {\"40.1\": {\"pass\": 3, \"total\": 3}, \"40.2\": {\"pass\": 0, \"total\": 3}, \"40.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 64.24,
+    "setup_s": 0.0,
+    "grade_s": 0.816
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.41s"
+  ]
+}

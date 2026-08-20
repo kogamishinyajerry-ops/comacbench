@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Geometry parameters from the 3D squarebend tutorial\\nW = 50        # half-width in y\\nH = 50        # half-height in z\\nr_in = 50     # inlet radius offset\\ninlet_x = -50\\nmid_x = 25\\noutlet_x = -500\\noutlet_y_offset = -75\\n\\n# Helper functions\\ndef write_file(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\ndef write_block_mesh_dict():\\n    content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    // Inlet (plane x = -50)\\n    (-50  25  25)   // 0\\n    (-50  25 -25)   // 1\\n    (-50 -25 -25)   // 2\\n    (-50 -25  25)   // 3\\n    // Mid-bend upstream (plane x = 25)\\n    (25  25  25)    // 4\\n    (25  25 -25)    // 5\\n    (25 -25 -25)    // 6\\n    (25 -25  25)    // 7\\n    // Outlet (plane x = -500, shifted in y by -75)\\n    (-500 -50  25)  // 8\\n    (-500 -50 -25)  // 9\\n    (-500 -100 -25) // 10\\n    (-500 -100  25) // 11\\n);\\n\\nblocks\\n(\\n    // Block 1: Inlet section (-50 to 25) - straight pipe\\n    hex (0 1 2 3 4 5 6 7) (10 10 10) simpleGrading (1 1 1)\\n    // Block 2: Bend section (25 to -500) - curved part\\n    hex (4 5 6 7 8 9 10 11) (20 10 10) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\""
+  },
+  "timings": {
+    "agent_s": 215.522,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_shallowwaterwithsquarebump_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Domain and grid\\nLx, Ly, Lz = 1.0, 1.0, 0.1\\nNx, Ny, Nz = 20, 20, 1\\nendTime = 100.0\\ndeltaT = 0.1\\nwriteInterval = 1.0\\nsolver = \\\"shallowWaterFoam\\\"\\n\\n# Helpers\\ndef write(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# blockMeshDict: single hex block with a 20x20x1 grid (1 cell in z => 20x20x1 points => 19x19x1 cells => use simpleGrading 1)\\nblock_mesh = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Website:  www.openfoam.com                      |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({Lx} 0 0)\\n    ({Lx} {Ly} 0)\\n    (0 {Ly} 0)\\n    (0 0 {Lz})\\n    ({Lx} 0 {Lz})\\n    ({Lx} {Ly} {Lz})\\n    (0 {Ly} {Lz})\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({Nx} {Ny} {Nz}) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            ((0 4 7 3))\\n        );\\n    }}\\n    outlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            ((1 2 6 5))\\n        );\\n    }}\\n    bottom\\n    {{\\n        type wall;\\n        faces\\n        (\\n            ((0 1 2\""
+  },
+  "timings": {
+    "agent_s": 248.977,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:4e7c4e53ed2f00e635b19e111a87c01850b90b2a28b5d78cd597eb982f2029d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

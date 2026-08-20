@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p033",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.66665,
+  "artifacts": {
+    "code": "\"def calc_hamiltonian(kx, ky, a, t1, t2, phi, m):\\n    '''Function to generate the Haldane Hamiltonian with a given set of parameters.\\n    Inputs:\\n    kx : float\\n        The x component of the wavevector.\\n    ky : float\\n        The y component of the wavevector.\\n    a : float\\n        The lattice spacing, i.e., the length of one side of the hexagon.\\n    t1 : float\\n        The nearest-neighbor coupling constant.\\n    t2 : float\\n        The next-nearest-neighbor coupling constant.\\n    phi : float\\n        The phase ranging from -π to π.\\n    m : float\\n        The on-site energy.\\n    Output:\\n    hamiltonian : matrix of shape(2, 2)\\n        The Haldane Hamiltonian on a hexagonal lattice.\\n    '''\\n    sqrt3 = sqrt(3)\\n    \\n    # Calculate d0\\n    d0 = 2*t2*cos(phi) * (cos(sqrt3*kx*a) + cos(-sqrt3*kx*a/2 + 3*ky*a/2) + cos(-sqrt3*kx*a/2 - 3*ky*a/2))\\n    \\n    # Calculate d1\\n    d1 = t1 * (cos(ky*a) + cos(sqrt3*kx*a/2 - ky*a/2) + cos(-sqrt3*kx*a/2 - ky*a/2))\\n    \\n    # Calculate d2\\n    d2 = t1 * (sin(ky*a) + sin(sqrt3*kx*a/2 - ky*a/2) + sin(-sqrt3*kx*a/2 - ky*a/2))\\n    \\n    # Calculate d3\\n    d3 = m - 2*t2*sin(phi) * (sin(sqrt3*kx*a) + sin(-sqrt3*kx*a/2 + 3*ky*a/2) + sin(-sqrt3*kx*a/2 - 3*ky*a/2))\\n    \\n    # Construct Hamiltonian: H = d0*I + d1*sigma1 + d2*sigma2 + d3*sigma3\\n    h00 = d0 + d3\\n    h01 = d1 - 1j*d2\\n    h10 = d1 + 1j*d2\\n    h11 = d0 - d3\\n    \\n    hamiltonian = np.array([[h00, h01], [h10, h11]])\\n    return hamiltonian\\n\\n\\ndef compute_chern_number(delta, a, t1, t2, phi, m):\\n    '''Function to compute the Chern number with a given set of parameters.\\n    Inputs:\\n    delta : float\\n        The grid size in kx and ky axis for discretizing the Brillouin zone.\\n    a : float\\n        The lattice spacing, i.e., the length of one side of the hexagon.\\n    t1 : float\\n        The nearest-neighbor coupling constant.\\n    t2 : float\\n        The next-nearest-neighbor coupling constant.\\n    phi : float\\n        The phase ranging from -π to π.\\n    m : float\\n        The on-site energy.\\n    Output:\\n    chern_number : float\\n        The Chern number, a real number that should be close to an integer. The imaginary part is cropped out due to the negligible magnitude.\\n    '''\\n    kx0 = 2*sqrt(3)*pi/(3*a)\\n    ky0 = 4*pi/(3*a)\\n    \\n    Nx = int(round(kx0/delta))\\n    Ny = int(round(ky0/delta))\\n    \\n    kx_vals = np.linspace(0, kx0, Nx)\\n    ky_vals = np.linspace(0, ky0, Ny)\\n    \\n    # Compute eigenvectors for the lower band at each k-point\\n    wavefunctions = np.zeros((Nx, Ny, 2), dtype=complex)\\n    \\n    for i in range(Nx):\\n        for j in range(Ny):\\n            H = calc_hamiltonian(kx_vals[i], ky_vals[j], a, t1, t2, phi, m)\\n            eigvals, eigvecs = np.linalg.eigh(H)\\n            wavefunctions[i, j] = eigvecs[:, 0]\\n    \\n    # Compute U(1) link variables\\n    Ux = np.zeros((Nx, Ny), dtype=complex)\\n    Uy = np.zeros((Nx, Ny), dtype=complex)\\n    \\n    for i in range(Nx):\\n        for j in range(Ny):\\n            ip1 = (i + 1) % Nx\\n            jp1 = (j + 1) % Ny\\n            \\n            overlap_x = np.vdot(wavefunctions[i, j], wavefunctions[ip1, j])\\n            Ux[i, j] = overlap_x / abs(overlap_x)\\n            \\n            overlap_y = np.vdot(wavefunctions[i, j], wavefunctions[i, jp1])\\n            Uy[i, j] = overlap_y / abs(overlap_y)\\n    \\n    # Compute Berry curvature flux\\n    F = np.zeros((Nx, Ny), dtype=complex)\\n    \\n    for i in range(Nx):\\n        for j in range(Ny):\\n            ip1 = (i + 1) % Nx\\n            jp1 = (j + 1) % Ny\\n            \\n            F[i, j] = np.log(Ux[i, j] * Uy[ip1, j] / (Ux[i, jp1] * Uy[i, j]))\\n    \\n    # Sum fluxes and compute Chern number\\n    total_flux = np.sum(F)\\n    chern = total_flux / (2 * np.pi * 1j)\\n    \\n    return chern.real\\n\\n\\ndef compute_chern_number_grid(delta, a, t1, t2, N):\\n    '''Function to calculate the Chern numbers by sweeping the given set of parameters and returns the results along with the corresponding swept next-nearest-neighbor coupling constant and phase.\\n    Inputs:\\n    delta : float\\n        The grid size in kx and \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 9, \"steps_all_pass\": 1, \"steps_total\": 3, \"per_step\": {\"33.1\": {\"pass\": 3, \"total\": 3}, \"33.2\": {\"pass\": 0, \"total\": 3}, \"33.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 187.848,
+    "setup_s": 0.0,
+    "grade_s": 33.383
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 16.68s"
+  ]
+}

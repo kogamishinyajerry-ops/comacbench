@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_1d_diffusion",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9765,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.98825,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Physical parameters\\nnu = 0.3\\nLx = 2.0\\nLt = 0.0333\\n\\n# Spatial discretization\\nNx = 101  # dx = 0.02\\ndx = Lx / (Nx - 1)\\nx = np.linspace(0, Lx, Nx)\\n\\n# Time stepping (FTCS stability requires r = nu*dt/dx^2 <= 0.5)\\nr_max = 0.4\\ndt_target = r_max * dx**2 / nu\\nnt = int(np.ceil(Lt / dt_target))\\ndt = Lt / nt\\nr = nu * dt / dx**2\\n\\n# Initial condition\\nu = np.ones(Nx)\\nu[(x >= 0.5) & (x <= 1.0)] = 2.0\\n\\n# Time integration using FTCS scheme\\nfor n in range(nt):\\n    u_new = u.copy()\\n    u_new[1:-1] = u[1:-1] + r * (u[2:] - 2.0 * u[1:-1] + u[:-2])\\n    # Dirichlet boundary conditions (matching background value)\\n    u_new[0] = 1.0\\n    u_new[-1] = 1.0\\n    u = u_new\\n\\n# Save final solution\\nnp.save('u.npy', u)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.006778938493598919, \"MAE\": 0.05635161443144612, \"RMSE\": 0.08233430933455942, \"Cosine\": 0.9980523056836853, \"R2\": 0.9548695224514103, \"NMSE\": 0.003931243292469178, \"score01\": 0.9765}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.06}"
+  },
+  "timings": {
+    "agent_s": 40.722,
+    "setup_s": 0.0,
+    "grade_s": 0.117
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.06s",
+    "missing=[] nonfinite=[]"
+  ]
+}

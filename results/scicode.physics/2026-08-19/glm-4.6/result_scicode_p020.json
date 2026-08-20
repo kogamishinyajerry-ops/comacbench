@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p020",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def bose_distribution(freq, temp):\\n    '''This function defines the bose-einstein distribution\\n    Input\\n    freq: a 2D numpy array of dimension (nqpts, nbnds) that contains the phonon frequencies; each element is a float. For example, freq[0][1] is the phonon frequency of the 0th q point on the 1st band\\n    temp: a float representing the temperature of the distribution\\n    Output\\n    nbose: A 2D array of the same shape as freq, representing the Bose-Einstein distribution factor for each frequency.\\n    '''\\n    if temp == 0:\\n        return np.zeros_like(freq)\\n    else:\\n        THz_to_eV = 0.004135667\\n        kB_eV = 8.617333262145e-5\\n        energy_eV = freq * THz_to_eV\\n        x = energy_eV / (kB_eV * temp)\\n        nbose = 1.0 / (np.exp(x) - 1.0)\\n        return nbose\\n\\ndef phonon_angular_momentum(freq, polar_vec, temp):\\n    '''    Calculate the phonon angular momentum based on predefined axis orders: alpha=z, beta=x, gamma=y.\\n        Input\\n        freq: a 2D numpy array of dimension (nqpts, nbnds) that contains the phonon frequencies; each element is a float. For example, freq[0][1] is the phonon frequency of the 0th q point on the 1st band\\n        polar_vec: a numpy array of shape (nqpts, nbnds, natoms, 3) that contains the phonon polarization vectors; each element is a numpy array of 3 complex numbers. \\n        nqpts is the number of k points. nbnds is the number of bands. natoms is the number of atoms. For example, polar_vec[0][1][2][:] represents the 1D array of x,y,z components of the \\n        polarization vector of the 0th q point of the 1st band of the 2nd atom.\\n        temp: a float representing the temperature of the distribution in Kelvin\\n        Output\\n        momentum: A 3D array containing the mode decomposed phonon angular momentum. The dimension is (3, nqpts, nbnds). For example, momentum[0][1][2] is the x-component\\n    of the phonon angular momentum of the 1st q point on the 2nd band\\n        Notes:\\n        - Angular momentum values are in units of ħ (reduced Planck constant).\\n        \\n    '''\\n    n = bose_distribution(freq, temp)\\n    eps = polar_vec\\n    # l_z = 2 * Im( sum_i eps_i^x* eps_i^y )\\n    sum_xstar_y = np.sum(eps[..., 0].conj() * eps[..., 1], axis=2)\\n    l_z = 2.0 * np.imag(sum_xstar_y)\\n    # l_x = 2 * Im( sum_i eps_i^y* eps_i^z )\\n    sum_ystar_z = np.sum(eps[..., 1].conj() * eps[..., 2], axis=2)\\n    l_x = 2.0 * np.imag(sum_ystar_z)\\n    # l_y = 2 * Im( sum_i eps_i^z* eps_i^x )\\n    sum_zstar_x = np.sum(eps[..., 2].conj() * eps[..., 0], axis=2)\\n    l_y = 2.0 * np.imag(sum_zstar_x)\\n    factor = n + 0.5\\n    l_x_contrib = factor * l_x\\n    l_y_contrib = factor * l_y\\n    l_z_contrib = factor * l_z\\n    momentum = np.stack([l_x_contrib, l_y_contrib, l_z_contrib], axis=0)\\n    return momentum\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 6, \"cases_total\": 6, \"steps_all_pass\": 2, \"steps_total\": 2, \"per_step\": {\"20.1\": {\"pass\": 3, \"total\": 3}, \"20.2\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 354.821,
+    "setup_s": 0.0,
+    "grade_s": 0.821
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.41s"
+  ]
+}

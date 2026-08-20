@@ -1,0 +1,13 @@
+Context [1]:
+Within NASA, four UAM concept vehicles were initially developed by the Revolutionary Vertical Lift Technology (RVLT) Program to focus and guide research activities.[3, 4] These vehicles, shown in Fig. 1, differ significantly in their design, size, payload, range, propulsion system and operation. The concept on the left is a quadrotor vehicle designed to carry a single passenger over a short 50 nm range. Because of this short range and small size, it is anticipated that the propulsion system for this vehicle would be all-electric. The two vehicle on the right are larger with the ability to carry six passengers on multiple flights before needing refueling. The side-by-side rotor concept (2nd from right) is envisioned to have a hybrid propulsion system with some power produced by energy stored in batteries with the rest coming from turboshaft engines while the Lift+Cruise concept (right) is a candidate for either electric or turboelectric propulsion systems. Lastly, the largest concept is a tiltwing design (2nd from left) capable of carrying 15 passengers on eight 50 nm flight segments. The propulsion system for this concept is expected to be a turboelectric design where a single turboshaft engine generates electricity which is transmitted to four electric motor driven rotors/propellers. It is this last concept, the turboelectric tiltwing, which will serve as the demonstration example in this paper.
+
+Context [2]:
+The initial studies to develop these UAM concept vehicle designs applied a set of existing rotorcraft design and analysis tools in a traditional design process. Overall, the the objectives of these studies were to sufficiently refine the design such that crucial technologies and research needs could be identified. As a result, the generated concept designs revealed several areas of further research which are required to evolve and mature the designs were identified. These areas included improving the modeling and assumptions for the propulsion system, vehicle weights, aerodynamics and acoustics.[3] Furthermore, it was identified that the traditional design process needs to be modified to perform an integrated multidisciplinary environment to optimize these concepts to further improve the overall design
+
+Question: What is the maximum range of the tiltwing concept?
+
+Answer using ONLY the information in the contexts above.
+Respond EXACTLY in this three-line format:
+ANSWER: <your answer in one short sentence; write REFUSED if the contexts do not contain the answer>
+BASIS: <report | computed | inferred>  (report = stated in the contexts; computed = derived by calculation; inferred = your own inference)
+CITATION: <the context number(s) you used or checked, e.g. [1] or [1,2]>

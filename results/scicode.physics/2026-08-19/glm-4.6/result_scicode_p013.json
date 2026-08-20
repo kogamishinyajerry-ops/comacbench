@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p013",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef partial_derivs_vec(fct, delta):\\n    nx, ny, nz = fct.shape\\n    dx = delta\\n    dy = delta\\n    dz = delta\\n    \\n    deriv_x = np.zeros_like(fct)\\n    deriv_y = np.zeros_like(fct)\\n    deriv_z = np.zeros_like(fct)\\n\\n    # Interior (central difference)\\n    if nx >= 3:\\n        deriv_x[1:-1, :, :] = (fct[2:, :, :] - fct[:-2, :, :]) / (2 * dx)\\n        # Boundary x (second order one-sided)\\n        deriv_x[0, :, :] = (-3 * fct[0, :, :] + 4 * fct[1, :, :] - fct[2, :, :]) / (2 * dx)\\n        deriv_x[-1, :, :] = (3 * fct[-1, :, :] - 4 * fct[-2, :, :] + fct[-3, :, :]) / (2 * dx)\\n    \\n    if ny >= 3:\\n        deriv_y[:, 1:-1, :] = (fct[:, 2:, :] - fct[:, :-2, :]) / (2 * dy)\\n        # Boundary y\\n        deriv_y[:, 0, :] = (-3 * fct[:, 0, :] + 4 * fct[:, 1, :] - fct[:, 2, :]) / (2 * dy)\\n        deriv_y[:, -1, :] = (3 * fct[:, -1, :] - 4 * fct[:, -2, :] + fct[:, -3, :]) / (2 * dy)\\n\\n    if nz >= 3:\\n        deriv_z[:, :, 1:-1] = (fct[:, :, 2:] - fct[:, :, :-2]) / (2 * dz)\\n        # Boundary z\\n        deriv_z[:, :, 0] = (-3 * fct[:, :, 0] + 4 * fct[:, :, 1] - fct[:, :, 2]) / (2 * dz)\\n        deriv_z[:, :, -1] = (3 * fct[:, :, -1] - 4 * fct[:, :, -2] + fct[:, :, -3]) / (2 * dz)\\n        \\n    return deriv_x, deriv_y, deriv_z\\n\\ndef laplace(fct, delta):\\n    nx, ny,\""
+  },
+  "timings": {
+    "agent_s": 418.734,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

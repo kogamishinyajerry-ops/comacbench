@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p038",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def cross(a, b):\\n    '''Calculates the cross product of the input vectors.\\n    Input:\\n    a (numpy array): Vector a.\\n    b (numpy array): Vector b.\\n    Output:\\n    t (numpy array): The cross product of a and b.\\n    '''\\n    return np.array([a[1]*b[2] - a[2]*b[1],\\n                     a[2]*b[0] - a[0]*b[2],\\n                     a[0]*b[1] - a[1]*b[0]])\\n\\ndef reciprocal_3D(a1, a2, a3):\\n    '''Calculates the 3D reciprocal vectors given the input.\\n    Input:\\n    a1 (numpy array): Vector 1.\\n    a2 (numpy array): Vector 2.\\n    a3 (numpy array): Vector 3.\\n    Returns:\\n    b_i (list of numpy arrays): The collection of reciprocal vectors.\\n    '''\\n    cross_a2a3 = cross(a2, a3)\\n    cross_a3a1 = cross(a3, a1)\\n    cross_a1a2 = cross(a1, a2)\\n    volume = np.dot(a1, cross_a2a3)\\n    factor = 2 * np.pi / volume\\n    b1 = factor * cross_a2a3\\n    b2 = factor * cross_a3a1\\n    b3 = factor * cross_a1a2\\n    return [b1, b2, b3]\\n\\ndef reciprocal(*args):\\n    '''Computes the reciprocal vector(s) based on the input vector(s).\\n    Input:\\n    *arg (numpy array(s)): some vectors, with the amount uncertain within the range of [1, 2, 3]\\n    Output:\\n    rec (list of numpy array(s)): The collection of all the reciprocal vectors.\\n    '''\\n    n = len(args)\\n    if n == 1:\\n        a = args[0]\\n        b = (2 * np.pi * a) / np.dot(a, a)\\n        return [b]\\n    elif n == 2:\\n        a1, a2 = args\\n        n_vec = cross(a1, a2)\\n        area = np.linalg.norm(n_vec)\\n        if area == 0:\\n            raise ValueError(\\\"Input vectors are collinear, cannot define a 2D lattice.\\\")\\n        n_unit = n_vec / area\\n        cross_a2_n = cross(a2, n_unit)\\n        cross_n_a1 = cross(n_unit, a1)\\n        denom = np.dot(a1, cross_a2_n)  # equals area mathematically\\n        b1 = (2 * np.pi * cross_a2_n) / denom\\n        b2 = (2 * np.pi * cross_n_a1) / denom\\n        return [b1, b2]\\n    elif n == 3:\\n        return reciprocal_3D(args[0], args[1], args[2])\\n    else:\\n        raise ValueError(\\\"Number of input vectors must be 1, 2, or 3.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 10, \"cases_total\": 10, \"steps_all_pass\": 3, \"steps_total\": 3, \"per_step\": {\"38.1\": {\"pass\": 3, \"total\": 3}, \"38.2\": {\"pass\": 3, \"total\": 3}, \"38.3\": {\"pass\": 4, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 119.186,
+    "setup_s": 0.0,
+    "grade_s": 0.793
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.41s"
+  ]
+}

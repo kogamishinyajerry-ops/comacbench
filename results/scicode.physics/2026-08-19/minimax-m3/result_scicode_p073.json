@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p073",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef Bmat(pa):\\n    '''Calculate the B matrix.\\n    Input\\n    pa = (a,b,c,alpha,beta,gamma)\\n    a,b,c: the lengths a, b, and c of the three cell edges meeting at a vertex, float in the unit of angstrom\\n    alpha,beta,gamma: the angles alpha, beta, and gamma between those edges, float in the unit of degree\\n    Output\\n    B: a 3*3 matrix, float\\n    '''\\n    a, b, c, alpha, beta, gamma = pa\\n    alpha_rad = np.radians(alpha)\\n    beta_rad = np.radians(beta)\\n    gamma_rad = np.radians(gamma)\\n    \\n    ca, cb, cg = np.cos(alpha_rad), np.cos(beta_rad), np.cos(gamma_rad)\\n    sa, sb, sg = np.sin(alpha_rad), np.sin(beta_rad), np.sin(gamma_rad)\\n    \\n    # Volume of direct cell\\n    v = np.sqrt(1 - ca**2 - cb**2 - cg**2 + 2*ca*cb*cg)\\n    \\n    # Direct lattice vectors in Cartesian (with a along x-axis)\\n    a_vec = np.array([a, 0, 0])\\n    b_vec = np.array([b*cg, b*sg, 0])\\n    c_vec = np.array([c*cb, c*(ca - cb*cg)/sg, c*v/sg])\\n    \\n    # Reciprocal lattice vectors\\n    b1 = np.cross(b_vec, c_vec) / np.dot(a_vec, np.cross(b_vec, c_vec))\\n    b2 = np.cross(c_vec, a_vec) / np.dot(a_vec, np.cross(b_vec, c_vec))\\n    b3 = np.cross(a_vec, b_vec) / np.dot(a_vec, np.cross(b_vec, c_vec))\\n    \\n    B = np.array([b1, b2, b3])\\n    return B\\n\\n\\ndef q_cal_p(p, b_c, det_d, p_s, wl, yaw, pitch, roll):\\n    '''Calculate the momentum transfer Q at detector pixel (x,y). Here we use the convention of k=1/\\\\lambda,\\n    k and \\\\lambda are the x-ray momentum and wavelength respectively\\n    Input\\n    p: detector pixel (x,y), a tuple of two integer\\n    b_c: incident beam center at detector pixel (xc,yc\""
+  },
+  "timings": {
+    "agent_s": 188.011,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

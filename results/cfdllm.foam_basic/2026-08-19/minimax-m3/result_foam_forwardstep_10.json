@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_forwardstep_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCreate an OpenFOAM 10 (Foundation) case for laminar, compressible flow\\nover a forward-facing step using the rhoCentralFoam solver.\\n\\nRun the generated Allrun script to execute the case.\\n\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\n# ---------------------------------------------------------------------------\\n# Case configuration\\n# ---------------------------------------------------------------------------\\nCASE_DIR = os.path.abspath(os.getcwd())\\nSOLVER   = \\\"rhoCentralFoam\\\"\\nEND_TIME = 4.0\\nDELTA_T  = 0.002\\nWRITE_INTERVAL = 0.1  # writes every 0.1 s\\n\\n# Geometry (forward-facing step)\\nDOMAIN_X = 1.0      # streamwise length\\nDOMAIN_Y = 0.4      # height of the domain\\nSTEP_X   = 0.3      # x position of the step\\nSTEP_Y   = 0.1      # step height\\n\\n# Flow conditions\\nU_INLET   = 2.7\\nT_INLET   = 1.0\\nP_INLET   = 101325.0\\n\\n# Gas properties (close to air but reduced to make the case cheap)\\nGAMMA = 1.4\\nR     = 287.0  # J/(kg K)\\nCv    = R / (GAMMA - 1.0)\\nCp    = GAMMA * Cv\\n\\n# ---------------------------------------------------------------------------\\n# Helper functions\\n# ---------------------------------------------------------------------------\\ndef write(path, content):\\n    full = os.path.join(CASE_DIR, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with open(full, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# ---------------------------------------------------------------------------\\n# 0/ - initial and boundary fields\\n# ---------------------------------------------------------------------------\\nwrite(\\n    \\\"0/U\\\",\\n    \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * *\""
+  },
+  "timings": {
+    "agent_s": 262.175,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

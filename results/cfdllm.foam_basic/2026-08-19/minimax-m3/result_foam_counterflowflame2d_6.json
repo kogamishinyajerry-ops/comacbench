@@ -1,0 +1,40 @@
+{
+  "task_id": "foam_counterflowflame2d_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Create directory and write file with content.\\\"\\\"\\\"\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# 1. system/blockMeshDict\\nblock_mesh_dict = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (0.02 0 0)\\n    (0.02 0.02 0)\\n    (0 0.02 0)\\n    (0 0 0.001)\\n    (0.02 0 0.001)\\n    (0.02 0.02 0.001)\\n    (0 0.02 0.001)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (100 100 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    left\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }\\n    right\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 2 6 5)\\n        );\\n    }\\n    top\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    bottom\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergeTolerance 1e-6;\\n\\\"\\\"\\\"\\n\\n# 2. system/controlDict\\ncontrol_dict = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n\\napplication     reactingFoam;\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         0.5;\\ndeltaT          1e-6;\\nwriteControl    runTime;\\nwriteInterval   0.05;\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\ntimeFormat      general;\\ntimePrecision   6;\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n\\n# 3. system/fvSchemes\\nfv_schemes = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default Euler;\\n}\\n\\ngradSchemes\\n{\\n    default Gauss linear;\\n    grad(p) Gauss linear;\\n    grad(U) Gauss linear;\\n    grad(T) Gauss linear;\\n    grad(Yi) Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default none;\\n    div(phi,U) bounded linearUpwind grad(U);\\n    div(phi,CH4) bounded linearUpwind grad(CH4);\\n    div(phi,O2) bounded linearUpwind grad(O2);\\n    div(phi,N2) bounded linearUpwind grad(N2);\\n    div(phi,CO2) bounded linearUpwind grad(CO2);\\n    div(phi,H2O) bounded linearUpwind grad(H2O);\\n    div(phi,he) bounded linearUpwind grad(he);\\n    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default corrected;\\n}\\n\\\"\\\"\\\"\\n\\n# 4. system/fvSolution\\nfv_solution = \\\"\\\"\\\"\\\\\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    p\\n    {\\n        solver          GAMG;\\n        tolerance       1e-7;\\n        relTol          0.01;\\n    }\\n\\n    U\\n    {\\n        solver          smoothSolver;\\n        smoother        symGaussSeidel;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n\\n    CH4\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n\\n    O2\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n\\n    N2\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n\\n    CO2\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n\\n    H2O\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n\\n    he\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-7;\\n        relTol          0.1;\\n    }\\n}\\n\\nPIMPLE\\n{\\n    nOuterCorrectors 1;\\n    nCorrectors     2;\\n    nNonOrthogonalCorrectors 0;\\n}\\n\\\"\\\"\\\"\\n\\n# 5. constan\"",
+    "stderr_tail": "\"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_1_3wwly9/make_case.py\\\", line 772, in <module>\\n    write_file('Allrun', allrun)\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_1_3wwly9/make_case.py\\\", line 6, in write_file\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n  File \\\"<frozen os>\\\", line 225, in makedirs\\nFileNotFoundError: [Errno 2] No such file or directory: ''\\n\""
+  },
+  "timings": {
+    "agent_s": 159.364,
+    "setup_s": 0.0,
+    "grade_s": 0.023
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.02s",
+    "stderr: write_file('Allrun', allrun)\n  File \"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_1_3wwly9/make_case.py\", line 6, in write_file\n    os.makedirs(os.path.dirname(path), exist_ok=True)\n  File \"<frozen os>\", line 225, in makedirs\nFileNotFoundError: [Errno 2] No such file or directory: ''\n"
+  ]
+}

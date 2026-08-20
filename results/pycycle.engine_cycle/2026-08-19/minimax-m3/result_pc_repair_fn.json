@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_fn",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\ndef run_turbojet(fn_target):\\n    \\\"\\\"\\\"Run a standard turbojet design solve at the given fn_target.\\\"\\\"\\\"\\n    prob = om.Problem()\\n    prob.model = pyc.Turbojet()\\n    prob.setup()\\n    \\n    # Standard sea-level static turbojet design point (OPR 13.5)\\n    prob.set_val('fc.alt', 0, units='ft')\\n    prob.set_val('fc.MN', 0.0)\\n    prob.set_val('fc.fn_target', fn_target, units='lbf')\\n    prob.set_val('inlet.ram_recovery', 0.95)\\n    prob.set_val('inlet.MN2', 0.5)\\n    prob.set_val('comp.PR', 13.5)\\n    prob.set_val('comp.eff', 0.9)\\n    prob.set_val('burner.dPqP', 0.05)\\n    prob.set_val('turb.eff', 0.9)\\n    prob.set_val('turb.Tt4', 3200, units='degR')\\n    prob.set_val('nozzle.Cv', 0.99)\\n    \\n    prob.run_model()\\n    tsfc = prob.get_val('fc.tsfc')[0]\\n    return tsfc\\n\\nreference_tsfc = 0.79852  # lb/(lbf·hr)\\n\\n# Standard thrust targets commonly used in the SL turbojet cycle family\\ncandidates = [500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000,\\n              3500, 4000, 4500, 5000, 5500, 6000, 7000, 7500, 8000, 9000, 10000]\\n\\nresults = []\\nfor fn in candidates:\\n    try:\\n        tsfc = run_turbojet(fn)\\n        diff = abs(tsfc - reference_tsfc)\\n        results.append((fn, tsfc, diff))\\n        print(f\\\"fn_target={fn:6.0f} lbf -> TSFC = {tsfc:.6f}  (diff = {diff:.6f})\\\")\\n    except Exception as e:\\n        print(f\\\"fn_target={fn}: solver error: {e}\\\")\\n\\n# Find the best match\\nbest = min(results, key=lambda x: x[2])\\nprint(f\\\"\\\\nBest match: fn_target = {best[0]} lbf, TSFC = {best[1]:.6f}, diff = {best[2]:.6f}\\\")\\n\\n# Also check units conversion in case TSFC is in lbm/(lbf·s)\\nresults_s = []\\nfor fn in candidates:\\n    try:\\n        tsfc = run_turbojet(fn) * 3600.0\\n        diff = abs(tsfc - reference_tsfc)\\n        results_s.append((fn, tsfc, diff))\\n    except Exception:\\n        pass\\n\\nif results_s:\\n    best_s = min(results_s, key=lambda x: x[2])\\n    print(f\\\"(If TSFC were lbm/(lbf·s), best: fn_target={best_s[0]}, TSFC={best_s[1]:.6f})\\\")\\n\\n# Determine final answer\\nif results_s and best_s[2] < best[2]:\\n    final_fn = best_s[0]\\nelse:\\n    final_fn = best[0]\\n\\nresult = {\\n    \\\"corrupted_param\\\": \\\"fn_target\\\",\\n    \\\"restored_value\\\": float(final_fn)\\n}\\nwith open(\\\"result.json\\\", \\\"w\\\") as f:\\n    json.dump(result, f)\\n\\nprint(f\\\"\\\\nWritten result.json: {result}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_nbarr091/solve.py\\\", line 45, in <module>\\n    best = min(results, key=lambda x: x[2])\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nValueError: min() iterable argument is empty\\n\"}"
+  },
+  "timings": {
+    "agent_s": 44.363,
+    "setup_s": 0.0,
+    "grade_s": 1.205
+  },
+  "environment_digest": "sha256:1542aec1c75ffe8bbbbbe5a8c9723f831ded55f9c89c457c16ccb57779ee16a4",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.2s"
+  ]
+}

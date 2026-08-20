@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p016",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.91665,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef init_matrix(dim, noise):\\n    '''Generate a symmetric matrix with increasing values along its diagonal.\\n    Inputs:\\n    - dim: The dimension of the matrix (int).\\n    - noise: Noise level (float).\\n    Output:\\n    - A: a 2D array where each element is a float, representing the symmetric matrix.\\n    '''\\n    # Diagonal with values 1,2,...,dim\\n    diag_vals = np.arange(1, dim+1, dtype=float)\\n    A = np.diag(diag_vals)\\n    # Add normally distributed noise scaled by 'noise'\\n    A += noise * np.random.randn(dim, dim)\\n    # Symmetrize\\n    A = (A + A.T) / 2.0\\n    return A\\n\\ndef davidson_solver(matrixA, num_eigenvalues, threshold):\\n    '''Implements the Davidson algorithm to compute the first few eigenvalues of a symmetric matrix.\\n    Inputs:\\n    - matrixA: Symmetric matrix (2D array of float).\\n    - num_eigenvalues: Number of lowest eigenvalues to compute (int).\\n    - threshold: Convergence threshold for the algorithm (float).\\n    Output:\\n    - current_eigenvalues: computed eigenvalues (1D array of float).\\n    '''\\n    N = matrixA.shape[0]\\n    diagA = np.diag(matrixA).copy()   # for preconditioner\\n\\n    # Initial orthonormal subspace (random vectors)\\n    V = np.random.randn(N, num_eigenvalues)\\n    V, _ = np.linalg.qr(V)\\n    AV = matrixA @ V\\n\\n    max_iter = 1000\\n    iter = 0\\n    converged = np.zeros(num_eigenvalues, dtype=bool)\\n    eigenvalues = np.zeros(num_eigenvalues)\\n\\n    while not np.all(converged) and iter < max_iter:\\n        iter += 1\\n        m = V.shape[1]\\n        # Project A onto the subspace\\n        H = V.T @ AV\\n        # Solve projected eigenproblem\\n        theta, s = np.linalg.eigh(H)   # theta ascending, s eigenvectors\\n\\n        # Check convergence for the smallest num_eigenvalues\\n        for i in range(num_eigenvalues):\\n            coeff = s[:, i]               # coordinates in V\\n            x = V @ coeff                 # Ritz vector\\n            Ax = AV @ coeff               # A * x\\n            r = Ax - theta[i] * x         # residual\\n            r_norm = np.linalg.norm(r)\\n            if r_norm < threshold:\\n                converged[i] = True\\n            else:\\n                converged[i] = False\\n            eigenvalues[i] = theta[i]\\n\\n        if np.all(converged):\\n            break\\n\\n        # Generate correction vectors for unconverged Ritz pairs\\n        new_vectors = []\\n        for i in range(num_eigenvalues):\\n            if not converged[i]:\\n                coeff = s[:, i]\\n                x = V @ coeff\\n                Ax = AV @ coeff\\n                r = Ax - theta[i] * x\\n                # Diagonal preconditioner\\n                denom = diagA - theta[i]\\n                denom = np.where(np.abs(denom) < 1e-12, 1e-12, denom)\\n                q = -r / denom\\n                # Orthogonalize against current V\\n                q = q - V @ (V.T @ q)\\n                norm_q = np.linalg.norm(q)\\n                if norm_q > 1e-12:\\n                    q = q / norm_q\\n                    new_vectors.append(q)\\n\\n        if new_vectors:\\n            # Add new vectors and re-orthonormalize the whole set\\n            newV = np.column_stack(new_vectors)\\n            V = np.column_stack((V, newV))\\n            V, _ = np.linalg.qr(V)\\n            AV = matrixA @ V\\n        else:\\n            # No new vectors could be added; stop to avoid infinite loop\\n            break\\n\\n    return eigenvalues\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 5, \"cases_total\": 6, \"steps_all_pass\": 1, \"steps_total\": 2, \"per_step\": {\"16.1\": {\"pass\": 3, \"total\": 3}, \"16.2\": {\"pass\": 2, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 202.471,
+    "setup_s": 0.0,
+    "grade_s": 4.686
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 2.36s"
+  ]
+}

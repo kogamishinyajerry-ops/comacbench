@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_dambreakwithobstacle_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\ncase_dir = os.getcwd()\\n\\n# Directory structure\\ndirs = [\\n    \\\"system\\\",\\n    \\\"constant\\\",\\n    \\\"0\\\",\\n]\\nfor d in dirs:\\n    os.makedirs(os.path.join(case_dir, d), exist_ok=True)\\n\\n# ---------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------\\nblock_mesh_dict = r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\  /    A nd           | Website:  www.openfoam.org                       |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (1 0 0)\\n    (1 1 0)\\n    (0 1 0)\\n    (0 0 1)\\n    (1 0 1)\\n    (1 1 1)\\n    (0 1 1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (32 32 32) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    walls\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 7 6 2)\\n            (0 4 7 3)\\n            (2 6 5 1)\\n            (1 5 4 0)\\n        );\\n    }\\n    atmosphere\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 1 2 3)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\nwith open(os.path.join(case_dir, \\\"system\\\", \\\"blockMeshDict\\\"), \\\"w\\\") as f:\\n    f.write(block_mesh_dict)\\n\\n# ---------------------------------------------------------------\\n# system/controlDict\\n# ---------------------------------------------------------------\\ncontrol_dict = r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------\""
+  },
+  "timings": {
+    "agent_s": 133.702,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

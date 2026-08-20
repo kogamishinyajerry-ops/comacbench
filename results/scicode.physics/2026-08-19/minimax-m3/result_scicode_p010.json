@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p010",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5952,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.7976,
+  "artifacts": {
+    "code": "\"def get_alpha(recvec, alpha_scaling=5):\\n    \\\"\\\"\\\"Calculate the alpha value for the Ewald summation, scaled by a specified factor.\\\"\\\"\\\"\\n    # Compute norms of each reciprocal lattice vector\\n    norms = np.linalg.norm(recvec, axis=1)\\n    # Consider only non-zero norms\\n    nonzero = norms[norms > 0]\\n    if nonzero.size == 0:\\n        return alpha_scaling\\n    min_norm = np.min(nonzero)\\n    return alpha_scaling * min_norm\\n\\n\\ndef get_lattice_coords(latvec, nlatvec=1):\\n    \\\"\\\"\\\"Generate lattice coordinates based on the provided lattice vectors.\\\"\\\"\\\"\\n    rng = np.arange(-nlatvec, nlatvec + 1)\\n    i, j, k = np.meshgrid(rng, rng, rng, indexing='ij')\\n    indices = np.stack([i.ravel(), j.ravel(), k.ravel()], axis=1)\\n    # Each index vector (n1,n2,n3) maps to n1*a1 + n2*a2 + n3*a3\\n    lattice_coords = indices @ latvec\\n    return lattice_coords\\n\\n\\ndef distance_matrix(configs):\\n    \\\"\\\"\\\"Compute distance vectors for each pair of particles.\\\"\\\"\\\"\\n    n = configs.shape[0]\\n    idxs = np.triu_indices(n, k=1)\\n    r_i = configs[idxs[0]]\\n    r_j = configs[idxs[1]]\\n    distances = r_j - r_i\\n    pair_idxs = list(zip(idxs[0], idxs[1]))\\n    return distances, pair_idxs\\n\\n\\ndef real_cij(distances, lattice_coords, alpha):\\n    \\\"\\\"\\\"Calculate the real-space terms for the Ewald summation over particle pairs.\\\"\\\"\\\"\\n    # Handle 2D distances (npairs, 3) by reshaping to 4D\\n    if distances.ndim == 2:\\n        distances = distances[np.newaxis, :, np.newaxis, :]\\n        lattice_coords = lattice_coords[np.newaxis, np.newaxis, :, :]\\n    # Broadcast to (natoms, npairs, ncells, 3)\\n    d = distances + lattice_coords\\n    r_norm = np.linalg.norm(d, axis=-1)\\n    # Avoid division by zero\\n    c = erfc(alpha * r_norm) / r_norm\\n    c = np.where(r_norm > 0, c, 0.0)\\n    # Sum over lattice cells\\n    c_sum = np.sum(c, axis=2)  # shape (natoms, npairs)\\n    # Sum over the first dimension to obtain shape (npairs,)\\n    c_sum = np.sum(c_sum, axis=0)\\n    return c_sum\\n\\n\\ndef sum_real_cross(atom_charges, atom_coords, configs, lattice_coords, alpha):\\n    \\\"\\\"\\\"Calculate the sum of real-space cross terms for the Ewald summation.\\\"\\\"\\\"\\n    natoms = atom_charges.shape[0]\\n    nelectrons = configs.shape[0]\\n    # Combine atom and electron data\\n    positions = np.vstack([atom_coords, configs])\\n    charges = np.concatenate([atom_charges, -np.ones(nelectrons)])\\n    # Distance matrix for all pairs\\n    distances, pair_idxs = distance_matrix(positions)\\n    # Real-space coefficients c_ij\\n    c_ij = real_cij(distances, lattice_coords, alpha)\\n    # Charge products for each pair\\n    pair_arr = np.array(pair_idxs)\\n    qi = charges[pair_arr[:, 0]]\\n    qj = charges[pair_arr[:, 1]]\\n    q_i_q_j = qi * qj\\n    # Weighted sum\\n    E_cross = np.sum(q_i_q_j * c_ij)\\n    return E_cross\\n\\n\\ndef generate_gpoints(recvec, gmax):\\n    \\\"\\\"\\\"Generate a grid of g-points for reciprocal space.\\\"\\\"\\\"\\n    i_vals = np.arange(0, gmax + 1)\\n    j_vals = np.arange(-gmax, gmax + 1)\\n    k_vals = np.arange(-gmax, gmax + 1)\\n    i, j, k = np.meshgrid(i_vals, j_vals, k_vals, indexing='ij')\\n    i_flat = i.ravel()\\n    j_flat = j.ravel()\\n    k_flat = k.ravel()\\n    # Exclude origin and unwanted points\\n    mask = ~((i_flat == 0) & (j_flat == 0) & (k_flat == 0))\\n    mask &= ~((i_flat == 0) & (j_flat == 0) & (k_flat < 0))\\n    mask &= ~((i_flat == 0) & (j_flat < 0))\\n    i_filtered = i_flat[mask]\\n    j_filtered = j_flat[mask]\\n    k_filtered = k_flat[mask]\\n    # Compute g vectors: g = i * recvec[0] + j * recvec[1] + k * recvec[2]\\n    gpoints = np.dot(np.stack([i_filtered, j_filtered, k_filtered], axis=1), recvec)\\n    return gpoints\\n\\n\\ndef select_big_weights(gpoints_all, cell_volume, alpha, tol=1e-10):\\n    \\\"\\\"\\\"Filter g-points based on weight in reciprocal space.\\\"\\\"\\\"\\n    k_norm = np.linalg.norm(gpoints_all, axis=1)\\n    weight = np.zeros_like(k_norm)\\n    nonzero = k_norm > 0\\n    weight[nonzero] = (4 * np.pi / cell_volume) * np.exp(-k_norm[nonzero]**2 / (4 * alpha**2)) / (k_norm[nonzero]**2)\\n    mask = weight > tol\\n    return gpoints_all[mask], weight[mask]\\n\\n\\ndef sum_recip(atom_charges, atom_co\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 25, \"cases_total\": 42, \"steps_all_pass\": 6, \"steps_total\": 11, \"per_step\": {\"10.1\": {\"pass\": 4, \"total\": 4}, \"10.2\": {\"pass\": 4, \"total\": 4}, \"10.3\": {\"pass\": 4, \"total\": 4}, \"10.4\": {\"pass\": 1, \"total\": 4}, \"10.5\": {\"pass\": 4, \"total\": 4}, \"10.6\": {\"pass\": 0, \"total\": 3}, \"10.7\": {\"pass\": 0, \"total\": 3}, \"10.8\": {\"pass\": 0, \"total\": 4}, \"10.9\": {\"pass\": 4, \"total\": 4}, \"10.10\": {\"pass\": 4, \"total\": 4}, \"10.11\": {\"pass\": 0, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 218.442,
+    "setup_s": 0.0,
+    "grade_s": 8.651
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 4.29s"
+  ]
+}

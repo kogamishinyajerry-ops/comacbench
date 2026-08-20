@@ -1,0 +1,102 @@
+id: av_range_sweep
+registry_id: aviary.transport_mission
+domain: mdo_design
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- aviary
+input:
+  prompt_file: tasks/aviary.transport_mission/av_range_sweep.md
+  prompt_sha256: 14079a259e44c7658409e9ab99557e24e534bf23b24ad222f3afd94e3cf64f50
+  assets:
+  - path: data/aviary/transport_mission/base/aircraft_for_bench_GwGm.csv
+    digest: f9e84e7234044a6b953aa196a710a84362e3ea6304115f19b4649e90a3f2f0c1
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_2400.csv
+    digest: deea129664480823a77801593f2ecea15f75c969a0bdb5e235ef2105a5012129
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_3600.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade_165400.csv
+    digest: 0d1859ac221a96ad587e7db6696d884ee00a0ea37dd0b38ef063f2f3fc917022
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade_175400.csv
+    digest: f9e84e7234044a6b953aa196a710a84362e3ea6304115f19b4649e90a3f2f0c1
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade_185400.csv
+    digest: 2300cb33baffe03d05c88168c53a20812bcf3fbe07df7bddeebf66aa96a726e2
+  - path: data/aviary/transport_mission/derived/av_range_2500_m75.csv
+    digest: 0a8398666b7936e45db2d6d4f362a34d5596e385559274fcabc2591471084999
+  - path: data/aviary/transport_mission/derived/av_range_3000_m80.csv
+    digest: bdb148ac360b5f355e594d6fe58d5f4c66b98d7f122a5b5ec628772ea3cb39d8
+  - path: data/aviary/transport_mission/derived/av_range_3200_m785.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_range_sweep_2400.csv
+    digest: deea129664480823a77801593f2ecea15f75c969a0bdb5e235ef2105a5012129
+  - path: data/aviary/transport_mission/derived/av_range_sweep_2800.csv
+    digest: f6dd71b7aff8a784e6aa52ebf237e40abd35f8d2e5125655809bf4e42725b443
+  - path: data/aviary/transport_mission/derived/av_range_sweep_3200.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_range_sweep_3600.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_repair_grossmass_clean.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_repair_grossmass_corrupt.csv
+    digest: f947ce865feab1087ad44b8dc82cdbf512f827ff061fdb1e40ad154df658244e
+  - path: data/aviary/transport_mission/derived/av_repair_range_clean.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_repair_range_corrupt.csv
+    digest: 6ef704a85c68c53cdbdbfbfb5abf2eaba9a1e9cdcffd10b769031a01a99f8d1a
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（本 harness，aviary 1.0.1 分析模式确定性）
+  revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1
+  values:
+    dfuel_drange_lbm_per_nm: 0.0
+    fuel_2400_lbm: 43389.55357572943
+    fuel_2800_lbm: 43389.55357572943
+    fuel_3200_lbm: 43389.55357572943
+    fuel_3600_lbm: 43389.55357572943
+  rel_tol: 0.01
+  uncertainty_note: 确定性正向分析；容差覆盖模型间口径差异
+grader:
+  answer_format: code
+  exec_kind: aviary_mission
+  validity_gate: true
+  result_keys:
+  - fuel_2400_lbm
+  - fuel_2800_lbm
+  - fuel_3200_lbm
+  - fuel_3600_lbm
+  - dfuel_drange_lbm_per_nm
+  numeric_rel_tol: 0.01
+  exact_keys:
+  - corrupted_param
+  - restored_value
+  - min_fuel_grossmass_lbm
+  solver_backend: aviary-analysis-venv
+  oracle_source: data/aviary/transport_mission/gold/av_range_sweep.py
+  sandbox:
+    banned: network/process/ctypes
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（容差 1%）；requirements=result.json 键完备；objective/robustness=N/A（静态任务）权重
+    0
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 1200
+  attempts: 3
+license_provenance:
+  source: 自建任务 + NASA Aviary (Apache-2.0) 基准模型
+  license: Apache-2.0 (Aviary 及其模型)；任务文本自建
+  status: confirmed-repo
+  revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1
+  mirror_allowed: true
+  attribution: NASA Aviary, github.com/openmdao/Aviary

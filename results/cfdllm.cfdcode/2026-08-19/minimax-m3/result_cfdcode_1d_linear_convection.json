@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_1d_linear_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_advection_diffusion(c=1.0, epsilon=5e-4,\\n                             x_start=-5.0, x_end=5.0,\\n                             Nx=200, dt=0.01, t_end=10.0):\\n    \\\"\\\"\\\"\\n    Solve the 1D advection‑diffusion equation\\n        u_t + c*u_x = epsilon*u_xx\\n    on a periodic domain using explicit finite differences.\\n    \\\"\\\"\\\"\\n    # spatial grid (periodic: exclude right endpoint)\\n    dx = (x_end - x_start) / Nx\\n    x = np.linspace(x_start, x_end, Nx, endpoint=False)\\n\\n    # initial condition: Gaussian\\n    u = np.exp(-x**2)\\n\\n    # number of time steps\\n    Nt = int(np.round(t_end / dt))\\n\\n    # time integration (upwind for advection, central for diffusion)\\n    for _ in range(Nt):\\n        # upwind advection (c>0)\\n        u = u - dt * c * (u - np.roll(u, 1)) / dx\\n        # diffusion (central)\\n        u = u + dt * epsilon * (np.roll(u, -1) - 2.0*u + np.roll(u, 1)) / dx**2\\n\\n    return u\\n\\n# --- Solve and save both undamped and damped cases ---\\nif __name__ == \\\"__main__\\\":\\n    # undamped case (epsilon = 0)\\n    u_undamped = solve_advection_diffusion(epsilon=0.0)\\n    np.save(\\\"u_undamped.npy\\\", u_undamped)\\n\\n    # damped case (epsilon = 5e-4)\\n    u_damped = solve_advection_diffusion(epsilon=5e-4)\\n    np.save(\\\"u_damped.npy\\\", u_damped)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [\"u\"], \"nonfinite\": [], \"fields\": {}, \"determinism\": null, \"run1_exit\": 0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 87.733,
+    "setup_s": 0.0,
+    "grade_s": 0.101
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s",
+    "missing=['u'] nonfinite=[]"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_bernardcells_4",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\nCASE_NAME = \\\".\\\"\\nSOLVER = \\\"buoyantFoam\\\"\\n\\n# Domain dimensions\\nLX = 9.0\\nLY = 1.0\\nLZ = 2.0\\n\\n# Cell counts\\nNX = 30\\nNY = 10\\nNZ = 20\\n\\n# Time controls\\nSTART_TIME = 0\\nEND_TIME = 1000\\nDELTA_T = 1\\nWRITE_INTERVAL = 50\\n\\n# Temperatures\\nT_HOT = 315.0\\nT_COLD = 300.0\\nT_REF = 300.0\\nT_INIT = 305.0\\n\\n# Gravity\\nGZ = -9.81\\n\\n# Fluid properties\\nRHO = 1.0\\nMU = 1.8e-5\\nNU = MU / RHO\\nCP = 1000.0\\nKAPPA = 0.025\\nBETA = 1.0 / T_REF\\nPR = CP * MU / KAPPA\\n\\n\\ndef write(path, content):\\n    with open(os.path.join(CASE_NAME, path), \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\ndef make_dirs():\\n    for d in [\\n        \\\"system\\\",\\n        \\\"constant\\\",\\n        \\\"0\\\",\\n        \\\"constant/geometry\\\",\\n    ]:\\n        os.makedirs(os.path.join(CASE_NAME, d), exist_ok=True)\\n\\n\\n# ---------------------------------------------------------------------------\\n# blockMeshDict\\n# ---------------------------------------------------------------------------\\ndef write_block_mesh():\\n    sx = LX / NX\\n    sy = LY / NY\\n    sz = LZ / NZ\\n\\n    vertices = []\\n    for k in range(NZ + 1):\\n        for j in range(NY + 1):\\n            for i in range(NX + 1):\\n                x = i * sx\\n                y = j * sy\\n                z = k * sz\\n                vertices.append((x, y, z))\\n\\n    def vid(i, j, k):\\n        return k * (NY + 1) * (NX + 1) + j * (NX + 1) + i\\n\\n    blocks = []\\n    for k in range(NZ):\\n        for j in range(NY):\\n            for i in range(NX):\\n                v0 = vid(i, j, k)\\n                v1 = vid(i + 1, j, k)\\n                v2 = vid(i + 1, j + 1, k)\\n                v3 = vid(i, j +\""
+  },
+  "timings": {
+    "agent_s": 179.854,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p078",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"def pendulum_derivs(state, t, g, L, beta, A, alpha):\\n    '''Calculate the derivatives for the pendulum motion.'''\\n    theta, omega = state\\n    dtheta_dt = omega\\n    domega_dt = -(g / L) * np.sin(theta) - beta * omega + A * np.cos(alpha * t)\\n    return np.array([dtheta_dt, domega_dt])\\n\\ndef runge_kutta_4th_order(f, state, t0, dt, n, g, L, beta, A, alpha):\\n    '''Run the RK4 integrator to solve the pendulum motion.'''\\n    trajectory = np.zeros((n + 1, 2))\\n    trajectory[0] = state\\n    t = t0\\n    y = state.copy()\\n    for i in range(1, n + 1):\\n        k1 = f(y, t, g, L, beta, A, alpha)\\n        k2 = f(y + 0.5 * dt * k1, t + 0.5 * dt, g, L, beta, A, alpha)\\n        k3 = f(y + 0.5 * dt * k2, t + 0.5 * dt, g, L, beta, A, alpha)\\n        k4 = f(y + dt * k3, t + dt, g, L, beta, A, alpha)\\n        y = y + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)\\n        t += dt\\n        trajectory[i] = y\\n    return trajectory\\n\\ndef pendulum_analysis(g, L, beta, A, alpha, initial_state, t0, tf, min_dt, max_dt, num_timesteps):\\n    '''Analyze a damped, driven pendulum system under various conditions.'''\\n    dt_candidates = np.linspace(min_dt, max_dt, num_timesteps)\\n    best_metric = np.inf\\n    best_traj = None\\n\\n    for dt_cand in dt_candidates:\\n        if dt_cand <= 0:\\n            continue\\n        # Adjust dt to exactly reach tf\\n        n = int(round((tf - t0) / dt_cand))\\n        if n < 1:\\n            n = 1\\n        dt = (tf - t0) / n\\n\\n        # Time the coarse integration\\n        start = time.perf_counter()\\n        coarse_traj = runge_kutta_4th_order(pendulum_derivs, np.array(initial_state), t0, dt, n, g, L, beta, A, alpha)\\n        elapsed = time.perf_counter() - start\\n\\n        # Fine integration for error estimation (step-doubling)\\n        dt_fine = dt / 2.0\\n        n_fine = 2 * n\\n        fine_traj = runge_kutta_4th_order(pendulum_derivs, np.array(initial_state), t0, dt_fine, n_fine, g, L, beta, A, alpha)\\n\\n        # Compare at coarse time points\\n        fine_at_coarse = fine_traj[::2]          # shape (n+1, 2)\\n        err_vectors = (fine_at_coarse - coarse_traj) / 15.0\\n        err_norms = np.linalg.norm(err_vectors, axis=1)\\n        GTE = np.sum(err_norms)\\n\\n        metric = GTE * np.sqrt(elapsed)\\n\\n        if metric < best_metric:\\n            best_metric = metric\\n            best_traj = coarse_traj\\n\\n    return best_traj\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 6, \"cases_total\": 9, \"steps_all_pass\": 2, \"steps_total\": 3, \"per_step\": {\"78.1\": {\"pass\": 3, \"total\": 3}, \"78.2\": {\"pass\": 3, \"total\": 3}, \"78.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 318.179,
+    "setup_s": 0.0,
+    "grade_s": 5.06
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 2.17s"
+  ]
+}

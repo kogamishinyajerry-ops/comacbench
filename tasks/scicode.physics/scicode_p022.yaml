@@ -1,0 +1,191 @@
+id: scicode_p022
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p022.md
+  prompt_sha256: a1de351b4448d4902127c31ad8826c88c30b7c4d3714dc81284574617fbd3502
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '22'
+  problem_name: Beam_translation_reexpansion
+  split: test
+  n_steps: 3
+  n_cases: 10
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    import scipy'
+  steps:
+  - step_id: '22.1'
+    n_cases: 3
+    test_cases:
+    - 'l = 1
+
+      n = 1
+
+      m = 0
+
+      wl = 2 * np.pi
+
+      k = 2 * np.pi / wl
+
+      z = 0.75
+
+      N_t = 8
+
+      assert np.allclose(Rlnm(l, n, m, k, z, N_t), target)'
+    - 'l = 2
+
+      n = 1
+
+      m = 0
+
+      wl = 2 * np.pi
+
+      k = 2 * np.pi / wl
+
+      z = 0.75
+
+      N_t = 8
+
+      assert np.allclose(Rlnm(l, n, m, k, z, N_t), target)'
+    - 'l = 3
+
+      n = 2
+
+      m = 1
+
+      wl = 2 * np.pi
+
+      k = 2 * np.pi / wl
+
+      z = 0.75
+
+      N_t = 8
+
+      assert np.allclose(Rlnm(l, n, m, k, z, N_t), target)'
+  - step_id: '22.2'
+    n_cases: 3
+    test_cases:
+    - 'Q = np.matrix([[0, 0, 1],[0, 1, 0],[-1, 0, 0]])
+
+      assert np.allclose(Tnvm(2, 1, 1, Q), target)'
+    - 'Q = np.matrix([[0, 0, 1],[0, 1, 0],[-1, 0, 0]])
+
+      assert np.allclose(Tnvm(5, 2, 1, Q), target)'
+    - 'Q = np.matrix([[- 1 / np.sqrt(2), - 1 / np.sqrt(2), 0],[1 / (2 * np.sqrt(2)),
+      - 1 / (2 * np.sqrt(2)), np.sqrt(3) / 2],[- np.sqrt(3 / 2) / 2, np.sqrt(3 / 2)
+      / 2, 1 / 2]])
+
+      assert np.allclose(Tnvm(1, 1, 0, Q), target)'
+  - step_id: '22.3'
+    n_cases: 4
+    test_cases:
+    - 'r0 = np.array([0.5, 0, 0])
+
+      N_t = 5
+
+      B = np.zeros((N_t + 1, 2 * N_t + 1))
+
+      B[1, N_t] = 1
+
+      wl = 2 * np.pi
+
+      n = 2
+
+      m = 1
+
+      assert np.allclose(compute_BRnm(r0, B, n, m, wl, N_t), target)'
+    - 'r0 = np.array([0.5, 0.5, 0])
+
+      N_t = 5
+
+      B = np.zeros((N_t + 1, 2 * N_t + 1))
+
+      B[1, N_t] = 1
+
+      wl = 2 * np.pi
+
+      n = 2
+
+      m = 1
+
+      assert np.allclose(compute_BRnm(r0, B, n, m, wl, N_t), target)'
+    - 'r0 = np.array([0.5, 1, 0])
+
+      N_t = 5
+
+      B = np.zeros((N_t + 1, 2 * N_t + 1))
+
+      B[1, N_t] = 1
+
+      wl = 2 * np.pi
+
+      n = 2
+
+      m = 1
+
+      assert np.allclose(compute_BRnm(r0, B, n, m, wl, N_t), target)'
+    - 'r0 = np.array([0, 0.5, 0])
+
+      N_t = 5
+
+      B = np.zeros((N_t + 1, 2 * N_t + 1))
+
+      B[1, N_t + 1] = 1
+
+      wl = 2 * np.pi
+
+      n = 2
+
+      m = 2
+
+      assert (compute_BRnm(r0, B, n, m, wl, N_t) == 0) == target'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

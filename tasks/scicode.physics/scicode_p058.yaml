@@ -1,0 +1,221 @@
+id: scicode_p058
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p058.md
+  prompt_sha256: e237d3dc08a4dcbef1ba988c11ce7a0f1af8d3c93d2d39b9792e30f41a9c8766
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '58'
+  problem_name: Tolman_Oppenheimer_Volkoff_star
+  split: test
+  n_steps: 5
+  n_cases: 16
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    import scipy as sp
+
+    import scipy.integrate as si'
+  steps:
+  - step_id: '58.1'
+    n_cases: 3
+    test_cases:
+    - 'rho = 0.1
+
+      eos_Gamma = 2.0
+
+      eos_kappa = 100.
+
+      assert np.allclose(eos_press_from_rho(rho, eos_Gamma, eos_kappa), target)'
+    - 'rho = 0.2
+
+      eos_Gamma = 3./5.
+
+      eos_kappa = 80
+
+      assert np.allclose(eos_press_from_rho(rho, eos_Gamma, eos_kappa), target)'
+    - 'rho = 1.1
+
+      eos_Gamma = 1.8
+
+      eos_kappa = 20
+
+      assert np.allclose(eos_press_from_rho(rho, eos_Gamma, eos_kappa), target)'
+  - step_id: '58.2'
+    n_cases: 3
+    test_cases:
+    - 'press = 10
+
+      eos_Gamma = 20
+
+      eos_kappa = 30
+
+      assert np.allclose(eos_rho_from_press(press, eos_Gamma, eos_kappa), target)'
+    - 'press = 1000
+
+      eos_Gamma = 50
+
+      eos_kappa = 80
+
+      assert np.allclose(eos_rho_from_press(press, eos_Gamma, eos_kappa), target)'
+    - 'press = 20000
+
+      eos_Gamma = 2.
+
+      eos_kappa = 100.
+
+      assert np.allclose(eos_rho_from_press(press, eos_Gamma, eos_kappa), target)'
+  - step_id: '58.3'
+    n_cases: 3
+    test_cases:
+    - 'press = 10
+
+      eos_Gamma = 15
+
+      eos_kappa = 20
+
+      assert np.allclose(eos_rho_from_press(press, eos_Gamma, eos_kappa), target)'
+    - 'press = 10000
+
+      eos_Gamma = 3./5.
+
+      eos_kappa = 80
+
+      assert np.allclose(eos_rho_from_press(press, eos_Gamma, eos_kappa), target)'
+    - 'press = 100
+
+      eos_Gamma = 2.
+
+      eos_kappa = 100.
+
+      assert np.allclose(eos_rho_from_press(press, eos_Gamma, eos_kappa), target)'
+  - step_id: '58.4'
+    n_cases: 3
+    test_cases:
+    - 'data = (1e35, 0.0, 0.0)  # High pressure, mass = 0, phi = 0 at the origin
+
+      r = 0.0
+
+      eos_Gamma = 2.0
+
+      eos_kappa = 1e-10
+
+      assert np.allclose(tov_RHS(data, r, eos_Gamma, eos_kappa), target)'
+    - 'data = (10, 20, 1.0)  # Moderate pressure, some mass, some phi inside the star
+
+      r = 1e3
+
+      eos_Gamma = 2.0
+
+      eos_kappa = 1e-3
+
+      assert np.allclose(tov_RHS(data, r, eos_Gamma, eos_kappa), target)'
+    - 'data = (0.3, 1e3, 1.0)
+
+      r = 20
+
+      eos_Gamma = 2
+
+      eos_kappa = 100
+
+      assert np.allclose(tov_RHS(data, r, eos_Gamma, eos_kappa), target)'
+  - step_id: '58.5'
+    n_cases: 4
+    test_cases:
+    - 'rhoc = 0.3
+
+      eos_Gamma = 2.1
+
+      eos_kappa = 30
+
+      npoints = 200
+
+      rmax = 100000.
+
+      assert np.allclose(tov(rhoc, eos_Gamma, eos_kappa, npoints, rmax), target)'
+    - 'rhoc = 2e-5
+
+      eos_Gamma = 1.8
+
+      eos_kappa = 20
+
+      npoints = 2000
+
+      rmax = 100.
+
+      assert np.allclose(tov(rhoc, eos_Gamma, eos_kappa, npoints, rmax), target)'
+    - 'rhoc = 1.28e-3
+
+      eos_Gamma = 5./3.
+
+      eos_kappa = 80.
+
+      npoints = 200000
+
+      rmax = 100.
+
+      assert np.allclose(tov(rhoc, eos_Gamma, eos_kappa, npoints, rmax), target)'
+    - 'rhoc = 1.28e-3
+
+      # equation of state
+
+      eos_Gamma = 2.0
+
+      eos_kappa = 100.
+
+      # grid for integration
+
+      rmax = 100.
+
+      npoints = 200000
+
+      assert np.allclose(tov(rhoc, eos_Gamma, eos_kappa, npoints, rmax), target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

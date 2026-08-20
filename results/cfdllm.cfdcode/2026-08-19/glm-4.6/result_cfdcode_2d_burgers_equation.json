@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_burgers_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9993,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.99965,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_cfd_problem():\\n    # Physical parameters\\n    nu = 0.01\\n    L = 2.0\\n    T_final = 0.027\\n    \\n    # Grid parameters\\n    Nx = 101\\n    Ny = 101\\n    dx = L / (Nx - 1)\\n    dy = L / (Ny - 1)\\n    \\n    # Time step selection based on stability constraints\\n    # Diffusion stability: dt <= dx^2 / (4*nu)\\n    # CFL stability: dt <= dx / max_velocity\\n    # Using dx ~ 0.02, nu=0.01, V~2 -> dt_diff ~ 0.01, dt_cfl ~ 0.01\\n    # Choosing a safe time step\\n    dt = 0.0005\\n    Nt = int(T_final / dt)\\n    \\n    # Spatial grid\\n    x = np.linspace(0, L, Nx)\\n    y = np.linspace(0, L, Ny)\\n    X, Y = np.meshgrid(x, y)\\n    \\n    # Initialize fields u and v\\n    u = np.ones((Ny, Nx))\\n    v = np.ones((Ny, Nx))\\n    \\n    # Apply Initial Conditions\\n    # u = v = 1 everywhere, except u = v = 2 for 0.5 <= x, y <= 1\\n    mask = (X >= 0.5) & (X <= 1.0) & (Y >= 0.5) & (Y <= 1.0)\\n    u[mask] = 2.0\\n    v[mask] = 2.0\\n    \\n    # Time integration loop (Finite Difference Method)\\n    # Method: Forward Time, Upwind Space (for convection), Central Space (for diffusion)\\n    # Note: u and v are positive throughout domain based on BCs and ICs, \\n    # so backward difference is sufficient for upwinding.\\n    \\n    for n in range(Nt + 1):\\n        u_old = u.copy()\\n        v_old = v.copy()\\n        \\n        # Define slices for vectorized operations\\n        # uc, vc: center (i, j)\\n        uc = u_old[1:-1, 1:-1]\\n        vc = v_old[1:-1, 1:-1]\\n        \\n        # Neighbors for x-derivatives\\n        u_im = u_old[1:-1, 0:-2] # i, j-1\\n        u_ip = u_old[1:-1, 2:]   # i, j+1\\n        v_im = v_old[1:-1, 0:-2]\\n        v_ip = v_old[1:-1, 2:]\\n        \\n        # Neighbors for y-derivatives\\n        u_jm = u_old[0:-2, 1:-1] # i-1, j\\n        u_jp = u_old[2:, 1:-1]   # i+1, j\\n        v_jm = v_old[0:-2, 1:-1]\\n        v_jp = v_old[2:, 1:-1]\\n        \\n        # Compute Convective Terms (Upwind: u du/dx + v du/dy)\\n        # u * du/dx (backward diff)\\n        conv_u_x = uc * (uc - u_im) / dx\\n        # v * du/dy (backward diff)\\n        conv_u_y = vc * (uc - u_jm) / dy\\n        \\n        # u * dv/dx (backward diff)\\n        conv_v_x = uc * (vc - v_im) / dx\\n        # v * dv/dy (backward diff)\\n        conv_v_y = vc * (vc - v_jm) / dy\\n        \\n        # Compute Diffusive Terms (Central: nu * (d2u/dx2 + d2u/dy2))\\n        diff_u_x = (u_ip - 2*uc + u_im) / dx**2\\n        diff_u_y = (u_jp - 2*uc + u_jm) / dy**2\\n        \\n        diff_v_x = (v_ip - 2*vc + v_im) / dx**2\\n        diff_v_y = (v_jp - 2*vc + v_jm) / dy**2\\n        \\n        # Update interior points\\n        # u_new = u + dt * (Diffusion - Convection)\\n        u[1:-1, 1:-1] = uc + dt * (nu * (diff_u_x + diff_u_y) - (conv_u_x + conv_u_y))\\n        v[1:-1, 1:-1] = vc + dt * (nu * (diff_v_x + diff_v_y) - (conv_v_x + conv_v_y))\\n        \\n        # Enforce Boundary Conditions (Dirichlet)\\n        u[0, :] = 1.0\\n        u[-1, :] = 1.0\\n        u[:, 0] = 1.0\\n        u[:, -1] = 1.0\\n        \\n        v[0, :] = 1.0\\n        v[-1, :] = 1.0\\n        v[:, 0] = 1.0\\n        v[:, -1] = 1.0\\n\\n    # Save final solutions to .npy files\\n    np.save('u.npy', u)\\n    np.save('v.npy', v)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_cfd_problem()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 7.294791171993218e-05, \"MAE\": 0.002143915011124967, \"RMSE\": 0.00854095496533802, \"Cosine\": 0.9999696904568247, \"R2\": 0.9985591620074996, \"NMSE\": 6.17427903351009e-05, \"score01\": 0.9993}, \"v\": {\"MSE\": 7.294791171993218e-05, \"MAE\": 0.002143915011124967, \"RMSE\": 0.00854095496533802, \"Cosine\": 0.9999696904568247, \"R2\": 0.9985591620074996, \"NMSE\": 6.17427903351009e-05, \"score01\": 0.9993}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 234.51,
+    "setup_s": 0.0,
+    "grade_s": 0.142
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s",
+    "missing=[] nonfinite=[]"
+  ]
+}

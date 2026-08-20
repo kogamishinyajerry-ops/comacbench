@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p059",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def rotation_matrices(axis, theta):\\n    '''Create rotation matrices Rx, Ry, and Rz with the given angle theta.\\n    Inputs:\\n    axis : int\\n        The rotation axis. 1 = x, 2 = y, 3 = z.\\n    theta : float\\n        The rotation angle.\\n    Output:\\n    R : matrix of shape(2, 2)\\n        The rotation matrix.\\n    '''\\n    if axis == 1:\\n        R = np.array([[np.cos(theta / 2), -1j * np.sin(theta / 2)],\\n                      [-1j * np.sin(theta / 2), np.cos(theta / 2)]], dtype=complex)\\n    elif axis == 2:\\n        R = np.array([[np.cos(theta / 2), -np.sin(theta / 2)],\\n                      [np.sin(theta / 2), np.cos(theta / 2)]], dtype=complex)\\n    elif axis == 3:\\n        R = np.array([[np.exp(-1j * theta / 2), 0],\\n                      [0, np.exp(1j * theta / 2)]], dtype=complex)\\n    else:\\n        raise ValueError(\\\"Invalid axis: must be 1 (x), 2 (y), or 3 (z).\\\")\\n    return R\\n\\n\\ndef create_ansatz(theta):\\n    '''Create the ansatz wavefunction with a given theta.\\n    Input:\\n    theta : float\\n        The only variational parameter.\\n    Output:\\n    ansatz : array of shape (4, 1)\\n        The ansatz wavefunction.\\n    '''\\n    # Initial state |00>\\n    psi = np.array([[1], [0], [0], [0]], dtype=complex)\\n\\n    # Hartree-Fock preparation: Rx(pi) on second qubit\\n    Rx_pi = rotation_matrices(1, np.pi)\\n    I2 = np.eye(2, dtype=complex)\\n    Rx_pi_q2 = np.kron(I2, Rx_pi)\\n    psi = Rx_pi_q2 @ psi\\n\\n    # Step 1: Ry(pi/2) on qubit 1, Rx(-pi/2) on qubit 2\\n    Ry_pi_2 = rotation_matrices(2, np.pi / 2)\\n    Rx_minus_pi_2 = rotation_matrices(1, -np.pi / 2)\\n    step1 = np.kron(Ry_pi_2, Rx_minus_pi_2)\\n    psi = step1 @ psi\\n\\n    # Step 2: CNOT12 (control first, target second)\\n    CNOT12 = np.array([[1, 0, 0, 0],\\n                       [0, 1, 0, 0],\\n                       [0, 0, 0, 1],\\n                       [0, 0, 1, 0]], dtype=complex)\\n    psi = CNOT12 @ psi\\n\\n    # Step 3: Rz(-2*theta) on qubit 2\\n    Rz_minus_2theta = rotation_matrices(3, -2 * theta)\\n    step3 = np.kron(I2, Rz_minus_2theta)\\n    psi = step3 @ psi\\n\\n    # Step 4: CNOT12 again\\n    psi = CNOT12 @ psi\\n\\n    # Step 5: Ry(-pi/2) on qubit 1, Rx(pi/2) on qubit 2\\n    Ry_minus_pi_2 = rotation_matrices(2, -np.pi / 2)\\n    Rx_pi_2 = rotation_matrices(1, np.pi / 2)\\n    step5 = np.kron(Ry_minus_pi_2, Rx_pi_2)\\n    psi = step5 @ psi\\n\\n    ansatz = psi\\n    return ansatz\\n\\n\\ndef measureZ(U, psi):\\n    '''Perform a measurement in the Z-basis for a 2-qubit system where only Pauli Sz measurements are possible.\\n    The measurement is applied to the first qubit.\\n    Inputs:\\n    U : matrix of shape(4, 4)\\n        The unitary transformation to be applied before measurement.\\n    psi : array of shape (4, 1)\\n        The two-qubit state before the unitary transformation.\\n    Output:\\n    measured_result: float\\n        The result of the Sz measurement after applying U.\\n    '''\\n    # Apply the unitary transformation\\n    psi_prime = U @ psi\\n\\n    # Define Z on first qubit (Z ⊗ I)\\n    Z = np.array([[1, 0], [0, -1]], dtype=complex)\\n    Z1 = np.kron(Z, np.eye(2, dtype=complex))\\n\\n    # Expectation value of Z1\\n    measured_result = np.real(np.vdot(psi_prime, Z1 @ psi_prime))\\n    return float(measured_result)\\n\\n\\ndef projective_expected(theta, gl):\\n    '''Calculate the expectation value of the energy with proper unitary transformations.\\n    Input:\\n    theta : float\\n        The only variational parameter.\\n    gl = [g0, g1, g2, g3, g4, g5] : array in size 6\\n        Hamiltonian coefficients.\\n    Output:\\n    energy : float\\n        The expectation value of the energy with the given parameter theta.\\n    '''\\n    g0, g1, g2, g3, g4, g5 = gl\\n\\n    # Get ansatz state\\n    psi = create_ansatz(theta)\\n\\n    # Define necessary gates\\n    I4 = np.eye(4, dtype=complex)\\n\\n    # Z1 term (no transformation)\\n    exp_Z1 = measureZ(I4, psi)\\n\\n    # Z2 term: apply SWAP\\n    SWAP = np.array([[1, 0, 0, 0],\\n                     [0, 0, 1, 0],\\n                     [0, 1, 0, 0],\\n                     [0, 0, 0, 1]], dtype=complex)\\n    exp_Z2 = measureZ(SWAP, psi)\\n\\n    # Z1Z2 term: app\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 15, \"cases_total\": 15, \"steps_all_pass\": 5, \"steps_total\": 5, \"per_step\": {\"59.1\": {\"pass\": 3, \"total\": 3}, \"59.2\": {\"pass\": 3, \"total\": 3}, \"59.3\": {\"pass\": 3, \"total\": 3}, \"59.4\": {\"pass\": 3, \"total\": 3}, \"59.5\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 65.015,
+    "setup_s": 0.0,
+    "grade_s": 0.815
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.41s"
+  ]
+}

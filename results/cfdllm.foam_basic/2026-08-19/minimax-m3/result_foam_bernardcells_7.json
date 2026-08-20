@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_bernardcells_7",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"Create an OpenFOAM 10 case for 3D Benard cell using buoyantFoam.\\\"\\\"\\\"\\n\\nimport os\\n\\n# Domain dimensions\\nLX = 9.0\\nLY = 1.0\\nLZ = 2.0\\n\\n# Wall temperatures\\nT_HOT = 310.0\\nT_COLD = 295.0\\n\\n# Time settings\\nDT = 1.0\\nEND_TIME = 1000.0\\nWRITE_INTERVAL = 50.0\\n\\n# Physical properties\\nNU = 1e-4          # kinematic viscosity [m^2/s]\\nPR = 0.71          # Prandtl number\\nBETA = 3.3e-3      # thermal expansion [1/K]\\nT_REF = 300.0      # reference temperature [K]\\nGRAVITY = 9.81     # m/s^2\\n\\n# Thermal diffusivity alpha = nu / Pr\\nALPHA = NU / PR\\n\\n# Incompressible ideal gas density for buoyancy (rho0)\\nRHO0 = 1.0\\n\\n# Derived: cp via alpha = k/(rho*cp), use k=0.025, cp = k/(rho*alpha)\\nK = 0.025\\nCP = K / (RHO0 * ALPHA)\\n\\n# Cell counts\\nNX = 18\\nNY = 4\\nNZ = 8\\n\\n\\ndef write(path, content):\\n    \\\"\\\"\\\"Write string content to a file, creating directories as needed.\\\"\\\"\\\"\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\n# ---------------------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------------------\\nblock_mesh_dict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Website:  www.openfoam.org                      |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * *\""
+  },
+  "timings": {
+    "agent_s": 206.633,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

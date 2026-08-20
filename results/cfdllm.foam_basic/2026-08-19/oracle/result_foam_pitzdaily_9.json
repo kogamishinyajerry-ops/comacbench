@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_pitzdaily_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: GT 文件逐字写出（FoamBench_basic.json，repr 转义）\\nimport os\\n\\nFILES = {\\n    '0/U': '/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\\\n  =========                 |\\\\n  \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox\\\\n   \\\\\\\\\\\\\\\\    /   O peration     | Website:  https://openfoam.org\\\\n    \\\\\\\\\\\\\\\\  /    A nd           | Version:  10\\\\n     \\\\\\\\\\\\\\\\/     M anipulation  |\\\\n\\\\\\\\*---------------------------------------------------------------------------*/\\\\nFoamFile\\\\n{\\\\n    format      ascii;\\\\n    class       volVectorField;\\\\n    object      U;\\\\n}\\\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\\\n\\\\ndimensions      [0 1 -1 0 0 0 0];\\\\n\\\\ninternalField   uniform (0 0 0);\\\\n\\\\nboundaryField\\\\n{\\\\n    inlet\\\\n    {\\\\n        type            fixedValue;\\\\n        value           uniform (25 0 0);\\\\n    }\\\\n\\\\n    outlet\\\\n    {\\\\n        type            zeroGradient;\\\\n    }\\\\n\\\\n    upperWall\\\\n    {\\\\n        type            noSlip;\\\\n    }\\\\n\\\\n    lowerWall\\\\n    {\\\\n        type            noSlip;\\\\n    }\\\\n\\\\n    frontAndBack\\\\n    {\\\\n        type            empty;\\\\n    }\\\\n}\\\\n\\\\n// ************************************************************************* //\\\\n',\\n    '0/epsilon': '/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\\\n  =========                 |\\\\n  \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox\\\\n   \\\\\\\\\\\\\\\\    /   O peration     | Website:  https://openfoam.org\\\\n    \\\\\\\\\\\\\\\\  /    A nd           | Version:  10\\\\n     \\\\\\\\\\\\\\\\/     M anipulation  |\\\\n\\\\\\\\*---------------------------------------------------------------------------*/\\\\nFoamFile\\\\n{\\\\n    format      ascii;\\\\n    class       volScalarField;\\\\n    location    \\\"0\\\";\\\\n    object      epsilon;\\\\n}\\\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\\\n\\\\ndimensions      [0 2 -3 0 0 0 0];\\\\n\\\\ninternalField   uniform 14.855;\\\\n\\\\nboundaryField\\\\n{\\\\n    inlet\\\\n    {\\\\n        type            fixedValue;\\\\n        value           uniform 14.855;\\\\n    }\\\\n    outlet\\\\n    {\\\\n        type            zeroGradient;\\\\n    }\\\\n    upperWall\\\\n    {\\\\n        type            epsilonWallFunction;\\\\n        value           uniform 14.855;\\\\n    }\\\\n    lowerWall\\\\n    {\\\\n        type            epsilonWallFunction;\\\\n        value           uniform 14.855;\\\\n    }\\\\n    frontAndBack\\\\n    {\\\\n        type            empty;\\\\n    }\\\\n}\\\\n\\\\n\\\\n// ************************************************************************* //\\\\n',\\n    '0/k': '/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\\\n  =========                 |\\\\n  \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox\\\\n   \\\\\\\\\\\\\\\\    /   O peration     | Website:  https://openfoam.org\\\\n    \\\\\\\\\\\\\\\\  /    A nd           | Version:  10\\\\n     \\\\\\\\\\\\\\\\/     M anipulation  |\\\\n\\\\\\\\*---------------------------------------------------------------------------*/\\\\nFoamFile\\\\n{\\\\n    format      ascii;\\\\n    class       volScalarField;\\\\n    location    \\\"0\\\";\\\\n    object      k;\\\\n}\\\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\\\n\\\\ndimensions      [0 2 -2 0 0 0 0];\\\\n\\\\ninternalField   uniform 0.375;\\\\n\\\\nboundaryField\\\\n{\\\\n    inlet\\\\n    {\\\\n        type            fixedValue;\\\\n        value           uniform 0.375;\\\\n    }\\\\n    outlet\\\\n    {\\\\n        type            zeroGradient;\\\\n    }\\\\n    upperWall\\\\n    {\\\\n        type            kqRWallFunction;\\\\n        value           uniform 0.375;\\\\n    }\\\\n    lowerWall\\\\n    {\\\\n        type            kqRWallFunction;\\\\n        value           uniform 0.375;\\\\n    }\\\\n    frontAndBack\\\\n    {\\\\n        type            empty;\\\\n    }\\\\n}\\\\n\\\\n\\\\n// ************************************************************************* //\\\\n',\\n    '0/nuTilda': '/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\\\n  =========                 |\\\\n  \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox\\\\n   \\\\\\\\\\\\\\\\    /   O peration     | Website:  https://openfo\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 0, \"last_time\": \"0.3\", \"exec_ok\": true, \"nmse\": 0.0, \"nmse_per_field\": {\"U\": 0.0, \"p\": 0.0}, \"nmse_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 100.763,
+    "setup_s": 0.0,
+    "grade_s": 100.763
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=True exit=0 100.7s last_time=0.3",
+    "nmse=0 score=1.0"
+  ]
+}

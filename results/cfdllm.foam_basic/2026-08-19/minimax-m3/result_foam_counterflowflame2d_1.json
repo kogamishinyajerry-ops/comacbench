@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_counterflowflame2d_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# ---------- Case meta ----------\\ncase_dir = os.getcwd()\\nsolver = \\\"reactingFoam\\\"\\n\\n# Geometry\\nwidth = 0.02\\nheight = 0.02\\nnx = 40\\nny = 40\\n\\n# Inlet velocities\\nU_fuel = 0.1\\nU_air = -0.1\\n\\n# Run controls\\nendTime = 0.5\\nwriteInterval = 0.05\\ndeltaT = 1e-6\\n\\n# Species molecular weights\\nMW = {\\n    \\\"CH4\\\": 16.0428e-3,\\n    \\\"O2\\\":  31.9988e-3,\\n    \\\"N2\\\":  28.0134e-3,\\n    \\\"H2O\\\": 18.0153e-3,\\n    \\\"CO2\\\": 44.0095e-3,\\n}\\n\\nR_universal = 8.314462618\\nRspecies = {sp: R_universal / MW[sp] for sp in MW}\\n\\ndef mkdirp(*parts):\\n    path = os.path.join(case_dir, *parts)\\n    os.makedirs(path, exist_ok=True)\\n\\n# ---------------- system files ----------------\\nmkdirp(\\\"system\\\")\\nmkdirp(\\\"constant\\\")\\nmkdirp(\\\"0\\\")\\n\\n# --- blockMeshDict ---\\nblockMeshDict = f\\\"\\\"\\\"FoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({width} 0 0)\\n    ({width} {height} 0)\\n    (0 {height} 0)\\n    (0 0 0.001)\\n    ({width} 0 0.001)\\n    ({width} {height} 0.001)\\n    (0 {height} 0.001)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    fuel\\n    {{\\n        type patch;\\n        faces\\n        (\\n            ((1 2 6 5))\\n        );\\n    }}\\n    air\\n    {{\\n        type patch;\\n        faces\\n        (\\n            ((3 0 4 7))\\n        );\""
+  },
+  "timings": {
+    "agent_s": 222.503,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

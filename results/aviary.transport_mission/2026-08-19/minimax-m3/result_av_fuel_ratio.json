@@ -1,0 +1,40 @@
+{
+  "task_id": "av_fuel_ratio",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Paths to the two range-variant aircraft data CSVs\\ncsv_2400 = 'aviary/models/aircraft/N3CC_2400.csv'\\ncsv_3600 = 'aviary/models/aircraft/N3CC_3600.csv'\\n\\ndef run_mission_analysis(input_file):\\n    \\\"\\\"\\\"Run forward mission analysis with cruise Mach 0.80.\\\"\\\"\\\"\\n    # Deep copy default phase info to avoid modifying the original\\n    phase_info = deepcopy(default_phase_info)\\n    \\n    # Set cruise Mach to 0.80\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Run Aviary mission analysis\\n    prob = run_aviary(\\n        input_file,\\n        phase_info,\\n        run_driver=False,\\n        optimizer='SLSQP',\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Get total fuel mass in lbm\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    return fuel_mass\\n\\n# Run analyses for both range variants\\nfuel_2400 = run_mission_analysis(csv_2400)\\nfuel_3600 = run_mission_analysis(csv_3600)\\n\\n# Calculate fuel ratio\\nfuel_ratio = fuel_3600 / fuel_2400\\n\\n# Write result to JSON file\\nresult = {\\n    'fuel_ratio_3600_over_2400': fuel_ratio\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f)\\n\\nprint(f\\\"Fuel at 2400 NM: {fuel_2400:.2f} lbm\\\")\\nprint(f\\\"Fuel at 3600 NM: {fuel_3600:.2f} lbm\\\")\\nprint(f\\\"Fuel ratio (3600/2400): {fuel_ratio:.6f}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"erry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/aviary/utils/process_input_decks.py\\\", line 110, in create_vehicle\\n    vehicle_deck = get_path(vehicle_deck, verbosity)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/aviary/utils/functions.py\\\", line 244, in get_path\\n    raise FileNotFoundError(\\nFileNotFoundError: File not found in absolute path: aviary/models/aircraft/N3CC_2400.csv, relative path: /private/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_fwpf4uxt/aviary/models/aircraft/N3CC_2400.csv, or Aviary-based path: /Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/aviary/aviary/models/aircraft/N3CC_2400.csv\\n\"}"
+  },
+  "timings": {
+    "agent_s": 147.784,
+    "setup_s": 0.0,
+    "grade_s": 1.263
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.26s"
+  ]
+}

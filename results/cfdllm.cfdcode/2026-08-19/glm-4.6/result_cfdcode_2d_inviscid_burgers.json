@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_inviscid_burgers",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9653,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.98265,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Domain and grid parameters\\nLx, Ly = 2.0, 2.0\\nNx, Ny = 101, 101          # number of grid points in x and y\\ndx = Lx / (Nx - 1)\\ndy = Ly / (Ny - 1)\\n\\n# Time parameters\\nT = 0.40\\ndt = 0.001                 # time step, satisfies CFL condition\\nnsteps = int(T / dt)       # number of time steps (400)\\n\\n# Create grid\\nx = np.linspace(0, Lx, Nx)\\ny = np.linspace(0, Ly, Ny)\\nX, Y = np.meshgrid(x, y, indexing='ij')\\n\\n# Initialize solution fields\\nu = np.ones((Nx, Ny))\\nv = np.ones((Nx, Ny))\\n\\n# Set initial condition: u = v = 2 in the square [0.5,1] x [0.5,1]\\nmask = (X >= 0.5) & (X <= 1.0) & (Y >= 0.5) & (Y <= 1.0)\\nu[mask] = 2.0\\nv[mask] = 2.0\\n\\n# Enforce Dirichlet boundary conditions\\nu[0, :] = 1; u[-1, :] = 1; u[:, 0] = 1; u[:, -1] = 1\\nv[0, :] = 1; v[-1, :] = 1; v[:, 0] = 1; v[:, -1] = 1\\n\\n# Time stepping with first-order upwind finite differences\\nfor _ in range(nsteps):\\n    u_new = u.copy()\\n    v_new = v.copy()\\n\\n    # Interior points slices\\n    u_mid = u[1:-1, 1:-1]\\n    v_mid = v[1:-1, 1:-1]\\n\\n    # --- Update u ---\\n    # du/dx upwind based on sign of u\\n    du_dx_back = (u_mid - u[0:-2, 1:-1]) / dx\\n    du_dx_forw = (u[2:, 1:-1] - u_mid) / dx\\n    du_dx = np.where(u_mid > 0, du_dx_back, du_dx_forw)\\n\\n    # du/dy upwind based on sign of v\\n    du_dy_back = (u_mid - u[1:-1, 0:-2]) / dy\\n    du_dy_forw = (u[1:-1, 2:] - u_mid) / dy\\n    du_dy = np.where(v_mid > 0, du_dy_back, du_dy_forw)\\n\\n    u_new[1:-1, 1:-1] = u_mid - dt * (u_mid * du_dx + v_mid * du_dy)\\n\\n    # --- Update v ---\\n    # dv/dx upwind based on sign of u\\n    dv_dx_back = (v_mid - v[0:-2, 1:-1]) / dx\\n    dv_dx_forw = (v[2:, 1:-1] - v_mid) / dx\\n    dv_dx = np.where(u_mid > 0, dv_dx_back, dv_dx_forw)\\n\\n    # dv/dy upwind based on sign of v\\n    dv_dy_back = (v_mid - v[1:-1, 0:-2]) / dy\\n    dv_dy_forw = (v[1:-1, 2:] - v_mid) / dy\\n    dv_dy = np.where(v_mid > 0, dv_dy_back, dv_dy_forw)\\n\\n    v_new[1:-1, 1:-1] = v_mid - dt * (u_mid * dv_dx + v_mid * dv_dy)\\n\\n    # Update arrays\\n    u, v = u_new, v_new\\n\\n    # Re-apply boundary conditions\\n    u[0, :] = 1; u[-1, :] = 1; u[:, 0] = 1; u[:, -1] = 1\\n    v[0, :] = 1; v[-1, :] = 1; v[:, 0] = 1; v[:, -1] = 1\\n\\n# Save final solutions\\nnp.save('u.npy', u)\\nnp.save('v.npy', v)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.0024118873348140217, \"MAE\": 0.015286903736486189, \"RMSE\": 0.049110969597575875, \"Cosine\": 0.9989530797850665, \"R2\": 0.9316127308769785, \"NMSE\": 0.0020969823764529815, \"score01\": 0.9653}, \"v\": {\"MSE\": 0.0024118873348140217, \"MAE\": 0.015286903736486189, \"RMSE\": 0.049110969597575875, \"Cosine\": 0.9989530797850665, \"R2\": 0.9316127308769785, \"NMSE\": 0.0020969823764529815, \"score01\": 0.9653}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.13}"
+  },
+  "timings": {
+    "agent_s": 200.879,
+    "setup_s": 0.0,
+    "grade_s": 0.277
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.13s",
+    "missing=[] nonfinite=[]"
+  ]
+}

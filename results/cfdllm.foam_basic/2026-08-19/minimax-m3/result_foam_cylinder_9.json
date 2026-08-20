@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cylinder_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# ============================================================\\n# Generate an OpenFOAM v10 case for laminar flow past an offset\\n# cylinder using pimpleFoam with a Cross-Power-Law viscosity model.\\n# ============================================================\\n\\nCASE_DIR = os.getcwd()\\n\\n# Helper to write a file\\ndef write_file(path, content):\\n    full_path = os.path.join(CASE_DIR, path)\\n    os.makedirs(os.path.dirname(full_path), exist_ok=True)\\n    with open(full_path, 'w') as f:\\n        f.write(content)\\n\\n# Geometry parameters\\nR = 0.05            # cylinder radius [m]\\nCYL_CX = 0.2        # cylinder center x\\nCYL_CY = 0.2        # cylinder center y\\nLX = 2.2            # domain length in x\\nLY = 0.41           # domain height in y\\nINLET_X = 0.0\\nOUTLET_X = 2.2\\n\\n# Block mesh parameters\\nNX = 220\\nNY = 41\\n\\n# Cell size around cylinder (refinement near cylinder)\\n# We use simple grading for now\\nX_GRAD = 1.0\\nY_GRAD = 1.0\\n\\n# ============================================================\\n# system/blockMeshDict\\n# ============================================================\\nblock_mesh_dict = r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Website:  www.openfoam.com                      |\\n|   \\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (2.2 0 0)\\n    (2.2 0.41 0)\\n    (0 0.41 0)\\n    (0 0 0.1)\\n    (2.2 0 0.1)\\n    (2.2 0.41 0.1)\\n    (0 0.41 0.1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2\""
+  },
+  "timings": {
+    "agent_s": 208.62,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

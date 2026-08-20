@@ -1,0 +1,73 @@
+id: cfdcode_lid_driven_cavity
+registry_id: cfdllm.cfdcode
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: cfdcode@3b46d30+kaggle_v1
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/cfdllm.cfdcode/cfdcode_lid_driven_cavity.md
+  prompt_sha256: 4142064e2c201295986362f48c8cd8ff5ac944b068c04510f7b056330d831a7e
+  assets:
+  - path: data/cfdllm/cfdcode/prompt/PDE_TASK_QUESTION_ONLY.json
+    digest: d76d2c59806213c45113e77c11fad29228ea58350ceeb931d19e6a752bbee65f
+  - path: data/cfdllm/cfdcode/gold_outputs/u_Lid_Driven_Cavity.npy
+    digest: 29d4e65d939e3fb59127b366826dcf1eae8022f35949229b58362040c256fbaf
+  - path: data/cfdllm/cfdcode/gold_outputs/v_Lid_Driven_Cavity.npy
+    digest: 5473adff42048c8bf30ecf63551d434bafe8ae4a5880f844f538611bd0451c6d
+  - path: data/cfdllm/cfdcode/gold_outputs/p_Lid_Driven_Cavity.npy
+    digest: a357e7773a41c521f39a03b51e1043a09bb35096583571d6e03b7572e1125736
+output_contract:
+- u.npy
+- v.npy
+- p.npy
+reference:
+  source: CFDCodeBench gold solution 预计算输出（本 harness 离线锁定）
+  revision: cfdcode@3b46d30+kaggle_v1
+  solution_script: solution/Lid_Driven_Cavity.py
+  metrics:
+  - MSE
+  - MAE
+  - RMSE
+  - Cosine
+  - R2
+  - NMSE
+  uncertainty_note: 参考场为单一确定性数值解，无比对不确定度；形状不一致时按官方 scipy.zoom 一阶插值对齐
+grader:
+  answer_format: code
+  exec_kind: cfdcode_problem
+  validity_gate: true
+  save_values:
+  - u
+  - v
+  - p
+  gold_dir: data/cfdllm/cfdcode/gold_outputs
+  gold_prefix: Lid_Driven_Cavity
+  field_compare: official_interpolate+cos_r2
+  stability_layer: false
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/cfdllm/cfdcode/solution/Lid_Driven_Cavity.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A（数据集无边界输入测试）权重 0；robustness=两次执行确定性
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: NREL-Theseus/cfdllmbench + Kaggle nithinsekhar/cfdcodebench
+  license: BSD-3-Clause
+  status: confirmed-repo
+  revision: cfdcode@3b46d30+kaggle_v1
+  mirror_allowed: true

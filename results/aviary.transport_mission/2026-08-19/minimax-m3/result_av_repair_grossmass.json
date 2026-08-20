@@ -1,0 +1,38 @@
+{
+  "task_id": "av_repair_grossmass",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport json\\nimport os\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\ncsv_path = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_grossmass_corrupt.csv\\\"\\n\\n# Read the CSV to examine structure\\nwith open(csv_path, 'r') as f:\\n    reader = csv.reader(f)\\n    header = next(reader)\\n    rows = list(reader)\\n\\n# Print all rows for debugging\\nprint(\\\"CSV contents:\\\")\\nfor row in rows:\\n    print(row)\\n\\n# Function to write a fixed CSV with specific modifications\\ndef write_fixed_csv(filepath, modifications):\\n    with open(csv_path, 'r') as f_in, open(filepath, 'w') as f_out:\\n        reader = csv.reader(f_in)\\n        writer = csv.writer(f_out)\\n        for row in reader:\\n            if len(row) >= 2 and row[0] in modifications:\\n                writer.writerow([row[0], str(modifications[row[0]])])\\n            else:\\n                writer.writerow(row)\\n\\n# Setup phase_info with cruise Mach 0.80\\nphase_info = deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Test 1: Restore gross_mass to 175400\\nfixed_csv_1 = \\\"fixed_grossmass.csv\\\"\\nwrite_fixed_csv(fixed_csv_1, {'aircraft:design:gross_mass': 175400.0})\\n\\nprob1 = run_aviary(\\n    fixed_csv_1,\\n    phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\nfuel_burn_1 = prob1.get_val('mission:total_fuel_mass', units='lbm')[0]\\nprint(f\\\"Test 1 (gross_mass restored to 175400): fuel_burn = {fuel_burn_1}\\\")\\n\\n# Test 2: Restore range to 3200\\nfixed_csv_2 = \\\"fixed_range.csv\\\"\\nwrite_fixed_csv(fixed_csv_2, {'aircraft:design:range': 3200.0})\\n\\nprob2 = run_aviary(\\n    fixed_csv_2,\\n    phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\nfuel_burn_2 = prob2.get_val('mission:total_fuel_mass', units='lbm')[0]\\nprint(f\\\"Test 2 (range restored to 3200): fuel_burn = {fuel_burn_2}\\\")\\n\\n# Determine which is corrupted by comparing to reference fuel burn\\nreference_fuel_burn = 43389.55\\nif abs(fuel_burn_1 - reference_fuel_burn) < 1.0:\\n    result = {\\n        \\\"corrupted_param\\\": \\\"aircraft:design:gross_mass\\\",\\n        \\\"restored_value\\\": 175400.0\\n    }\\nelif abs(fuel_burn_2 - reference_fuel_burn) < 1.0:\\n    result = {\\n        \\\"corrupted_param\\\": \\\"aircraft:design:range\\\",\\n        \\\"restored_value\\\": 3200.0\\n    }\\nelse:\\n    raise ValueError(f\\\"Neither restoration matches reference fuel burn. Test 1: {fuel_burn_1}, Test 2: {fuel_burn_2}\\\")\\n\\nwith open(\\\"result.json\\\", \\\"w\\\") as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(f\\\"Result: {result}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": true, \"got\": \"aircraft:design:gross_mass\", \"ref\": \"aircraft:design:gross_mass\"}, \"restored_value\": {\"status\": \"exact\", \"ok\": true, \"got\": 175400.0, \"ref\": 175400.0}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 84.562,
+    "setup_s": 0.0,
+    "grade_s": 6.992
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 6.99s"
+  ]
+}

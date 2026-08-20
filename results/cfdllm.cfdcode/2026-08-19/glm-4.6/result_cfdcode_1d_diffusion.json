@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_1d_diffusion",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9762,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.9881,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_diffusion():\\n    # Parameters\\n    nu = 0.3\\n    L = 2.0\\n    T_final = 0.0333\\n\\n    # Spatial Discretization\\n    Nx = 400\\n    x = np.linspace(0, L, Nx)\\n    dx = x[1] - x[0]\\n\\n    # Temporal Discretization\\n    # Stability condition for Explicit Euler: dt <= dx^2 / (2 * nu)\\n    # We use a safety factor of 0.8\\n    dt = 0.8 * (dx**2) / (2 * nu)\\n    Nt = int(T_final / dt)\\n    \\n    # Adjust dt to match T_final exactly\\n    if Nt < 1:\\n        Nt = 1\\n    dt = T_final / Nt\\n\\n    # Initial Condition\\n    u = np.ones(Nx)\\n    # u(x,0) = 2 if 0.5 <= x <= 1, else 1\\n    mask = (x >= 0.5) & (x <= 1.0)\\n    u[mask] = 2.0\\n\\n    # Boundary Conditions\\n    # The problem statement leaves Boundary Conditions blank, but given the IC is 1 at the boundaries,\\n    # we assume Dirichlet boundary conditions u(0,t) = 1 and u(L,t) = 1.\\n    u[0] = 1.0\\n    u[-1] = 1.0\\n\\n    # Finite Difference Method (FTCS - Forward Time Centered Space)\\n    for _ in range(Nt):\\n        u_new = u.copy()\\n        # Update internal points\\n        u_new[1:-1] = u[1:-1] + nu * dt / dx**2 * (u[2:] - 2*u[1:-1] + u[:-2])\\n        \\n        # Enforce Boundary Conditions\\n        u_new[0] = 1.0\\n        u_new[-1] = 1.0\\n        \\n        u = u_new\\n\\n    # Saving the results\\n    # Based on the instruction to save variables specified in 'save_values'.\\n    # Since 'save_values' was not explicitly provided in the prompt, we infer 'u' is the target variable.\\n    save_values = ['u']\\n    \\n    for var_name in save_values:\\n        if var_name in locals():\\n            np.save(f'{var_name}.npy', locals()[var_name])\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_diffusion()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.006855091771356916, \"MAE\": 0.05619440744680335, \"RMSE\": 0.08279548158780717, \"Cosine\": 0.9981156879034847, \"R2\": 0.9543625354363556, \"NMSE\": 0.003975406115700036, \"score01\": 0.9762}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.06}"
+  },
+  "timings": {
+    "agent_s": 110.765,
+    "setup_s": 0.0,
+    "grade_s": 0.126
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.06s",
+    "missing=[] nonfinite=[]"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_obliqueshock_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate an OpenFOAM 10 (Foundation) case for a 2D oblique shock wave\\nsimulation using the rhoCentralFoam solver.\\n\\nThe computational domain is 4.1 m x 1.0 m x 0.1 m. The case uses\\nnormalized thermodynamic properties (R = 0.7143, gamma = 1.4) so that\\nthe inlet conditions are conveniently unit-based.\\n\\nThe script only writes files; it does not execute OpenFOAM commands.\\n\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\n\\n# --------------------------------------------------------------------------- #\\n# Case-level parameters\\n# --------------------------------------------------------------------------- #\\n\\nCASE_NAME        = \\\"obliqueShock\\\"\\nSOLVER           = \\\"rhoCentralFoam\\\"\\n\\n# Geometry\\nDX = 4.1\\nDY = 1.0\\nDZ = 0.1\\n\\n# Inflow conditions (normalized)\\nP_INLET  = 1.0\\nT_INLET  = 1.0\\nU_INLET  = 3.5\\nV_INLET  = 0.0\\nW_INLET  = 0.0\\n\\n# Top boundary (post-shock oblique flow)\\nT_TOP    = 1.25853\\nU_TOP    = 2.61933\\nV_TOP    = -0.50632\\nW_TOP    = 0.0\\n\\n# Normalized thermodynamic properties\\nMOL_WEIGHT = 11640.3\\nCP         = 2.5\\nPR         = 1.0\\nMU         = 0.0\\n\\n# Derived constants\\nR_SPECIFIC = CP * (1.4 - 1.0)   # R = Cp*(gamma-1) = 2.5*0.4 = 1.0\\n# The given R value in the prompt is 0.7143, but for the normalized\\n# thermodynamic closure to be internally consistent with Cp=2.5 and\\n# gamma=1.4 we use R = 1.0 (i.e. molWeight is set so that R*molWeight is\\n# consistent). OpenFOAM's thermo uses R = R_universal/molWeight, so we set\\n# molWeight to satisfy R = 0.7143:\\nR_UNIVERSAL = 8314.46261815324\\nR_GIVEN     = 0.7143\\nMOL_WEIGHT  = R_UNIVERSAL / R_GIVEN\\n# Cp follows from gamma and\""
+  },
+  "timings": {
+    "agent_s": 228.578,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

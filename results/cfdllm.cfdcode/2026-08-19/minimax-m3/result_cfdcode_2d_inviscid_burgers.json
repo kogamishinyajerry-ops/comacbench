@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_inviscid_burgers",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9549,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.97745,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Domain and grid\\nx = np.linspace(0, 2, 101)\\ny = np.linspace(0, 2, 101)\\ndx = x[1] - x[0]\\ndy = y[1] - y[0]\\nnx = len(x)\\nny = len(y)\\n\\n# Time parameters\\nt_final = 0.40\\ndt = 0.005\\nnt = int(t_final / dt)\\n\\n# Initialize u and v\\nu = np.ones((ny, nx))\\nv = np.ones((ny, nx))\\n\\n# Set initial conditions: u = v = 2 in [0.5,1] x [0.5,1]\\nfor i in range(ny):\\n    for j in range(nx):\\n        if 0.5 <= x[j] <= 1 and 0.5 <= y[i] <= 1:\\n            u[i, j] = 2.0\\n            v[i, j] = 2.0\\n\\n# Apply boundary conditions (Dirichlet: u=v=1 on boundaries)\\ndef apply_boundary_conditions(u, v):\\n    u[0, :] = 1.0\\n    u[-1, :] = 1.0\\n    u[:, 0] = 1.0\\n    u[:, -1] = 1.0\\n    v[0, :] = 1.0\\n    v[-1, :] = 1.0\\n    v[:, 0] = 1.0\\n    v[:, -1] = 1.0\\n\\napply_boundary_conditions(u, v)\\n\\n# Upwind scheme for both u and v\\nfor n in range(nt):\\n    u_old = u.copy()\\n    v_old = v.copy()\\n    \\n    # Compute new u\\n    for i in range(1, ny-1):\\n        for j in range(1, nx-1):\\n            # x-direction flux\\n            if u_old[i, j] >= 0:\\n                flux_x = u_old[i, j] * (u_old[i, j] - u_old[i, j-1]) / dx\\n            else:\\n                flux_x = u_old[i, j] * (u_old[i, j+1] - u_old[i, j]) / dx\\n            \\n            # y-direction flux\\n            if v_old[i, j] >= 0:\\n                flux_y = v_old[i, j] * (u_old[i, j] - u_old[i-1, j]) / dy\\n            else:\\n                flux_y = v_old[i, j] * (u_old[i+1, j] - u_old[i, j]) / dy\\n            \\n            u[i, j] = u_old[i, j] - dt * (flux_x + flux_y)\\n    \\n    # Compute new v\\n    for i in range(1, ny-1):\\n        for j in range(1, nx-1):\\n            # x-direction flux\\n            if u_old[i, j] >= 0:\\n                flux_x = u_old[i, j] * (v_old[i, j] - v_old[i, j-1]) / dx\\n            else:\\n                flux_x = u_old[i, j] * (v_old[i, j+1] - v_old[i, j]) / dx\\n            \\n            # y-direction flux\\n            if v_old[i, j] >= 0:\\n                flux_y = v_old[i, j] * (v_old[i, j] - v_old[i-1, j]) / dy\\n            else:\\n                flux_y = v_old[i, j] * (v_old[i+1, j] - v_old[i, j]) / dy\\n            \\n            v[i, j] = v_old[i, j] - dt * (flux_x + flux_y)\\n    \\n    # Apply boundary conditions\\n    apply_boundary_conditions(u, v)\\n\\n# Save final solutions\\nnp.save('u.npy', u)\\nnp.save('v.npy', v)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.0031330376325573194, \"MAE\": 0.013028675944715993, \"RMSE\": 0.05597354404142478, \"Cosine\": 0.9986499331195718, \"R2\": 0.9111650512619102, \"NMSE\": 0.002723976615907422, \"score01\": 0.9549}, \"v\": {\"MSE\": 0.0031330376325573194, \"MAE\": 0.013028675944715993, \"RMSE\": 0.05597354404142478, \"Cosine\": 0.9986499331195718, \"R2\": 0.9111650512619102, \"NMSE\": 0.002723976615907422, \"score01\": 0.9549}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 1.73}"
+  },
+  "timings": {
+    "agent_s": 37.045,
+    "setup_s": 0.0,
+    "grade_s": 3.395
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 1.73s",
+    "missing=[] nonfinite=[]"
+  ]
+}

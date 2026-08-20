@@ -1,0 +1,200 @@
+id: scicode_p033
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p033.md
+  prompt_sha256: 62e31b3463ad714c920648d5b3502e92d04189a6d39e6938b276cecb581eba13
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '33'
+  problem_name: phase_diagram_chern_haldane_model_v1
+  split: test
+  n_steps: 3
+  n_cases: 9
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    import cmath
+
+    from math import pi, sin, cos, sqrt'
+  steps:
+  - step_id: '33.1'
+    n_cases: 3
+    test_cases:
+    - 'kx = 1
+
+      ky = 1
+
+      a = 1
+
+      t1 = 1
+
+      t2 = 0.3
+
+      phi = 1
+
+      m = 1
+
+      assert np.allclose(calc_hamiltonian(kx, ky, a, t1, t2, phi, m), target)'
+    - 'kx = 0
+
+      ky = 1
+
+      a = 0.5
+
+      t1 = 1
+
+      t2 = 0.2
+
+      phi = 1
+
+      m = 1
+
+      assert np.allclose(calc_hamiltonian(kx, ky, a, t1, t2, phi, m), target)'
+    - 'kx = 1
+
+      ky = 0
+
+      a = 0.5
+
+      t1 = 1
+
+      t2 = 0.2
+
+      phi = 1
+
+      m = 1
+
+      assert np.allclose(calc_hamiltonian(kx, ky, a, t1, t2, phi, m), target)'
+  - step_id: '33.2'
+    n_cases: 3
+    test_cases:
+    - 'delta = 2 * np.pi / 200
+
+      a = 1
+
+      t1 = 4
+
+      t2 = 1
+
+      phi = 1
+
+      m = 1
+
+      assert np.allclose(compute_chern_number(delta, a, t1, t2, phi, m), target)'
+    - 'delta = 2 * np.pi / 100
+
+      a = 1
+
+      t1 = 1
+
+      t2 = 0.3
+
+      phi = -1
+
+      m = 1
+
+      assert np.allclose(compute_chern_number(delta, a, t1, t2, phi, m), target)'
+    - 'delta = 2 * np.pi / 100
+
+      a = 1
+
+      t1 = 1
+
+      t2 = 0.2
+
+      phi = 1
+
+      m = 1
+
+      assert np.allclose(compute_chern_number(delta, a, t1, t2, phi, m), target)'
+  - step_id: '33.3'
+    n_cases: 3
+    test_cases:
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      delta = 2 * np.pi / 30
+
+      a = 1.0
+
+      t1 = 4.0
+
+      t2 = 1.0
+
+      N = 40
+
+      assert cmp_tuple_or_list(compute_chern_number_grid(delta, a, t1, t2, N), target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      delta = 2 * np.pi / 30
+
+      a = 1.0
+
+      t1 = 5.0
+
+      t2 = 1.0
+
+      N = 40
+
+      assert cmp_tuple_or_list(compute_chern_number_grid(delta, a, t1, t2, N), target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      delta = 2 * np.pi / 30
+
+      a = 1.0
+
+      t1 = 1.0
+
+      t2 = 0.2
+
+      N = 40
+
+      assert cmp_tuple_or_list(compute_chern_number_grid(delta, a, t1, t2, N), target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

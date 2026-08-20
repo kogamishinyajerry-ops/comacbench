@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p024",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.4444,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.7222,
+  "artifacts": {
+    "code": "\"def make_IC(n):\\n    '''The function computes the inital condition mentioned above\\n    Inputs:\\n    n  : number of grid points, integer\\n    Outputs:\\n    v  : cell averaged approximation of initial condition, 1d array size n-1\\n    '''\\n    dx = np.pi / (n - 1)\\n    u0_avg = np.zeros(n - 1)\\n    # Gauss nodes and weights for 3-point rule on [-1,1]\\n    t = np.array([-np.sqrt(3/5), 0, np.sqrt(3/5)])\\n    w = np.array([5/9, 8/9, 5/9])\\n    for i in range(n - 1):\\n        a = -np.pi/2 + i * dx\\n        b = a + dx\\n        # Map Gauss points to cell\\n        x = (b - a) / 2 * t + (a + b) / 2\\n        # Evaluate initial condition piecewise\\n        vals = np.where(x <= 0, np.sin(x) - 1, np.sin(x) + 1)\\n        # Cell average = 0.5 * sum(w * vals)\\n        u0_avg[i] = 0.5 * np.dot(w, vals)\\n    return u0_avg\\n\\ndef LaxF(uL, uR):\\n    '''This function computes Lax-Fridrich numerical flux.\\n    Inputs: \\n    uL : Cell averaged value at cell i, float\\n    uR : Cell averaged value at cell i+1, float\\n    Output: flux, float\\n    '''\\n    alpha = 2.0\\n    fL = 0.5 * uL**2\\n    fR = 0.5 * uR**2\\n    flux = 0.5 * (fL + fR - alpha * (uR - uL))\\n    return flux\\n\\ndef solve(n_x, n_t, T):\\n    '''Inputs:\\n    n_x : number of spatial grids, Integer\\n    n_t : number of temperal grids, Integer\\n    T   : final time, float\\n    Outputs\\n    u1   : solution vector, 1d array of size n_x-1\\n    '''\\n    dx = np.pi / (n_x - 1)\\n    dt = T / n_t\\n    u = make_IC(n_x)   # initial cell averages\\n    for _ in range(n_t):\\n        # Compute fluxes at all vertices (edges)\\n        flux = np.zeros(n_x)\\n        # Left boundary: free outflow -> physical flux\\n        flux[0] = 0.5 * u[0]**2\\n        # Right boundary: free outflow -> physical flux\\n        flux[-1] = 0.5 * u[-1]**2\\n        # Interior edges\\n        for j in range(1, n_x - 1):\\n            flux[j] = LaxF(u[j-1], u[j])\\n        # Update cell averages using Euler forward\\n        u = u - (dt / dx) * (flux[1:] - flux[:-1])\\n    return u\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 4, \"cases_total\": 9, \"steps_all_pass\": 1, \"steps_total\": 3, \"per_step\": {\"24.1\": {\"pass\": 1, \"total\": 3}, \"24.2\": {\"pass\": 3, \"total\": 3}, \"24.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 149.857,
+    "setup_s": 0.0,
+    "grade_s": 0.824
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.42s"
+  ]
+}

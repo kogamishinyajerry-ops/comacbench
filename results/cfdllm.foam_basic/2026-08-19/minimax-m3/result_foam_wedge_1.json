@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# Create directory structure\\ndirs = [\\n    \\\"system\\\",\\n    \\\"constant\\\",\\n    \\\"0\\\",\\n]\\nfor d in dirs:\\n    os.makedirs(d, exist_ok=True)\\n\\n# Geometry parameters\\nx_min, x_max = -0.15242, 0.3048\\ny_min, y_max = 0.0, 0.1524\\nz_min, z_max = -0.005, 0.005\\n\\nnx, ny, nz = 80, 40, 1\\n\\nx_len = x_max - x_min\\ny_len = y_max - y_min\\nz_len = z_max - z_min\\n\\n# blockMeshDict - simple rectangular block (wedge approximated)\\nblock_mesh_dict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Website:  https://openfoam.org                  |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    ({x_min} {y_min} {z_min})\\n    ({x_max} {y_min} {z_min})\\n    ({x_max} {y_max} {z_min})\\n    ({x_min} {y_max} {z_min})\\n    ({x_min} {y_min} {z_max})\\n    ({x_max} {y_min} {z_max})\\n    ({x_max} {y_max} {z_max})\\n    ({x_min} {y_max} {z_max})\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            (0 4 7\""
+  },
+  "timings": {
+    "agent_s": 213.427,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

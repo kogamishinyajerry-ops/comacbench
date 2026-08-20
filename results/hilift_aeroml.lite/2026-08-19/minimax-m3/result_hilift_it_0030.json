@@ -1,0 +1,37 @@
+{
+  "task_id": "hilift_it_0030",
+  "registry_id": "hilift_aeroml.lite",
+  "adapter": "field_prediction",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "coefficient_rel_err_band",
+    "requirements": "coeff 字段完备",
+    "objective": "N/A(coeff_lite 基础题)",
+    "robustness": "split=it"
+  },
+  "score": 0.85,
+  "artifacts": {
+    "prediction": "{\"cl\": 2.5, \"cd\": 0.4, \"cm\": -0.7}",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"field_prediction\", \"hits\": {\"cl\": {\"rel_err\": 0.125915, \"pred\": 2.5, \"true\": 2.220417, \"band\": 0.25}, \"cd\": {\"rel_err\": 0.031231, \"pred\": 0.4, \"true\": 0.387886, \"band\": 1.0}, \"cm\": {\"rel_err\": 0.04361, \"pred\": -0.7, \"true\": -0.731919, \"band\": 1.0}}, \"split_group\": \"it\", \"wing_shape_idx\": \"LHC180\"}"
+  },
+  "timings": {
+    "agent_s": 8.122,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:e6d19af73ee5328d16cdaf3da9a9f7c9efd6e8e36ea2b99f12561137bb4098af",
+  "assets_revision": "hilift@hf-lite-2026-08-19",
+  "logs": [
+    "pred={'cl': 2.5, 'cd': 0.4, 'cm': -0.7}",
+    "gate=1 failures=[]"
+  ]
+}

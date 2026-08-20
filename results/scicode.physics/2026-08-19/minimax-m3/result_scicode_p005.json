@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p005",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"def lanczos(A, b, m):\\n    \\\"\\\"\\\"\\n    Perform Lanczos iteration on a symmetric matrix A.\\n\\n    Inputs:\\n    A : Matrix, 2d array of shape (M, M)\\n    b : Vector, 1d array of length M\\n    m : integer, number of Lanczos steps (m < M)\\n\\n    Outputs:\\n    Q : Matrix, 2d array of shape (M, m+1) with orthonormal columns\\n    \\\"\\\"\\\"\\n    # Convert inputs to numpy arrays\\n    A = np.asarray(A, dtype=float)\\n    b = np.asarray(b, dtype=float).ravel()\\n\\n    n = A.shape[0]\\n    if A.shape[0] != A.shape[1]:\\n        raise ValueError(\\\"Matrix A must be square\\\")\\n    if b.shape[0] != n:\\n        raise ValueError(\\\"Vector b must have length equal to dimension of A\\\")\\n    if m >= n:\\n        raise ValueError(\\\"Parameter m must be less than dimension of A\\\")\\n\\n    # Initial vector (normalized)\\n    beta = np.linalg.norm(b)\\n    if beta == 0:\\n        raise ValueError(\\\"Input vector b must be non‑zero\\\")\\n\\n    # Allocate matrix Q\\n    Q = np.zeros((n, m + 1))\\n    q = b / beta\\n    Q[:, 0] = q\\n\\n    # beta_{j-1} for j=1 is the initial norm\\n    beta_prev = beta\\n\\n    for j in range(m):\\n        # Compute w = A q_j\\n        w = A @ q\\n\\n        # Diagonal coefficient alpha_j = q_j^T w\\n        alpha = np.dot(q, w)\\n\\n        # Subtract the contribution from previous vectors\\n        if j > 0:\\n            w = w - beta_prev * Q[:, j - 1]\\n        w = w - alpha * q\\n\\n        # Compute off‑diagonal coefficient beta_j = ||w||\\n        beta_cur = np.linalg.norm(w)\\n\\n        if beta_cur == 0:\\n            # Early termination: fill remaining columns with zeros\\n            Q[:, j + 1:] = 0\\n            break\\n\\n        # New orthonormal vector q_{j+1}\\n        q_new = w / beta_cur\\n        Q[:, j + 1] = q_new\\n\\n        # Prepare for next iteration\\n        q = q_new\\n        beta_prev = beta_cur\\n\\n    return Q\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 2, \"cases_total\": 3, \"steps_all_pass\": 0, \"steps_total\": 1, \"per_step\": {\"5.1\": {\"pass\": 2, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 14.387,
+    "setup_s": 0.0,
+    "grade_s": 0.786
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.39s"
+  ]
+}

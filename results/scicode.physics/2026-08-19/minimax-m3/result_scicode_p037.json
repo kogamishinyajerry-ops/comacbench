@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p037",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef calculate_paraxial(h1, r1, r2, r3, d1, d2, n1, n2, n3, n_total):\\n    '''Computes the axial parameters for spherical aberration calculation.\\n    Parameters:\\n    - h1 (array of floats): Aperture heights, in range (0.01, hm)\\n    - r1 (float): Radius of curvature for the first lens surface\\n    - r2 (float): Radius of curvature for the second lens surface\\n    - r3 (float): Radius of curvature for the third lens surface\\n    - d1 (float): Separation distance between first and second surfaces\\n    - d2 (float): Separation distance between second and third surfaces\\n    - n1 (float): Refractive index of the first lens material\\n    - n2 (float): Refractive index of the second lens material\\n    - n3 (float): Refractive index of the third lens material\\n    - n_total (float): Refractive index of the surrounding medium (air)\\n    Returns:\\n    - l31 (array of floats): Axial image locations for the third surface\\n    '''\\n    # Assume object at infinity: l is infinite, so for paraxial rays with height h1,\\n    # the initial aperture angle u = h1 / l ≈ 0 for parallel rays.\\n    # For an object at infinity, the incident ray is parallel, so u ≈ 0.\\n    # However, we use the relation: sin(u) ≈ u = h1 / l, but since l → ∞, u → 0.\\n    # In practice, for object at infinity, we set l = infinity and u is determined by h1.\\n    # Actually, the problem assumes the incident light comes from the left with height h1,\\n    # and we want to find where the ray intersects the axis after the doublet lens.\\n    # We'll assume the object is at infinity, so incident rays are parallel.\\n    # For parallel incident rays, the incident angle I is given by sin(I) = h1/R1,\\n    # but in paraxial approximation, I = h1/R1.\\n    # However, the formula given uses u (aperture angle) as input.\\n    # From geometry: for object at infinity, l = ∞, so i = (l-r)/r * u, with u → 0, i is indeterminate.\\n    # Actually, for parallel rays, l = ∞\""
+  },
+  "timings": {
+    "agent_s": 238.966,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

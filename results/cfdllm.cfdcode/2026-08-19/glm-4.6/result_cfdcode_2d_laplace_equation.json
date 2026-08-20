@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_laplace_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8015,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.90075,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_laplace():\\n    # Domain parameters\\n    Lx = 2.0\\n    Ly = 1.0\\n    \\n    # Grid resolution\\n    Nx = 41\\n    Ny = 21\\n    \\n    dx = Lx / (Nx - 1)\\n    dy = Ly / (Ny - 1)\\n    \\n    # Coordinates\\n    x = np.linspace(0, Lx, Nx)\\n    y = np.linspace(0, Ly, Ny)\\n    \\n    # Initialize field p[y_index, x_index]\\n    # Initial condition p = 0\\n    p = np.zeros((Ny, Nx))\\n    \\n    # Finite difference coefficients\\n    cx = 1.0 / dx**2\\n    cy = 1.0 / dy**2\\n    denom = 2.0 * (cx + cy)\\n    \\n    # Iteration parameters\\n    tolerance = 1e-6\\n    max_iterations = 10000\\n    \\n    print(\\\"Starting solver...\\\")\\n    \\n    for iteration in range(max_iterations):\\n        pn = p.copy()\\n        \\n        # --- Update Interior Points ---\\n        # Vectorized Jacobi update\\n        # p[i,j] = (cx*(p[i+1,j] + p[i-1,j]) + cy*(p[i,j+1] + p[i,j-1])) / (2*cx + 2*cy)\\n        p[1:-1, 1:-1] = (cx * (pn[1:-1, 2:] + pn[1:-1, :-2]) + \\n                         cy * (pn[2:, 1:-1] + pn[:-2, 1:-1])) / denom\\n        \\n        # --- Apply Boundary Conditions ---\\n        \\n        # 1. Left Boundary (x=0): Dirichlet, p = 0\\n        p[:, 0] = 0.0\\n        \\n        # 2. Right Boundary (x=Lx): Dirichlet, p = y\\n        p[:, -1] = y\\n        \\n        # 3. Bottom Boundary (y=0): Neumann, dp/dy = 0\\n        # Using ghost point p[i,-1] = p[i,1]\\n        # Update equation for boundary node: \\n        # p[0,j] = (cx*(p[0,j+1] + p[0,j-1]) + 2*cy*p[1,j]) / (2*cx + 2*cy)\\n        p[0, 1:-1] = (cx * (pn[0, 2:] + pn[0, :-2]) + 2 * cy * pn[1, 1:-1]) / (2 * cx + 2 * cy)\\n        \\n        # 4. Top Boundary (y=Ly): Neumann, dp/dy = 0\\n        # Using ghost point p[i,Ny] = p[i,Ny-2]\\n        # Update equation for boundary node:\\n        # p[-1,j] = (cx*(p[-1,j+1] + p[-1,j-1]) + 2*cy*p[-2,j]) / (2*cx + 2*cy)\\n        p[-1, 1:-1] = (cx * (pn[-1, 2:] + pn[-1, :-2]) + 2 * cy * pn[-2, 1:-1]) / (2 * cx + 2 * cy)\\n        \\n        # 5. Corners\\n        # Bottom-Left (0,0): Dirichlet (x=0) -> 0\\n        p[0, 0] = 0.0\\n        # Bottom-Right (0, -1): Dirichlet (x=2, y=0) -> 0\\n        p[0, -1] = 0.0\\n        # Top-Left (-1, 0): Dirichlet (x=0) -> 0\\n        p[-1, 0] = 0.0\\n        # Top-Right (-1, -1): Dirichlet (x=2, y=1) -> 1\\n        p[-1, -1] = 1.0\\n        \\n        # --- Check Convergence ---\\n        diff = np.max(np.abs(p - pn))\\n        if diff < tolerance:\\n            print(f\\\"Converged in {iteration} iterations.\\\")\\n            break\\n            \\n    # Save the solution variable\\n    # The problem specifies saving the variable 'p'\\n    np.save('p.npy', p)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_laplace()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"p\": {\"MSE\": 0.011497806701659686, \"MAE\": 0.09259183817558352, \"RMSE\": 0.10722782615375398, \"Cosine\": 0.9446884549209933, \"R2\": 0.6582334170746014, \"NMSE\": 0.19619592777411624, \"score01\": 0.8015}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.12}"
+  },
+  "timings": {
+    "agent_s": 148.666,
+    "setup_s": 0.0,
+    "grade_s": 0.234
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.12s",
+    "missing=[] nonfinite=[]"
+  ]
+}

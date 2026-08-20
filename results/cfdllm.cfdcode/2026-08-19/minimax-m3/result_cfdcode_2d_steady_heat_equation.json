@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_steady_heat_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1091,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.55455,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Domain parameters\\nLx = 5.0\\nLy = 4.0\\nNx = 50  # number of intervals in x\\nNy = 40  # number of intervals in y\\n\\ndx = Lx / Nx\\ndy = Ly / Ny\\n\\n# Grid coordinates\\nx = np.linspace(0, Lx, Nx+1)\\ny = np.linspace(0, Ly, Ny+1)\\n\\n# Initialize temperature field (interior = 0)\\nT = np.zeros((Ny+1, Nx+1))\\n\\n# Apply Dirichlet boundary conditions\\nT[:, 0] = 10.0    # Left boundary (x=0): T = 10\\nT[:, -1] = 40.0   # Right boundary (x=5): T = 40\\nT[0, :] = 20.0    # Bottom boundary (y=0): T = 20\\nT[-1, :] = 0.0    # Top boundary (y=4): T = 0\\n\\n# Jacobi iteration for Laplace equation\\n# d2T/dx2 + d2T/dy2 = 0  =>  T[i,j] = (T[i-1,j] + T[i+1,j] + T[i,j-1] + T[i,j+1]) / 4\\nmax_iter = 100000\\ntolerance = 1e-6\\n\\nfor iteration in range(max_iter):\\n    T_new = T.copy()\\n    \\n    # Update interior points using 5-point stencil\\n    T_new[1:-1, 1:-1] = 0.25 * (\\n        T[0:-2, 1:-1] + T[2:, 1:-1] + T[1:-1, 0:-2] + T[1:-1, 2:]\\n    )\\n    \\n    # Reapply boundary conditions\\n    T_new[:, 0] = 10.0\\n    T_new[:, -1] = 40.0\\n    T_new[0, :] = 20.0\\n    T_new[-1, :] = 0.0\\n    \\n    # Check convergence\\n    diff = np.max(np.abs(T_new - T))\\n    T = T_new\\n    \\n    if diff < tolerance:\\n        print(f\\\"Converged after {iteration+1} iterations, diff = {diff:.2e}\\\")\\n        break\\nelse:\\n    print(f\\\"Did not converge after {max_iter} iterations, final diff = {diff:.2e}\\\")\\n\\n# Save the final solution\\nnp.save('T.npy', T)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"T\": {\"MSE\": 356.78611276641806, \"MAE\": 16.20352587542567, \"RMSE\": 18.888782723257158, \"Cosine\": 0.2181666445717118, \"R2\": -4.7747046162398465, \"NMSE\": 4.273976545454378, \"score01\": 0.1091}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 54.891,
+    "setup_s": 0.0,
+    "grade_s": 0.225
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.11s",
+    "missing=[] nonfinite=[]"
+  ]
+}

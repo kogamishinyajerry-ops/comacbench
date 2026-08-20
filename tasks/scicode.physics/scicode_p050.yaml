@@ -1,0 +1,236 @@
+id: scicode_p050
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p050.md
+  prompt_sha256: 4016403b037f85d347df588d1cede62727631fae174ef8cc08ac755c563af3a7
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '50'
+  problem_name: Replica_symmetry_breaking
+  split: test
+  n_steps: 4
+  n_cases: 12
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: import numpy as np
+  steps:
+  - step_id: '50.1'
+    n_cases: 3
+    test_cases:
+    - 'np.random.seed(1)
+
+      N = 50
+
+      T = 1.5
+
+      num_steps = 1000
+
+      spins = np.random.choice([-1, 1], size=N)
+
+      J = np.random.randn(N, N)
+
+      J = (J + J.T) / 2  # Make symmetric
+
+      np.fill_diagonal(J, 0)  # No self-interaction
+
+      J = J / np.sqrt(N)
+
+      spins = find_equilibrium(spins, N, T, J, num_steps)
+
+      assert np.allclose(spins, target)'
+    - 'np.random.seed(2)
+
+      N = 50
+
+      T = 0.5
+
+      num_steps = 1000
+
+      spins = np.random.choice([-1, 1], size=N)
+
+      J = np.random.randn(N, N)
+
+      J = (J + J.T) / 2  # Make symmetric
+
+      np.fill_diagonal(J, 0)  # No self-interaction
+
+      J = J / np.sqrt(N)
+
+      spins = find_equilibrium(spins, N, T, J, num_steps)
+
+      assert np.allclose(spins, target)'
+    - 'np.random.seed(2)
+
+      N = 100
+
+      T = 0.7
+
+      num_steps = 5000
+
+      spins = np.random.choice([-1, 1], size=N)
+
+      J = np.random.randn(N, N)
+
+      J = (J + J.T) / 2  # Make symmetric
+
+      np.fill_diagonal(J, 0)  # No self-interaction
+
+      J = J / np.sqrt(N)
+
+      spins = find_equilibrium(spins, N, T, J, num_steps)
+
+      assert np.allclose(spins, target)'
+  - step_id: '50.2'
+    n_cases: 3
+    test_cases:
+    - 'replicas = [np.ones(5) for _ in range(5)]
+
+      overlaps = calculate_overlap(replicas)
+
+      assert np.allclose(overlaps, target)'
+    - 'np.random.seed(1)
+
+      replicas = [np.random.choice([-1, 1], size=10) for _ in range(10)]
+
+      overlaps = calculate_overlap(replicas)
+
+      assert np.allclose(overlaps, target)'
+    - 'np.random.seed(3)
+
+      replicas = [np.random.choice([-1, 1], size=360) for _ in range(10)]
+
+      overlaps = calculate_overlap(replicas)
+
+      assert np.allclose(overlaps, target)'
+  - step_id: '50.3'
+    n_cases: 3
+    test_cases:
+    - 'N = 100
+
+      overlaps = np.random.normal(0, 1/np.sqrt(N), size=1000)
+
+      potential_RSB = analyze_rsb(overlaps, N)
+
+      assert potential_RSB == target'
+    - 'N = 100
+
+      overlaps = np.random.normal(0, 1/np.sqrt(N/3), size=1000)
+
+      potential_RSB = analyze_rsb(overlaps, N)
+
+      assert potential_RSB == target'
+    - 'N = 100
+
+      samples_peak1 = np.random.normal(loc=-0.5, scale=0.2, size=500)
+
+      samples_peak2 = np.random.normal(loc=0.5, scale=0.2, size=500)
+
+      rsb_samples = np.concatenate([samples_peak1, samples_peak2])
+
+      overlaps = np.clip(rsb_samples, -1, 1)
+
+      potential_RSB = analyze_rsb(overlaps, N)
+
+      assert potential_RSB == target'
+  - step_id: '50.4'
+    n_cases: 3
+    test_cases:
+    - 'np.random.seed(1)
+
+      T = 1.5
+
+      N = 100
+
+      num_steps = 500
+
+      num_replicas = 50
+
+      num_realizations = 10
+
+      aa, bb, cc = spin_glass(N, T, num_steps, num_replicas, num_realizations)
+
+      a, b, c = target
+
+      assert a == aa and np.allclose((b, c), (bb, cc))'
+    - 'np.random.seed(3)
+
+      T = 0.7
+
+      N = 100
+
+      num_steps = 500
+
+      num_replicas = 50
+
+      num_realizations = 10
+
+      aa, bb, cc = spin_glass(N, T, num_steps, num_replicas, num_realizations)
+
+      a, b, c = target
+
+      assert a == aa and np.allclose((b, c), (bb, cc))'
+    - 'np.random.seed(2)
+
+      T = 0.5
+
+      N = 256
+
+      num_steps = 500
+
+      num_replicas = 50
+
+      num_realizations = 5
+
+      aa, bb, cc = spin_glass(N, T, num_steps, num_replicas, num_realizations)
+
+      a, b, c = target
+
+      assert a == aa and np.allclose((b, c), (bb, cc))'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

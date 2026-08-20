@@ -1,0 +1,455 @@
+id: scicode_p013
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p013.md
+  prompt_sha256: fa526c35eb3d3ccb59be900229ddcfa3fcde0eabbdf01eee3faf6a0898ca3931
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '13'
+  problem_name: Maxwell_Equation_Solver
+  split: test
+  n_steps: 14
+  n_cases: 43
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'from numpy import zeros, linspace, exp, sqrt
+
+    import numpy as np'
+  steps:
+  - step_id: '13.1'
+    n_cases: 3
+    test_cases:
+    - "x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)\nfct   = np.sin(x)*np.sin(2*y)*np.sin(3*z)\
+      \ \ndelta = x[0][1][0] - x[0][0][0]\nassert np.allclose(partial_derivs_vec(fct,\
+      \ delta), target)"
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fct   = (x+y)**2+z
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(partial_derivs_vec(fct, delta), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fct   = x*z + y*z + x*y
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(partial_derivs_vec(fct, delta), target)'
+  - step_id: '13.2'
+    n_cases: 3
+    test_cases:
+    - "x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)\nfct   = np.sin(x)*np.sin(2*y)*np.sin(3*z)\
+      \ \ndelta = x[0][1][0] - x[0][0][0]\nassert np.allclose(laplace(fct, delta),\
+      \ target)"
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fct   = x**2+y**2+z**2
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(laplace(fct, delta), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fct   = x**4 + y**2 + z**5
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(laplace(fct, delta), target)'
+  - step_id: '13.3'
+    n_cases: 3
+    test_cases:
+    - "x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)\nfct   = np.sin(x)*np.sin(2*y)*np.sin(3*z)\
+      \ \ndelta = x[0][1][0] - x[0][0][0]\nassert np.allclose(gradient(fct, delta),\
+      \ target)"
+    - "x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)\nfct   = np.sin(x)*np.sin(2*y)*np.sin(3*z)\
+      \ \ndelta = x[0][1][0] - x[0][0][0]\nassert np.allclose(gradient(fct, delta),\
+      \ target)"
+    - "x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)\nfct   = np.sin(x)*np.sin(2*y)*np.sin(3*z)\
+      \ \ndelta = x[0][1][0] - x[0][0][0]\nassert np.allclose(gradient(fct, delta),\
+      \ target)"
+  - step_id: '13.4'
+    n_cases: 3
+    test_cases:
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fx    = -y
+
+      fy    = x
+
+      fz    = np.zeros(z.shape)
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(divergence(fx, fy, fz, delta), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fx    = x
+
+      fy    = y
+
+      fz    = z
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(divergence(fx, fy, fz, delta), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fx    = np.sin(x*y*z)
+
+      fy    = np.cos(x*y*z)
+
+      fz    = fx*fy
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(divergence(fx, fy, fz, delta), target)'
+  - step_id: '13.5'
+    n_cases: 3
+    test_cases:
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fx    = -y
+
+      fy    = x
+
+      fz    = np.zeros(z.shape)
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(grad_div(fx, fy, fz, delta), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fx    = x
+
+      fy    = y
+
+      fz    = z
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(grad_div(fx, fy, fz, delta), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      fx    = np.sin(x*y*z)
+
+      fy    = np.cos(x*y*z)
+
+      fz    = fx*fy
+
+      delta = x[0][1][0] - x[0][0][0]
+
+      assert np.allclose(grad_div(fx, fy, fz, delta), target)'
+  - step_id: '13.7'
+    n_cases: 3
+    test_cases:
+    - "x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)\nf_dot = np.sin(x)*np.sin(2*y)*np.sin(3*z)\
+      \ \nassert np.allclose(symmetry(f_dot, 1, 1, -1), target)"
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      f_dot = (x+y)**2+z
+
+      assert np.allclose(symmetry(f_dot, -1, 1, 1), target)'
+    - 'x,y,z = np.meshgrid(*[np.linspace(-10,10,100)]*3)
+
+      f_dot = x**4 + y**2 + z**5
+
+      assert np.allclose(symmetry(f_dot, 1, -1, 1), target)'
+  - step_id: '13.8'
+    n_cases: 3
+    test_cases:
+    - "maxwell = Maxwell(50,2)\nx,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)\nf_dot\
+      \ = np.sin(x)*np.sin(2*y)*np.sin(3*z) \nf     = 2*f_dot\nassert np.allclose(outgoing_wave(maxwell,\
+      \ f_dot, f), target)"
+    - "maxwell = Maxwell(50,2)\nx,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)\nf_dot\
+      \ = (x+y)**2+z \nf     = 2*f_dot\nassert np.allclose(outgoing_wave(maxwell,\
+      \ f_dot, f), target)"
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      f_dot = x**4 + y**2 + z**5
+
+      f     = 2*f_dot
+
+      assert np.allclose(outgoing_wave(maxwell, f_dot, f), target)'
+  - step_id: '13.9'
+    n_cases: 3
+    test_cases:
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x,y,z, z*0)
+
+      assert np.allclose(derivatives(maxwell, fields), target)'
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,-y,x,z*0, z*0+1)
+
+      assert np.allclose(derivatives(maxwell, fields), target)'
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x*0,-z,y, z*0+1)
+
+      assert np.allclose(derivatives(maxwell, fields), target)'
+  - step_id: '13.10'
+    n_cases: 3
+    test_cases:
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x,y,z, z*0)
+
+      fields_dot = derivatives(maxwell, fields)
+
+      factor  = 0.5
+
+      dt      = 0.1
+
+      assert np.allclose(update_fields(maxwell, fields, fields_dot, factor, dt), target)'
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,-y,x,z*0, z*0+1)
+
+      fields_dot = derivatives(maxwell, fields)
+
+      factor  = 0.3
+
+      dt      = 0.1
+
+      assert np.allclose(update_fields(maxwell, fields, fields_dot, factor, dt), target)'
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x*0,-z,y, z*0+1)
+
+      fields_dot = derivatives(maxwell, fields)
+
+      factor  = 0.2
+
+      dt      = 0.1
+
+      assert np.allclose(update_fields(maxwell, fields, fields_dot, factor, dt), target)'
+  - step_id: '13.11'
+    n_cases: 3
+    test_cases:
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x,y,z, z*0+1)
+
+      courant  = 0.5
+
+      t_const  = 0.2
+
+      assert cmp_tuple_or_list(stepper(maxwell, fields, courant, t_const), target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,-y,x,z*0, z*0+1)
+
+      courant  = 0.5
+
+      t_const  = 0.2
+
+      assert cmp_tuple_or_list(stepper(maxwell, fields, courant, t_const), target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x*0,-z,y, z*0+1)
+
+      courant  = 0.5
+
+      t_const  = 0.2
+
+      assert cmp_tuple_or_list(stepper(maxwell, fields, courant, t_const), target)'
+  - step_id: '13.12'
+    n_cases: 3
+    test_cases:
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x,y,z, z*0+1)
+
+      courant  = 0.5
+
+      t_const  = 0.2
+
+      stepper(maxwell, fields, courant, t_const)
+
+      assert np.allclose(check_constraint(maxwell), target)'
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,-y,x,z*0, z*0+1)
+
+      courant  = 0.5
+
+      t_const  = 0.2
+
+      stepper(maxwell, fields, courant, t_const)
+
+      assert np.allclose(check_constraint(maxwell), target)'
+    - 'maxwell = Maxwell(50,2)
+
+      x,y,z = np.meshgrid(*[np.linspace(0,2,50)]*3)
+
+      fields = (x,y,z,x*0,-z,y, z*0+1)
+
+      courant  = 0.5
+
+      t_const  = 0.2
+
+      stepper(maxwell, fields, courant, t_const)
+
+      assert np.allclose(check_constraint(maxwell), target)'
+  - step_id: '13.13'
+    n_cases: 3
+    test_cases:
+    - "def initialize(maxwell):\n    x, y, z, r = maxwell.x, maxwell.y, maxwell.z,\
+      \ maxwell.r\n    costheta2 = (z/r)**2\n    sintheta  = np.sqrt(1-costheta2)\n\
+      \    Ephi      = -8*r*sintheta * np.exp(-r**2)\n    rho       = np.sqrt(x**2\
+      \ + y**2)\n    cosphi    = x/rho\n    sinphi    = y/rho\n    maxwell.E_x = -Ephi*sinphi\n\
+      \    maxwell.E_y =  Ephi*cosphi\n    check_constraint(maxwell)\nmaxwell = Maxwell(50,2)\n\
+      initialize(maxwell)\ncourant = 0.3\nt_max   = 1\nt_check = 0.1\nassert np.allclose(integrate(maxwell,\
+      \ courant, t_max, t_check ), target)"
+    - "def initialize(maxwell):\n    x, y, z, r = maxwell.x, maxwell.y, maxwell.z,\
+      \ maxwell.r\n    costheta2 = (z/r)**2\n    sintheta  = np.sqrt(1-costheta2)\n\
+      \    Ephi      = -8*r*sintheta * np.exp(-r**2)\n    rho       = np.sqrt(x**2\
+      \ + y**2)\n    cosphi    = x/rho\n    sinphi    = y/rho\n    maxwell.E_x = -Ephi*sinphi\n\
+      \    maxwell.E_y =  Ephi*cosphi\n    check_constraint(maxwell)\nmaxwell = Maxwell(50,2)\n\
+      initialize(maxwell)\ncourant = 0.5\nt_max   = 1\nt_check = 0.1\nassert np.allclose(integrate(maxwell,\
+      \ courant, t_max, t_check ), target)"
+    - "def initialize(maxwell):\n    x, y, z, r = maxwell.x, maxwell.y, maxwell.z,\
+      \ maxwell.r\n    costheta2 = (z/r)**2\n    sintheta  = np.sqrt(1-costheta2)\n\
+      \    Ephi      = -8*r*sintheta * np.exp(-r**2)\n    rho       = np.sqrt(x**2\
+      \ + y**2)\n    cosphi    = x/rho\n    sinphi    = y/rho\n    maxwell.E_x = -Ephi*sinphi\n\
+      \    maxwell.E_y =  Ephi*cosphi\n    check_constraint(maxwell)\nmaxwell = Maxwell(20,2)\n\
+      initialize(maxwell)\ncourant = 0.5\nt_max   = 1\nt_check = 0.1\nassert np.allclose(integrate(maxwell,\
+      \ courant, t_max, t_check), target)"
+  - step_id: '13.14'
+    n_cases: 3
+    test_cases:
+    - 'maxwell = Maxwell(50, 2)
+
+      maxwell = initialize(maxwell)
+
+      assert np.allclose((maxwell.E_x, maxwell.E_y, maxwell.E_z,  maxwell.A_x, maxwell.A_y,
+      maxwell.A_z, maxwell.phi), target)'
+    - 'maxwell = Maxwell(20, 2)
+
+      maxwell = initialize(maxwell)
+
+      assert np.allclose((maxwell.E_x, maxwell.E_y, maxwell.E_z,  maxwell.A_x, maxwell.A_y,
+      maxwell.A_z, maxwell.phi), target)'
+    - 'maxwell = Maxwell(100, 2)
+
+      maxwell = initialize(maxwell)
+
+      assert np.allclose((maxwell.E_x, maxwell.E_y, maxwell.E_z,  maxwell.A_x, maxwell.A_y,
+      maxwell.A_z, maxwell.phi), target)'
+  - step_id: '13.15'
+    n_cases: 4
+    test_cases:
+    - 'n_grid = 10
+
+      x_out  = 1
+
+      courant = 0.3
+
+      t_max   = 1
+
+      t_check = 0.1
+
+      assert np.allclose(main(n_grid, x_out, courant, t_max, t_check), target)'
+    - 'n_grid = 20
+
+      x_out  = 1
+
+      courant = 0.3
+
+      t_max   = 1
+
+      t_check = 0.1
+
+      assert np.allclose(main(n_grid, x_out, courant, t_max, t_check), target)'
+    - 'n_grid = 40
+
+      x_out  = 1
+
+      courant = 0.3
+
+      t_max   = 1
+
+      t_check = 0.1
+
+      assert np.allclose(main(n_grid, x_out, courant, t_max, t_check), target)'
+    - assert np.allclose(main(52, 6.0, 0.5, 10, 0.5), target)
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

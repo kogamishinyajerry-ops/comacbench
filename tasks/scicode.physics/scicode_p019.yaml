@@ -1,0 +1,100 @@
+id: scicode_p019
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p019.md
+  prompt_sha256: bfb39ccc27fde6c35be571c80568d03fd5fb37c8fe4b95f1d2b6b95b5ae063c4
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '19'
+  problem_name: n_tangle
+  split: dev
+  n_steps: 2
+  n_cases: 7
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    from scipy.linalg import sqrtm'
+  steps:
+  - step_id: '19.1'
+    n_cases: 3
+    test_cases:
+    - assert np.allclose(tensor([0,1],[0,1]), target)
+    - assert np.allclose(tensor(np.eye(3),np.ones((3,3))), target)
+    - assert np.allclose(tensor([[1/2,1/2],[0,1]],[[1,2],[3,4]]), target)
+  - step_id: '19.2'
+    n_cases: 4
+    test_cases:
+    - 'MaxEnt = np.array([1,0,0,1])/np.sqrt(2)
+
+      assert np.allclose(n_tangle(MaxEnt), target)'
+    - 'GHZ = np.zeros(16)
+
+      GHZ[0] = 1/np.sqrt(2)
+
+      GHZ[15] = 1/np.sqrt(2)
+
+      assert np.allclose(n_tangle(GHZ), target)'
+    - 'W = np.zeros(16)
+
+      W[1] = 1/2
+
+      W[2] = 1/2
+
+      W[4] = 1/2
+
+      W[8] = 1/2
+
+      assert np.allclose(n_tangle(W), target)'
+    - 'product_state = np.kron(np.array([0,1]),np.array([0.8,0.6]))
+
+      assert np.allclose(n_tangle(product_state), target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/scicode/physics/gold_dev/p019_gold.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

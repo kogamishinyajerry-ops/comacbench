@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p045",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"def init_grid(Nt, Nx, Ny, x_split, T1, alpha1, T2, alpha2):\\n    '''Initialize a 3d array for storing the temperature values. The array has one time dimension and two real space dimensions.\\n    Initialize a 2d array for storing the thermal diffusivity corresponding to each grid point in real space.  \\n    There could be a vertical boundary in real space that represents the interface between two different materials.\\n    Input\\n    Nt: time dimension of the temperature grid; int\\n    Nx: x-dimension (number of columns) of the temperature grid; int\\n    Ny: y-dimension (number of rows) of the temperature grid; int\\n    x_split: the column index of the vertical interface. All columns up to and including this index (material 1) will have T1 and alpha1, and all columns with a larger index (material 2) will have T2 and alpha2; int\\n    T1: the initial temperature of each grid point for material 1(in Celsius); float\\n    alpha1: the thermal diffusivity of material 1; float\\n    T2: the initial temperature of each grid point for material 2(in Celsius); float\\n    alpha2: the heat conductivity of material 2; float\\n    Output\\n    temp_grid: temperature grid; 3d array of floats\\n    diff_grid: thermal diffusivity grid; 2d array of floats\\n    '''\\n    temp_grid = np.zeros((Nt, Ny, Nx))\\n    diff_grid = np.zeros((Ny, Nx))\\n    # Set initial temperatures and diffusivities\\n    # Columns <= x_split are material 1\\n    temp_grid[0, :, :x_split+1] = T1\\n    temp_grid[0, :, x_split+1:] = T2\\n    diff_grid[:, :x_split+1] = alpha1\\n    diff_grid[:, x_split+1:] = alpha2\\n    return temp_grid, diff_grid\\n\\n\\ndef add_dirichlet_bc(grid, time_index, bc=np.array([])):\\n    '''Add Dirichlet type of boundary conditions to the temperature grid. Users define the real space positions and values of the boundary conditions. \\n    This function will update boundary conditions constantly as time progresses.\\n    Boundary conditions will not be applied to corner grid points.\\n    Input\\n    grid: the temperature grid for the problem; 3d array of floats\\n    time_index: the function will update the boundary conditions for the slice with this time axis index; int\\n    bc: a 2d array where each row has three elements: i, j, and T. \\n        - i and j: the row and column indices to set the boundary conditions; ints\\n        - T: the value of the boundary condition; float\\n    Output\\n    grid: the updated temperature grid; 3d array of floats\\n    '''\\n    Nt, Ny, Nx = grid.shape\\n    for i, j, T_val in bc:\\n        # Skip corners\\n        if (i == 0 or i == Ny-1) and (j == 0 or j == Nx-1):\\n            continue\\n        grid[time_index, i, j] = T_val\\n    return grid\\n\\n\\ndef add_neumann_bc(grid, time_index, bc=np.array([])):\\n    '''Add Neumann type of boundary conditions to the temperature grid. Users define the real space positions and values of the boundary conditions.\\n    This function will update boundary conditions constantly as time progresses.\\n    Boundary conditions will not be applied to corner grid points.\\n    Input\\n    grid: the temperature grid for the problem; 3d array of floats\\n    time_index: the function will update the boundary conditions for the slice with this time axis index; int\\n    bc: a 2d array where each row has three elements: i, j, and T. \\n        - i and j: the row and column indices to set the boundary conditions; ints\\n        - T: the value of the boundary condition; float\\n    Output\\n    grid: the updated temperature grid; 3d array of floats\\n    '''\\n    Nt, Ny, Nx = grid.shape\\n    for i, j, q in bc:\\n        # Skip corners\\n        if (i == 0 or i == Ny-1) and (j == 0 or j == Nx-1):\\n            continue\\n        if i == 0:  # bottom boundary\\n            grid[time_index, i, j] = grid[time_index, i+1, j] + q\\n        elif i == Ny-1:  # top boundary\\n            grid[time_index, i, j] = grid[time_index, i-1, j] + q\\n        elif j == 0:  # left boundary\\n            grid[time_index, i, j] = grid[time_index, i, j+1] + q\\n        elif j == Nx-1:  # right boundary\\n            grid[time_index, i\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 6, \"cases_total\": 12, \"steps_all_pass\": 2, \"steps_total\": 4, \"per_step\": {\"45.1\": {\"pass\": 3, \"total\": 3}, \"45.2\": {\"pass\": 3, \"total\": 3}, \"45.3\": {\"pass\": 0, \"total\": 3}, \"45.4\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 259.821,
+    "setup_s": 0.0,
+    "grade_s": 1.118
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.59s"
+  ]
+}

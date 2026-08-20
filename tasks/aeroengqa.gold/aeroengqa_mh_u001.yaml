@@ -1,0 +1,64 @@
+id: aeroengqa_mh_u001
+registry_id: aeroengqa.gold
+domain: knowledge
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: aeroengqa@zenodo.14215677-v1.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/aeroengqa.gold/aeroengqa_mh_u001.md
+  prompt_sha256: a1e4042ac7fa0d85e63acf677428a35d7c79f4541913180730b2c77c232b873b
+  assets:
+  - path: data/aeroengqa/gold/AeroEngQA_multi-hop-unanswerable.json
+    digest: c6edfc9497c7aae6820dd1bf3476ba20ae3005feb70e4b604d810ba6a6c54109
+  - path: data/aeroengqa/gold/AeroEngQA_multi-hop.json
+    digest: 964f164003931e5e5ed93e02572eeba1d3faac0ca9b1616a350b64cf0ed7d6fc
+  - path: data/aeroengqa/gold/AeroEngQA_single-hop-unanswerable.json
+    digest: 2fd30bcfd9daf6c7821f43f0902121bdeecdda583f0ab631dc2d5bd032701611
+  - path: data/aeroengqa/gold/AeroEngQA_single-hop.json
+    digest: 8e991ae261ec96f9ac88bb986a6878b756cde4454d87135211887d845caaa793
+output_contract:
+- answer
+reference:
+  source: AeroEngQA AeroEngQA_single-hop.json/AeroEngQA_multi-hop.json/AeroEngQA_single-hop-unanswerable.json/AeroEngQA_multi-hop-unanswerable.json
+  revision: aeroengqa@zenodo.14215677-v1.0
+  question_id: 1
+  split: mh_u
+  n_contexts: 2
+  needed_citations:
+  - 1
+  - 2
+  refusal_expected: true
+grader:
+  answer_format: free_text
+  validity_gate: true
+  objective_layer: free_text_exact_numeric_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: true
+  refusal_layer: true
+  distinction_layer: true
+  distinction_note: 数据集无参考 basis 标签；区分层只判 BASIS 结构合法性，逐字核验不进分（见 runners/qa_grounded.py
+    注释）
+  robustness_samples: 1
+scoring:
+  weights:
+    requirements: 0.0
+    physics: 0.6
+    objective: 0.4
+    robustness: 0.0
+  note: 四层齐备：req=客观层(可答题)，phy=拒答+证据，obj=区分；robustness 样本=1 不适用权重 0；不可答题 requirements
+    N/A 权重 0（.60/.40 再分配到 phy/obj）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: Zenodo 10.5281/zenodo.14215677 v1.0 (CC BY 4.0)
+  license: CC BY 4.0
+  status: confirmed-dataset
+  revision: aeroengqa@zenodo.14215677-v1.0
+  mirror_allowed: true
+  attribution: Silva, Marsh, Yong, Middleton, Sóbester, AIAA-2025, doi:10.2514/6.2025-0700

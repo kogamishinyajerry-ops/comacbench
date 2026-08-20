@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p001",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def cg(A, b, x, tol):\\n    '''Inputs:\\n    A : Matrix, 2d array size M * M\\n    b : Vector, 1d array size M\\n    x : Initial guess vector, 1d array size M\\n    tol : tolerance, float\\n    Outputs:\\n    x : solution vector, 1d array size M\\n    '''\\n    r = b - A @ x\\n    p = r.copy()\\n    rsold = np.dot(r, r)\\n    n = len(b)\\n    for i in range(n):\\n        Ap = A @ p\\n        alpha = np.dot(p, r) / np.dot(p, Ap)\\n        x = x + alpha * p\\n        r = r - alpha * Ap\\n        rsnew = np.dot(r, r)\\n        if np.sqrt(rsnew) < tol:\\n            break\\n        beta = rsnew / rsold\\n        p = r + beta * p\\n        rsold = rsnew\\n    return x\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 3, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"1.1\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 51.094,
+    "setup_s": 0.0,
+    "grade_s": 1.026
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.63s"
+  ]
+}

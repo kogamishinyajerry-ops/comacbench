@@ -1,0 +1,34 @@
+{
+  "task_id": "cfdquery_q078",
+  "registry_id": "cfdllm.cfdquery",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "2",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}"
+  },
+  "timings": {
+    "agent_s": 12.551,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:159fb7f37a366330964fec492184442aa6fa3fb8d2321d9b470e2ca1ba1e3a96",
+  "assets_revision": "cfdquery@3b46d30+kaggle_v4",
+  "logs": [
+    "answer=2 raw='<think>The question asks for the steady-state, 2-D momentum balance in the y-direction, neglecting gravity, for constant property flow.\\n\\nThe general Navier-Stokes equation in the y-direction is:\\nρ(∂v/∂t + u∂v/∂x + v∂v/∂y + w∂v/∂z) = -∂p/∂y + μ(∂²v/∂x² + ∂²v/∂y² + ∂²v/∂z²) + ρgy\\n\\nFor steady-state: ∂v/∂t = 0\\n2-D: w = 0, ∂/∂z = 0\\nNeglecting gravity: ρgy = 0\\nConstant properties: ρ and μ are constant\\n\\nSo we get:\\nρ(u∂v/∂x + v∂v/∂y) = -∂p/∂y + μ(∂²v/∂x² + ∂²v/∂y²)\\n\\nDividing by ρ:\\nu∂v/∂x + v∂v/∂y = -(1/ρ)∂p/∂y + (μ/ρ)(∂²v/∂x² + ∂²v/∂y²)\\n\\nThis matches option 2.</think>\\n\\n2' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p015",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def init_AB(N, L, h):\\n    '''Initialize the matrices A and B\\n    Input\\n    N: the number of grid intervals; int\\n    L: the dimension of the 1D well; float\\n    h: the size of each time step in seconds; float\\n    Output\\n    A,B: A and B matrices; 2D arrays of dimension N-1 by N-1 where each element is a float\\n    '''\\n    m = 9.109e-31\\n    hbar = 1.0545718e-34\\n    \\n    a = L / N\\n    C = 1j * hbar / (4 * m * a**2)\\n    \\n    dim = N - 1\\n    \\n    a1 = 1 + 2 * h * C\\n    a2 = -h * C\\n    b1 = 1 - 2 * h * C\\n    b2 = h * C\\n    \\n    diag_A = np.full(dim, a1, dtype=complex)\\n    off_diag_A = np.full(dim-1, a2, dtype=complex)\\n    diag_B = np.full(dim, b1, dtype=complex)\\n    off_diag_B = np.full(dim-1, b2, dtype=complex)\\n    \\n    A = np.diag(diag_A) + np.diag(off_diag_A, k=1) + np.diag(off_diag_A, k=-1)\\n    B = np.diag(diag_B) + np.diag(off_diag_B, k=1) + np.diag(off_diag_B, k=-1)\\n    \\n    return A, B\\n\\ndef crank_nicolson(sigma, kappa, T, nstep, N, L):\\n    '''Solve the Crank-Nicolson equation of the form A * psi(x, t+h) = B * psi(x, t)\\n    Input\\n    sigma: the sigma parameter of a Gaussian wave packet; float\\n    kappa: the kappa parameter of a Gaussian wave packet; float\\n    T: the total amount of time for the evolution in seconds; float\\n    nstep: the total number of time steps; int\\n    N: the total number of grid intervals; int\\n    L: the dimension of the 1D well in meters; float\\n    Output\\n    psi: the real part of the wavefunction after time T; 1D array of float with shape (N+1,)\\n    '''\\n    h = T / nstep\\n    \\n    x = np.linspace(0, L, N+1)\\n    x0 = L / 2\\n    \\n    psi = np.exp(-(x - x0)**2 / (2 * sigma**2)) * np.exp(1j * kappa * x)\\n    \\n    psi[0] = 0\\n    psi[-1] = 0\\n    \\n    A, B = init_AB(N, L, h)\\n    \\n    for _ in range(nstep):\\n        psi_interior = psi[1:-1]\\n        rhs = B @ psi_interior\\n        psi_new_interior = np.linalg.solve(A, rhs)\\n        psi[1:-1] = psi_new_interior\\n    \\n    return psi.real\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 7, \"cases_total\": 7, \"steps_all_pass\": 2, \"steps_total\": 2, \"per_step\": {\"15.1\": {\"pass\": 3, \"total\": 3}, \"15.2\": {\"pass\": 4, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 106.174,
+    "setup_s": 0.0,
+    "grade_s": 8.027
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 4.02s"
+  ]
+}

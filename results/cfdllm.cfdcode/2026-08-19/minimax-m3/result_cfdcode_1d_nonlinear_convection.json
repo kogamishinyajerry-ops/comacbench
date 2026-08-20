@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_1d_nonlinear_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1782,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5891,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_burgers():\\n    # Spatial domain\\n    Lx = 2.0 * np.pi\\n    Nx = 200\\n    dx = Lx / Nx\\n    x = np.linspace(0, Lx, Nx, endpoint=False)  # periodic grid\\n\\n    # Temporal domain\\n    t_final = 5.0\\n    CFL = 0.5\\n\\n    # Initial condition\\n    u = np.sin(x) + 0.5 * np.sin(0.5 * x)\\n\\n    t = 0.0\\n    while t < t_final:\\n        # Determine time step based on CFL condition\\n        max_speed = np.max(np.abs(u))\\n        if max_speed == 0.0:\\n            dt = t_final - t\\n        else:\\n            dt = CFL * dx / max_speed\\n        if t + dt > t_final:\\n            dt = t_final - t\\n\\n        # Flux function f(u) = u^2/2\\n        f = 0.5 * u**2\\n        f_right = np.roll(f, -1)   # f_{i+1}\\n        u_right = np.roll(u, -1)   # u_{i+1}\\n\\n        # Local Lax-Friedrichs flux\\n        a = np.maximum(np.abs(u), np.abs(u_right))\\n        F_half = 0.5 * (f + f_right - a * (u_right - u))\\n\\n        # Update using conservative form\\n        u = u - (dt / dx) * (F_half - np.roll(F_half, 1))\\n\\n        t += dt\\n\\n    return u\\n\\nif __name__ == \\\"__main__\\\":\\n    u_final = solve_burgers()\\n    np.save(\\\"u.npy\\\", u_final)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.5469554167987106, \"MAE\": 0.5918815095297969, \"RMSE\": 0.7395643425684547, \"Cosine\": 0.35641752104453694, \"R2\": -0.1083741012456012, \"NMSE\": 0.9193717685406737, \"score01\": 0.1782}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 39.207,
+    "setup_s": 0.0,
+    "grade_s": 0.154
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s",
+    "missing=[] nonfinite=[]"
+  ]
+}

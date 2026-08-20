@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_sweep",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom copy import deepcopy\\nimport os\\nimport aviary\\nfrom aviary.models.missions import two_dof_default\\nfrom aviary.api import run_aviary\\n\\n# Target design ranges\\nranges = [2400, 2800, 3200, 3600]\\n\\n# Locate the four range-variant CSVs\\naviary_dir = os.path.dirname(aviary.__file__)\\nsearch_dirs = [os.getcwd()]\\nfor sub in ['', 'aircraft', 'models/aircraft',\\n            'validation_cases/validation_data',\\n            'validation_cases/validation_data/aircraft_data',\\n            'models/N3CC', 'models/aircraft/n3cc']:\\n    p = os.path.join(aviary_dir, sub)\\n    if os.path.isdir(p):\\n        search_dirs.append(p)\\n\\nfound_files = {}\\nfor r in ranges:\\n    target = str(r)\\n    for d in search_dirs:\\n        if not os.path.isdir(d):\\n            continue\\n        try:\\n            entries = os.listdir(d)\\n        except Exception:\\n            continue\\n        for f in entries:\\n            if f.endswith('.csv') and target in f:\\n                found_files[r] = os.path.join(d, f)\\n                break\\n        if r in found_files:\\n            break\\n    if r not in found_files:\\n        raise FileNotFoundError(f\\\"Could not find CSV for {r} NM in: {search_dirs}\\\")\\n\\nprint(\\\"Found aircraft data files:\\\")\\nfor r in ranges:\\n    print(f\\\"  {r} NM -> {found_files[r]}\\\")\\n\\n# Deepcopy default phase info and set cruise Mach 0.80\\nphase_info = deepcopy(two_dof_default.phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Run forward mission analyses\\nresults = {}\\nfor r in ranges:\\n    prob = run_aviary(\\n        found_files[r],\\n        phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False,\\n    )\\n    fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    final_mass = prob.get_val('mission:final_mass', units='lbm')[0]\\n    range_val = prob.get_val('mission:range', units='NM')[0]\\n    results[r] = float(fuel)\\n    print(f\\\"{r} NM: fuel={fuel:.2f} lbm, final_mass={final_mass:.2f} lbm, range={range_val:.2f} NM\\\")\\n\\n# Least-squares slope of fuel vs range\\nranges_arr = np.array(sorted(results.keys()), dtype=float)\\nfuel_arr = np.array([results[int(r)] for r in ranges_arr])\\nslope, intercept = np.polyfit(ranges_arr, fuel_arr, 1)\\n\\n# Write result.json\\noutput = {\\n    'fuel_2400_lbm': results[2400],\\n    'fuel_2800_lbm': results[2800],\\n    'fuel_3200_lbm': results[3200],\\n    'fuel_3600_lbm': results[3600],\\n    'dfuel_drange_lbm_per_nm': float(slope),\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(output, f, indent=2)\\n\\nprint(\\\"\\\\nResult written to result.json:\\\")\\nprint(json.dumps(output, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ilr_exaf/solve.py\\\", line 40, in <module>\\n    raise FileNotFoundError(f\\\"Could not find CSV for {r} NM in: {search_dirs}\\\")\\nFileNotFoundError: Could not find CSV for 2400 NM in: ['/private/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ilr_exaf', '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/aviary/', '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/aviary/models/aircraft', '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/aviary/validation_cases/validation_data']\\n\"}"
+  },
+  "timings": {
+    "agent_s": 75.29,
+    "setup_s": 0.0,
+    "grade_s": 1.016
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

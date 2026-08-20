@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_1d_burgers_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "non_physical_values"
+  ],
+  "failure_mode": "non_physical_values",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Parameters\\nnu = 0.07\\nL = 2 * np.pi\\nT = 0.14 * np.pi\\n\\n# Grid parameters\\nN = 200  # Number of spatial points\\ndx = L / N\\nx = np.linspace(0, L, N, endpoint=False)\\n\\n# Time step parameters\\n# Stability constraints:\\n# CFL: u * dt / dx <= 1\\n# Diffusion: nu * dt / dx^2 <= 0.5\\n# Estimate max u (initial u is approx 4 +/- small term)\\nu_max_est = 5.0\\ndt_cfl = dx / u_max_est\\ndt_diff = 0.5 * dx**2 / nu\\n\\ndt = min(dt_cfl, dt_diff) * 0.9 # Safety factor\\nnt = int(T / dt) + 1\\n# Adjust dt slightly to hit final time exactly\\ndt = T / (nt - 1)\\n\\n# Initial Condition\\n# phi = exp(-x^2 / 4nu) + exp(-(x - 2pi)^2 / 4nu)\\nterm1 = np.exp(-x**2 / (4 * nu))\\nterm2 = np.exp(-(x - 2 * np.pi)**2 / (4 * nu))\\nphi = term1 + term2\\n\\n# dphi/dx\\n# d/dx(exp(-x^2 / 4nu)) = -x / (2nu) * exp(-x^2 / 4nu)\\ndphi_dx = (-x / (2 * nu)) * term1 + (-(x - 2 * np.pi) / (2 * nu)) * term2\\n\\n# u = -2nu/phi * dphi/dx + 4\\nu = - (2 * nu / phi) * dphi_dx + 4\\n\\n# Finite Difference Solution\\n# Method: Upwind for convection, Central for diffusion\\n# Equation: u_t + u*u_x = nu*u_xx\\n\\nfor _ in range(nt):\\n    un = u.copy()\\n    \\n    # Periodic boundary handling using np.roll\\n    # u_i_plus_1 = u[i+1], u_i_minus_1 = u[i-1]\\n    u_ip1 = np.roll(un, -1)\\n    u_im1 = np.roll(un, 1)\\n    \\n    # Spatial derivatives\\n    # Upwind difference for du/dx (assuming u > 0, which it is roughly around 4)\\n    # u_x ~ (u[i] - u[i-1]) / dx\\n    du_dx = (un - u_im1) / dx\\n    \\n    # Central difference for d2u/dx2\\n    # u_xx ~ (u[i+1] - 2u[i] + u[i-1]) / dx^2\\n    d2u_dx2 = (u_ip1 - 2*un + u_im1) / dx**2\\n    \\n    # Update equation\\n    u = un + dt * (-un * du_dx + nu * d2u_dx2)\\n\\n# Save final solution\\nnp.save('u.npy', u)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [\"u\"], \"fields\": {}, \"determinism\": null, \"run1_exit\": 0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 111.32,
+    "setup_s": 0.0,
+    "grade_s": 0.088
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s",
+    "missing=[] nonfinite=['u']"
+  ]
+}

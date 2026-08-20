@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p057",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.93335,
+  "artifacts": {
+    "code": "\"def f_x(x, En):\\n    \\\"\\\"\\\"Return the value of f(x) with energy En\\n    Input\\n    x: coordinate x; a float or a 1D array of float\\n    En: energy; a float\\n    Output\\n    f_x: the value of f(x); a float or a 1D array of float\\n    \\\"\\\"\\\"\\n    return x**2 - En\\n\\n\\ndef Numerov(f_in, u_b, up_b, step):\\n    \\\"\\\"\\\"Given precomputed function f(x), solve the differential equation u''(x) = f(x)*u(x)\\n    using the Numerov method.\\n    Inputs:\\n    - f_in: input function f(x); a 1D array of float representing the function values at discretized points\\n    - u_b: the value of u at boundary; a float\\n    - up_b: the derivative of u at boundary; a float\\n    - step: step size; a float.\\n    Output:\\n    - u: u(x); a 1D array of float representing the solution.\\n    \\\"\\\"\\\"\\n    n = len(f_in)\\n    u = np.empty(n, dtype=float)\\n    # Initial conditions\\n    u[0] = u_b\\n    if n > 1:\\n        u[1] = u_b + up_b * step\\n    # Precompute constants\\n    h2 = step * step\\n    h2_over_12 = h2 / 12.0\\n    # Propagate using Numerov recurrence\\n    for i in range(1, n - 1):\\n        numerator = (2.0 * u[i] * (1.0 - h2_over_12 * f_in[i])\\n                     - u[i - 1] * (1.0 - h2_over_12 * f_in[i - 1])\\n                     + h2 * f_in[i] * u[i])\\n        denominator = 1.0 - h2_over_12 * f_in[i + 1]\\n        u[i + 1] = numerator / denominator\\n    return u\\n\\n\\ndef Solve_Schrod(x, En, u_b, up_b, step):\\n    \\\"\\\"\\\"Input\\n    x: coordinate x; a float or a 1D array of float\\n    En: energy; a float\\n    u_b: value of u(x) at one boundary for the Numerov function; a float\\n    up_b: value of the derivative of u(x) at one boundary for the Numerov function; a float\\n    step: the step size for the Numerov method; a float\\n    Output\\n    u_norm: normalized u(x); a float or a 1D array of float\\n    \\\"\\\"\\\"\\n    # Compute f(x) = x^2 - En\\n    f = f_x(x, En)\\n    # Solve the ODE\\n    u = Numerov(f, u_b, up_b, step)\\n    # Normalize using Simpson's rule\\n    integral = integrate.simpson(u**2, x)\\n    if integral <= 0:\\n        return np.zeros_like(u)\\n    u_norm = u / np.sqrt(integral)\\n    return u_norm\\n\\n\\ndef count_sign_changes(solv_schrod):\\n    \\\"\\\"\\\"Input\\n    solv_schrod: a 1D array\\n    Output\\n    sign_changes: number of times of sign change occurrence; an int\\n    \\\"\\\"\\\"\\n    signs = np.sign(solv_schrod)\\n    # Count where consecutive signs have opposite signs\\n    return int(np.sum(signs[:-1] * signs[1:] < 0))\\n\\n\\ndef BoundStates(x, Emax, Estep):\\n    \\\"\\\"\\\"Input\\n    x: coordinate x; a float or a 1D array of float\\n    Emax: maximum energy of a bound state; a float\\n    Estep: energy step size; a float\\n    Output\\n    bound_states: a list, each element is a tuple containing the principal quantum number (an int) and energy (a float)\\n    \\\"\\\"\\\"\\n    # Step size from coordinate array\\n    step = x[1] - x[0]\\n    # Initial boundary conditions: even parity (u(0)=1, u'(0)=0)\\n    u_b = 1.0\\n    up_b = 0.0\\n    parity = 0  # 0 for even, 1 for odd\\n    bound_states = []\\n    # Energy values to scan\\n    energies = np.arange(0, Emax + Estep, Estep)\\n    prev_En = None\\n    prev_nodes = None\\n    for En in energies:\\n        # Compute wavefunction for current energy and parity\\n        u = Solve_Schrod(x, En, u_b, up_b, step)\\n        nodes = count_sign_changes(u)\\n        # Detect crossing of node number (eigenenergy)\\n        if prev_nodes is not None and nodes != prev_nodes:\\n            # Quantum number is the number of nodes before crossing\\n            n = prev_nodes\\n            # Refine energy using root‑finding on the value at the far boundary\\n            def u_last(En_val):\\n                u_temp = Solve_Schrod(x, En_val, u_b, up_b, step)\\n                return u_temp[-1]\\n            f_prev = u_last(prev_En)\\n            f_curr = u_last(En)\\n            if f_prev * f_curr < 0:\\n                En_root = optimize.brentq(u_last, prev_En, En)\\n            else:\\n                # If signs do not change, use midpoint as approximation\\n                En_root = (prev_En + En) / 2.0\\n            bound_states.append((n, En_root))\\n            # Toggle parity for the next state\\n        \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 13, \"cases_total\": 15, \"steps_all_pass\": 4, \"steps_total\": 5, \"per_step\": {\"57.1\": {\"pass\": 3, \"total\": 3}, \"57.2\": {\"pass\": 3, \"total\": 3}, \"57.3\": {\"pass\": 3, \"total\": 3}, \"57.4\": {\"pass\": 3, \"total\": 3}, \"57.5\": {\"pass\": 1, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 233.887,
+    "setup_s": 0.0,
+    "grade_s": 132.076
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 66.31s"
+  ]
+}

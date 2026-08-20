@@ -1,0 +1,194 @@
+id: scicode_p078
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p078.md
+  prompt_sha256: 1b8533247d3dc89a4d88f98fc2c00b66df26a3bb784f57f88d2f3afa8d8a0b18
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '78'
+  problem_name: Chaotic_Dynamics_Pendulum
+  split: dev
+  n_steps: 3
+  n_cases: 9
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    import time'
+  steps:
+  - step_id: '78.1'
+    n_cases: 3
+    test_cases:
+    - "def test_case_1():\n    state = np.array([0.1, 0.0])  # initial theta and omega\n\
+      \    t = 0.0  # initial time\n    g = 9.81  # gravity\n    L = 1.0  # pendulum\
+      \ length\n    beta = 0.0  # no damping\n    A = 0.0  # no driving force\n  \
+      \  alpha = 0.0  # driving frequency (irrelevant since A=0)\n    expected_output\
+      \ = np.array([0.0, - (g / L) * np.sin(0.1)])  # [dtheta_dt, domega_dt]\n   \
+      \ output = pendulum_derivs(state, t, g, L, beta, A, alpha)\n    assert np.allclose(output,\
+      \ expected_output), \"Test Case 1 Failed\"\n# Run test cases\ntest_case_1()"
+    - "def test_case_2():\n    state = np.array([0.1, 0.2])  # initial theta and omega\n\
+      \    t = 0.0  # initial time\n    g = 9.81  # gravity\n    L = 1.0  # pendulum\
+      \ length\n    beta = 0.1  # damping coefficient\n    A = 0.0  # no driving force\n\
+      \    alpha = 0.0  # driving frequency (irrelevant since A=0)\n    expected_output\
+      \ = np.array([0.2, - (g / L) * np.sin(0.1) - 0.1 * 0.2])  # [dtheta_dt, domega_dt]\n\
+      \    output = pendulum_derivs(state, t, g, L, beta, A, alpha)\n    assert np.allclose(output,\
+      \ expected_output), \"Test Case 2 Failed\"\ntest_case_2()"
+    - "def test_case_3():\n    state = np.array([0.1, 0.2])  # initial theta and omega\n\
+      \    t = 1.0  # time\n    g = 9.81  # gravity\n    L = 1.0  # pendulum length\n\
+      \    beta = 0.1  # damping coefficient\n    A = 1.0  # amplitude of driving\
+      \ force\n    alpha = 2.0  # driving frequency\n    expected_output = np.array([0.2,\
+      \ - (g / L) * np.sin(0.1) - 0.1 * 0.2 + 1.0 * np.cos(2.0 * 1.0)])  # [dtheta_dt,\
+      \ domega_dt]\n    output = pendulum_derivs(state, t, g, L, beta, A, alpha)\n\
+      \    assert np.allclose(output, expected_output), \"Test Case 3 Failed\"\ntest_case_3()"
+  - step_id: '78.2'
+    n_cases: 3
+    test_cases:
+    - "def test_case_1():\n    state = np.array([0.1, 0.0])  # initial theta and omega\n\
+      \    t0 = 0.0  # initial time\n    dt = 0.01  # time step\n    n = 1000  # number\
+      \ of steps\n    g = 9.81  # gravity\n    L = 1.0  # pendulum length\n    beta\
+      \ = 0.0  # no damping\n    A = 0.0  # no driving force\n    alpha = 0.0  # driving\
+      \ frequency (irrelevant since A=0)\n    trajectory = runge_kutta_4th_order(pendulum_derivs,\
+      \ state, t0, dt, n, g, L, beta, A, alpha)\n    final_state = trajectory[-1]\n\
+      \    expected_theta = state[0] * np.cos(np.sqrt(g / L) * n * dt)  # Simple harmonic\
+      \ motion solution\n    assert np.isclose(final_state[0], expected_theta, atol=0.1),\
+      \ \"Test Case 1 Failed\"\n# Run test cases\ntest_case_1()"
+    - "def test_case_2():\n    state = np.array([0.1, 0.0])  # initial theta and omega\n\
+      \    t0 = 0.0  # initial time\n    dt = 0.01  # time step\n    n = 1000  # number\
+      \ of steps\n    g = 9.81  # gravity\n    L = 1.0  # pendulum length\n    beta\
+      \ = 0.1  # damping coefficient\n    A = 0.0  # no driving force\n    alpha =\
+      \ 0.0  # driving frequency (irrelevant since A=0)\n    trajectory = runge_kutta_4th_order(pendulum_derivs,\
+      \ state, t0, dt, n, g, L, beta, A, alpha)\n    final_state = trajectory[-1]\n\
+      \    assert final_state[0] < state[0], \"Test Case 2 Failed\"  # Expecting damping\
+      \ to reduce theta\ntest_case_2()"
+    - "def test_case_3():\n    state = np.array([0.1, 0.0])  # initial theta and omega\n\
+      \    t0 = 0.0  # initial time\n    dt = 0.01  # time step\n    n = 1000  # number\
+      \ of steps\n    g = 9.81  # gravity\n    L = 1.0  # pendulum length\n    beta\
+      \ = 0.1  # damping coefficient\n    A = 1.0  # amplitude of driving force\n\
+      \    alpha = 2.0  # driving frequency\n    trajectory = runge_kutta_4th_order(pendulum_derivs,\
+      \ state, t0, dt, n, g, L, beta, A, alpha)\n    final_state = trajectory[-1]\n\
+      \    assert not np.isnan(final_state).any(), \"Test Case 3 Failed\"  # Check\
+      \ if the result is a valid number\ntest_case_3()"
+  - step_id: '78.3'
+    n_cases: 3
+    test_cases:
+    - 'g = 9.81
+
+      L = 0.1
+
+      beta = 0.1
+
+      A = 0.0
+
+      alpha = 0.0
+
+      initial_state = [0.1, 0.0]
+
+      t0 = 0.0
+
+      tf = 10.0
+
+      min_dt = 0.001
+
+      max_dt = 10
+
+      num_timesteps = 2
+
+      assert np.allclose(pendulum_analysis(g, L, beta, A, alpha, initial_state, t0,
+      tf, min_dt, max_dt, num_timesteps), target)'
+    - 'g = 9.81
+
+      L = 0.5
+
+      beta = 0.2
+
+      A = 1.0
+
+      alpha = 0.5
+
+      initial_state = [0.5, 0.1]
+
+      t0 = 0.0
+
+      tf = 20.0
+
+      min_dt = 0.001
+
+      max_dt = 10
+
+      num_timesteps = 2
+
+      assert np.allclose(pendulum_analysis(g, L, beta, A, alpha, initial_state, t0,
+      tf, min_dt, max_dt, num_timesteps), target)'
+    - 'g = 9.81
+
+      L = 0.3
+
+      beta = 1.0
+
+      A = 0.2
+
+      alpha = 1.0
+
+      initial_state = [1.0, 0.0]
+
+      t0 = 0.0
+
+      tf = 15.0
+
+      min_dt = 0.001
+
+      max_dt = 10
+
+      num_timesteps = 2
+
+      assert np.allclose(pendulum_analysis(g, L, beta, A, alpha, initial_state, t0,
+      tf, min_dt, max_dt, num_timesteps), target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/scicode/physics/gold_dev/p078_gold.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

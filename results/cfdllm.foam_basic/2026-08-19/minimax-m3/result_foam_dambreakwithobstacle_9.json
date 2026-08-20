@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_dambreakwithobstacle_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate an OpenFOAM 10 case for a laminar dam break with an obstacle.\\nSolver: interFoam\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Geometry / numerics parameters\\n# ---------------------------------------------------------------------------\\nNX = NY = NZ = 32          # grid points in each direction\\nLX = LY = LZ = 1.0         # domain extent\\nEND_TIME = 0.1\\nDT       = 0.001\\nWRITE_INTERVAL = 0.02\\n\\nRHO_AIR  = 1.0\\nRHO_WATER = 1000.0\\nMU_AIR   = 1.48e-05\\nMU_WATER = 1.0e-04\\n\\n# Obstacle (square cylinder placed on the floor)\\nOBS_CX = 0.30   # centre x\\nOBS_CZ = 0.10   # centre z (height above floor)\\nOBS_HALF = 0.05 # half-width\\n\\n# Water column initial location\\nWATER_W = 0.50   # x-extent (from x=0 to x=WATER_W)\\nWATER_H = 0.40   # height\\nWATER_LEFT = 0.0\\n\\n# ---------------------------------------------------------------------------\\n# Helpers\\n# ---------------------------------------------------------------------------\\ndef w(path, text):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(text)\\n\\ndef block_mesh_dict():\\n    # Simple hex block, uniform grid. OpenFOAM 10 syntax.\\n    cells = f\\\"({NX} {NY} {NZ})\\\"\\n    return f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Website:  www.openfoam.org                      |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({LX} 0 0)\\n    ({LX} {LY} 0)\\n    (0 {LY}\""
+  },
+  "timings": {
+    "agent_s": 339.391,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,186 @@
+id: scicode_p028
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p028.md
+  prompt_sha256: aa8d10b3aa5ddd461f8eb09de2e2bfd792077c98a1cfabed8c568ce80b2afbc0
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '28'
+  problem_name: Gaussian_Beam_Intensity
+  split: test
+  n_steps: 3
+  n_cases: 10
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    from scipy.integrate import simps'
+  steps:
+  - step_id: '28.1'
+    n_cases: 3
+    test_cases:
+    - "N = 500  # sample number ,\nL = 10*10**-3   # Full side length \nLd = 0.6328\
+      \ * 10**-6  \nw0 = 1.0 * 10**-3  \nz = 10  \ngau1, gau2= propagate_gaussian_beam(N,\
+      \ Ld, w0, z, L)\n# domain specific check 1\n# Physics Calculate the energy info\
+      \ at beginning and end \n# The result is Intensity distrbution\n# The total\
+      \ energy value is expressed as total power, the intensity integrated over the\
+      \ cross section \ndx = L/N\ndy = L/N\ndA = dx*dy\nP1 = np.sum(gau1) * dA\nP2\
+      \ = np.sum(gau2)* dA\nassert np.allclose((P1, P2), target)"
+    - "N = 800  \nL = 16*10**-3\nLd = 0.6328 * 10**-6  \nw0 = 1.5* 10**-3  \nz = 15\
+      \  \ngau1, gau2= propagate_gaussian_beam(N, Ld, w0, z, L)\n# domain specific\
+      \ check 2\n# Physics Calculate the energy info at beginning and end \n# The\
+      \ result is Intensity distrbution\n# The total energy value is expressed as\
+      \ total power, the intensity integrated over the cross section \ndx = L/N\n\
+      dy = L/N\ndA = dx*dy\nP1 = np.sum(gau1) * dA\nP2 = np.sum(gau2)* dA\nassert\
+      \ np.allclose((P1, P2), target)"
+    - "N = 400 \nL = 8*10**-3\nLd = 0.6328 * 10**-6  \nw0 = 1.5* 10**-3  \nz = 20\
+      \  \ngau1, gau2= propagate_gaussian_beam(N, Ld, w0, z, L)\n# domain specific\
+      \ 3\n# Physics Calculate the energy info at beginning and end \n# The result\
+      \ is Intensity distrbution\n# The total energy value is expressed as total power,\
+      \ the intensity integrated over the cross section \ndx = L/N\ndy = L/N\ndA =\
+      \ dx*dy\nP1 = np.sum(gau1) * dA\nP2 = np.sum(gau2)* dA\nassert np.allclose((P1,\
+      \ P2), target)"
+  - step_id: '28.2'
+    n_cases: 3
+    test_cases:
+    - 'lambda_ = 1.064e-3  # Wavelength in mm
+
+      w0 = 0.2  # Initial waist size in mm
+
+      R0 = 1.0e30  # Initial curvature radius
+
+      Mf1 = np.array([[1, 0], [-1/50, 1]])  # Free space propagation matrix
+
+      L1 = 200  # Distance in mm
+
+      z = np.linspace(0, 300, 1000)  # Array of distances in mm
+
+      s = 150 # initial waist position
+
+      # User input for beam quality index
+
+      Mp2 = 1.5
+
+      assert np.allclose(gaussian_beam_through_lens(lambda_, w0, R0, Mf1, z,Mp2,L1,s),
+      target)'
+    - 'lambda_ = 1.064e-3  # Wavelength in mm
+
+      w0 = 0.2  # Initial waist size in mm
+
+      R0 = 1.0e30  # Initial curvature radius
+
+      Mf1 = np.array([[1, 0], [-1/50, 1]])  # Free space propagation matrix
+
+      L1 = 180  # Distance in mm
+
+      z = np.linspace(0, 300, 1000)  # Array of distances in mm
+
+      s = 180 # initial waist position
+
+      # User input for beam quality index
+
+      Mp2 = 1.5
+
+      assert np.allclose(gaussian_beam_through_lens(lambda_, w0, R0, Mf1, z,Mp2,L1,s),
+      target)'
+    - 'lambda_ = 1.064e-3  # Wavelength in mm
+
+      w0 = 0.2  # Initial waist size in mm
+
+      R0 = 1.0e30  # Initial curvature radius
+
+      Mf1 = np.array([[1, 0], [-1/50, 1]])  # Free space propagation matrix
+
+      L1 = 180  # Distance in mm
+
+      z = np.linspace(0, 300, 1000)  # Array of distances in mm
+
+      s = 100 # initial waist position
+
+      # User input for beam quality index
+
+      Mp2 = 1.5
+
+      assert np.allclose(gaussian_beam_through_lens(lambda_, w0, R0, Mf1, z,Mp2,L1,s),
+      target)'
+  - step_id: '28.3'
+    n_cases: 4
+    test_cases:
+    - "from scicode.compare.cmp import cmp_tuple_or_list\nLd = 1.064e-3  # Wavelength\
+      \ in mm\nw0 = 0.2  # Initial waist size in mm\nR0 = 1.0e30  # Initial curvature\
+      \ radius\nMf1 = np.array([[1, 0], [-1/50, 1]])  # Free space propagation matrix\n\
+      L1 = 150  # Distance in mm\nz = np.linspace(0, 300, 1000)  # Array of distances\
+      \ in mm\ns = 0\n# User input for beam quality index\nMp2 = 1\nN = 800  \nL =\
+      \ 16*10**-3\nassert cmp_tuple_or_list(Gussian_Lens_transmission(N, Ld, z, L,w0,R0,\
+      \ Mf1, Mp2, L1, s), target)"
+    - "from scicode.compare.cmp import cmp_tuple_or_list\nLd= 1.064e-3  # Wavelength\
+      \ in mm\nw0 = 0.2  # Initial waist size in mm\nR0 = 1.0e30  # Initial curvature\
+      \ radius\nMf1 = np.array([[1, 0], [-1/50, 1]])  # Free space propagation matrix\n\
+      L1 = 180  # Distance in mm\nz = np.linspace(0, 300, 1000)  # Array of distances\
+      \ in mm\ns = 100 # initial waist position\n# User input for beam quality index\n\
+      Mp2 = 1.5\nN = 800  \nL = 16*10**-3\nassert cmp_tuple_or_list(Gussian_Lens_transmission(N,\
+      \ Ld, z, L,w0,R0, Mf1, Mp2, L1, s), target)"
+    - "from scicode.compare.cmp import cmp_tuple_or_list\nLd = 1.064e-3  # Wavelength\
+      \ in mm\nw0 = 0.2  # Initial waist size in mm\nR0 = 1.0e30  # Initial curvature\
+      \ radius\nMf1 = np.array([[1, 0], [-1/50, 1]])  # Free space propagation matrix\n\
+      L1 = 180  # Distance in mm\nz = np.linspace(0, 300, 1000)  # Array of distances\
+      \ in mm\ns = 150 # initial waist position\n# User input for beam quality index\n\
+      Mp2 = 1.5\nN = 800  \nL = 16*10**-3\nassert cmp_tuple_or_list(Gussian_Lens_transmission(N,\
+      \ Ld, z, L,w0,R0, Mf1, Mp2, L1, s), target)"
+    - "Ld = 1.064e-3  # Wavelength in mm\nw0 = 0.2  # Initial waist size in mm\nR0\
+      \ = 1.0e30  # Initial curvature radius\nMf1 = np.array([[1, 0], [-1/50, 1]])\
+      \  # Free space propagation matrix\nL1 = 180  # Distance in mm\nz = np.linspace(0,\
+      \ 300, 1000)  # Array of distances in mm\ns = 150 # initial waist position\n\
+      # User input for beam quality index\nMp2 = 1.5\nN = 800  \nL = 16*10**-3\nWz,\
+      \ _, _ = Gussian_Lens_transmission(N, Ld, z, L,w0,R0, Mf1, Mp2, L1, s)\nscalingfactor\
+      \ = max(z)/len(z)\nLensWz = Wz[round(L1/scalingfactor)]\nBeforeLensWz = Wz[round((L1-5)/scalingfactor)]\n\
+      AfterLensWz = Wz[round((L1+5)/scalingfactor)]\nassert (LensWz>BeforeLensWz,\
+      \ LensWz>AfterLensWz) == target"
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_forwardstep_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"Create an OpenFOAM 10 case: laminar compressible flow over a forward-facing step\\n   using rhoCentralFoam.\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\n# ---------------------------------------------------------------------------\\n# Case parameters\\n# ---------------------------------------------------------------------------\\nEND_TIME   = 4.0\\nDT         = 0.002\\nWRITE_INT  = 0.1       # writeInterval in seconds\\nU_IN       = 2.3       # inlet velocity [m/s]\\nT_IN       = 1.0       # inlet temperature [K]\\n\\n# Geometry of forward-facing step channel (2-D, extruded in z)\\nX0, X1 = 0.0, 6.0      # domain length in x\\nY0, Y1 = 0.0, 2.0      # domain height in y\\nSTEP_X  = 2.0           # x-location of step\\nSTEP_H  = 0.4           # step height\\nZ_THICK = 0.1           # small extrusion thickness\\n\\n# Number of cells\\nNX = 120\\nNY = 40\\nNZ = 1\\n\\nCASE = \\\".\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Helper functions\\n# ---------------------------------------------------------------------------\\ndef write(path, content):\\n    full = os.path.join(CASE, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with open(full, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# ---------------------------------------------------------------------------\\n# 0/  - Initial and boundary fields\\n# ---------------------------------------------------------------------------\\nwrite(\\\"0/U\\\", f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (2.3\""
+  },
+  "timings": {
+    "agent_s": 200.803,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

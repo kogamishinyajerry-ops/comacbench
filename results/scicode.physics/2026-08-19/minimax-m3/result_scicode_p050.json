@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p050",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"def find_equilibrium(spins, N, T, J, num_steps):\\n    '''Find the thermal euilibrium state of a given spin system\\n    Input:\\n    spins: starting spin state, 1D array of 1 and -1\\n    N: size of spin system, int\\n    T: temprature, float\\n    J: interaction matrix, 2D array of floats\\n    num_steps: number of sampling steps per spin in the Monte Carlo simulation, int\\n    Output:\\n    spins: final spin state after Monte Carlo simulation, 1D array of 1 and -1\\n    '''\\n    total_steps = num_steps * N\\n    for _ in range(total_steps):\\n        i = np.random.randint(0, N)\\n        h_i = np.dot(J[i, :], spins) - J[i, i] * spins[i]\\n        dE = 2 * spins[i] * h_i\\n        if dE <= 0:\\n            spins[i] = -spins[i]\\n        else:\\n            if np.random.rand() < np.exp(-dE / T):\\n                spins[i] = -spins[i]\\n    return spins\\n\\ndef calculate_overlap(replicas):\\n    '''Calculate all overlaps in an emsemble of replicas\\n    Input:\\n    replicas: list of replicas, list of 1D arrays of 1 and -1\\n    Output:\\n    overlaps: pairwise overlap values between all replicas, 1D array of floats, sorted\\n    '''\\n    n = len(replicas)\\n    N = len(replicas[0])\\n    overlaps = []\\n    for i in range(n):\\n        for j in range(i+1, n):\\n            overlap = np.dot(replicas[i], replicas[j]) / N\\n            overlaps.append(overlap)\\n    return np.sort(np.array(overlaps))\\n\\ndef analyze_rsb(overlaps, N):\\n    '''Analyze if the overlap distribution to identify broad peak or multimodal behavior, indicating potential replica symmetry breaking.\\n    Input:\\n    overlaps: all overlap values between replicas from all realization, 1D array of floats\\n    N: size of spin system, int\\n    Output:\\n    potential_RSB: True if potential RSB is indicated, False otherwise, boolean\\n    '''\\n    expected_std = 1.0 / np.sqrt(N)\\n    actual_std = np.std(overlaps)\\n    \\n    # Check if standard deviation is significantly broader than expected\\n    if actual_std > 1.5 * expected_std:\\n        return True\\n    \\n    # Check for multimodality using histogram analysis\\n    num_bins = min(30, max(10, len(overlaps)//5))\\n    hist, _ = np.histogram(overlaps, bins=num_bins)\\n    \\n    if len(hist) >= 3:\\n        # Find local maxima (bins higher than both neighbors)\\n        is_peak = np.zeros(len(hist), dtype=bool)\\n        for i in range(1, len(hist)-1):\\n            if hist[i] > hist[i-1] and hist[i] > hist[i+1]:\\n                is_peak[i] = True\\n        if np.sum(is_peak) > 1:\\n            return True\\n    \\n    # Check if the range of overlaps is significantly wider than expected\\n    overlap_range = np.max(overlaps) - np.min(overlaps)\\n    if overlap_range > 6 * expected_std:\\n        return True\\n        \\n    return False\\n\\ndef spin_glass(N, T, num_steps, num_replicas, num_realizations):\\n    '''Simulation the SK model using replica method, analyze overlap and identify potential replica symmetry breaking\\n    Input:\\n    N: size of spin system, int\\n    T: temprature, float\\n    num_steps: number of sampling steps per spin in the Monte Carlo simulation, int\\n    num_replicas: number of system replicas in one realization, int\\n    num_realizations: number of realizations to sample different J's, int\\n    Output:\\n    potential_RSB: True if potential RSB is indicated, False otherwise, boolean\\n    mean: mean of the overall overlap distribution, float\\n    std: standard deviation of the overall overlap distribution, float\\n    '''\\n    all_overlaps = []\\n    \\n    for _ in range(num_realizations):\\n        # Generate symmetric J matrix where J_{ij} = n_{ij}/sqrt(N) for i<j\\n        n = np.random.randn(N, N) / np.sqrt(N)\\n        J = np.triu(n, k=1) + np.triu(n, k=1).T\\n        \\n        replicas = []\\n        for _ in range(num_replicas):\\n            # Random initial state\\n            spins = np.random.choice([-1, 1], N)\\n            spins = find_equilibrium(spins, N, T, J, num_steps)\\n            replicas.append(spins)\\n        \\n        overlaps = calculate_overlap(replicas)\\n        all_overlaps.extend(overlaps)\\n    \\n    all_overlaps = np.array(a\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 8, \"cases_total\": 12, \"steps_all_pass\": 2, \"steps_total\": 4, \"per_step\": {\"50.1\": {\"pass\": 3, \"total\": 3}, \"50.2\": {\"pass\": 3, \"total\": 3}, \"50.3\": {\"pass\": 2, \"total\": 3}, \"50.4\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 572.803,
+    "setup_s": 0.0,
+    "grade_s": 472.901
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 237.82s"
+  ]
+}

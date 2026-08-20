@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_cavity_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\ndef write_case_file(path, content):\\n    \\\"\\\"\\\"Helper function to write content to a file, creating directories if needed.\\\"\\\"\\\"\\n    dir_name = os.path.dirname(path)\\n    if dir_name:\\n        os.makedirs(dir_name, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# ----------------------------------------------------------------------\\n# System files\\n# ----------------------------------------------------------------------\\n\\n# blockMeshDict\\n# Dimensions: Normalized 1x1x0.1, scaled by 0.1 -> 0.1x0.1x0.01 m\\n# Grid: 20x20x1\\nblockMeshDict_content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 0.1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (1 0 0)\\n    (1 1 0)\\n    (0 1 0)\\n    (0 0 0.1)\\n    (1 0 0.1)\\n    (1 1 0.1)\\n    (0 1 0.1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (20 20 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    movingWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    fixedWalls\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 0 4 7)\\n            (1 2 6 5)\\n            (0 1 5 4)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_case_file(\\\"system/blockMeshDict\\\", blockMeshDict_content)\\n\\n# controlDict\\ncontrolDict_content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      controlDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\napplication     pisoFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         10;\\n\\ndeltaT          0.005;\\n\\nwriteControl    timeStep;\\n\\nwriteInterval   100;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_case_file(\\\"system/controlDict\\\", controlDict_content)\\n\\n# fvSchemes\\nfvSchemes_content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      fvSchemes;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nddtSchemes\\n{\\n    default Euler;\\n}\\n\\ngradSchemes\\n{\\n    default Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default corrected;\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_case_file(\\\"system/fvSchemes\\\", fvSchemes_content)\\n\\n# fvSolution\\nfvSolution_content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      fvSolution;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nsolvers\\n{\\n    p\\n    {\\n        solver          GAMG;\\n        tolerance       1e-06;\\n        relTol          0.1;\\n        smoother        GaussSeidel;\\n    }\\n\\n    U\\n    {\\n        solver          smoothSolver;\\n        smoother        symGaussSeidel;\\n        tolerance       1e-05;\\n        relTol          0;\\n    }\\n}\\n\\nPISO\\n{\\n    nCorrectors      2;\\n    nNonOrthogonalCorrectors 0;\\n    pRefCell        0;\\n    pRefValue       0;\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_case_file(\\\"system/fvSolution\\\", fvSolution_content)\\n\\n# ----------------------------------------------------------------------\\n# Constant files\\n# ----------------------------------------------------------------------\\n\\n# transportProperties\\ntransportProperties_content = \\\"\\\"\\\"Fo\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 381.549,
+    "setup_s": 0.0,
+    "grade_s": 2.712
+  },
+  "environment_digest": "sha256:805799ebd833d705cf0a4c4ffe9786841a7d1ef8f5889ae6a4ece71f348bd588",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.05s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.7s last_time=0"
+  ]
+}

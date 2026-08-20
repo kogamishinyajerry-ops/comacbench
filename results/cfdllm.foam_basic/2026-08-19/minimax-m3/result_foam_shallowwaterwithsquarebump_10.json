@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_shallowwaterwithsquarebump_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\nCASE_DIR = os.getcwd()\\n\\n# -----------------------------\\n# system/blockMeshDict\\n# -----------------------------\\nblockMeshDict = r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Website:  www.openfoam.com                      |\\n|   \\\\\\\\  /    A nd           | Version:  10                                    |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nvertices\\n(\\n    (0 0 0)\\n    (1 0 0)\\n    (1 1 0)\\n    (0 1 0)\\n    (0 0 0.1)\\n    (1 0 0.1)\\n    (1 1 0.1)\\n    (0 1 0.1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (20 20 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    left\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 7 4 0)\\n        );\\n    }\\n    right\\n    {\\n        type patch;\\n        faces\\n        (\\n            (2 6 5 1)\\n        );\\n    }\\n    bottom\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 5 4 0)\\n        );\\n    }\\n    top\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 2 6 7)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 4 5 1)\\n            (1 5 6 2)\\n            (2 6 7 3)\\n            (3 7 4 0)\\n        );\\n    }\\n);\\n\\nmergeType   none;\\n\\\"\\\"\\\"\\n\\n# -----------------------------\\n# system/controlDict\\n# -----------------------------\\ncontrolDict = r\\\"\\\"\\\"/*--------------------------------\""
+  },
+  "timings": {
+    "agent_s": 178.758,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

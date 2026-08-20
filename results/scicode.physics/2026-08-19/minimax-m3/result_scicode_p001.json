@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p001",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def cg(A, b, x, tol):\\n    \\\"\\\"\\\"\\n    Solve the linear system A x = b using the conjugate gradient method.\\n\\n    Parameters\\n    ----------\\n    A : ndarray, shape (M, M)\\n        Symmetric positive‑definite matrix.\\n    b : ndarray, shape (M,)\\n        Right‑hand side vector.\\n    x : ndarray, shape (M,)\\n        Initial guess for the solution.\\n    tol : float\\n        Convergence tolerance (based on the L2‑norm of the residual).\\n\\n    Returns\\n    -------\\n    x : ndarray, shape (M,)\\n        Approximate solution to A x = b.\\n    \\\"\\\"\\\"\\n    # Initial residual r0 = b - A x0\\n    r = b - A @ x\\n    # Initial search direction p0 = r0\\n    p = r.copy()\\n\\n    # Maximum number of iterations (CG converges in at most N steps for SPD A)\\n    max_iter = A.shape[0]\\n\\n    for _ in range(max_iter):\\n        # Matrix-vector product\\n        Ap = A @ p\\n\\n        # Compute step size alpha_k = (r_k^T r_k) / (p_k^T A p_k)\\n        pAp = p @ Ap\\n        if pAp == 0:\\n            # Avoid division by zero; the method cannot continue.\\n            break\\n        alpha = (r @ r) / pAp\\n\\n        # Update solution\\n        x = x + alpha * p\\n\\n        # Update residual\\n        r_new = r - alpha * Ap\\n\\n        # Check convergence\\n        if np.linalg.norm(r_new) < tol:\\n            r = r_new\\n            break\\n\\n        # Compute beta_k = (r_{k+1}^T r_{k+1}) / (r_k^T r_k)\\n        beta = (r_new @ r_new) / (r @ r)\\n\\n        # Update search direction\\n        p = r_new + beta * p\\n\\n        # Prepare r for next iteration\\n        r = r_new\\n\\n    return x\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 3, \"steps_all_pass\": 1, \"steps_total\": 1, \"per_step\": {\"1.1\": {\"pass\": 3, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 27.161,
+    "setup_s": 0.0,
+    "grade_s": 0.781
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.39s"
+  ]
+}

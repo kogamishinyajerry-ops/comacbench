@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p019",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def tensor(*args):\\n    '''Takes the tensor product of an arbitrary number of matrices/vectors.\\n    Input:\\n    args: any number of arrays, corresponding to input matrices\\n    Output:\\n    M: the tensor product (kronecker product) of input matrices\\n    '''\\n    if len(args) == 0:\\n        return 1.0  # identity for empty product (scalar)\\n    result = args[0]\\n    for mat in args[1:]:\\n        result = np.kron(result, mat)\\n    return result\\n\\ndef n_tangle(psi):\\n    '''Returns the n_tangle of pure state psi\\n    Input:\\n    psi: 1d array of floats, the vector representation of the state\\n    Output:\\n    tangle: float, the n-tangle of psi\\n    '''\\n    n = int(np.log2(psi.size))\\n    sigma_y = np.array([[0, -1j], [1j, 0]], dtype=complex)\\n    M = tensor(*[sigma_y]*n)\\n    psi_conj = np.conj(psi)\\n    value = np.dot(psi_conj, M @ psi_conj)\\n    return float(np.abs(value)**2)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 7, \"cases_total\": 7, \"steps_all_pass\": 2, \"steps_total\": 2, \"per_step\": {\"19.1\": {\"pass\": 3, \"total\": 3}, \"19.2\": {\"pass\": 4, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 170.428,
+    "setup_s": 0.0,
+    "grade_s": 1.063
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.63s"
+  ]
+}

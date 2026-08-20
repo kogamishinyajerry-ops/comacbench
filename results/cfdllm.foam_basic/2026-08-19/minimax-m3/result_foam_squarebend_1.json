@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a complete OpenFOAM 10 case for a 3D squareBend flow simulation.\\nThis script only writes the case files - it does not execute OpenFOAM commands.\\n\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\n# ------------------------------------------------------------------\\n# Solver and basic settings\\n# ------------------------------------------------------------------\\nSOLVER = \\\"rhoSimpleFoam\\\"\\nSTART_TIME = 0\\nEND_TIME = 500\\nDELTA_T = 1\\nWRITE_INTERVAL = 100\\n\\n# Inlet / outlet parameters\\nMASS_FLOW_RATE = 0.5\\nINLET_TEMPERATURE = 1000.0\\nINLET_PRESSURE = 110000.0\\nPR_VALUE = 0.71\\n\\n# Geometry vertices (from the OpenFOAM squareBend tutorial)\\n# Inlet\\nP_INLET_HI = (-50, 25, 25)\\nP_INLET_LO = (-50, 25, -25)\\n# Mid-bend\\nP_MID_HI = (25, 0, 25)\\nP_MID_LO = (25, 0, -25)\\n# Outlet\\nP_OUT_HI = (-500, -75, 25)\\nP_OUT_LO = (-500, -75, -25)\\n\\n# ------------------------------------------------------------------\\n# Helper functions\\n# ------------------------------------------------------------------\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Create directory and write text content to file.\\\"\\\"\\\"\\n    directory = os.path.dirname(path)\\n    if directory:\\n        os.makedirs(directory, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n\\ndef fmt_point(p):\\n    \\\"\\\"\\\"Format a 3D point tuple as an OpenFOAM vector string.\\\"\\\"\\\"\\n    return f\\\"({p[0]} {p[1]} {p[2]})\\\"\\n\\n\\n# ------------------------------------------------------------------\\n# system/blockMeshDict\\n# ------------------------------------------------------------------\\ndef write_block_mesh_dict():\\n    # The squareBend tutorial uses a single hex block connecting inlet -> mid -> outlet.\\n    # Block vertices order (8 points) following OpenFOAM conventions:\\n    #   inlet face  : (inlet_lo, inlet_hi) at x = -50\\n    #   outlet face : (out_lo, out_hi)    at the outlet\\n    x_in = P_INLET_LO[0]\\n    x_out = P_OUT_HI[0]\\n    y_in_hi = P_INLET_HI[1]\\n    y_in_lo = P_INLET_LO[1]\\n    z_hi\""
+  },
+  "timings": {
+    "agent_s": 147.229,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_poisson_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.219,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.6095,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_poisson():\\n    # Domain parameters\\n    Lx = 2.0\\n    Ly = 1.0\\n    \\n    # Grid parameters\\n    Nx = 101\\n    Ny = 51\\n    dx = Lx / (Nx - 1)\\n    dy = Ly / (Ny - 1)\\n    \\n    # Grid coordinates\\n    x = np.linspace(0, Lx, Nx)\\n    y = np.linspace(0, Ly, Ny)\\n    \\n    # Initialize solution (p) and source term (b)\\n    # Initial Condition: p = 0 everywhere\\n    p = np.zeros((Ny, Nx))\\n    b = np.zeros((Ny, Nx))\\n    \\n    # Define Source Term b(x, y)\\n    # b = 100 at x = 1/4 Lx, y = 1/4 Ly\\n    # b = -100 at x = 3/4 Lx, y = 3/4 Ly\\n    # Find nearest indices\\n    src1_x = 0.25 * Lx\\n    src1_y = 0.25 * Ly\\n    src2_x = 0.75 * Lx\\n    src2_y = 0.75 * Ly\\n    \\n    ix1 = np.argmin(np.abs(x - src1_x))\\n    iy1 = np.argmin(np.abs(y - src1_y))\\n    b[iy1, ix1] = 100.0\\n    \\n    ix2 = np.argmin(np.abs(x - src2_x))\\n    iy2 = np.argmin(np.abs(y - src2_y))\\n    b[iy2, ix2] = -100.0\\n    \\n    # Boundary Conditions: p = 0 at x=0, x=2, y=0, y=1\\n    # Since p is initialized to zeros and we only update interior points,\\n    # Dirichlet BCs are automatically satisfied.\\n    \\n    # Numerical Method: Finite Difference Method (Iterative Jacobi)\\n    # Since the problem is steady (Poisson eq), \\\"time steps\\\" are iterations.\\n    # We iterate until convergence or for a fixed number of steps.\\n    max_iter = 20000\\n    \\n    # Coefficients for the finite difference stencil\\n    # (p[i+1,j] - 2p[i,j] + p[i-1,j])/dx^2 + (p[i,j+1] - 2p[i,j] + p[i,j-1])/dy^2 = b[i,j]\\n    # p[i,j] * (2/dx^2 + 2/dy^2) = (p[i+1,j]+p[i-1,j])/dx^2 + (p[i,j+1]+p[i,j-1])/dy^2 - b[i,j]\\n    \\n    denom = 2 / dx**2 + 2 / dy**2\\n    \\n    for _ in range(max_iter):\\n        p_new = p.copy()\\n        \\n        # Vectorized update for interior points\\n        p_new[1:-1, 1:-1] = (\\n            (p[2:, 1:-1] + p[:-2, 1:-1]) / dx**2 +\\n            (p[1:-1, 2:] + p[1:-1, :-2]) / dy**2 -\\n            b[1:-1, 1:-1]\\n        ) / denom\\n        \\n        # Update p\\n        p = p_new\\n        \\n    # Save the final solution\\n    # The problem asks to save variables specified. Based on the problem statement, \\n    # the primary variable of interest is the potential p.\\n    np.save('p.npy', p)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_poisson()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"p\": {\"MSE\": 1.2368284688511423e-05, \"MAE\": 0.002275498512862868, \"RMSE\": 0.0035168572175326403, \"Cosine\": 0.43808257728027866, \"R2\": -4395.085429523675, \"NMSE\": 4396.085429523674, \"score01\": 0.219}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.45}"
+  },
+  "timings": {
+    "agent_s": 137.711,
+    "setup_s": 0.0,
+    "grade_s": 0.903
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.45s",
+    "missing=[] nonfinite=[]"
+  ]
+}

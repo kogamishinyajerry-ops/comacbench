@@ -1,0 +1,103 @@
+"""sandbox.py — code_exec 的执行沙箱（dev 终端实现，无容器）。
+
+设计边界（如实声明，写入 M2 报告）：
+- dev 终端无容器运行时；本沙箱 = **静态检查（AST）+ 隔离子进程执行**：
+  * `python -I`（isolated mode：忽略用户 site/环境变量 PYTHONPATH、不插入 cwd）；
+  * 独立临时工作目录（读写仅限该目录），墙钟超时硬杀；
+  * 静态检查禁止 网络/子进程/系统调用 类导入与调用，命中即
+    `sandbox_escape_attempt`（score=0 并单独告警，adapters/README.md code_exec 失败模式）。
+- macOS 无 RLIMIT_AS；内存限额不可强制 => 以墙钟超时兜底，报告中如实标注
+  「dev 层沙箱强度 = 静态审查 + 隔离解释器 + 超时，非 OS 级强制隔离」；
+  intranet 层移植时应替换为容器执行（env-matrix.md §2 python_sandbox）。
+- `open()` 不禁：任务契约要求模型代码写 .npy 产物（写限在其临时工作目录）。
+"""
+
+from __future__ import annotations
+
+import ast
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Any
+
+# 静态黑名单：导入即违规（网络/进程/系统侵入）
+BANNED_IMPORTS = {
+    "socket", "socketserver", "ssl", "asyncio",  # asyncio: 主要为网络用途，禁
+    "subprocess", "multiprocessing", "concurrent",  # 进程逃逸
+    "urllib", "requests", "http", "http.client", "ftplib", "telnetlib",
+    "smtplib", "webbrowser", "xmlrpc", "ctypes", "cffi",
+    "importlib",  # 动态导入绕过静态检查
+    "shutil",  # 文件系统批量操作（模型代码无需）
+}
+# importlib.metadata 等科学栈不会用；保留 os/sys/math 等基础（gold 代码用到 os.path）
+
+# 属性调用黑名单（进程逃逸/权限提升）。os.chmod 属良性文件操作，2026-08-19 已移除——
+# 曾误伤 foam_basic 33 例（M4 判分器缺陷，已修）。
+BANNED_CALL_SUBSTRINGS = (
+    "os.system", "os.popen", "os.exec", "os.fork", "os.spawn",
+    "os.kill", "os.setuid", "os.chown",
+)
+
+
+def static_check(code: str) -> tuple[list[str], bool]:
+    """AST 静态检查 -> (violations, syntax_ok)。violations 非空 => sandbox_escape_attempt。"""
+    violations: list[str] = []
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as e:
+        return [], False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".")[0]
+                if alias.name in BANNED_IMPORTS or root in BANNED_IMPORTS:
+                    violations.append(f"banned_import:{alias.name}")
+        elif isinstance(node, ast.ImportFrom):
+            root = (node.module or "").split(".")[0]
+            if node.module in BANNED_IMPORTS or root in BANNED_IMPORTS:
+                violations.append(f"banned_import_from:{node.module}")
+        elif isinstance(node, ast.Call):
+            func = node.func
+            parts: list[str] = []
+            while isinstance(func, ast.Attribute):
+                parts.append(func.attr)
+                func = func.value
+            if isinstance(func, ast.Name):
+                parts.append(func.id)
+            call = ".".join(reversed(parts))
+            for pat in BANNED_CALL_SUBSTRINGS:
+                if pat.rstrip("(") in call:
+                    violations.append(f"banned_call:{call}")
+                    break
+    return sorted(set(violations)), True
+
+
+class IsolatedRun:
+    """一次性隔离子进程工作目录。"""
+
+    def __init__(self) -> None:
+        self.dir = Path(tempfile.mkdtemp(prefix="bm_sandbox_"))
+
+    def write(self, name: str, content: str) -> Path:
+        p = self.dir / name
+        p.write_text(content, encoding="utf-8")
+        return p
+
+    def run(self, script: Path, timeout_s: float) -> dict[str, Any]:
+        t0 = time.time()
+        try:
+            r = subprocess.run(
+                [sys.executable, "-I", str(script)],
+                cwd=self.dir, capture_output=True, text=True, timeout=timeout_s,
+                env={"PATH": "/usr/bin:/bin", "HOME": str(self.dir),
+                     "MPLCONFIGDIR": str(self.dir)},
+            )
+            return {"exit": r.returncode, "stdout": r.stdout[-20000:],
+                    "stderr": r.stderr[-20000:], "duration_s": round(time.time() - t0, 2),
+                    "timeout": False}
+        except subprocess.TimeoutExpired as e:
+            return {"exit": -1, "stdout": (e.stdout or b"")[-20000:] if isinstance(e.stdout, bytes) else (e.stdout or "")[-20000:],
+                    "stderr": f"[sandbox timeout after {timeout_s}s]",
+                    "duration_s": round(time.time() - t0, 2), "timeout": True}

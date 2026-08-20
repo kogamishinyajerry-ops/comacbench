@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p014",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.91665,
+  "artifacts": {
+    "code": "\"def harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0, vrms):\\n    '''Function to employ Mannella's leapfrog method to solve the Langevin equation of a microsphere optically trapped in the gas.\\n    Input\\n    x0 : float\\n        Initial position of the microsphere.\\n    v0 : float\\n        Initial velocity of the microsphere.\\n    t0 : float\\n        Total simulation time.\\n    steps : int\\n        Number of integration steps.\\n    taup : float\\n        Momentum relaxation time of the trapped microsphere in the gas (often referred to as the particle relaxation time).\\n    omega0 : float\\n        Resonant frequency of the harmonic potential (optical trap).\\n    vrms : float\\n        Root mean square velocity of the trapped microsphere in the gas.\\n    Output\\n    x : float\\n        Final position of the microsphere after the simulation time.\\n    '''\\n    dt = t0 / steps\\n    half_dt = dt / 2\\n    denom = 1 + dt / (2 * taup)\\n    noise_coeff = np.sqrt(2 / taup) * vrms\\n    \\n    x = x0\\n    v = v0\\n    \\n    for _ in range(steps):\\n        # First leap: x_{n+1/2} = x_n + v_n * dt/2\\n        x_half = x + v * half_dt\\n        \\n        # Sample stochastic term: DeltaW ~ N(0, sqrt(dt))\\n        deltaW = np.random.normal(0, np.sqrt(dt))\\n        noise = noise_coeff * deltaW\\n        \\n        # Update velocity: v_{n+1} = (v_n - v_n*dt/(2*taup) - omega0^2*x_{n+1/2}*dt + noise) / (1 + dt/(2*taup))\\n        v = (v - v * half_dt / taup - (omega0 ** 2) * x_half * dt + noise) / denom\\n        \\n        # Second leap: x_{n+1} = x_{n+1/2} + v_{n+1} * dt/2\\n        x = x_half + v * half_dt\\n    \\n    return x\\n\\n\\ndef calculate_msd(t0, steps, taup, omega0, vrms, Navg):\\n    '''Calculate the mean-square displacement (MSD) of an optically trapped microsphere in a gas by averaging Navg simulations.\\n    Input:\\n    t0 : float\\n        The time point at which to calculate the MSD.\\n    steps : int\\n        Number of simulation steps for the integration.\\n    taup : float\\n        Momentum relaxation time of the microsphere.\\n    omega0 : float\\n        Resonant frequency of the optical trap.\\n    vrms : float\\n        Root mean square velocity of the thermal fluctuations.\\n    Navg : int\\n        Number of simulations to average over for computing the MSD.\\n    Output:\\n    x_MSD : float\\n        The computed MSD at time point `t0`.\\n    '''\\n    # Standard deviations for initial conditions (Maxwell-Boltzmann for harmonic trap)\\n    xrms = vrms / omega0\\n    \\n    msd_sum = 0.0\\n    \\n    for _ in range(Navg):\\n        # Sample initial conditions from Gaussian distributions\\n        x0 = np.random.normal(0, xrms)\\n        v0 = np.random.normal(0, vrms)\\n        \\n        # Run simulation to get final position\\n        x_final = harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0, vrms)\\n        \\n        # Compute squared displacement and accumulate\\n        displacement = x_final - x0\\n        msd_sum += displacement ** 2\\n    \\n    x_MSD = msd_sum / Navg\\n    return x_MSD\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 5, \"cases_total\": 6, \"steps_all_pass\": 1, \"steps_total\": 2, \"per_step\": {\"14.1\": {\"pass\": 3, \"total\": 3}, \"14.2\": {\"pass\": 2, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 177.342,
+    "setup_s": 0.0,
+    "grade_s": 152.413
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 75.99s"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_1d_burgers_equation",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9928,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.9964,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Parameters\\nnu = 0.07\\nL = 2 * np.pi\\nT_final = 0.14 * np.pi\\nN = 512\\ndx = L / N\\n\\n# Spatial grid (periodic)\\nx = np.linspace(0, L, N, endpoint=False)\\n\\n# Initial condition derived from Cole-Hopf transformation\\n# u(x,0) = 4 + x - 2*pi / (1 + exp(-pi*(x - pi)/nu))\\nu = 4 + x - 2 * np.pi / (1 + np.exp(-np.pi * (x - np.pi) / nu))\\n\\n# Right-hand side of Burgers' equation: du/dt = -u * du/dx + nu * d2u/dx2\\ndef rhs(u):\\n    u_p1 = np.roll(u, -1)  # u[i+1]\\n    u_m1 = np.roll(u, 1)   # u[i-1]\\n    u_x = (u_p1 - u_m1) / (2 * dx)\\n    u_xx = (u_p1 - 2 * u + u_m1) / (dx ** 2)\\n    return -u * u_x + nu * u_xx\\n\\n# Time integration using classical RK4\\ndt = 0.0005\\nt = 0.0\\nwhile t < T_final:\\n    dt = min(dt, T_final - t)\\n    k1 = dt * rhs(u)\\n    k2 = dt * rhs(u + k1 / 2)\\n    k3 = dt * rhs(u + k2 / 2)\\n    k4 = dt * rhs(u + k3)\\n    u = u + (k1 + 2 * k2 + 2 * k3 + k4) / 6\\n    t += dt\\n\\n# Save the final solution\\nnp.save('u.npy', u)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.020491448473495842, \"MAE\": 0.01689245571354452, \"RMSE\": 0.14314834429184237, \"Cosine\": 0.9994134356872824, \"R2\": 0.9862596445957441, \"NMSE\": 0.001173154437324495, \"score01\": 0.9928}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.12}"
+  },
+  "timings": {
+    "agent_s": 126.886,
+    "setup_s": 0.0,
+    "grade_s": 0.231
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.12s",
+    "missing=[] nonfinite=[]"
+  ]
+}

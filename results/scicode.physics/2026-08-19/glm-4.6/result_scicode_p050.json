@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p050",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"def find_equilibrium(spins, N, T, J, num_steps):\\n    '''Find the thermal euilibrium state of a given spin system\\n    Input:\\n    spins: starting spin state, 1D array of 1 and -1\\n    N: size of spin system, int\\n    T: temprature, float\\n    J: interaction matrix, 2D array of floats\\n    num_steps: number of sampling steps per spin in the Monte Carlo simulation, int\\n    Output:\\n    spins: final spin state after Monte Carlo simulation, 1D array of 1 and -1\\n    '''\\n    spins = spins.copy()\\n    total_steps = N * num_steps\\n    for _ in range(total_steps):\\n        i = np.random.randint(0, N)\\n        sigma_i = spins[i]\\n        h = np.dot(J[i], spins)\\n        dE = 2 * sigma_i * h\\n        if dE <= 0 or np.random.rand() < np.exp(-dE / T):\\n            spins[i] = -spins[i]\\n    return spins\\n\\n\\ndef calculate_overlap(replicas):\\n    '''Calculate all overlaps in an emsemble of replicas\\n    Input:\\n    replicas: list of replicas, list of 1D arrays of 1 and -1\\n    Output:\\n    overlaps: pairwise overlap values between all replicas, 1D array of floats, sorted\\n    '''\\n    M = len(replicas)\\n    if M < 2:\\n        return np.array([])\\n    N = len(replicas[0])\\n    overlaps = []\\n    for i in range(M):\\n        for j in range(i+1, M):\\n            q = np.dot(replicas[i], replicas[j]) / N\\n            overlaps.append(q)\\n    return np.sort(np.array(overlaps))\\n\\n\\ndef analyze_rsb(overlaps, N):\\n    '''Analyze if the overlap distribution to identify broad peak or multimodal behavior, indicating potential replica symmetry breaking.\\n    Input:\\n    overlaps: all overlap values between replicas from all realization, 1D array of floats\\n    N: size of spin system, int\\n    Output:\\n    potential_RSB: True if potential RSB is indicated, False otherwise, boolean\\n    '''\\n    if len(overlaps) == 0:\\n        return False\\n    observed_std = np.std(overlaps)\\n    expected_std = 1.0 / np.sqrt(N)\\n    # A significantly broader distribution (factor > 1.5) suggests RSB\\n    return observed_std > 1.5 * expected_std\\n\\n\\ndef spin_glass(N, T, num_steps, num_replicas, num_realizations):\\n    '''Simulation the SK model using replica method, analyze overlap and identify potential replica symmetry breaking\\n    Input:\\n    N: size of spin system, int\\n    T: temprature, float\\n    num_steps: number of sampling steps per spin in the Monte Carlo simulation, int\\n    num_replicas: number of system replicas in one realization, int\\n    num_realizations: number of realizations to sample different J's, int\\n    Output:\\n    potential_RSB: True if potential RSB is indicated, False otherwise, boolean\\n    mean: mean of the overall overlap distribution, float\\n    std: standard deviation of the overall overlap distribution, float\\n    '''\\n    all_overlaps = []\\n    for _ in range(num_realizations):\\n        # Generate symmetric J with off-diagonal variance 1/N and zero diagonal\\n        R = np.random.randn(N, N)\\n        J = (R + R.T) / np.sqrt(2 * N)\\n        np.fill_diagonal(J, 0.0)\\n\\n        replicas = []\\n        for _ in range(num_replicas):\\n            spins = np.random.choice([-1, 1], size=N)\\n            spins_eq = find_equilibrium(spins, N, T, J, num_steps)\\n            replicas.append(spins_eq)\\n\\n        overlaps_real = calculate_overlap(replicas)\\n        all_overlaps.extend(overlaps_real)\\n\\n    all_overlaps = np.array(all_overlaps)\\n    potential_RSB = analyze_rsb(all_overlaps, N)\\n    mean = np.mean(all_overlaps)\\n    std = np.std(all_overlaps)\\n    return potential_RSB, mean, std\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 9, \"cases_total\": 12, \"steps_all_pass\": 3, \"steps_total\": 4, \"per_step\": {\"50.1\": {\"pass\": 3, \"total\": 3}, \"50.2\": {\"pass\": 3, \"total\": 3}, \"50.3\": {\"pass\": 3, \"total\": 3}, \"50.4\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 585.086,
+    "setup_s": 0.0,
+    "grade_s": 435.949
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 216.82s"
+  ]
+}

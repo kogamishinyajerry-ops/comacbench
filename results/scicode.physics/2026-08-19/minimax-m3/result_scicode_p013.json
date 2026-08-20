@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p013",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3488,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.6744,
+  "artifacts": {
+    "code": "\"def partial_derivs_vec(fct, delta):\\n    '''Computes the partial derivatives of a scalar field in three dimensions using second-order finite differences.\\n    Parameters:\\n    -----------\\n    fct : numpy.ndarray\\n        A 3D array representing the scalar field values on the grid. Shape: (nx, ny, nz).\\n    delta : float\\n        The grid spacing or step size in each spatial direction.\\n    Returns:\\n    --------\\n    deriv_x : numpy.ndarray\\n        The partial derivative of the field with respect to the x direction (∂f/∂x).\\n    deriv_y : numpy.ndarray\\n        The partial derivative of the field with respect to the y direction (∂f/∂y).\\n    deriv_z : numpy.ndarray\\n        The partial derivative of the field with respect to the z direction (∂f/∂z).\\n    '''\\n    nx, ny, nz = fct.shape\\n    deriv_x = np.zeros_like(fct, dtype=float)\\n    deriv_y = np.zeros_like(fct, dtype=float)\\n    deriv_z = np.zeros_like(fct, dtype=float)\\n    \\n    # Interior: central difference\\n    deriv_x[1:-1, :, :] = (fct[2:, :, :] - fct[:-2, :, :]) / (2.0 * delta)\\n    deriv_y[:, 1:-1, :] = (fct[:, 2:, :] - fct[:, :-2, :]) / (2.0 * delta)\\n    deriv_z[:, :, 1:-1] = (fct[:, :, 2:] - fct[:, :, :-2]) / (2.0 * delta)\\n    \\n    # Boundaries: one-sided second-order\\n    # x-boundaries\\n    deriv_x[0, :, :] = (-3.0 * fct[0, :, :] + 4.0 * fct[1, :, :] - fct[2, :, :]) / (2.0 * delta)\\n    deriv_x[-1, :, :] = (3.0 * fct[-1, :, :] - 4.0 * fct[-2, :, :] + fct[-3, :, :]) / (2.0 * delta)\\n    # y-boundaries\\n    deriv_y[:, 0, :] = (-3.0 * fct[:, 0, :] + 4.0 * fct[:, 1, :] - fct[:, 2, :]) / (2.0 * delta)\\n    deriv_y[:, -1, :] = (3.0 * fct[:, -1, :] - 4.0 * fct[:, -2, :] + fct[:, -3, :]) / (2.0 * delta)\\n    # z-boundaries\\n    deriv_z[:, :, 0] = (-3.0 * fct[:, :, 0] + 4.0 * fct[:, :, 1] - fct[:, :, 2]) / (2.0 * delta)\\n    deriv_z[:, :, -1] = (3.0 * fct[:, :, -1] - 4.0 * fct[:, :, -2] + fct[:, :, -3]) / (2.0 * delta)\\n    \\n    return deriv_x, deriv_y, deriv_z\\n\\ndef laplace(fct, delta):\\n    '''Computes the Laplacian of a scalar field in the interior of a 3D grid using second-order finite differences.\\n    This function calculates the Laplacian of a scalar field on a structured 3D grid using a central finite difference\\n    scheme. The output boundary values are set to zero to ensure the Laplacian is only calculated for the interior grid points.\\n    Parameters:\\n    -----------\\n    fct : numpy.ndarray\\n        A 3D array representing the scalar field values on the grid. Shape: (nx, ny, nz).\\n    delta : float\\n        The grid spacing or step size in each spatial direction.\\n    Returns:\\n    --------\\n    lap : numpy.ndarray\\n        A 3D array representing the Laplacian of the scalar field. Shape: (nx, ny, nz).\\n        The boundary values are set to zero, while the interior values are computed using the finite difference method.\\n    '''\\n    nx, ny, nz = fct.shape\\n    lap = np.zeros_like(fct, dtype=float)\\n    \\n    # Interior: central difference\\n    lap[1:-1, 1:-1, 1:-1] = (\\n        (fct[2:, 1:-1, 1:-1] - 2.0 * fct[1:-1, 1:-1, 1:-1] + fct[:-2, 1:-1, 1:-1]) +\\n        (fct[1:-1, 2:, 1:-1] - 2.0 * fct[1:-1, 1:-1, 1:-1] + fct[1:-1, :-2, 1:-1]) +\\n        (fct[1:-1, 1:-1, 2:] - 2.0 * fct[1:-1, 1:-1, 1:-1] + fct[1:-1, 1:-1, :-2])\\n    ) / (delta * delta)\\n    \\n    return lap\\n\\ndef gradient(fct, delta):\\n    '''Computes the gradient of a scalar field in the interior of a 3D grid using second-order finite differences.\\n    Parameters:\\n    -----------\\n    fct : numpy.ndarray\\n        A 3D array representing the scalar field values on the grid. Shape: (nx, ny, nz).\\n    delta : float\\n        The grid spacing or step size in all spatial directions.\\n    Returns:\\n    --------\\n    grad_x : numpy.ndarray\\n        A 3D array representing the partial derivative of the field with respect to the x direction (∂f/∂x). \\n        Shape: (nx, ny, nz). Boundary values are zeroed out.\\n    grad_y : numpy.ndarray\\n        A 3D array representing the partial derivative of the field with respect to the y direction (∂f/∂y). \\n        Shape: (nx, ny, nz)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 15, \"cases_total\": 43, \"steps_all_pass\": 5, \"steps_total\": 14, \"per_step\": {\"13.1\": {\"pass\": 3, \"total\": 3}, \"13.2\": {\"pass\": 3, \"total\": 3}, \"13.3\": {\"pass\": 0, \"total\": 3}, \"13.4\": {\"pass\": 3, \"total\": 3}, \"13.5\": {\"pass\": 3, \"total\": 3}, \"13.7\": {\"pass\": 3, \"total\": 3}, \"13.8\": {\"pass\": 0, \"total\": 3}, \"13.9\": {\"pass\": 0, \"total\": 3}, \"13.10\": {\"pass\": 0, \"total\": 3}, \"13.11\": {\"pass\": 0, \"total\": 3}, \"13.12\": {\"pass\": 0, \"total\": 3}, \"13.13\": {\"pass\": 0, \"total\": 3}, \"13.14\": {\"pass\": 0, \"total\": 3}, \"13.15\": {\"pass\": 0, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 207.367,
+    "setup_s": 0.0,
+    "grade_s": 55.733
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 28.08s"
+  ]
+}

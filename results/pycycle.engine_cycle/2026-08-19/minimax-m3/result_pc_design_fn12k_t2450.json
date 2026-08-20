@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# Build the problem\\nprob = om.Problem()\\nprob.model = om.Group()\\n\\n# Build the simple turbojet cycle: Inlet -> Compressor -> Combustor -> Turbine -> Nozzle (+ Shaft)\\nelements = [\\n    pyc.Inlet(name='inlet'),\\n    pyc.Compressor(name='comp', map_data=pyc.AXI5),\\n    pyc.Shaft(name='shaft'),\\n    pyc.Combustor(name='comb'),\\n    pyc.Turbine(name='turb', map_data=pyc.LPT2269),\\n    pyc.Nozzle(name='noz', loss_coef=1.0),\\n]\\n\\n# Create the flow path\\nflow = pyc.FlowPath(prob.model, elements)\\n\\n# Cycle parameters: TABULAR thermo with AIR_JETA_TAB_SPEC\\nprob.model.pyc_add_cycle_param('fuel_THV', 18400., units='Btu/lbm')\\nprob.model.pyc_add_cycle_param('air', pyc.AIR_JETA_TAB_SPEC)\\n\\n# Default inlet conditions\\nprob.model.set_input_defaults('inlet.MN', 0.0)\\nprob.model.set_input_defaults('inlet.alt', 0.0, units='ft')\\n\\n# Add MEAP (Mission Analysis Problem) - wraps the cycle and sets up design matching\\nprob.model.add_subsystem('DESIGN', pyc.MissionAnalysisProblem())\\n\\nprob.setup()\\n\\n# --- DESIGN POINT: SL static, MN~0, OPR=14, T4=2450°R, Fn_target=12000 lbf ---\\n# Flight conditions\\nprob['DESIGN.design.inlet.MN'] = 0.0\\nprob['DESIGN.design.inlet.alt'] = 0.0\\n\\n# Compressor\\nprob['DESIGN.design.comp.PR'] = 14.0\\nprob['DESIGN.design.comp.eff'] = 0.9          # initial guess (map picks final on design line)\\n\\n# Combustor exit (turbine inlet) temperature\\nprob['DESIGN.design.comb.Tt4'] = 2450.0\\n\\n# Turbine\\nprob['DESIGN.design.turb.eff'] = 0.9           # initial guess\\nprob['DESIGN.design.turb.MN'] = 0.4\\n\\n# Convergent-Divergent (CD) nozzle: exhaust to ambient (sea level static, 14.696 psia)\\nprob['DESIGN.design.noz.Ps_exhaust'] = 14.696\\n\\n# Initial guesses for matching variables\\nprob['DESIGN.design.inlet.W'] = 100.0          # adjusted to match Fn target\\nprob['DESIGN.design.shaft.Nmech'] = 10000.0    # adjusted to balance shaft power\\n\\n# Thrust target\\nprob['DESIGN.design.overall.Fn_target'] = 12000.0\\n\\n# Solve the design point\\nprob.run_model()\\n\\n# Extract results\\nFn     = float(prob.get_val('DESIGN.design.overall.Fn'))\\nTSFC   = float(prob.get_val('DESIGN.design.overall.TSFC'))\\nOPR    = float(prob.get_val('DESIGN.design.comp.PR'))\\nWfuel  = float(prob.get_val('DESIGN.design.overall.Wfuel'))\\n\\nresult = {\\n    'Fn_lbf':     Fn,\\n    'TSFC':       TSFC,\\n    'OPR':        OPR,\\n    'Wfuel_lbm_s': Wfuel,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"dao/core/system.py\\\", line 487, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 466, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 510, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 240, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Inlet: Option 'name' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 42.213,
+    "setup_s": 0.0,
+    "grade_s": 1.275
+  },
+  "environment_digest": "sha256:1542aec1c75ffe8bbbbbe5a8c9723f831ded55f9c89c457c16ccb57779ee16a4",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.27s"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_shallowwaterwithsquarebump_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a complete OpenFOAM 10 (Foundation) case for shallowWaterFoam\\nover a square bump.\\n\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Write content to a file, creating directories if needed.\\\"\\\"\\\"\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\ndef main():\\n    # -------------------------------------------------------------------------\\n    # Geometry / mesh parameters\\n    # -------------------------------------------------------------------------\\n    xmin, xmax = 0.0, 1.0\\n    ymin, ymax = 0.0, 1.0\\n    nx, ny, nz = 20, 20, 1\\n\\n    # -------------------------------------------------------------------------\\n    # system/blockMeshDict\\n    # -------------------------------------------------------------------------\\n    block_mesh_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1.0;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (1 0 0)\\n    (1 1 0)\\n    (0 1 0)\\n    (0 0 0.1)\\n    (1 0 0.1)\\n    (1 1 0.1)\\n    (0 1 0.1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    left\\n    {{\\n        type patch;\\n        faces ((0 3 7 4));\\n    }}\\n    right\\n    {{\\n        type patch;\\n        faces ((1 2 6 5));\\n    }}\\n    bottom\\n    {{\\n        type patch;\\n        faces ((0 1 5 4));\\n    }}\\n    top\\n    {\""
+  },
+  "timings": {
+    "agent_s": 181.16,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

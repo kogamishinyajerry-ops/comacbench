@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p062",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nfrom scipy.sparse import kron, identity\\nfrom scipy.sparse.linalg import eigsh\\n\\nclass Block:\\n    def __init__(self, length, basis_size, operator_dict):\\n        self.length = length\\n        self.basis_size = basis_size\\n        self.operator_dict = operator_dict\\n\\n    def print_all(self):\\n        print(f\\\"Block attributes:\\\")\\n        print(f\\\"  Length: {self.length}\\\")\\n        print(f\\\"  Basis size: {self.basis_size}\\\")\\n        print(f\\\"  Operators: {list(self.operator_dict.keys())}\\\")\\n\\nclass EnlargedBlock:\\n    def __init__(self, length, basis_size, operator_dict):\\n        self.length = length\\n        self.basis_size = basis_size\\n        self.operator_dict = operator_dict\\n\\n    def print_all(self):\\n        print(f\\\"EnlargedBlock attributes:\\\")\\n        print(f\\\"  Length: {self.length}\\\")\\n        print(f\\\"  Basis size: {self.basis_size}\\\")\\n        print(f\\\"  Operators: {list(self.operator_dict.keys())}\\\")\\n\\ndef block_initial(model_d):\\n    '''Construct the initial block for the DMRG algo. H1, Sz1 and Sp1 is single-site Hamiltonian, spin-z operator\\n    and spin ladder operator in the form of 2x2 matrix, respectively.\\n    Input:\\n    model_d: int, single-site basis size\\n    Output:\\n    initial_block: instance of the \\\"Block\\\" class, with attributes \\\"length\\\", \\\"basis_size\\\", \\\"operator_dict\\\"\\n                  - length: An integer representing the block's current length.\\n                  - basis_size: An integer indicating the size of the basis.\\n                  - operator_dict: A dictionary containing operators: Hamiltonian (\\\"H\\\":H1), \\n                                   Connection operator (\\\"conn_Sz\\\":Sz1), and Connection operator(\\\"conn_Sp\\\":Sp1).\\n                                   H1, Sz1 and Sp1: 2d array of float\\n    '''\\n    # Basis: |up>, |down>\\n    # S^z = 1/2 [[1, 0], [0, -1]]\\n    Sz1 = 0.5 * np.array([[1, 0], [0, -1]], dtype=float)\\n    \\n    # S^+ = [[0, 1], [0, 0]]\\n    Sp1 = np.array([[0, 1], [0, 0]], dtype=float)\\n    \\n    # H_1 = 0\\n    H1\""
+  },
+  "timings": {
+    "agent_s": 389.144,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

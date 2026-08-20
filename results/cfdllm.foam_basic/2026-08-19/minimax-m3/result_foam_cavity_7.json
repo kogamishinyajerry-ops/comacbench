@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cavity_7",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Create necessary directories\\nos.makedirs(\\\"system\\\", exist_ok=True)\\nos.makedirs(\\\"constant\\\", exist_ok=True)\\nos.makedirs(\\\"0\\\", exist_ok=True)\\n\\n# system/blockMeshDict\\nblockMeshDict = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (0.1 0 0)\\n    (0.1 0.1 0)\\n    (0 0.1 0)\\n    (0 0 0.01)\\n    (0.1 0 0.01)\\n    (0.1 0.1 0.01)\\n    (0 0.1 0.01)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (20 20 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\npatches\\n(\\n    patch movingWall\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    patch fixedWalls\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 1 5 4)\\n            (0 4 7 3)\\n            (1 2 6 5)\\n        );\\n    }\\n    empty frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/blockMeshDict\\\", \\\"w\\\") as f:\\n    f.write(blockMeshDict)\\n\\n# system/controlDict\\ncontrolDict = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n\\napplication     pisoFoam;\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         10;\\ndeltaT          0.005;\\nwriteControl    timeStep;\\nwriteInterval   100;\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\ntimeFormat      general;\\ntimePrecision   6;\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/controlDict\\\", \\\"w\\\") as f:\\n    f.write(controlDict)\\n\\n# system/fvSchemes\\nfvSchemes = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear orthogonal;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         orthogonal;\\n}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/fvSchemes\\\", \\\"w\\\") as f:\\n    f.write(fvSchemes)\\n\\n# system/fvSolution\\nfvSolution = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    p\\n    {\\n        solver          PCG;\\n        preconditioner  DIC;\\n        tolerance       1e-06;\\n        relTol          0.05;\\n    }\\n    pFinal\\n    {\\n        $p;\\n        relTol          0;\\n    }\\n    U\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-05;\\n        relTol          0.1;\\n    }\\n    UFinal\\n    {\\n        $U;\\n        relTol          0;\\n    }\\n}\\n\\nPISO\\n{\\n    nCorrectors     2;\\n    nNonOrthogonalCorrectors 0;\\n}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/fvSolution\\\", \\\"w\\\") as f:\\n    f.write(fvSolution)\\n\\n# constant/physicalProperties\\nphysicalProperties = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      physicalProperties;\\n}\\n\\ntransportModel  Newtonian;\\nnu              1e-03;\\n\\\"\\\"\\\"\\n\\nwith open(\\\"constant/physicalProperties\\\", \\\"w\\\") as f:\\n    f.write(physicalProperties)\\n\\n# constant/momentumTransport\\nmomentumTransport = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      momentumTransport;\\n}\\n\\nsimulationType laminar;\\n\\\"\\\"\\\"\\n\\nwith open(\\\"constant/momentumTransport\\\", \\\"w\\\") as f:\\n    f.write(momentumTransport)\\n\\n# 0/U\\nU = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n\\ndimensions      [0 1 -1 0 0 0 0];\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    movingWall\\n    {\\n        type            fixedValue;\\n        value           uniform (2 0 0);\\n    }\\n    fixedWalls\\n    {\\n        type            noSlip;\\n    }\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\\"\\\"\\\"\\n\\nwith open(\\\"0/U\\\", \\\"w\\\") as f:\\n    f.write(U)\\n\\n# 0/p\\np = \\\"\\\"\\\"FoamFile\\n{\\n    versio\""
+  },
+  "timings": {
+    "agent_s": 87.487,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

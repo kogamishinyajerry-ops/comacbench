@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_1d_euler_shock_tube",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9743,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.98715,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# Parameters\\ngamma = 1.4\\nx_left, x_right = -1.0, 1.0\\nt_final = 0.25\\nN = 401\\ndx = (x_right - x_left) / (N - 1)\\nx = np.linspace(x_left, x_right, N)\\nCFL = 0.5\\n\\n# Initial conditions (Sod shock tube)\\nrho_init = np.where(x < 0, 1.0, 0.125)\\nu_init = np.zeros(N)\\np_init = np.where(x < 0, 1.0, 0.1)\\nE_init = p_init / ((gamma - 1) * rho_init) + 0.5 * u_init**2\\n\\n# Conservative variables: U = [rho, rho*u, rho*E]\\nU = np.zeros((3, N))\\nU[0] = rho_init\\nU[1] = rho_init * u_init\\nU[2] = rho_init * E_init\\n\\n\\ndef rusanov_flux(U_L, U_R):\\n    \\\"\\\"\\\"Rusanov (local Lax-Friedrichs) numerical flux.\\\"\\\"\\\"\\n    rho_L = np.maximum(U_L[0], 1e-12)\\n    rho_R = np.maximum(U_R[0], 1e-12)\\n    u_L = U_L[1] / rho_L\\n    u_R = U_R[1] / rho_R\\n    E_L = U_L[2] / rho_L\\n    E_R = U_R[2] / rho_R\\n    p_L = np.maximum((gamma - 1.0) * rho_L * (E_L - 0.5 * u_L**2), 1e-12)\\n    p_R = np.maximum((gamma - 1.0) * rho_R * (E_R - 0.5 * u_R**2), 1e-12)\\n    c_L = np.sqrt(gamma * p_L / rho_L)\\n    c_R = np.sqrt(gamma * p_R / rho_R)\\n    s = np.maximum(np.abs(u_L) + c_L, np.abs(u_R) + c_R)\\n    \\n    F_L = np.empty_like(U_L)\\n    F_L[0] = rho_L * u_L\\n    F_L[1] = rho_L * u_L**2 + p_L\\n    F_L[2] = u_L * (rho_L * E_L + p_L)\\n    \\n    F_R = np.empty_like(U_R)\\n    F_R[0] = rho_R * u_R\\n    F_R[1] = rho_R * u_R**2 + p_R\\n    F_R[2] = u_R * (rho_R * E_R + p_R)\\n    \\n    return 0.5 * (F_L + F_R) - 0.5 * s * (U_R - U_L)\\n\\n\\n# Time stepping\\nt = 0.0\\nwhile t < t_final:\\n    # CFL condition\\n    rho_safe = np.maximum(U[0], 1e-12)\\n    u_safe = U[1] / rho_safe\\n    E_safe = U[2] / rho_safe\\n    p_safe = np.maximum((gamma - 1.0) * rho_safe * (E_safe - 0.5 * u_safe**2), 1e-12)\\n    c_safe = np.sqrt(gamma * p_safe / rho_safe)\\n    max_speed = np.max(np.abs(u_safe) + c_safe)\\n    dt = CFL * dx / max_speed\\n    if t + dt > t_final:\\n        dt = t_final - t\\n    \\n    # Extended array with ghost cells\\n    U_ext = np.zeros((3, N + 2))\\n    U_ext[:, 1:-1] = U\\n    \\n    # Reflective BC at left wall: mirror with negated normal velocity\\n    U_ext[:, 0] = U[:, 0]\\n    U_ext[1, 0] = -U[1, 0]\\n    \\n    # Reflective BC at right wall: mirror with negated normal velocity\\n    U_ext[:, -1] = U[:, -1]\\n    U_ext[1, -1] = -U[1, -1]\\n    \\n    # Numerical fluxes at cell interfaces\\n    F_num = rusanov_flux(U_ext[:, :-1], U_ext[:, 1:])\\n    \\n    # Update conservative variables\\n    U = U - (dt / dx) * (F_num[:, 1:] - F_num[:, :-1])\\n    \\n    t += dt\\n\\n# Extract final primitive variables\\nrho_final = U[0]\\nu_final = U[1] / np.maximum(U[0], 1e-12)\\nE_final = U[2] / np.maximum(U[0], 1e-12)\\np_final = (gamma - 1.0) * rho_final * (E_final - 0.5 * u_final**2)\\n\\n# Save results\\nnp.save('rho.npy', rho_final)\\nnp.save('u.npy', u_final)\\nnp.save('p.npy', p_final)\\nnp.save('E.npy', E_final)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"E\": {\"MSE\": 0.018370953167233257, \"MAE\": 0.03193686897556813, \"RMSE\": 0.13553948932777213, \"Cosine\": 0.998405872743899, \"R2\": 0.8604021425624255, \"NMSE\": 0.003189419259613824, \"score01\": 0.9294}, \"rho\": {\"MSE\": 0.0003712200435943892, \"MAE\": 0.008770338834530737, \"RMSE\": 0.019267071484644186, \"Cosine\": 0.9995952399099203, \"R2\": 0.9973121526160428, \"NMSE\": 0.0008167356076012809, \"score01\": 0.9985}, \"u\": {\"MSE\": 0.0012284593240243437, \"MAE\": 0.012274255554443416, \"RMSE\": 0.035049384074821395, \"Cosine\": 0.9977816884352214, \"R2\": 0.992349087798997, \"NMSE\": 0.005166527683125915, \"score01\": 0.9951}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 193.577,
+    "setup_s": 0.0,
+    "grade_s": 0.136
+  },
+  "environment_digest": "sha256:71d38aa4853c682d9f76d541793ea63638436c14faec04edfd1da55475ef8064",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s",
+    "missing=[] nonfinite=[]"
+  ]
+}

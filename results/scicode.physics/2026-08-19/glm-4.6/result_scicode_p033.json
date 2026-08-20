@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p033",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.66665,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport cmath\\nfrom math import pi, sin, cos, sqrt\\n\\ndef calc_hamiltonian(kx, ky, a, t1, t2, phi, m):\\n    '''Function to generate the Haldane Hamiltonian with a given set of parameters.\\n    Inputs:\\n    kx : float\\n        The x component of the wavevector.\\n    ky : float\\n        The y component of the wavevector.\\n    a : float\\n        The lattice spacing, i.e., the length of one side of the hexagon.\\n    t1 : float\\n        The nearest-neighbor coupling constant.\\n    t2 : float\\n        The next-nearest-neighbor coupling constant.\\n    phi : float\\n        The phase ranging from -π to π.\\n    m : float\\n        The on-site energy.\\n    Output:\\n    hamiltonian : matrix of shape(2, 2)\\n        The Haldane Hamiltonian on a hexagonal lattice.\\n    '''\\n    sqrt3 = np.sqrt(3)\\n    # d1\\n    d1 = t1 * (np.cos(ky*a) + np.cos(sqrt3*kx*a/2 - ky*a/2) + np.cos(-sqrt3*kx*a/2 - ky*a/2))\\n    # d2\\n    d2 = t1 * (np.sin(ky*a) + np.sin(sqrt3*kx*a/2 - ky*a/2) + np.sin(-sqrt3*kx*a/2 - ky*a/2))\\n    # d0\\n    d0 = 2 * t2 * np.cos(phi) * (np.cos(sqrt3*kx*a) + np.cos(-sqrt3*kx*a/2 + 3*ky*a/2) + np.cos(-sqrt3*kx*a/2 - 3*ky*a/2))\\n    # d3\\n    d3 = m - 2 * t2 * np.sin(phi) * (np.sin(sqrt3*kx*a) + np.sin(-sqrt3*kx*a/2 + 3*ky*a/2) + np.sin(-sqrt3*kx*a/2 - 3*ky*a/2))\\n    # Hamiltonian matrix\\n    H = np.array([[d0 + d3, d1 - 1j*d2],\\n                  [d1 + 1j*d2, d0 - d3]], dtype=complex)\\n    return H\\n\\ndef compute_chern_number(delta, a, t1, t2, phi, m):\\n    '''Function to compute the Chern number with a given set of parameters.\\n    Inputs:\\n    delta : float\\n        The grid size in kx and ky axis for discretizing the Brillouin zone.\\n    a : float\\n        The lattice spacing, i.e., the length of one side of the hexagon.\\n    t1 : float\\n        The nearest-neighbor coupling constant.\\n    t2 : float\\n        The next-nearest-neighbor coupling constant.\\n    phi : float\\n        The phase ranging from -π to π.\\n    m : float\\n        The on-site energy.\\n    Output:\\n    chern_number : float\\n        The Chern number, a real number that should be close to an integer. The imaginary part is cropped out due to the negligible magnitude.\\n    '''\\n    sqrt3 = np.sqrt(3)\\n    kx0 = 2 * sqrt3 * pi / (3 * a)\\n    ky0 = 4 * pi / (3 * a)\\n\\n    # Number of grid points (adjust to fit the BZ exactly)\\n    Nx = int(round(kx0 / delta))\\n    Ny = int(round(ky0 / delta))\\n    if Nx < 1:\\n        Nx = 1\\n    if Ny < 1:\\n        Ny = 1\\n\\n    # k-point grids\\n    kx_vals = np.linspace(0, kx0, Nx, endpoint=False)\\n    ky_vals = np.linspace(0, ky0, Ny, endpoint=False)\\n\\n    # Precompute eigenvectors of the lower band\\n    eigvecs = np.empty((Nx, Ny, 2), dtype=complex)\\n    for i, kx in enumerate(kx_vals):\\n        for j, ky in enumerate(ky_vals):\\n            H = calc_hamiltonian(kx, ky, a, t1, t2, phi, m)\\n            eigvals, eigvecs_ij = np.linalg.eigh(H)\\n            eigvecs[i, j, :] = eigvecs_ij[:, 0]   # lower band\\n\\n    # Link variables U_x and U_y\\n    Ux = np.empty((Nx, Ny), dtype=complex)\\n    Uy = np.empty((Nx, Ny), dtype=complex)\\n\\n    for i in range(Nx):\\n        ip1 = (i + 1) % Nx\\n        for j in range(Ny):\\n            u = eigvecs[i, j, :]\\n            v = eigvecs[ip1, j, :]\\n            inner = np.vdot(u, v)\\n            denom = np.abs(inner)\\n            if denom < 1e-15:\\n                Ux[i, j] = 1.0\\n            else:\\n                Ux[i, j] = inner / denom\\n\\n    for i in range(Nx):\\n        for j in range(Ny):\\n            jp1 = (j + 1) % Ny\\n            u = eigvecs[i, j, :]\\n            v = eigvecs[i, jp1, :]\\n            inner = np.vdot(u, v)\\n            denom = np.abs(inner)\\n            if denom < 1e-15:\\n                Uy[i, j] = 1.0\\n            else:\\n                Uy[i, j] = inner / denom\\n\\n    # Sum the field strength over all plaquettes\\n    total_angle = 0.0\\n    for i in range(Nx):\\n        ip1 = (i + 1) % Nx\\n        for j in range(Ny):\\n            jp1 = (j + 1) % Ny\\n            product = Ux[i, j] * Uy[ip1, j] * np.conj(Ux[i, jp1]) * np.conj(Uy[i, j])\\n            total_angle += np.angle(product)\\n\\n\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 3, \"cases_total\": 9, \"steps_all_pass\": 1, \"steps_total\": 3, \"per_step\": {\"33.1\": {\"pass\": 3, \"total\": 3}, \"33.2\": {\"pass\": 0, \"total\": 3}, \"33.3\": {\"pass\": 0, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 365.229,
+    "setup_s": 0.0,
+    "grade_s": 65.109
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 32.52s"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_2d_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9933,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.99665,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_burgers_2d():\\n    # --- Parameters ---\\n    Lx, Ly = 2.0, 2.0      # Domain size\\n    Nx, Ny = 200, 200      # Grid points (increased for better resolution)\\n    T_final = 0.32         # Final time\\n    \\n    # Grid generation\\n    x = np.linspace(0, Lx, Nx)\\n    y = np.linspace(0, Ly, Ny)\\n    X, Y = np.meshgrid(x, y)\\n    dx = x[1] - x[0]\\n    dy = y[1] - y[0]\\n    \\n    # --- Initialization ---\\n    # Initialize fields with background value 1\\n    u = np.ones((Ny, Nx))\\n    v = np.ones((Ny, Nx))\\n    \\n    # Apply Initial Conditions\\n    # u = v = 2 for 0.5 <= x, y <= 1\\n    mask = (X >= 0.5) & (X <= 1.0) & (Y >= 0.5) & (Y <= 1.0)\\n    u[mask] = 2.0\\n    v[mask] = 2.0\\n    \\n    # --- Time Stepping Setup ---\\n    # CFL Condition for stability: dt <= dx / (|u| + |v|)\\n    # Max estimated velocity is 2.0 (from initial conditions)\\n    u_max = 2.0\\n    v_max = 2.0\\n    cfl_safety = 0.5\\n    dt = cfl_safety * min(dx, dy) / (u_max + v_max)\\n    \\n    # Adjust dt to exactly match T_final\\n    num_steps = int(T_final / dt)\\n    dt = T_final / num_steps\\n    \\n    # --- Solver: Finite Difference (First-Order Upwind) ---\\n    # We assume u > 0 and v > 0 based on ICs and BCs, so we use backward differences.\\n    \\n    for _ in range(num_steps):\\n        u_old = u.copy()\\n        v_old = v.copy()\\n        \\n        # Interior points\\n        # u_yy[j, i] corresponds to u(x[i], y[j])\\n        # u_i = u[1:-1, 1:-1]\\n        \\n        u_c = u_old[1:-1, 1:-1] # u at center\\n        v_c = v_old[1:-1, 1:-1] # v at center\\n        \\n        # Gradients (Upwind: backward difference)\\n        du_dx = (u_c - u_old[1:-1, 0:-2]) / dx\\n        du_dy = (u_c - u_old[0:-2, 1:-1]) / dy\\n        \\n        dv_dx = (v_c - v_old[1:-1, 0:-2]) / dx\\n        dv_dy = (v_c - v_old[0:-2, 1:-1]) / dy\\n        \\n        # Update equations\\n        # u_t = - u * u_x - v * u_y\\n        u[1:-1, 1:-1] = u_c - dt * (u_c * du_dx + v_c * du_dy)\\n        \\n        # v_t = - u * v_x - v * v_y\\n        v[1:-1, 1:-1] = v_c - dt * (u_c * dv_dx + v_c * dv_dy)\\n        \\n        # --- Boundary Conditions ---\\n        # Dirichlet: u = 1, v = 1 on all boundaries\\n        u[0, :] = 1.0; u[-1, :] = 1.0\\n        u[:, 0] = 1.0; u[:, -1] = 1.0\\n        \\n        v[0, :] = 1.0; v[-1, :] = 1.0\\n        v[:, 0] = 1.0; v[:, -1] = 1.0\\n        \\n    # --- Save Results ---\\n    np.save('u.npy', u)\\n    np.save('v.npy', v)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_burgers_2d()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.00048467183994678297, \"MAE\": 0.005048818433863346, \"RMSE\": 0.022015263794621744, \"Cosine\": 0.9997922352975098, \"R2\": 0.9868815951414607, \"NMSE\": 0.00042099784656040017, \"score01\": 0.9933}, \"v\": {\"MSE\": 0.00048467183994678297, \"MAE\": 0.005048818433863346, \"RMSE\": 0.022015263794621744, \"Cosine\": 0.9997922352975098, \"R2\": 0.9868815951414607, \"NMSE\": 0.00042099784656040017, \"score01\": 0.9933}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.14}"
+  },
+  "timings": {
+    "agent_s": 125.016,
+    "setup_s": 0.0,
+    "grade_s": 0.285
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.14s",
+    "missing=[] nonfinite=[]"
+  ]
+}

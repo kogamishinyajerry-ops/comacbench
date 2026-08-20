@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p059",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef rotation_matrices(axis, theta):\\n    '''Create rotation matrices Rx, Ry, and Rz with the given angle theta.\\n    Inputs:\\n    axis : int\\n        The rotation axis. 1 = x, 2 = y, 3 = z.\\n    theta : float\\n        The rotation angle.\\n    Output:\\n    R : matrix of shape(2, 2)\\n        The rotation matrix.\\n    '''\\n    c = np.cos(theta / 2.0)\\n    s = np.sin(theta / 2.0)\\n    if axis == 1:  # Rx\\n        return np.array([[c, -1j * s], [-1j * s, c]], dtype=complex)\\n    elif axis == 2:  # Ry\\n        return np.array([[c, -s], [s, c]], dtype=complex)\\n    elif axis == 3:  # Rz\\n        return np.array([[np.exp(-1j * theta / 2.0), 0], [0, np.exp(1j * theta / 2.0)]], dtype=complex)\\n    else:\\n        raise ValueError(\\\"Axis must be 1, 2, or 3.\\\")\\n\\ndef create_ansatz(theta):\\n    '''Create the ansatz wavefunction with a given theta.\\n    Input:\\n    theta : float\\n        The only variational parameter.\\n    Output:\\n    ansatz : array of shape (4, 1)\\n        The ansatz wavefunction.\\n    '''\\n    # Basis states\\n    q0 = np.array([[1], [0]], dtype=complex)\\n    q1 = np.array([[0], [1]], dtype=complex)\\n    psi_init = np.kron(q0, q0)\\n\\n    # 1. Hartree-Fock state: R_x(pi) on second qubit\\n    Rx_pi = rotation_matrices(1, np.pi)\\n    Id = np.eye(2, dtype=complex)\\n    U_hf = np.kron(Id, Rx_pi)\\n    psi_hf = U_hf @ psi_init\\n\\n    # 2. UCC ansatz U(theta) = exp(-i theta Y1 X2)\\n    # Decomposition provided in background:\\n    # Ry(pi/2) on 1, Rx(-pi/2) on 2\\n    Ry_pi2_1 = np.kron(rotation_matrices(2, np.pi/2), Id)\\n    Rx_mpi2_2 = np.k\""
+  },
+  "timings": {
+    "agent_s": 421.301,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

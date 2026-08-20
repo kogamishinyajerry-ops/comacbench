@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_1d_euler_shock_tube",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_sod_shock_tube():\\n    # --- Parameters ---\\n    gamma = 1.4\\n    x_start = -1.0\\n    x_end = 1.0\\n    t_start = 0.0\\n    t_end = 0.25\\n    nx = 400\\n    CFL = 0.9\\n    nu = 0.02  # Artificial viscosity coefficient to stabilize shock\\n\\n    # --- Grid Initialization ---\\n    dx = (x_end - x_start) / (nx - 1)\\n    x = np.linspace(x_start, x_end, nx)\\n\\n    # --- Initial Conditions ---\\n    # Left state (x < 0)\\n    rho = np.ones(nx)\\n    u = np.zeros(nx)\\n    p = np.ones(nx)\\n\\n    # Right state (x >= 0)\\n    mask = x >= 0.0\\n    rho[mask] = 0.125\\n    p[mask] = 0.1\\n\\n    # Calculate Total Energy: E = p/((gamma-1)*rho) + 0.5*u^2\\n    E = p / ((gamma - 1) * rho) + 0.5 * u**2\\n\\n    # Conservative Variables U: [rho, rho*u, rho*E]\\n    U = np.zeros((3, nx))\\n    U[0, :] = rho\\n    U[1, :] = rho * u\\n    U[2, :] = rho * E\\n\\n    # --- Helper Functions ---\\n    def get_pressure(U_in, g):\\n        rho = np.maximum(U_in[0, :], 1e-6)\\n        mom = U_in[1, :]\\n        energy = U_in[2, :]\\n        u_prim = mom / rho\\n        p = (g - 1) * (energy - 0.5 * rho * u_prim**2)\\n        return np.maximum(p, 1e-6)\\n\\n    def get_flux(U_in, g):\\n        rho = np.maximum(U_in[0, :], 1e-6)\\n        mom = U_in[1, :]\\n        energy = U_in[2, :]\\n        u_prim = mom / rho\\n        p = (g - 1) * (energy - 0.5 * rho * u_prim**2)\\n        p = np.maximum(p, 1e-6)\\n\\n        F = np.zeros_like(U_in)\\n        F[0, :] = mom\\n        F[1, :] = mom * u_prim + p\\n        F[2, :] = u_prim * (energy + p)\\n        return F\\n\\n    def apply_boundary_conditions(U_in, g):\\n        # Reflective BC: u=0 at walls, rho and p extrapolated\\n        # Left wall (index 0)\\n        U_in[0, 0] = U_in[0, 1]       # rho extrapolated\\n        U_in[1, 0] = 0.0             # rho*u = 0 (u=0)\\n        # rho*E derived from extrapolated pressure and u=0\\n        p_neighbor = get_pressure(U_in[:, 1:2], g)[0]\\n        U_in[2, 0] = p_neighbor / (g - 1) \\n\\n        # Right wall (index -1)\\n        U_in[0, -1] = U_in[0, -2]\\n        U_in[1, -1] = 0.0\\n        p_neighbor = get_pressure(U_in[:, -2:-1], g)[0]\\n        U_in[2, -1] = p_neighbor / (g - 1)\\n        \\n        return U_in\\n\\n    # --- Time Stepping Loop ---\\n    t = t_start\\n    # Apply initial BCs\\n    U = apply_boundary_conditions(U, gamma)\\n\\n    while t < t_end:\\n        # Adaptive Time Stepping based on CFL condition\\n        rho_curr = np.maximum(U[0, :], 1e-6)\\n        u_curr = U[1, :] / rho_curr\\n        p_curr = get_pressure(U, gamma)\\n        c = np.sqrt(gamma * p_curr / rho_curr)\\n        max_wave_speed = np.max(np.abs(u_curr) + c)\\n        \\n        if max_wave_speed < 1e-9:\\n            dt = 0.001\\n        else:\\n            dt = CFL * dx / max_wave_speed\\n\\n        if t + dt > t_end:\\n            dt = t_end - t\\n\\n        # --- MacCormack Method (Finite Difference) ---\\n        \\n        # 1. Predictor Step (Forward Difference)\\n        F = get_flux(U, gamma)\\n        U_pred = U.copy()\\n        # Update interior points i = 0 to N-2\\n        U_pred[:, :-1] = U[:, :-1] - (dt / dx) * (F[:, 1:] - F[:, :-1])\\n        U_pred = apply_boundary_conditions(U_pred, gamma)\\n\\n        # 2. Corrector Step (Backward Difference)\\n        F_pred = get_flux(U_pred, gamma)\\n        U_corr = U.copy()\\n        # Update interior points i = 1 to N-1\\n        U_corr[:, 1:] = U[:, 1:] - (dt / dx) * (F_pred[:, 1:] - F_pred[:, :-1])\\n\\n        # 3. Average\\n        U_new = 0.5 * (U + U_corr)\\n\\n        # 4. Artificial Viscosity (Laplacian smoothing for shock capturing)\\n        # D_i = U_{i+1} - 2U_i + U_{i-1}\\n        diff = U_new[:, 2:] - 2 * U_new[:, 1:-1] + U_new[:, :-2]\\n        U_new[:, 1:-1] += nu * diff\\n\\n        # Update State and enforce BCs\\n        U = U_new\\n        U = apply_boundary_conditions(U, gamma)\\n\\n        t += dt\\n\\n    # --- Extract Primitive Variables for Saving ---\\n    rho_final = U[0, :]\\n    u_final = U[1, :] / rho_final\\n    p_final = get_pressure(U, gamma)\\n\\n    # --- Save to .npy files ---\\n    np.save('rho.npy', rho_final)\\n    np.save('u.npy', u_final)\\n    np.save('p.npy', p_final)\\n\\nif __name__ == \\\"__main_\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [\"E\"], \"nonfinite\": [], \"fields\": {}, \"determinism\": null, \"run1_exit\": 0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 216.804,
+    "setup_s": 0.0,
+    "grade_s": 0.074
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s",
+    "missing=['E'] nonfinite=[]"
+  ]
+}

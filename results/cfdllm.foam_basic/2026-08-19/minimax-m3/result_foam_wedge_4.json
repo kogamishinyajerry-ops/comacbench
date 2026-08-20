@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_4",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\ncase_dir = os.getcwd()\\n\\n# Wedge angle parameters\\nWEDGE_ANGLE_DEG = 20.0\\nWEDGE_ANGLE_RAD = 3.141592653589793 * WEDGE_ANGLE_DEG / 180.0\\n\\n# Domain bounds\\nX_MIN = -0.15242\\nX_MAX = 0.3048\\nY_MIN = 0.0\\nY_MAX = 0.1524\\nZ_MIN = -0.005\\nZ_MAX = 0.005\\n\\n# Inlet conditions\\nU_INLET = 10.0\\nT_INLET = 3.0\\nP_INLET = 1.0\\n\\n# Thermodynamic properties\\nmolWeight = 11640.3\\nCp = 2.5\\nPr = 1.0\\nmu = 0.0\\nR = 0.7143\\ngamma = 1.4\\n\\n# Time controls\\nstartTime = 0.0\\nendTime = 0.2\\ndeltaT = 0.0001\\nwriteInterval = 0.02\\n\\n# Number of cells along each direction\\nnx = 200\\nny = 80\\nnz = 1\\n\\n# Block mesh vertices - wedge geometry with angled top surface\\n# The wedge is at the bottom-left, with the ramp surface inclined at WEDGE_ANGLE_DEG\\n# Bottom surface is flat from (X_MIN, Y_MIN) to (X_MAX, Y_MIN)\\n# Top surface starts at (X_MIN, Y_MAX) and ramps down to the wedge at (0, 0)\\n# Front ramp: from (X_MIN, Y_MAX) to (0, 0)\\n# After the ramp: from (0, 0) to (X_MAX, Y_MAX)\\n\\nx_inlet = X_MIN\\nramp_end_x = 0.0\\nramp_end_y = Y_MIN\\ntop_inlet_x = X_MIN\\ntop_inlet_y = Y_MAX\\ntop_outlet_x = X_MAX\\ntop_outlet_y = Y_MAX\\n\\nv000 = (X_MIN, Y_MIN, Z_MIN)\\nv100 = (ramp_end_x, ramp_end_y, Z_MIN)\\nv200 = (X_MAX, Y_MIN, Z_MIN)\\nv300 = (X_MAX, Y_MAX, Z_MIN)\\nv010 = (X_MIN, Y_MIN, Z_MAX)\\nv110 = (ramp_end_x, ramp_end_y\""
+  },
+  "timings": {
+    "agent_s": 272.824,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:4e7c4e53ed2f00e635b19e111a87c01850b90b2a28b5d78cd597eb982f2029d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

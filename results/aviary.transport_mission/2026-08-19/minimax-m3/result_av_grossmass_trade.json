@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_trade",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport glob\\nimport warnings\\nimport numpy as np\\nfrom copy import deepcopy\\n\\nwarnings.filterwarnings('ignore')\\n\\nfrom aviary.interface.methods import run_aviary\\nfrom aviary.models.missions.two_dof_default import two_dof_default\\n\\n# Find aircraft CSVs by gross mass in current working directory\\nmasses = [165400, 175400, 185400]\\nmass_to_csv = {}\\n\\nall_csvs = sorted(glob.glob(\\\"*.csv\\\"))\\nfor mass in masses:\\n    found = None\\n    for csv_file in all_csvs:\\n        if str(mass) in csv_file:\\n            found = csv_file\\n            break\\n    if found is None:\\n        raise FileNotFoundError(\\n            f\\\"Could not find aircraft CSV containing '{mass}' in {os.getcwd() if False else '.'}\\\"\\n        )\\n    mass_to_csv[mass] = found\\n\\nresults = {}\\nfor mass in masses:\\n    aircraft_csv = mass_to_csv[mass]\\n\\n    # Deep-copy the default 2DOF mission and set cruise Mach to 0.80\\n    phase_info = deepcopy(two_dof_default)\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n    # Forward mission analysis (no driver, SLSQP optimizer required since IPOPT not installed)\\n    prob = run_aviary(\\n        aircraft_data_file=aircraft_csv,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False,\\n    )\\n\\n    # Read promoted outputs in colon style\\n    fuel_lbm = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\n    final_mass_lbm = float(prob.get_val('mission:final_mass', units='lbm')[0])\\n    range_nm = float(prob.get_val('mission:range', units='NM')[0])\\n\\n    results[f'fuel_{mass}_lbm'] = fuel_lbm\\n\\n# Determine which gross-mass variant burns the least fuel\\nmin_grossmass = min(masses, key=lambda m: results[f'fuel_{m}_lbm'])\\nresults['min_fuel_grossmass_lbm'] = int(min_grossmass)\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=2)\\n\\nprint(json.dumps(results, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_tnt87nx6/solve.py\\\", line 9, in <module>\\n    from aviary.interface.methods import run_aviary\\nModuleNotFoundError: No module named 'aviary.interface.methods'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 31.889,
+    "setup_s": 0.0,
+    "grade_s": 0.071
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.07s"
+  ]
+}

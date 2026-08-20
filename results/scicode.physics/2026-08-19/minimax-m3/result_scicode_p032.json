@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p032",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.4,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.7,
+  "artifacts": {
+    "code": "\"def binding_force(P, phi, R, l, w, a, n):\\n    '''Function to calculate the optical binding force between two trapped nanospheres.\\n    Input\\n    P : list of length 2\\n        Power of the two optical traps.\\n    phi : float\\n        Polarization direction of the optical traps.\\n    R : float\\n        Distance between the trapped nanospheres.\\n    l : float\\n        Wavelength of the optical traps.\\n    w : float\\n        Beam waist of the optical traps.\\n    a : float\\n        Radius of the trapped microspheres.\\n    n : float\\n        Refractive index of the trapped microspheres.\\n    Output\\n    F : float\\n        The optical binding force between two trapped nanospheres.\\n    '''\\n    # Polarizability of a Rayleigh sphere\\n    alpha = 4 * np.pi * epsilon_0 * a**3 * (n**2 - 1) / (n**2 + 2)\\n\\n    # Electric field amplitudes at the particle positions\\n    E1 = np.sqrt(4 * P[0] / (np.pi * w**2 * epsilon_0 * c))\\n    E2 = np.sqrt(4 * P[1] / (np.pi * w**2 * epsilon_0 * c))\\n\\n    # Wave number\\n    k = 2 * np.pi / l\\n\\n    # Polarization components\\n    cos_phi = np.cos(phi)\\n    sin_phi = np.sin(phi)\\n\\n    # Argument kR\\n    kr = k * R\\n\\n    # Terms from the analytical force expressions\\n    term_xx = -3 * np.cos(kr) - 3 * kr * np.sin(kr) + kr**2 * np.cos(kr)\\n    term_xy = 3 * np.cos(kr) + 3 * kr * np.sin(kr) - 2 * kr**2 * np.cos(kr) - kr**3 * np.sin(kr)\\n\\n    # F_xx contribution\\n    prefactor_xx = alpha**2 * E1 * E2 * cos_phi**2\\n    F_xx = prefactor_xx / (4 * np.pi * epsilon_0 * R**4) * term_xx\\n\\n    # F_xy contribution\\n    prefactor_xy = alpha**2 * E1 * E2 * sin_phi**2\\n    F_xy = prefactor_xy / (8 * np.pi * epsilon_0 * R**4) * term_xy\\n\\n    return F_xx + F_xy\\n\\n\\ndef generate_Hamiltonian(P, phi, R, l, w, a, n, h, N, rho):\\n    '''Function to generate the Hamiltonian of trapped nanospheres with optical binding force appeared.\\n    Input\\n    P : list of length N\\n        Power of each individual optical trap.\\n    phi : float\\n        Polarization direction of the optical traps.\\n    R : float\\n        Distance between the adjacent trapped nanospheres.\\n    l : float\\n        Wavelength of the optical traps.\\n    w : float\\n        Beam waist of the optical traps.\\n    a : float\\n        Radius of the trapped microspheres.\\n    n : float\\n        Refractive index of the trapped microspheres.\\n    h : float\\n        Step size of the differentiation.\\n    N : int\\n        The total number of trapped nanospheres.\\n    rho: float\\n        Density of the trapped microspheres.\\n    Output\\n    H : matrix of shape(N, N)\\n        The Hamiltonian of trapped nanospheres with optical binding force appeared.\\n    '''\\n    # Polarizability\\n    alpha = 4 * np.pi * epsilon_0 * a**3 * (n**2 - 1) / (n**2 + 2)\\n\\n    # Mass of each nanosphere\\n    m = (4.0 / 3.0) * np.pi * a**3 * rho\\n\\n    # Trap stiffness (harmonic confinement) for each site\\n    k_trap = np.zeros(N)\\n    for i in range(N):\\n        k_trap[i] = (8 * alpha * P[i]) / (np.pi * c * epsilon_0 * w**4)\\n\\n    # Coupling matrix from optical binding force derivative\\n    k_coupling = np.zeros((N, N))\\n    for i in range(N):\\n        for j in range(N):\\n            if i == j:\\n                continue\\n            R_ij = abs(i - j) * R\\n            # Numerical derivative dF/dR via central difference\\n            F_plus = binding_force([P[i], P[j]], phi, R_ij + h, l, w, a, n)\\n            F_minus = binding_force([P[i], P[j]], phi, R_ij - h, l, w, a, n)\\n            k_coupling[i, j] = (F_plus - F_minus) / (2 * h)\\n\\n    # Resonant frequencies Omega_i\\n    Omega = np.zeros(N)\\n    for i in range(N):\\n        sum_kij = np.sum(k_coupling[i, :])\\n        Omega[i] = np.sqrt((k_trap[i] + sum_kij) / m)\\n\\n    # Coupling constants g_ij\\n    g = np.zeros((N, N))\\n    for i in range(N):\\n        for j in range(N):\\n            if i == j:\\n                continue\\n            g[i, j] = -k_coupling[i, j] / (2 * m * np.sqrt(Omega[i] * Omega[j]))\\n\\n    # Build Hamiltonian: diagonal are the frequencies, off-diagonal are the couplings\\n    H = np.diag(Omega) + g\\n    return H\\n\\n\\ndef runge_kutta(C0, H, L, \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 4, \"cases_total\": 10, \"steps_all_pass\": 1, \"steps_total\": 3, \"per_step\": {\"32.1\": {\"pass\": 3, \"total\": 3}, \"32.2\": {\"pass\": 0, \"total\": 3}, \"32.3\": {\"pass\": 1, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 268.19,
+    "setup_s": 0.0,
+    "grade_s": 24.431
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 12.2s"
+  ]
+}

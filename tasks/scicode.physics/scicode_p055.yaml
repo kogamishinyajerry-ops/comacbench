@@ -1,0 +1,312 @@
+id: scicode_p055
+registry_id: scicode.physics
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/scicode.physics/scicode_p055.md
+  prompt_sha256: 44a4238319764e632cbef06561c6306437c93bece1b72fe4948b6ed29777184b
+  assets:
+  - path: data/scicode/physics/problems_dev.jsonl
+    digest: 193968aff23b7ed931c8f6d196b611e2f6694adb49e6cc085444a60ad2fc4f7b
+  - path: data/scicode/physics/problems_test.jsonl
+    digest: 38797fef78f434720be6d053b4f3a86839d6f8ea5fb9115450677cd3a6edf81d
+  - path: data/scicode/physics/test_data.h5
+    digest: 48b0272a88b17dbd29777c217e1b4fb2b019b92e11cc2add847409db9541b890
+output_contract:
+- solution_code
+reference:
+  source: SciCode problems_{split}.jsonl + test_data.h5（官方数值期望）
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  problem_id: '55'
+  problem_name: Swift_Hohenberg
+  split: test
+  n_steps: 4
+  n_cases: 15
+  uncertainty_note: 期望值为确定性数值（h5 锁定）；assert 语义来自数据集原始断言
+grader:
+  answer_format: code
+  exec_kind: scicode_problem
+  validity_gate: true
+  dependencies: 'import numpy as np
+
+    from numpy.fft import fft2, ifft2, fftshift, rfft2, irfft2, fftfreq, rfftfreq
+
+    from scipy.signal import find_peaks, peak_widths'
+  steps:
+  - step_id: '55.1'
+    n_cases: 3
+    test_cases:
+    - 'N = 10
+
+      u0 = np.zeros((N, N))
+
+      dt = 0.01
+
+      epsilon = 0
+
+      q0 = 1.
+
+      T = 0.05
+
+      assert np.allclose(solve_SH(u0, dt, T, N, epsilon, q0), target)'
+    - 'N = 10
+
+      u0 = np.ones((N, N))
+
+      dt = 0.01
+
+      epsilon = 0.7
+
+      q0 = 1.
+
+      T = 0.05
+
+      assert np.allclose(solve_SH(u0, dt, T, N, epsilon, q0), target)'
+    - 'N = 20
+
+      np.random.seed(1)  # For reproducibility
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      epsilon = 0.7
+
+      q0 =1.
+
+      T = 0.05
+
+      assert np.allclose(solve_SH(u0, dt, T, N, epsilon, q0), target)'
+  - step_id: '55.2'
+    n_cases: 3
+    test_cases:
+    - 'N = 20
+
+      u = np.tile(np.sin(np.arange(N)), (N, 1))
+
+      assert np.allclose(structure_factor(u), target)'
+    - 'N = 30
+
+      i = np.arange(N)[:, np.newaxis]  # Column vector of i indices
+
+      j = np.arange(N)  # Row vector of j indices
+
+      u = np.sin(i) + np.cos(j)
+
+      assert np.allclose(structure_factor(u), target)'
+    - 'N = 20
+
+      u = np.ones((N, N))
+
+      assert np.allclose(structure_factor(u), target)'
+  - step_id: '55.3'
+    n_cases: 3
+    test_cases:
+    - 'N = 50
+
+      q0 = 1.0
+
+      u = np.tile(np.sin(q0 * np.arange(N)), (N, 1))
+
+      min_height = 1e-12
+
+      Kx, Ky, Sk = structure_factor(u)
+
+      peak_found_near_q0, peak_near_q0_location = analyze_structure_factor(Sk, Kx,
+      Ky, q0, min_height)
+
+      a, b = target
+
+      assert a == peak_found_near_q0 and np.allclose(b, peak_near_q0_location)'
+    - 'N = 30
+
+      q0 = 2.0
+
+      i = np.arange(N)[:, np.newaxis]  # Column vector of i indices
+
+      j = np.arange(N)  # Row vector of j indices
+
+      u = np.sin(q0*i) + np.cos(q0*j)
+
+      min_height = 1e-12
+
+      Kx, Ky, Sk = structure_factor(u)
+
+      peak_found_near_q0, peak_near_q0_location = analyze_structure_factor(Sk, Kx,
+      Ky, q0, min_height)
+
+      a, b = target
+
+      assert a == peak_found_near_q0 and np.allclose(b, peak_near_q0_location)'
+    - 'N = 20
+
+      u = np.ones((N, N))
+
+      q0 = 1.0
+
+      min_height = 1e-12
+
+      Kx, Ky, Sk = structure_factor(u)
+
+      peak_found_near_q0, peak_near_q0_location = analyze_structure_factor(Sk, Kx,
+      Ky, q0, min_height)
+
+      a, b = target
+
+      assert a == peak_found_near_q0 and np.allclose(b, peak_near_q0_location)'
+  - step_id: '55.4'
+    n_cases: 6
+    test_cases:
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      np.random.seed(42)  # For reproducibility
+
+      N = 100
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      T = 50.
+
+      epsilon = 0.7
+
+      q0 = 0.5
+
+      min_height = 1e-12
+
+      assert cmp_tuple_or_list(SH_pattern_formation(u0, dt, T, N, epsilon, q0, min_height),
+      target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      np.random.seed(42)  # For reproducibility
+
+      N = 100
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      T = 50.
+
+      epsilon = 0.2
+
+      q0 = 0.5
+
+      min_height = 1e-12
+
+      assert cmp_tuple_or_list(SH_pattern_formation(u0, dt, T, N, epsilon, q0, min_height),
+      target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      np.random.seed(42)  # For reproducibility
+
+      N = 100
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      T = 50.
+
+      epsilon = - 0.5
+
+      q0 = 0.5
+
+      min_height = 1e-12
+
+      assert cmp_tuple_or_list(SH_pattern_formation(u0, dt, T, N, epsilon, q0, min_height),
+      target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      np.random.seed(42)  # For reproducibility
+
+      N = 200
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      T = 50.
+
+      epsilon = 0.7
+
+      q0 = 0.4
+
+      min_height = 1e-12
+
+      assert cmp_tuple_or_list(SH_pattern_formation(u0, dt, T, N, epsilon, q0, min_height),
+      target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      np.random.seed(42)  # For reproducibility
+
+      N = 200
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      T = 50.
+
+      epsilon = 0.7
+
+      q0 = 1.0
+
+      min_height = 1e-12
+
+      assert cmp_tuple_or_list(SH_pattern_formation(u0, dt, T, N, epsilon, q0, min_height),
+      target)'
+    - 'from scicode.compare.cmp import cmp_tuple_or_list
+
+      np.random.seed(42)  # For reproducibility
+
+      N = 200
+
+      u0 = np.random.rand(N, N)
+
+      dt = 0.005
+
+      T = 50.
+
+      epsilon = 0.7
+
+      q0 = 2.0
+
+      min_height = 1e-12
+
+      assert cmp_tuple_or_list(SH_pattern_formation(u0, dt, T, N, epsilon, q0, min_height),
+      target)'
+  assert_semantics: dataset_verbatim_np_allclose_vs_h5_target
+  stability_layer: false
+  determinism_runs: 2
+  protocol_note: 整题一次生成（官方为逐步骤多轮）；分数不与官方榜单直接对比
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: physics=逐 case 通过率；requirements=判分 harness 可执行；objective=N/A（数据集无边界输入测试）权重
+    0；robustness=两轮 pass 模式一致
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: scicode-bench/SciCode (Apache-2.0) + HF SciCode1/SciCode (apache-2.0)
+  license: Apache-2.0
+  status: confirmed-repo
+  revision: scicode@e3158ea+hf_v1+test_data_h5_20240712
+  mirror_allowed: true
+  attribution: 'SciCode: A Research Coding Benchmark Curated by Scientists, arXiv:2407.13168'

@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p070",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nimport cmath\\n\\ndef pmns_mixing_matrix(s12, s23, s13, dCP):\\n    c12 = np.sqrt(1 - s12**2)\\n    c23 = np.sqrt(1 - s23**2)\\n    c13 = np.sqrt(1 - s13**2)\\n    \\n    eip = np.exp(1j * dCP)\\n    eim = np.exp(-1j * dCP)\\n    \\n    U = np.zeros((3, 3), dtype=complex)\\n    U[0, 0] = c12 * c13\\n    U[0, 1] = s12 * c13\\n    U[0, 2] = s13 * eim\\n    \\n    U[1, 0] = -s12 * c23 - c12 * s23 * s13 * eip\\n    U[1, 1] = c12 * c23 - s12 * s23 * s13 * eip\\n    U[1, 2] = s23 * c13\\n    \\n    U[2, 0] = s12 * s23 - c12 * c23 * s13 * eip\\n    U[2, 1] = -c12 * s23 - s12 * c23 * s13 * eip\\n    U[2, 2] = c23 * c13\\n    \\n    return U\\n\\ndef hamiltonian_3nu(s12, s23, s13, dCP, D21, D31):\\n    U = pmns_mixing_matrix(s12, s23, s13, dCP)\\n    mass_matrix = np.diag([0, D21, D31]).astype(complex)\\n    H = 0.5 * U @ mass_matrix @ U.conj().T\\n    return H.tolist()\\n\\ndef hamiltonian_3nu_su3_coefficients(hamiltonian):\\n    H = np.array(hamiltonian)\\n    h = np.zeros(8, dtype=complex)\\n    \\n    h[0] = np.real(H[0, 1])\\n    h[1] = -np.imag(H[0, 1])\\n    h[2] = 0.5 * (H[0, 0] - H[1, 1])\\n    h[3] = np.real(H[0, 2])\\n    h[4] = -np\""
+  },
+  "timings": {
+    "agent_s": 510.463,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p071",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nfrom scipy.optimize import fminbound\\nimport itertools\\nfrom scipy.linalg import logm\\n\\ndef ket(dim):\\n    '''Input:\\n    dim: int or list, dimension of the ket\\n    args: int or list, the i-th basis vector\\n    Output:\\n    out: dim dimensional array of float, the matrix representation of the ket\\n    '''\\n    args = dim\\n    if isinstance(args, int):\\n        d = args\\n        j = 0\\n    elif isinstance(args, list) and len(args) == 1 and isinstance(args[0], int):\\n        d = args[0]\\n        j = 0\\n    elif isinstance(args, list) and isinstance(args[0], list):\\n        # args is [j_list, d_list] or just [j_list] where d is inferred or d is also a list\\n        # Based on prompt: \\\"Given integers j and d\\\", \\\"If d is given as a list [d1,d2...] return ... as tensor product\\\"\\n        # The function signature is def ket(dim):. This is ambiguous. \\n        # Let's assume standard interpretation of such tasks: ket(j, d) or ket([j1, j2], [d1, d2]).\\n        # Since signature is ket(dim), we assume dim is the j value (or list of j).\\n        # We need a way to pass d. The prompt says \\\"Given integers j and d\\\".\\n        # In Python, we can't overload. We assume 'dim' might be a tuple or we parse arguments differently.\\n        # However, the prompt signature is fixed.\\n        # Let's assume the caller passes j and d in a specific way or we infer d from max index?\\n        # Actually, looking at the prompt: \\\"Given integers j and d... If d is given as a list...\\\".\\n        # Let's assume the function signature in the prompt `def ket(dim):` might be a typo for `def ket(j, d)`.\\n        # But we must adhere to \\\"Adhere exactly to the provided function headers\\\".\\n        # Header: `def ket(dim):`\\n        # This implies the input is one argument.\\n        # If I pass `j` as int, it's a 1D ket. What is `d`? Implicitly `j+1`?\\n        # If I pass a list `[j1, j2, ...]`, are these the indices? What are dimensions?\""
+  },
+  "timings": {
+    "agent_s": 485.474,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

@@ -1,0 +1,78 @@
+id: superwing_ge_0050
+registry_id: superwing.coeff_lite
+domain: cfd
+task_type: field_prediction
+model_profile: plain_llm
+assets_revision: superwing@hf-coeff-lite-2026-08-19
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/superwing.coeff_lite/superwing_ge_0050.md
+  prompt_sha256: 72309f4cfd144999eab9583babec34c197ce4b61432e4c8c75297df55ffe9f67
+  assets:
+  - path: data/superwing/coeff_lite/configs.dat
+    digest: 78f673f75b665d6b1250382c4ddfbe3de6704de0a0d2dca745470f284d0c043d
+  - path: data/superwing/coeff_lite/index.npy
+    digest: 6028984561df7a4f377a757ada1edc4edfeb724d45c4b522e70c8ccc0f6c1671
+  - path: data/superwing/coeff_lite/train.parquet
+    digest: 67f3b608d33afa746bb7d83e6a97f31f59ce08a87a62c3e8abf3cd0bdb33cfdc
+  - path: data/superwing/coeff_lite/test.parquet
+    digest: d9eef7e1f44d960081e390bc0105740fe8dc266bb8fd0a5eea9fee1ba19f3d99
+output_contract:
+- prediction
+reference:
+  source: SuperWing 系数层（configs.dat + index.npy/parquet，RANS ADflow 真值）
+  revision: superwing@hf-coeff-lite-2026-08-19
+  wing_shape_idx: 1385
+  aoa: 7.8832894671
+  mach: 0.8893801667
+  'true':
+    cl: 0.4334926977390873
+    cd: 0.05137513220069867
+    cm: 0.35714887642182147
+  tol: &id001
+    cl: 0.05
+    cd: 0.1
+    cm: 0.05
+  envelope: &id002
+    cl:
+    - -0.5
+    - 1.2
+    cd:
+    - 0.0
+    - 0.2
+    cm:
+    - -0.5
+    - 1.5
+  split_group: ge
+  uncertainty_note: 确定性 RANS 单次求解；系数真值无不确定度带（误差带评分用相对容差）
+grader:
+  answer_format: json
+  exec_kind: field_prediction
+  validity_gate: true
+  coefficients:
+  - cl
+  - cd
+  - cm
+  band_tol: *id001
+  envelope: *id002
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=系数相对误差带（cl/cm 5%/cd 10%）；requirements=字段完备；objective=N/A；robustness=划分纪律（聚合层分组报告，不计逐任务分）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: HuggingFace yunplus/SuperWing（系数层子集）
+  license: CC BY-SA 4.0
+  status: confirmed-dataset
+  revision: superwing@hf-coeff-lite-2026-08-19
+  mirror_allowed: true
+  note: SA 传染性：派生评测子集按同许可发布策略（scoring §8）；仅系数层不触体数据

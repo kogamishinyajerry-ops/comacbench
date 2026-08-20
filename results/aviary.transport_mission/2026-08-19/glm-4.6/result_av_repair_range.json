@@ -1,0 +1,37 @@
+{
+  "task_id": "av_repair_range",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "sandbox_escape_attempt"
+  ],
+  "failure_mode": "sandbox_escape_attempt",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nimport numpy as np\\nfrom aviary.api import AviaryProblem, run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Configuration\\nCSV_PATH = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_range_corrupt.csv'\\nOUTPUT_FILE = 'result.json'\\nTARGET_FUEL_BURN = 43389.55\\nCRUISE_MACH = 0.80\\nTOLERANCE = 0.1\\n\\ndef evaluate_candidate(csv_path, param_name, param_value, units, mach):\\n    \\\"\\\"\\\"\\n    Loads the aircraft CSV, overrides a specific parameter, and runs the analysis.\\n    \\\"\\\"\\\"\\n    # Prepare phase info with specified cruise Mach\\n    phase_info = copy.deepcopy(default_phase_info)\\n    phase_info['cruise']['user_options']['mach_cruise'] = mach\\n\\n    # Initialize Aviary Problem\\n    prob = AviaryProblem()\\n\\n    # Load inputs\\n    prob.load_inputs(csv_path, phase_info)\\n\\n    # Restore/Override the candidate parameter\\n    prob.set_val(param_name, param_value, units=units)\\n\\n    # Build and Setup the problem\\n    prob.check_and_preprocess_inputs()\\n    prob.add_pre_mission_systems()\\n    prob.add_mission_systems()\\n    prob.add_post_mission_systems()\\n    prob.link_phases()\\n    prob.setup()\\n\\n    # Run the driver\\n    run_aviary(prob, run_driver=False, optimizer=\\\"SLSQP\\\", verbosity=0, make_plots=False)\\n\\n    # Extract fuel burn\\n    # Using [0] as per instructions to handle potential array return\\n    fuel_burn = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    return fuel_burn\\n\\ndef main():\\n    # Define the candidates for restoration based on the prompt\\n    # Format: (Param Name, True Value, Units)\\n    restoration_candidates = [\\n        (\\\"aircraft:design:range\\\", 3200.0, \\\"NM\\\"),\\n        (\\\"aircraft:design:gross_mass\\\", 175400.0, \\\"lbm\\\")\\n    ]\\n\\n    solution_found = False\\n    result_data = {}\\n\\n    print(f\\\"Target Fuel Burn: {TARGET_FUEL_BURN} lbm\\\")\\n\\n    for param, value, units in restoration_candidates:\\n        print(f\\\"Testing restoration: {param} = {value} {units}...\\\")\\n        \\n        try:\\n            calculated_burn = evaluate_candidate(CSV_PATH, param, value, units, CRUISE_MACH)\\n            print(f\\\"  Calculated Burn: {calculated_burn:.2f} lbm\\\")\\n            \\n            if abs(calculated_burn - TARGET_FUEL_BURN) < TOLERANCE:\\n                result_data = {\\n                    \\\"corrupted_param\\\": param,\\n                    \\\"restored_value\\\": float(value)\\n                }\\n                solution_found = True\\n                print(\\\"  -> MATCH!\\\")\\n                break\\n        except Exception as e:\\n            print(f\\\"  Error running simulation: {e}\\\")\\n\\n    if not solution_found:\\n        raise ValueError(\\\"Could not identify the corrupted parameter based on fuel burn.\\\")\\n\\n    # Write the result to result.json\\n    with open(OUTPUT_FILE, 'w') as f:\\n        json.dump(result_data, f, indent=4)\\n    \\n    print(f\\\"Result saved to {OUTPUT_FILE}\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\""
+  },
+  "timings": {
+    "agent_s": 157.696,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9d450eb0814a3707625c23d394ef0049fccc29a8da038a63e73f21c2565e6c11",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=['banned_call:prob.add_mission_systems', 'banned_call:prob.add_post_mission_systems', 'banned_call:prob.add_pre_mission_systems']",
+    "syntax_ok=True"
+  ]
+}

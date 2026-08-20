@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_1d_linear_convection",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_pde():\\n    # Parameters\\n    c = 1.0\\n    epsilons = [0, 5e-4]  # Undamped and damped cases\\n    x_start, x_end = -5.0, 5.0\\n    t_start, t_end = 0.0, 10.0\\n    \\n    # Spatial Grid\\n    Nx = 400\\n    dx = (x_end - x_start) / Nx\\n    x = np.linspace(x_start, x_end, Nx, endpoint=False)\\n    \\n    # Time Grid\\n    # Upwind scheme stability condition: CFL = c * dt / dx <= 1\\n    # We choose a CFL number of 0.8 for stability\\n    CFL = 0.8\\n    dt = CFL * dx / c\\n    Nt = int((t_end - t_start) / dt)\\n    \\n    # Initial Condition: u(x, 0) = exp(-x^2)\\n    u_initial = np.exp(-x**2)\\n    \\n    # Dictionary to store results\\n    results = {}\\n    \\n    # Solve for each epsilon value\\n    for eps in epsilons:\\n        u = u_initial.copy()\\n        \\n        # Time stepping loop\\n        for _ in range(Nt):\\n            # Spatial derivatives using Finite Difference Method\\n            # Periodic boundary conditions are handled by np.roll\\n            \\n            # First derivative (Convection): Upwind Scheme\\n            # (u[i] - u[i-1]) / dx\\n            u_x = (u - np.roll(u, 1)) / dx\\n            \\n            # Second derivative (Diffusion): Central Difference\\n            # (u[i+1] - 2*u[i] + u[i-1]) / dx^2\\n            u_xx = (np.roll(u, -1) - 2*u + np.roll(u, 1)) / dx**2\\n            \\n            # Update solution: Forward Euler\\n            # u_new = u - dt * (c * u_x - epsilon * u_xx)\\n            u = u - dt * (c * u_x - eps * u_xx)\\n        \\n        # Determine variable name for saving\\n        if eps == 0:\\n            var_name = 'u_undamped'\\n        else:\\n            var_name = 'u_damped'\\n            \\n        results[var_name] = u\\n\\n    # Save the final solution fields to .npy files\\n    # Based on the instruction to save variables specified for the problem\\n    for name, array in results.items():\\n        np.save(f\\\"{name}.npy\\\", array)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_pde()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [\"u\"], \"nonfinite\": [], \"fields\": {}, \"determinism\": null, \"run1_exit\": 0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 196.378,
+    "setup_s": 0.0,
+    "grade_s": 0.096
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s",
+    "missing=['u'] nonfinite=[]"
+  ]
+}

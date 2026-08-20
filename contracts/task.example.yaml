@@ -1,0 +1,69 @@
+# 任务契约示例（带逐字段注释）
+# 本文件是任务 YAML 的规范参考实现；字段说明见 scoring/README.md 与 adapters/README.md。
+# 每个任务一个 YAML；文件名 = task_id.yaml
+
+id: crm_dpw_case_001                 # 全局唯一，文件名一致
+registry_id: crm_dpw_hlpw.coarse     # 所属 registry 条目
+domain: aerodynamics                 # 报告九维度之一: knowledge|coding|cad_geometry|cfd|
+                                     #   structures|propulsion|flight_control|mdo_design|robustness_audit
+task_type: simulation_agent          # 五类 adapter 之一
+model_profile: code_tool_agent       # plain_llm | code_tool_agent | multimodal_agent
+assets_revision: nasa_crm_revision_x # 锁定的资产版本（几何/网格/数据），进审计日志
+environment_digest: sha256:...       # 容器镜像/依赖锁的摘要；不匹配则作废重跑
+hidden: false                        # true = 隐藏动态题（不进入公开报告明细，只进汇总分）
+
+allowed_tools:                       # 白名单；越界 = tool_violation = 0 分
+  - shell
+  - openfoam
+  - python
+
+input:
+  prompt_file: tasks/crm_dpw_case_001.md   # 自然语言任务书（不内联，便于版本化）
+  assets:                                  # 只读挂载
+    - path: geometry/nasa_crm_dpwx.igs
+      digest: sha256:...
+    - path: meshes/coarse/blockMesh.dict.tmpl
+      digest: sha256:...
+
+output_contract:                     # Agent 必须交付的产物；缺任一 = missing_output
+  - case_directory                   # 完整 OpenFOAM 算例目录
+  - result.json                      # 关键指标输出（schema 由 grader 定义）
+
+reference:                           # 参考真值（预计算、锁版本、带不确定度）
+  source: dpw_committee_data
+  revision: dpw-x
+  metrics:
+    CL: {value: 0.500, tol: 0.005}
+    CD: {value: 0.0190, tol: 0.0008}
+    CM: {value: -0.05, tol: 0.01}
+  uncertainty_note: 委员会散布见资产包 dpw-x/report.pdf
+
+grader:
+  validity_gate: true                # 启用 simulation_agent 硬门槛全检查器
+  convergence_check:
+    residual_threshold: 1.0e-6
+    monitor_plateau: 500             # 监控量连续 N 步变化 < 0.1%
+  conservation_check: mass_energy    # 守恒性检查类别
+  field_sanity:                      # 场变量物理范围
+    - {field: p, min: 20000, max: 120000}
+    - {field: U, max: 350}
+  reference_metrics: [CL, CD, CM]
+  robustness_probe:                  # 隐藏扰动重算
+    - vary: [angle_of_attack, +0.5deg]
+      expect: 收敛且 |dCL/dalpha| 在参考导数带内
+
+scoring:                             # 缺省用 adapter 默认权重；此任务覆写 physics 权重
+  weights: {physics: 0.35, requirements: 0.30, objective: 0.20, robustness: 0.15}
+
+limits:
+  cpu: 8
+  memory_gb: 32
+  wall_steps: 200                    # 求解器最大步数
+  wall_clock_s: 7200
+  attempts: 3                        # Agent 侧最大尝试次数
+
+license_provenance:                  # 与 registry/license-notes.md 一致
+  source: NASA CRM / AIAA DPW
+  license: needs-version-lock (当前状态)
+  revision: fixed dpw-x
+  mirror_allowed: false              # 放行前不得镜像源数据

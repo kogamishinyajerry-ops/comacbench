@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p065",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.95,
+  "artifacts": {
+    "code": "\"def tensor(*args):\\n    '''Takes the tensor product of an arbitrary number of matrices/vectors.\\n    Input:\\n    args: any number of nd arrays of floats, corresponding to input matrices\\n    Output:\\n    M: the tensor product (kronecker product) of input matrices, 2d array of floats\\n    '''\\n    if len(args) == 0:\\n        return np.array([[1.0]])\\n    M = args[0]\\n    for i in range(1, len(args)):\\n        M = np.kron(M, args[i])\\n    return M\\n\\n\\ndef apply_channel(K, rho, sys=None, dim=None):\\n    '''Applies the channel with Kraus operators in K to the state rho on\\n    systems specified by the list sys. The dimensions of the subsystems of\\n    rho are given by dim.\\n    Inputs:\\n    K: list of 2d array of floats, list of Kraus operators\\n    rho: 2d array of floats, input density matrix\\n    sys: list of int or None, list of subsystems to apply the channel, None means full system\\n    dim: list of int or None, list of dimensions of each subsystem, None means full system\\n    Output:\\n    matrix: output density matrix of floats\\n    '''\\n    if sys is None or dim is None:\\n        rho_out = np.zeros_like(rho)\\n        for K_i in K:\\n            rho_out += K_i @ rho @ K_i.conj().T\\n        return rho_out\\n    \\n    n = len(dim)\\n    rho_current = rho.copy()\\n    \\n    for s in sys:\\n        K_full_list = []\\n        for K_i in K:\\n            ops = []\\n            for idx in range(n):\\n                if idx == s:\\n                    ops.append(K_i)\\n                else:\\n                    ops.append(np.eye(dim[idx]))\\n            K_full = tensor(*ops)\\n            K_full_list.append(K_full)\\n        \\n        rho_new = np.zeros_like(rho_current)\\n        for K_full in K_full_list:\\n            rho_new += K_full @ rho_current @ K_full.conj().T\\n        rho_current = rho_new\\n    \\n    return rho_current\\n\\n\\ndef channel_output(input_state, channel1, channel2=None):\\n    '''Returns the channel output\\n    Inputs:\\n        input_state: density matrix of the input 2n qubit state, ( 2**(2n), 2**(2n) ) array of floats\\n        channel1: kruas operators of the first channel, list of (2,2) array of floats\\n        channel2: kruas operators of the second channel, list of (2,2) array of floats\\n    Output:\\n        output: the channel output, ( 2**(2n), 2**(2n) ) array of floats\\n    '''\\n    if channel2 is None:\\n        channel2 = channel1\\n    \\n    d = input_state.shape[0]\\n    n = int(np.log2(d) / 2)\\n    \\n    sys1 = list(range(n))\\n    dim = [2] * (2 * n)\\n    rho = apply_channel(channel1, input_state, sys=sys1, dim=dim)\\n    \\n    sys2 = list(range(n, 2 * n))\\n    rho = apply_channel(channel2, rho, sys=sys2, dim=dim)\\n    \\n    return rho\\n\\n\\ndef ghz_protocol(state):\\n    '''Returns the output state of the protocol\\n    Input:\\n    state: 2n qubit input state, 2^2n by 2^2n array of floats, where n is determined from the size of the input state\\n    Output:\\n    post_selected: the output state\\n    '''\\n    d = state.shape[0]\\n    n_qubits = int(np.log2(d))\\n    n = n_qubits // 2\\n    \\n    dim_n = 2 ** n\\n    P1 = np.zeros((dim_n, dim_n))\\n    P1[0, 0] = 1\\n    P1[dim_n-1, dim_n-1] = 1\\n    P2 = P1.copy()\\n    \\n    P = tensor(P1, P2)\\n    \\n    rho_proj = P @ state @ P.conj().T\\n    prob = np.trace(rho_proj)\\n    \\n    if prob == 0:\\n        return np.zeros((4, 4))\\n    \\n    rho_prime = rho_proj / prob\\n    \\n    V = np.zeros((2, dim_n))\\n    V[0, 0] = 1\\n    V[1, dim_n-1] = 1\\n    \\n    V_total = tensor(V, V)\\n    \\n    post_selected = V_total @ rho_prime @ V_total.conj().T\\n    \\n    return post_selected\\n\\n\\ndef fidelity(rho, sigma):\\n    '''Returns the fidelity between two states.\\n    Inputs:\\n    rho, sigma: density matrices of the two states, 2d array of floats\\n    Output:\\n    fid: fidelity, float\\n    '''\\n    sqrt_rho = sqrtm(rho)\\n    sqrt_sigma = sqrtm(sigma)\\n    \\n    product = sqrt_rho @ sqrt_sigma\\n    \\n    s = np.linalg.svd(product, compute_uv=False)\\n    \\n    trace_norm = np.sum(s)\\n    \\n    fid = trace_norm ** 2\\n    \\n    return np.real(fid)\\n\\n\\ndef ghz_protocol_fidelity(input_state, channel1, channel2=None):\\n    '''Returns the ac\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 18, \"cases_total\": 20, \"steps_all_pass\": 4, \"steps_total\": 6, \"per_step\": {\"65.1\": {\"pass\": 3, \"total\": 3}, \"65.2\": {\"pass\": 2, \"total\": 3}, \"65.3\": {\"pass\": 3, \"total\": 3}, \"65.4\": {\"pass\": 3, \"total\": 3}, \"65.5\": {\"pass\": 3, \"total\": 3}, \"65.6\": {\"pass\": 4, \"total\": 5}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 89.082,
+    "setup_s": 0.0,
+    "grade_s": 0.888
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.51s"
+  ]
+}

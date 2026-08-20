@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p058",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.625,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.8125,
+  "artifacts": {
+    "code": "\"def eos_press_from_rho(rho, eos_Gamma, eos_kappa):\\n    return eos_kappa * rho**eos_Gamma\\n\\ndef eos_rho_from_press(press, eos_Gamma, eos_kappa):\\n    if press <= 0:\\n        return 0.0\\n    return (press / eos_kappa) ** (1.0 / eos_Gamma)\\n\\ndef eos_eps_from_press(press, eos_Gamma, eos_kappa):\\n    if press <= 0:\\n        return 0.0\\n    rho = eos_rho_from_press(press, eos_Gamma, eos_kappa)\\n    return press / (rho * (eos_Gamma - 1))\\n\\ndef tov_RHS(data, r, eos_Gamma, eos_kappa):\\n    press, mass, phi = data\\n    if r == 0 or press <= 0:\\n        return (0.0, 0.0, 0.0)\\n    rho = eos_rho_from_press(press, eos_Gamma, eos_kappa)\\n    eps = eos_eps_from_press(press, eos_Gamma, eos_kappa)\\n    mu = rho * (1.0 + eps)\\n    factor = (mass + 4.0 * np.pi * r**3 * press) / (r * (r - 2.0 * mass))\\n    dpress = - (mu + press) * factor\\n    dmass = 4.0 * np.pi * r**3 * mu\\n    dphi = factor\\n    return (dpress, dmass, dphi)\\n\\ndef tov(rhoc, eos_Gamma, eos_kappa, npoints, rmax):\\n    # initial conditions at r=0\\n    P0 = eos_press_from_rho(rhoc, eos_Gamma, eos_kappa)\\n    # radial grid\\n    r = np.linspace(0.0, rmax, npoints)\\n    dr = r[1] - r[0]\\n    # state array: [pressure, mass, phi] at each radius\\n    u = np.zeros((3, npoints))\\n    u[0,0] = P0\\n    u[1,0] = 0.0\\n    u[2,0] = 0.0\\n\\n    # helper to compute derivatives\\n    def deriv(state, r_val):\\n        dpress, dmass, dphi = tov_RHS((state[0], state[1], state[2]), r_val, eos_Gamma, eos_kappa)\\n        return np.array([dpress, dmass, dphi])\\n\\n    # RK4 integration\\n    for i in range(npoints - 1):\\n        state = u[:, i]\\n        r_cur = r[i]\\n        k1 = deriv(state, r_cur)\\n        k2 = deriv(state + 0.5*dr*k1, r_cur + 0.5*dr)\\n        k3 = deriv(state + 0.5*dr*k2, r_cur + 0.5*dr)\\n        k4 = deriv(state + dr*k3, r_cur + dr)\\n        u[:, i+1] = state + (dr/6.0) * (k1 + 2*k2 + 2*k3 + k4)\\n        # stop if pressure reaches zero (surface)\\n        if u[0, i+1] <= 0.0:\\n            u[0, i+1] = 0.0\\n            surface_idx = i+1\\n            break\\n    else:\\n        # if loop completes without break, surface not reached within rmax\\n        surface_idx = npoints - 1\\n\\n    R = r[surface_idx]\\n    M = u[1, surface_idx]\\n    phi_s = u[2, surface_idx]\\n\\n    # shift phi to match exterior Schwarzschild potential at surface\\n    C = 0.5 * np.log(1.0 - 2.0*M/R) - phi_s\\n    lapse = np.exp(C)   # time dilation factor at center\\n\\n    return (M, lapse)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 10, \"cases_total\": 16, \"steps_all_pass\": 3, \"steps_total\": 5, \"per_step\": {\"58.1\": {\"pass\": 3, \"total\": 3}, \"58.2\": {\"pass\": 3, \"total\": 3}, \"58.3\": {\"pass\": 3, \"total\": 3}, \"58.4\": {\"pass\": 1, \"total\": 3}, \"58.5\": {\"pass\": 0, \"total\": 4}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 292.16,
+    "setup_s": 0.0,
+    "grade_s": 1.669
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.99s"
+  ]
+}

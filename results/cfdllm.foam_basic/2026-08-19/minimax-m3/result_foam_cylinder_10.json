@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_cylinder_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\nCASE_DIR = os.getcwd()\\n\\n# Solver: pimpleFoam\\nSOLVER = \\\"pimpleFoam\\\"\\n\\n# Time controls\\nDT = 0.0025\\nEND_TIME = 0.5\\nWRITE_INTERVAL = 0.05\\n\\n\\ndef write_file(path, content):\\n    full = os.path.join(CASE_DIR, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with open(full, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\n# -----------------------------------------------------------------------------\\n# system/blockMeshDict\\n# -----------------------------------------------------------------------------\\nblock_mesh_dict = r\\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0    0    0)\\n    (20   0    0)\\n    (20   4   0)\\n    (0    4   0)\\n    (0    0    0.5)\\n    (20   0    0.5)\\n    (20   4   0.5)\\n    (0    4   0.5)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (200 40 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }\\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 2 6 5)\\n        );\\n    }\\n    top\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    bottom\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    cylinder\\n    {\\n        type wall;\\n        faces\\n        (\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\n# -----------------------------------------------------------------------------\\n# system/controlDict\\n# -----------------------------------------------------------------------------\\ncontrol_dict = f\\\"\\\"\\\"FoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}}\\n\\napplication     {SOLVER};\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime\""
+  },
+  "timings": {
+    "agent_s": 154.422,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

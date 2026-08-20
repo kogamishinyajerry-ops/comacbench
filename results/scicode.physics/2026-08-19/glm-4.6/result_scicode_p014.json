@@ -1,0 +1,38 @@
+{
+  "task_id": "scicode_p014",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_tests+numeric",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.91665,
+  "artifacts": {
+    "code": "\"def harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0, vrms):\\n    '''Function to employ Mannella's leapfrog method to solve the Langevin equation of a microsphere optically trapped in the gas.'''\\n    dt = t0 / steps\\n    x = x0\\n    v = v0\\n    for _ in range(steps):\\n        x_half = x + v * dt / 2.0\\n        dW = np.random.normal(0.0, np.sqrt(dt))\\n        numerator = v - v * dt / (2.0 * taup) - (omega0**2) * x_half * dt + np.sqrt(2.0 / taup) * vrms * dW\\n        denominator = 1.0 + dt / (2.0 * taup)\\n        v_next = numerator / denominator\\n        x_next = x_half + v_next * dt / 2.0\\n        x, v = x_next, v_next\\n    return x\\n\\ndef calculate_msd(t0, steps, taup, omega0, vrms, Navg):\\n    '''Calculate the mean-square displacement (MSD) of an optically trapped microsphere in a gas by averaging Navg simulations.'''\\n    x_std = vrms / omega0\\n    v_std = vrms\\n    total = 0.0\\n    for _ in range(Navg):\\n        x0 = np.random.normal(0.0, x_std)\\n        v0 = np.random.normal(0.0, v_std)\\n        x_final = harmonic_mannella_leapfrog(x0, v0, t0, steps, taup, omega0, vrms)\\n        disp = x_final - x0\\n        total += disp * disp\\n    msd = total / Navg\\n    return msd\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"scicode\", \"cases_pass\": 5, \"cases_total\": 6, \"steps_all_pass\": 1, \"steps_total\": 2, \"per_step\": {\"14.1\": {\"pass\": 3, \"total\": 3}, \"14.2\": {\"pass\": 2, \"total\": 3}}, \"determinism\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 278.839,
+    "setup_s": 0.0,
+    "grade_s": 211.772
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 105.76s"
+  ]
+}

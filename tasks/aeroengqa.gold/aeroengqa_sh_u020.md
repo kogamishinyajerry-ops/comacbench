@@ -1,0 +1,10 @@
+Context [1]:
+Due to the highly dynamic wind tunnel test environment, including vehicle vibrations, each run in the 12-Foot LST initially began with a vehicle preflight inspection. This step ensured that the airframe was intact, there were no loose parts and all screws were properly tightened. Prior to each flight, proper operation of all onboard systems was verified. This consisted of insuring there was a battery with full charge, then installing the battery and insuring it does not affect the location of the CG. On-board sensors were calibrated prior to each run, or at least daily, due to the potential for sensor drift. The vehicle was then placed on the floor of the tunnel test section and the appropriate tethers were attached. Upon startup the pilot initiated a set of pulses via the transmitter such that the raw data could be identified by run number and correlated between the three data systems previously described. Each test run was initiated by liftoff into a hover prior to starting the wind tunnel. Once established in a stabilized hover, the wind tunnel would be brought to the desired velocity and the pilot would attempt to hold a steady 1-g trim condition for at least ten seconds. A typical test run consisted of gradually increasing tunnel velocities to until the maximum desired condition was reached or battery charge was depleted. When flying, the pilot’s objective was to maintain a constant position in the tunnel with near zero sideslip angle. To achieve this objective the vehicle’s sideslip angle was visually monitored in real time via the wind tunnel cameras and corrected as needed.
+
+Question: What maximum velocity was the wind tunnel set to, in knots?
+
+Answer using ONLY the information in the contexts above.
+Respond EXACTLY in this three-line format:
+ANSWER: <your answer in one short sentence; write REFUSED if the contexts do not contain the answer>
+BASIS: <report | computed | inferred>  (report = stated in the contexts; computed = derived by calculation; inferred = your own inference)
+CITATION: <the context number(s) you used or checked, e.g. [1] or [1,2]>

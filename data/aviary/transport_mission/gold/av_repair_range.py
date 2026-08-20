@@ -1,0 +1,29 @@
+"""gold 解（aviary 分析模式）。判分参考预计算用；模型不可见。"""
+import json
+import os
+import warnings
+from copy import deepcopy
+
+warnings.filterwarnings("ignore")
+
+from aviary.interface.run_aviary import run_aviary
+from aviary.models.missions.two_dof_default import phase_info
+from aviary.variable_info.variables import Mission
+
+BASE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_range_clean.csv'
+
+
+def solve(csv_path: str, mach: float):
+    pi = deepcopy(phase_info)
+    pi["cruise"]["user_options"]["mach_cruise"] = mach
+    prob = run_aviary(csv_path, pi, optimizer="SLSQP", run_driver=False,
+                      verbosity=0, make_plots=False)
+    fuel = float(prob.get_val(Mission.TOTAL_FUEL_MASS, units="lbm")[0])
+    final = float(prob.get_val(Mission.FINAL_MASS, units="lbm")[0])
+    return {"fuel_burn_lbm": fuel, "final_mass_lbm": final}
+
+
+if __name__ == "__main__":
+    # repair 参考：gold 直接给出真值（模型侧需通过 Aviary 实验识别）
+    r = {"corrupted_param": 'aircraft:design:range', "restored_value": float('3200')}
+    json.dump(r, open("result.json", "w"), indent=1)

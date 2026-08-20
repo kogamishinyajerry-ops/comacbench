@@ -1,0 +1,51 @@
+id: cfdquery_q013
+registry_id: cfdllm.cfdquery
+domain: knowledge
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: cfdquery@3b46d30+kaggle_v4
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/cfdllm.cfdquery/cfdquery_q013.md
+  assets:
+  - path: data/cfdllm/cfdquery/CFDQuery.json
+    digest: cad5f941aa0affa77ad2873df40aac2de2a52a708d9a098294afbbb9b521137a
+output_contract:
+- answer
+reference:
+  source: CFDQuery.json (BSD-3-Clause, NREL-Theseus/cfdllmbench)
+  revision: cfdquery@3b46d30+kaggle_v4
+  question_index: 13
+  correct_option_index: 1
+  n_options: 4
+  refusal_expected: false
+  uncertainty_note: 客观题唯一答案，无不确定度
+grader:
+  validity_gate: true
+  objective_layer: exact_match
+  parse_rule: strict_then_tolerant_first_digit_1_to_4
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯 MCQ 无证据/拒答/区分层：physics/objective 不适用（result.json 标注 N/A），权重经 YAML 覆写塌缩到
+    requirements（adapter 契约的覆写机制，非静默改分）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: NREL-Theseus/cfdllmbench + Kaggle nithinsekhar/cfdquery
+  license: BSD-3-Clause
+  status: confirmed-repo
+  revision: cfdquery@3b46d30+kaggle_v4
+  mirror_allowed: true

@@ -1,0 +1,34 @@
+{
+  "task_id": "cfdquery_q030",
+  "registry_id": "cfdllm.cfdquery",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "1",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}"
+  },
+  "timings": {
+    "agent_s": 34.009,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:159fb7f37a366330964fec492184442aa6fa3fb8d2321d9b470e2ca1ba1e3a96",
+  "assets_revision": "cfdquery@3b46d30+kaggle_v4",
+  "logs": [
+    "answer=1 raw='<think>\\nWe need answer only number. Need determine. \"numerical dispersion term of second-order upwind Euler scheme is of ____ for linear advection\" Options third, second, first, none. Need know terminology. Second-order upwind scheme perhaps Taylor-Galerkin? For linear advection, second-order upwind finite difference has third-order numerical dispersion? Let\\'s derive/recall.\\n\\nFinite difference modified wave analysis. Second-order upwind biased:\\n(u_j^{n+1}-u_j^n)/dt + c(3u_j -4u_{j-1}+u_{j-2})/(2 dx)=0 (linear c>0), modified wavenumber k\\' = (3 -4 e^{-iθ}+e^{-2iθ})/(2 dx) perhaps expand real: [3 -4 cosθ + cos2θ]/2 =? 1 + 2 sin²(θ/2) perhaps. k\\' dx = 1 + 2 sin² θ/2 = 2 - cosθ. Meanwhile exact k dx=θ. Difference = 2 - cosθ - θ. Leading 2 - (1 -θ²/2+θ⁴/24) -θ =1 + θ²/2 -θ⁴/24... The leading quadratic means phase error is second order in k dx, though dispersion \"term\" may be third-order? Common classifications:\\nFirst-order upwind has numerical diffusion and dispersion, dispersion begins second order?\\nSecond-order upwind scheme has second-order accurate advection but third-order numerical dispersion? Need resolve likely expected \"third-order\". Search memory: CFD numerical schemes: \"The second-order upwind scheme has third-order numerical diffusion and dispersion errors\"? Hmm.\\n\\nQuestion phrasing \"The numerical dispersion term of the second-order upwind Euler scheme is of ______ for linear advection\". Maybe from a source discussing Taylor series, asks order of numerical dispersion term. Could be \"third-order\" because derivative of phase error? Let\\'s investigate deeply.\\n\\nThere are Euler explicit schemes:\\n- first-order upwind (FTBS)\\n- second-order upwind (maybe SSPRK2 + MUSCL)\\nNumerical diffusion term for second-order upwind linear advection is fourth order? Numerical dispersion is second order?\\nVon Neumann: 2nd-order upwind approximation to first derivative. Modified wavenumber:\\n\\\\tilde{k} = (1/dx)[3/2 - 2e^{-ikdx} + 1/2 e^{-2ikdx}]\\n= k [something].\\nExpand \\\\tilde{k}/k = 1 + (k² dx²)/6? Let\\'s calculate. Above 2 - cos θ. cosθ = 1 - θ²/2 + θ⁴/24 -θ⁶/720.\\n2 - cosθ = 1 + θ²/2 - θ⁴/24 + θ⁶/720.\\nDivide θ: θ^{-1} + θ/2 - θ³/24 + θ⁵/720. So modified k = 1/dx [θ/2 - θ³/24...] = k/2 - k³ dx²/24. Relative minus 1 = -k² dx²/8? Wait exact k=θ/dx. ktilde-k = (θ/2 - θ³/24 + ... -θ)/dx = -θ/2 - θ³/24..., leading -θ/2 (first order!), and /k = -θ/2 - θ²/24. So phase error leading is first-order for upwind-biased second-order flux due to asymmetry! That\\'s because second-order upwind modifies amplitude? Is this really a second-order spatial derivative approximation? Backward differencing (3f_i-4f_{i-1}+f_{i-2})/(2h) is only first-order accurate, not second-order! Ah yes. \"Second-order upwind\" perhaps two-step Lax-Wendroff, not a one-sided second derivative stencil. Second-order upwind scheme may mean second order in time too (Lax-Wendroff/upwind Euler) and is centered-like phase error third order. They explicitly say \"second-order upwind Euler scheme.\" Likely Lax-Wendroff scheme. Numerical dispersion term order? Need know.\\n\\nCould refer to Euler equations finite volume and \"second-order upwind Euler scheme\" likely \"second-order upwind Euler\" = Lax-Wendroff. For linear scalar advection, modified equation has third-order numerical dispersion. Let\\'s recall.\\n\\nLax-Wendroff:\\nu_j^{n+1}=u_j^n - (C/2)(u_{j+1}^n-u_{j-1}^n)+(C²/2)(u_{j+1}^n-2u_j^n+u_{j-1}^n).\\nUpdate amplification G=1 - i σ sin θ - 2σ² sin²(θ/2), σ=a dt/dx. Assume C Courant. Stability C≤1, perhaps second-order RK version? Numerical dispersion relation phase. Leading phase error O(k³ dx²) / third-order? Taylor modified PDE:\\nu_t + a u_x = -a (dx²/6)(1-C²) u_xxx? Lax-Wendroff has third derivative, called third-order dispersion. Thus answer 1.\\n\\nBut perhaps \"second-order upwind Euler scheme\" is Beam-Warming? It has second-order phase error. Need parse exact wording likely exam question sourced from text. \"The numerical dispersion term of the second-order upwind Euler scheme is of ______ for linear advection\" This sounds an MCQ testing order in modified equation: \"second-order upwind Euler scheme\" perhaps \"2nd order upwind\" has \"third order dispersion\". Standard:\\n- Lax-Wendroff scheme numerical dissipation is fourth order? Modified equation: u_t + a u_x = -a^3 dt²/6 u_xxx + ... ; numerical diffusion is fourth? The added term has third derivative, perhaps \"numerical diffusion is of fourth order\"? Let\\'s inspect terminology.\\n\\nFor a finite difference approximation, modified wavenumber error expansion:\\n- Lax-Wendroff (second-order upwind / Lax-Friedrichs): ktilde/k =? Leading phase error k² Δx² /6 maybe.\\n- Leapfrog/Dufort-Frankel centered: fourth order phase.\\n- First-order upwind: first-order phase and second-order diffusion.\\nQuestion \"numerical dispersion term ... is of ____\" likely third-order.\\n\\nNeed only number.\\n</think>\\n1' attempts=1"
+  ]
+}

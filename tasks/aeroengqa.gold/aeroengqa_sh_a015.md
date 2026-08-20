@@ -1,0 +1,10 @@
+Context [1]:
+A report from the National Transportation Safety Board (NTSB) about a helicopter air ambulance collision with terrain that occurred on January 29, 2019. The accident involved a single-engine, turbine-powered Bell 407 helicopter being operated as a helicopter air ambulance (HAA) flight. The helicopter collided with forested terrain about 4 miles northeast of Zaleski, Ohio. The certificated commercial pilot, flight nurse, and flight paramedic died, and the helicopter was destroyed. The helicopter was registered to and operated by Viking Aviation, LLC, doing business as Survival Flight Inc., under Title 14 Code of Federal Regulations Part 135. The probable cause of this accident was Survival Flight’s inadequate management of safety, which normalized pilots’ and operations control specialists’ noncompliance with risk analysis procedures and resulted in the initiation of the flight without a comprehensive preflight weather evaluation, leading to the pilot’s inadvertent encounter with instrument meteorological conditions, failure to maintain altitude, and subsequent collision with terrain. Contributing to the accident was the Federal Aviation Administration’s inadequate oversight of the operator’s risk management program and failure to require Title 14 Code of Federal Regulations Part 135 operators to establish safety management system programs. As a result of this investigation, the NTSB made several safety recommendations to the Federal Aviation Administration, the National Weather Service, and Survival Flight.
+
+Question: In what ways were the Federal Aviation Administration at fault in this accident?
+
+Answer using ONLY the information in the contexts above.
+Respond EXACTLY in this three-line format:
+ANSWER: <your answer in one short sentence; write REFUSED if the contexts do not contain the answer>
+BASIS: <report | computed | inferred>  (report = stated in the contexts; computed = derived by calculation; inferred = your own inference)
+CITATION: <the context number(s) you used or checked, e.g. [1] or [1,2]>

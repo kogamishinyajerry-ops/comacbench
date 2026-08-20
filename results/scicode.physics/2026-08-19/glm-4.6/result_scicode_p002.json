@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p002",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport numpy as np\\nfrom scipy.integrate import simps\\n\\ndef simulate_light_diffraction(n, d, RL, R0, lambda_):\\n    \\\"\\\"\\\"\\n    Simulates light diffraction through a lens and computes the resulting intensity distribution.\\n\\n    Inputs:\\n    n (float): Refractive index of the lens material.\\n    d (float): Center thickness of the lens (mm).\\n    RL (float): Radius of curvature of the lens (mm).\\n    R0 (float): Radius of the incident light beam (mm).\\n    lambda_ (float): Wavelength of the incident light (mm).\\n\\n    Outputs:\\n    Ie (numpy.ndarray): A 2D array of intensity values.\\n    \\\"\\\"\\\"\\n    # Discretization parameters\\n    mr2 = 51  # Number of radial points in the output plane\\n    ne2 = 61  # Number of angular points\\n    mr0 = 81  # Number of radial points for the input field\\n\\n    # 1. Define Input Field (at the lens)\\n    # Radial coordinates for the input field (r from 0 to R0)\\n    r_in = np.linspace(0, R0, mr0)\\n    \\n    # Gaussian amplitude profile at the lens (assuming waist is at the lens)\\n    # E(r) = exp(-r^2 / R0^2)\\n    # We ignore the constant prefactor as it scales out of intensity\\n    E_in = np.exp(-(r_in**2) / (R0**2))\\n    \\n    # 2. Define Output Plane Grid\\n    # Radial coordinates for the output plane\\n    r_out = np.linspace(0, R0, mr2)\\n    # Angular coordinates\\n    theta = np.linspace(0, 2*np.pi, ne2)\\n    \\n    # Create 2D meshgrid for output polar coordinates\\n    R_out, Theta_out = np.meshgrid(r_out, theta, indexing='ij')\\n    \\n    # Convert to Cartesian for output\\n    X = R_out * np.cos(Theta_out)\\n    Y = R_out * np.sin(Theta_out)\\n    \\n    # 3. Lens Transmission Function (Phase Transformation)\\n    # The lens adds a phase delay due to its thickness variation.\\n    # t(r) = exp(-i * k * (n-1) * h(r)), where h(r) is the thickness profile.\\n    # For a symmetric biconvex lens with radius of curvature RL and center thickness\""
+  },
+  "timings": {
+    "agent_s": 461.274,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

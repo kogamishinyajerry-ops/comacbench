@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdcode_flow_past_circular_cylinder",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "non_physical_values"
+  ],
+  "failure_mode": "non_physical_values",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\n# --- Parameters ---\\nnu = 0.005          # Kinematic viscosity\\nv_inf = 1.0         # Free stream velocity\\nR_in = 0.5          # Inner radius (cylinder)\\nR_out = 10.0        # Outer radius\\nT_final = 10.0      # Final time\\n\\n# Grid parameters\\nNr = 80             # Number of grid points in r\\nNtheta = 160        # Number of grid points in theta\\n\\ndr = (R_out - R_in) / (Nr - 1)\\ndtheta = 2 * np.pi / Ntheta\\n\\n# Stability check for time step\\n# Diffusion limit: dt <= dr^2 / (4*nu)\\ndt_diff = dr**2 / (4 * nu)\\n# Advection limit: dt <= dr / v_inf\\ndt_adv = dr / v_inf\\n# Choose dt with a safety factor\\ndt = min(dt_diff, dt_adv) * 0.5\\n\\nNt = int(T_final / dt)\\nprint(f\\\"Time step: {dt}, Total steps: {Nt}\\\")\\n\\n# --- Grid Initialization ---\\nr = np.linspace(R_in, R_out, Nr)\\ntheta = np.linspace(0, 2 * np.pi, Ntheta, endpoint=False)\\nR, THETA = np.meshgrid(r, theta, indexing='ij')\\n\\n# Fields\\npsi = np.zeros((Nr, Ntheta))\\nomega = np.zeros((Nr, Ntheta))\\nur = np.zeros((Nr, Ntheta))\\nutheta = np.zeros((Nr, Ntheta))\\n\\n# Precompute coefficients for Poisson Equation\\n# Discretization: \\n# (1/dr^2 + 1/(2r*dr)) psi_i+1 + (1/dr^2 - 1/(2r*dr)) psi_i-1 + (1/r^2 dth^2)(psi_j+1 + psi_j-1) - 2/dr^2 + 2/r^2 dth^2 psi_i = -omega\\n\\nA = 1.0 / dr**2\\n# B depends on r, shape (Nr, 1)\\nB = 1.0 / (2.0 * R * dr)\\n# C depends on r, shape (Nr, 1)\\nC = 1.0 / (R**2 * dtheta**2)\\nDenom = 2.0 * (A + C)\\n\\n# SOR Relaxation parameter\\nomega_sor = 1.7\\n\\n# --- Time Loop ---\\nfor n in range(Nt):\\n    \\n    # 1. Apply Boundary Conditions for Streamfunction (Psi)\\n    # Inner boundary (cylinder surface)\\n    psi[0, :] = 20.0\\n    \\n    # Outer boundary (free stream)\\n    # psi = v_inf * y + 20 = v_inf * r * sin(theta) + 20\\n    psi[-1, :] = v_inf * R_out * np.sin(theta) + 20.0\\n    \\n    # 2. Solve Poisson Equation for Psi (Iterative SOR)\\n    # Perform a few iterations per time step (sufficient for small dt)\\n    for _ in range(20):\\n        psi_old = psi.copy()\\n        \\n        # Neighbors in theta (Periodic)\\n        psi_jp1 = np.roll(psi, -1, axis=1)\\n        psi_jm1 = np.roll(psi, 1, axis=1)\\n        \\n        # Update interior points (1 to Nr-2)\\n        # term_r_plus = (A + B) * psi[i+1]\\n        term_r_plus = (A + B[1:-1, :]) * psi[2:, :]\\n        # term_r_minus = (A - B) * psi[i-1]\\n        term_r_minus = (A - B[1:-1, :]) * psi[:-2, :]\\n        # term_theta = C * (psi[j+1] + psi[j-1])\\n        term_theta = C[1:-1, :] * (psi_jp1[1:-1, :] + psi_jm1[1:-1, :])\\n        \\n        psi_calc = (term_r_plus + term_r_minus + term_theta + omega[1:-1, :]) / Denom[1:-1, :]\\n        \\n        # SOR Update\\n        psi[1:-1, :] = (1 - omega_sor) * psi_old[1:-1, :] + omega_sor * psi_calc\\n\\n    # 3. Compute Velocities\\n    # ur = (1/r) * d(psi)/d(theta)\\n    # utheta = - d(psi)/dr\\n    \\n    # Central difference for derivatives\\n    # dpsi/dtheta\\n    dpsi_dtheta = (np.roll(psi, -1, axis=1) - np.roll(psi, 1, axis=1)) / (2 * dtheta)\\n    ur = (1.0 / R) * dpsi_dtheta\\n    \\n    # dpsi/dr\\n    # Handle internal points\\n    dpsi_dr = np.zeros_like(psi)\\n    dpsi_dr[1:-1, :] = (psi[2:, :] - psi[:-2, :]) / (2 * dr)\\n    # Forward/Backward for boundaries\\n    dpsi_dr[0, :] = (psi[1, :] - psi[0, :]) / dr\\n    dpsi_dr[-1, :] = (psi[-1, :] - psi[-2, :]) / dr\\n    \\n    utheta = -dpsi_dr\\n\\n    # 4. Update Vorticity (Omega) using Transport Equation\\n    # d(omega)/dt = - ur * d(omega)/dr - (utheta/r) * d(omega)/d(theta) + nu * Laplacian(omega)\\n    \\n    # Slices for interior points\\n    w = omega[1:-1, :]\\n    w_ip1 = omega[2:, :]\\n    w_im1 = omega[:-2, :]\\n    w_jp1 = np.roll(omega, -1, axis=1)[1:-1, :]\\n    w_jm1 = np.roll(omega, 1, axis=1)[1:-1, :]\\n    \\n    ur_in = ur[1:-1, :]\\n    utheta_in = utheta[1:-1, :]\\n    R_in_grid = R[1:-1, :]\\n    \\n    # Advection terms (Upwind scheme)\\n    \\n    # Radial advection: ur * d(omega)/dr\\n    adv_r = np.zeros_like(w)\\n    # If ur > 0, use backward difference: (w[i] - w[i-1])/dr\\n    # If ur <= 0, use forward difference: (w[i+1] - w[i])/dr\\n    adv_r[ur_in > 0] = (w[ur_in > 0] - w_im1[ur_in > 0]) / dr\\n    adv_r[ur_in <= 0] = (w_ip1[u\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [\"psi\", \"omega\"], \"fields\": {}, \"determinism\": null, \"run1_exit\": 0, \"run1_s\": 0.31}"
+  },
+  "timings": {
+    "agent_s": 187.42,
+    "setup_s": 0.0,
+    "grade_s": 0.314
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.31s",
+    "missing=[] nonfinite=['psi', 'omega']"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "cfdcode_lid_driven_cavity",
+  "registry_id": "cfdllm.cfdcode",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0064,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "field_metrics(cos/R2)",
+    "requirements": "npy 契约",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5032,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef solve_cavity_flow():\\n    # Simulation Parameters\\n    nx = 41\\n    ny = 41\\n    nt = 500\\n    nit = 50  # Iterations for Pressure Poisson Equation\\n    c = 1     # Placeholder (advection speed parameter, implicitly 1.0 for u)\\n    dx = 1.0 / (nx - 1)\\n    dy = 1.0 / (ny - 1)\\n    \\n    # Physical properties\\n    rho = 1.0\\n    nu = 0.1\\n    dt = 0.001  # Time step size\\n    \\n    # Field arrays\\n    u = np.zeros((ny, nx))\\n    v = np.zeros((ny, nx))\\n    p = np.zeros((ny, nx))\\n    b = np.zeros((ny, nx))\\n    \\n    # Main Time Loop\\n    for n in range(nt):\\n        un = u.copy()\\n        vn = v.copy()\\n        \\n        # --- Step 1: Momentum Equation (Tentative Velocity) ---\\n        # Discretized explicit update for u and v\\n        # Using first-order upwind for advection and central for diffusion\\n        u[1:-1, 1:-1] = (un[1:-1, 1:-1] -\\n                         un[1:-1, 1:-1] * dt / dx * (un[1:-1, 1:-1] - un[1:-1, 0:-2]) -\\n                         vn[1:-1, 1:-1] * dt / dy * (un[1:-1, 1:-1] - un[0:-2, 1:-1]) +\\n                         nu * dt / dx**2 * (un[1:-1, 2:] - 2 * un[1:-1, 1:-1] + un[1:-1, 0:-2]) +\\n                         nu * dt / dy**2 * (un[2:, 1:-1] - 2 * un[1:-1, 1:-1] + un[0:-2, 1:-1]))\\n        \\n        v[1:-1, 1:-1] = (vn[1:-1, 1:-1] -\\n                         un[1:-1, 1:-1] * dt / dx * (vn[1:-1, 1:-1] - vn[1:-1, 0:-2]) -\\n                         vn[1:-1, 1:-1] * dt / dy * (vn[1:-1, 1:-1] - vn[0:-2, 1:-1]) +\\n                         nu * dt / dx**2 * (vn[1:-1, 2:] - 2 * vn[1:-1, 1:-1] + vn[1:-1, 0:-2]) +\\n                         nu * dt / dy**2 * (vn[2:, 1:-1] - 2 * vn[1:-1, 1:-1] + vn[0:-2, 1:-1]))\\n        \\n        # Boundary Conditions for Velocity (No-slip)\\n        u[0, :]  = 0\\n        u[-1, :] = 0\\n        u[:, 0]  = 0\\n        u[:, -1] = 1 # Top lid driven at u=1\\n        \\n        v[0, :]  = 0\\n        v[-1, :] = 0\\n        v[:, 0]  = 0\\n        v[:, -1] = 0\\n        \\n        # --- Step 2: Pressure Poisson Equation ---\\n        # Calculate source term b = (rho/dt) * div(u*)\\n        b[1:-1, 1:-1] = (rho * (1 / dt) * \\n                        ((u[1:-1, 2:] - u[1:-1, 0:-2]) / (2 * dx) + \\n                         (v[2:, 1:-1] - v[0:-2, 1:-1]) / (2 * dy)))\\n        \\n        # Solve using Jacobi Iteration\\n        for _ in range(nit):\\n            pn = p.copy()\\n            p[1:-1, 1:-1] = (((pn[1:-1, 2:] + pn[1:-1, 0:-2]) * dy**2 + \\n                              (pn[2:, 1:-1] + pn[0:-2, 1:-1]) * dx**2) /\\n                              (2 * (dx**2 + dy**2)) -\\n                              dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * \\n                              b[1:-1, 1:-1])\\n            \\n            # Pressure Boundary Conditions (Homogeneous Neumann: dp/dn = 0)\\n            p[:, -1] = p[:, -2] # Right\\n            p[0, :] = p[1, :]   # Bottom\\n            p[:, 0] = p[:, 1]   # Left\\n            p[-1, :] = p[-2, :] # Top\\n            \\n            # Reference pressure condition to fix singularity\\n            p[0, 0] = 0\\n        \\n        # --- Step 3: Velocity Correction ---\\n        # Update velocities using pressure gradient\\n        u[1:-1, 1:-1] = (u[1:-1, 1:-1] - \\n                         dt / rho * (p[1:-1, 2:] - p[1:-1, 0:-2]) / (2 * dx))\\n        \\n        v[1:-1, 1:-1] = (v[1:-1, 1:-1] - \\n                         dt / rho * (p[2:, 1:-1] - p[0:-2, 1:-1]) / (2 * dy))\\n        \\n        # Enforce Velocity Boundary Conditions again\\n        u[0, :]  = 0\\n        u[-1, :] = 0\\n        u[:, 0]  = 0\\n        u[:, -1] = 1\\n        \\n        v[0, :]  = 0\\n        v[-1, :] = 0\\n        v[:, 0]  = 0\\n        v[:, -1] = 0\\n\\n    # Save the final solution\\n    np.save('u.npy', u)\\n    np.save('v.npy', v)\\n    np.save('p.npy', p)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve_cavity_flow()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cfdcode\", \"missing\": [], \"nonfinite\": [], \"fields\": {\"u\": {\"MSE\": 0.4205491288494087, \"MAE\": 0.5433291039354211, \"RMSE\": 0.6484975935571455, \"Cosine\": -0.051522730279764645, \"R2\": -6.093826982553648, \"NMSE\": 6.87811780975671, \"score01\": 0.0}, \"v\": {\"MSE\": 0.019687104082648066, \"MAE\": 0.09809651620520789, \"RMSE\": 0.1403107411520874, \"Cosine\": -0.4126855176693185, \"R2\": -1.2064485438466015, \"NMSE\": 2.206448413973844, \"score01\": 0.0}, \"p\": {\"MSE\": 14833482.336788269, \"MAE\": 3850.2801790937465, \"RMSE\": 3851.42601341221, \"Cosine\": 0.03822279313231741, \"R2\": -86848666.66863889, \"NMSE\": 86720745.73618189, \"score01\": 0.0191}}, \"determinism\": 1.0, \"run1_exit\": 0, \"run1_s\": 0.38}"
+  },
+  "timings": {
+    "agent_s": 202.85,
+    "setup_s": 0.0,
+    "grade_s": 0.754
+  },
+  "environment_digest": "sha256:e51ae13684086a23d3850fb44e384ccca3646f1eaaf523865b6681b262e94858",
+  "assets_revision": "cfdcode@3b46d30+kaggle_v1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.38s",
+    "missing=[] nonfinite=[]"
+  ]
+}

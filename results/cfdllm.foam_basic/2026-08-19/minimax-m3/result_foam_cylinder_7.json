@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_cylinder_7",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Create directory structure\\nos.makedirs(\\\"system\\\", exist_ok=True)\\nos.makedirs(\\\"constant\\\", exist_ok=True)\\nos.makedirs(\\\"0\\\", exist_ok=True)\\n\\nheader = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\n\\\"\\\"\\\"\\n\\n# system/blockMeshDict\\nblock_mesh = header + \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (2.2 0 0)\\n    (2.2 0.41 0)\\n    (0 0.41 0)\\n    (0 0 0.1)\\n    (2.2 0 0.1)\\n    (2.2 0.41 0.1)\\n    (0 0.41 0.1)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (44 8 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }\\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 2 6 5)\\n        );\\n    }\\n    topWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    bottomWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    front\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 3 2 1)\\n        );\\n    }\\n    back\\n    {\\n        type empty;\\n        faces\\n        (\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/blockMeshDict\\\", \\\"w\\\") as f:\\n    f.write(block_mesh)\\n\\n# system/controlDict\\ncontrol_dict = header + \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\napplication     pimpleFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         0.5;\\n\\ndeltaT          0.0025;\\n\\nwriteControl    runTime;\\n\\nwriteInterval   0.05;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\nfunctions\\n{\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/controlDict\\\", \\\"w\\\") as f:\\n    f.write(control_dict)\\n\\n# system/fvSchemes\\nfv_schemes = header + \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n    grad(p)         Gauss linear;\\n    grad(U)         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      Gauss linearUpwind grad(U);\\n    div((nuEff*dev2(T(grad(U))))) Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear orthogonal;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n    interpolate(U)  linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         orthogonal;\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\nwith open(\\\"system/fvSchemes\\\", \\\"w\\\") as f:\\n    f.write(fv_schemes)\\n\\n# system/fvSolution\\nfv_solution = header + \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nsolvers\\n{\\n    p\\n    {\\n        solver          GAMG;\\n        tolerance       1e-7;\\n        \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 158.077,
+    "setup_s": 0.0,
+    "grade_s": 2.548
+  },
+  "environment_digest": "sha256:7c4fb5805fd4cd6ff6f66525e6c113e1a3ac677d40368f2adee80dd27ca7edff",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.5s last_time=0"
+  ]
+}

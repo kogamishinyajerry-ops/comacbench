@@ -1,0 +1,34 @@
+{
+  "task_id": "cfdquery_q068",
+  "registry_id": "cfdllm.cfdquery",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "4",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}"
+  },
+  "timings": {
+    "agent_s": 12.586,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:159fb7f37a366330964fec492184442aa6fa3fb8d2321d9b470e2ca1ba1e3a96",
+  "assets_revision": "cfdquery@3b46d30+kaggle_v4",
+  "logs": [
+    "answer=4 raw=\"<think>A symmetry boundary in CFD means the flow is symmetric across the boundary. So the normal velocity component is zero (no flow crosses the symmetry plane), but the tangential velocity can be non-zero, meaning shear stress can exist along the symmetry plane. The normal stress condition depends on the formulation.\\n\\nFor a symmetry boundary:\\n- Normal velocity Vn = 0 (no penetration)\\n- Tangential velocity is allowed (free slip)\\n- Normal gradient of normal velocity... \\n- Shear stress on the symmetry plane (which is tangential) can be non-zero\\n- Normal stress τnn = 0 means no normal stress, which is the condition for a free/symmetry boundary\\n\\nWait, let me think again. At a symmetry plane:\\n- V_n = 0 (no flow through)\\n- The shear stress parallel to the plane (tangential shear) τ_nt = 0 actually... no wait.\\n\\nAt symmetry boundary:\\n- V_n = 0\\n- ∂V_t/∂n = 0\\n- This means τ_nt = μ ∂V_t/∂n = 0\\n\\nBut τ_nn is the normal stress component. In compressible flow, this relates to ∂V_n/∂n = 0, so τ_nn = 0 (for the viscous part).\\n\\nHmm, actually I need to be careful. The viscous stress component τ_nn is:\\nτ_nn = 2μ ∂V_n/∂n - (2/3)μ ∇·V\\n\\nIf V_n = 0 at the wall and the flow is symmetric, ∂V_n/∂n = 0 at the symmetry plane, so τ_nn = 0.\\n\\nSo the answer is: V_n = 0 and τ_nn = 0, which is option 4.\\n\\nWait, but some sources say shear stress on symmetry is zero (free-slip) and normal velocity is zero. Let me reconsider.\\n\\nThe tangential shear stress τ_nt = μ ∂V_t/∂n = 0 at symmetry (free slip).\\n\\nThe normal viscous stress τ_nn = 2μ ∂V_n/∂n - (2/3)μ(∇·V). With ∂V_n/∂n = 0 at symmetry, τ_nn = -(2/3)μ(∇·V), which may or may not be zero depending on whether flow is compressible.\\n\\nHmm, but typically in the context of this question, they're asking about the basic conditions. The most common answer taught is:\\n\\nSymmetry: V_n = 0, τ_nn = 0 (no normal flow, no viscous shear across the surface actually... )\\n\\nWait, let me re-examine. The symmetry boundary is like a slip wall where:\\n- V_n = 0\\n- τ_nt = 0 (free slip, no tangential shear)\\n\\nFor τ_nn, this is the normal component of viscous stress. In an incompressible flow with V_n = 0 on the boundary and ∂V_n/∂n = 0 (symmetry), τ_nn = 0.\\n\\nActually, I think the standard answer for this type of textbook question is option 4: V_n = 0, τ_nn = 0.\\n\\nHmm, but I'm second-guessing myself. Let me think about this differently.\\n\\nFor a symmetry boundary in CFD:\\n1. No flow through: V_n = 0\\n2. No viscous shear: This could mean τ_nn = 0 OR τ_nt = 0\\n\\nThe question specifies τ_nn specifically. In the stress tensor:\\nτ_nn = normal viscous stress in normal direction\\n\\nFor symmetry with V_n = 0 everywhere on the plane and ∂V_n/∂n = 0 (because of symmetry, V_n increases from 0 at the plane), so:\\nτ_nn = 2μ(∂V_n/∂n) ≈ 0\\n\\nSo both V_n = 0 and τ_nn = 0, which is option 4.\\n\\nYes, the answer is 4.</think>\\n\\n4\" attempts=1"
+  ]
+}

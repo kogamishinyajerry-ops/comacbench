@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p055",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef solve_SH(u, dt, T, N, epsilon, q0):\\n    '''Run a 2D simulation of Swift-Hohenberg equation\\n    Input\\n    u: initial condition of the order parameter, 2D array of floats\\n    dt: time step size, float\\n    T: total time of the ecolution, float\\n    N: system size where the 2D system is of dimension N*N, int\\n    epsilon: control parameter, float\\n    q0: critical mode, float\\n    Output\\n    u: final state of the system at the end time T.\\n    '''\\n    # Precompute k-space grid and linear operator for the linear part\\n    # kx and ky in standard FFT order (0 to N-1, then negative frequencies)\\n    kx = 2 * np.pi * np.fft.fftfreq(N, d=1.0)\\n    ky = 2 * np.pi * np.fft.fftfreq(N, d=1.0)\\n    KX, KY = np.meshgrid(kx, ky)\\n    \\n    # K^2 = kx^2 + ky^2\\n    K2 = KX**2 + KY**2\\n    \\n    # Linear operator in k-space: L(k) = - (2/q0^2 * K^2 + 1/q0^4 * K^4)\\n    # We will evolve u_hat: d(u_hat)/dt = [epsilon - 1] u_hat - (1/q0^2 K^2 + 1/q0^4 K^4) u_hat - F[u^3]\\n    # Using split-step: first treat nonlinear term explicitly, then linear term exactly\\n    # The linear evolution factor: exp( (epsilon - 1 - (1/q0^2 * K^2 + 1/q0^4 * K^4)) * dt )\\n    # Note: The linear part includes the epsilon and -1 from the expansion.\\n    linear_decay = (epsilon - 1) - (K2 / q0**2 + K2**2 / q0**4)\\n    evolution_factor = np.exp(linear_decay * dt)\\n    \\n    u_current = u.astype(np.complex128)\\n    \\n    num_steps = int(T / dt)\\n    if num_steps == 0:\\n        return u_current.real\\n    \\n    for _ in range(num_steps):\\n        # Step 1: Compute nonlinear term in real\""
+  },
+  "timings": {
+    "agent_s": 417.599,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3b0f314eaaf821290d7049703bba78eb4d360035fbb65db46e207beb533459dd",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

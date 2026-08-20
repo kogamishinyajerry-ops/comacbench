@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_pitzdaily_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCreate a complete OpenFOAM v10 RAS pitzDaily case.\\n- 2D millimeter-scale channel (pitzDaily geometry)\\n- Inlet fixed velocity 25 m/s, outlet zeroGradient pressure\\n- No-slip walls\\n- RAS turbulence model (k-epsilon)\\n- PIMPLE algorithm\\n- nu = 1e-3\\n- timestep 1e-4, writeInterval 0.01, endTime 0.3\\n\\\"\\\"\\\"\\n\\nimport os\\nimport math\\n\\nCASE_DIR = os.getcwd()\\n\\n# ----------------------------------------------------------------------\\n# Geometry definition for pitzDaily (mm-scale 2D channel with backward step)\\n# ----------------------------------------------------------------------\\n#\\n# We define a single z-extruded block to keep it simple in 2D.\\n# Domain is roughly 0.286 m long (286 mm) with the characteristic pitzDaily shape.\\n# We'll build it with a single hex block which simplifies grading and meshing.\\n#\\n# In OpenFOAM pitzDaily, the typical mesh has the following vertices (in meters):\\n# (0,        0)    - inlet bottom\\n# (0,        y1)   - inlet top\\n# (0.0635,   y1)   - top of step ramp begin\\n# (0.0635,   0)    - backward step face top? Actually pitzDaily has a forward-facing step\\n#\\n# For simplicity we use a simple 2D-like single-block mesh that approximates the\\n# channel with an inlet/outlet, top wall and a small bottom step. The essential\\n# feature is that flow separates at the step.\\n\\n# We'll describe the block as 8 vertices in (x,y,z):\\n#\\n#   Vertices (z=0 front, z=1 back):\\n#       0:(0,         0,    0)\\n#       1:(0.286,     0,    0)        outlet bottom\\n#       2:(0.286,     0.081, 0)        outlet top (extension above the step)\\n#       3:(0,         0.081, 0)        inlet top\\n#       4:(0,         0,    0.01)\\n#       5:(0.286,     0,    0.01)\\n#       6:(0.286,     0.081, 0.01)\\n#\""
+  },
+  "timings": {
+    "agent_s": 181.536,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cf3db2b898c05796b2372764021d2601e838985e1a2fed9a324731734d2bb460",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

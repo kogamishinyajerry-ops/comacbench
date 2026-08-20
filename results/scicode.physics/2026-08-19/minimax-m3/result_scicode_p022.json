@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p022",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef Rlnm(l, n, m, k, z, N_t):\\n    '''Function to calculate the translation coefficient (R|R)lmn.\\n    Input\\n    l : int\\n        The principal quantum number for the expansion.\\n    n : int\\n        The principal quantum number for the reexpansion.\\n    m : int\\n        The magnetic quantum number for the reexpansion.\\n    k : float\\n        Wavevector of the optical beam.\\n    z : float\\n        The translation distance along z direction\\n    N_t : int\\n        Truncated space size.\\n    Output\\n    (R|R)lmn : complex\\n        The translation coefficient (R|R)lmn.\\n    '''\\n    # Helper to compute a_n^m and b_n^m\\n    def a_coef(n, m):\\n        if n < abs(m):\\n            return 0.0\\n        mm = abs(m)\\n        return np.sqrt(((n + 1 + mm) * (n + 1 - mm)) / ((2 * n + 1) * (2 * n + 3)))\\n    \\n    def b_coef(n, m):\\n        if n < abs(m):\\n            return 0.0\\n        if m >= 0:\\n            sign = 1.0\\n        else:\\n            sign = -1.0\\n        return sign * np.sqrt(((n - m - 1) * (n - m)) / ((2 * n - 1) * (2 * n + 1)))\\n    \\n    # Precompute b_coef for needed n, m\\n    max_n = N_t + 1\\n    # Build translation matrix using recursion\\n    # First, compute elements with m (the parameter) fixed, using initial recursion\\n    # The matrix elements (R|R)_{l,n}^m are indexed by l (row) and n (col)\\n    # We need values for l from 0..N_t, n from 0..N_t\\n    \\n    # Initialize matrix\\n    R_matrix = np.zeros((N_t + 1, N_t + 1), dtype=complex)\\n    \\n    # Step 1: Initialize diagonal elements (R|R)_{l,l}^m for l = |m|..N_t using formula\\n    # (R|R)_{l,0}^0 = (-1)^l sqrt(2l+1) j_l(k z)\\n    from scipy.special import spherical_jn\\n    for\""
+  },
+  "timings": {
+    "agent_s": 342.54,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

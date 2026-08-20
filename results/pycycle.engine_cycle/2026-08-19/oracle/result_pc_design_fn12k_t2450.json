@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold 解（pycycle turbojet）。判分参考预计算用；模型不可见。\\\"\\\"\\\"\\nimport json\\nimport sys\\nimport warnings\\n\\nwarnings.filterwarnings(\\\"ignore\\\")\\nimport matplotlib\\nmatplotlib.use(\\\"Agg\\\")\\n\\nENGINE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/pycycle/engine_cycle/turbojet_engine.py'\\nsys.path.insert(0, __import__(\\\"os\\\").path.dirname(ENGINE))\\nimport turbojet_engine as te\\n\\nif __name__ == \\\"__main__\\\":\\n    r = r = te.solve_design(12000, 2450, 14.0)\\n    json.dump(r, open(\\\"result.json\\\", \\\"w\\\"), indent=1)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"Fn_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 11999.995614787369, \"ref\": 11999.995614787369}, \"TSFC\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.8148717801400097, \"ref\": 0.8148717801400097}, \"OPR\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 14.0, \"ref\": 14.0}, \"Wfuel_lbm_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.71623827452616, \"ref\": 2.71623827452616}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 3.3,
+    "setup_s": 0.0,
+    "grade_s": 3.3
+  },
+  "environment_digest": "sha256:bb5d6754084bbc99803eb7a950ae6fcb75b80a889a709aeeaba275ef316b246f",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 3.3s"
+  ]
+}

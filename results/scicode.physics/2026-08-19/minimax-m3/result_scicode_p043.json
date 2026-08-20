@@ -1,0 +1,36 @@
+{
+  "task_id": "scicode_p043",
+  "registry_id": "scicode.physics",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef f(z, y, Pssat, Ppsat, N, sigma_ap, sigma_ep, sigma_as, sigma_es,\\n      gamma_p, alpha_p, gamma_s, alpha_s):\\n    \\\"\\\"\\\"Rate equations for the forward and backward pump and signal powers.\\\"\\\"\\\"\\n    Pp_plus, Pp_minus, Ps_plus, Ps_minus = y\\n\\n    Pp = Pp_plus + Pp_minus\\n    Ps = Ps_plus + Ps_minus\\n\\n    Pp_norm = Pp / Ppsat\\n    Ps_norm = Ps / Pssat\\n\\n    N2_over_N = (\\n        (sigma_ap / (sigma_ap + sigma_ep)) * Pp_norm\\n        + (sigma_as / (sigma_as + sigma_es)) * Ps_norm\\n    ) / (Pp_norm + 1.0 + Ps_norm)\\n\\n    pump_absorption = gamma_p * (\\n        sigma_ap * N - (sigma_ap + sigma_ep) * N2_over_N\\n    )\\n    signal_gain = gamma_s * (\\n        (sigma_es + sigma_as) * N2_over_N - sigma_as * N\\n    )\\n\\n    dPp_plus_dz = -pump_absorption * Pp_plus - alpha_p * Pp_plus\\n    dPp_minus_dz = pump_absorption * Pp_minus + alpha_p * Pp_minus\\n    dPs_plus_dz = signal_gain * Ps_plus - alpha_s * Ps_plus\\n    dPs_minus_dz = -signal_gain * Ps_minus + alpha_s * Ps_minus\\n\\n    return np.array([\\n        dPp_plus_dz,\\n        dPp_minus_dz,\\n        dPs_plus_dz,\\n        dPs_minus_dz,\\n    ])\\n\\n\\ndef bc(ya, yb, Ppl, Ppr, R1, R2):\\n    \\\"\\\"\\\"Boundary conditions for an end-pumped bidirectional fiber laser.\\\"\\\"\\\"\\n    return np.array([\\n        ya[0] - Ppl,\\n        yb[1] - Ppr,\\n        ya[2] - R1 * ya[3],\\n        yb[3] - R2 * yb[2],\\n    ])\\n\\n\\ndef Pout_Nz_Calculation(\\n    lambda_s,\\n    lambda_p,\\n    tau,\\n    sigma_ap,\\n    sigma_ep,\\n    sigma_as,\\n    sigma_es,\\n    A_c,\\n    N,\\n    alpha_p,\\n    alpha_s,\\n    gamma_s,\\n    gamma_p,\\n    R1,\\n    R2,\\n    L,\\n    Ppl,\\n    Ppr,\\n):\\n    \\\"\\\"\\\"Solve\""
+  },
+  "timings": {
+    "agent_s": 470.567,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:22b0b4bb146d3c2093dae288cdcedfe85b3a8dd62a124ee272f76d6a6eae2267",
+  "assets_revision": "scicode@e3158ea+hf_v1+test_data_h5_20240712",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}
