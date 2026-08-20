@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_091",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def find_substring(str_list, sub_str):\\n    \\\"\\\"\\\"\\n    Checks if a substring is present in any of the strings within a list.\\n    \\n    Args:\\n        str_list (list): A list of strings to search within.\\n        sub_str (str): The substring to search for.\\n        \\n    Returns:\\n        bool: True if the substring is found in any string, False otherwise.\\n    \\\"\\\"\\\"\\n    for s in str_list:\\n        if sub_str in s:\\n            return True\\n    return False\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 10.9,
+    "setup_s": 0.0,
+    "grade_s": 0.079
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

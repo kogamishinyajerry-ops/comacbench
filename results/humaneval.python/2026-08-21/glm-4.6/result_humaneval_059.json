@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_059",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def largest_prime_factor(n: int) -> int:\\n    \\\"\\\"\\\"Return the largest prime factor of n. Assume n > 1 and is not a prime.\\n    >>> largest_prime_factor(13195)\\n    29\\n    >>> largest_prime_factor(2048)\\n    2\\n    \\\"\\\"\\\"\\n    max_prime = 1\\n    # Handle factor 2\\n    while n % 2 == 0:\\n        max_prime = 2\\n        n //= 2\\n    factor = 3\\n    while factor * factor <= n:\\n        while n % factor == 0:\\n            max_prime = factor\\n            n //= factor\\n        factor += 2\\n    if n > 1:\\n        max_prime = n\\n    return max_prime\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 26.423,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

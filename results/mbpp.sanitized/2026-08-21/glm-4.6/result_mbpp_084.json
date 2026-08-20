@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_084",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def sequence(n):\\n    \\\"\\\"\\\"\\n    Returns the nth number in the Newman-Conway sequence.\\n    Sequence is defined as:\\n    P(1) = 1\\n    P(2) = 1\\n    P(n) = P(P(n - 1)) + P(n - P(n - 1)) for n > 2\\n    \\\"\\\"\\\"\\n    if n < 1:\\n        raise ValueError(\\\"n must be a positive integer\\\")\\n    if n == 1 or n == 2:\\n        return 1\\n    \\n    # Using a list for memoization (1-based indexing)\\n    # size n + 1 so we can access index n directly\\n    p = [0] * (n + 1)\\n    p[1] = 1\\n    p[2] = 1\\n    \\n    for i in range(3, n + 1):\\n        p[i] = p[p[i - 1]] + p[i - p[i - 1]]\\n        \\n    return p[n]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 24.54,
+    "setup_s": 0.0,
+    "grade_s": 0.053
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

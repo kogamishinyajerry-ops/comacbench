@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_086",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def anti_shuffle(s):\\n    \\\"\\\"\\\"\\n    Write a function that takes a string and returns an ordered version of it.\\n    Ordered version of string, is a string where all words (separated by space)\\n    are replaced by a new word where all the characters arranged in\\n    ascending order based on ascii value.\\n    Note: You should keep the order of words and blank spaces in the sentence.\\n\\n    For example:\\n    anti_shuffle('Hi') returns 'Hi'\\n    anti_shuffle('hello') returns 'ehllo'\\n    anti_shuffle('Hello World!!!') returns 'Hello !!!Wdlor'\\n    \\\"\\\"\\\"\\n    tokens = []\\n    i = 0\\n    n = len(s)\\n    while i < n:\\n        if s[i] == ' ':\\n            start = i\\n            while i < n and s[i] == ' ':\\n                i += 1\\n            tokens.append(s[start:i])   # space token\\n        else:\\n            start = i\\n            while i < n and s[i] != ' ':\\n                i += 1\\n            tokens.append(s[start:i])   # word token\\n\\n    result = []\\n    for token in tokens:\\n        if token[0] == ' ':\\n            result.append(token)\\n        else:\\n            result.append(''.join(sorted(token)))\\n    return ''.join(result)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 69.073,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

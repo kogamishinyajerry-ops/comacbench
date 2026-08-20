@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_109",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def odd_Equivalent(s, n):\\n    \\\"\\\"\\\"\\n    Finds the number of numbers with an odd value when rotating a binary string the given number of times.\\n    \\n    A binary number is odd if its last bit (Least Significant Bit) is 1.\\n    When rotating the string (right rotation), the last bit of the rotated string\\n    corresponds to the bits of the original string in reverse order.\\n    i.e., Rot 0 ends with s[-1], Rot 1 ends with s[-2], ..., Rot L-1 ends with s[0].\\n    \\n    Args:\\n        s (str): The binary string.\\n        n (int): The number of rotations.\\n        \\n    Returns:\\n        int: The count of odd numbers obtained.\\n    \\\"\\\"\\\"\\n    if not s:\\n        return 0\\n        \\n    length = len(s)\\n    # The sequence of last digits for rotations corresponds to the reversed string\\n    reversed_s = s[::-1]\\n    \\n    # Count of 1s in the reversed string (which is the same as count in original string)\\n    ones_in_cycle = reversed_s.count('1')\\n    \\n    # Number of full cycles and remaining rotations\\n    full_cycles = n // length\\n    remainder = n % length\\n    \\n    # Calculate total odd numbers\\n    # From full cycles\\n    count = full_cycles * ones_in_cycle\\n    # From the partial cycle (first 'remainder' characters of the reversed string)\\n    if remainder > 0:\\n        count += reversed_s[:remainder].count('1')\\n        \\n    return count\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 167.052,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

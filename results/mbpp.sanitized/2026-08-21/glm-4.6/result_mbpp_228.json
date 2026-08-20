@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_228",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def all_Bits_Set_In_The_Given_Range(n, l, r):\\n    \\\"\\\"\\\"\\n    Checks if all bits are unset (0) in the given range [l, r].\\n    Note: The function name is fixed as requested, though the logic checks for unset bits\\n    based on the provided test case and description.\\n    \\n    Parameters:\\n    n (int): The number to check.\\n    l (int): Left index of the range (1-based from LSB).\\n    r (int): Right index of the range (1-based from LSB).\\n    \\n    Returns:\\n    bool: True if all bits in the range are unset, False otherwise.\\n    \\\"\\\"\\\"\\n    # Calculate the number of bits in the range\\n    count = r - l + 1\\n    \\n    # Create a mask with 'count' 1s, shifted to the starting position 'l-1'\\n    # This isolates the bits in the range [l, r]\\n    mask = ((1 << count) - 1) << (l - 1)\\n    \\n    # Check if the bits in the range are unset (0) by performing bitwise AND\\n    # If the result is 0, all bits in the range were 0\\n    return (n & mask) == 0\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 110.096,
+    "setup_s": 0.0,
+    "grade_s": 0.052
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

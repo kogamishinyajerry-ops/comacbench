@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_463",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_subarray_product(nums):\\n    \\\"\\\"\\\"Return the maximum product of any contiguous subarray in nums.\\\"\\\"\\\"\\n    if not nums:\\n        return 0  # Handle empty input gracefully\\n\\n    max_ending = min_ending = result = nums[0]\\n    for num in nums[1:]:\\n        candidates = (num, max_ending * num, min_ending * num)\\n        max_ending = max(candidates)\\n        min_ending = min(candidates)\\n        result = max(result, max_ending)\\n    return result\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    assert max_subarray_product([1, -2, -3, 0, 7, -8, -2]) == 112\\n    print(\\\"All tests passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 51.14,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

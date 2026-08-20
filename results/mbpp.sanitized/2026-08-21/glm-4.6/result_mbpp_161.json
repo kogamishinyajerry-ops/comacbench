@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_161",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def remove_elements(lst, to_remove):\\n    \\\"\\\"\\\"\\n    Return a new list containing all elements from `lst` that are not present\\n    in `to_remove`.\\n\\n    Parameters\\n    ----------\\n    lst : list\\n        The original list.\\n    to_remove : list\\n        List of elements to be removed from `lst`.\\n\\n    Returns\\n    -------\\n    list\\n        A new list with the unwanted elements removed.\\n    \\\"\\\"\\\"\\n    remove_set = set(to_remove)   # O(m) conversion, then O(1) lookups\\n    return [item for item in lst if item not in remove_set]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 11.062,
+    "setup_s": 0.0,
+    "grade_s": 0.069
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_430",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"def parabola_directrix(a, b, c):\\n    \\\"\\\"\\\"\\n    Calculates the directrix of a parabola given coefficients a, b, c.\\n    The parabola equation is y = ax^2 + bx + c.\\n    Returns the directrix as a value Y = k (constant).\\n    \\\"\\\"\\\"\\n    if a == 0:\\n        raise ValueError(\\\"Coefficient 'a' must not be zero for a parabola.\\\")\\n\\n    # Vertex formula: x_v = -b / (2a), y_v = c - (b^2) / (4a)\\n    # Derived from y = a(x + b/2a)^2 + (4ac - b^2)/4a\\n    y_vertex = c - (b**2) / (4 * a)\\n\\n    # The distance from the vertex to the focus is p = 1 / (4a)\\n    # The directrix is at distance p from the vertex in the opposite direction.\\n    # y_directrix = y_vertex - p\\n    # y_directrix = c - b^2/4a - 1/4a\\n    # y_directrix = (4ac - b^2 - 1) / 4a\\n\\n    directrix = (4 * a * c - b**2 - 1) / (4 * a)\\n    return directrix\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 0, \"cases_total\": 3, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 388.057,
+    "setup_s": 0.0,
+    "grade_s": 0.069
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

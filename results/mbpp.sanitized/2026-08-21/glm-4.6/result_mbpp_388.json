@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_388",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def highest_Power_of_2(n: int) -> int:\\n    \\\"\\\"\\\"\\n    Return the highest power of 2 that is less than or equal to n.\\n\\n    For positive integers n, this is the value of the most significant bit.\\n    \\\"\\\"\\\"\\n    if n <= 0:\\n        # No positive power of 2 <= n; conventionally return 0.\\n        return 0\\n    # The bit_length method gives the number of bits needed to represent n.\\n    # Shifting 1 by (bit_length-1) gives the value of the most significant bit.\\n    return 1 << (n.bit_length() - 1)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 6.764,
+    "setup_s": 0.0,
+    "grade_s": 0.041
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_417",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def group_tuples(test_list):\\n    \\\"\\\"\\\"\\n    Groups tuples in the input list based on their first element.\\n    \\n    Args:\\n        test_list (list): A list of tuples.\\n        \\n    Returns:\\n        list: A list of tuples where the first element is the common key \\n              and the subsequent elements are the grouped remaining elements.\\n    \\\"\\\"\\\"\\n    grouped = {}\\n    for t in test_list:\\n        # Ensure the tuple has at least one element to serve as a key\\n        if t:\\n            key = t[0]\\n            values = t[1:]\\n            \\n            if key in grouped:\\n                grouped[key].extend(values)\\n            else:\\n                grouped[key] = list(values)\\n                \\n    # Construct the result list of tuples\\n    return [(k, *v) for k, v in grouped.items()]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 47.316,
+    "setup_s": 0.0,
+    "grade_s": 0.041
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

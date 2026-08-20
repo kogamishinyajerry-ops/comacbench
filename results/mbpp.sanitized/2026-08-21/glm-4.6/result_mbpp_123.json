@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_123",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def amicable_numbers_sum(limit):\\n    from functools import lru_cache\\n    \\n    @lru_cache(maxsize=None)\\n    def sum_proper_divisors(n):\\n        if n <= 1:\\n            return 0\\n        total = 1  # 1 is always a proper divisor for n > 1\\n        for i in range(2, int(n**0.5) + 1):\\n            if n % i == 0:\\n                total += i\\n                if i != n // i:\\n                    total += n // i\\n        return total\\n    \\n    total = 0\\n    for n in range(1, limit + 1):\\n        m = sum_proper_divisors(n)\\n        if m != n and sum_proper_divisors(m) == n:\\n            total += n\\n    \\n    return total\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.05}"
+  },
+  "timings": {
+    "agent_s": 158.349,
+    "setup_s": 0.0,
+    "grade_s": 0.092
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.05s"
+  ]
+}

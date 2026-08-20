@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_157",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef right_angle_triangle(a, b, c):\\n    '''\\n    Given the lengths of the three sides of a triangle. Return True if the three\\n    sides form a right-angled triangle, False otherwise.\\n    A right-angled triangle is a triangle in which one angle is right angle or \\n    90 degree.\\n    Example:\\n    right_angle_triangle(3, 4, 5) == True\\n    right_angle_triangle(1, 2, 3) == False\\n    '''\\n    # Ensure sides are positive (triangle sides must be positive)\\n    if a <= 0 or b <= 0 or c <= 0:\\n        return False\\n    # Sort to identify the hypotenuse (the longest side)\\n    sides = sorted([a, b, c])\\n    # Check Pythagorean theorem with tolerance for floating point\\n    return math.isclose(sides[0]**2 + sides[1]**2, sides[2]**2)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 11, \"cases_total\": 11, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 23.088,
+    "setup_s": 0.0,
+    "grade_s": 0.067
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

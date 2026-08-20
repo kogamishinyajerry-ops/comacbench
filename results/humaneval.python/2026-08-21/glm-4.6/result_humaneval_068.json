@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_068",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def pluck(arr):\\n    \\\"\\\"\\\"\\n    \\\"Given an array representing a branch of a tree that has non-negative integer nodes\\n    your task is to pluck one of the nodes and return it.\\n    The plucked node should be the node with the smallest even value.\\n    If multiple nodes with the same smallest even value are found return the node that has smallest index.\\n\\n    The plucked node should be returned in a list, [ smalest_value, its index ],\\n    If there are no even values or the given array is empty, return [].\\n\\n    Example 1:\\n        Input: [4,2,3]\\n        Output: [2, 1]\\n        Explanation: 2 has the smallest even value, and 2 has the smallest index.\\n\\n    Example 2:\\n        Input: [1,2,3]\\n        Output: [2, 1]\\n        Explanation: 2 has the smallest even value, and 2 has the smallest index. \\n\\n    Example 3:\\n        Input: []\\n        Output: []\\n    \\n    Example 4:\\n        Input: [5, 0, 3, 0, 4, 2]\\n        Output: [0, 1]\\n        Explanation: 0 is the smallest value, but  there are two zeros,\\n                     so we will choose the first zero, which has the smallest index.\\n\\n    Constraints:\\n        * 1 <= nodes.length <= 10000\\n        * 0 <= node.value\\n    \\\"\\\"\\\"\\n    smallest_val = None\\n    idx = None\\n    for i, v in enumerate(arr):\\n        if v % 2 == 0:\\n            if smallest_val is None or v < smallest_val:\\n                smallest_val = v\\n                idx = i\\n    if smallest_val is None:\\n        return []\\n    return [smallest_val, idx]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 11.342,
+    "setup_s": 0.0,
+    "grade_s": 0.042
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

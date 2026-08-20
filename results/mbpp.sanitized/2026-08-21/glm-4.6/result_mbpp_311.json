@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_311",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def set_left_most_unset_bit(n):\\n    \\\"\\\"\\\"\\n    Sets the left most unset bit in the binary representation of a positive integer n.\\n    Example: 10 (1010) -> 14 (1110)\\n    \\\"\\\"\\\"\\n    # Handle the case for 0 separately\\n    if n == 0:\\n        return 1\\n    \\n    # Find the bit length of the number to determine the range of bits to check\\n    # e.g., for 10 (1010), bit_length is 4.\\n    num_bits = n.bit_length()\\n    \\n    # Create a mask with 1s in all positions up to the most significant bit\\n    # e.g., for 10, mask is 0b1111 (15)\\n    mask = (1 << num_bits) - 1\\n    \\n    # Invert n and apply the mask to find the unset bits within the range\\n    # e.g., ~10 & 0b1111 = 0b0101\\n    unset_bits = (~n) & mask\\n    \\n    # If there are no unset bits (e.g., n is 7 or 0b111), return n as is\\n    if unset_bits == 0:\\n        return n\\n    \\n    # Find the position of the most significant set bit in the unset_bits variable.\\n    # This corresponds to the leftmost unset bit in the original number.\\n    # e.g., for 0b0101, bit_length is 3, so position is 3 - 1 = 2.\\n    msb_pos = unset_bits.bit_length() - 1\\n    \\n    # Set the bit at the calculated position and return the result\\n    return n | (1 << msb_pos)\\n\\n# Test\\nassert set_left_most_unset_bit(10) == 14\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.05}"
+  },
+  "timings": {
+    "agent_s": 162.883,
+    "setup_s": 0.0,
+    "grade_s": 0.076
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.05s"
+  ]
+}

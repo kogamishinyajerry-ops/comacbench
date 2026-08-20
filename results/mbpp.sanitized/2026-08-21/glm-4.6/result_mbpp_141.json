@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_141",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def pancake_sort(arr):\\n    # Make a copy to avoid modifying the original list\\n    a = arr[:]\\n    n = len(a)\\n    for size in range(n, 1, -1):\\n        # Find the index of the maximum element in the unsorted prefix\\n        max_idx = a.index(max(a[:size]))\\n        # If the maximum is not already at the end of the current prefix\\n        if max_idx != size - 1:\\n            # Bring the maximum to the top (index 0) if it's not already\\n            if max_idx != 0:\\n                a[:max_idx+1] = a[max_idx::-1]  # flip prefix up to max_idx\\n            # Then flip the entire prefix of length 'size' to move the maximum to its final position\\n            a[:size] = a[size-1::-1]\\n    return a\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 39.165,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

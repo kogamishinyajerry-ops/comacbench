@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_077",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def is_Diff(num):\\n    \\\"\\\"\\\"\\n    Determines if a number is divisible by 11 using the alternating sum rule.\\n    The difference between the sum of digits in odd positions and the sum \\n    of digits in even positions is checked for divisibility by 11.\\n    \\\"\\\"\\\"\\n    num_str = str(num)\\n    sum_odd_pos = 0\\n    sum_even_pos = 0\\n    \\n    for i, char in enumerate(num_str):\\n        digit = int(char)\\n        # Assuming 1-based indexing for positions:\\n        # Index 0 in string is Position 1 (Odd)\\n        # Index 1 in string is Position 2 (Even)\\n        if i % 2 == 0:\\n            sum_odd_pos += digit\\n        else:\\n            sum_even_pos += digit\\n            \\n    # A number is divisible by 11 if the difference of the sums is divisible by 11\\n    difference = sum_odd_pos - sum_even_pos\\n    return difference % 11 == 0\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 47.095,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

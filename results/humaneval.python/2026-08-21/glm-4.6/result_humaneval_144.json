@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_144",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def simplify(x, n):\\n    \\\"\\\"\\\"Your task is to implement a function that will simplify the expression\\n    x * n. The function returns True if x * n evaluates to a whole number and False\\n    otherwise. Both x and n, are string representation of a fraction, and have the following format,\\n    <numerator>/<denominator> where both numerator and denominator are positive whole numbers.\\n\\n    You can assume that x, and n are valid fractions, and do not have zero as denominator.\\n\\n    simplify(\\\"1/5\\\", \\\"5/1\\\") = True\\n    simplify(\\\"1/6\\\", \\\"2/1\\\") = False\\n    simplify(\\\"7/10\\\", \\\"10/2\\\") = False\\n    \\\"\\\"\\\"\\n    a, b = map(int, x.split('/'))\\n    c, d = map(int, n.split('/'))\\n    numerator = a * c\\n    denominator = b * d\\n    return numerator % denominator == 0\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 13, \"cases_total\": 13, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 17.515,
+    "setup_s": 0.0,
+    "grade_s": 0.052
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

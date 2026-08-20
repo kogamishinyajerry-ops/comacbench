@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_462",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def combinations_list(lst):\\n    \\\"\\\"\\\"\\n    Generates all possible combinations of the elements of a given list.\\n    The combinations are ordered based on the binary representation of indices\\n    from 0 to 2^n - 1, and elements within each combination are ordered by\\n    descending index.\\n    \\\"\\\"\\\"\\n    n = len(lst)\\n    result = []\\n    # Iterate through all possible combinations using a bitmask\\n    for i in range(2**n):\\n        current_combination = []\\n        # Check bits from highest index to lowest to maintain order within subsets\\n        for j in range(n - 1, -1, -1):\\n            # If the j-th bit is set, include the j-th element\\n            if (i >> j) & 1:\\n                current_combination.append(lst[j])\\n        result.append(current_combination)\\n    return result\\n\\n# Test the function\\nif __name__ == \\\"__main__\\\":\\n    assert combinations_list(['orange', 'red', 'green', 'blue']) == [[], ['orange'], ['red'], ['red', 'orange'], ['green'], ['green', 'orange'], ['green', 'red'], ['green', 'red', 'orange'], ['blue'], ['blue', 'orange'], ['blue', 'red'], ['blue', 'red', 'orange'], ['blue', 'green'], ['blue', 'green', 'orange'], ['blue', 'green', 'red'], ['blue', 'green', 'red', 'orange']]\\n    print(\\\"All tests passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 89.864,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_119",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def search(nums):\\n    \\\"\\\"\\\"\\n    Finds the element that appears only once in a sorted array where every other\\n    element appears exactly twice.\\n    \\\"\\\"\\\"\\n    low, high = 0, len(nums) - 1\\n    \\n    while low < high:\\n        mid = (low + high) // 2\\n        \\n        # If mid is even, then its pair should be at mid + 1.\\n        # If mid is odd, then its pair should be at mid - 1.\\n        # The expression mid ^ 1 flips the last bit of mid, effectively giving\\n        # the index of the pair partner.\\n        if nums[mid] == nums[mid ^ 1]:\\n            # If nums[mid] is part of a pair on the left side of the single element,\\n            # the single element must be on the right.\\n            low = mid + 1\\n        else:\\n            # Otherwise, the single element is at mid or to the left.\\n            high = mid\\n            \\n    return nums[low]\\n\\nif __name__ == \\\"__main__\\\":\\n    assert search([1,1,2,2,3]) == 3\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 78.132,
+    "setup_s": 0.0,
+    "grade_s": 0.061
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_145",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.2857,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.64285,
+  "artifacts": {
+    "code": "\"def order_by_points(nums):\\n    \\\"\\\"\\\"\\n    Write a function which sorts the given list of integers\\n    in ascending order according to the sum of their digits.\\n    Note: if there are several items with similar sum of their digits,\\n    order them based on their index in original list.\\n\\n    For example:\\n    >>> order_by_points([1, 11, -1, -11, -12]) == [-1, -11, 1, -12, 11]\\n    >>> order_by_points([]) == []\\n    \\\"\\\"\\\"\\n    def digit_sum(n):\\n        s = 0\\n        # Work with absolute value to handle negatives\\n        for digit in str(abs(n)):\\n            s += int(digit)\\n        return s\\n\\n    # Use enumerate to include the original index for stable sorting\\n    # sorted() is stable, so if we keep the original index as a secondary key,\\n    # we ensure items with the same digit sum maintain their relative order.\\n    # We sort by (digit_sum, index) and then extract the number.\\n    return [num for _, _, num in sorted(enumerate(nums), key=lambda x: (digit_sum(x[1]), x[0]))]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 2, \"cases_total\": 7, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"ValueError: not enough values to unpack (expected 3, got 2)\"}, {\"case\": 2, \"pass\": false, \"err\": \"ValueError: not enough values to unpack (expected 3, got 2)\"}, {\"case\": 4, \"pass\": false, \"err\": \"ValueError: not enough values to unpack (expected 3, got 2)\"}, {\"case\": 5, \"pass\": false, \"err\": \"ValueError: not enough values to unpack (expected 3, got 2)\"}, {\"case\": 6, \"pass\": false, \"err\": \"ValueError: not enough values to unpack (expected 3, got 2)\"}], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 350.759,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

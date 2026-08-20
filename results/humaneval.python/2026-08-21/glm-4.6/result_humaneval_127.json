@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_127",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef intersection(interval1, interval2):\\n    \\\"\\\"\\\"You are given two intervals,\\n    where each interval is a pair of integers. For example, interval = (start, end) = (1, 2).\\n    The given intervals are closed which means that the interval (start, end)\\n    includes both start and end.\\n    For each given interval, it is assumed that its start is less or equal its end.\\n    Your task is to determine whether the length of intersection of these two \\n    intervals is a prime number.\\n    Example, the intersection of the intervals (1, 3), (2, 4) is (2, 3)\\n    which its length is 1, which not a prime number.\\n    If the length of the intersection is a prime number, return \\\"YES\\\",\\n    otherwise, return \\\"NO\\\".\\n    If the two intervals don't intersect, return \\\"NO\\\".\\n\\n\\n    [input/output] samples:\\n    intersection((1, 2), (2, 3)) ==> \\\"NO\\\"\\n    intersection((-1, 1), (0, 4)) ==> \\\"NO\\\"\\n    intersection((-3, -1), (-5, 5)) ==> \\\"YES\\\"\\n    \\\"\\\"\\\"\\n    start = max(interval1[0], interval2[0])\\n    end = min(interval1[1], interval2[1])\\n    if start > end:\\n        return \\\"NO\\\"\\n    length = end - start\\n    if length < 2:\\n        return \\\"NO\\\"\\n    if length % 2 == 0:\\n        return \\\"YES\\\" if length == 2 else \\\"NO\\\"\\n    # Check odd divisors up to sqrt\\n    limit = math.isqrt(length)\\n    for i in range(3, limit + 1, 2):\\n        if length % i == 0:\\n            return \\\"NO\\\"\\n    return \\\"YES\\\"\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 35.088,
+    "setup_s": 0.0,
+    "grade_s": 0.065
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

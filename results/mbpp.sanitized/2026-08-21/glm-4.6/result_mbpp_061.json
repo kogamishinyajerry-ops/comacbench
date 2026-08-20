@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_061",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def count_Substrings(s):\\n    \\\"\\\"\\\"\\n    Counts the number of substrings where the sum of digits equals the length of the substring.\\n    \\n    The condition sum(digits) == length can be rewritten as sum(digits - 1) == 0.\\n    We iterate through the string, maintaining a running sum of (digit - 1).\\n    We use a hash map to store how many times each prefix sum has occurred.\\n    If a prefix sum occurs again, it means the sum of the elements between those\\n    two indices is zero, satisfying our condition.\\n    \\n    Args:\\n    s (str): A string consisting of digits.\\n    \\n    Returns:\\n    int: The count of substrings with digit sum equal to length.\\n    \\\"\\\"\\\"\\n    count = 0\\n    current_sum = 0\\n    # Dictionary to store the frequency of prefix sums. Initialized with {0: 1}\\n    # to account for substrings starting at index 0.\\n    prefix_sums = {0: 1}\\n\\n    for char in s:\\n        # Convert char to int\\n        val = int(char)\\n        # Add (val - 1) to the running sum\\n        current_sum += (val - 1)\\n\\n        # If this sum has been seen before, the subarray between the previous\\n        # occurrence(s) and current index sums to 0.\\n        if current_sum in prefix_sums:\\n            count += prefix_sums[current_sum]\\n            prefix_sums[current_sum] += 1\\n        else:\\n            prefix_sums[current_sum] = 1\\n\\n    return count\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 55.761,
+    "setup_s": 0.0,
+    "grade_s": 0.049
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

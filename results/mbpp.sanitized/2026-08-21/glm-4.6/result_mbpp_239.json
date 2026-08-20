@@ -1,0 +1,36 @@
+{
+  "task_id": "mbpp_239",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef get_total_number_of_sequences(m, n):\\n    \\\"\\\"\\\"\\n    Calculates the number of sequences of length n where each element is a\\n    positive integer >= 1, <= m, and >= 2 * previous_element.\\n    \\\"\\\"\\\"\\n    # dp[i] represents the number of valid sequences ending with the value i.\\n    # The range of i is 1 to m.\\n    dp = [0] * (m + 1)\\n    \\n    # Base case: For sequences of length 1 (n=1), any number from 1 to m is valid.\\n    # So, there is 1 way to have a sequence ending in each number i.\\n    # This initialization effectively serves as the count for n=1.\\n    # We iterate n-1 times to build sequences of length n.\\n    # If n=1, the loop below doesn't execute, and we sum the initialized array.\\n    for i in range(1, m + 1):\\n        dp[i] = 1\\n        \\n    # Iterate for the remaining positions in the sequence (from 2 to n).\\n    # We need to perform this update (n - 1) times.\\n    for _ in range(n - 1):\\n        new_dp = [0] * (m + 1)\\n        \\n        # Calculate the number of sequences ending with 'current_val'.\\n        # We maintain a running sum of valid previous elements.\\n        running_sum = 0\\n        for current_val in range(1, m + 1):\\n            # The previous value (prev_val) must satisfy:\\n            # prev_val >= 1 and prev_val <= current_val / 2\\n            \\n            # lower_bound is 1.\\n            # upper_bound is current_val // 2.\\n            \\n            upper_bound = current_val // 2\\n            \\n            if upper_bound >= 1:\\n                # Add dp[upper_bound] to the running sum.\\n                # The sum accumulates dp[1] + ... + dp[upper_bound].\\n                running_sum += dp[upper_bound]\\n            \\n            # The number of sequences ending in current_val is the sum of\\n            # sequences ending in any valid previous value.\\n            new_dp[current_val] = running_sum\\n            \\n        dp = new_dp\\n        \\n    # The result is the sum of all valid sequences of length n ending in any number 1..m.\\n    return sum(dp)\\n\\n# Verification with the provided test case\\nif __name__ == \\\"__main__\\\":\\n    assert get_total_number_of\""
+  },
+  "timings": {
+    "agent_s": 252.731,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

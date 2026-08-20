@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_391",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def convert_list_dictionary(*lists):\\n    \\\"\\\"\\\"\\n    Converts multiple lists into a list of nested dictionaries.\\n    \\n    The last list provides the values, and the preceding lists provide \\n    the keys for each level of nesting.\\n    \\n    Example:\\n    List 1 (Keys 1): [\\\"S001\\\", \\\"S002\\\"]\\n    List 2 (Keys 2): [\\\"Adina Park\\\", \\\"Leyton Marsh\\\"]\\n    List 3 (Values): [85, 98]\\n    \\n    Result: [{'S001': {'Adina Park': 85}}, {'S002': {'Leyton Marsh': 98}}]\\n    \\\"\\\"\\\"\\n    if not lists:\\n        return []\\n    \\n    result = []\\n    # Iterate through the lists row by row (by index)\\n    for items in zip(*lists):\\n        # Start with the last item as the innermost value\\n        nested_dict = items[-1]\\n        \\n        # Build the dictionary from the inside out using the remaining items as keys\\n        # We iterate in reverse to establish the correct nesting order\\n        for key in reversed(items[:-1]):\\n            nested_dict = {key: nested_dict}\\n            \\n        result.append(nested_dict)\\n        \\n    return result\\n\\n# Test\\nassert convert_list_dictionary([\\\"S001\\\", \\\"S002\\\", \\\"S003\\\", \\\"S004\\\"],[\\\"Adina Park\\\", \\\"Leyton Marsh\\\", \\\"Duncan Boyle\\\", \\\"Saim Richards\\\"] ,[85, 98, 89, 92])==[{'S001': {'Adina Park': 85}}, {'S002': {'Leyton Marsh': 98}}, {'S003': {'Duncan Boyle': 89}}, {'S004': {'Saim Richards': 92}}]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 88.617,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

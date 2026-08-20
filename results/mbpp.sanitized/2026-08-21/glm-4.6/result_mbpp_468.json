@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_468",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_product(arr):\\n    \\\"\\\"\\\"\\n    Returns the maximum product of a contiguous strictly increasing subarray.\\n    \\\"\\\"\\\"\\n    if not arr:\\n        return None  # No product for empty array\\n\\n    # max_ending and min_ending store the maximum and minimum products\\n    # of an increasing contiguous subarray ending at the current index.\\n    max_ending = min_ending = arr[0]\\n    max_prod = arr[0]\\n\\n    for i in range(1, len(arr)):\\n        if arr[i] > arr[i-1]:\\n            # We can extend previous subarrays. The best extension depends on the sign.\\n            candidates = [arr[i], max_ending * arr[i], min_ending * arr[i]]\\n            max_ending = max(candidates)\\n            min_ending = min(candidates)\\n        else:\\n            # Must start a new subarray at i.\\n            max_ending = min_ending = arr[i]\\n\\n        if max_ending > max_prod:\\n            max_prod = max_ending\\n\\n    return max_prod\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    # Provided test case\\n    assert max_product([3, 100, 4, 5, 150, 6]) == 3000\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 188.009,
+    "setup_s": 0.0,
+    "grade_s": 0.073
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

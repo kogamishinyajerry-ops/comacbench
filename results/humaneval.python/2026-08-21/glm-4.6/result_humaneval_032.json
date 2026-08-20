@@ -1,0 +1,36 @@
+{
+  "task_id": "humaneval_032",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport math\\n\\ndef poly(xs: list, x: float):\\n    \\\"\\\"\\\"\\n    Evaluates polynomial with coefficients xs at point x.\\n    return xs[0] + xs[1] * x + xs[2] * x^2 + .... xs[n] * x^n\\n    \\\"\\\"\\\"\\n    return sum([coeff * math.pow(x, i) for i, coeff in enumerate(xs)])\\n\\n\\ndef find_zero(xs: list):\\n    \\\"\\\"\\\" xs are coefficients of a polynomial.\\n    find_zero find x such that poly(x) = 0.\\n    find_zero returns only only zero point, even if there are many.\\n    Moreover, find_zero only takes list xs having even number of coefficients\\n    and largest non zero coefficient as it guarantees\\n    a solution.\\n    >>> round(find_zero([1, 2]), 2) # f(x) = 1 + 2x\\n    -0.5\\n    >>> round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3) = -6 + 11x - 6x^2 + x^3\\n    1.0\\n    \\\"\\\"\\\"\\n    if len(xs) % 2 != 0:\\n        raise ValueError(\\\"The list of coefficients must have an even number of elements.\\\")\\n    \\n    def f(x):\\n        return poly(xs, x)\\n\\n    # Determine the range for search.\\n    # Since the degree is odd (len(xs) - 1), the polynomial goes to -inf on one side and +inf on the other.\\n    # We search outward until the sign changes.\\n    x = 0.0\\n    step = 1.0\\n    val = f(x)\\n    \\n    # If we are exactly at a root (unlikely but possible), return it.\\n    if val == 0:\\n        return x\\n    \\n    # Search in the positive direction if the limit at +inf is positive, else negative.\\n    # The limit at +inf is the sign of the leading coefficient.\\n    # The limit at -inf is -sign of leading coefficient (since degree is odd).\\n    # We want f(low) and f(high) to have opposite signs.\\n    \\n    leading_coeff = xs[-1]\\n    \\n    # We start at x=0. If f(0) is 0, we returned. \\n    # If leading coeff > 0: f(+inf) =\""
+  },
+  "timings": {
+    "agent_s": 252.273,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

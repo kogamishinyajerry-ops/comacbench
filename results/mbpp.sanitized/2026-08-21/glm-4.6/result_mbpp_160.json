@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_160",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.3333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.66665,
+  "artifacts": {
+    "code": "\"def find_solution(a, b, n):\\n    \\\"\\\"\\\"\\n    Returns integers x and y that satisfy ax + by = n as a tuple,\\n    or returns None if no solution exists.\\n    \\\"\\\"\\\"\\n    # We are looking for a solution to ax + by = n.\\n    # A solution exists if and only if gcd(a, b) divides n.\\n    \\n    # Helper function to compute the Greatest Common Divisor (GCD)\\n    # using the Euclidean algorithm.\\n    def _gcd(u, v):\\n        while v:\\n            u, v = v, u % v\\n        return u\\n\\n    # Calculate the GCD of a and b\\n    g = _gcd(abs(a), abs(b))\\n\\n    # If n is not divisible by the GCD, no integer solution exists\\n    if n % g != 0:\\n        return None\\n\\n    # Handle edge case where both a and b are 0\\n    # If a = 0 and b = 0, then 0 = n. If n == 0, any (x, y) works, return (0,0).\\n    # If n != 0, no solution exists (caught by the modulo check above).\\n    if a == 0 and b == 0:\\n        return (0, 0)\\n    \\n    # If a is 0, the equation becomes by = n.\\n    # A solution is x = 0, y = n / b.\\n    # We know g = |b|, and g | n, so y is an integer.\\n    if a == 0:\\n        return (0, n // b)\\n        \\n    # If b is 0, the equation becomes ax = n.\\n    # A solution is x = n / a, y = 0.\\n    if b == 0:\\n        return (n // a, 0)\\n\\n    # General case: a != 0 and b != 0\\n    # We can fix x = 0 and solve for y.\\n    # If we set x = 0, then by = n => y = n / b.\\n    # Since b != 0 and we established that g | n, and g | b,\\n    # n/b is an integer.\\n    return (0, n // b)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 1, \"cases_total\": 3, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 268.236,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

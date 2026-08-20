@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_075",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def find_tuples(tuples_list, k):\\n    \\\"\\\"\\\"\\n    Finds tuples from the given list where all elements are divisible by k.\\n    \\n    Args:\\n    tuples_list (list of tuples): The list of tuples to filter.\\n    k (int): The divisor.\\n    \\n    Returns:\\n    list of tuples: A list containing only the tuples where every element is divisible by k.\\n    \\\"\\\"\\\"\\n    result = []\\n    for t in tuples_list:\\n        # Check if all elements in the current tuple t are divisible by k\\n        if all(element % k == 0 for element in t):\\n            result.append(t)\\n    return result\\n\\n# Test case to verify the solution\\nif __name__ == \\\"__main__\\\":\\n    assert find_tuples([(6, 24, 12), (7, 9, 6), (12, 18, 21)], 6) == [(6, 24, 12)]\\n    print(\\\"Test passed successfully.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 10.617,
+    "setup_s": 0.0,
+    "grade_s": 0.041
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

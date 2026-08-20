@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_128",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def prod_signs(arr):\\n    \\\"\\\"\\\"\\n    You are given an array arr of integers and you need to return\\n    sum of magnitudes of integers multiplied by product of all signs\\n    of each number in the array, represented by 1, -1 or 0.\\n    Note: return None for empty arr.\\n\\n    Example:\\n    >>> prod_signs([1, 2, 2, -4]) == -9\\n    >>> prod_signs([0, 1]) == 0\\n    >>> prod_signs([]) == None\\n    \\\"\\\"\\\"\\n    if not arr:\\n        return None\\n    prod_sign = 1\\n    sum_mag = 0\\n    for x in arr:\\n        sum_mag += abs(x)\\n        if x > 0:\\n            s = 1\\n        elif x < 0:\\n            s = -1\\n        else:\\n            s = 0\\n        prod_sign *= s\\n    return sum_mag * prod_sign\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 13.154,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

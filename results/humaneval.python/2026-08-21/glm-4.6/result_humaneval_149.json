@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_149",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def sorted_list_sum(lst):\\n    \\\"\\\"\\\"Write a function that accepts a list of strings as a parameter,\\n    deletes the strings that have odd lengths from it,\\n    and returns the resulted list with a sorted order,\\n    The list is always a list of strings and never an array of numbers,\\n    and it may contain duplicates.\\n    The order of the list should be ascending by length of each word, and you\\n    should return the list sorted by that rule.\\n    If two words have the same length, sort the list alphabetically.\\n    The function should return a list of strings in sorted order.\\n    You may assume that all words will have the same length.\\n    For example:\\n    assert list_sort([\\\"aa\\\", \\\"a\\\", \\\"aaa\\\"]) => [\\\"aa\\\"]\\n    assert list_sort([\\\"ab\\\", \\\"a\\\", \\\"aaa\\\", \\\"cd\\\"]) => [\\\"ab\\\", \\\"cd\\\"]\\n    \\\"\\\"\\\"\\n    # Keep only strings with even length\\n    even_length = [s for s in lst if len(s) % 2 == 0]\\n    # Sort by length, then alphabetically\\n    even_length.sort(key=lambda s: (len(s), s))\\n    return even_length\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 14.86,
+    "setup_s": 0.0,
+    "grade_s": 0.05
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

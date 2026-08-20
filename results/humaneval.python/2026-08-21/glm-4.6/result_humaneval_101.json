@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_101",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import re\\n\\ndef words_string(s):\\n    \\\"\\\"\\\"\\n    You will be given a string of words separated by commas or spaces. Your task is\\n    to split the string into words and return an array of the words.\\n    \\n    For example:\\n    words_string(\\\"Hi, my name is John\\\") == [\\\"Hi\\\", \\\"my\\\", \\\"name\\\", \\\"is\\\", \\\"John\\\"]\\n    words_string(\\\"One, two, three, four, five, six\\\") == [\\\"One\\\", \\\"two\\\", \\\"three\\\", \\\"four\\\", \\\"five\\\", \\\"six\\\"]\\n    \\\"\\\"\\\"\\n    return re.findall(r'[^,\\\\s]+', s)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 21.347,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

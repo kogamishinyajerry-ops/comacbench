@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_389",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def find_lucas(n):\\n    \\\"\\\"\\\"\\n    Calculate the n'th Lucas number.\\n    \\n    The Lucas numbers are an integer sequence named after the mathematician \\n    François Édouard Anatole Lucas (1842–1891), who studied both that sequence \\n    and the closely related Fibonacci numbers. Like the Fibonacci numbers, \\n    each Lucas number is defined to be the sum of its two immediate previous terms, \\n    i.e. it is a Fibonacci integer sequence. However, the first two Lucas numbers \\n    are L0 = 2 and L1 = 1, whereas Fibonacci numbers are F0 = 0 and F1 = 1.\\n    \\n    Args:\\n        n (int): The index of the Lucas number to find.\\n        \\n    Returns:\\n        int: The n'th Lucas number.\\n    \\\"\\\"\\\"\\n    if n == 0:\\n        return 2\\n    elif n == 1:\\n        return 1\\n    \\n    prev2, prev1 = 2, 1\\n    for _ in range(2, n + 1):\\n        current = prev1 + prev2\\n        prev2, prev1 = prev1, current\\n        \\n    return prev1\\n\\n# Test cases\\nif __name__ == \\\"__main__\\\":\\n    assert find_lucas(9) == 76\\n    print(\\\"All tests passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 10.388,
+    "setup_s": 0.0,
+    "grade_s": 0.058
+  },
+  "environment_digest": "sha256:51bb16e1ee8071021dd75f16782bee62f1c07711f6e9c8a389a3edb2e97014c2",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}
