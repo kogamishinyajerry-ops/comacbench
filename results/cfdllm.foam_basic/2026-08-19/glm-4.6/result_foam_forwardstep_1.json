@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_forwardstep_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Helper function to write files\\ndef write_file(path, content):\\n    # Ensure directory exists\\n    directory = os.path.dirname(path)\\n    if directory and not os.path.exists(directory):\\n        os.makedirs(directory, exist_ok=True)\\n    \\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- Directory Structure ---\\nos.makedirs(\\\"system\\\", exist_ok=True)\\nos.makedirs(\\\"constant\\\", exist_ok=True)\\nos.makedirs(\\\"0\\\", exist_ok=True)\\n\\n# --- system/blockMeshDict ---\\n# Geometry: Forward facing step\\n# Domain: 0<=x<=4, 0<=y<=1\\n# Step at x=1, height=0.5\\n# We use 3 blocks to handle the topology cleanly\\nblockMeshDict_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    // Block 0 (Lower Inlet) - x: 0..1, y: 0..0.5\\n    (0 0 0)      // 0\\n    (1 0 0)      // 1\\n    (1 0.5 0)    // 2\\n    (0 0.5 0)    // 3\\n\\n    // Block 1 (Upper Inlet) - x: 0..1, y: 0.5..1\\n    (0 0.5 0)    // 4\\n    (1 0.5 0)    // 5\\n    (1 1 0)      // 6\\n    (0 1 0)      // 7\\n\\n    // Block 2 (Upper Outlet) - x: 1..4, y: 0.5..1\\n    (1 0.5 0)    // 8\\n    (4 0.5 0)    // 9\\n    (4 1 0)      // 10\\n    (1 1 0)      // 11\\n);\\n\\nblocks\\n(\\n    // Lower Inlet\\n    hex (0 1 2 3 0 1 2 3) (50 25 1) simpleGrading (1 1 1)\\n    \\n    // Upper Inlet\\n    hex (4 5 6 7 4 5 6 7) (50 25 1) simpleGrading (1 1 1)\\n    \\n    // Upper Outlet\\n    hex (8 9 10 11 8 9 10 11) (150 25 1) simpleGrading (1 1 1)\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 0 0 0) // Block 0 left\\n            (7 4 4 4) // Block 1 left\\n        );\\n    }\\n    \\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (9 10 11 11) // Block 2 right\\n        );\\n    }\\n    \\n    walls\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 1 0)   // Block 0 bottom\\n            (6 7 7 6)   // Block 1 top\\n            (10 11 11 10) // Block 2 top\\n            (8 9 9 8)   // Block 2 bottom (floor after step)\\n        );\\n    }\\n\\n    obstacle\\n    {\\n        type wall;\\n        faces\\n        (\\n            (1 2 2 1)   // Block 0 right (The face of the step)\\n        );\\n    }\\n\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            // Block 0\\n            (0 1 2 3)\\n            (0 1 2 3)\\n            // Block 1\\n            (4 5 6 7)\\n            (4 5 6 7)\\n            // Block 2\\n            (8 9 10 11)\\n            (8 9 10 11)\\n        );\\n    }\\n);\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_file(\\\"system/blockMeshDict\\\", blockMeshDict_content)\\n\\n# --- system/controlDict ---\\ncontrolDict_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n// * * * * \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 234.51,
+    "setup_s": 0.0,
+    "grade_s": 2.607
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.6s last_time=0"
+  ]
+}

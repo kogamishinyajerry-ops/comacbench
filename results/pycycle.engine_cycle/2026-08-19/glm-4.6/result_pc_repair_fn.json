@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_repair_fn",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport json\\nimport numpy as np\\nimport pycycle.api as pyc\\n\\n# Known parameters from the problem statement\\nOPR = 13.5\\nTARGET_TSFC = 0.79852\\nCORRUPTED_VAL = 9999.0\\n\\n# Standard thrust values (lbs) typically associated with this class/engine in examples/test cases\\n# We scan these to find the one that yields the Reference TSFC.\\n# Based on pycycle examples, 't4_target' is usually 2850 (R) for this class.\\n# The corrupted parameter is 'fn_target'.\\nCANDIDATE_FN_VALUES = [\\n    10000.0, \\n    15000.0, \\n    20000.0, \\n    25000.0, \\n    30000.0, \\n    50000.0, \\n    12000.0, \\n    18000.0\\n]\\n\\ndef run_simulation(fn_value):\\n    prob = pyc.Problem()\\n    prob.model = pyc.Turbojet()\\n    prob.setup()\\n    \\n    # Initial guesses to help convergence\\n    prob.set_val('design.fan.PR', 1.2)\\n    prob.set_val('design.lpc.PR', 1.5)\\n    prob.set_val('design.hpc.PR', 10.0)\\n    prob.set_val('design.hpt.sm_H', 0.5)\\n    prob.set_val('design.lpt.sm_H', 0.5)\\n    \\n    # Set Operating Parameters\\n    prob.set_val('design.hpc.PR', OPR)\\n    \\n    # Set Targets\\n    # The problem states the target was corrupted.\\n    # In pycycle Turbojet design mode, we control Thrust (fn) and T4.\\n    # We assume T4 is the standard 2850 R and vary FN.\\n    prob.set_val('design.t4_target', 2850.0, units='degR')\\n    prob.set_val('design.fn_target', fn_value, units='lbf')\\n    \\n    # Run\\n    try:\\n        prob.run_model()\\n    except Exception as e:\\n        # print(f\\\"Failed for fn={fn_value}: {e}\\\")\\n        return None\\n        \\n    # Extract TSFC\\n    tsfc = prob.get_val('design.tsfc', units='lb/(lbf*h)')\\n    return tsfc\\n\\n# Search for the matching TSFC\\nbest_match = None\\nmin\""
+  },
+  "timings": {
+    "agent_s": 345.322,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:1efc3eca892ea0be5e1c977b441c228ad2b02865021da27fd32275a2a2a9c1b1",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

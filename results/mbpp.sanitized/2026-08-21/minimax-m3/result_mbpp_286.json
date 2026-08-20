@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_286",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_sub_array_sum_repeated(arr, n, k):\\n    # Compute maximum subarray sum for a single copy using Kadane's algorithm\\n    max_ending_here = max_so_far = arr[0]\\n    for i in range(1, n):\\n        max_ending_here = max(arr[i], max_ending_here + arr[i])\\n        max_so_far = max(max_so_far, max_ending_here)\\n    max_single = max_so_far\\n    \\n    # If only one repetition, the answer is the max subarray sum of the single array\\n    if k == 1:\\n        return max_single\\n    \\n    # Compute maximum prefix sum\\n    max_prefix = arr[0]\\n    current = arr[0]\\n    for i in range(1, n):\\n        current += arr[i]\\n        max_prefix = max(max_prefix, current)\\n    \\n    # Compute maximum suffix sum\\n    max_suffix = arr[n-1]\\n    current = arr[n-1]\\n    for i in range(n-2, -1, -1):\\n        current += arr[i]\\n        max_suffix = max(max_suffix, current)\\n    \\n    # Compute total sum of the array\\n    arr_sum = sum(arr)\\n    \\n    # Determine the best result considering multiple copies\\n    if arr_sum > 0:\\n        # When total sum is positive, including more copies increases the sum\\n        result = max_suffix + (k - 2) * arr_sum + max_prefix\\n    else:\\n        # When total sum is zero or negative, only use boundary copies\\n        result = max_suffix + max_prefix\\n    \\n    # The answer is the maximum between the single-copy best and the multi-copy best\\n    return max(max_single, result)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 42.327,
+    "setup_s": 0.0,
+    "grade_s": 0.045
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

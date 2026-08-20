@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_102",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef choose_num(x, y):\\n    \\\"\\\"\\\"Return the biggest even integer number in the range [x, y] inclusive.\\n    If there is no such number, return -1.\\n    \\\"\\\"\\\"\\n    # If the lower bound is greater than the upper bound, the range is invalid.\\n    if x > y:\\n        return -1\\n\\n    # Determine the smallest integer >= x and the largest integer <= y.\\n    lo = math.ceil(x)\\n    hi = math.floor(y)\\n\\n    # If there are no integers in the interval, there cannot be an even integer.\\n    if lo > hi:\\n        return -1\\n\\n    # The largest even integer not exceeding hi is hi with its parity stripped.\\n    candidate = hi - (hi % 2)\\n\\n    # Verify that the candidate lies within the [lo, hi] interval.\\n    if candidate >= lo:\\n        return candidate\\n    return -1\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 28.722,
+    "setup_s": 0.0,
+    "grade_s": 0.045
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

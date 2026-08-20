@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_100",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def make_a_pile(n):\\n    \\\"\\\"\\\"\\n    Given a positive integer n, you have to make a pile of n levels of stones.\\n    The first level has n stones.\\n    The number of stones in the next level is:\\n        - the next odd number if n is odd.\\n        - the next even number if n is even.\\n    Return the number of stones in each level in a list, where element at index\\n    i represents the number of stones in the level (i+1).\\n\\n    Examples:\\n    >>> make_a_pile(3)\\n    [3, 5, 7]\\n    \\\"\\\"\\\"\\n    return [n + 2 * i for i in range(n)]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 3.618,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

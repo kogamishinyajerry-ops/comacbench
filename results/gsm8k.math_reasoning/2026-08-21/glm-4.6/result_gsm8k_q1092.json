@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1092",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let's solve this step by step:\\n\\nLet x be the initial weight of the triceratops in kilograms.\\n\\nStep 1: The T-Rex ate half of the triceratops.\\nAfter this, there was: x/2 kilograms remaining\\n\\nStep 2: The velociraptors scavenged half of what was left.\\nAfter this, there was: (x/2)/2 = x/4 kilograms remaining\\n\\nStep 3: The Allosaurus ate the last 270 kilograms of meat.\\nThis means: x/4 = 270\\n\\nSolving for x:\\nx = 270 × 4\\nx = 1,080\\n\\nTo verify:\\n- T-Rex ate half: 1,080 ÷ 2 = 540 kg remaining\\n- Velociraptors ate half: 540 ÷ 2 = 270 kg remaining\\n- Allosaurus ate the last 270 kg ✓\\n\\n#### 1080\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 1080.0, \"reference_number\": 1080.0, \"raw_tail\": \"80\\n\\nTo verify:\\n- T-Rex ate half: 1,080 ÷ 2 = 540 kg remaining\\n- Velociraptors ate half: 540 ÷ 2 = 270 kg remaining\\n- Allosaurus ate the last 270 kg ✓\\n\\n#### 1080\"}"
+  },
+  "timings": {
+    "agent_s": 9.888,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Let's solve this step by step:\\n\\nLet x be the initial weight of the triceratops in kilograms.\\n\\nStep 1: The T-Rex ate half\" attempts=1"
+  ]
+}

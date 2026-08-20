@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_109",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def move_one_ball(arr):\\n    \\\"\\\"\\\"\\n    Determine if the array can be sorted in non‑decreasing order by performing\\n    any number of right‑shift operations (the last element moves to the front).\\n\\n    Parameters\\n    ----------\\n    arr : list[int]\\n        A list of integers with unique elements.\\n\\n    Returns\\n    -------\\n    bool\\n        True if the array is empty or can be sorted by right shifts,\\n        otherwise False.\\n    \\\"\\\"\\\"\\n    # An empty array is trivially sorted\\n    if not arr:\\n        return True\\n\\n    n = len(arr)\\n\\n    # Count the number of places where the order \\\"breaks\\\" (including the wrap‑around)\\n    # For a rotation of a sorted list there can be at most one such break.\\n    drops = sum(1 for i in range(n) if arr[i] > arr[(i + 1) % n])\\n\\n    # No break -> the array is already sorted\\n    if drops == 0:\\n        return True\\n\\n    # More than one break -> it cannot be a rotation of a sorted array\\n    if drops > 1:\\n        return False\\n\\n    # Exactly one break: the array could be a rotation.\\n    # Find the index of the minimum element; after a suitable number of right\\n    # shifts this element will become the first element.\\n    min_idx = arr.index(min(arr))\\n\\n    # Rotate so that the minimum element is at the front (left rotation by min_idx)\\n    rotated = arr[min_idx:] + arr[:min_idx]\\n\\n    # Check whether the rotated array is fully sorted\\n    return all(rotated[i] <= rotated[i + 1] for i in range(n - 1))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 18.892,
+    "setup_s": 0.0,
+    "grade_s": 0.065
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

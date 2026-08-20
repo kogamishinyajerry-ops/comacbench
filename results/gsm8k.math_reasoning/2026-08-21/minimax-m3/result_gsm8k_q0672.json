@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0672",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to track Christina's moods throughout a 30-day month.\\n\\n## Setting Up the Problem\\n\\n**Total month:** 30 days\\n- 12 good days\\n- 8 bad days  \\n- 10 neutral days (the rest)\\n\\n## Accounting for Each Period\\n\\n**Days 1-8 (first eight days):** All good → **8 good days**\\n\\n**Days 9-16 (second eight days):** All bad → **8 bad days**\\n\\n**Days 17-24 (third eight days):** All neutral → **8 neutral days**\\n\\n**Days 25-27 (next three days):** Good, neutral, good → **2 good days, 1 neutral day**\\n\\n## Counting Days Used So Far\\n\\nTotal days described: 8 + 8 + 8 + 3 = **27 days**\\n\\nDays remaining: 30 − 27 = **3 days**\\n\\n## Tallying Each Mood Type\\n\\n| Mood | Used | Required | Remaining |\\n|------|------|----------|-----------|\\n| Good | 8 + 2 = 10 | 12 | **2** |\\n| Bad | 8 | 8 | 0 |\\n| Neutral | 8 + 1 = 9 | 10 | 1 |\\n\\n## Verification\\n\\nThe 3 remaining days must be: 2 good + 0 bad + 1 neutral = 3 days ✓\\n\\n#### 2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 2.0, \"reference_number\": 2.0, \"raw_tail\": \" 12 | **2** |\\n| Bad | 8 | 8 | 0 |\\n| Neutral | 8 + 1 = 9 | 10 | 1 |\\n\\n## Verification\\n\\nThe 3 remaining days must be: 2 good + 0 bad + 1 neutral = 3 days ✓\\n\\n#### 2\"}"
+  },
+  "timings": {
+    "agent_s": 23.045,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to track Christina's moods throughout a 30-day month.\\n\\n## Setting Up the Problem\\n\\n**Tota\" attempts=1"
+  ]
+}

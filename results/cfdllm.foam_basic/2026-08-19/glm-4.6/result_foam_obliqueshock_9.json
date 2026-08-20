@@ -1,0 +1,40 @@
+{
+  "task_id": "foam_obliqueshock_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\n# --- Case Parameters ---\\ncase_name = \\\"obliqueShockCase\\\"\\ndomain = {\\\"x\\\": 4.1, \\\"y\\\": 1.0, \\\"z\\\": 0.1}\\n\\n# Boundary Conditions\\ninlet_U = (4.0, 0.0, 0.0)\\ntop_U = (3.5, -0.50632, 0.0)\\n\\ninlet_T = 2.0\\ntop_T = 2.0\\n\\ninlet_P = 1.0\\n# Assuming top pressure is same as inlet unless specified otherwise for shock generation\\n# but following strict prompt instructions: only \\\"inlet pressure of 1.0 Pa\\\" is specified.\\n# We assume Top P is 1.0 to avoid unphysical explosion without explicit value.\\ntop_P = 1.0 \\n\\n# Thermodynamics\\nmolWeight = 11640.3\\nCp = 2.5\\nPr = 1.0\\nmu = 0.0\\n# R = Cp - Cv. Gamma = 1.4. Cp/Cv = 1.4 => Cv = Cp/1.4\\n# R = Cp - Cp/1.4 = Cp * (1 - 1/1.4) = 2.5 * 0.4/1.4 = 2.5 * 2/7 = 5/7 = 0.714285...\\nR_val = 0.7143\\n\\n# Derived Initial Fields (based on Inlet)\\n# rho = P / (R * T)\\nrho_val = inlet_P / (R_val * inlet_T) # 1.0 / (0.7143 * 2.0) = 0.7\\n\\n# Time Control\\ndeltaT = 0.0025\\nwriteInterval = 1.0\\nendTime = 10.0\\nwriteSteps = int(writeInterval / deltaT)\\n\\n# --- Helper Functions ---\\ndef create_dir(path):\\n    os.makedirs(path, exist_ok=True)\\n\\ndef write_file(path, content):\\n    create_dir(os.path.dirname(path))\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- File Contents ---\\n\\n# 1. system/controlDict\\ncontrolDict_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      controlDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\napplication     rhoCentralFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         10.0;\\n\\ndeltaT          0.0025;\\n\\nwriteControl    timeStep;\\n\\nwriteInterval   400;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\nrunTimeModifiable true;\\n\\nfunctions\\n{\\n    // Optional: Could add probes or graphing here\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\n# 2. system/fvSchemes\\nfvSchemes_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      fvSchemes;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(tauMC)      Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\n# 3. system/fvSolution\\nfvSolution_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                         \"",
+    "stderr_tail": "\"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xhenipgi/make_case.py\\\", line 593, in <module>\\n    write_file(\\\"Allrun\\\", Allrun_content)\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xhenipgi/make_case.py\\\", line 45, in write_file\\n    create_dir(os.path.dirname(path))\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xhenipgi/make_case.py\\\", line 42, in create_dir\\n    os.makedirs(path, exist_ok=True)\\n  File \\\"<frozen os>\\\", line 225, in makedirs\\nFileNotFoundError: [Errno 2] No such file or directory: ''\\n\""
+  },
+  "timings": {
+    "agent_s": 227.937,
+    "setup_s": 0.0,
+    "grade_s": 0.022
+  },
+  "environment_digest": "sha256:22ab4b4f675745db5005a78465ba65186a9fe0eae9bc7c327577265ba484fdd2",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.02s",
+    "stderr: e_file\n    create_dir(os.path.dirname(path))\n  File \"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xhenipgi/make_case.py\", line 42, in create_dir\n    os.makedirs(path, exist_ok=True)\n  File \"<frozen os>\", line 225, in makedirs\nFileNotFoundError: [Errno 2] No such file or directory: ''\n"
+  ]
+}

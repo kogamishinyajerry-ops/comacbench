@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0761",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"I need to solve this step by step.\\n\\nLet's define some variables:\\n- Let $T$ be the total number of puppies Jana has.\\n\\nGiven information:\\n1) Two thirds of the puppies are Pomeranians.\\n   Number of Pomeranians = $\\\\frac{2}{3}T$\\n\\n2) One third of the Pomeranians are girls.\\n   Number of Pomeranian girls = $\\\\frac{1}{3} \\\\times \\\\frac{2}{3}T = \\\\frac{2}{9}T$\\n\\n3) There are 6 Pomeranian girls.\\n   So: $\\\\frac{2}{9}T = 6$\\n\\nTo find $T$, I solve this equation:\\n$\\\\frac{2}{9}T = 6$\\n$T = 6 \\\\times \\\\frac{9}{2}$\\n$T = 27$\\n\\nTherefore, Jana has 27 puppies.\\n\\nTo verify:\\n- Pomeranians = $\\\\frac{2}{3} \\\\times 27 = 18$\\n- Pomeranian girls = $\\\\frac{1}{3} \\\\times 18 = 6$ ✓\\n\\n#### 27\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 27.0, \"reference_number\": 27.0, \"raw_tail\": \"$\\n$T = 27$\\n\\nTherefore, Jana has 27 puppies.\\n\\nTo verify:\\n- Pomeranians = $\\\\frac{2}{3} \\\\times 27 = 18$\\n- Pomeranian girls = $\\\\frac{1}{3} \\\\times 18 = 6$ ✓\\n\\n#### 27\"}"
+  },
+  "timings": {
+    "agent_s": 11.307,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"I need to solve this step by step.\\n\\nLet's define some variables:\\n- Let $T$ be the total number of puppies Jana has.\\n\\nGiv\" attempts=1"
+  ]
+}

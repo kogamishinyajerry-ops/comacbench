@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_114",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def minSubArraySum(nums):\\n    \\\"\\\"\\\"\\n    Given an array of integers nums, find the minimum sum of any non-empty sub-array\\n    of nums.\\n    Example\\n    minSubArraySum([2, 3, 4, 1, 2, 4]) == 1\\n    minSubArraySum([-1, -2, -3]) == -6\\n    \\\"\\\"\\\"\\n    if not nums:\\n        # Return 0 for empty input; alternatively raise an error.\\n        return 0\\n\\n    # Initialize with the first element.\\n    current_min = global_min = nums[0]\\n\\n    # Iterate over the rest of the array.\\n    for num in nums[1:]:\\n        # Minimum sum of a sub‑array ending at the current position.\\n        current_min = min(num, current_min + num)\\n        # Update the best (smallest) sum seen so far.\\n        global_min = min(global_min, current_min)\\n\\n    return global_min\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 12, \"cases_total\": 12, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 12.375,
+    "setup_s": 0.0,
+    "grade_s": 0.057
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

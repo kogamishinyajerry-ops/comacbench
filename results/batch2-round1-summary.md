@@ -22,7 +22,16 @@
 | --- | --- |
 | cfdllm.cfdcode | **gate 11/15，均分 0.586**（过 gate 题 physics 0.598）——GLM 通过率高于 M3（11 vs 8），精度低于 M3（0.598 vs 0.937）：画像分化 |
 | scicode.physics | **gate 29/52，均分 0.477，满分 11**（23 code_not_executable——通过率低于 M3 42/52，画像分化） |
-| foam_basic / superwing / hilift / pycycle | 串行链（/tmp/glm_chain.sh）**已中断**（2026-08-20 核对：foam 停在 14/110，最后落盘 19:45 后进程消失；脚本 cwd 指向迁移前旧路径且 `.venv` 已删——见 §8.1）|
+| cfdllm.foam_basic | **gate 0/110**：36 code_not_executable + 67 simulation_failed + 7 missing_output——vs M3（87+23）：GLM 可执行率高近 3× 但仿真失败反超，「写得出来 ≠ 算得出来」 |
+| superwing.coeff_lite | gate 100/100，均分 0.4135：physics 外推 **0.025**/内插 **0.017**（M3 0.080/0.044）——CL err 300-479%，跨声速系数回归 GLM 更差 |
+| hilift_aeroml.lite | gate 100/100，均分 0.4885：physics 外推 **0.150**/内插 0.142（M3 0.124/0.186）——CM err 338-370%，两家 LLM 同败于高升力俯仰力矩（ML 正例 0.82/0.88） |
+| pycycle.engine_cycle | **gate 0/7**：7 code_not_executable——同类幻觉 API（`ThermoZone` 不存在等，solve <2s 即败）；环境无责（oracle 7/7） |
+
+> 运行学（2026-08-20/21 补齐过程）：v1 串行链随仓库迁移死亡（见 §8.1）→ v2 重建
+> （`--resume` 断点续跑 + venv 兼容栈重建）后进一步拆 4-5 条并行流（任务族不相交、
+> 同 out 目录幂等、峰值 ~0.6 req/min 无 429），20:32→02:32 共 6h 跑完余下
+> foam 96 + superwing/hilift/pycycle 全量 207 题；单题时长 3-44 min 波动
+> （长尾 = 反应流算例 OpenFOAM 仿真本身 + 偶发超长思考重试）。
 
 ## 3. superwing ML 基线（正例参照）
 
@@ -73,13 +82,9 @@ RandomForest(100 trees, sklearn) on 25985 训练样本（38 几何参数 + aoa +
 
 ## 8. 待议清单（本轮新增）
 
-1. **GLM 串行链遗留（2026-08-20 审计 + 同日重建）**：v1 链已死——scicode 52/52 ✓、
-   foam **14/110** 中断（最后落盘 19:45，其后无进程）、superwing/hilift/pycycle 未启动。
-   死因：脚本 `cd` 迁移前旧路径 `JerryDSH/benchmarks`（结果靠 inode 跟随迁移落进
-   新仓库）+ `.venv/` 已删。**v2 已于 20:32 重启**（/tmp/glm_chain2.sh，nohup 脱离）：
-   新仓库路径 + runner 新增 `--resume` 断点续跑（foam 已有 14 件保留）+ venv 重建
-   （om-pycycle 4.4.0 兼容栈，oracle pycycle 7/7 自检通过）；顺序 foam(余96) →
-   superwing → hilift → pycycle，预计隔夜完成；
+1. ~~GLM 串行链遗留~~ **已闭环（2026-08-21 02:32）**：v1 死因（旧路径 cwd + .venv 删除）
+   → v2 重建（`--resume` + venv 兼容栈 + 沙箱 3.12 修复，commit 5e251dda）→ 4-5 并行流
+   6h 跑完全量，四基准 GLM 基线全部落盘（§2 终版数据）；
 2. ~~hilift ML 正例基线（RF 同款）待跑~~ **已补齐**（ml-hilift，见 §4）；
 3. mechvqa 多模态 provider（expect="vlm"）+ 规则判分口径评审；
 4. cadgen 三重前置（design_artifact adapter / 多模态 / GT 私有边界声明）；

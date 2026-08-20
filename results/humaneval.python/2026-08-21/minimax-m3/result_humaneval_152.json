@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_152",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def compare(game, guess):\\n    \\\"\\\"\\\"I think we all remember that feeling when the result of some long-awaited\\n    event is finally known. The feelings and thoughts you have at that moment are\\n    definitely worth noting down and comparing.\\n    Your task is to determine if a person correctly guessed the results of a number of matches.\\n    You are given two arrays of scores and guesses of equal length, where each index shows a match. \\n    Return an array of the same length denoting how far off each guess was. If they have guessed correctly,\\n    the value is 0, and if not, the value is the absolute difference between the guess and the score.\\n    \\n    \\n    example:\\n\\n    compare([1,2,3,4,5,1],[1,2,3,4,2,-2]) -> [0,0,0,0,3,3]\\n    compare([0,5,0,0,0,4],[4,1,1,0,0,-2]) -> [4,4,1,0,0,6]\\n    \\\"\\\"\\\"\\n    return [abs(g - s) for g, s in zip(game, guess)]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 9.853,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

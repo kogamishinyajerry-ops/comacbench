@@ -1,0 +1,41 @@
+{
+  "task_id": "mbpp_430",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_unit_tests",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"def parabola_directrix(a, b, c):\\n    # For a parabola in standard form y = ax^2 + bx + c\\n    # The directrix is a horizontal line y = k - 1/(4a)\\n    # where k is the y-coordinate of the vertex\\n    \\n    # Vertex y-coordinate: k = c - b^2/(4a)\\n    k = c - (b * b) / (4 * a)\\n    \\n    # Directrix: y = k - 1/(4a)\\n    directrix = k - 1 / (4 * a)\\n    \\n    return directrix\\n\\n# Test\\nassert parabola_directrix(5, 3, 2) == -198\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "stderr_tail": "\"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox__thnmnhz/candidate.py\\\", line 17, in <module>\\n    assert parabola_directrix(5, 3, 2) == -198\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError\\n\""
+  },
+  "timings": {
+    "agent_s": 295.205,
+    "setup_s": 0.0,
+    "grade_s": 0.024
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=1 0.02s",
+    "stderr: Traceback (most recent call last):\n  File \"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox__thnmnhz/candidate.py\", line 17, in <module>\n    assert parabola_directrix(5, 3, 2) == -198\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  ]
+}

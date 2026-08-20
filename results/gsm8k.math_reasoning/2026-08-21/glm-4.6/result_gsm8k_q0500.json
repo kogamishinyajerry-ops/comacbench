@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0500",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let's define variables for the number of insects each person found.\\n\\nLet $l$ be the number of insects Lily found.\\nLet $d$ be the number of insects David found.\\nLet $b$ be the number of insects Bodhi found.\\n\\nWe are given:\\n1. Together, Lily, David, and Bodhi collected 43 insects: $l + d + b = 43$\\n2. Lily found 7 more than David: $l = d + 7$\\n3. David found half of what Bodhi found: $d = \\\\frac{b}{2}$ or $b = 2d$\\n\\nI'll substitute $l$ and $b$ in terms of $d$ into the first equation.\\n\\nFrom equation 2: $l = d + 7$\\nFrom equation 3: $b = 2d$\\n\\nSubstituting into equation 1:\\n$(d + 7) + d + 2d = 43$\\n\\nSimplifying:\\n$4d + 7 = 43$\\n\\nSolving for $d$:\\n$4d = 43 - 7$\\n$4d = 36$\\n$d = 9$\\n\\nSo David found 9 insects.\\n\\nNow I'll find the number of insects Lily found using $l = d + 7$:\\n$l = 9 + 7$\\n$l = 16$\\n\\nTo verify, let me check that the total is 43:\\n- Lily found 16 insects\\n- David found 9 insects\\n- Bodhi found $2 \\\\cdot 9 = 18$ insects\\n- Total: $16 + 9 + 18 = 43$ ✓\\n\\nTherefore, Lily found 16 insects.\\n\\n#### 16\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 16.0, \"reference_number\": 16.0, \"raw_tail\": \"- Lily found 16 insects\\n- David found 9 insects\\n- Bodhi found $2 \\\\cdot 9 = 18$ insects\\n- Total: $16 + 9 + 18 = 43$ ✓\\n\\nTherefore, Lily found 16 insects.\\n\\n#### 16\"}"
+  },
+  "timings": {
+    "agent_s": 11.958,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Let's define variables for the number of insects each person found.\\n\\nLet $l$ be the number of insects Lily found.\\nLet $d\" attempts=1"
+  ]
+}

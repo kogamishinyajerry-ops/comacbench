@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0844",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given:\\n\\n- Peter has twice as many socks as Jack.\\n- Peter has half as many dishes as Jack (interpreting \\\"half times as many\\\" as \\\"half as many\\\").\\n- Jack collected twice as many dishes as socks.\\n- Jack collected 60 dishes.\\n\\nFirst, find Jack's number of socks. Since Jack's dishes are twice his socks, we have:\\n\\\\[\\n\\\\text{Jack's dishes} = 2 \\\\times \\\\text{Jack's socks}.\\n\\\\]\\nGiven Jack's dishes = 60, then:\\n\\\\[\\n60 = 2 \\\\times \\\\text{Jack's socks} \\\\quad\\\\Rightarrow\\\\quad \\\\text{Jack's socks} = \\\\frac{60}{2} = 30.\\n\\\\]\\n\\nNow compute Peter's numbers:\\n- Peter's socks = twice Jack's socks = \\\\(2 \\\\times 30 = 60\\\\).\\n- Peter's dishes = half Jack's dishes = \\\\(\\\\frac{1}{2} \\\\times 60 = 30\\\\).\\n\\nNow total items (socks + dishes) for both together:\\n- Total socks = Jack's socks + Peter's socks = \\\\(30 + 60 = 90\\\\).\\n- Total dishes = Jack's dishes + Peter's dishes = \\\\(60 + 30 = 90\\\\).\\n- Grand total = \\\\(90 + 90 = 180\\\\).\\n\\nThus the total number of socks and dishes they have together is 180.\\n\\n#### 180\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 180.0, \"reference_number\": 180.0, \"raw_tail\": \"s dishes + Peter's dishes = \\\\(60 + 30 = 90\\\\).\\n- Grand total = \\\\(90 + 90 = 180\\\\).\\n\\nThus the total number of socks and dishes they have together is 180.\\n\\n#### 180\"}"
+  },
+  "timings": {
+    "agent_s": 22.508,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='We are given:\\n\\n- Peter has twice as many socks as Jack.\\n- Peter has half as many dishes as Jack (interpreting \"half time' attempts=1"
+  ]
+}

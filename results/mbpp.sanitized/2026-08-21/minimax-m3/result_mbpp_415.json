@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_415",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"def max_Product(arr):\\n    if len(arr) < 2:\\n        return None\\n    sorted_arr = sorted(arr)\\n    \\n    # Product of two largest numbers\\n    product1 = sorted_arr[-1] * sorted_arr[-2]\\n    pair1 = (sorted_arr[-2], sorted_arr[-1])\\n    \\n    # Product of two smallest numbers\\n    product2 = sorted_arr[0] * sorted_arr[1]\\n    pair2 = (sorted_arr[0], sorted_arr[1])\\n    \\n    # Return the pair with the highest product\\n    if product1 >= product2:\\n        return pair1\\n    else:\\n        return pair2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 2, \"cases_total\": 3, \"failed_cases\": [{\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 21.14,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

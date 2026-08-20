@@ -69,8 +69,14 @@ scicode：42 过 gate 的题中 14 满分、28 部分分（physics 均值 0.54�
 
 | 模型 | 完整基准 | 受限基准 | 原因 |
 | --- | --- | --- | --- |
-| MiniMax-M3 | cfdquery/aeroengqa/scicode/cfdcode/superwing/aviary | foam_basic（进行中） | 长跑 |
-| GLM-4.6 | cfdquery/aeroengqa/aviary | scicode/cfdcode/foam（429） | 共享端点限流 |
+| MiniMax-M3 | cfdquery/aeroengqa/scicode/cfdcode/superwing/aviary/foam_basic | — | — |
+| GLM-4.6 | cfdquery/aeroengqa/aviary/scicode/cfdcode/foam_basic/superwing/hilift/pycycle（batch-2 三项 2026-08-21 补齐） | — | 429 限流曾致中断，链 v2 重建后全量完成 |
+
+GLM-4.6 次要基线速览（vs M3）：cfdcode 通过率高（11 vs 8）精度低；scicode 通过率低
+（29 vs 42）；foam 代码可执行率高近 3× 但仿真失败反超（67 vs 23）；superwing 系数回归
+更差（physics 0.025/0.017 vs 0.080/0.044）；hilift 略优（0.150/0.142 vs 0.124/0.186，
+CM 两家同灾难级）；pycycle 同败于幻觉 API。**两家模型强弱势互补、无一能在工程可执行层
+立足**——详见 results/batch2-round1-summary.md §2。
 
 复现性：stub/oracle 离线逐字节可复现；API 基线受推理非确定性影响（temperature=0 下思考
 型仍非逐题确定）。所有命令/seed/digest 落各 run_manifest。

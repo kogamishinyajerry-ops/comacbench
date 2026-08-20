@@ -9,7 +9,7 @@
 | `stub/` | stub | 0/110 | 0 | missing_output ×110（`pass` 不产算例）——gate 语义正确 |
 | `oracle/` | GT 逐字写出器 | **110/110** | **1.000** | GT→docker 重跑→NMSE=0 自洽（判分器全量验证）|
 | `minimax-m3/` | MiniMax-M3 | 0/110 | 0 | **87 code_not_executable + 23 simulation_failed**（脚本崩溃 / Allrun 用 `source` 而非 POSIX `.`）——LLM 写不出可运行 OpenFOAM 算例 |
-| `glm-4.6/` | GLM-4.6 | 待跑 | — | 共享端点 429 限流（M2 遗留），配额恢复后单跑补齐 |
+| `glm-4.6/` | GLM-4.6 | 0/110 | 0 | **36 code_not_executable + 67 simulation_failed + 7 missing_output**——与 M3 画像分化：GLM 代码可执行率高近 3×（不可执行 36 vs 87），但可执行后仿真失败反超（67 vs 23）——「写得出来 ≠ 算得出来」（2026-08-21 补齐，串行链 v2 断点续跑）|
 
 判分口径（官方语义映射，详见 `data/cfdllm/foam_basic/PROVENANCE.md`）：
 - gate = 脚本跑通 → 算例结构契约（system 四件套+constant+0+Allrun）→ docker Allrun 跑完

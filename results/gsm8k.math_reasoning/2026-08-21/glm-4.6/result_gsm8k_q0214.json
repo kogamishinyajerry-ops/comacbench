@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0214",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let the amount of water in the small pool 4 minutes ago be \\\\(S_0\\\\) gallons, and the amount in the big pool 4 minutes ago be \\\\(B_0\\\\) gallons. Both pools leak at 4 gallons per minute, so over 4 minutes each loses \\\\(4 \\\\times 4 = 16\\\\) gallons. Therefore, now the small pool has \\\\(S = S_0 - 16\\\\) gallons, and the big pool has \\\\(B = B_0 - 16\\\\) gallons.\\n\\nFrom the information given:\\n- Four minutes ago: \\\\(B_0 = 2S_0\\\\).\\n- Now: \\\\(B = 4S\\\\).\\n\\nSubstitute the expressions for \\\\(B\\\\) and \\\\(S\\\\) into the now condition:\\n\\\\[\\nB_0 - 16 = 4(S_0 - 16).\\n\\\\]\\n\\nReplace \\\\(B_0\\\\) with \\\\(2S_0\\\\):\\n\\\\[\\n2S_0 - 16 = 4S_0 - 64.\\n\\\\]\\n\\nSolve for \\\\(S_0\\\\):\\n\\\\[\\n2S_0 - 16 = 4S_0 - 64 \\\\implies -16 + 64 = 4S_0 - 2S_0 \\\\implies 48 = 2S_0 \\\\implies S_0 = 24.\\n\\\\]\\n\\nThen the current amount in the small pool is:\\n\\\\[\\nS = S_0 - 16 = 24 - 16 = 8.\\n\\\\]\\n\\nCheck: \\\\(B_0 = 2 \\\\times 24 = 48\\\\); now \\\\(B = 48 - 16 = 32\\\\), and indeed \\\\(32 = 4 \\\\times 8\\\\). The solution is consistent.\\n\\nThus the small pool now has 8 gallons of water.\\n\\n#### 8\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 8.0, \"reference_number\": 8.0, \"raw_tail\": \"\\\\times 24 = 48\\\\); now \\\\(B = 48 - 16 = 32\\\\), and indeed \\\\(32 = 4 \\\\times 8\\\\). The solution is consistent.\\n\\nThus the small pool now has 8 gallons of water.\\n\\n#### 8\"}"
+  },
+  "timings": {
+    "agent_s": 19.647,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Let the amount of water in the small pool 4 minutes ago be \\\\(S_0\\\\) gallons, and the amount in the big pool 4 minutes ago' attempts=1"
+  ]
+}

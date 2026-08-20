@@ -1,0 +1,40 @@
+{
+  "task_id": "foam_wedge_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.8571,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef ensure_dir(directory):\\n    if not os.path.exists(directory):\\n        os.makedirs(directory)\\n\\ndef write_file(path, content):\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# Case directory structure\\ncase_dir = os.getcwd()\\nconstant_dir = os.path.join(case_dir, 'constant')\\nsystem_dir = os.path.join(case_dir, 'system')\\nzero_dir = os.path.join(case_dir, '0')\\npolyMesh_dir = os.path.join(constant_dir, 'polyMesh')\\n\\nensure_dir(polyMesh_dir)\\nensure_dir(system_dir)\\nensure_dir(zero_dir)\\n\\n# --- Parameters ---\\nx_min = -0.15242\\nx_max = 0.3048\\ny_min = 0.0\\ny_max = 0.1524\\nz_min = -0.005\\nz_max = 0.005\\n\\ninlet_u = 20.0\\ninlet_t = 3.0\\ninlet_p = 1.0\\n\\nR = 0.7143\\ngamma = 1.4\\nCp = 2.5\\nmu = 0.0\\nPr = 1.0\\nmolWeight = 11640.3\\n\\n# Calculate initial density (rho = p / R*T)\\ninit_rho = inlet_p / (R * inlet_t)\\n\\n# --- constant/thermophysicalProperties ---\\nthermophysicalProperties_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      thermophysicalProperties;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nthermoType\\n{\\n    type            heRhoThermo;\\n    mixture         pureMixture;\\n    transport       const;\\n    thermo          hConst;\\n    equationOfState perfectGas;\\n    specie          specie;\\n    energy          sensibleInternalEnergy;\\n}\\n\\nmixture\\n{\\n    specie\\n    {\\n        molWeight       %g;\\n    }\\n    thermodynamics\\n    {\\n        Cp              %g;\\n        Hf              0;\\n    }\\n    transport\\n    {\\n        mu              0;\\n        Pr              %g;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\" % (molWeight, Cp, Pr)\\n\\nwrite_file(os.path.join(constant_dir, 'thermophysicalProperties'), thermophysicalProperties_content)\\n\\n# --- constant/turbulenceProperties ---\\nturbulenceProperties_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"constant\\\";\\n    object      turbulenceProperties;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nsimulationType laminar;\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_file(os.path.join(constant_dir, 'turbulenceProperties'), turbulenceProperties_content)\\n\\n# --- system/controlDict ---\\ncontrolDict_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*-----------\"",
+    "grade_details": "{\"missing\": [\"system/blockMeshDict\"]}"
+  },
+  "timings": {
+    "agent_s": 165.423,
+    "setup_s": 0.0,
+    "grade_s": 0.021
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=6/7 missing=['system/blockMeshDict']"
+  ]
+}

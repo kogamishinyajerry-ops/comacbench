@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\ndef create_file(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- Configuration ---\\ncase_dir = os.getcwd()\\nsystem_dir = os.path.join(case_dir, \\\"system\\\")\\nconstant_dir = os.path.join(case_dir, \\\"constant\\\")\\nzero_dir = os.path.join(case_dir, \\\"0\\\")\\n\\n# --- Geometry Definition (Square Bend L-Shape) ---\\n# Based on user constraints:\\n# Inlet x=-50, y=25 (center), z=[-25, 25] -> Face y in [0, 50]\\n# Bend (25, 0) -> Corner of the L\\n# Outlet y=-75, x=25 (center), z=[-25, 25] -> Face x in [0, 50]\\n# We construct two hex blocks.\\n# Block 1: Horizontal (Inlet Leg)\\n#   x: -50 to 25\\n#   y: 0 to 50\\n#   z: -25 to 25\\n# Block 2: Vertical (Outlet Leg)\\n#   x: 0 to 50\\n#   y: -75 to 0\\n#   z: -25 to 25\\n# This forms a continuous L-shaped duct with square cross-section 50x50.\\n\\nvertices = [\\n    # Block 1 Vertices (0-7)\\n    # x = -50\\n    \\\"(-50 0 -25)\\\",   # 0\\n    \\\"(-50 50 -25)\\\",  # 1\\n    \\\"(-50 50 25)\\\",   # 2\\n    \\\"(-50 0 25)\\\",    # 3\\n    # x = 25\\n    \\\"(25 0 -25)\\\",    # 4\\n    \\\"(25 50 -25)\\\",   # 5\\n    \\\"(25 50 25)\\\",    # 6\\n    \\\"(25 0 25)\\\",     # 7\\n\\n    # Block 2 Vertices (8-15)\\n    # y = -75\\n    \\\"(0 -75 -25)\\\",   # 8\\n    \\\"(50 -75 -25)\\\",  # 9\\n    \\\"(50 -75 25)\\\",   # 10\\n    \\\"(0 -75 25)\\\",    # 11\\n    # y = 0\\n    \\\"(0 0 -25)\\\",     # 12\\n    \\\"(50 0 -25)\\\",    # 13\\n    \\\"(50 0 25)\\\",     # 14\\n    \\\"(0 0 25)\\\"       # 15\\n]\\n\\n# Faces: Inlet, Outlet, Walls\\n# Inlet: Block 1, face 0 (x=-50)\\n# Outlet: Block 2, face 4 (y=-75)\\n# Walls: Everything else.\\n\\nboundary_dict = \\\"\\\"\\\"\\ninlet\\n{\\n    type patch;\\n    faces\\n    (\\n        (0 1 2 3) // Block 1, x=-50\\n    );\\n}\\noutlet\\n{\\n    type patch;\\n    faces\\n    (\\n        (8 9 10 11) // Block 2, y=-75\\n    );\\n}\\nwalls\\n{\\n    type wall;\\n    faces\\n    (\\n        // Block 1 remaining faces\\n        (1 5 6 2) // Top (y=50)\\n        (0 4 7 3) // Bottom (y=0)\\n        (0 1 5 4) // Front (z=-25)\\n        (3 2 6 7) // Back (z=25)\\n        (4 5 6 7) // End cap (x=25) - partly internal, but defined as wall then merged? \\n                   // Actually in single region blockMesh, internal faces are not boundary.\\n                   // The L-shape overlap creates internal boundaries if not careful, \\n                   // but with standard blockMesh, we just define the outer shell.\\n                   // The face (4 5 6 7) and (12 13 14 15) are internal?\\n                   // Let's list only the OUTER shell of the composite L-shape.\\n    );\\n}\\n// Need to be careful with internal faces. \\n// The L-shape union: x[-50, 25], y[0, 50] UNION x[0, 50], y[-75, 0].\\n// The shared volume is x[0, 25], y[0, 0]? No, they touch at the edge/corner.\\n// With the defined blocks:\\n// Block 1 ends at x=25. Block 2 starts at x=0. They overlap in x[0, 25].\\n// Block 1 is y[0, 50]. Block 2 is y[-75, 0]. They touch at y=0.\\n// Overlap region is x[0, 25], y[0, 0]? That's a line.\\n// Block 1 is z[-25, 25]. Block 2 is z[-25, 25].\\n// So they meet at the line/face y=0.\\n// Block 1 occupies y>0. Block 2 occupies y<0.\\n// Face (4 5 6 7) is at x=25, y[0, 50]. This is the vertical wall at the end of the horizontal leg.\\n// Face (12 13 14 15) is at y=0, x[0, 50]. This is the horizontal \\\"floor\\\" of the vertical leg? \\n// Wait, Block 2 is vertical leg. Flow goes down (-y). \\n// Block 2 x-range [0, 50]. y-range [-75, 0].\\n// So y=0 is the TOP of the vertical leg.\\n// Block 1 y-range [0, 50]. y=0 is the BOTTOM of the horizontal leg.\\n// So the interface is y=0.\\n// Face (4 5 6 7) [Block 1, x=25, y 0->50] is an EXTERNAL wall (the outer corner).\\n// Face (12 13 14 15) [Block 2, y=0, x 0->50] is INTERNAL if Block 1 covers it?\\n// Block 1 covers x[-50, 25], y[0, 50]. At y=0, Block 1 covers x[-50, 25].\\n// Block 2 covers x[0, 50], y[-75, 0]. At y=0, Block 2 covers x[0, 50].\\n// The shared interface is x[0, 25], y=0.\\n// In blockMesh, if faces are coincident, we just don't list them in boundary.\\n// We list only the outer hull.\\n\\n// Let's redefine boundary faces for the hull.\\n// Hull:\\n// Inlet: x=-50, y[0, 50], z[-25, 25]\\n// Outlet: y=-\""
+  },
+  "timings": {
+    "agent_s": 337.866,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

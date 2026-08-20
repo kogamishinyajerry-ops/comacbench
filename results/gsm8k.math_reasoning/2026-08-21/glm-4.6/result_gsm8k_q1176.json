@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1176",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The teacher starts with a 5-inch piece of chalk.  \\nOn Monday, he uses 45% of it:  \\n\\\\[\\n5 \\\\times 0.45 = 2.25\\\\text{ inches used.}\\n\\\\]  \\nRemaining after Monday:  \\n\\\\[\\n5 - 2.25 = 2.75\\\\text{ inches.}\\n\\\\]  \\nFrom Tuesday onward, he uses 20% of the current length each day.  \\nWe need to determine how many days (starting Tuesday) he can continue using the chalk before its length falls below 2 inches.\\n\\n- **Tuesday**: Start length = 2.75 inches (≥2, so usable).  \\n  After using 20%, remaining length = \\\\(2.75 \\\\times 0.80 = 2.20\\\\) inches.\\n- **Wednesday**: Start length = 2.20 inches (≥2, so usable).  \\n  After using 20%, remaining length = \\\\(2.20 \\\\times 0.80 = 1.76\\\\) inches (<2).\\n- **Thursday**: Start length = 1.76 inches (<2), so he cannot use it and must recycle it.\\n\\nThus, after returning to the 20% daily usage, he can use the chalk for **2 days** (Tuesday and Wednesday) before it becomes too small.\\n\\n#### 2\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 2.0, \"reference_number\": 2.0, \"raw_tail\": \"must recycle it.\\n\\nThus, after returning to the 20% daily usage, he can use the chalk for **2 days** (Tuesday and Wednesday) before it becomes too small.\\n\\n#### 2\"}"
+  },
+  "timings": {
+    "agent_s": 200.255,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='The teacher starts with a 5-inch piece of chalk.  \\nOn Monday, he uses 45% of it:  \\n\\\\[\\n5 \\\\times 0.45 = 2.25\\\\text{ inches ' attempts=1"
+  ]
+}

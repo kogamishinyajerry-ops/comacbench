@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_108",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def count_nums(arr):\\n    \\\"\\\"\\\"\\n    Return the number of integers whose signed digit sum is greater than zero.\\n\\n    If a number is negative, its first digit is treated as negative.\\n    \\\"\\\"\\\"\\n    count = 0\\n\\n    for number in arr:\\n        digits = str(abs(number))\\n\\n        if number < 0:\\n            digit_sum = -int(digits[0]) + sum(\\n                int(digit) for digit in digits[1:]\\n            )\\n        else:\\n            digit_sum = sum(int(digit) for digit in digits)\\n\\n        if digit_sum > 0:\\n            count += 1\\n\\n    return count\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 68.066,
+    "setup_s": 0.0,
+    "grade_s": 0.057
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

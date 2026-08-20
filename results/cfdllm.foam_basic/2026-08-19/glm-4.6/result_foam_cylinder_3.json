@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_cylinder_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\n# -----------------------------------------------------------------------------\\n# File Creation Helpers\\n# -----------------------------------------------------------------------------\\n\\ndef write_file(path, content):\\n    dirname = os.path.dirname(path)\\n    if dirname:\\n        os.makedirs(dirname, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# -----------------------------------------------------------------------------\\n# Configuration\\n# -----------------------------------------------------------------------------\\n\\n# Mesh settings\\nlx, ly, lz = 2.0, 1.0, 0.1\\ncyl_x, cyl_y = 0.5, 0.3  # Center of cylinder (offset)\\ncyl_r = 0.1\\n# Simplify to a square cylinder for blockMesh compatibility\\ncyl_x_min = cyl_x - cyl_r\\ncyl_x_max = cyl_x + cyl_r\\ncyl_y_min = cyl_y - cyl_r\\ncyl_y_max = cyl_y + cyl_r\\n\\n# -----------------------------------------------------------------------------\\n# 0/ Directory\\n# -----------------------------------------------------------------------------\\n\\nwrite_file(\\\"0/U\\\", \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform (1.5 0 0);\\n    }\\n    outlet\\n    {\\n        type            zeroGradient;\\n    }\\n    walls\\n    {\\n        type            noSlip;\\n    }\\n    cylinder\\n    {\\n        type            noSlip;\\n    }\\n    front\\n    {\\n        type            empty;\\n    }\\n    back\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\")\\n\\nwrite_file(\\\"0/p\\\", \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 2 -2 0 0 0 0];\\n\\ninternalField   uniform 0;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            zeroGradient;\\n    }\\n    outlet\\n    {\\n        type            fixedValue;\\n        value           uniform 0;\\n    }\\n    walls\\n    {\\n        type            zeroGradient;\\n    }\\n    cylinder\\n    {\\n        type            zeroGradient;\\n    }\\n    front\\n    {\\n        type            empty;\\n    }\\n    back\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\")\\n\\n# -----------------------------------------------------------------------------\\n# constant/ Directory\\n# -----------------------------------------------------------------------------\\n\\nwrite_file(\\\"constant/momentumTransport\\\", \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| ======\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 280.415,
+    "setup_s": 0.0,
+    "grade_s": 2.654
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.6s last_time=0"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0783",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find how many white fish Bob bought.\\n\\n**Setting up the problem:**\\n\\nBob's original fish:\\n- Orange: 3\\n- White: 4\\n\\nLet w = white fish bought, o = orange fish bought\\n\\n**Equations:**\\n- w + o = 17 (total fish bought)\\n- 3 + o = 2(4 + w) (twice as many orange as white after adding)\\n\\n**Solving:**\\n\\nFrom the second equation:\\n- 3 + o = 8 + 2w\\n- o = 5 + 2w\\n\\nSubstituting into the first equation:\\n- w + (5 + 2w) = 17\\n- 3w + 5 = 17\\n- 3w = 12\\n- w = 4\\n\\n**Verification:**\\n- Bought 4 white and 13 orange\\n- Orange total: 3 + 13 = 16\\n- White total: 4 + 4 = 8\\n- 16 = 2 × 8 ✓\\n\\n#### 4\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 4.0, \"reference_number\": 4.0, \"raw_tail\": \"17\\n- 3w + 5 = 17\\n- 3w = 12\\n- w = 4\\n\\n**Verification:**\\n- Bought 4 white and 13 orange\\n- Orange total: 3 + 13 = 16\\n- White total: 4 + 4 = 8\\n- 16 = 2 × 8 ✓\\n\\n#### 4\"}"
+  },
+  "timings": {
+    "agent_s": 3.315,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to find how many white fish Bob bought.\\n\\n**Setting up the problem:**\\n\\nBob's original fis\" attempts=1"
+  ]
+}

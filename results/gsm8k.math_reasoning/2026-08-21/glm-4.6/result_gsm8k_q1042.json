@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1042",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Step 1: Determine the amount lost on the first race.  \\nGiven: lost $5. So loss₁ = $5.\\n\\nStep 2: Determine the amount won on the second race.  \\nWon $1 more than twice the amount previously lost.  \\nPreviously lost = $5.  \\nTwice that = 2 × $5 = $10.  \\nAdd $1 → $10 + $1 = $11.  \\nSo win₂ = $11 (positive, meaning money gained).\\n\\nStep 3: Determine the amount lost on the third race.  \\nLost 1.5 times as much as he won in the second race.  \\nWon in second race = $11.  \\n1.5 × $11 = $16.5.  \\nSo loss₃ = $16.5.\\n\\nStep 4: Compute the total net loss for the day.  \\nTotal money lost = loss₁ + loss₃ = $5 + $16.5 = $21.5.  \\nTotal money won = win₂ = $11.  \\nNet loss = total lost – total won = $21.5 – $11 = $10.5.\\n\\nStep 5: Compute the average loss per race.  \\nThere are 3 races.  \\nAverage loss = net loss / number of races = $10.5 / 3 = $3.5.\\n\\nThus, Johnny's dad lost an average of $3.5 per race that day.\\n\\n#### 3.5\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 3.5, \"reference_number\": 3.0, \"raw_tail\": \"e.  \\nThere are 3 races.  \\nAverage loss = net loss / number of races = $10.5 / 3 = $3.5.\\n\\nThus, Johnny's dad lost an average of $3.5 per race that day.\\n\\n#### 3.5\"}"
+  },
+  "timings": {
+    "agent_s": 103.302,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Step 1: Determine the amount lost on the first race.  \\nGiven: lost $5. So loss₁ = $5.\\n\\nStep 2: Determine the amount won ' attempts=1"
+  ]
+}

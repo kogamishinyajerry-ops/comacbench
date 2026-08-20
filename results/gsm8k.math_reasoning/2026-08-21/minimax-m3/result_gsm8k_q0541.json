@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0541",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the daily saving amount for the second half of April.\\n\\n**Setting up the problem:**\\n- April has 30 days total\\n- First half: 15 days\\n- Second half: 15 days\\n- Monthly target: $1125\\n\\n**Defining variables:**\\n- Let x = daily savings in the first half\\n- Daily savings in the second half = 2x (twice as much)\\n\\n**Writing the equation:**\\n$$15x + 15(2x) = 1125$$\\n\\n**Solving:**\\n$$15x + 30x = 1125$$\\n$$45x = 1125$$\\n$$x = 25$$\\n\\n**Finding the second half daily savings:**\\n$$2x = 2(25) = 50$$\\n\\n**Verification:**\\n- First half: 15 × $25 = $375\\n- Second half: 15 × $50 = $750\\n- Total: $375 + $750 = $1,125 ✓\\n\\n#### 50\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 50.0, \"reference_number\": 50.0, \"raw_tail\": \"lf daily savings:**\\n$$2x = 2(25) = 50$$\\n\\n**Verification:**\\n- First half: 15 × $25 = $375\\n- Second half: 15 × $50 = $750\\n- Total: $375 + $750 = $1,125 ✓\\n\\n#### 50\"}"
+  },
+  "timings": {
+    "agent_s": 4.974,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the daily saving amount for the second half of April.\\n\\n**Setting up the problem:' attempts=1"
+  ]
+}

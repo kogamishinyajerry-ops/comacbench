@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_wedge_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\n# --- Helper functions ---\\ndef create_dir(path):\\n    if not os.path.exists(path):\\n        os.makedirs(path)\\n\\ndef write_file(path, content):\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- Parameters ---\\nx_min = -0.15242\\nx_max = 0.3048\\ny_min = 0.0\\ny_max = 0.1524\\nz_min = -0.005\\nz_max = 0.005\\n\\n# Wedge Geometry (15 degrees, starting at x=0)\\nwedge_tip_x = 0.0\\nwedge_end_x = 0.1\\nwedge_angle_deg = 15.0\\nwedge_end_y = wedge_end_x * math.tan(math.radians(wedge_angle_deg))\\n\\n# Simulation parameters\\ndt = 0.00005\\nend_time = 0.2\\nwrite_interval = 0.02\\ninlet_U = (20.0, 0.0, 0.0)\\ninlet_T = 3.0\\ninlet_p = 1.0\\n\\n# Thermodynamics\\nmolWeight = 11640.3\\nCp = 2.5\\n# Calculate derived properties for initialization if needed\\nR_univ = 8314.46261815324 # J/(kmol.K)\\nR_spec = R_univ / molWeight\\nrho_init = inlet_p / (R_spec * inlet_T)\\n\\n# --- Directory Structure ---\\ndirs = ['0', 'constant/polyMesh', 'system', 'constant']\\nfor d in dirs:\\n    create_dir(d)\\n\\n# --- 1. constant/polyMesh/blockMeshDict ---\\nvertices = [\\n    # Block 1 (Inlet)\\n    f\\\"({x_min} {y_min} {z_min})\\\",   # 0\\n    f\\\"({wedge_tip_x} {y_min} {z_min})\\\", # 1\\n    f\\\"({wedge_tip_x} {y_max} {z_min})\\\", # 2\\n    f\\\"({x_min} {y_max} {z_min})\\\",   # 3\\n    \\n    # Block 2 (Wedge/Ramp)\\n    f\\\"({wedge_tip_x} {y_min} {z_min})\\\", # 4 (same as 1)\\n    f\\\"({wedge_end_x} {wedge_end_y} {z_min})\\\", # 5\\n    f\\\"({wedge_end_x} {y_max} {z_min})\\\", # 6\\n    f\\\"({wedge_tip_x} {y_max} {z_min})\\\", # 7 (same as 2)\\n    \\n    # Block 3 (Outlet)\\n    f\\\"({wedge_end_x} {wedge_end_y} {z_min})\\\", # 8 (same as 5)\\n    f\\\"({x_max} {wedge_end_y} {z_min}\\\",), # 9\\n    f\\\"({x_max} {y_max} {z_min})\\\",   # 10\\n    f\\\"({wedge_end_x} {y_max} {z_min})\\\", # 11 (same as 6)\\n\\n    # Corresponding Z=high points (offset +12)\\n    f\\\"({x_min} {y_min} {z_max})\\\",   # 12\\n    f\\\"({wedge_tip_x} {y_min} {z_max})\\\", # 13\\n    f\\\"({wedge_tip_x} {y_max} {z_max})\\\", # 14\\n    f\\\"({x_min} {y_max} {z_max})\\\",   # 15\\n    f\\\"({wedge_end_x} {wedge_end_y} {z_max})\\\", # 16\\n    f\\\"({wedge_end_x} {y_max} {z_max})\\\", # 17\\n    f\\\"({x_max} {wedge_end_y} {z_max})\\\",  # 18\\n    f\\\"({x_max} {y_max} {z_max})\\\",   # 19\\n]\\n# To make writing easier, let's use explicit indices in the dict string generation\\n# Indices for blockMesh\\n# 0: x_min, y_min, z_min\\n# 1: wedge_tip_x, y_min, z_min\\n# 2: wedge_tip_x, y_max, z_min\\n# 3: x_min, y_max, z_min\\n# 4: wedge_end_x, wedge_end_y, z_min\\n# 5: wedge_end_x, y_max, z_min\\n# 6: x_max, wedge_end_y, z_min\\n# 7: x_max, y_max, z_min\\n# +8 for z_max\\n\\nverts_template = \\\"\\\"\\\"vertices\\n(\\n    {xmin} {ymin} {zmin}\\n    {wtipx} {ymin} {zmin}\\n    {wtipx} {ymax} {zmin}\\n    {xmin} {ymax} {zmin}\\n    {wendx} {wendy} {zmin}\\n    {wendx} {ymax} {zmin}\\n    {xmax} {wendy} {zmin}\\n    {xmax} {ymax} {zmin}\\n\\n    {xmin} {ymin} {zmax}\\n    {wtipx} {ymin} {zmax}\\n    {wtipx} {ymax} {zmax}\\n    {xmin} {ymax} {zmax}\\n    {wendx} {wendy} {zmax}\\n    {wendx} {ymax} {zmax}\\n    {xmax} {wendy} {zmax}\\n    {xmax} {ymax} {zmax}\\n);\\n\\\"\\\"\\\"\\n\\nverts_str = verts_template.format(\\n    xmin=x_min, xmax=x_max, ymin=y_min, ymax=y_max, zmin=z_min, zmax=z_max,\\n    wtipx=wedge_tip_x, wendx=wedge_end_x, wendy=wedge_end_y\\n)\\n\\nblocks_str = \\\"\\\"\\\"blocks\\n(\\n    hex (0 1 2 3 8 9 10 11) (20 20 1) simpleGrading (1 1 1)\\n    hex (1 4 5 2 9 12 13 10) (10 20 1) simpleGrading (1 1 1)\\n    hex (4 6 7 5 12 14 15 13) (20 20 1) simpleGrading (1 1 1)\\n);\\n\\\"\\\"\\\"\\n\\nboundary_str = \\\"\\\"\\\"boundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 3 10 8)\\n        );\\n    }\\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (6 7 15 14)\\n        );\\n    }\\n    top\\n    {\\n        type symmetryPlane;\\n        faces\\n        (\\n            (2 5 13 10)\\n            (5 7 15 13)\\n        );\\n    }\\n    wedge\\n    {\\n        type patch;\\n        faces\\n        (\\n            (1 4 12 9)\\n        );\\n    }\\n    bottom\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 1 9 8)\\n            (4 6 14 12)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 1 2 3)\\n            (1 4 5 2)\\n         \""
+  },
+  "timings": {
+    "agent_s": 282.02,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

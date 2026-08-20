@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_021",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List\\n\\ndef rescale_to_unit(numbers: List[float]) -> List[float]:\\n    \\\"\\\"\\\"Given list of numbers (of at least two elements), apply a linear transform to that list,\\n    such that the smallest number will become 0 and the largest will become 1.\\n    \\n    >>> rescale_to_unit([1.0, 2.0, 3.0, 4.0, 5.0])\\n    [0.0, 0.25, 0.5, 0.75, 1.0]\\n    \\\"\\\"\\\"\\n    if len(numbers) < 2:\\n        raise ValueError(\\\"The input list must contain at least two elements.\\\")\\n    \\n    min_val = min(numbers)\\n    max_val = max(numbers)\\n    \\n    # If all numbers are identical, scaling would cause division by zero.\\n    # Return a list of zeros to reflect that the scale is undefined.\\n    if min_val == max_val:\\n        return [0.0 for _ in numbers]\\n    \\n    # Apply linear transformation: (x - min) / (max - min)\\n    return [(x - min_val) / (max_val - min_val) for x in numbers]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 4.885,
+    "setup_s": 0.0,
+    "grade_s": 0.062
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

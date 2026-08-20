@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_105",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def by_length(arr):\\n    \\\"\\\"\\\"\\n    Given an array of integers, sort the integers that are between 1 and 9 inclusive,\\n    reverse the resulting array, and then replace each digit by its corresponding name from\\n    \\\"One\\\", \\\"Two\\\", \\\"Three\\\", \\\"Four\\\", \\\"Five\\\", \\\"Six\\\", \\\"Seven\\\", \\\"Eight\\\", \\\"Nine\\\".\\n\\n    For example:\\n      arr = [2, 1, 1, 4, 5, 8, 2, 3]   \\n            -> sort arr -> [1, 1, 2, 2, 3, 4, 5, 8] \\n            -> reverse arr -> [8, 5, 4, 3, 2, 2, 1, 1]\\n      return [\\\"Eight\\\", \\\"Five\\\", \\\"Four\\\", \\\"Three\\\", \\\"Two\\\", \\\"Two\\\", \\\"One\\\", \\\"One\\\"]\\n    \\n      If the array is empty, return an empty array:\\n      arr = []\\n      return []\\n    \\n      If the array has any strange number ignore it:\\n      arr = [1, -1 , 55] \\n            -> sort arr -> [-1, 1, 55]\\n            -> reverse arr -> [55, 1, -1]\\n      return = ['One']\\n    \\\"\\\"\\\"\\n    # Mapping from digits to their corresponding names\\n    digit_to_name = {\\n        1: \\\"One\\\",\\n        2: \\\"Two\\\",\\n        3: \\\"Three\\\",\\n        4: \\\"Four\\\",\\n        5: \\\"Five\\\",\\n        6: \\\"Six\\\",\\n        7: \\\"Seven\\\",\\n        8: \\\"Eight\\\",\\n        9: \\\"Nine\\\"\\n    }\\n    \\n    # Filter to keep only integers between 1 and 9 inclusive\\n    filtered_arr = [x for x in arr if isinstance(x, int) and 1 <= x <= 9]\\n    \\n    # Sort the filtered array\\n    filtered_arr.sort()\\n    \\n    # Reverse the sorted array\\n    filtered_arr.reverse()\\n    \\n    # Replace each digit by its corresponding name\\n    result = [digit_to_name[x] for x in filtered_arr]\\n    \\n    return result\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 5.678,
+    "setup_s": 0.0,
+    "grade_s": 0.057
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\ndef write_file(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- Geometry & Constants based on Tutorial Description ---\\n# Standard squareBend tutorial scaled (factor 1000) and z-shifted\\n# Inlet: x=-50, y=0..50, z=-25..25\\n# Outlet: y=-50, x=0..50, z=-25..25\\n# Corner: (0,0)\\n# User specified inlet points (-50, 25, 25) and (-50, 25, -25) match center of inlet face\\n# User specified mid-bend points (25, 0, 25) match top edge of outlet leg (tutorial structure)\\n\\nscale = 1000.0\\nz_shift = -25.0\\n\\n# Vertices for the standard 5-block squareBend\\n# Block 0: Inlet leg (-50,0) to (0,50)\\n# Blocks 1,2,3: The bend\\n# Block 4: Outlet leg (0,-50) to (50,0)\\n# We define them explicitly for clarity\\nvertices = [\\n    # Inlet Block (x=-50 to 0, y=0 to 50)\\n    \\\"(-50  0  -25)\\\",  # 0\\n    \\\"(  0  0  -25)\\\",  # 1\\n    \\\"(  0 50  -25)\\\",  # 2\\n    \\\"(-50 50  -25)\\\",  # 3\\n    \\\"(-50  0   25)\\\",  # 4\\n    \\\"(  0  0   25)\\\",  # 5\\n    \\\"(  0 50   25)\\\",  # 6\\n    \\\"(-50 50   25)\\\",  # 7\\n    \\n    # Bend vertices approximations for 90 degree turn (Corner at 0,0)\\n    # Using simple divisions for the bend\\n    # We will define the blocks in the blockMeshDict string directly\\n]\\n\\n# --- File Contents ---\\n\\n# 1. Allrun\\nallrun_content = \\\"\\\"\\\"#!/bin/bash\\ncd \\\"${0%/*}\\\" || exit 1    # Run from this directory\\n. $WM_PROJECT_DIR/bin/tools/RunFunctions\\n\\nrunApplication blockMesh\\nrunApplication rhoSimpleFoam\\n\\\"\\\"\\\"\\n\\n# 2. system/controlDict\\ncontrol_dict_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      controlDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\napplication     rhoSimpleFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         500;\\n\\ndeltaT          1;\\n\\nwriteControl    timeStep;\\n\\nwriteInterval   100;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\nrunTimeModifiable true;\\n\\nfunctions\\n{\\n    #includeFunc CourantNo\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\n# 3. system/fvSchemes\\nfv_schemes_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      fvSchemes;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nddtSchemes\\n{\\n    default         steadyState;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      bounded Gauss upwind;\\n    div(phi,k)      bounded Gauss upwind;\\n    div(phi,epsilon) bounded Gauss upwind;\\n    div(phi,e)      bounded Gauss upwind;\\n    div(phi,Ekp)    bounded Gauss upwind;\\n}\\n\\nlaplacianSchemes\\n{\\n    default     \""
+  },
+  "timings": {
+    "agent_s": 328.996,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

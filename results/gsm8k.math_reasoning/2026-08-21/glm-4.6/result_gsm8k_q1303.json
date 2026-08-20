@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1303",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"**Step 1:** Calculate the total number of holes dug while Nate is on vacation.  \\nThe dog digs 6 holes per day for 14 days:  \\n\\\\(6 \\\\times 14 = 84\\\\) holes.\\n\\n**Step 2:** Understand the daily process after Nate returns.  \\n- During the day, Nate fills 9 holes.  \\n- Each night, the dog digs 6 new holes.  \\n\\nSo each full day (day + night) reduces the number of holes by \\\\(9 - 6 = 3\\\\), **provided** there are at least 9 holes at the start of the day.\\n\\n**Step 3:** Determine the day when all holes are filled.  \\nThe task finishes on the day when Nate can fill all remaining holes, i.e., when the number of holes at the start of that day is \\\\(\\\\le 9\\\\).\\n\\nLet \\\\(H_d\\\\) be the number of holes at the start of day \\\\(d\\\\) (with \\\\(d = 1,2,\\\\dots\\\\)).  \\n\\\\(H_1 = 84\\\\).  \\n\\nFor any day where \\\\(H_d > 9\\\\):  \\n- Nate fills 9 → \\\\(H_d - 9\\\\) remain.  \\n- Dog digs 6 → \\\\(H_{d+1} = H_d - 9 + 6 = H_d - 3\\\\).  \\n\\nThus, while \\\\(H_d > 9\\\\), the sequence decreases by 3 each day:  \\n\\\\(H_d = 84 - 3(d-1)\\\\).\\n\\nWe need the smallest integer \\\\(d\\\\) such that \\\\(H_d \\\\le 9\\\\):  \\n\\\\(84 - 3(d-1) \\\\le 9\\\\)  \\n\\\\(84 - 3d + 3 \\\\le 9\\\\)  \\n\\\\(87 - 3d \\\\le 9\\\\)  \\n\\\\(78 \\\\le 3d\\\\)  \\n\\\\(d \\\\ge 26\\\\).\\n\\nSo \\\\(d = 26\\\\) days. On day 26, \\\\(H_{26} = 84 - 3 \\\\times 25 = 9\\\\) holes, and Nate fills all of them, completing the task.\\n\\n**Step 4:** Convert days to weeks.  \\n\\\\(26 \\\\text{ days} \\\\div 7 \\\\text{ days/week} = \\\\frac{26}{7}\\\\) weeks.\\n\\n#### 26/7\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 26.0, \"reference_number\": 4.0, \"raw_tail\": \"Nate fills all of them, completing the task.\\n\\n**Step 4:** Convert days to weeks.  \\n\\\\(26 \\\\text{ days} \\\\div 7 \\\\text{ days/week} = \\\\frac{26}{7}\\\\) weeks.\\n\\n#### 26/7\"}"
+  },
+  "timings": {
+    "agent_s": 224.679,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='**Step 1:** Calculate the total number of holes dug while Nate is on vacation.  \\nThe dog digs 6 holes per day for 14 day' attempts=1"
+  ]
+}

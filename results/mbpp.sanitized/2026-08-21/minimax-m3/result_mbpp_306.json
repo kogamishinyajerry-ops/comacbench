@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_306",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_sum_increasing_subseq(arr, n, i, k):\\n    \\\"\\\"\\\"\\n    Find the maximum sum of an increasing subsequence that includes the element\\n    at index k and uses elements only from the prefix indices 0..i (i < k).\\n    The subsequence is strictly increasing in values.\\n    \\n    Parameters:\\n    arr (list): List of integers.\\n    n (int): Length of the array.\\n    i (int): Index i (prefix ends at i, inclusive).\\n    k (int): Index k (k > i) of the element that must be included.\\n    \\n    Returns:\\n    int: The maximum sum of such an increasing subsequence.\\n    \\\"\\\"\\\"\\n    # Validate indices\\n    if not (0 <= i < k < n):\\n        raise ValueError(\\\"Invalid indices: must have 0 <= i < k < n\\\")\\n    \\n    # Compute maximum sum of increasing subsequence ending at each index j <= i\\n    dp = [0] * (i + 1)\\n    for idx in range(i + 1):\\n        # Start with just the element arr[idx]\\n        best = arr[idx]\\n        # Try to extend any increasing subsequence ending at a previous index\\n        for j in range(idx):\\n            if arr[j] < arr[idx]:\\n                if dp[j] + arr[idx] > best:\\n                    best = dp[j] + arr[idx]\\n        dp[idx] = best\\n    \\n    # Now extend the subsequence to include arr[k]\\n    # The subsequence can consist only of arr[k] or attach it to a valid prefix subsequence\\n    ans = arr[k]\\n    for j in range(i + 1):\\n        if arr[j] < arr[k]:\\n            if dp[j] + arr[k] > ans:\\n                ans = dp[j] + arr[k]\\n    \\n    return ans\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 80.179,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

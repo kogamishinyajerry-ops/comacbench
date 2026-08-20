@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_099",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from decimal import Decimal, ROUND_HALF_UP\\n\\ndef closest_integer(value):\\n    '''\\n    Create a function that takes a value (string) representing a number\\n    and returns the closest integer to it. If the number is equidistant\\n    from two integers, round it away from zero.\\n\\n    Examples\\n    >>> closest_integer(\\\"10\\\")\\n    10\\n    >>> closest_integer(\\\"15.3\\\")\\n    15\\n\\n    Note:\\n    Rounding away from zero means that if the given number is equidistant\\n    from two integers, the one you should return is the one that is the\\n    farthest from zero. For example closest_integer(\\\"14.5\\\") should\\n    return 15 and closest_integer(\\\"-14.5\\\") should return -15.\\n    '''\\n    # Convert the string to a Decimal to avoid floating-point rounding issues\\n    d = Decimal(value)\\n    # Round to the nearest integer with ties rounded away from zero\\n    rounded = d.quantize(Decimal('1'), rounding=ROUND_HALF_UP)\\n    return int(rounded)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 8.48,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

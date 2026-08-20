@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_033",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def sort_third(l: list):\\n    \\\"\\\"\\\"This function takes a list l and returns a list l' such that\\n    l' is identical to l in the indicies that are not divisible by three, while its values at the indicies that are divisible by three are equal\\n    to the values of the corresponding indicies of l, but sorted.\\n    >>> sort_third([1, 2, 3])\\n    [1, 2, 3]\\n    >>> sort_third([5, 6, 3, 4, 8, 9, 2])\\n    [2, 6, 3, 4, 8, 9, 5]\\n    \\\"\\\"\\\"\\n    l_prime = l[:]  # Create a copy to avoid modifying the original list\\n    div_indices = [i for i in range(len(l)) if i % 3 == 0]\\n    sorted_vals = sorted([l[i] for i in div_indices])\\n    for i, val in zip(div_indices, sorted_vals):\\n        l_prime[i] = val\\n    return l_prime\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 14.083,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

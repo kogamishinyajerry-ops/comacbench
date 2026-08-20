@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0960",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let's break down the problem day by day to find the number of holes dug on the fourth day.\\n\\n- **First day:** They dug 10 holes.  \\n  Holes at end of day 1 = 10.\\n\\n- **Second day:** They dug 13 holes.  \\n  Holes at end of day 2 = 10 + 13 = 23.\\n\\n- **Third day:** They dug 8 holes but then filled in 2 holes.  \\n  Net change = +8 – 2 = +6 holes.  \\n  Holes at end of day 3 = 23 + 6 = 29.\\n\\n- **Fourth day:** They dug some number of holes, call it \\\\(x\\\\), before finding the treasure.  \\n  Holes at the moment of finding the treasure = 29 + \\\\(x\\\\).\\n\\nAccording to the problem, at that moment the island had four times as many holes as at the end of the first day.  \\nHoles at end of first day = 10, so four times that is \\\\(4 \\\\times 10 = 40\\\\).\\n\\nSet up the equation:\\n\\\\[29 + x = 40\\\\]\\n\\nSolve for \\\\(x\\\\):\\n\\\\[x = 40 - 29 = 11\\\\]\\n\\nTherefore, the pirates dug 11 holes on the fourth day before finding the treasure.\\n\\n#### 11\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 11.0, \"reference_number\": 11.0, \"raw_tail\": \"he equation:\\n\\\\[29 + x = 40\\\\]\\n\\nSolve for \\\\(x\\\\):\\n\\\\[x = 40 - 29 = 11\\\\]\\n\\nTherefore, the pirates dug 11 holes on the fourth day before finding the treasure.\\n\\n#### 11\"}"
+  },
+  "timings": {
+    "agent_s": 26.835,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Let's break down the problem day by day to find the number of holes dug on the fourth day.\\n\\n- **First day:** They dug 10\" attempts=1"
+  ]
+}

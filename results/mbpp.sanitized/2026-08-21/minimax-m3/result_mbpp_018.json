@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_018",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def str_to_list(s):\\n    \\\"\\\"\\\"Convert a string to a list of characters.\\\"\\\"\\\"\\n    return list(s)\\n\\n\\ndef lst_to_string(lst):\\n    \\\"\\\"\\\"Convert a list of characters back to a string.\\\"\\\"\\\"\\n    return ''.join(lst)\\n\\n\\ndef get_char_count_array(s):\\n    \\\"\\\"\\\"Return a count array (size 256) indicating occurrences of each character in s.\\\"\\\"\\\"\\n    count = [0] * 256\\n    for ch in s:\\n        count[ord(ch)] += 1\\n    return count\\n\\n\\ndef remove_dirty_chars(string, second_string):\\n    \\\"\\\"\\\"Remove characters from `string` that are present in `second_string`.\\\"\\\"\\\"\\n    # Get the count array for the second string\\n    count = get_char_count_array(second_string)\\n    \\n    # Build a list of characters that are NOT in the second string\\n    result = []\\n    for ch in string:\\n        if count[ord(ch)] == 0:\\n            result.append(ch)\\n    \\n    # Convert the result list back to a string\\n    return lst_to_string(result)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 8.115,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

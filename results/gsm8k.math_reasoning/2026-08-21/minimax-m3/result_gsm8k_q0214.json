@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0214",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the current water in the small pool.\\n\\n## Setting Up Variables\\n\\nLet me define:\\n- **S** = current water in the small pool (gallons)\\n- **B** = current water in the big pool (gallons)\\n\\n**Current relationship:** B = 4S\\n\\n## Accounting for the Leaks\\n\\nBoth pools leak at 4 gallons/minute, so over 4 minutes each pool loses:\\n$$4 \\\\text{ gal/min} \\\\times 4 \\\\text{ min} = 16 \\\\text{ gallons}$$\\n\\n**Water amounts 4 minutes ago:**\\n- Small pool: S + 16\\n- Big pool: B + 16 = 4S + 16\\n\\n## Applying the Past Condition\\n\\nFour minutes ago, the big pool had **twice** as much water as the small pool:\\n$$4S + 16 = 2(S + 16)$$\\n\\n## Solving the Equation\\n\\n$$4S + 16 = 2S + 32$$\\n$$2S = 16$$\\n$$S = 8$$\\n\\n## Verification\\n\\n- **Now:** Small = 8 gallons, Big = 32 gallons → 32 = 4(8) ✓\\n- **4 minutes ago:** Small = 24 gallons, Big = 48 gallons → 48 = 2(24) ✓\\n\\n#### 8\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 8.0, \"reference_number\": 8.0, \"raw_tail\": \"\\n\\n## Verification\\n\\n- **Now:** Small = 8 gallons, Big = 32 gallons → 32 = 4(8) ✓\\n- **4 minutes ago:** Small = 24 gallons, Big = 48 gallons → 48 = 2(24) ✓\\n\\n#### 8\"}"
+  },
+  "timings": {
+    "agent_s": 3.459,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the current water in the small pool.\\n\\n## Setting Up Variables\\n\\nLet me define:\\n- ' attempts=1"
+  ]
+}

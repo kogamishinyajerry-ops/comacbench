@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_118",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def get_closest_vowel(word):\\n    \\\"\\\"\\\"You are given a word. Your task is to find the closest vowel that stands between \\n    two consonants from the right side of the word (case sensitive).\\n    \\n    Vowels in the beginning and ending doesn't count. Return empty string if you didn't\\n    find any vowel met the above condition. \\n\\n    You may assume that the given string contains English letter only.\\n\\n    Example:\\n    get_closest_vowel(\\\"yogurt\\\") ==> \\\"u\\\"\\n    get_closest_vowel(\\\"FULL\\\") ==> \\\"U\\\"\\n    get_closest_vowel(\\\"quick\\\") ==> \\\"\\\"\\n    get_closest_vowel(\\\"ab\\\") ==> \\\"\\\"\\n    \\\"\\\"\\\"\\n    vowels = set('aeiouAEIOU')\\n    n = len(word)\\n    \\n    # Iterate from the right side, but skip the last character\\n    # We need at least one character on each side of the vowel\\n    # So we check indices from n-2 down to 1 (inclusive)\\n    for i in range(n - 2, 0, -1):\\n        if word[i] in vowels:\\n            # Check if both neighbors are consonants (not vowels)\\n            if word[i - 1] not in vowels and word[i + 1] not in vowels:\\n                return word[i]\\n    \\n    return \\\"\\\"\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 14, \"cases_total\": 14, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 15.24,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

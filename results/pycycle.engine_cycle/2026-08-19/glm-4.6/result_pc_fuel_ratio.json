@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\ndef solve_fuel_flow(target_t4):\\n    \\\"\\\"\\\"\\n    Solves the turbojet design point for a given T4 and returns the fuel flow.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    prob.model = pyc.Turbojet()\\n    \\n    prob.setup()\\n    \\n    # Set Environment: Sea Level (h=0), Static (MN=0)\\n    prob.set_val('flight_cond.MN', 0.0)\\n    prob.set_val('flight_cond.h', 0.0)\\n    \\n    # Set Cycle Parameters\\n    # OPR is the Compressor Pressure Ratio\\n    prob.set_val('comp.PR', 13.5)\\n    # T4 is the Burner Outlet Temperature\\n    prob.set_val('burner.Tt4', target_t4)\\n    # Inlet Mach number (affects inlet sizing)\\n    prob.set_val('inlet.MN', 0.6)\\n    \\n    # Initial guess for Nozzle Throat Area to scale the engine\\n    prob.set_val('nozzle.Throat:A', 0.5)\\n    \\n    # Configure Optimization Driver\\n    prob.driver = om.ScipyOptimizeDriver()\\n    prob.driver.options['optimizer'] = 'SLSQP'\\n    prob.driver.options['tol'] = 1e-2  # 1% tolerance\\n    prob.driver.options['disp'] = False\\n    \\n    # Define Design Variable: Nozzle Throat Area\\n    # We vary the area to size the engine to meet the thrust requirement\\n    prob.model.add_design_var('nozzle.Throat:A', lower=0.1, upper=5.0)\\n    \\n    # Define Constraint: Target Thrust\\n    # Thrust is calculated by the Nozzle element in the Turbojet cycle\\n    prob.model.add_constraint('nozzle.Fn', equals=11800)\\n    \\n    # Run initial model to propagate values (helps convergence)\\n    try:\\n        prob.run_model()\\n    except Exception:\\n        # Ignore initial failures, the optimizer should find a feasible path\\n        pass\\n        \\n    # Run the Optimization Driver\\n    prob.run_driver()\\n    \\n    # Retrieve Fuel Flow from the Burner element\\n    wf = prob.get_val('burner.W_f')\\n    return float(wf)\\n\\n# Run calculations for both T4 cases\\nprint(\\\"Solving for T4 = 2200 degR...\\\")\\nwf_2200 = solve_fuel_flow(2200)\\n\\nprint(\\\"Solving for T4 = 2600 degR...\\\")\\nwf_2600 = solve_fuel_flow(2600)\\n\\n# Calculate the ratio\\nfuel_ratio = wf_2600 / wf_2200\\n\\n# Prepare result dictionary\\nresult = {\\n    \\\"fuel_ratio_t2600_over_t2200\\\": fuel_ratio\\n}\\n\\n# Write to result.json\\nwith open(\\\"result.json\\\", \\\"w\\\") as f:\\n    json.dump(result, f, indent=4)\\n\\nprint(f\\\"Calculation complete. Ratio: {fuel_ratio}\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_n49ix2qq/solve.py\\\", line 59, in <module>\\n    wf_2200 = solve_fuel_flow(2200)\\n              ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_n49ix2qq/solve.py\\\", line 10, in solve_fuel_flow\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 212.267,
+    "setup_s": 0.0,
+    "grade_s": 0.844
+  },
+  "environment_digest": "sha256:1efc3eca892ea0be5e1c977b441c228ad2b02865021da27fd32275a2a2a9c1b1",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.84s"
+  ]
+}

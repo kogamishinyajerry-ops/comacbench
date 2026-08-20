@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_163",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def generate_integers(a, b):\\n    \\\"\\\"\\\"\\n    Given two positive integers a and b, return the even digits between a\\n    and b, in ascending order.\\n\\n    For example:\\n    generate_integers(2, 8) => [2, 4, 6, 8]\\n    generate_integers(8, 2) => [2, 4, 6, 8]\\n    generate_integers(10, 14) => []\\n    \\\"\\\"\\\"\\n    lower = max(2, min(a, b))\\n    upper = min(8, max(a, b))\\n    return [i for i in range(lower, upper + 1) if i % 2 == 0]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 25.567,
+    "setup_s": 0.0,
+    "grade_s": 0.065
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

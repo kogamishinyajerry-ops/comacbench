@@ -9,6 +9,7 @@
 | `stub/` | stub | 0/7 | 0 | missing_output ×7 |
 | `oracle/` | vendored 引擎 gold | **7/7** | **1.000** | 判分管线全验证（含修复题精确匹配、OPR 扫描键名对齐）|
 | `minimax-m3/` | MiniMax-M3 | 0/7 | 0 | 7 code_not_executable（幻觉 pycycle API 如 `TabularThermo`/import 路径错）——真实能力边界；沙箱 add_subsystem 误封修正后重跑定稿 |
+| `glm-4.6/` | GLM-4.6 | 0/7 | 0 | 7 code_not_executable——同类幻觉 API（`pycycle.api.ThermoZone` 不存在等 6 例 + 1 例语法错误），solve 皆 <2s 即败；环境无责（oracle 同环境 7/7，2026-08-20 venv 重建后验证）|
 
 复现：
 ```bash

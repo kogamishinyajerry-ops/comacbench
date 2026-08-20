@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_311",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"def set_left_most_unset_bit(n):\\n    L = n.bit_length()\\n    \\n    # If n is 0 or all bits from 0 to L-1 are 1 (e.g., n = 1, 3, 7, 15...)\\n    if n == (1 << L) - 1:\\n        return 1 << L\\n    \\n    # XOR n with all 1s up to bit L-1 to get a mask where 1s mark the positions of 0s in n\\n    pos = (n ^ ((1 << L) - 1)).bit_length() - 1\\n    return n | (1 << pos)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 2, \"cases_total\": 3, \"failed_cases\": [{\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 28.488,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

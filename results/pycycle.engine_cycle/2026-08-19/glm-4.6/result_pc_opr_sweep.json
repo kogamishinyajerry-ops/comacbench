@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_opr_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport numpy as np\\nimport json\\n\\ndef solve_design_point(opr_target, fn_target, t4_target):\\n    \\\"\\\"\\\"\\n    Solves the turbojet design point for a given OPR, Thrust, and T4.\\n    Returns the TSFC.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    \\n    # Instantiate the Turbojet model\\n    prob.model = pyc.Turbojet()\\n    \\n    # Setup the optimizer\\n    # Using SLSQP to handle the constraint (Thrust) and design variable (Nozzle Area)\\n    prob.driver = om.ScipyOptimizeDriver()\\n    prob.driver.options['tol'] = 0.01  # 1% numeric tolerance\\n    \\n    # Design Variable: Nozzle Throat Area\\n    # We adjust the geometry to meet the thrust requirement\\n    prob.model.add_design_var('design.nozzle.Throat:stat:area', lower=0.5, upper=5.0)\\n    \\n    # Constraint: Net Thrust must match target\\n    # The optimizer will ensure this holds within the tolerance\\n    prob.model.add_constraint('design.Fn', equals=fn_target)\\n    \\n    # Objective: Minimize Nozzle Area (find the smallest efficient nozzle to meet thrust)\\n    # Or simply any valid objective since we have a hard constraint.\\n    # Minimizing area is physically logical for a design point.\\n    prob.model.add_objective('design.nozzle.Throat:stat:area')\\n    \\n    prob.setup()\\n    \\n    # --- Set Inputs ---\\n    \\n    # Flight Conditions: Sea Level (0 ft) Static (Mach 0)\\n    prob.set_val('design.OD_inlet.MN', 0.0)\\n    prob.set_val('design.OD_inlet.alt', 0.0, units='ft')\\n    \\n    # Cycle Parameters\\n    prob.set_val('design.combustor.Tt_out', t4_target, units='degR')\\n    prob.set_val('design.comp.PR', opr_target)\\n    \\n    # Initial Guess for Nozzle Area\\n    # A reasonable guess for ~12,000 lbf thrust is roughly 1.0 to 2.0 sq ft\\n    prob.set_val('design.nozzle.Throat:stat:area', 1.5, units='ft**2')\\n    \\n    # --- Run ---\\n    prob.run_driver()\\n    \\n    # --- Extract Results ---\\n    tsfc = prob.get_val('design.tsfc', units='lbm/lbf/hr')[0]\\n    thrust_actual = prob.get_val('design.Fn', units='lbf')[0]\\n    \\n    print(f\\\"OPR: {opr_target}, Thrust: {thrust_actual:.2f} lbf, TSFC: {tsfc:.5f} lbm/lbf/hr\\\")\\n    \\n    return tsfc\\n\\ndef main():\\n    # Target parameters\\n    fn_target = 12000.0  # lbf\\n    t4_target = 2450.0   # degR\\n    opr_list = [11.0, 13.5, 16.0]\\n    \\n    tsfc_results = []\\n    \\n    # Run scan\\n    for opr in opr_list:\\n        tsfc = solve_design_point(opr, fn_target, t4_target)\\n        tsfc_results.append(tsfc)\\n        \\n    # Calculate Sensitivity (dTSFC/dOPR) using least-squares\\n    # polyfit returns [slope, intercept] for degree 1\\n    slope, _ = np.polyfit(opr_list, tsfc_results, 1)\\n    dtsfc_dopr = slope\\n    \\n    # Prepare output dictionary\\n    # Keys are formatted as requested: tsfc_opr110, tsfc_opr135, tsfc_opr160\\n    result = {\\n        'tsfc_opr110': tsfc_results[0],\\n        'tsfc_opr135': tsfc_results[1],\\n        'tsfc_opr160': tsfc_results[2],\\n        'dtsfc_dopr': dtsfc_dopr\\n    }\\n    \\n    # Write to JSON\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=4)\\n        \\n    print(\\\"Results saved to result.json\\\")\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_23ywp65j/solve.py\\\", line 95, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_23ywp65j/solve.py\\\", line 71, in main\\n    tsfc = solve_design_point(opr, fn_target, t4_target)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_23ywp65j/solve.py\\\", line 14, in solve_design_point\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 123.774,
+    "setup_s": 0.0,
+    "grade_s": 0.935
+  },
+  "environment_digest": "sha256:1efc3eca892ea0be5e1c977b441c228ad2b02865021da27fd32275a2a2a9c1b1",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.93s"
+  ]
+}

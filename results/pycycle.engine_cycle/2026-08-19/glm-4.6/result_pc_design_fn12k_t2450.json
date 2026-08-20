@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurboJetDesign(om.Group):\\n    def setup(self):\\n        # Thermodynamic properties for the cycle\\n        self.add_subsystem('thermo', pyc.ThermoZone(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n\\n        # Flight conditions\\n        self.add_subsystem('fc', pyc.FlightCondition())\\n\\n        # Engine Components\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.CompressorAxi5(map_data=pyc.AXI5_MAP))\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        self.add_subsystem('turb', pyc.TurbineLPT2269(map_data=pyc.LPT2269_MAP))\\n        self.add_subsystem('nozzle', pyc.NozzleCD())\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # --- Balances ---\\n        \\n        # Balance 1: Power Balance\\n        # Constraint: Power from Comp (-) + Power from Turb (+) = 0 (or sum to zero depending on sign convention)\\n        # Pycycle convention: Compressor Power is positive (in), Turbine Power is negative (out).\\n        # Equation: comp.power + turb.power = 0\\n        # Driver: Turbine Pressure Ratio (PR)\\n        bal_power = self.add_subsystem('bal_power', om.BalanceComp())\\n        bal_power.add_balance('power', eq_units='hp', lhs_name='comp_P', rhs_name='neg_turb_P')\\n\\n        # Balance 2: Burner Exit Temperature (T4)\\n        # Constraint: T4 = 2450 degR\\n        # Driver: Fuel Flow (W_F)\\n        bal_T4 = self.add_subsystem('bal_T4', om.BalanceComp())\\n        bal_T4.add_balance('W_F', eq_units='degR', lhs_name='T4_actual', rhs_name='T4_target')\\n\\n        # Balance 3: Net Thrust\\n        # Constraint: Fn = 12000 lbf\\n        # Driver: Shaft Speed (Nmech)\\n        bal_Fn = self.add_subsystem('bal_Fn', om.BalanceComp())\\n        bal_Fn.add_balance('Nmech', eq_units='lbf', lhs_name='Fn_actual', rhs_name='Fn_target')\\n\\n        # --- Connections ---\\n\\n        # Flow Path\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozzle.Fl_I')\\n\\n        # Thermo Data (Fluid Properties)\\n        self.connect('thermo.allflows', ['inlet.Fl_I:stat', 'comp.Fl_I:stat', \\n                                         'burner.Fl_I:stat', 'turb.Fl_I:stat', \\n                                         'nozzle.Fl_I:stat'])\\n\\n        # Nozzle Back Pressure (Ambient Static Pressure)\\n        self.connect('fc.Fl_O:stat.Ps', 'nozzle.Ps_back')\\n\\n        # Mechanical Connections\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # Balance Connections\\n        # Power: comp.power + turb.power = 0\\n        # We pass turb.power through a ref=-1 to make it positive for the balance equation lhs - rhs = 0\\n        self.connect('comp.power', 'bal_power.comp_P')\\n        self.connect('turb.power', 'bal_power.neg_turb_P', ref=-1.0) \\n        self.connect('bal_power.power', 'turb.PR')\\n\\n        # T4\\n        self.connect('burner.Tt_out', 'bal_T4.T4_actual')\\n        self.connect('bal_T4.W_F', 'burner.W_F')\\n\\n        # Thrust\\n        self.connect('nozzle.Fn', 'bal_Fn.Fn_actual')\\n        self.connect('bal_Fn.Nmech', 'shaft.Nmech')\\n\\n        # --- Initial Guesses / Design Inputs ---\\n        self.set_input_defaults('shaft.Nmech', 10000.0, units='rpm')\\n        self.set_input_defaults('turb.PR', 3.5)\\n        self.set_input_defaults('burner.W_F', 2.0, units='lbm/s')\\n        self.set_input_defaults('comp.PR', 14.0)\\n        \\n        # Set reasonable nozzle area (Design Point Geometry)\\n        # These are fixed for this design point analysis\\n        self.set_input_defaults('nozzle.A_throat', 1.2, units='ft**2')\\n        self.set_input_defaults('nozzle.A_exit', 1.5, units='ft**2')\\n\\nif __name__ == \\\"__main__\\\":\\n    # Setup the Problem\\n    prob = om.Problem()\\n    prob.model = TurboJetDesign()\\n\\n    # Solver Configuration\\n    prob.model.nonlinear_solver = \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"/python3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_uzq3uy5g/solve.py\\\", line 8, in setup\\n    self.add_subsystem('thermo', pyc.ThermoZone(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n                                 ^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'ThermoZone'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 232.48,
+    "setup_s": 0.0,
+    "grade_s": 1.667
+  },
+  "environment_digest": "sha256:1efc3eca892ea0be5e1c977b441c228ad2b02865021da27fd32275a2a2a9c1b1",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.66s"
+  ]
+}

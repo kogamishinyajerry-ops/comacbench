@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_counterflowflame2d_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef write_file(path, content):\\n    # Ensure directory exists\\n    dir_name = os.path.dirname(path)\\n    if dir_name:\\n        os.makedirs(dir_name, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- 0/ Fields ---\\n\\nheader = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    location    \\\"0\\\";\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    inlet_fuel\\n    {\\n        type            fixedValue;\\n        value           uniform (0 0.4 0);\\n    }\\n    inlet_air\\n    {\\n        type            fixedValue;\\n        value           uniform (0 -0.4 0);\\n    }\\n    sides\\n    {\\n        type            pressureInletOutletVelocity;\\n        value           uniform (0 0 0);\\n    }\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\nwrite_file(\\\"0/U\\\", header)\\n\\nheader_p = header.replace(\\\"volVectorField\\\", \\\"volScalarField\\\").replace(\\\"object      U;\\\", \\\"object      p;\\\").replace(\\\"dimensions      [0 1 -1 0 0 0 0];\\\", \\\"dimensions      [1 -1 -2 0 0 0 0];\\\").replace(\\\"internalField   uniform (0 0 0);\\\", \\\"internalField   uniform 1e5;\\\")\\nboundary_p = \\\"\\\"\\\"boundaryField\\n{\\n    inlet_fuel\\n    {\\n        type            zeroGradient;\\n    }\\n    inlet_air\\n    {\\n        type            zeroGradient;\\n    }\\n    sides\\n    {\\n        type            fixedValue;\\n        value           uniform 1e5;\\n    }\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/p\\\", header_p.split(\\\"boundaryField\\\")[0] + boundary_p)\\n\\nheader_T = header.replace(\\\"volVectorField\\\", \\\"volScalarField\\\").replace(\\\"object      U;\\\", \\\"object      T;\\\").replace(\\\"dimensions      [0 1 -1 0 0 0 0];\\\", \\\"dimensions      [0 0 0 1 0 0 0];\\\").replace(\\\"internalField   uniform (0 0 0);\\\", \\\"internalField   uniform 300;\\\")\\nboundary_T = \\\"\\\"\\\"boundaryField\\n{\\n    inlet_fuel\\n    {\\n        type            fixedValue;\\n        value           uniform 300;\\n    }\\n    inlet_air\\n    {\\n        type            fixedValue;\\n        value           uniform 300;\\n    }\\n    sides\\n    {\\n        type            inletOutletTotalTemperature;\\n        inletValue      uniform 300;\\n        value           uniform 300;\\n    }\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/T\\\", header_T.split(\\\"boundaryField\\\")[0] + boundary_T)\\n\\nspecies = [\\\"CH4\\\", \\\"O2\\\", \\\"N2\\\", \\\"CO2\\\", \\\"H2O\\\"]\\ninitial_composition = {\\\"CH4\\\": 0.0, \\\"O2\\\": 0.23, \\\"N2\\\": 0.77, \\\"CO2\\\": 0.0, \\\"H2O\\\": 0.0}\\n\\nfor sp in species:\\n    header_Y = header.replace(\\\"volVectorField\\\", \\\"volScalarField\\\").replace(f\\\"object      U;\\\", f\\\"object      {sp};\\\").replace(\\\"dimensions      [0 1 -1 0 0 0 0];\\\", \\\"dimensions      [0 0 0 0 0 0 0];\\\").replace(\\\"internalField   uniform (0 0 0);\\\", f\\\"internalField   uniform {initial_composition[sp]};\\\")\\n    \\n    bc = \\\"\\\"\\n    if sp == \\\"CH4\\\":\\n        bc = \\\"\\\"\\\"    inlet_fuel { type fixedValue; value uniform 1; }\\n    inlet_air { type fixedValue; value uniform 0; }\\\"\\\"\\\"\\n    elif sp == \\\"O2\\\":\\n        bc = \\\"\\\"\\\"    inlet_fuel { type fixedValue; value uniform 0; }\\n    inlet_air { type fixedValue; value uniform 0.23; }\\\"\\\"\\\"\\n    elif sp == \\\"N2\\\":\\n        bc = \\\"\\\"\\\"    inlet_fuel { type fixedValue; value uniform 0; }\\n    inlet_air { type fixedValue; value uniform 0.77; }\\\"\\\"\\\"\\n    else:\\n        bc = \\\"\\\"\\\" \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 197.545,
+    "setup_s": 0.0,
+    "grade_s": 2.666
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.6s last_time=0"
+  ]
+}

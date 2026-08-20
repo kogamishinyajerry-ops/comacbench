@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_115",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_fill(grid, capacity):\\n    \\\"\\\"\\\"\\n    You are given a rectangular grid of wells. Each row represents a single well,\\n    and each 1 in a row represents a single unit of water.\\n    Each well has a corresponding bucket that can be used to extract water from it, \\n    and all buckets have the same capacity.\\n    Your task is to use the buckets to empty the wells.\\n    Output the number of times you need to lower the buckets.\\n\\n    Example 1:\\n        Input: \\n            grid : [[0,0,1,0], [0,1,0,0], [1,1,1,1]]\\n            bucket_capacity : 1\\n        Output: 6\\n\\n    Example 2:\\n        Input: \\n            grid : [[0,0,1,1], [0,0,0,0], [1,1,1,1], [0,1,1,1]]\\n            bucket_capacity : 2\\n        Output: 5\\n    \\n    Example 3:\\n        Input: \\n            grid : [[0,0,0], [0,0,0]]\\n            bucket_capacity : 5\\n        Output: 0\\n\\n    Constraints:\\n        * all wells have the same length\\n        * 1 <= grid.length <= 10^2\\n        * 1 <= grid[:,1].length <= 10^2\\n        * grid[i][j] -> 0 | 1\\n        * 1 <= capacity <= 10\\n    \\\"\\\"\\\"\\n    total_lowerings = 0\\n    for row in grid:\\n        water_units = sum(row)          # total units of water in this well\\n        if water_units:                # avoid unnecessary computation for empty wells\\n            total_lowerings += (water_units + capacity - 1) // capacity  # ceil division\\n    return total_lowerings\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 14.845,
+    "setup_s": 0.0,
+    "grade_s": 0.069
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

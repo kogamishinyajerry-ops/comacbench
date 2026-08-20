@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_291",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def count_no_of_ways(n, k):\\n    if n == 0:\\n        return 0\\n    if n == 1:\\n        return k\\n    \\n    # total[i] = total number of ways to paint i posts\\n    # same[i] = number of ways where the i-th post has the same color as the (i-1)-th post\\n    total = k\\n    same = 0\\n    \\n    for i in range(2, n + 1):\\n        # If the i-th post has the same color as (i-1)-th, then (i-1)-th must differ from (i-2)-th\\n        new_same = total - same\\n        # If the i-th post differs from (i-1)-th, there are (k-1) color choices\\n        new_total = total * k - same\\n        same = new_same\\n        total = new_total\\n    \\n    return total\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 7.046,
+    "setup_s": 0.0,
+    "grade_s": 0.049
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

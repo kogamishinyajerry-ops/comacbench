@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1102",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let me work through this step by step.\\n\\n**Step 1: Initial charge**\\nSheila charged $85.00 on her credit card.\\n\\n**Step 2: Return item**\\nShe returned an item costing $15.00, which reduces her balance.\\n- Balance: $85.00 - $15.00 = $70.00\\n\\n**Step 3: Frying pan purchase (20% off $20.00)**\\n- Discount: 20% × $20.00 = $4.00\\n- Sale price: $20.00 - $4.00 = $16.00\\n\\n**Step 4: Towels purchase (10% off $30.00)**\\n- Discount: 10% × $30.00 = $3.00\\n- Sale price: $30.00 - $3.00 = $27.00\\n\\n**Step 5: New balance**\\n- Total new purchases: $16.00 + $27.00 = $43.00\\n- New balance: $70.00 + $43.00 = $113.00\\n\\n#### 113\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 113.0, \"reference_number\": 113.0, \"raw_tail\": \" Sale price: $30.00 - $3.00 = $27.00\\n\\n**Step 5: New balance**\\n- Total new purchases: $16.00 + $27.00 = $43.00\\n- New balance: $70.00 + $43.00 = $113.00\\n\\n#### 113\"}"
+  },
+  "timings": {
+    "agent_s": 4.705,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Let me work through this step by step.\\n\\n**Step 1: Initial charge**\\nSheila charged $85.00 on her credit card.\\n\\n**Step 2: ' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1071",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to:\\n1. Find the total number of invited people\\n2. Subtract those who can't come\\n3. Calculate the cost using the fee structure\\n\\n**Step 1: Total invited**\\n- Classmates: 25\\n- Dance class girls: 7\\n- Family members: 13\\n- Total invited: 25 + 7 + 13 = 45\\n\\n**Step 2: Actual attendees**\\n- 4 people can't come: 45 - 4 = 41 people\\n\\n**Step 3: Calculate the cost**\\n- Base fee for 20 people: $125\\n- Additional guests beyond 20: 41 - 20 = 21\\n- Cost for additional guests: 21 × $6 = $126\\n- Total cost: $125 + $126 = $251\\n\\n#### 251\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 251.0, \"reference_number\": 251.0, \"raw_tail\": \"Base fee for 20 people: $125\\n- Additional guests beyond 20: 41 - 20 = 21\\n- Cost for additional guests: 21 × $6 = $126\\n- Total cost: $125 + $126 = $251\\n\\n#### 251\"}"
+  },
+  "timings": {
+    "agent_s": 2.753,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to:\\n1. Find the total number of invited people\\n2. Subtract those who can't come\\n3. Calcu\" attempts=1"
+  ]
+}

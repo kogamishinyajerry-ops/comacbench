@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0846",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"First, convert the total show time from hours to minutes: 2 hours × 60 minutes/hour = 120 minutes.\\n\\nThe time needed for each group consists of:  \\n- 2 minutes to get on stage  \\n- 6 minutes to perform  \\n- 2 minutes to exit the stage  \\nTotal per group = 2 + 6 + 2 = 10 minutes.\\n\\nA 10-minute intermission is also part of the show, so the time available for groups is:  \\n120 minutes total – 10 minutes intermission = 110 minutes.\\n\\nNow, divide the available time by the time per group:  \\n110 minutes ÷ 10 minutes/group = 11 groups.\\n\\nCheck: 11 groups × 10 minutes = 110 minutes, plus 10 minutes intermission = 120 minutes, exactly the total show time.  \\n12 groups would require 120 minutes for groups plus intermission = 130 minutes, which exceeds the total time.\\n\\nTherefore, the maximum number of groups that can perform is 11.\\n\\n#### 11\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 11.0, \"reference_number\": 11.0, \"raw_tail\": \" 120 minutes for groups plus intermission = 130 minutes, which exceeds the total time.\\n\\nTherefore, the maximum number of groups that can perform is 11.\\n\\n#### 11\"}"
+  },
+  "timings": {
+    "agent_s": 19.352,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='First, convert the total show time from hours to minutes: 2 hours × 60 minutes/hour = 120 minutes.\\n\\nThe time needed for ' attempts=1"
+  ]
+}

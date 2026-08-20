@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_counterflowflame2d_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef write_file(path, content):\\n    dir_name = os.path.dirname(path)\\n    if dir_name:\\n        os.makedirs(dir_name, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# Common FoamFile header\\nfoam_file_header = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      {OBJECT};\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\n\\\"\\\"\\\"\\n\\n# 1. system/controlDict\\ncontrol_dict_content = foam_file_header.replace(\\\"{OBJECT}\\\", \\\"controlDict\\\")\\ncontrol_dict_content += \\\"\\\"\\\"\\napplication     reactingFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         0.5;\\n\\ndeltaT          1e-6;\\n\\nwriteControl    timeStep;\\n\\nwriteInterval   50000;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\nfunctions\\n{\\n    #includeFunc residuals\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"system/controlDict\\\", control_dict_content)\\n\\n# 2. system/fvSchemes\\nfv_schemes_content = foam_file_header.replace(\\\"{OBJECT}\\\", \\\"fvSchemes\\\")\\nfv_schemes_content += \\\"\\\"\\\"\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n    grad(p)         Gauss linear;\\n    grad(U)         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      bounded Gauss upwind;\\n    div(phi,h)      bounded Gauss upwind;\\n    div(phi,k)      bounded Gauss upwind;\\n    div(phi,omega)  bounded Gauss upwind;\\n    div(phi,epsilon) bounded Gauss upwind;\\n    div(phi,Yi_h)   bounded Gauss upwind;\\n    div(phid,p)     Gauss upwind;\\n    div((rho*nuDev2(T))) Gauss linear;\\n    divergenceSchemes\\n    {\\n        default         none;\\n        div(phi,U)      bounded Gauss linearUpwind grad(U);\\n        div(phi,h)      bounded Gauss linearUpwind grad(h);\\n        div(phi,k)      bounded Gauss linearUpwind grad(k);\\n        div(phi,omega)  bounded Gauss linearUpwind grad(omega);\\n        div(phi,epsilon) bounded Gauss linearUpwind grad(epsilon);\\n        div(phi,Yi_h)   bounded Gauss linearUpwind grad(Yi_h);\\n    }\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"system/fvSchemes\\\", fv_schemes_content)\\n\\n# 3. system/fvSolution\\nfv_solution_content = foam_file_header.replace(\\\"{OBJECT}\\\", \\\"fvSolution\\\")\\nfv_solution_content += \\\"\\\"\\\"\\nsolvers\\n{\\n    p\\n    {\\n        solver          GAMG;\\n        tolerance       1e-06;\\n        relTol          0.1;\\n        smoother        GaussSeidel;\\n    }\\n\\n    pFinal\\n    {\\n        $p;\\n        relTol          0;\\n    }\\n\\n    \\\"(U|h|k|omega|epsilon|R)\\\"\\n    {\\n        solver          smoothSolver;\\n        smoother        GaussSeidel;\\n        tolerance       1e-05;\\n        relTol          0.1;\\n    }\\n\\n    \\\"(U|h|k|omega|epsilon|R)Final\\\"\\n    {\\n        $U;\\n        relTol          0;\\n    }\\n\\n    Yi\\n    {\\n        solver          smoothSolver;\\n        smoother        GaussSeidel;\\n        tolerance       1e-06;\\n        relTol          0.1;\\n    }\\n\\n    YiFinal\\n    {\\n        $Yi;\\n        relTol          0;\\n    }\\n}\\n\\nPIMPLE\\n{\\n    momentumPredictor yes;\\n    nOuterCorrectors 1;\\n    nCorrectors     2;\\n    nNonOrthogonalCorrectors 0;\\n    rhoMin          0.01;\\n    rhoMax          1000;\\n}\\n\\nrelaxationFactors\\n{\\n    fields\\n    {\\n        p               0.3;\\n        rho\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 278.267,
+    "setup_s": 0.0,
+    "grade_s": 2.732
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.7s last_time=0"
+  ]
+}

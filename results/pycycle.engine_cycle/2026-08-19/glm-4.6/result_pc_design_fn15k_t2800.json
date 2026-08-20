@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\nimport numpy as np\\n\\nclass TurboJetDesign(om.Group):\\n    def setup(self):\\n        # Thermodynamic data using AIR_JETA_TAB_SPEC as requested\\n        thermo_data = pyc.AIR_JETA_TAB_SPEC\\n\\n        # --- Flow Path Elements ---\\n        \\n        # Flight Conditions: SL, Mach ~0\\n        self.add_subsystem('fc', pyc.FlightConditions(thermo_data=thermo_data))\\n        \\n        # Inlet\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo_data))\\n        \\n        # Compressor: AXI5 map\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=thermo_data))\\n        \\n        # Combustor\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo_data))\\n        \\n        # Turbine: LPT2269 map\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=thermo_data))\\n        \\n        # Nozzle: CD Nozzle\\n        self.add_subsystem('noz', pyc.CDNozzle(thermo_data=thermo_data))\\n        \\n        # --- Mechanical Elements ---\\n        \\n        # Shaft connecting Compressor and Turbine\\n        self.add_subsystem('shaft', pyc.Shaft())\\n\\n        # --- Connections ---\\n\\n        # Flow connections\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n        # Mechanical connections\\n        # Turbine produces torque (drive), Compressor absorbs torque (load)\\n        self.connect('turb.trq', 'shaft.trq_in')\\n        self.connect('comp.trq', 'shaft.trq_out')\\n        \\n        # Rotational speed connection\\n        self.connect('shaft.N', 'comp.N')\\n        self.connect('shaft.N', 'turb.N')\\n\\n        # --- Design Balances ---\\n        # We have 4 constraints: Fn=15000, T4=2800, OPR=15.0, Torque=0\\n        # We need 4 variables: W (Flow), W_fuel, N (Speed), A8 (Nozzle Area)\\n\\n        # 1. Thrust Balance: Adjust Inlet W (Flow) to match Fn_target\\n        bal_thrust = self.add_subsystem('bal_thrust', om.BalanceComp())\\n        bal_thrust.add_balance('W', val=150.0, units='lbm/s', eq_units='lbf', lower=10.0, upper=1000.0)\\n        self.connect('bal_thrust.W', 'inlet.W')\\n        self.connect('noz.Fn', 'bal_thrust.rhs:W')\\n\\n        # 2. T4 Balance: Adjust Burner W_fuel to match T4_target\\n        bal_t4 = self.add_subsystem('bal_t4', om.BalanceComp())\\n        bal_t4.add_balance('W_fuel', val=2.0, units='lbm/s', eq_units='degR', lower=0.1, upper=10.0)\\n        self.connect('bal_t4.W_fuel', 'burner.W_fuel')\\n        self.connect('burner.Fl_O:tot:T', 'bal_t4.rhs:W_fuel')\\n\\n        # 3. OPR Balance: Adjust Shaft N (Speed) to match OPR_target\\n        bal_opr = self.add_subsystem('bal_opr', om.BalanceComp())\\n        bal_opr.add_balance('N', val=12000.0, units='rpm', eq_units='unitless', lower=1000.0, upper=20000.0)\\n        self.connect('bal_opr.N', 'shaft.N')\\n        self.connect('comp.PR', 'bal_opr.rhs:N')\\n\\n        # 4. Torque Balance: Adjust Nozzle Throat Area to match Torque=0\\n        # Changing A8 changes backpressure, thus turbine work, balancing the shaft\\n        bal_trq = self.add_subsystem('bal_trq', om.BalanceComp())\\n        bal_trq.add_balance('A8', val=200.0, units='inch**2', eq_units='ft*lbf', lower=10.0, upper=500.0)\\n        self.connect('bal_trq.A8', 'noz.Throat:area')\\n        self.connect('shaft.trq', 'bal_trq.rhs:A8')\\n\\n        # --- Input Defaults / Targets ---\\n        \\n        # Flight Conditions: SL (0 ft), MN 0\\n        self.set_input_defaults('fc.mach', 0.0)\\n        self.set_input_defaults('fc.alt', 0.0, units='ft')\\n\\n        # Design Targets\\n        self.set_input_defaults('bal_thrust.lhs:W', 15000.0, units='lbf')      # Fn_target\\n        self.set_input_defaults('bal_t4.lhs:W_fuel', 2800.0, units='degR')   # T4_target\\n        self.set_input_defaults('bal_opr.lhs:N', 15.0)                       # OPR_target\\n        self.set_input_defaults('bal_trq.lhs:A8', 0.0, un\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"hon3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_3b5kuu7z/solve.py\\\", line 29, in setup\\n    self.add_subsystem('noz', pyc.CDNozzle(thermo_data=thermo_data))\\n                              ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'CDNozzle'. Did you mean: 'Nozzle'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 225.648,
+    "setup_s": 0.0,
+    "grade_s": 0.911
+  },
+  "environment_digest": "sha256:1efc3eca892ea0be5e1c977b441c228ad2b02865021da27fd32275a2a2a9c1b1",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.91s"
+  ]
+}

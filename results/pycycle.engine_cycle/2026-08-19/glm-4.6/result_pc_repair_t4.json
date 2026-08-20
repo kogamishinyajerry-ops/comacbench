@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_t4",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ndef find_restored_value():\\n    # Reference TSFC for the TRUE configuration\\n    TARGET_TSFC = 0.79852\\n    # Design OPR given in the prompt\\n    OPR = 13.5\\n    \\n    # \\\"Standard values\\\" for T4 (Turbine Inlet Temperature) in Rankine for this engine class.\\n    # The corrupted value was 3200 R (implausible). \\n    # We test plausible standard integer values to find the one matching the reference TSFC.\\n    candidates = [2400, 2500, 2600, 2700, 2800, 2900, 3000]\\n    \\n    best_t4 = None\\n    min_error = float('inf')\\n    \\n    print(f\\\"Starting search for T4 matching TSFC {TARGET_TSFC} at OPR {OPR}...\\\")\\n    \\n    for t4_val in candidates:\\n        prob = om.Problem()\\n        prob.model = pyc.Turbojet()\\n        \\n        prob.setup()\\n        \\n        # Set Sea Level (SL) Design conditions\\n        prob.set_val('design.Mach', 0.0)\\n        prob.set_val('design.alt', 0.0, units='ft')\\n        \\n        # Set OPR\\n        prob.set_val('design.OPR', OPR)\\n        \\n        # Set T4 target\\n        prob.set_val('design.T4', t4_val, units='degR')\\n        \\n        try:\\n            # Run the design point analysis\\n            prob.run_model()\\n            \\n            # Retrieve TSFC\\n            # pycycle calculates TSFC in lb/lbf-hr by default\\n            tsfc = prob.get_val('TSFC', units='lb/lbf-hr')\\n            \\n            error = abs(tsfc - TARGET_TSFC)\\n            print(f\\\"T4: {t4_val} R -> TSFC: {tsfc:.5f} (Diff: {error:.5f})\\\")\\n            \\n            if error < min_error:\\n                min_error = error\\n                best_t4 = t4_val\\n                \\n        except Exception as e:\\n            # Handle cases where the cycle might not converge for a specific T4\\n            print(f\\\"T4: {t4_val} R -> Failed: {e}\\\")\\n            continue\\n\\n    return best_t4\\n\\nif __name__ == \\\"__main__\\\":\\n    restored_value = find_restored_value()\\n    \\n    # The prompt identifies the corrupted parameter explicitly:\\n    # \\\"corrupted target: t4_target = 3200\\\"\\n    # Therefore, the corrupted parameter is 't4_target'.\\n    # The value 3200 is wrong; we found the true value (restored_value).\\n    \\n    result = {\\n        \\\"corrupted_param\\\": \\\"t4_target\\\",\\n        \\\"restored_value\\\": restored_value\\n    }\\n    \\n    with open('result.json', 'w') as f:\\n        json.dump(result, f)\\n        \\n    print(f\\\"\\\\nResult written to result.json: {result}\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xtwdg60a/solve.py\\\", line 60, in <module>\\n    restored_value = find_restored_value()\\n                     ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xtwdg60a/solve.py\\\", line 23, in find_restored_value\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 189.746,
+    "setup_s": 0.0,
+    "grade_s": 0.938
+  },
+  "environment_digest": "sha256:1efc3eca892ea0be5e1c977b441c228ad2b02865021da27fd32275a2a2a9c1b1",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.94s"
+  ]
+}

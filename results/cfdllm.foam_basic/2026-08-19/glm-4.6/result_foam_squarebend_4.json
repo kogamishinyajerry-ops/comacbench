@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_4",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# -----------------------------------------------------------------------------\\n# Helper function to write files\\n# -----------------------------------------------------------------------------\\ndef write_file(path, content):\\n    dirname = os.path.dirname(path)\\n    if dirname:\\n        os.makedirs(dirname, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# -----------------------------------------------------------------------------\\n# Directories\\n# -----------------------------------------------------------------------------\\ncase_dir = os.getcwd()\\nsystem_dir = os.path.join(case_dir, \\\"system\\\")\\nconstant_dir = os.path.join(case_dir, \\\"constant\\\")\\nzero_dir = os.path.join(case_dir, \\\"0\\\")\\n\\n# -----------------------------------------------------------------------------\\n# system/blockMeshDict\\n# -----------------------------------------------------------------------------\\n# Vertices based on user input:\\n# Inlet face (x=-50): (-50, 25, +/-25) -> Assumed square cross section y: [-25, 25]\\n# Mid face (x=25): (25, 0, +/-25) -> Assumed square cross section shifted to y: [-50, 0]\\n# Outlet face (x=-500): (-500, -75, +/-25) -> Assumed square cross section shifted to y: [-125, -75]\\n\\n# Block 0: Inlet (-50, y: -25..25) to Mid (25, y: -50..0)\\n# Block 1: Mid (25, y: -50..0) to Outlet (-500, y: -125..-75)\\n\\nblock_mesh_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nscale   1;\\n\\nvertices\\n(\\n    // Block 0: Inlet Face (x = -50)\\n    (-50  25   25)   // 0\\n    (-50  25  -25)   // 1\\n    (-50 -25   25)   // 2\\n    (-50 -25  -25)   // 3\\n    \\n    // Block 0: Mid Face (x = 25)\\n    ( 25   0   25)   // 4\\n    ( 25   0  -25)   // 5\\n    ( 25 -50   25)   // 6\\n    ( 25 -50  -25)   // 7\\n    \\n    // Block 1: Mid Face (x = 25) - Shared vertices 4,5,6,7\\n    \\n    // Block 1: Outlet Face (x = -500)\\n    (-500 -75   25)  // 8\\n    (-500 -75  -25)  // 9\\n    (-500 -125  25)  // 10\\n    (-500 -125 -25)  // 11\\n);\\n\\nblocks\\n(\\n    // Block 0: Inlet to Mid\\n    hex (0 4 6 2 1 5 7 3) (50 20 10) simpleGrading (1 1 1)\\n    \\n    // Block 1: Mid to Outlet\\n    // Connecting vertices 4,6,7,5 to 8,10,11,9\\n    hex (4 8 10 6 5 9 11 7) (50 20 10) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 1 3 2)\\n        );\\n    }\\n    \\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (8 9 11 10)\\n        );\\n    }\\n    \\n    walls\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 4 6 2)\\n            (1 5 7 3)\\n            (0 1 5 4)\\n            (2 3 7 6)\\n            // Block 1 walls\\n            (4 8 10 6)\\n            (5 9 11 7)\\n            (4 5 9 8)\\n            (6 7 11 10)\\n        );\\n    }\\n);\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_file(os.path.join(system_dir, \\\"blockMeshDict\\\"), block_mesh_dict)\\n\\n# -----------------------------------------------------------------------------\\n# system/controlDict\\n# -----------------------------------------------------------------------------\\ncontrol_dict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The O\""
+  },
+  "timings": {
+    "agent_s": 323.592,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

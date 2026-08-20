@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_shallowwaterwithsquarebump_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef write_file(path, content):\\n    dirname = os.path.dirname(path)\\n    if dirname:\\n        os.makedirs(dirname, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\ndef get_foam_header(class_name, location, object_name, format=\\\"ascii\\\"):\\n    return f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      {format};\\n    class       {class_name};\\n    location    \\\"{location}\\\";\\n    object      {object_name};\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\n\\\"\\\"\\\"\\n\\n# Case parameters\\nnx, ny, nz = 20, 20, 1\\nlx, ly, lz = 1.0, 1.0, 0.1\\nh0 = 0.03\\nmom_x = 0.001\\n# Calculate initial velocity from momentum: U = momentum / depth\\nu_x = mom_x / h0\\nbump_height = 0.005\\n\\n# --- 0/d (Bed height) ---\\n# Generate nonuniform list for the square bump\\n# Grid 20x20x1. Cell centers.\\n# X loop fastest, then Y, then Z (standard blockMesh order)\\ndx = lx / nx\\ndy = ly / ny\\ndz = lz / nz\\n\\nd_values = []\\nfor k in range(nz):\\n    for j in range(ny):\\n        for i in range(nx):\\n            # Cell center coordinates\\n            x_c = (i + 0.5) * dx\\n            y_c = (j + 0.5) * dy\\n            \\n            # Square bump definition: 0.4 < x < 0.6 and 0.4 < y < 0.6\\n            if 0.4 < x_c < 0.6 and 0.4 < y_c < 0.6:\\n                val = bump_height\\n            else:\\n                val = 0.0\\n            d_values.append(f\\\"{val}\\\\n\\\")\\n\\nd_content = get_foam_header(\\\"volScalarField\\\", \\\"0\\\", \\\"d\\\")\\nd_content += f\\\"\\\"\\\"dimensions      [0 1 0 0 0 0 0];\\n\\ninternalField   nonuniform List<scalar> \\n{len(d_values)}\\n(\\n{''.join(d_values)}\\n);\\n\\nboundaryField\\n{{\\n    xMin\\n    {{\\n        type            zeroGradient;\\n    }}\\n    xMax\\n    {{\\n        type            zeroGradient;\\n    }}\\n    yMin\\n    {{\\n        type            zeroGradient;\\n    }}\\n    yMax\\n    {{\\n        type            zeroGradient;\\n    }}\\n    zMin\\n    {{\\n        type            empty;\\n    }}\\n    zMax\\n    {{\\n        type            empty;\\n    }}\\n}}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/d\\\", d_content)\\n\\n# --- 0/h (Total water depth) ---\\nh_content = get_foam_header(\\\"volScalarField\\\", \\\"0\\\", \\\"h\\\")\\nh_content += f\\\"\\\"\\\"dimensions      [0 1 0 0 0 0 0];\\n\\ninternalField   uniform {h0};\\n\\nboundaryField\\n{{\\n    xMin\\n    {{\\n        type            slip;\\n    }}\\n    xMax\\n    {{\\n        type            slip;\\n    }}\\n    yMin\\n    {{\\n        type            slip;\\n    }}\\n    yMax\\n    {{\\n        type            slip;\\n    }}\\n    zMin\\n    {{\\n        type            empty;\\n    }}\\n    zMax\\n    {{\\n        type            empty;\\n    }}\\n}}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/h\\\", h_content)\\n\\n# --- 0/U (Velocity) ---\\nu_content = get_foam_header(\\\"volVectorField\\\", \\\"0\\\", \\\"U\\\")\\nu_content += f\\\"\\\"\\\"dimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform ({u_x} 0 0);\\n\\nboundaryField\\n{{\\n    xMin\\n    {{\\n        type            slip;\\n    }}\\n    xMax\\n    {{\\n        type            slip;\\n    }}\\n    yMin\\n    {{\\n        type            slip;\\n    }}\\n    yMax\\n    {{\\n        type            slip;\\n    }}\\n    zMin\\n    {{\\n        type            empty;\\n    }}\\n    zMax\\n    {{\\n        type            empty;\\n    }}\\n}}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/U\\\", u_content)\\n\\n# --- system/blockMeshDict ---\\nblock_mesh_content = get_foam_header(\\\"dictionary\\\", \\\"system\\\", \\\"blockMeshDict\\\")\\nblock_mesh_content += f\\\"\\\"\\\"convertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (1 0 0)\\n    (1 1 0)\\n    (0 1 0)\\n    (0 0 {lz})\\n    (1 0 {lz})\\n    (1 1 {lz})\\n    (0 1 {lz})\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading (1 1 1)\\n);\\n\\nboundary\\n(\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 213.034,
+    "setup_s": 0.0,
+    "grade_s": 2.315
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.3s last_time=0"
+  ]
+}

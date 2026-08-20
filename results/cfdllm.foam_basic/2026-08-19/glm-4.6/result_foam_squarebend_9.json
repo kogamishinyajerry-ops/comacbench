@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_squarebend_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Helper to write file content.\\\"\\\"\\\"\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- Directories ---\\n# Python script handles file creation, no need to explicitly create dirs if helper does it.\\n\\n# --- 0/ Fields ---\\n\\n# Internal fields\\ndef create_field_header(class_name, location=\\\"0\\\"):\\n    return f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       {class_name};\\n    location    \\\"{location}\\\";\\n    object      {class_name};\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\n\\\"\\\"\\\"\\n\\n# Pressure p\\np_content = create_field_header(\\\"volScalarField\\\") + \\\"\\\"\\\"\\ndimensions      [1 -1 -2 0 0 0 0];\\n\\ninternalField   uniform 110000;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            totalPressure;\\n        p0              uniform 110000;\\n        gamma           1.4; // Assuming ideal gas\\n    }\\n    outlet\\n    {\\n        type            fixedValue;\\n        value           uniform 0; // Gauge pressure\\n    }\\n    walls\\n    {\\n        type            zeroGradient;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/p\\\", p_content)\\n\\n# Velocity U\\n# Using massFlowRate 0.5\\nU_content = create_field_header(\\\"volVectorField\\\") + \\\"\\\"\\\"\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            massFlow;\\n        massFlowRate    0.5;\\n    }\\n    outlet\\n    {\\n        type            pressureInletOutletVelocity;\\n        value           uniform (0 0 0);\\n    }\\n    walls\\n    {\\n        type            noSlip;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/U\\\", U_content)\\n\\n# Temperature T\\nT_content = create_field_header(\\\"volScalarField\\\") + \\\"\\\"\\\"\\ndimensions      [0 0 0 1 0 0 0];\\n\\ninternalField   uniform 1000;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform 1000;\\n    }\\n    outlet\\n    {\\n        type            inletOutlet;\\n        inletValue      uniform 1000;\\n        value           uniform 1000;\\n    }\\n    walls\\n    {\\n        type            zeroGradient;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/T\\\", T_content)\\n\\n# Turbulence k\\nk_content = create_field_header(\\\"volScalarField\\\") + \\\"\\\"\\\"\\ndimensions      [0 2 -2 0 0 0 0];\\n\\ninternalField   uniform 0.1;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform 0.1;\\n    }\\n    outlet\\n    {\\n        type            inletOutlet;\\n        inletValue      uniform 0.1;\\n        value           uniform 0.1;\\n    }\\n    walls\\n    {\\n        type            kqRWallFunction;\\n        value           uniform 0;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/k\\\", k_content)\\n\\n# Turbulence epsilon\\nepsilon_content = create_field_header(\\\"volScalarField\\\") + \\\"\\\"\\\"\\ndimensions      [0 2 -3 0 0 0 0];\\n\\ninternalField   uniform 0.1;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform 0.1;\\n    }\\n    outlet\\n    {\\n        type            inletOutlet;\\n        inletValue      uniform 0.1;\\n        value           uniform 0.1;\\n    }\\n    walls\\n    {\\n        type            epsilonWallFunction;\\n        value           uniform 0;\\n    }\\n}\\n\\\"\\\"\\\"\\nwrite_file(\\\"0/epsilon\\\", epsilon_content)\\n\\n# Turbulent viscosity nut\\nnut_content = create_field_header(\\\"volScalarField\\\") + \\\"\\\"\\\"\\ndimensions      [0 2 -1 0 0 0 0];\\n\\ninternalField   uniform 0;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            calculated;\\n        value       \""
+  },
+  "timings": {
+    "agent_s": 305.321,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_forwardstep_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef write_file(path, content):\\n    \\\"\\\"\\\"Helper to write content to a file, creating directories if needed.\\\"\\\"\\\"\\n    dir_name = os.path.dirname(path)\\n    if dir_name and not os.path.exists(dir_name):\\n        os.makedirs(dir_name, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# =============================================================================\\n# 1. Allrun Script\\n# =============================================================================\\nallrun_content = \\\"\\\"\\\"#!/bin/bash\\ncd \\\"${0%/*}\\\" || exit\\n. $WM_PROJECT_DIR/bin/tools/RunFunctions\\n\\nrunApplication blockMesh\\nrunApplication rhoCentralFoam\\n\\\"\\\"\\\"\\nwrite_file(\\\"Allrun\\\", allrun_content)\\nos.chmod(\\\"Allrun\\\", 0o755)\\n\\n# =============================================================================\\n# 2. system/controlDict\\n# =============================================================================\\ncontrol_dict_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      controlDict;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\napplication     rhoCentralFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         4;\\n\\ndeltaT          0.002;\\n\\nwriteControl    runTime;\\n\\nwriteInterval   0.1;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_file(\\\"system/controlDict\\\", control_dict_content)\\n\\n# =============================================================================\\n# 3. system/fvSchemes\\n# =============================================================================\\nfv_schemes_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    location    \\\"system\\\";\\n    object      fvSchemes;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(tauMC)      Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\nwrite_file(\\\"system/fvSchemes\\\", fv_schemes_content)\\n\\n# =============================================================================\\n# 4. system/fvSolution\\n# =============================================================================\\nfv_solution_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========            \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 134, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"/opt/openfoam10/bin/tools/RunFunctions: line 53:   150 Aborted                 $APP_RUN \\\"$@\\\" > log.$LOG_SUFFIX 2>&1\\n\"}"
+  },
+  "timings": {
+    "agent_s": 220.584,
+    "setup_s": 0.0,
+    "grade_s": 3.02
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=134 3.0s last_time=0"
+  ]
+}

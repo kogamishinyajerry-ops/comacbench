@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0729",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to track the number of people who haven't voted through each time period.\\n\\n## Step 1: Calculate voters by midday (12:00)\\n\\nStarting with 5000 people:\\n- People who voted by midday: 2/5 × 5000 = **2000 people**\\n- People remaining: 5000 - 2000 = **3000 people**\\n\\n## Step 2: Calculate voters by 16:00\\n\\nFrom the remaining 3000 people:\\n- People who voted by 16:00: 2/3 × 3000 = **2000 people**\\n- People still remaining (not voted): 3000 - 2000 = **1000 people**\\n\\n## Verification\\n\\nTotal who voted by 16:00: 2000 + 2000 = 4000 people\\nPeople who didn't vote: 5000 - 4000 = 1000 people ✓\\n\\n#### 1000\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 1000.0, \"reference_number\": 1000.0, \"raw_tail\": \"00 - 2000 = **1000 people**\\n\\n## Verification\\n\\nTotal who voted by 16:00: 2000 + 2000 = 4000 people\\nPeople who didn't vote: 5000 - 4000 = 1000 people ✓\\n\\n#### 1000\"}"
+  },
+  "timings": {
+    "agent_s": 3.016,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to track the number of people who haven't voted through each time period.\\n\\n## Step 1: Ca\" attempts=1"
+  ]
+}

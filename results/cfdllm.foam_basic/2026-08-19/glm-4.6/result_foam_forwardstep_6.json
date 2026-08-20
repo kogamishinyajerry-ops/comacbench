@@ -1,0 +1,40 @@
+{
+  "task_id": "foam_forwardstep_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef write_file(path, content):\\n    # Ensure directory exists\\n    dir_name = os.path.dirname(path)\\n    if dir_name:\\n        os.makedirs(dir_name, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- Case Parameters ---\\ncase_name = \\\"forwardStep\\\"\\nsolver_name = \\\"rhoCentralFoam\\\"\\ndt = 0.002\\nend_time = 4.0\\nwrite_interval = 0.1\\nu_inlet = 1.9\\nt_inlet = 1.0\\np_outlet = 1e5\\n\\n# --- 0/ Directory ---\\n\\n# 0/p\\np_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [1 -1 -2 0 0 0 0];\\n\\ninternalField   uniform %g;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            zeroGradient;\\n    }\\n    outlet\\n    {\\n        type            fixedValue;\\n        value           uniform %g;\\n    }\\n    top\\n    {\\n        type            zeroGradient;\\n    }\\n    bottom\\n    {\\n        type            zeroGradient;\\n    }\\n    obstacle\\n    {\\n        type            zeroGradient;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\" % (p_outlet, p_outlet)\\n\\n# 0/U\\nU_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (%g 0 0);\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform (%g 0 0);\\n    }\\n    outlet\\n    {\\n        type            zeroGradient;\\n    }\\n    top\\n    {\\n        type            slip;\\n    }\\n    bottom\\n    {\\n        type            slip;\\n    }\\n    obstacle\\n    {\\n        type            slip;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\" % (u_inlet, u_inlet)\\n\\n# 0/T\\nT_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      T;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 0 0 1 0 0 0];\\n\\ninternalField   uniform %g;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform %g;\\n    }\\n   \"",
+    "stderr_tail": "\"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ncx0ow76/make_case.py\\\", line 574, in <module>\\n    allrun_content = \\\"\\\"\\\"#!/bin/bash\\n                     ^^^^^^^^^^^^^^\\nValueError: unsupported format character '/' (0x2f) at index 20\\n\""
+  },
+  "timings": {
+    "agent_s": 213.415,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.04s",
+    "stderr: Traceback (most recent call last):\n  File \"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ncx0ow76/make_case.py\", line 574, in <module>\n    allrun_content = \"\"\"#!/bin/bash\n                     ^^^^^^^^^^^^^^\nValueError: unsupported format character '/' (0x2f) at index 20\n"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1092",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to work backwards from what the Allosaurus ate to find the original amount.\\n\\n**Setting up the problem:**\\n\\nLet $x$ = initial kilograms of meat on the triceratops.\\n\\n**Step 1: T-Rex eats half**\\n- T-Rex eats: $\\\\frac{x}{2}$\\n- Remaining: $x - \\\\frac{x}{2} = \\\\frac{x}{2}$\\n\\n**Step 2: Velociraptors eat half of what remains**\\n- Velociraptors eat: $\\\\frac{1}{2} \\\\cdot \\\\frac{x}{2} = \\\\frac{x}{4}$\\n- Remaining: $\\\\frac{x}{2} - \\\\frac{x}{4} = \\\\frac{x}{4}$\\n\\n**Step 3: Allosaurus eats the rest**\\n- The Allosaurus ate $\\\\frac{x}{4}$ kilograms\\n- This equals 270 kg\\n\\n**Solving:**\\n$$\\\\frac{x}{4} = 270$$\\n$$x = 270 \\\\times 4 = 1080$$\\n\\n**Verification:**\\n- Start: 1080 kg\\n- After T-Rex (½): 540 kg remains\\n- After velociraptors (½ of remaining): 270 kg remains\\n- Allosaurus eats: 270 kg ✓\\n\\n#### 1080\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 1080.0, \"reference_number\": 1080.0, \"raw_tail\": \"Verification:**\\n- Start: 1080 kg\\n- After T-Rex (½): 540 kg remains\\n- After velociraptors (½ of remaining): 270 kg remains\\n- Allosaurus eats: 270 kg ✓\\n\\n#### 1080\"}"
+  },
+  "timings": {
+    "agent_s": 7.904,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to work backwards from what the Allosaurus ate to find the original amount.\\n\\n**Setting u' attempts=1"
+  ]
+}

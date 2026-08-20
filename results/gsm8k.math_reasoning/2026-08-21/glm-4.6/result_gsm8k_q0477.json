@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0477",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given:\\n\\n- Number of kids allergic to dairy: \\\\( D = 9 \\\\)\\n- Number allergic to peanuts: \\\\( P = 6 \\\\)\\n- Number allergic to both: \\\\( D \\\\cap P = 3 \\\\)\\n- Total kids in the class: \\\\( 32 \\\\)\\n\\nWe want the number of kids who are not allergic to either dairy or peanuts (i.e., not in \\\\( D \\\\cup P \\\\)).\\n\\nFirst, compute the number allergic to at least one of the two (the union) using inclusion-exclusion:\\n\\n\\\\[\\n|D \\\\cup P| = |D| + |P| - |D \\\\cap P| = 9 + 6 - 3 = 12.\\n\\\\]\\n\\nThus, 12 kids are allergic to dairy, peanuts, or both.\\n\\nThe number not allergic to anything is the total minus those who have at least one allergy:\\n\\n\\\\[\\n\\\\text{Not allergic} = 32 - 12 = 20.\\n\\\\]\\n\\nTherefore, 20 kids are not allergic to anything.\\n\\n#### 20\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 20.0, \"reference_number\": 20.0, \"raw_tail\": \"ng is the total minus those who have at least one allergy:\\n\\n\\\\[\\n\\\\text{Not allergic} = 32 - 12 = 20.\\n\\\\]\\n\\nTherefore, 20 kids are not allergic to anything.\\n\\n#### 20\"}"
+  },
+  "timings": {
+    "agent_s": 7.232,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='We are given:\\n\\n- Number of kids allergic to dairy: \\\\( D = 9 \\\\)\\n- Number allergic to peanuts: \\\\( P = 6 \\\\)\\n- Number allerg' attempts=1"
+  ]
+}

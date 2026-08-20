@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0763",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let me set up the problem with variables.\\n\\nLet the first house need **x** cases of shingles.\\n\\n**Setting up the relationships:**\\n- First house: x cases\\n- First house needs 1/2 of the second → second house = 2x\\n- Third house needs double the first → third house = 2x\\n\\n**Setting up the equation:**\\n\\nThe total cases needed equals 250:\\n$$x + 2x + 2x = 250$$\\n$$5x = 250$$\\n$$x = 50$$\\n\\n**Finding the third house:**\\n$$2x = 2(50) = 100$$\\n\\n**Verification:**\\n- First house: 50 cases\\n- Second house: 100 cases (50 = ½ × 100 ✓)\\n- Third house: 100 cases (100 = 2 × 50 ✓)\\n- Total: 50 + 100 + 100 = 250 ✓\\n\\n#### 100\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 100.0, \"reference_number\": 100.0, \"raw_tail\": \"cation:**\\n- First house: 50 cases\\n- Second house: 100 cases (50 = ½ × 100 ✓)\\n- Third house: 100 cases (100 = 2 × 50 ✓)\\n- Total: 50 + 100 + 100 = 250 ✓\\n\\n#### 100\"}"
+  },
+  "timings": {
+    "agent_s": 3.214,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Let me set up the problem with variables.\\n\\nLet the first house need **x** cases of shingles.\\n\\n**Setting up the relations' attempts=1"
+  ]
+}

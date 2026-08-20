@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_wedge_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\n# -----------------------------------------------------------------------------\\n# Helper function to write files\\n# -----------------------------------------------------------------------------\\ndef write_file(path, content):\\n    dirname = os.path.dirname(path)\\n    if dirname and not os.path.exists(dirname):\\n        os.makedirs(dirname)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# -----------------------------------------------------------------------------\\n# 1. Geometry parameters\\n# -----------------------------------------------------------------------------\\nx_min = -0.15242\\nx_max = 0.3048\\ny_min = 0.0\\ny_max = 0.1524\\nz_min = -0.005\\nz_max = 0.005\\n\\n# Wedge definition (25 degrees wedge for supersonic flow)\\n# Let's define a wedge starting at x=0.0 with a specific angle.\\n# The prompt doesn't specify the wedge angle, but \\\"supersonic flow over a wedge\\\" implies a shock.\\n# We will assume a wedge angle that generates a visible shock.\\n# Let's create a simple block mesh with a split to define the wedge surface.\\n# Alternatively, define the geometry using blockMesh vertices.\\n\\n# Vertices for a 2D wedge in a 3D domain\\n# V0 (inlet, bottom) -- V1 (inlet, top)\\n# |                    |\\n# V2 (wedge tip, bottom) -- V3 (wedge tip, top)\\n# |                    |\\n# V4 (outlet, bottom) -- V5 (outlet, top)\\n# And z-layers.\\n\\n# Wedge tip at x=0.\\n# Wedge angle alpha. Let's say alpha = 15 degrees for visualization, \\n# but with inlet velocity 10 m/s, it's not really supersonic in a gas sense \\n# (Mach ~ 0.1), but the prompt asks for \\\"Supersonic\\\" physics configuration \\n# (rhoCentralFoam, etc.) so we set up the geometry for it.\\n\\n# However, 10 m/s is very low. The prompt specifies inlet velocity 10 m/s, T=2K, P=1Pa.\\n# Speed of sound a = sqrt(gamma * R * T) = sqrt(1.4 * 0.7143 * 2) = sqrt(2.0) ~ 1.41 m/s.\\n# Mach = 10 / 1.41 ~ 7.0. So it IS supersonic.\\n\\n# Wedge definition:\\n# Let's place the wedge tip at x=0.0.\\n# Let the wedge surface slope upwards from y=0 at x=0 to y=H_wedge at x=x_max.\\n# Angle = atan(H_wedge / x_max).\\n# Let's pick a standard wedge angle, e.g., 15 degrees.\\nwedge_angle_deg = 15.0\\nwedge_angle_rad = math.radians(wedge_angle_deg)\\nwedge_height = x_max * math.tan(wedge_angle_rad)\\n\\n# Block structure:\\n# Block 0: Below the wedge (if wedge is above y=0?) or the wedge shape itself.\\n# The prompt says \\\"flow over a wedge\\\". Usually wedge is on the bottom wall.\\n# Let's assume the wedge is on the bottom boundary (y=0).\\n# So the domain goes from y=0 to y_max.\\n# The wedge shape occupies the region y < x * tan(theta) for x > 0.\\n\\n# Vertices (z-constant, say z=0, then extrude in z):\\n# 0: (x_min, y_min, z_min) -> Inlet-Bottom-Back\\n# 1: (x_min, y_max, z_min) -> Inlet-Top-Back\\n# 2: (0.0, y_min, z_min)   -> WedgeTip-Bottom-Back\\n# 3: (0.0, y_max, z_min)   -> WedgeTip-Top-Back\\n# 4: (x_max, wedge_height, z_min) -> Outlet-Surface-Back\\n# 5: (x_max, y_max, z_min)       -> Outlet-Top-Back\\n# Note: This defines 5 vertices in x-y plane. We need a hex mesh.\\n# We need to split the domain into two blocks:\\n# Block A: The wedge block (x>0, y<wedge_surface). This is actually the wedge solid? \\n# No, we need the fluid domain. The fluid domain is *above* the wedge.\\n# So the fluid is y > x * tan(theta).\\n# To make a structured mesh for this, we need a mapped block or a split at the wedge surface.\\n\\n# Let's define 6 vertices for the fluid domain (splitting at x=0).\\n# Region 1: x in [x_min, 0]. Simple rectangular block.\\n# Region 2: x in [0, x_max]. Trapezoidal block (fluid above wedge).\\n\\n# Vertices (z_min):\\n# V0: (x_min, 0, z_min)  -- Inlet bottom\\n# V1: (x_min, y_max, z_min) -- Inlet top\\n# V2: (0, 0, z_min)      -- Wedge tip bottom\\n# V3: (0, y_max, z_min)  -- Wedge tip top\\n# V4: (x_max, wedge_height, z_min) -- Outlet bottom (on wedge surface)\\n# V5: (x_max, y_max, z_min)       -- Outlet top\\n\\n# Vertices (z_max):\\n# V6: (x_min, 0, z_max)\\n# V7: (x_min, y_max, z_max)\\n# V8: (0, 0, z_max)\\n# V9: (0, y_max, z_max)\\n# V10: (x_max, wedge_height, z_max)\\n# V11: (x_max, y_max, \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 180.717,
+    "setup_s": 0.0,
+    "grade_s": 2.577
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.6s last_time=0"
+  ]
+}

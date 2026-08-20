@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_160",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def do_algebra(operator, operand):\\n    \\\"\\\"\\\"\\n    Given two lists operator, and operand. The first list has basic algebra operations, and \\n    the second list is a list of integers. Use the two given lists to build the algebric \\n    expression and return the evaluation of this expression.\\n\\n    The basic algebra operations:\\n    Addition ( + ) \\n    Subtraction ( - ) \\n    Multiplication ( * ) \\n    Floor division ( // ) \\n    Exponentiation ( ** ) \\n\\n    Example:\\n    operator['+', '*', '-']\\n    array = [2, 3, 4, 5]\\n    result = 2 + 3 * 4 - 5\\n    => result = 9\\n\\n    Note:\\n        The length of operator list is equal to the length of operand list minus one.\\n        Operand is a list of of non-negative integers.\\n        Operator list has at least one operator, and operand list has at least two operands.\\n\\n    \\\"\\\"\\\"\\n    # Build the algebraic expression string by interleaving operators and operands\\n    expression = str(operand[0])\\n    for i in range(len(operator)):\\n        expression += operator[i] + str(operand[i + 1])\\n    # Evaluate the expression using Python's eval, which respects standard operator precedence\\n    return eval(expression)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 9.366,
+    "setup_s": 0.0,
+    "grade_s": 0.054
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

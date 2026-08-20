@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0415",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to set up variables for each type of tree and each sister.\\n\\n**Setting up what each person gathered:**\\n\\nJoanne:\\n- Tallest trees: 30 apples\\n- Shortest trees: half of 30 = 15 apples\\n- Average trees: J_a apples (unknown)\\n\\nSister:\\n- Tallest trees: 2 × 30 = 60 apples\\n- Shortest trees: 3 × 15 = 45 apples\\n- Average trees: 0 apples\\n\\n**Setting up the equation:**\\n\\nThe combined total is 500 apples:\\n\\n$$30 + 15 + J_a + 60 + 45 + 0 = 500$$\\n\\n**Solving:**\\n\\n$$150 + J_a = 500$$\\n\\n$$J_a = 350$$\\n\\n**Verification:** 30 + 15 + 350 + 60 + 45 = 500 ✓\\n\\nThe phrase \\\"more apples from the average trees\\\" simply confirms that she gathered more from average trees than from the tallest or shortest (350 > 30 > 15), which is consistent.\\n\\n#### 350\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 350.0, \"reference_number\": 350.0, \"raw_tail\": \"m the average trees\\\" simply confirms that she gathered more from average trees than from the tallest or shortest (350 > 30 > 15), which is consistent.\\n\\n#### 350\"}"
+  },
+  "timings": {
+    "agent_s": 7.739,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to set up variables for each type of tree and each sister.\\n\\n**Setting up what each perso' attempts=1"
+  ]
+}

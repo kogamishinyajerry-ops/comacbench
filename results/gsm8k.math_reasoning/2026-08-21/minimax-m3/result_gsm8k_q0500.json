@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0500",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let me define variables for each person's insect count:\\n- Lily: L\\n- David: D\\n- Bodhi: B\\n\\n**Setting up equations:**\\n\\nFrom the problem:\\n1. L + D + B = 43 (total insects)\\n2. L = D + 7 (Lily found 7 more than David)\\n3. D = B/2, so B = 2D (David found half of Bodhi's count)\\n\\n**Solving:**\\n\\nSubstitute equations 2 and 3 into equation 1:\\n$$(D + 7) + D + 2D = 43$$\\n$$4D + 7 = 43$$\\n$$4D = 36$$\\n$$D = 9$$\\n\\n**Finding Lily's count:**\\n$$L = D + 7 = 9 + 7 = 16$$\\n\\n**Verification:**\\n- Lily: 16, David: 9, Bodhi: 18\\n- Total: 16 + 9 + 18 = 43 ✓\\n- Lily (16) = David (9) + 7 ✓\\n- David (9) = half of Bodhi (18) ✓\\n\\n#### 16\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 16.0, \"reference_number\": 16.0, \"raw_tail\": \" = 16$$\\n\\n**Verification:**\\n- Lily: 16, David: 9, Bodhi: 18\\n- Total: 16 + 9 + 18 = 43 ✓\\n- Lily (16) = David (9) + 7 ✓\\n- David (9) = half of Bodhi (18) ✓\\n\\n#### 16\"}"
+  },
+  "timings": {
+    "agent_s": 3.012,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Let me define variables for each person's insect count:\\n- Lily: L\\n- David: D\\n- Bodhi: B\\n\\n**Setting up equations:**\\n\\nFrom\" attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_127",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef intersection(interval1, interval2):\\n    \\\"\\\"\\\"\\n    Determines whether the length of the intersection of two closed integer intervals\\n    is a prime number.\\n\\n    Each interval is a tuple (start, end) where start <= end.\\n    The intersection of [a, b] and [c, d] is [max(a, c), min(b, d)].\\n    Its length is defined as (min(b, d) - max(a, c)).\\n\\n    Returns \\\"YES\\\" if the length is a prime number, otherwise \\\"NO\\\".\\n    If the intervals do not intersect, returns \\\"NO\\\".\\n\\n    Examples\\n    --------\\n    >>> intersection((1, 2), (2, 3))\\n    'NO'   # intersection length = 0\\n    >>> intersection((-1, 1), (0, 4))\\n    'NO'   # intersection length = 1\\n    >>> intersection((-3, -1), (-5, 5))\\n    'YES'  # intersection length = 2 (prime)\\n    \\\"\\\"\\\"\\n    a, b = interval1\\n    c, d = interval2\\n\\n    # Compute the intersection boundaries\\n    start = max(a, c)\\n    end = min(b, d)\\n\\n    length = end - start\\n\\n    # If the intervals do not intersect or length <= 1, it cannot be prime\\n    if length <= 1:\\n        return \\\"NO\\\"\\n\\n    # Primality test for length\\n    for divisor in range(2, math.isqrt(length) + 1):\\n        if length % divisor == 0:\\n            return \\\"NO\\\"\\n\\n    return \\\"YES\\\"\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.05}"
+  },
+  "timings": {
+    "agent_s": 8.129,
+    "setup_s": 0.0,
+    "grade_s": 0.079
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.05s"
+  ]
+}

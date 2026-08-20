@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_116",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.95,
+  "artifacts": {
+    "code": "\"def sort_array(arr):\\n    \\\"\\\"\\\"\\n    Sort the given list of integers according to the number of ones in the\\n    binary representation of each non‑negative integer.  For negative numbers\\n    the binary count is ignored – they are sorted by their numeric value only.\\n\\n    Examples\\n    --------\\n    >>> sort_array([1, 5, 2, 3, 4])\\n    [1, 2, 4, 3, 5]\\n    >>> sort_array([-2, -3, -4, -5, -6])\\n    [-6, -5, -4, -3, -2]\\n    >>> sort_array([1, 0, 2, 3, 4])\\n    [0, 1, 2, 3, 4]\\n    \\\"\\\"\\\"\\n    def sort_key(x):\\n        \\\"\\\"\\\"Key used for sorting.\\n\\n        For non‑negative numbers the primary key is the count of '1' bits,\\n        with the numeric value as a tie‑breaker.\\n        For negative numbers the primary key is forced to 0 (the smallest\\n        possible count) so they are sorted only by their numeric value.\\n        \\\"\\\"\\\"\\n        if x < 0:\\n            # ignore popcount for negative numbers\\n            return (0, x)\\n        else:\\n            # number of 1‑bits in the binary representation\\n            return (bin(x).count('1'), x)\\n\\n    return sorted(arr, key=sort_key)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 10, \"failed_cases\": [{\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 25.018,
+    "setup_s": 0.0,
+    "grade_s": 0.07
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

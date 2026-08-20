@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_068",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List\\n\\ndef pluck(arr: List[int]) -> List[int]:\\n    \\\"\\\"\\\"\\n    Given a non‑empty list of non‑negative integers representing a tree branch,\\n    return a list `[value, index]` for the node with the smallest even value.\\n    If several nodes share that smallest even value, the one with the smallest\\n    index is chosen.  If the list is empty or contains no even numbers,\\n    return an empty list.\\n\\n    Parameters\\n    ----------\\n    arr : List[int]\\n        The array of node values.\\n\\n    Returns\\n    -------\\n    List[int]\\n        `[smallest_even_value, its_index]` or `[]` when no even value exists.\\n\\n    Examples\\n    --------\\n    >>> pluck([4, 2, 3])\\n    [2, 1]\\n    >>> pluck([1, 2, 3])\\n    [2, 1]\\n    >>> pluck([])\\n    []\\n    >>> pluck([5, 0, 3, 0, 4, 2])\\n    [0, 1]\\n    \\\"\\\"\\\"\\n    # Guard against None or empty input\\n    if not arr:\\n        return []\\n\\n    smallest_even = None   # type: int\\n    smallest_idx = -1\\n\\n    for idx, val in enumerate(arr):\\n        if val % 2 == 0:               # even number\\n            if smallest_even is None or val < smallest_even:\\n                smallest_even = val\\n                smallest_idx = idx\\n            # If val == smallest_even we keep the earlier index automatically.\\n\\n    if smallest_even is None:\\n        return []\\n    return [smallest_even, smallest_idx]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 12.265,
+    "setup_s": 0.0,
+    "grade_s": 0.053
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

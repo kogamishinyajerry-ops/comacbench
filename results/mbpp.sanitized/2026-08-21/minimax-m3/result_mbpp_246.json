@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_246",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def babylonian_squareroot(n):\\n    \\\"\\\"\\\"\\n    Compute the square root of n using the Babylonian method.\\n    \\n    The Babylonian method (an application of Newton's method) uses the iteration:\\n        x_{n+1} = (x_n + n / x_n) / 2\\n    \\n    The sequence converges quadratically to the square root of n.\\n    \\\"\\\"\\\"\\n    if n < 0:\\n        raise ValueError(\\\"Cannot compute square root of a negative number\\\")\\n    if n == 0:\\n        return 0\\n    \\n    # Initial guess; using n works well for n >= 1\\n    # For 0 < n < 1, using 1 as the initial guess is better\\n    x = n if n >= 1 else 1.0\\n    \\n    # Iterate until convergence\\n    tolerance = 1e-15\\n    max_iterations = 100\\n    \\n    for _ in range(max_iterations):\\n        x_new = (x + n / x) / 2\\n        if abs(x_new - x) < tolerance:\\n            return x_new\\n        x = x_new\\n    \\n    return x\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 9.43,
+    "setup_s": 0.0,
+    "grade_s": 0.065
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

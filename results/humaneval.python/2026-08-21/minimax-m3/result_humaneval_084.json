@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_084",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def solve(N):\\n    \\\"\\\"\\\"\\n    Given a positive integer N, return the total sum of its digits in binary.\\n\\n    The function computes the sum of the decimal digits of N, then returns the\\n    binary representation of that sum (without the '0b' prefix).\\n\\n    Parameters\\n    ----------\\n    N : int\\n        A non‑negative integer (0 ≤ N ≤ 10000).\\n\\n    Returns\\n    -------\\n    str\\n        Binary representation of the digit sum. For a sum of 0 the result is \\\"0\\\".\\n\\n    Examples\\n    --------\\n    >>> solve(1000)\\n    '1'\\n    >>> solve(150)\\n    '110'\\n    >>> solve(147)\\n    '1100'\\n    \\\"\\\"\\\"\\n    # Calculate the sum of the decimal digits of N\\n    digit_sum = sum(int(d) for d in str(N))\\n\\n    # Convert the sum to binary; handle the special case of 0\\n    if digit_sum == 0:\\n        return \\\"0\\\"\\n    return bin(digit_sum)[2:]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 5.764,
+    "setup_s": 0.0,
+    "grade_s": 0.046
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

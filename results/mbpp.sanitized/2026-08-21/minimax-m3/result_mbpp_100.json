@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_100",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def next_smallest_palindrome(num: int) -> int:\\n    \\\"\\\"\\\"\\n    Return the smallest palindrome strictly greater than `num`.\\n    The result is returned as an integer.\\n    \\\"\\\"\\\"\\n    s = str(num)\\n    n = len(s)\\n    # Length of the left half (including the middle digit if n is odd)\\n    left_len = (n + 1) // 2\\n    left_str = s[:left_len]\\n\\n    # Helper to mirror the left half to the right side\\n    def mirror(left: str) -> str:\\n        if n % 2 == 0:                     # even length\\n            return left + left[::-1]\\n        else:                              # odd length\\n            return left + left[-2::-1]     # same as left[:-1][::-1]\\n\\n    # Initial palindrome by mirroring the original left half\\n    pal = int(mirror(left_str))\\n    if pal > num:\\n        return pal\\n\\n    # Increment the left half and mirror again\\n    left_int = int(left_str) + 1\\n    left_str_inc = str(left_int)\\n\\n    # If increment caused the left half to grow (e.g., 99 -> 100),\\n    # we need a palindrome with one more digit: 1 followed by (n-1) zeros and a 1.\\n    if len(left_str_inc) > left_len:\\n        return int(\\\"1\\\" + (\\\"0\\\" * (n - 1)) + \\\"1\\\")\\n    else:\\n        return int(mirror(left_str_inc))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 43.56,
+    "setup_s": 0.0,
+    "grade_s": 0.063
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

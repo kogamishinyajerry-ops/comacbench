@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0984",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find how many plants fit in the bed, then calculate the cost.\\n\\n## Setting Up the Problem\\n\\n**Given information:**\\n- Flower bed length: 111 feet\\n- Each plant width: 12 inches = 1 foot\\n- Space between plants: 1.5 feet\\n- Plants already owned: 17\\n- Cost per plant: $6\\n\\n## Finding Total Plants Needed\\n\\nFor **n** plants in a row, there are **(n-1)** spaces between them.\\n\\nTotal length equation:\\n$$n \\\\times 1 + (n-1) \\\\times 1.5 = 111$$\\n\\nSolving:\\n$$n + 1.5n - 1.5 = 111$$\\n$$2.5n = 112.5$$\\n$$n = 45 \\\\text{ plants}$$\\n\\n**Verification:** 45 plants × 1 ft + 44 spaces × 1.5 ft = 45 + 66 = 111 ft ✓\\n\\n## Calculating Plants to Buy\\n\\n$$\\\\text{Plants needed} = 45 - 17 = 28 \\\\text{ plants}$$\\n\\n## Calculating Total Cost\\n\\n$$\\\\text{Total cost} = 28 \\\\times \\\\$6 = \\\\$168$$\\n\\n#### 168\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 168.0, \"reference_number\": 342.0, \"raw_tail\": \"lating Plants to Buy\\n\\n$$\\\\text{Plants needed} = 45 - 17 = 28 \\\\text{ plants}$$\\n\\n## Calculating Total Cost\\n\\n$$\\\\text{Total cost} = 28 \\\\times \\\\$6 = \\\\$168$$\\n\\n#### 168\"}"
+  },
+  "timings": {
+    "agent_s": 3.822,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find how many plants fit in the bed, then calculate the cost.\\n\\n## Setting Up the Prob' attempts=1"
+  ]
+}

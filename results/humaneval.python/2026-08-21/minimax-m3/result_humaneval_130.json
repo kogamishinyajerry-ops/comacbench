@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_130",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def tri(n):\\n    \\\"\\\"\\\"Return the list of the first n+1 Tribonacci numbers.\\n\\n    The Tribonacci sequence is defined as:\\n        tri(0) = 1\\n        tri(1) = 3\\n        tri(n) = 1 + n/2                     if n is even\\n        tri(n) = tri(n-1) + tri(n-2) + tri(n+1)   if n is odd\\n\\n    Parameters\\n    ----------\\n    n : int\\n        A non‑negative integer indicating the last index of the sequence\\n        to generate.\\n\\n    Returns\\n    -------\\n    list[int]\\n        A list ``[tri(0), tri(1), ..., tri(n)]``.\\n    \\\"\\\"\\\"\\n    import sys\\n\\n    # Ensure we can handle deep recursion for large n.\\n    sys.setrecursionlimit(10000)\\n\\n    # Memoization dictionary for computed values.\\n    memo = {0: 1, 1: 3}\\n\\n    def compute(k: int) -> int:\\n        \\\"\\\"\\\"Recursively compute tri(k) with memoization.\\\"\\\"\\\"\\n        if k in memo:\\n            return memo[k]\\n        if k % 2 == 0:                     # even case\\n            memo[k] = 1 + k // 2\\n        else:                               # odd case\\n            memo[k] = compute(k - 1) + compute(k - 2) + compute(k + 1)\\n        return memo[k]\\n\\n    # Pre‑fill even values up to n+1 to avoid unnecessary recursion\\n    # when an odd term references its forward neighbour.\\n    for i in range(0, n + 2):\\n        if i % 2 == 0:\\n            memo.setdefault(i, 1 + i // 2)\\n\\n    # Build the result list for indices 0..n.\\n    return [compute(i) for i in range(n + 1)]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 40.786,
+    "setup_s": 0.0,
+    "grade_s": 0.051
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

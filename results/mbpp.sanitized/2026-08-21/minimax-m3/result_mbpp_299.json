@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_299",
+  "registry_id": "mbpp.sanitized",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_aggregate(scores):\\n    \\\"\\\"\\\"\\n    Calculate the maximum aggregate (total) from a list of (name, value) tuples.\\n    \\n    Parameters\\n    ----------\\n    scores : list of tuple\\n        Each tuple contains a name (str) and a numeric value.\\n    \\n    Returns\\n    -------\\n    tuple or None\\n        A tuple (name, aggregate) representing the name with the highest total value.\\n        Returns None if the input list is empty.\\n    \\\"\\\"\\\"\\n    if not scores:\\n        return None\\n\\n    # Use a dictionary to accumulate totals per name\\n    totals = {}\\n    for name, value in scores:\\n        totals[name] = totals.get(name, 0) + value\\n\\n    # Find the name with the maximum total\\n    max_name = max(totals, key=lambda k: totals[k])\\n    return (max_name, totals[max_name])\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 3, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 3.923,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:2c98d153244321f6d23894c6b77a40d51a8abeababafe0f31f8e73e79cb223fe",
+  "assets_revision": "mbpp@sanitized_test+hf_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

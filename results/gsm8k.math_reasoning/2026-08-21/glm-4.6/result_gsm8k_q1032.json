@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1032",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Grandpa gets full from a certain total amount of \\\"jelly bean filling.\\\" Let’s define the filling power of a large bean as L, a medium bean as M, and a small bean as S.\\n\\n- It takes 75 large beans to fill him, so total capacity = 75 × L.\\n- He can eat twice as many medium beans as large beans. That means the number of medium beans needed to fill him is 2 × 75 = 150. So total capacity = 150 × M.  \\n  Equating the two expressions for capacity: 75L = 150M → M = L/2. So a medium bean has half the filling power of a large bean.\\n- Eating 3 small beans is the same as eating 1 medium bean: 3S = M → S = M/3 = (L/2)/3 = L/6. So a small bean has one‑sixth the filling power of a large bean.\\n\\nNow, to find how many small beans fill Grandpa, divide the total capacity by S:  \\nNumber of small beans = total capacity / S = (75L) / (L/6) = 75 × 6 = 450.\\n\\nThus Grandpa can eat 450 small jelly beans.\\n\\n#### 450\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 450.0, \"reference_number\": 450.0, \"raw_tail\": \"ide the total capacity by S:  \\nNumber of small beans = total capacity / S = (75L) / (L/6) = 75 × 6 = 450.\\n\\nThus Grandpa can eat 450 small jelly beans.\\n\\n#### 450\"}"
+  },
+  "timings": {
+    "agent_s": 25.74,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer='Grandpa gets full from a certain total amount of \"jelly bean filling.\" Let’s define the filling power of a large bean as' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_142",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def sum_squares(lst):\\n    \\\"\\\"\\\"\\n    This function will take a list of integers. For all entries in the list, the function shall square the integer entry if its index is a \\n    multiple of 3 and will cube the integer entry if its index is a multiple of 4 and not a multiple of 3. The function will not \\n    change the entries in the list whose indexes are not a multiple of 3 or 4. The function shall then return the sum of all entries. \\n    \\n    Examples:\\n    For lst = [1,2,3] the output should be 6\\n    For lst = []  the output should be 0\\n    For lst = [-1,-5,2,-1,-5]  the output should be -126\\n    \\\"\\\"\\\"\\n    total = 0\\n    for i, val in enumerate(lst):\\n        if i % 3 == 0:\\n            total += val ** 2\\n        elif i % 4 == 0:\\n            total += val ** 3\\n        else:\\n            total += val\\n    return total\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 11, \"cases_total\": 11, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 7.777,
+    "setup_s": 0.0,
+    "grade_s": 0.064
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

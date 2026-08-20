@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q1176",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to track the chalk length carefully.\\n\\n## Setting Up the Problem\\n\\n**Monday's usage:**\\n- Initial chalk: 5 inches\\n- Used: 45% × 5 = 2.25 inches\\n- Remaining after Monday: 5 - 2.25 = **2.75 inches**\\n\\n**Rule for remaining days:** Use 20% of current chalk each day (so 80% remains)\\n\\n## Tracking Each Day\\n\\n**Tuesday:**\\n- Uses: 20% × 2.75 = 0.55 inches\\n- Remaining: 2.75 - 0.55 = **2.20 inches** ✓ (≥ 2, keep going)\\n\\n**Wednesday:**\\n- Uses: 20% × 2.20 = 0.44 inches\\n- Remaining: 2.20 - 0.44 = **1.76 inches** ✗ (less than 2, must recycle)\\n\\n## Conclusion\\n\\nAfter Wednesday, the chalk is smaller than 2 inches, so the teacher must recycle it on Thursday.\\n\\nThe teacher has **Tuesday** and **Wednesday** — 2 days before recycling.\\n\\n#### 2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 2.0, \"reference_number\": 2.0, \"raw_tail\": \"he chalk is smaller than 2 inches, so the teacher must recycle it on Thursday.\\n\\nThe teacher has **Tuesday** and **Wednesday** — 2 days before recycling.\\n\\n#### 2\"}"
+  },
+  "timings": {
+    "agent_s": 12.059,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to track the chalk length carefully.\\n\\n## Setting Up the Problem\\n\\n**Monday's usage:**\\n- I\" attempts=1"
+  ]
+}

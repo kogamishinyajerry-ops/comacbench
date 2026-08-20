@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0313",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let's solve step by step.\\n\\n**Given:**\\n- Currently, Cera is 46 years old.\\n- Six years ago, Noah was half as old as Cera (at that time).\\n- Six years ago, the population of Chile was half of what it is now.\\n- Six years ago, the population was 3000 times the age of Noah (at that time).\\n\\n**Step 1: Find ages six years ago.**\\n- Cera's current age = 46.\\n- Cera's age six years ago = 46 – 6 = 40.\\n- Six years ago, Noah was half as old as Cera, so:\\n  \\\\[\\n  \\\\text{Noah's age six years ago} = \\\\frac{1}{2} \\\\times 40 = 20.\\n  \\\\]\\n\\n**Step 2: Find Noah's current age (optional but not needed for the population).**\\n- Noah's current age = 20 + 6 = 26. (We may not need this if the population relation uses his age six years ago.)\\n\\n**Step 3: Use the population information six years ago.**\\n- Let \\\\( P \\\\) be the current population of Chile.\\n- Population six years ago = \\\\(\\\\frac{P}{2}\\\\).\\n- According to the given, population six years ago = 3000 × (Noah's age six years ago).\\n- Noah's age six years ago = 20, so:\\n  \\\\[\\n  \\\\frac{P}{2} = 3000 \\\\times 20 = 60000.\\n  \\\\]\\n\\n**Step 4: Solve for current population \\\\( P \\\\).**\\n\\\\[\\nP = 2 \\\\times 60000 = 120000.\\n\\\\]\\n\\nThus, the population of Chile now is 120,000.\\n\\n#### 120000\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 120000.0, \"reference_number\": 120000.0, \"raw_tail\": \" = 60000.\\n  \\\\]\\n\\n**Step 4: Solve for current population \\\\( P \\\\).**\\n\\\\[\\nP = 2 \\\\times 60000 = 120000.\\n\\\\]\\n\\nThus, the population of Chile now is 120,000.\\n\\n#### 120000\"}"
+  },
+  "timings": {
+    "agent_s": 36.627,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Let's solve step by step.\\n\\n**Given:**\\n- Currently, Cera is 46 years old.\\n- Six years ago, Noah was half as old as Cera (\" attempts=1"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_dambreakwithobstacle_5",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\ndef write_file(path, content):\\n    os.makedirs(os.path.dirname(path), exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n\\n# --- blockMeshDict ---\\n# Geometry: 1x1x1 domain with a step obstacle in the center bottom.\\n# Obstacle: x in [0.5, 0.6875], z in [0, 0.25]. Spans full Y (weir).\\n# Grid: 32x32x32 points.\\n# Splits:\\n# X: 16 (0.0-0.5), 6 (0.5-0.6875), 10 (0.6875-1.0)\\n# Z: 8 (0.0-0.25), 24 (0.25-1.0)\\n\\nvertices = [\\n    # Z = 0\\n    (0.0, 0.0, 0.0),    # 0\\n    (0.5, 0.0, 0.0),    # 1\\n    (0.6875, 0.0, 0.0), # 2\\n    (1.0, 0.0, 0.0),    # 3\\n    (0.0, 1.0, 0.0),    # 4\\n    (0.5, 1.0, 0.0),    # 5\\n    (0.6875, 1.0, 0.0), # 6\\n    (1.0, 1.0, 0.0),    # 7\\n    \\n    # Z = 0.25\\n    (0.0, 0.0, 0.25),    # 8\\n    (0.5, 0.0, 0.25),    # 9\\n    (0.6875, 0.0, 0.25), # 10\\n    (1.0, 0.0, 0.25),    # 11\\n    (0.0, 1.0, 0.25),    # 12\\n    (0.5, 1.0, 0.25),    # 13\\n    (0.6875, 1.0, 0.25), # 14\\n    (1.0, 1.0, 0.25),    # 15\\n    \\n    # Z = 1.0\\n    (0.0, 0.0, 1.0),    # 16\\n    (0.5, 0.0, 1.0),    # 17\\n    (0.6875, 0.0, 1.0), # 18\\n    (1.0, 0.0, 1.0),    # 19\\n    (0.0, 1.0, 1.0),    # 20\\n    (0.5, 1.0, 1.0),    # 21\\n    (0.6875, 1.0, 1.0), # 22\\n    (1.0, 1.0, 1.0),    # 23\\n]\\n\\nblocks_str = \\\"\\\"\\n# L1: Left Bottom (Fluid)\\nblocks_str += \\\"    hex (0 1 5 4 8 9 13 12) (16 32 8) simpleGrading (1 1 1)\\\\n\\\"\\n# L2: Left Top (Fluid)\\nblocks_str += \\\"    hex (8 9 13 12 16 17 21 20) (16 32 24) simpleGrading (1 1 1)\\\\n\\\"\\n# M2: Middle Top (Fluid, Gap above obstacle)\\nblocks_str += \\\"    hex (9 10 14 13 17 18 22 21) (6 32 24) simpleGrading (1 1 1)\\\\n\\\"\\n# R1: Right Bottom (Fluid)\\nblocks_str += \\\"    hex (2 3 7 6 10 11 15 14) (10 32 8) simpleGrading (1 1 1)\\\\n\\\"\\n# R2: Right Top (Fluid)\\nblocks_str += \\\"    hex (10 11 15 14 18 19 23 22) (10 32 24) simpleGrading (1 1 1)\\\\n\\\"\\n\\nboundary_str = \\\"\\\"\\\"\\n    inlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (0 4 12 8)\\n            (8 12 20 16)\\n        );\\n    }\\n    outlet\\n    {\\n        type patch;\\n        faces\\n        (\\n            (3 11 15 7)\\n            (11 19 23 15)\\n        );\\n    }\\n    walls\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4) // Bottom Left\\n            (2 3 7 6) // Bottom Right\\n        );\\n    }\\n    top\\n    {\\n        type patch;\\n        faces\\n        (\\n            (16 17 21 20)\\n            (17 18 22 21)\\n            (18 19 23 22)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type empty;\\n        faces\\n        (\\n            (0 1 9 8) (1 2 10 9) (2 3 11 10)\\n            (4 5 13 12) (5 6 14 13) (6 7 15 14)\\n            (8 9 17 16) (9 10 18 17) (10 11 19 18)\\n            (12 13 21\""
+  },
+  "timings": {
+    "agent_s": 331.974,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:54f3ab989643ac6c6498ac5d0361f54f5c876b6d1ef090abf12637d2f851c278",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

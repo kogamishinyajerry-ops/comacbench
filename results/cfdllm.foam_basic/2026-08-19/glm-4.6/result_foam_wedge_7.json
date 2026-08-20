@@ -1,0 +1,41 @@
+{
+  "task_id": "foam_wedge_7",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\n# -----------------------------------------------------------------------------\\n# Configuration\\n# -----------------------------------------------------------------------------\\ncase_name = \\\"wedgeCase\\\"\\nx_min = -0.15242\\nx_corner = 0.0\\nx_max = 0.3048\\ny_min = 0.0\\ny_max = 0.1524\\nz_min = -0.005\\nz_max = 0.005\\n\\n# Wedge angle (15 degrees) to calculate slope\\nwedge_angle_deg = 15.0\\nwedge_height = x_max * math.tan(math.radians(wedge_angle_deg))\\n\\n# Time settings\\nstart_time = 0.0\\nend_time = 0.2\\ndelta_t = 0.00005\\nwrite_interval = 0.02\\n\\n# Physical properties\\nu_inlet = 15.0\\nt_inlet = 2.0\\np_inlet = 1.0\\n\\n# -----------------------------------------------------------------------------\\n# Helper functions\\n# -----------------------------------------------------------------------------\\ndef write_file(path, content):\\n    dirname = os.path.dirname(path)\\n    if dirname:\\n        os.makedirs(dirname, exist_ok=True)\\n    with open(path, 'w') as f:\\n        f.write(content)\\n    print(f\\\"Created {path}\\\")\\n\\ndef make_executable(path):\\n    os.chmod(path, 0o755)\\n\\n# -----------------------------------------------------------------------------\\n# Dictionaries\\n# -----------------------------------------------------------------------------\\n\\n# --- system/blockMeshDict ---\\nblockMeshDict_content = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    // Block 0: Upstream (Flat Bottom)\\n    ( {x_min} {y_min} {z_min} ) // 0\\n    ( {x_corner} {y_min} {z_min} ) // 1\\n    ( {x_corner} {y_max} {z_min} ) // 2\\n    ( {x_min} {y_max} {z_min} ) // 3\\n    \\n    ( {x_min} {y_min} {z_max} ) // 4\\n    ( {x_corner} {y_min} {z_max} ) // 5\\n    ( {x_corner} {y_max} {z_max} ) // 6\\n    ( {x_min} {y_max} {z_max} ) // 7\\n\\n    // Block 1: Downstream (Wedge/Ramp)\\n    // Note: Vertex 1 (x_corner, y_min, z_min) is shared.\\n    ( {x_corner} {y_min} {z_min} ) // 8 (Same as 1)\\n    ( {x_max} {wedge_height} {z_min} ) // 9\\n    ( {x_max} {y_max} {z_min} ) // 10\\n    ( {x_corner} {y_max} {z_min} ) // 11 (Same as 2)\\n\\n    ( {x_corner} {y_min} {z_max} ) // 12 (Same as 5)\\n    ( {x_max} {wedge_height} {z_max} ) // 13\\n    ( {x_max} {y_max} {z_max} ) // 14\\n    ( {x_corner} {y_max} {z_max} ) // 15 (Same as 6)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (50 20 1) simpleGrading (1 1 1)\\n    hex (8 9 10 11 12 13 14 15) (80 20 1) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    inlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            (0 4 7 3)\\n        );\\n    }}\\n    \\n    outlet\\n    {{\\n        type patch;\\n        faces\\n        (\\n            (9 10 14 13)\\n        );\\n    }}\\n    \\n    top\\n    {{\\n        type patch;\\n        faces\\n        (\\n            (2 3 7 6)\\n            (10 11 15 14)\\n        );\\n    }}\\n    \\n    bottomFlat\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }}\\n    \\n    wedge\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (8 9 13 12)\\n        );\\n    }}\\n    \\n    frontAndBack\\n    {{\\n        type empty;\\n        faces\\n        (\\n            (0 1 2 3)\\n            (4 5 6 7)\\n            (8 9 10 11)\\n            (12 13 14 15)\\n        );\\n    }}\\n);\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n\\n# --- system/controlDict ---\\ncontrolDict_content = f\\\"\\\"\\\"/*------------------------\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 165.308,
+    "setup_s": 0.0,
+    "grade_s": 2.904
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.9s last_time=0"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_008",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List, Tuple\\n\\ndef sum_product(numbers: List[int]) -> Tuple[int, int]:\\n    \\\"\\\"\\\" For a given list of integers, return a tuple consisting of a sum and a product of all the integers in a list.\\n    Empty sum should be equal to 0 and empty product should be equal to 1.\\n    >>> sum_product([])\\n    (0, 1)\\n    >>> sum_product([1, 2, 3, 4])\\n    (10, 24)\\n    \\\"\\\"\\\"\\n    total = sum(numbers)\\n    product = 1\\n    for n in numbers:\\n        product *= n\\n    return total, product\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 11.2,
+    "setup_s": 0.0,
+    "grade_s": 0.074
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

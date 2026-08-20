@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_113",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def odd_count(lst):\\n    \\\"\\\"\\\"Given a list of strings, where each string consists of only digits, return a list.\\n    Each element i of the output should be \\\"the number of odd elements in the\\n    string i of the input.\\\" where all the i's should be replaced by the number\\n    of odd digits in the i'th string of the input.\\n\\n    >>> odd_count(['1234567'])\\n    [\\\"the number of odd elements 4n the str4ng 4 of the 4nput.\\\"]\\n    >>> odd_count(['3',\\\"11111111\\\"])\\n    [\\\"the number of odd elements 1n the str1ng 1 of the 1nput.\\\",\\n     \\\"the number of odd elements 8n the str8ng 8 of the 8nput.\\\"]\\n    \\\"\\\"\\\"\\n    template = \\\"the number of odd elements in the string i of the input.\\\"\\n    result = []\\n    for s in lst:\\n        count = sum(1 for c in s if int(c) % 2 == 1)\\n        result.append(template.replace('i', str(count)))\\n    return result\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}"
+  },
+  "timings": {
+    "agent_s": 5.547,
+    "setup_s": 0.0,
+    "grade_s": 0.071
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

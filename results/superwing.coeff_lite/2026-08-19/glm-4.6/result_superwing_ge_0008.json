@@ -1,0 +1,37 @@
+{
+  "task_id": "superwing_ge_0008",
+  "registry_id": "superwing.coeff_lite",
+  "adapter": "field_prediction",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "coefficient_rel_err_band",
+    "requirements": "coeff 字段完备",
+    "objective": "N/A(coeff_lite 基础题)",
+    "robustness": "split=ge"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "prediction": "{\"cl\": 0.908, \"cd\": 0.069, \"cm\": -0.402}",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"field_prediction\", \"hits\": {\"cl\": {\"rel_err\": 1.25259, \"pred\": 0.908, \"true\": 0.40309162072378946, \"band\": 0.0}, \"cd\": {\"rel_err\": 3.273535, \"pred\": 0.069, \"true\": 0.016145884484429114, \"band\": 0.0}, \"cm\": {\"rel_err\": 1.789685, \"pred\": -0.402, \"true\": 0.5090640362014771, \"band\": 0.0}}, \"split_group\": \"ge\", \"wing_shape_idx\": 1743}"
+  },
+  "timings": {
+    "agent_s": 157.079,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:360605bc8de0c97e9a58cbc0a1ba13123028872f45af2acedc16d5f60e4f5df1",
+  "assets_revision": "superwing@hf-coeff-lite-2026-08-19",
+  "logs": [
+    "pred={'cl': 0.908, 'cd': 0.069, 'cm': -0.402}",
+    "gate=1 failures=[]"
+  ]
+}

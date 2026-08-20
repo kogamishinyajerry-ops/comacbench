@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_020",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List, Tuple\\n\\ndef find_closest_elements(numbers: List[float]) -> Tuple[float, float]:\\n    \\\"\\\"\\\" From a supplied list of numbers (of length at least two) select and return two that are the closest to each\\n    other and return them in order (smaller number, larger number).\\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])\\n    (2.0, 2.2)\\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])\\n    (2.0, 2.0)\\n    \\\"\\\"\\\"\\n    sorted_nums = sorted(numbers)\\n    min_diff = float('inf')\\n    best_pair = (sorted_nums[0], sorted_nums[1])  # placeholder, will be updated\\n    for i in range(len(sorted_nums) - 1):\\n        a, b = sorted_nums[i], sorted_nums[i+1]\\n        diff = b - a\\n        if diff < min_diff:\\n            min_diff = diff\\n            best_pair = (a, b)\\n    return best_pair\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 45.527,
+    "setup_s": 0.0,
+    "grade_s": 0.052
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

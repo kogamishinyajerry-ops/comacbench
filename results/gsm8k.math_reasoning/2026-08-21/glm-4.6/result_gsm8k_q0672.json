@@ -1,0 +1,36 @@
+{
+  "task_id": "gsm8k_q0672",
+  "registry_id": "gsm8k.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let me solve this step by step.\\n\\nFirst, let's determine the total number of each type of mood:\\n- Total days in the month: 30 days\\n- Good days: 12 days\\n- Bad days: 8 days\\n- Neutral days: 30 - 12 - 8 = 10 days\\n\\nNow, let's track what happened on specific days:\\n- First 8 days (days 1-8): All good → 8 good days\\n- Next 8 days (days 9-16): All bad → 8 bad days\\n- Next 8 days (days 17-24): All neutral → 8 neutral days\\n- Next 3 days (days 25-27): Good, neutral, and good → 2 good days, 1 neutral day\\n\\nSo far, we've accounted for:\\n- Good days: 8 + 2 = 10 days\\n- Bad days: 8 days\\n- Neutral days: 8 + 1 = 9 days\\n\\nThat's a total of 27 days (10 + 8 + 9), leaving 3 days (days 28-30).\\n\\nSince there were 12 good days in total and we've accounted for 10, there are 12 - 10 = 2 good days left.\\n\\nWe can verify this with the neutral days: 10 total neutral days - 9 accounted for = 1 neutral day left, which matches our total of 3 remaining days (2 good + 1 neutral = 3 days).\\n\\n#### 2\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 2.0, \"reference_number\": 2.0, \"raw_tail\": \"e neutral days: 10 total neutral days - 9 accounted for = 1 neutral day left, which matches our total of 3 remaining days (2 good + 1 neutral = 3 days).\\n\\n#### 2\"}"
+  },
+  "timings": {
+    "agent_s": 185.569,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b756c8ce60391cb7a12cd716482df316c8d94bad1785d1cb7731b3e2bc867619",
+  "assets_revision": "gsm8k@openai-master+test.jsonl_20260821",
+  "logs": [
+    "answer=\"Let me solve this step by step.\\n\\nFirst, let's determine the total number of each type of mood:\\n- Total days in the month\" attempts=1"
+  ]
+}

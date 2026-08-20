@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_forwardstep_10",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\ndef create_case():\\n    # Base directory\\n    case_dir = os.getcwd()\\n    \\n    # Create directories\\n    dirs = [\\n        os.path.join(case_dir, \\\"system\\\"),\\n        os.path.join(case_dir, \\\"constant\\\"),\\n        os.path.join(case_dir, \\\"0\\\"),\\n        os.path.join(case_dir, \\\"constant\\\", \\\"polyMesh\\\")\\n    ]\\n    for d in dirs:\\n        os.makedirs(d, exist_ok=True)\\n\\n    # --- 0/ files ---\\n\\n    # 0/U\\n    u_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (2.7 0 0);\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform (2.7 0 0);\\n    }\\n    outlet\\n    {\\n        type            zeroGradient;\\n    }\\n    obstacle\\n    {\\n        type            slip;\\n    }\\n    walls\\n    {\\n        type            noSlip;\\n    }\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n    with open(os.path.join(case_dir, \\\"0\\\", \\\"U\\\"), \\\"w\\\") as f:\\n        f.write(u_content)\\n\\n    # 0/T\\n    t_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      T;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 0 0 1 0 0 0];\\n\\ninternalField   uniform 1;\\n\\nboundaryField\\n{\\n    inlet\\n    {\\n        type            fixedValue;\\n        value           uniform 1;\\n    }\\n    outlet\\n    {\\n        type            zeroGradient;\\n    }\\n    obstacle\\n    {\\n        type            slip;\\n    }\\n    walls\\n    {\\n        type            zeroGradient;\\n    }\\n    frontAndBack\\n    {\\n        type            empty;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\"\\n    with open(os.path.join(case_dir, \\\"0\\\", \\\"T\\\"), \\\"w\\\") as f:\\n        f.write(t_content)\\n\\n    # 0/p\\n    # Assuming absolute pressure. Initializing to approx 101325 Pa based on T=1K and rho~353\\n    # to maintain consistency, though 1K is physically cryogenic for air.\\n    p_content = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       vo\""
+  },
+  "timings": {
+    "agent_s": 306.587,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:744664619635688c3f813b21af053c911585ee3926b7fbb8edcc9c4475c2ba01",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

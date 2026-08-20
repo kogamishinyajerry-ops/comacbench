@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_132",
+  "registry_id": "humaneval.python",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def is_nested(string):\\n    \\\"\\\"\\\"\\n    Create a function that takes a string as input which contains only square brackets.\\n    The function should return True if and only if there is a valid subsequence of brackets \\n    where at least one bracket in the subsequence is nested.\\n\\n    is_nested('[[]]') ➞ True\\n    is_nested('[]]]]]]][[[[[]') ➞ False\\n    is_nested('[][]') ➞ False\\n    is_nested('[]') ➞ False\\n    is_nested('[[][]]') ➞ True\\n    is_nested('[[]][[') ➞ True\\n    \\\"\\\"\\\"\\n    n = len(string)\\n    idx = 0\\n\\n    # Find the first '['\\n    while idx < n and string[idx] != '[':\\n        idx += 1\\n    if idx == n:\\n        return False\\n\\n    # Find the second '[' after the first\\n    idx += 1\\n    while idx < n and string[idx] != '[':\\n        idx += 1\\n    if idx == n:\\n        return False\\n\\n    # Find the first ']' after the second '['\\n    idx += 1\\n    while idx < n and string[idx] != ']':\\n        idx += 1\\n    if idx == n:\\n        return False\\n\\n    # Find the second ']' after the first ']'\\n    idx += 1\\n    while idx < n and string[idx] != ']':\\n        idx += 1\\n    if idx == n:\\n        return False\\n\\n    return True\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 14, \"cases_total\": 14, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}"
+  },
+  "timings": {
+    "agent_s": 201.609,
+    "setup_s": 0.0,
+    "grade_s": 0.055
+  },
+  "environment_digest": "sha256:936cc154241b87935f3f66a77081fa4af6d66090c73d5d23a409124bc82381e9",
+  "assets_revision": "humaneval@openai-master+jsonl_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}
