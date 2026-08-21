@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q025",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The functional equation is \\\\(f(x) + f(y) = f(x + y) - xy - 1\\\\) for all real \\\\(x, y\\\\), with \\\\(f(1) = 1\\\\).  \\nSet \\\\(y = 0\\\\) to obtain \\\\(f(x) = f(x) + f(0) + 1\\\\), so \\\\(f(0) = -1\\\\).  \\n\\nDefine \\\\(g(x) = f(x) - \\\\frac{1}{2}x^2\\\\). Then  \\n\\\\[\\ng(x+y) = f(x+y) - \\\\frac{1}{2}(x+y)^2 = \\\\bigl(f(x)+f(y)+xy+1\\\\bigr) - \\\\frac{1}{2}(x^2+2xy+y^2) = g(x)+g(y)+1.\\n\\\\]  \\nNow let \\\\(h(x) = g(x) + 1\\\\). Substituting gives \\\\(h(x+y) = h(x) + h(y)\\\\), so \\\\(h\\\\) is additive.  \\nFrom \\\\(f(1)=1\\\\) we get \\\\(g(1)=1-\\\\frac12=\\\\frac12\\\\), hence \\\\(h(1)=\\\\frac12+1=\\\\frac32\\\\).  \\n\\nFor any integer \\\\(n\\\\), additivity forces \\\\(h(n) = n\\\\,h(1) = \\\\frac{3}{2}n\\\\). Then  \\n\\\\[\\ng(n) = h(n)-1 = \\\\frac{3}{2}n-1,\\\\qquad f(n) = g(n) + \\\\frac{1}{2}n^2 = \\\\frac{1}{2}n^2 + \\\\frac{3}{2}n - 1.\\n\\\\]  \\n\\nSet \\\\(f(n) = n\\\\):  \\n\\\\[\\n\\\\frac{1}{2}n^2 + \\\\frac{3}{2}n - 1 = n \\\\;\\\\Longrightarrow\\\\; n^2 + 3n - 2 = 2n \\\\;\\\\Longrightarrow\\\\; n^2 + n - 2 = 0 \\\\;\\\\Longrightarrow\\\\; (n+2)(n-1)=0.\\n\\\\]  \\nThus \\\\(n = 1\\\\) or \\\\(n = -2\\\\). Both satisfy the original condition (check: \\\\(f(1)=1\\\\), \\\\(f(-2) = \\\\frac12\\\\cdot4 + \\\\frac32\\\\cdot(-2) - 1 = 2 -3 -1 = -2\\\\)).  \\n\\nThe integers are \\\\(-2\\\\) and \\\\(1\\\\).\\n\\n\\\\boxed{-2, 1}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-2, 1\", \"reference_number\": \"1,-2\", \"raw_tail\": \"he original condition (check: \\\\(f(1)=1\\\\), \\\\(f(-2) = \\\\frac12\\\\cdot4 + \\\\frac32\\\\cdot(-2) - 1 = 2 -3 -1 = -2\\\\)).  \\n\\nThe integers are \\\\(-2\\\\) and \\\\(1\\\\).\\n\\n\\\\boxed{-2, 1}\"}"
+  },
+  "timings": {
+    "agent_s": 68.157,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The functional equation is \\\\(f(x) + f(y) = f(x + y) - xy - 1\\\\) for all real \\\\(x, y\\\\), with \\\\(f(1) = 1\\\\).  \\nSet \\\\(y = 0\\\\)' attempts=1"
+  ]
+}

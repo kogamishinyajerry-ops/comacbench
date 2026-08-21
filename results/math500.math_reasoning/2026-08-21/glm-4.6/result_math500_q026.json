@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q026",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to count the number of distinct circular seating arrangements of 7 people (Pierre, Rosa, Thomas, and four other distinct people) such that Pierre, Rosa, and Thomas are never adjacent to each other. Rotations are considered identical.\\n\\nA convenient method is to first arrange the four unrestricted people around the table, then insert the three restricted people into the gaps between them.\\n\\n- The four unrestricted people are distinct. Their circular permutations number \\\\((4-1)! = 3! = 6\\\\).\\n- After placing them, there are exactly 4 gaps (between consecutive unrestricted people). To ensure that Pierre, Rosa, and Thomas are not adjacent, each gap can contain at most one of them. Since there are 3 restricted people, we must choose 3 of the 4 gaps to occupy, and then assign the three distinct people to those chosen gaps. The number of ways is \\\\(\\\\binom{4}{3} \\\\times 3! = 4 \\\\times 6 = 24\\\\).\\n\\nMultiplying gives the total number of valid arrangements:  \\n\\\\[\\n6 \\\\times 24 = 144.\\n\\\\]\\n\\nThus, the answer is \\\\(\\\\boxed{144}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"144\", \"reference_number\": \"144\", \"raw_tail\": \"4}{3} \\\\times 3! = 4 \\\\times 6 = 24\\\\).\\n\\nMultiplying gives the total number of valid arrangements:  \\n\\\\[\\n6 \\\\times 24 = 144.\\n\\\\]\\n\\nThus, the answer is \\\\(\\\\boxed{144}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 150.257,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to count the number of distinct circular seating arrangements of 7 people (Pierre, Rosa, Thomas, and four other ' attempts=1"
+  ]
+}

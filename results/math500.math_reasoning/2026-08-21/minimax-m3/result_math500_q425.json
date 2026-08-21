@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q425",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $AF^2 + BF^2 + CF^2$ where $F$ is the midpoint of segment $\\\\overline{GH}$.\\n\\n## Setting Up Coordinates\\n\\nI'll place the circumcenter $O$ at the origin, so $|A| = |B| = |C| = R$.\\n\\n**Key positions:**\\n- Centroid: $G = \\\\dfrac{A+B+C}{3}$\\n- Orthocenter: $H = A + B + C$ (by the Euler line relation $H = 3G$ when $O = 0$)\\n- Midpoint: $F = \\\\dfrac{G+H}{2} = \\\\dfrac{2(A+B+C)}{3}$\\n\\n## Computing the Sum\\n\\nUsing the identity $\\\\sum |F - X_i|^2 = 3|F|^2 - 2F \\\\cdot \\\\sum X_i + \\\\sum |X_i|^2$:\\n\\n**First term:** $|F|^2 = \\\\dfrac{4|A+B+C|^2}{9}$\\n\\n**Second term:** $F \\\\cdot (A+B+C) = \\\\dfrac{2}{3}|A+B+C|^2$\\n\\n**Third term:** $|A|^2 + |B|^2 + |C|^2 = 3R^2$\\n\\n**Combining:**\\n$$AF^2 + BF^2 + CF^2 = 3 \\\\cdot \\\\frac{4|A+B+C|^2}{9} - 2 \\\\cdot \\\\frac{2|A+B+C|^2}{3} + 3R^2$$\\n$$= \\\\frac{4|A+B+C|^2}{3} - \\\\frac{4|A+B+C|^2}{3} + 3R^2 = 3R^2$$\\n\\n## Verification with Examples\\n\\n**Equilateral triangle** (side 2): $R = \\\\frac{2}{\\\\sqrt{3}}$, so $3R^2 = 4$. Since $G = H$ here, $F = G$ and $FA = \\\\frac{2\\\\sqrt{3}}{3}$, giving sum $= 3 \\\\cdot \\\\frac{4}{3} = 4$ ✓\\n\\n**Right triangle** with $A=(0,0)$, $B=(3,0)$, $C=(0,4)$: Here $R = \\\\frac{5}{2}$, so $3R^2 = \\\\frac{75}{4}$.\\n- $G = (1, 4/3)$, $H = (0,0)$, $F = (1/2, 2/3)$\\n- $AF^2 = 25/36$, $BF^2 = 241/36$, $CF^2 = 409/36$\\n- Sum: $675/36 = 75/4$ ✓\\n\\n## Answer\\n\\n$$\\\\boxed{3R^2}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3R^2\", \"reference_number\": \"3R^2\", \"raw_tail\": \"5}{4}$.\\n- $G = (1, 4/3)$, $H = (0,0)$, $F = (1/2, 2/3)$\\n- $AF^2 = 25/36$, $BF^2 = 241/36$, $CF^2 = 409/36$\\n- Sum: $675/36 = 75/4$ ✓\\n\\n## Answer\\n\\n$$\\\\boxed{3R^2}$$\"}"
+  },
+  "timings": {
+    "agent_s": 36.179,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $AF^2 + BF^2 + CF^2$ where $F$ is the midpoint of segment $\\\\overline{GH}$.\\n\\n## S' attempts=1"
+  ]
+}

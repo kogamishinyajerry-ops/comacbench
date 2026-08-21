@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q214",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the number of physics students using the given information.\\n\\n## Setting Up Variables\\n\\nLet me define:\\n- |C| = 180 (calculus)\\n- |P| = ? (physics — what I want to find)\\n- |Ch| = ? (chemistry)\\n- |C ∪ P ∪ Ch| = 360 − 15 = **345** (subtracting those who take none)\\n- |C ∩ P ∩ Ch| = 15\\n- |C ∩ P| = 30, |C ∩ Ch| = 75, |P ∩ Ch| = 75\\n- |Ch| = 2|P|\\n\\n## Applying Inclusion-Exclusion\\n\\n$$|C \\\\cup P \\\\cup Ch| = |C| + |P| + |Ch| - |C \\\\cap P| - |C \\\\cap Ch| - |P \\\\cap Ch| + |C \\\\cap P \\\\cap Ch|$$\\n\\nSubstituting known values:\\n$$345 = 180 + |P| + |Ch| - 30 - 75 - 75 + 15$$\\n\\n$$345 = 15 + |P| + |Ch|$$\\n\\n$$|P| + |Ch| = 330$$\\n\\n## Solving with the Chemistry Relationship\\n\\nSince |Ch| = 2|P|:\\n$$|P| + 2|P| = 330$$\\n$$3|P| = 330$$\\n$$|P| = 110$$\\n\\n## Verification\\n\\nWith |P| = 110 and |Ch| = 220:\\n$$|C \\\\cup P \\\\cup Ch| = 180 + 110 + 220 - 30 - 75 - 75 + 15 = 345 ✓$$\\n\\nTotal students: 345 + 15 = 360 ✓\\n\\n\\\\boxed{110}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"110\", \"reference_number\": \"110\", \"raw_tail\": \"Verification\\n\\nWith |P| = 110 and |Ch| = 220:\\n$$|C \\\\cup P \\\\cup Ch| = 180 + 110 + 220 - 30 - 75 - 75 + 15 = 345 ✓$$\\n\\nTotal students: 345 + 15 = 360 ✓\\n\\n\\\\boxed{110}\"}"
+  },
+  "timings": {
+    "agent_s": 7.295,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the number of physics students using the given information.\\n\\n## Setting Up Varia' attempts=1"
+  ]
+}

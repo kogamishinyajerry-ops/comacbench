@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q104",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The two equations simplify to a circle \\\\((x+3)^2+(y-12)^2=81\\\\) and a hyperbola \\\\((x+3)^2-(y-8)^2=-9\\\\). Let \\\\(u=(x+3)^2\\\\). Then  \\n\\\\(u+(y-12)^2=81\\\\) and \\\\(u-(y-8)^2=-9\\\\). Equating gives \\\\(81-(y-12)^2=(y-8)^2-9\\\\), leading to \\\\(y^2-20y+59=0\\\\) with solutions \\\\(y=10\\\\pm\\\\sqrt{41}\\\\).  \\n\\nFor \\\\(y=10+\\\\sqrt{41}\\\\), \\\\(u=36+4\\\\sqrt{41}\\\\); for \\\\(y=10-\\\\sqrt{41}\\\\), \\\\(u=36-4\\\\sqrt{41}\\\\). Each \\\\(y\\\\) yields two symmetric \\\\(x\\\\)-values with the same \\\\(u\\\\).  \\n\\nDistance from a point \\\\((x,y)\\\\) to \\\\((-3,2)\\\\) is \\\\(\\\\sqrt{u+(y-2)^2}\\\\).  \\nCompute:  \\n- For \\\\(y=10+\\\\sqrt{41}\\\\): \\\\((y-2)^2=105+16\\\\sqrt{41}\\\\), so \\\\(u+(y-2)^2=141+20\\\\sqrt{41}\\\\).  \\n- For \\\\(y=10-\\\\sqrt{41}\\\\): \\\\((y-2)^2=105-16\\\\sqrt{41}\\\\), so \\\\(u+(y-2)^2=141-20\\\\sqrt{41}\\\\).  \\n\\nLet \\\\(A=\\\\sqrt{141+20\\\\sqrt{41}}\\\\), \\\\(B=\\\\sqrt{141-20\\\\sqrt{41}}\\\\). Then  \\n\\\\((A+B)^2 = A^2+B^2+2AB = (141+20\\\\sqrt{41})+(141-20\\\\sqrt{41})+2\\\\sqrt{141^2-(20\\\\sqrt{41})^2} = 282+2\\\\sqrt{3481}=282+2\\\\cdot59=400\\\\), so \\\\(A+B=20\\\\).  \\n\\nEach distance occurs twice, so total sum \\\\(=2(A+B)=40\\\\).  \\n\\n\\\\boxed{40}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"40\", \"reference_number\": \"40\", \"raw_tail\": \"})+2\\\\sqrt{141^2-(20\\\\sqrt{41})^2} = 282+2\\\\sqrt{3481}=282+2\\\\cdot59=400\\\\), so \\\\(A+B=20\\\\).  \\n\\nEach distance occurs twice, so total sum \\\\(=2(A+B)=40\\\\).  \\n\\n\\\\boxed{40}\"}"
+  },
+  "timings": {
+    "agent_s": 102.98,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The two equations simplify to a circle \\\\((x+3)^2+(y-12)^2=81\\\\) and a hyperbola \\\\((x+3)^2-(y-8)^2=-9\\\\). Let \\\\(u=(x+3)^2\\\\)' attempts=1"
+  ]
+}

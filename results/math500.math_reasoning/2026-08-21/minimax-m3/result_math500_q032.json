@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q032",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to count circular arrangements where Pierre, Rosa, and Thomas must sit consecutively.\\n\\n## Setting Up the Problem\\n\\n**Key technique:** Treat the three required-adjacent people as a single \\\"block\\\" to satisfy the constraint.\\n\\nAfter grouping Pierre, Rosa, and Thomas together, I have:\\n- 1 block (containing the 3 people)\\n- 5 remaining individuals\\n\\nThis gives **6 total units** to arrange around the table.\\n\\n## Counting the Arrangements\\n\\n**Step 1: Arrange the 6 units around the circle.**\\n\\nFor circular arrangements, $n$ distinct objects can be arranged in $(n-1)!$ ways (since rotations are considered equivalent).\\n\\n$$\\\\text{Arrangements of 6 units} = (6-1)! = 5! = 120$$\\n\\n**Step 2: Arrange the 3 people within the block.**\\n\\nThe three people inside the block can be ordered in:\\n\\n$$3! = 6 \\\\text{ ways}$$\\n\\n## Total Count\\n\\nBy the multiplication principle:\\n\\n$$5! \\\\times 3! = 120 \\\\times 6 = 720$$\\n\\n#### 720\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"720\", \"reference_number\": \"720\", \"raw_tail\": \" inside the block can be ordered in:\\n\\n$$3! = 6 \\\\text{ ways}$$\\n\\n## Total Count\\n\\nBy the multiplication principle:\\n\\n$$5! \\\\times 3! = 120 \\\\times 6 = 720$$\\n\\n#### 720\"}"
+  },
+  "timings": {
+    "agent_s": 8.464,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to count circular arrangements where Pierre, Rosa, and Thomas must sit consecutively.\\n\\n#' attempts=1"
+  ]
+}

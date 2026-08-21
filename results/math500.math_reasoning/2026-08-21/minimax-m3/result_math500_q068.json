@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q068",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $x$ where $0 < x < 180$ satisfying:\\n$$\\\\tan 53° \\\\tan 81° \\\\tan x° = \\\\tan 53° + \\\\tan 81° + \\\\tan x°$$\\n\\n## Identifying the Key Identity\\n\\nThere's a well-known trigonometric identity: **if $A + B + C = 180°$, then**\\n$$\\\\tan A + \\\\tan B + \\\\tan C = \\\\tan A \\\\tan B \\\\tan C$$\\n\\n## Verification of the Identity\\n\\nStarting from $A + B + C = 180°$, I get $C = 180° - (A+B)$, so:\\n$$\\\\tan C = \\\\tan(180° - (A+B)) = -\\\\tan(A+B) = -\\\\frac{\\\\tan A + \\\\tan B}{1 - \\\\tan A \\\\tan B}$$\\n\\nRearranging:\\n$$\\\\tan C(1 - \\\\tan A \\\\tan B) = -(\\\\tan A + \\\\tan B)$$\\n$$\\\\tan C - \\\\tan A \\\\tan B \\\\tan C = -\\\\tan A - \\\\tan B$$\\n$$\\\\tan A + \\\\tan B + \\\\tan C = \\\\tan A \\\\tan B \\\\tan C \\\\checkmark$$\\n\\n## Applying the Identity\\n\\nFor the given equation to match this identity, I need:\\n$$53° + 81° + x° = 180°$$\\n\\nSolving:\\n$$x = 180° - 53° - 81° = 46°$$\\n\\n**Verification:** Since $53° + 81° + 46° = 180°$, the identity guarantees that $\\\\tan 53° \\\\tan 81° \\\\tan 46° = \\\\tan 53° + \\\\tan 81° + \\\\tan 46°$. ✓\\n\\nAlso, $0 < 46 < 180$ satisfies the constraint.\\n\\n#### 46\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"46\", \"reference_number\": \"46\", \"raw_tail\": \" = 180°$, the identity guarantees that $\\\\tan 53° \\\\tan 81° \\\\tan 46° = \\\\tan 53° + \\\\tan 81° + \\\\tan 46°$. ✓\\n\\nAlso, $0 < 46 < 180$ satisfies the constraint.\\n\\n#### 46\"}"
+  },
+  "timings": {
+    "agent_s": 5.644,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $x$ where $0 < x < 180$ satisfying:\\n$$\\\\tan 53° \\\\tan 81° \\\\tan x° = \\\\tan 53° + \\\\ta' attempts=1"
+  ]
+}

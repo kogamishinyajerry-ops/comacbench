@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q021",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The expression \\\\((\\\\sqrt{7} + \\\\sqrt{5})^6\\\\) can be expanded using the binomial theorem:\\n\\n\\\\[\\n(\\\\sqrt{7} + \\\\sqrt{5})^6 = \\\\sum_{k=0}^{6} \\\\binom{6}{k} (\\\\sqrt{7})^{6-k} (\\\\sqrt{5})^{k}.\\n\\\\]\\n\\nComputing term by term:\\n\\n\\\\[\\n\\\\begin{aligned}\\n(\\\\sqrt{7})^6 &= 7^3 = 343,\\\\\\\\\\n(\\\\sqrt{5})^6 &= 5^3 = 125,\\\\\\\\\\n\\\\binom{6}{1} (\\\\sqrt{7})^5 \\\\sqrt{5} &= 6 \\\\cdot 49\\\\sqrt{35} = 294\\\\sqrt{35},\\\\\\\\\\n\\\\binom{6}{2} (\\\\sqrt{7})^4 (\\\\sqrt{5})^2 &= 15 \\\\cdot 49 \\\\cdot 5 = 3675,\\\\\\\\\\n\\\\binom{6}{3} (\\\\sqrt{7})^3 (\\\\sqrt{5})^3 &= 20 \\\\cdot 35\\\\sqrt{35} = 700\\\\sqrt{35},\\\\\\\\\\n\\\\binom{6}{4} (\\\\sqrt{7})^2 (\\\\sqrt{5})^4 &= 15 \\\\cdot 7 \\\\cdot 25 = 2625,\\\\\\\\\\n\\\\binom{6}{5} \\\\sqrt{7} (\\\\sqrt{5})^5 &= 6 \\\\cdot 25\\\\sqrt{35} = 150\\\\sqrt{35}.\\n\\\\end{aligned}\\n\\\\]\\n\\nSumming the integer parts: \\\\(343 + 125 + 3675 + 2625 = 6768\\\\).\\nSumming the \\\\(\\\\sqrt{35}\\\\) parts: \\\\(294 + 700 + 150 = 1144\\\\).\\n\\nThus\\n\\n\\\\[\\n(\\\\sqrt{7} + \\\\sqrt{5})^6 = 6768 + 1144\\\\sqrt{35}.\\n\\\\]\\n\\nLet \\\\(a = \\\\sqrt{7} + \\\\sqrt{5}\\\\) and \\\\(b = \\\\sqrt{7} - \\\\sqrt{5}\\\\). Then \\\\(b = \\\\sqrt{7} - \\\\sqrt{5} \\\\approx 0.4097\\\\) is positive and less than \\\\(1\\\\). Moreover,\\n\\n\\\\[\\nb^6 = (\\\\sqrt{7} - \\\\sqrt{5})^6 = 6768 - 1144\\\\sqrt{35}.\\n\\\\]\\n\\nHence\\n\\n\\\\[\\na^6 + b^6 = 2 \\\\cdot 6768 = 13536,\\n\\\\]\\n\\nso\\n\\n\\\\[\\na^6 = 13536 - b^6.\\n\\\\]\\n\\nSince \\\\(0 < b^6 < 1\\\\) (numerically \\\\(b^6 \\\\approx 0.00473\\\\)), we have\\n\\n\\\\[\\n13535 < a^6 < 13536.\\n\\\\]\\n\\nTherefore, the greatest integer less than \\\\((\\\\sqrt{7} + \\\\sqrt{5})^6\\\\) is \\\\(13535\\\\).\\n\\n\\\\[\\n\\\\boxed{13535}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13535\", \"reference_number\": \"13535\", \"raw_tail\": \"approx 0.00473\\\\)), we have\\n\\n\\\\[\\n13535 < a^6 < 13536.\\n\\\\]\\n\\nTherefore, the greatest integer less than \\\\((\\\\sqrt{7} + \\\\sqrt{5})^6\\\\) is \\\\(13535\\\\).\\n\\n\\\\[\\n\\\\boxed{13535}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 133.246,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The expression \\\\((\\\\sqrt{7} + \\\\sqrt{5})^6\\\\) can be expanded using the binomial theorem:\\n\\n\\\\[\\n(\\\\sqrt{7} + \\\\sqrt{5})^6 = \\\\su' attempts=1"
+  ]
+}

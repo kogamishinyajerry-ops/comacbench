@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q340",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I'll use a geometric approach by placing the vectors to form a triangle.\\n\\n## Setting Up the Triangle\\n\\nI'll place vectors $\\\\mathbf{a}$ and $\\\\mathbf{b}$ tail-to-tail at origin $O$:\\n- Let $P$ be the tip of $\\\\mathbf{a}$, so $\\\\overrightarrow{OP} = \\\\mathbf{a}$\\n- Let $Q$ be the tip of $\\\\mathbf{b}$, so $\\\\overrightarrow{OQ} = \\\\mathbf{b}$\\n\\nThen $\\\\mathbf{a} - \\\\mathbf{b} = \\\\overrightarrow{OP} - \\\\overrightarrow{OQ} = \\\\overrightarrow{QP}$, connecting $Q$ to $P$.\\n\\nThis creates triangle $OPQ$ with vertices at the origin, tip of $\\\\mathbf{a}$, and tip of $\\\\mathbf{b}$.\\n\\n## Finding the Interior Angles\\n\\n**Angle at vertex $O$:** This is the angle between $\\\\overrightarrow{OP} = \\\\mathbf{a}$ and $\\\\overrightarrow{OQ} = \\\\mathbf{b}$, which is given as $29°$.\\n\\n**Angle at vertex $Q$:** The interior angle of the triangle at $Q$ is between $\\\\overrightarrow{QO} = -\\\\mathbf{b}$ and $\\\\overrightarrow{QP} = \\\\mathbf{a} - \\\\mathbf{b}$.\\n\\nSince the angle between $\\\\mathbf{b}$ and $\\\\mathbf{a} - \\\\mathbf{b}$ is $84°$, the angle between $-\\\\mathbf{b}$ and $\\\\mathbf{a} - \\\\mathbf{b}$ is:\\n$$180° - 84° = 96°$$\\n\\n**Angle at vertex $P$:** Using the triangle angle sum:\\n$$180° - 29° - 96° = 55°$$\\n\\n## Interpreting the Answer\\n\\nThe interior angle at $P$ is between:\\n- $\\\\overrightarrow{PO} = -\\\\mathbf{a}$\\n- $\\\\overrightarrow{PQ} = \\\\mathbf{b} - \\\\mathbf{a} = -(\\\\mathbf{a} - \\\\mathbf{b})$\\n\\nSince negating both vectors preserves the angle between them, the angle between $-\\\\mathbf{a}$ and $-(\\\\mathbf{a} - \\\\mathbf{b})$ equals the angle between $\\\\mathbf{a}$ and $\\\\mathbf{a} - \\\\mathbf{b}$.\\n\\n## Answer\\n\\n$$\\\\boxed{55}$$\\n\\n#### 55\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"55\", \"reference_number\": \"55^\\\\circ\", \"raw_tail\": \" between $-\\\\mathbf{a}$ and $-(\\\\mathbf{a} - \\\\mathbf{b})$ equals the angle between $\\\\mathbf{a}$ and $\\\\mathbf{a} - \\\\mathbf{b}$.\\n\\n## Answer\\n\\n$$\\\\boxed{55}$$\\n\\n#### 55\"}"
+  },
+  "timings": {
+    "agent_s": 13.129,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I'll use a geometric approach by placing the vectors to form a triangle.\\n\\n## Setting Up the Tri\" attempts=1"
+  ]
+}

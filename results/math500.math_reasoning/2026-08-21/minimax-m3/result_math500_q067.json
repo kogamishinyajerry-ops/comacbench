@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q067",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find how the area changes when sides of a square are modified to form a rectangle.\\n\\n## Setting Up the Problem\\n\\nLet the original square have side length $s$, so its area is:\\n$$A_{\\\\text{square}} = s^2$$\\n\\n## Modifying the Sides\\n\\n**Two opposite sides** are decreased by 40%:\\n$$\\\\text{New length} = s - 0.40s = 0.60s$$\\n\\n**The other two sides** are increased by 50%:\\n$$\\\\text{New length} = s + 0.50s = 1.50s$$\\n\\n## Calculating the New Area\\n\\nThe rectangle has area:\\n$$A_{\\\\text{rectangle}} = 0.60s \\\\times 1.50s = 0.90s^2$$\\n\\n## Finding the Percent Decrease\\n\\nThe decrease in area:\\n$$\\\\frac{s^2 - 0.90s^2}{s^2} \\\\times 100\\\\% = \\\\frac{0.10s^2}{s^2} \\\\times 100\\\\% = 10\\\\%$$\\n\\n#### 10\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \" 0.90s^2$$\\n\\n## Finding the Percent Decrease\\n\\nThe decrease in area:\\n$$\\\\frac{s^2 - 0.90s^2}{s^2} \\\\times 100\\\\% = \\\\frac{0.10s^2}{s^2} \\\\times 100\\\\% = 10\\\\%$$\\n\\n#### 10\"}"
+  },
+  "timings": {
+    "agent_s": 3.051,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find how the area changes when sides of a square are modified to form a rectangle.\\n\\n#' attempts=1"
+  ]
+}

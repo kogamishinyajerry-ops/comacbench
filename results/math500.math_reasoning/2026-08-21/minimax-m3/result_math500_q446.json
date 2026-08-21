@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q446",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $n$ such that the partial sum of the geometric sequence equals $\\\\frac{255}{512}$.\\n\\n## Setting Up the Formula\\n\\n**Identify the sequence parameters:**\\n- First term: $a = \\\\frac{1}{4}$\\n- Common ratio: $r = \\\\frac{1}{2}$\\n\\n**Partial sum formula:**\\n$$S_n = \\\\frac{a(1-r^n)}{1-r}$$\\n\\nSubstituting the values:\\n$$S_n = \\\\frac{\\\\frac{1}{4}\\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right)}{1 - \\\\frac{1}{2}} = \\\\frac{\\\\frac{1}{4}\\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right)}{\\\\frac{1}{2}} = \\\\frac{1}{2}\\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right)$$\\n\\n## Solving for n\\n\\nSetting the partial sum equal to $\\\\frac{255}{512}$:\\n$$\\\\frac{1}{2}\\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right) = \\\\frac{255}{512}$$\\n\\n$$1 - \\\\left(\\\\frac{1}{2}\\\\right)^n = \\\\frac{2 \\\\cdot 255}{512} = \\\\frac{510}{512} = \\\\frac{255}{256}$$\\n\\n$$\\\\left(\\\\frac{1}{2}\\\\right)^n = 1 - \\\\frac{255}{256} = \\\\frac{1}{256}$$\\n\\n## Finding n\\n\\nSince $\\\\frac{1}{256} = \\\\frac{1}{2^8}$:\\n\\n$$\\\\left(\\\\frac{1}{2}\\\\right)^n = \\\\left(\\\\frac{1}{2}\\\\right)^8$$\\n\\n$$n = 8$$\\n\\n**Verification:** $S_8 = \\\\frac{1}{4} + \\\\frac{1}{8} + \\\\frac{1}{16} + \\\\cdots + \\\\frac{1}{512} = \\\\frac{255}{512}$ ✓\\n\\n$$\\\\boxed{n = 8}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"n = 8\", \"reference_number\": \"8\", \"raw_tail\": \"{1}{2}\\\\right)^8$$\\n\\n$$n = 8$$\\n\\n**Verification:** $S_8 = \\\\frac{1}{4} + \\\\frac{1}{8} + \\\\frac{1}{16} + \\\\cdots + \\\\frac{1}{512} = \\\\frac{255}{512}$ ✓\\n\\n$$\\\\boxed{n = 8}$$\"}"
+  },
+  "timings": {
+    "agent_s": 5.318,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $n$ such that the partial sum of the geometric sequence equals $\\\\frac{255}{512}$' attempts=1"
+  ]
+}

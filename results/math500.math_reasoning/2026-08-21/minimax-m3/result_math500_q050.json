@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q050",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the smallest number of coins before finding the bag of 53.\\n\\n## Setting Up the Problem\\n\\n**Before finding the bag:** I have 7 bags with $n$ coins each, totaling $7n$ coins.\\n\\n**After finding the bag:** I have $7n + 53$ coins to redistribute equally among 8 bags.\\n\\n## Finding the Conditions\\n\\n**Condition 1 (Divisibility):** $7n + 53$ must be divisible by 8.\\n\\nWorking modulo 8:\\n$$7n + 53 \\\\equiv -n + 5 \\\\equiv 0 \\\\pmod{8}$$\\n$$n \\\\equiv 5 \\\\pmod{8}$$\\n\\nSo $n \\\\in \\\\{5, 13, 21, 29, 37, ...\\\\}$.\\n\\n**Condition 2 (More than 200 coins):** \\n$$7n + 53 > 200 \\\\implies 7n > 147 \\\\implies n > 21$$\\n\\n## Finding the Smallest Valid n\\n\\nThe smallest value of $n$ satisfying both conditions is $n = 29$.\\n\\n## Verification\\n\\n- Total before redistribution: $7 \\\\times 29 = 203$ coins\\n- After adding the found bag: $203 + 53 = 256$ coins  \\n- Redistributed into 8 bags: $256 \\\\div 8 = 32$ coins each ✓\\n- Check $256 > 200$ ✓\\n- Check $29 \\\\equiv 5 \\\\pmod 8$ ✓\\n\\n#### 203\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"203\", \"reference_number\": \"203\", \"raw_tail\": \" found bag: $203 + 53 = 256$ coins  \\n- Redistributed into 8 bags: $256 \\\\div 8 = 32$ coins each ✓\\n- Check $256 > 200$ ✓\\n- Check $29 \\\\equiv 5 \\\\pmod 8$ ✓\\n\\n#### 203\"}"
+  },
+  "timings": {
+    "agent_s": 16.821,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the smallest number of coins before finding the bag of 53.\\n\\n## Setting Up the Pr' attempts=1"
+  ]
+}

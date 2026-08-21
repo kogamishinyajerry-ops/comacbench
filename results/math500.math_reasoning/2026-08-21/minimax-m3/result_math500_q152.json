@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q152",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the area of triangle ENG, where:\\n- E is the midpoint of AC (since BE is a median)\\n- G is the centroid\\n- N is where the line through G parallel to BC meets AC\\n\\n## Setting Up Coordinates\\n\\nLet me place B = (0, 0), C = (a, 0), and A = (p, q), so BC lies on the x-axis.\\n\\n**Area of triangle ABC:** $\\\\frac{1}{2} \\\\cdot a \\\\cdot q = 144$\\n\\n**Centroid G:** \\n$$G = \\\\left(\\\\frac{a+p}{3}, \\\\frac{q}{3}\\\\right)$$\\n\\n**Line through G parallel to BC:** This is the horizontal line $y = \\\\frac{q}{3}$\\n\\n## Finding Key Points\\n\\n**Finding N** (intersection of horizontal line with AC):\\n\\nLine AC connects A(p, q) to C(a, 0). Setting y = q/3:\\n$$\\\\frac{q}{3} - q = \\\\frac{-q}{a-p}(x - p)$$\\n$$\\\\frac{2(a-p)}{3} = x - p \\\\implies x = \\\\frac{p + 2a}{3}$$\\n\\nSo $N = \\\\left(\\\\frac{p+2a}{3}, \\\\frac{q}{3}\\\\right)$\\n\\n**Point E** (midpoint of AC):\\n$$E = \\\\left(\\\\frac{p+a}{2}, \\\\frac{q}{2}\\\\right)$$\\n\\n## Computing Area of Triangle ENG\\n\\nSince both G and N lie on the line $y = \\\\frac{q}{3}$, segment GN is horizontal.\\n\\n**Base GN:**\\n$$\\\\text{GN} = \\\\left|\\\\frac{p+2a}{3} - \\\\frac{a+p}{3}\\\\right| = \\\\frac{a}{3}$$\\n\\n**Height from E to line GN:**\\n$$\\\\text{height} = \\\\frac{q}{2} - \\\\frac{q}{3} = \\\\frac{q}{6}$$\\n\\n**Area of ENG:**\\n$$\\\\text{Area}_{ENG} = \\\\frac{1}{2} \\\\cdot \\\\frac{a}{3} \\\\cdot \\\\frac{q}{6} = \\\\frac{aq}{36}$$\\n\\n## Computing the Ratio\\n\\n$$\\\\frac{\\\\text{Area}_{ENG}}{\\\\text{Area}_{ABC}} = \\\\frac{aq/36}{aq/2} = \\\\frac{1}{18}$$\\n\\n## Verification with Example\\n\\nLet B = (0,0), C = (6,0), A = (0,6). Then:\\n- G = (2, 2), N = (4, 2), E = (3, 3)\\n- Triangle ENG: base = 2, height = 1, area = 1\\n- Triangle ABC: area = 18\\n- Ratio: 1/18 ✓\\n\\n## Final Calculation\\n\\n$$\\\\text{Area}_{ENG} = \\\\frac{144}{18} = 8$$\\n\\n#### 8\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8\", \"reference_number\": \"8\", \"raw_tail\": \"Triangle ENG: base = 2, height = 1, area = 1\\n- Triangle ABC: area = 18\\n- Ratio: 1/18 ✓\\n\\n## Final Calculation\\n\\n$$\\\\text{Area}_{ENG} = \\\\frac{144}{18} = 8$$\\n\\n#### 8\"}"
+  },
+  "timings": {
+    "agent_s": 12.446,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the area of triangle ENG, where:\\n- E is the midpoint of AC (since BE is a median' attempts=1"
+  ]
+}

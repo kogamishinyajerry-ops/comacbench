@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q344",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the value of $a$ that makes the piecewise function continuous.\\n\\n## Setting Up the Continuity Condition\\n\\nFor the graph of $y = f(n)$ to be continuous, the two pieces must connect at $n = a$ without any jumps. This means the **left-hand limit** must equal the **right-hand value** at $n = a$.\\n\\n**Left-hand limit** (approaching $a$ from values where $n < a$):\\n$$\\\\lim_{n \\\\to a^-} f(n) = 4a + 3$$\\n\\n**Right-hand value** (at $n = a$, using the second piece since $n \\\\geq a$):\\n$$f(a) = 7a - 12$$\\n\\n## Solving for $a$\\n\\nSetting the two expressions equal:\\n$$4a + 3 = 7a - 12$$\\n\\n$$3 + 12 = 7a - 4a$$\\n\\n$$15 = 3a$$\\n\\n$$a = 5$$\\n\\n## Verification\\n\\nAt $n = 5$:\\n- Left piece: $4(5) + 3 = 23$\\n- Right piece: $7(5) - 12 = 23$ ✓\\n\\nBoth pieces give the same value, confirming continuity.\\n\\n#### 5\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"5\", \"reference_number\": \"5\", \"raw_tail\": \"$\\n\\n## Verification\\n\\nAt $n = 5$:\\n- Left piece: $4(5) + 3 = 23$\\n- Right piece: $7(5) - 12 = 23$ ✓\\n\\nBoth pieces give the same value, confirming continuity.\\n\\n#### 5\"}"
+  },
+  "timings": {
+    "agent_s": 4.53,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the value of $a$ that makes the piecewise function continuous.\\n\\n## Setting Up th' attempts=1"
+  ]
+}

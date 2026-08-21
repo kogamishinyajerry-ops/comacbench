@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q081",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given:\\n\\n- Ten treeks weigh as much as three squigs and one goolee: \\\\(10T = 3S + G\\\\).\\n- Two treeks and one goolee are equal in weight to one squig: \\\\(2T + G = S\\\\).\\n\\nWe need to find how many treeks (let’s call it \\\\(n\\\\)) have the same weight as one squig, i.e., \\\\(n T = S\\\\).\\n\\nSolve the system:\\n\\nFrom the second equation, \\\\(G = S - 2T\\\\).\\n\\nSubstitute into the first equation:\\n\\n\\\\[\\n10T = 3S + (S - 2T) = 4S - 2T.\\n\\\\]\\n\\nBring terms together:\\n\\n\\\\[\\n10T + 2T = 4S \\\\implies 12T = 4S \\\\implies 3T = S.\\n\\\\]\\n\\nThus one squig equals three treeks. Therefore, the combined weight of \\\\(\\\\boxed{3}\\\\) treeks equals the weight of one squig.\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3\", \"reference_number\": \"3\", \"raw_tail\": \"implies 12T = 4S \\\\implies 3T = S.\\n\\\\]\\n\\nThus one squig equals three treeks. Therefore, the combined weight of \\\\(\\\\boxed{3}\\\\) treeks equals the weight of one squig.\"}"
+  },
+  "timings": {
+    "agent_s": 18.176,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given:\\n\\n- Ten treeks weigh as much as three squigs and one goolee: \\\\(10T = 3S + G\\\\).\\n- Two treeks and one goolee ' attempts=1"
+  ]
+}

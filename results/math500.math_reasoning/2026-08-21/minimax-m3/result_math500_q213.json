@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q213",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a way to simplify the general term using a Fibonacci identity.\\n\\n## Setting Up the Telescoping Sum\\n\\nI'll use the Fibonacci recurrence $F_{n+2} = F_{n+1} + F_n$, which gives me $F_{n+2} - F_n = F_{n+1}$.\\n\\nThis suggests examining the difference:\\n$$\\\\frac{1}{F_n} - \\\\frac{1}{F_{n+2}} = \\\\frac{F_{n+2} - F_n}{F_n F_{n+2}} = \\\\frac{F_{n+1}}{F_n F_{n+2}}$$\\n\\nSo the general term equals:\\n$$\\\\frac{F_{n+1}}{F_n F_{n+2}} = \\\\frac{1}{F_n} - \\\\frac{1}{F_{n+2}}$$\\n\\n## Computing the Telescoping Sum\\n\\nPartial sum up to $N$:\\n$$\\\\sum_{n=1}^N \\\\left(\\\\frac{1}{F_n} - \\\\frac{1}{F_{n+2}}\\\\right) = \\\\frac{1}{F_1} + \\\\frac{1}{F_2} - \\\\frac{1}{F_{N+1}} - \\\\frac{1}{F_{N+2}}$$\\n\\nTaking the limit as $N \\\\to \\\\infty$, since $F_n \\\\to \\\\infty$:\\n$$\\\\lim_{N\\\\to\\\\infty} \\\\frac{1}{F_{N+1}} = 0 \\\\quad \\\\text{and} \\\\quad \\\\lim_{N\\\\to\\\\infty} \\\\frac{1}{F_{N+2}} = 0$$\\n\\n## Final Calculation\\n\\n$$\\\\sum_{n=1}^\\\\infty \\\\frac{F_{n+1}}{F_n F_{n+2}} = \\\\frac{1}{F_1} + \\\\frac{1}{F_2} = 1 + 1 = 2$$\\n\\n$$\\\\boxed{2}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\", \"reference_number\": \"2\", \"raw_tail\": \"fty} \\\\frac{1}{F_{N+2}} = 0$$\\n\\n## Final Calculation\\n\\n$$\\\\sum_{n=1}^\\\\infty \\\\frac{F_{n+1}}{F_n F_{n+2}} = \\\\frac{1}{F_1} + \\\\frac{1}{F_2} = 1 + 1 = 2$$\\n\\n$$\\\\boxed{2}$$\"}"
+  },
+  "timings": {
+    "agent_s": 8.027,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a way to simplify the general term using a Fibonacci identity.\\n\\n## Setting Up th' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q129",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given triangle \\\\(ABC\\\\) with sides \\\\(AB = 17\\\\), \\\\(AC = 8\\\\), and \\\\(BC = 15\\\\). Let \\\\(D\\\\) be the foot of the altitude from \\\\(C\\\\) to \\\\(AB\\\\). We need the area of triangle \\\\(ACD\\\\).\\n\\nSince \\\\(CD \\\\perp AB\\\\), triangles \\\\(ACD\\\\) and \\\\(BCD\\\\) are right-angled at \\\\(D\\\\). In right triangle \\\\(ACD\\\\), \\\\(AC = 8\\\\) is the hypotenuse, so\\n\\\\[\\nAD^2 + CD^2 = AC^2 = 64. \\\\tag{1}\\n\\\\]\\nIn right triangle \\\\(BCD\\\\), \\\\(BC = 15\\\\) is the hypotenuse, so\\n\\\\[\\nBD^2 + CD^2 = BC^2 = 225. \\\\tag{2}\\n\\\\]\\nAlso, \\\\(AB = AD + BD = 17\\\\). Let \\\\(AD = x\\\\). Then \\\\(BD = 17 - x\\\\). Substitute into (2) and use (1) to eliminate \\\\(CD^2\\\\):\\n\\\\[\\n(17 - x)^2 + CD^2 = 225.\\n\\\\]\\nFrom (1), \\\\(CD^2 = 64 - x^2\\\\). Hence\\n\\\\[\\n(17 - x)^2 + (64 - x^2) = 225.\\n\\\\]\\nExpand:\\n\\\\[\\n289 - 34x + x^2 + 64 - x^2 = 225 \\\\implies 353 - 34x = 225.\\n\\\\]\\nThus \\\\(34x = 128\\\\) and \\\\(x = \\\\frac{128}{34} = \\\\frac{64}{17}\\\\). So\\n\\\\[\\nAD = \\\\frac{64}{17}, \\\\qquad BD = 17 - \\\\frac{64}{17} = \\\\frac{225}{17}.\\n\\\\]\\nNow find \\\\(CD\\\\):\\n\\\\[\\nCD^2 = 64 - \\\\left(\\\\frac{64}{17}\\\\right)^2 = 64 - \\\\frac{4096}{289} = \\\\frac{18496 - 4096}{289} = \\\\frac{14400}{289},\\n\\\\]\\nso\\n\\\\[\\nCD = \\\\frac{120}{17}.\\n\\\\]\\n\\nTriangle \\\\(ACD\\\\) is right-angled at \\\\(D\\\\), so its area is\\n\\\\[\\n\\\\text{Area}_{ACD} = \\\\frac{1}{2} \\\\cdot AD \\\\cdot CD = \\\\frac{1}{2} \\\\cdot \\\\frac{64}{17} \\\\cdot \\\\frac{120}{17} = \\\\frac{64 \\\\cdot 120}{2 \\\\cdot 289} = \\\\frac{7680}{578} = \\\\frac{3840}{289}.\\n\\\\]\\n\\nAlternatively, using coordinates: place \\\\(A = (0,0)\\\\), \\\\(B = (17,0)\\\\), and let \\\\(C = (x,y)\\\\) with \\\\(y>0\\\\). Then \\\\(D = (x,0)\\\\). From distances:\\n\\\\[\\nx^2 + y^2 = 64, \\\\qquad (x-17)^2 + y^2 = 225.\\n\\\\]\\nSubtracting gives \\\\(-34x + 289 = 161\\\\) → \\\\(x = \\\\frac{64}{17}\\\\). Then \\\\(y^2 = 64 - \\\\left(\\\\frac{64}{17}\\\\right)^2 = \\\\frac{14400}{289}\\\\) → \\\\(y = \\\\frac{120}{17}\\\\). The area is \\\\(\\\\frac{1}{2} \\\\cdot x \\\\cdot y = \\\\frac{3840}{289}\\\\), confirming the result.\\n\\nThus the area of triangle \\\\(ACD\\\\) is \\\\(\\\\frac{3840}{289}\\\\).\\n\\n\\\\boxed{\\\\frac{3840}{289}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{3840}{289}\", \"reference_number\": \"\\\\frac{3840}{289}\", \"raw_tail\": \"\\\\(\\\\frac{1}{2} \\\\cdot x \\\\cdot y = \\\\frac{3840}{289}\\\\), confirming the result.\\n\\nThus the area of triangle \\\\(ACD\\\\) is \\\\(\\\\frac{3840}{289}\\\\).\\n\\n\\\\boxed{\\\\frac{3840}{289}}\"}"
+  },
+  "timings": {
+    "agent_s": 78.638,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given triangle \\\\(ABC\\\\) with sides \\\\(AB = 17\\\\), \\\\(AC = 8\\\\), and \\\\(BC = 15\\\\). Let \\\\(D\\\\) be the foot of the altitude' attempts=1"
+  ]
+}

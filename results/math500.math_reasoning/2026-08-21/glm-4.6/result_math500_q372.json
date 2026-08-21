@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q372",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The diagram shows point \\\\(D\\\\) on side \\\\(BC\\\\) with \\\\(AD = BD = CD\\\\).  \\nSince \\\\(BD = CD\\\\), \\\\(D\\\\) is the midpoint of \\\\(BC\\\\). Let \\\\(BD = CD = x\\\\); then \\\\(BC = 2x\\\\) and \\\\(AD = x\\\\).\\n\\nApplying Apollonius's theorem (or the median length formula) to \\\\(\\\\triangle ABC\\\\) with median \\\\(AD\\\\):\\n\\n\\\\[\\nAB^2 + AC^2 = 2\\\\left(AD^2 + BD^2\\\\right) = 2\\\\left(x^2 + x^2\\\\right) = 4x^2 = (2x)^2 = BC^2.\\n\\\\]\\n\\nThus \\\\(AB^2 + AC^2 = BC^2\\\\), so by the converse of the Pythagorean theorem, \\\\(\\\\angle BAC\\\\) is a right angle.\\n\\nTherefore, \\\\(\\\\angle BAC = 90^\\\\circ\\\\).\\n\\n\\\\boxed{90}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"90\", \"reference_number\": \"90^\\\\circ\", \"raw_tail\": \"\\nThus \\\\(AB^2 + AC^2 = BC^2\\\\), so by the converse of the Pythagorean theorem, \\\\(\\\\angle BAC\\\\) is a right angle.\\n\\nTherefore, \\\\(\\\\angle BAC = 90^\\\\circ\\\\).\\n\\n\\\\boxed{90}\"}"
+  },
+  "timings": {
+    "agent_s": 102.339,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The diagram shows point \\\\(D\\\\) on side \\\\(BC\\\\) with \\\\(AD = BD = CD\\\\).  \\nSince \\\\(BD = CD\\\\), \\\\(D\\\\) is the midpoint of \\\\(BC\\\\)' attempts=1"
+  ]
+}

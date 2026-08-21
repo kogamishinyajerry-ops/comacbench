@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q210",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the areas of the two shaded triangles.\\n\\n## Setting Up Coordinates\\n\\nBased on the Asymptote code, I'll place the rectangle on a coordinate system with corners at (0,0) and (3,4), giving a 3×4 rectangle made of 12 unit squares.\\n\\n## Identifying the Shaded Triangles\\n\\n**Shaded Triangle 1:** vertices (0,4), (0,0), (2,0)\\n- Right angle at (0,0)\\n- Legs: 2 (horizontal) and 4 (vertical)\\n- Area = ½ × 2 × 4 = **4**\\n\\n**Shaded Triangle 2:** vertices (0,4), (3,4), (3,0)  \\n- Right angle at (3,4)\\n- Legs: 3 (horizontal) and 4 (vertical)\\n- Area = ½ × 3 × 4 = **6**\\n\\n## Verifying the Triangles Don't Overlap\\n\\nThe two diagonal lines drawn are:\\n- From (0,4) to (2,0): equation y = 4 − 2x\\n- From (0,4) to (3,0): equation y = 4 − (4/3)x\\n\\nTriangle 1 lies **below** the line y = 4 − 2x, while Triangle 2 lies **above** the line y = 4 − (4/3)x.\\n\\nSince 4 − 2x ≤ 4 − (4/3)x for all x ≥ 0 (with equality only at x = 0), the two shaded triangles only touch at the single point (0,4) — no overlap occurs.\\n\\n## Computing the Total\\n\\n**Total shaded area = 4 + 6 = 10**\\n\\n*Verification:* The unshaded region is a triangle with vertices (0,4), (2,0), (3,0), having area 2. So shaded area = 12 − 2 = 10. ✓\\n\\n#### 10\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \"rea = 4 + 6 = 10**\\n\\n*Verification:* The unshaded region is a triangle with vertices (0,4), (2,0), (3,0), having area 2. So shaded area = 12 − 2 = 10. ✓\\n\\n#### 10\"}"
+  },
+  "timings": {
+    "agent_s": 32.47,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the areas of the two shaded triangles.\\n\\n## Setting Up Coordinates\\n\\nBased on the ' attempts=1"
+  ]
+}

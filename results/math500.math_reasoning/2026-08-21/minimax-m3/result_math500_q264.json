@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q264",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the length of $BH$ in rectangle $BEFH$.\\n\\n## Setting Up Coordinates\\n\\nLet me place $A$ at the origin with the line through $A, B, C, D$ along the x-axis.\\n\\nSince $CDEG$ is a square with $CD = 3$:\\n- $C = (c, 0)$ and $D = (c+3, 0)$ on the bottom\\n- $G = (c, 3)$ and $E = (c+3, 3)$ at the top\\n\\nLet $B = (b, 0)$ on the x-axis.\\n\\n## Applying the Distance Condition\\n\\nComputing $BE$:\\n$$BE = \\\\sqrt{(c+3-b)^2 + 3^2} = 5$$\\n\\nThis gives $(c+3-b)^2 + 9 = 25$, so $c+3-b = 4$, meaning:\\n$$\\\\vec{BE} = (4, 3)$$\\n\\n## Using the Rectangle Property\\n\\nFor rectangle $BEFH$, the side $\\\\vec{BH}$ is perpendicular to $\\\\vec{BE}$. Since $\\\\vec{BE} = (4,3)$, the direction perpendicular to it is $(-3, 4)$.\\n\\nLet $\\\\vec{BH} = t(-3, 4)$ for some scalar $t$. Then:\\n- $H = B + t(-3, 4) = (b - 3t, 4t)$\\n- $F = E + t(-3, 4) = (c+3-3t, 3+4t)$\\n\\n## Using Line AG\\n\\nBoth $H$ and $F$ lie on line $AG$, which passes through $(0,0)$ and $(c, 3)$, with equation:\\n$$y = \\\\frac{3}{c}x$$\\n\\n**For $H$:** $4t = \\\\frac{3}{c}(b - 3t)$\\n\\nWith $b = c - 1$:\\n$$4t = \\\\frac{3}{c}(c-1-3t)$$\\n$$4tc = 3(c-1) - 9t$$\\n$$t(4c + 9) = 3(c-1)$$\\n$$t = \\\\frac{3(c-1)}{4c+9}$$\\n\\n**For $F$:** $3 + 4t = \\\\frac{3}{c}(c+3-3t) = 3 + \\\\frac{9}{c} - \\\\frac{9t}{c}$\\n\\n$$4t + \\\\frac{9t}{c} = \\\\frac{9}{c}$$\\n$$t \\\\cdot \\\\frac{4c+9}{c} = \\\\frac{9}{c}$$\\n$$t = \\\\frac{9}{4c+9}$$\\n\\n## Solving for c\\n\\nSetting both expressions for $t$ equal:\\n$$\\\\frac{3(c-1)}{4c+9} = \\\\frac{9}{4c+9}$$\\n\\n$$3(c-1) = 9$$\\n$$c = 4$$\\n\\n## Computing BH\\n\\nWith $c = 4$:\\n$$t = \\\\frac{9}{16+9} = \\\\frac{9}{25}$$\\n\\nThe length of $BH$ is:\\n$$BH = |t| \\\\cdot \\\\sqrt{(-3)^2 + 4^2} = \\\\frac{9}{25} \\\\cdot 5 = \\\\frac{9}{5}$$\\n\\n## Verification\\n\\nWith $c=4$: $A=(0,0)$, $B=(3,0)$, $C=(4,0)$, $D=(7,0)$, $E=(7,3)$, $G=(4,3)$\\n- $H = (3 - 27/25, 36/25) = (48/25, 36/25)$\\n- Check on line $AG$: $\\\\frac{36/25}{48/25} = \\\\frac{3}{4}$ ✓\\n- $\\\\vec{BH} \\\\cdot \\\\vec{BE} = (-27/25)(4) + (36/25)(3) = 0$ ✓\\n\\nConverting to a mixed number: $\\\\frac{9}{5} = 1\\\\frac{4}{5}$\\n\\n#### $1\\\\frac{4}{5}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1\\\\frac{4}{5}\", \"reference_number\": \"1\\\\frac{4}{5}\", \"raw_tail\": \"} = \\\\frac{3}{4}$ ✓\\n- $\\\\vec{BH} \\\\cdot \\\\vec{BE} = (-27/25)(4) + (36/25)(3) = 0$ ✓\\n\\nConverting to a mixed number: $\\\\frac{9}{5} = 1\\\\frac{4}{5}$\\n\\n#### $1\\\\frac{4}{5}$\"}"
+  },
+  "timings": {
+    "agent_s": 27.28,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the length of $BH$ in rectangle $BEFH$.\\n\\n## Setting Up Coordinates\\n\\nLet me place' attempts=1"
+  ]
+}

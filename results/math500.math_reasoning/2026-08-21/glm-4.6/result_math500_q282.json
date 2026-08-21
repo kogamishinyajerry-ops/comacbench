@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q282",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The sequence begins with \\\\(a_1 = 0\\\\).  \\nThe operations alternate: add \\\\(k\\\\), then multiply by \\\\(k\\\\), for \\\\(k = 1, 2, 3, \\\\ldots\\\\).  \\n\\nCompute terms step by step:\\n\\n\\\\[\\n\\\\begin{align*}\\na_1 &= 0 \\\\\\\\\\na_2 &= a_1 + 1 = 0 + 1 = 1 \\\\\\\\\\na_3 &= a_2 \\\\times 1 = 1 \\\\times 1 = 1 \\\\\\\\\\na_4 &= a_3 + 2 = 1 + 2 = 3 \\\\\\\\\\na_5 &= a_4 \\\\times 2 = 3 \\\\times 2 = 6 \\\\\\\\\\na_6 &= a_5 + 3 = 6 + 3 = 9 \\\\\\\\\\na_7 &= a_6 \\\\times 3 = 9 \\\\times 3 = 27 \\\\\\\\\\na_8 &= a_7 + 4 = 27 + 4 = 31 \\\\\\\\\\na_9 &= a_8 \\\\times 4 = 31 \\\\times 4 = 124 \\\\\\\\\\na_{10} &= a_9 + 5 = 124 + 5 = 129\\n\\\\end{align*}\\n\\\\]\\n\\nNow \\\\(a_{10} = 129 > 125\\\\), and all earlier terms are \\\\(\\\\le 125\\\\). Therefore the first term greater than 125 is 129.\\n\\n\\\\boxed{129}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"129\", \"reference_number\": \"129\", \"raw_tail\": \"124 + 5 = 129\\n\\\\end{align*}\\n\\\\]\\n\\nNow \\\\(a_{10} = 129 > 125\\\\), and all earlier terms are \\\\(\\\\le 125\\\\). Therefore the first term greater than 125 is 129.\\n\\n\\\\boxed{129}\"}"
+  },
+  "timings": {
+    "agent_s": 22.016,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The sequence begins with \\\\(a_1 = 0\\\\).  \\nThe operations alternate: add \\\\(k\\\\), then multiply by \\\\(k\\\\), for \\\\(k = 1, 2, 3, ' attempts=1"
+  ]
+}

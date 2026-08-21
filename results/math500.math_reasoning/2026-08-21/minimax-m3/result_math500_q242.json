@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q242",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to calculate compound interest with:\\n- Principal: $24,000\\n- Rate: 1% per bi-monthly period\\n- Periods: 5 years = 60 months ÷ 2 = 30 bi-monthly periods\\n\\n## Setting Up the Formula\\n\\nUsing the compound interest formula:\\n$$A = P(1 + r)^n = 24000(1.01)^{30}$$\\n\\n## Computing $(1.01)^{30}$\\n\\nI'll compute step by step:\\n\\n$(1.01)^2 = 1.0201$\\n\\n$(1.01)^4 = (1.0201)^2 = 1.04060401$\\n\\n$(1.01)^5 = 1.04060401 \\\\times 1.01 = 1.0510100501$\\n\\n$(1.01)^{10} = (1.0510100501)^2 = 1.10462212541...$\\n\\n$(1.01)^{20} = (1.10462213)^2 = 1.22019004...$\\n\\n$(1.01)^{30} = (1.01)^{20} \\\\times (1.01)^{10} = 1.22019004 \\\\times 1.10462213$\\n\\nComputing this product:\\n$$1.22019004 \\\\times 1.10462213 = 1.34784892$$\\n\\n## Final Calculation\\n\\n$$A = 24000 \\\\times 1.34784892$$\\n\\nBreaking this down:\\n- $24000 \\\\times 1 = 24000$\\n- $24000 \\\\times 0.34784892 = 8348.37$\\n- Total: $24000 + 8348.37 = 32348.37$\\n\\nRounding to the nearest whole number:\\n\\n#### 32348\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"32348\", \"reference_number\": \"\\\\$32,\\\\!348\", \"raw_tail\": \" down:\\n- $24000 \\\\times 1 = 24000$\\n- $24000 \\\\times 0.34784892 = 8348.37$\\n- Total: $24000 + 8348.37 = 32348.37$\\n\\nRounding to the nearest whole number:\\n\\n#### 32348\"}"
+  },
+  "timings": {
+    "agent_s": 20.628,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to calculate compound interest with:\\n- Principal: $24,000\\n- Rate: 1% per bi-monthly peri' attempts=1"
+  ]
+}

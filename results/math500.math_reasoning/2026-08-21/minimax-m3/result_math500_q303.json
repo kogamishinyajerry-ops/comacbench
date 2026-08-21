@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q303",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the area of triangle $ACD$ given the constraints on trapezoid $ABCD$.\\n\\n## Setting Up Coordinates\\n\\nLet me place $A = (0, 0)$ and $D = (d, 0)$ on the x-axis, with $AD \\\\parallel BC$ along the horizontal direction.\\n\\nLet $\\\\angle BAD = 2\\\\alpha$, so since $AC$ bisects this angle, $\\\\angle BAC = \\\\angle CAD = \\\\alpha$.\\n\\nLet $C = (c_x, c_y)$ with $c_y > 0$. Since $BC \\\\parallel AD$, point $B$ also has y-coordinate $c_y$, so $B = (b_x, c_y)$.\\n\\n## Using the Conditions\\n\\n**Condition 1: $AC \\\\perp CD$**\\n\\nThe vectors $\\\\vec{AC} = (c_x, c_y)$ and $\\\\vec{CD} = (d - c_x, -c_y)$ satisfy:\\n$$c_x(d - c_x) - c_y^2 = 0 \\\\implies c_x^2 + c_y^2 = c_x d$$\\n\\n**Condition 2: $AC$ bisects $\\\\angle BAD$**\\n\\nSince $\\\\vec{AD}$ makes angle $0$ with the x-axis and $\\\\vec{AC}$ makes angle $\\\\alpha$, I need $\\\\vec{AB}$ to make angle $2\\\\alpha$:\\n$$\\\\tan(2\\\\alpha) = \\\\frac{c_y}{b_x} = \\\\frac{2\\\\tan\\\\alpha}{1-\\\\tan^2\\\\alpha} = \\\\frac{2c_xc_y}{c_x^2 - c_y^2}$$\\n\\nSolving: $b_x = \\\\dfrac{c_x^2 - c_y^2}{2c_x}$\\n\\n## Computing $BC$\\n\\n$$|BC| = c_x - b_x = c_x - \\\\frac{c_x^2 - c_y^2}{2c_x} = \\\\frac{c_x^2 + c_y^2}{2c_x} = \\\\frac{c_x d}{2c_x} = \\\\frac{d}{2}$$\\n\\n**Key result:** $BC = \\\\dfrac{AD}{2}$\\n\\n## Computing the Areas\\n\\n**Trapezoid area** (height $h = c_y$, parallel sides $AD$ and $BC$):\\n$$[ABCD] = \\\\frac{1}{2}(AD + BC) \\\\cdot h = \\\\frac{1}{2}\\\\left(d + \\\\frac{d}{2}\\\\right)c_y = \\\\frac{3dc_y}{4} = 42$$\\n\\nThis gives $dc_y = 56$.\\n\\n**Triangle $ACD$ area** (vertices $A(0,0)$, $C(c_x, c_y)$, $D(d,0)$):\\n$$[\\\\triangle ACD] = \\\\frac{1}{2}|x_A(y_C - y_D) + x_C(y_D - y_A) + x_D(y_A - y_C)| = \\\\frac{1}{2}dc_y$$\\n\\n## Final Calculation\\n\\n$$[\\\\triangle ACD] = \\\\frac{1}{2} \\\\cdot 56 = 28$$\\n\\n**Verification:** The triangle $ABC$ has area $[ABC] = \\\\frac{1}{2}c_y(c_x - b_x) = \\\\frac{dc_y}{4} = 14$. Then $[ACD] + [ABC] = 28 + 14 = 42$ ✓\\n\\n#### 28\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"28\", \"reference_number\": \"28\", \"raw_tail\": \" = 28$$\\n\\n**Verification:** The triangle $ABC$ has area $[ABC] = \\\\frac{1}{2}c_y(c_x - b_x) = \\\\frac{dc_y}{4} = 14$. Then $[ACD] + [ABC] = 28 + 14 = 42$ ✓\\n\\n#### 28\"}"
+  },
+  "timings": {
+    "agent_s": 25.985,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the area of triangle $ACD$ given the constraints on trapezoid $ABCD$.\\n\\n## Settin' attempts=1"
+  ]
+}

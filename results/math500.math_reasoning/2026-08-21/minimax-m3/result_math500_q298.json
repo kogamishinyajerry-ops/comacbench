@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q298",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to expand the cross product using the distributive property, then substitute the given cross products.\\n\\n## Setting Up the Expansion\\n\\nUsing the distributive property of the cross product and noting $\\\\mathbf{a} \\\\times \\\\mathbf{a} = \\\\mathbf{0}$:\\n\\n$$(2\\\\mathbf{b} - \\\\mathbf{a}) \\\\times (3\\\\mathbf{c} + \\\\mathbf{a}) = 6(\\\\mathbf{b} \\\\times \\\\mathbf{c}) + 2(\\\\mathbf{b} \\\\times \\\\mathbf{a}) - 3(\\\\mathbf{a} \\\\times \\\\mathbf{c}) - \\\\mathbf{0}$$\\n\\nSince $\\\\mathbf{b} \\\\times \\\\mathbf{a} = -(\\\\mathbf{a} \\\\times \\\\mathbf{b})$:\\n\\n$$= 6(\\\\mathbf{b} \\\\times \\\\mathbf{c}) - 2(\\\\mathbf{a} \\\\times \\\\mathbf{b}) - 3(\\\\mathbf{a} \\\\times \\\\mathbf{c})$$\\n\\n## Computing Each Term\\n\\n**First term:**\\n$$6(\\\\mathbf{b} \\\\times \\\\mathbf{c}) = 6\\\\begin{pmatrix} 1 \\\\\\\\ -7 \\\\\\\\ 18 \\\\end{pmatrix} = \\\\begin{pmatrix} 6 \\\\\\\\ -42 \\\\\\\\ 108 \\\\end{pmatrix}$$\\n\\n**Second term:**\\n$$-2(\\\\mathbf{a} \\\\times \\\\mathbf{b}) = -2\\\\begin{pmatrix} 6 \\\\\\\\ -7 \\\\\\\\ 3 \\\\end{pmatrix} = \\\\begin{pmatrix} -12 \\\\\\\\ 14 \\\\\\\\ -6 \\\\end{pmatrix}$$\\n\\n**Third term:**\\n$$-3(\\\\mathbf{a} \\\\times \\\\mathbf{c}) = -3\\\\begin{pmatrix} 4 \\\\\\\\ 7 \\\\\\\\ 2 \\\\end{pmatrix} = \\\\begin{pmatrix} -12 \\\\\\\\ -21 \\\\\\\\ -6 \\\\end{pmatrix}$$\\n\\n## Adding the Results\\n\\n$$(2\\\\mathbf{b} - \\\\mathbf{a}) \\\\times (3\\\\mathbf{c} + \\\\mathbf{a}) = \\\\begin{pmatrix} 6 - 12 - 12 \\\\\\\\ -42 + 14 - 21 \\\\\\\\ 108 - 6 - 6 \\\\end{pmatrix} = \\\\begin{pmatrix} -18 \\\\\\\\ -49 \\\\\\\\ 96 \\\\end{pmatrix}$$\\n\\n#### $\\\\begin{pmatrix} -18 \\\\\\\\ -49 \\\\\\\\ 96 \\\\end{pmatrix}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} -18 \\\\\\\\ -49 \\\\\\\\ 96 \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} -18 \\\\\\\\ -49 \\\\\\\\ 96 \\\\end{pmatrix}\", \"raw_tail\": \" 12 - 12 \\\\\\\\ -42 + 14 - 21 \\\\\\\\ 108 - 6 - 6 \\\\end{pmatrix} = \\\\begin{pmatrix} -18 \\\\\\\\ -49 \\\\\\\\ 96 \\\\end{pmatrix}$$\\n\\n#### $\\\\begin{pmatrix} -18 \\\\\\\\ -49 \\\\\\\\ 96 \\\\end{pmatrix}$\"}"
+  },
+  "timings": {
+    "agent_s": 6.111,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to expand the cross product using the distributive property, then substitute the given c' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_102",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef choose_num(x, y):\\n    \\\"\\\"\\\"This function takes two positive numbers x and y and returns the\\n    biggest even integer number that is in the range [x, y] inclusive. If \\n    there's no such number, then the function should return -1.\\n\\n    For example:\\n    choose_num(12, 15) = 14\\n    choose_num(13, 12) = -1\\n    \\\"\\\"\\\"\\n    # If the lower bound exceeds the upper bound, the range is empty.\\n    if x > y:\\n        return -1\\n\\n    # Compute the smallest integer >= x and the largest integer <= y.\\n    lower = math.ceil(x)\\n    upper = math.floor(y)\\n\\n    # If there is no integer between x and y, there can't be an even integer.\\n    if lower > upper:\\n        return -1\\n\\n    # Start from the largest integer and move down to the nearest even number.\\n    candidate = upper if upper % 2 == 0 else upper - 1\\n\\n    # If the candidate falls below the smallest integer in the range, no even integer exists.\\n    if candidate < lower:\\n        return -1\\n\\n    return candidate\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 37.182,
+    "setup_s": 0.0,
+    "grade_s": 0.13
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

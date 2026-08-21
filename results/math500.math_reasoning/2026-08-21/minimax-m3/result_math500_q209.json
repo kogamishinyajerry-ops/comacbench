@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q209",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a two-digit integer AB where AB³ = 912,673.\\n\\n## Setting Up the Search\\n\\nI'll start by estimating which two-digit number works.\\n\\n**Estimating the range:**\\n- 90³ = 729,000 (too small)\\n- 100³ = 1,000,000 (too large)\\n\\nSo AB is between 90 and 100.\\n\\n## Testing Candidates\\n\\n**Testing 97:**\\nFirst, calculate 97²:\\n$$97^2 = 9409$$\\n\\nThen calculate 97³:\\n$$97^3 = 97 \\\\times 9409$$\\n\\nBreaking this down:\\n- $9409 \\\\times 100 = 940{,}900$\\n- $9409 \\\\times 3 = 28{,}227$\\n- $97^3 = 940{,}900 - 28{,}227 = 912{,}673$ ✓\\n\\n## Finding A + B\\n\\nSince 97³ = 912,673, the two-digit integer is **97**, so:\\n- A = 9\\n- B = 7\\n\\n$$A + B = 9 + 7 = 16$$\\n\\n#### 16\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"16\", \"reference_number\": \"16\", \"raw_tail\": \"40{,}900 - 28{,}227 = 912{,}673$ ✓\\n\\n## Finding A + B\\n\\nSince 97³ = 912,673, the two-digit integer is **97**, so:\\n- A = 9\\n- B = 7\\n\\n$$A + B = 9 + 7 = 16$$\\n\\n#### 16\"}"
+  },
+  "timings": {
+    "agent_s": 4.371,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to find a two-digit integer AB where AB³ = 912,673.\\n\\n## Setting Up the Search\\n\\nI'll star\" attempts=1"
+  ]
+}

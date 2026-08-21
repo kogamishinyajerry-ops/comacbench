@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q011",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $p(8)$ where $p(x)$ is a degree 5 polynomial matching $\\\\frac{n}{n^2-1}$ at six points.\\n\\n## Setting Up the Auxiliary Polynomial\\n\\nLet me define $g(x) = (x^2-1)p(x) - x$. Since $p(x)$ has degree 5, $g(x)$ has degree 7.\\n\\n**Roots of g(x):** For $n = 2, 3, 4, 5, 6, 7$:\\n$$g(n) = (n^2-1)p(n) - n = (n^2-1) \\\\cdot \\\\frac{n}{n^2-1} - n = n - n = 0$$\\n\\n**Values at x = 1 and x = -1:**\\n- $g(1) = 0 \\\\cdot p(1) - 1 = -1$\\n- $g(-1) = 0 \\\\cdot p(-1) - (-1) = 1$\\n\\n## Constructing g(x)\\n\\nSince $g(x)$ has degree 7 with roots at $2, 3, 4, 5, 6, 7$ (6 roots), I can write:\\n$$g(x) = (x-2)(x-3)(x-4)(x-5)(x-6)(x-7)(ax + b)$$\\n\\n**Using g(1) = -1:**\\n$$(-1)(-2)(-3)(-4)(-5)(-6)(a+b) = 720(a+b) = -1$$\\n$$a + b = -\\\\frac{1}{720}$$\\n\\n**Using g(-1) = 1:**\\n$$(-3)(-4)(-5)(-6)(-7)(-8)(-a+b) = 20160(-a+b) = 1$$\\n$$-a + b = \\\\frac{1}{20160}$$\\n\\n## Solving for a and b\\n\\n**Adding the equations:**\\n$$2b = -\\\\frac{1}{720} + \\\\frac{1}{20160} = -\\\\frac{28}{20160} + \\\\frac{1}{20160} = -\\\\frac{27}{20160}$$\\n$$b = -\\\\frac{27}{40320}$$\\n\\n**Subtracting:**\\n$$2a = -\\\\frac{1}{720} - \\\\frac{1}{20160} = -\\\\frac{29}{20160}$$\\n$$a = -\\\\frac{29}{40320}$$\\n\\n## Computing g(8)\\n\\n$$8a + b = \\\\frac{-232}{40320} + \\\\frac{-27}{40320} = -\\\\frac{259}{40320}$$\\n\\n$$g(8) = (6)(5)(4)(3)(2)(1)(8a+b) = 720 \\\\cdot \\\\left(-\\\\frac{259}{40320}\\\\right) = -\\\\frac{259}{56}$$\\n\\n(since $40320/720 = 56$)\\n\\n## Computing p(8)\\n\\nUsing $g(8) = (8^2-1)p(8) - 8 = 63p(8) - 8$:\\n\\n$$63p(8) = g(8) + 8 = -\\\\frac{259}{56} + \\\\frac{448}{56} = \\\\frac{189}{56}$$\\n\\n$$p(8) = \\\\frac{189}{56 \\\\cdot 63} = \\\\frac{189}{3528}$$\\n\\nSince $\\\\gcd(189, 3528) = 63$:\\n$$p(8) = \\\\frac{3}{56}$$\\n\\n## Verification via Finite Differences\\n\\nUsing $a_n = \\\\frac{n}{n^2-1}$ with common denominator 1680:\\n| $n$ | $a_n$ | $\\\\Delta_1$ | $\\\\Delta_2$ | $\\\\Delta_3$ | $\\\\Delta_4$ | $\\\\Delta_5$ |\\n|---|---|---|---|---|---|---|\\n| 2 | 1120 | -490 | 308 | -224 | 176 | **-145** |\\n| 3 | 630 | -182 | 84 | -48 | 31 | |\\n| 4 | 448 | -98 | 36 | -17 | | |\\n| 5 | 350 | -62 | 19 | | | |\\n| 6 | 288 | -43 | | | | |\\n| 7 | 245 | | | | | |\\n\\nExtending with constant 5th differences confirms $p(8) = \\\\frac{3}{56}$.\\n\\n#### 3/56\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3/56\", \"reference_number\": \"\\\\frac{3}{56}\", \"raw_tail\": \"| 5 | 350 | -62 | 19 | | | |\\n| 6 | 288 | -43 | | | | |\\n| 7 | 245 | | | | | |\\n\\nExtending with constant 5th differences confirms $p(8) = \\\\frac{3}{56}$.\\n\\n#### 3/56\"}"
+  },
+  "timings": {
+    "agent_s": 101.791,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $p(8)$ where $p(x)$ is a degree 5 polynomial matching $\\\\frac{n}{n^2-1}$ at six p' attempts=1"
+  ]
+}

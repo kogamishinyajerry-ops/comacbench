@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q444",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the probability that a random point in rectangle $ABCD$ is closer to center $O$ than to any vertex.\\n\\n## Setting Up Coordinates\\n\\nLet me place $O$ at the origin with:\\n- $A = (-a, b)$, $B = (a, b)$, $C = (a, -b)$, $D = (-a, -b)$\\n- $k = AB/AD = 2a/(2b) = a/b$, so $a = kb$\\n\\nThe distance from any point $(x,y)$ to:\\n- $O$: $\\\\sqrt{x^2 + y^2}$\\n- Vertex $A$: $\\\\sqrt{(x+a)^2 + (y-b)^2}$\\n\\n## Finding the Region Near Vertex A\\n\\nA point is closer to $O$ than to $A$ if and only if:\\n$$x^2 + y^2 < (x+a)^2 + (y-b)^2$$\\n$$0 < 2ax - 2by + a^2 + b^2$$\\n$$2ax - 2by + a^2 + b^2 > 0$$\\n$$2ax - 2by > -(a^2 + b^2)$$\\n\\nThe boundary is the **perpendicular bisector** of $OA$, which passes through midpoint $M_A = (-a/2, b/2)$ with normal vector $(a, -b)$.\\n\\n## Symmetry\\n\\nBy the 4-fold symmetry of the rectangle, each of the four vertices creates an identical region. Since these regions are disjoint (the perpendicular bisectors partition the rectangle), the total area where the point is closer to $O$ than to all four vertices is:\\n$$4 \\\\times A_{\\\\text{near } A}$$\\n\\n## Computing the Area Near Vertex A\\n\\nThe line $2ax - 2by + a^2 + b^2 = 0$ intersects:\\n- $x = -a$ (left edge): $y = (a^2 + b^2 + 2a(-a))/(2b) = (b^2 - a^2)/(2b)$\\n- $y = b$ (top edge): $x = (-(a^2 + b^2) + 2b \\\\cdot b)/(2a) = (b^2 - a^2)/(2a)$\\n\\n**Setting** $c = |b^2 - a^2|/(2b)$ and noting that the\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": 2.0, \"reference_number\": \"\\\\frac{1}{2}\", \"raw_tail\": \"(2b) = (b^2 - a^2)/(2b)$\\n- $y = b$ (top edge): $x = (-(a^2 + b^2) + 2b \\\\cdot b)/(2a) = (b^2 - a^2)/(2a)$\\n\\n**Setting** $c = |b^2 - a^2|/(2b)$ and noting that the\"}"
+  },
+  "timings": {
+    "agent_s": 200.065,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the probability that a random point in rectangle $ABCD$ is closer to center $O$ ' attempts=2"
+  ]
+}

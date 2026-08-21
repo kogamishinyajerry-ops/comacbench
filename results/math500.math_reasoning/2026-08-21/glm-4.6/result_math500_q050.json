@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q050",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let \\\\(n\\\\) be the number of coins in each of the original seven bags. Initially, total coins = \\\\(7n\\\\). After finding the bag of 53 coins, total coins = \\\\(7n + 53\\\\). To redistribute equally among eight bags, the total must be divisible by 8:\\n\\n\\\\[\\n7n + 53 \\\\equiv 0 \\\\pmod{8}.\\n\\\\]\\n\\nCompute modulo 8: \\\\(53 \\\\equiv 5\\\\), so \\\\(7n + 5 \\\\equiv 0\\\\) \\\\(\\\\Rightarrow\\\\) \\\\(7n \\\\equiv 3 \\\\pmod{8}\\\\). Since \\\\(7 \\\\equiv -1\\\\), this gives \\\\(-n \\\\equiv 3\\\\) \\\\(\\\\Rightarrow\\\\) \\\\(n \\\\equiv -3 \\\\equiv 5 \\\\pmod{8}\\\\). Thus \\\\(n = 8k + 5\\\\) for some integer \\\\(k \\\\ge 0\\\\).\\n\\nWe also know that after redistribution the total number of coins is more than 200:\\n\\n\\\\[\\n7n + 53 > 200 \\\\;\\\\Rightarrow\\\\; 7n > 147 \\\\;\\\\Rightarrow\\\\; n > 21.\\n\\\\]\\n\\nThe smallest \\\\(n > 21\\\\) satisfying \\\\(n \\\\equiv 5 \\\\pmod{8}\\\\) is \\\\(n = 29\\\\) (since \\\\(21 \\\\equiv 5\\\\) but is not >21, next is \\\\(29\\\\)). Therefore, the initial number of coins is\\n\\n\\\\[\\n7n = 7 \\\\times 29 = 203.\\n\\\\]\\n\\nVerification: total after adding 53 is \\\\(203+53=256\\\\), which is divisible by 8 (each bag gets 32 coins) and \\\\(256 > 200\\\\). The smallest possible initial total is 203.\\n\\n\\\\boxed{203}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"203\", \"reference_number\": \"203\", \"raw_tail\": \" after adding 53 is \\\\(203+53=256\\\\), which is divisible by 8 (each bag gets 32 coins) and \\\\(256 > 200\\\\). The smallest possible initial total is 203.\\n\\n\\\\boxed{203}\"}"
+  },
+  "timings": {
+    "agent_s": 117.467,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let \\\\(n\\\\) be the number of coins in each of the original seven bags. Initially, total coins = \\\\(7n\\\\). After finding the ' attempts=1"
+  ]
+}

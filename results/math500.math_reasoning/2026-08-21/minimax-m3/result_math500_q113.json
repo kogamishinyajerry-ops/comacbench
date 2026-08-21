@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q113",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to evaluate $(26^2 - 24^2 - 10)^2 - 10^2$ step by step.\\n\\n## Step 1: Calculate $26^2 - 24^2$\\n\\nUsing the difference of squares formula:\\n$$26^2 - 24^2 = (26-24)(26+24) = 2 \\\\cdot 50 = 100$$\\n\\n## Step 2: Simplify Inside the Parentheses\\n\\n$$26^2 - 24^2 - 10 = 100 - 10 = 90$$\\n\\n## Step 3: Square the Result\\n\\n$$90^2 = 8100$$\\n\\n## Step 4: Subtract $10^2$\\n\\n$$8100 - 100 = 8000$$\\n\\n## Verification\\n\\nNote that $26^2 - 24^2 = 10^2$, so letting $x = 10$:\\n$$(x^2 - x)^2 - x^2 = x^2[(x-1)^2 - 1] = x^2(x^2 - 2x) = 100 \\\\cdot 80 = 8000 ✓$$\\n\\n#### 8000\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8000\", \"reference_number\": \"8000\", \"raw_tail\": \"# Verification\\n\\nNote that $26^2 - 24^2 = 10^2$, so letting $x = 10$:\\n$$(x^2 - x)^2 - x^2 = x^2[(x-1)^2 - 1] = x^2(x^2 - 2x) = 100 \\\\cdot 80 = 8000 ✓$$\\n\\n#### 8000\"}"
+  },
+  "timings": {
+    "agent_s": 5.118,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to evaluate $(26^2 - 24^2 - 10)^2 - 10^2$ step by step.\\n\\n## Step 1: Calculate $26^2 - 24' attempts=1"
+  ]
+}

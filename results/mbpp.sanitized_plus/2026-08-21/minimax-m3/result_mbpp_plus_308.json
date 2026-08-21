@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_308",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"import heapq\\n\\ndef large_product(list1, list2, n):\\n    \\\"\\\"\\\"\\n    Find the n largest products formed by multiplying one element from list1\\n    with one element from list2.\\n    \\\"\\\"\\\"\\n    # Sort both lists in descending order\\n    list1 = sorted(list1, reverse=True)\\n    list2 = sorted(list2, reverse=True)\\n    \\n    # Use a max-heap (Python's heapq is a min-heap, so we negate the values)\\n    # Each entry is (-product, i, j) where i, j are indices in list1, list2\\n    heap = [(-list1[0] * list2[0], 0, 0)]\\n    visited = {(0, 0)}\\n    result = []\\n    \\n    for _ in range(n):\\n        if not heap:\\n            break\\n        neg_product, i, j = heapq.heappop(heap)\\n        result.append(-neg_product)\\n        \\n        # Push neighbors (i+1, j) and (i, j+1) if not visited\\n        if i + 1 < len(list1) and (i + 1, j) not in visited:\\n            heapq.heappush(heap, (-list1[i + 1] * list2[j], i + 1, j))\\n            visited.add((i + 1, j))\\n        if j + 1 < len(list2) and (i, j + 1) not in visited:\\n            heapq.heappush(heap, (-list1[i] * list2[j + 1], i, j + 1))\\n            visited.add((i, j + 1))\\n    \\n    return result\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"IndexError: list index out of range\"}], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 25.221,
+    "setup_s": 0.0,
+    "grade_s": 0.149
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

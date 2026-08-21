@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q292",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The sequence satisfies the recurrence \\\\(x_n = x_{n-1} - x_{n-2} + x_{n-3} - x_{n-4}\\\\) for \\\\(n \\\\ge 5\\\\).  \\nThe characteristic polynomial is \\\\(r^4 - r^3 + r^2 - r + 1\\\\), which divides \\\\(r^{10}-1\\\\) because  \\n\\\\(r^{10}-1 = (r^5-1)(r+1)(r^4 - r^3 + r^2 - r + 1)\\\\).  \\nHence the shift operator \\\\(E\\\\) (with \\\\(E x_n = x_{n+1}\\\\)) satisfies \\\\(E^{10}=I\\\\) on the solution space, so the sequence is periodic with period 10.\\n\\nCompute the first 10 terms from the initial values:  \\n\\\\[\\n\\\\begin{aligned}\\nx_1 &= 211,\\\\\\\\\\nx_2 &= 375,\\\\\\\\\\nx_3 &= 420,\\\\\\\\\\nx_4 &= 523,\\\\\\\\\\nx_5 &= 523-420+375-211 = 267,\\\\\\\\\\nx_6 &= 267-523+420-375 = -211,\\\\\\\\\\nx_7 &= -211-267+523-420 = -375,\\\\\\\\\\nx_8 &= -375-(-211)+267-523 = -420,\\\\\\\\\\nx_9 &= -420-(-375)+(-211)-267 = -523,\\\\\\\\\\nx_{10} &= -523-(-420)+(-375)-(-211) = -267.\\n\\\\end{aligned}\\n\\\\]  \\nThen \\\\(x_{11}=211 = x_1\\\\), \\\\(x_{12}=375 = x_2\\\\), etc., confirming period 10.\\n\\nThus \\\\(x_n = x_r\\\\) where \\\\(r = n \\\\bmod 10\\\\) (with \\\\(r=0\\\\) giving \\\\(x_{10}\\\\)).  \\n\\n\\\\[\\n\\\\begin{aligned}\\n531 \\\\bmod 10 &= 1 &\\\\Rightarrow&\\\\ x_{531} = x_1 = 211,\\\\\\\\\\n753 \\\\bmod 10 &= 3 &\\\\Rightarrow&\\\\ x_{753} = x_3 = 420,\\\\\\\\\\n975 \\\\bmod 10 &= 5 &\\\\Rightarrow&\\\\ x_{975} = x_5 = 267.\\n\\\\end{aligned}\\n\\\\]  \\n\\nSumming: \\\\(211 + 420 + 267 = 898\\\\).\\n\\n\\\\[\\n\\\\boxed{898}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"898\", \"reference_number\": \"898\", \"raw_tail\": \"tarrow&\\\\ x_{753} = x_3 = 420,\\\\\\\\\\n975 \\\\bmod 10 &= 5 &\\\\Rightarrow&\\\\ x_{975} = x_5 = 267.\\n\\\\end{aligned}\\n\\\\]  \\n\\nSumming: \\\\(211 + 420 + 267 = 898\\\\).\\n\\n\\\\[\\n\\\\boxed{898}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 73.04,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The sequence satisfies the recurrence \\\\(x_n = x_{n-1} - x_{n-2} + x_{n-3} - x_{n-4}\\\\) for \\\\(n \\\\ge 5\\\\).  \\nThe characteris' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q010",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"A multiple of 30 must be divisible by 2, 3, and 5.\\n\\n- **Divisible by 5:** The last digit must be 0 or 5. Since only digits 0 and 2 are allowed, the last digit must be **0**.\\n- **Divisible by 2:** Automatically satisfied since the last digit is 0.\\n- **Divisible by 3:** The sum of the digits must be divisible by 3. Since the digits are only 0's and 2's, the number of 2's must be a multiple of 3 (because \\\\(2 \\\\times k \\\\equiv 0 \\\\pmod{3}\\\\) requires \\\\(k\\\\) divisible by 3).\\n\\nThe smallest positive integer uses the fewest digits possible, with the first digit being 2 (no leading zeros). We need at least three 2's (to satisfy divisibility by 3) and at least one 0 at the end (for divisibility by 5). \\n\\nWith four digits total (three 2's and one 0), the last digit must be the 0, so the number is **2220**.\\n\\nCheck:  \\n- Ends in 0 (divisible by 2 and 5).  \\n- Digit sum: \\\\(2+2+2+0 = 6\\\\), divisible by 3.  \\n- \\\\(2220 \\\\div 30 = 74\\\\).\\n\\nNo smaller number works (two-digit options are 20 or 00; three-digit options like 200, 220 have digit sums not divisible by 3).\\n\\n#### 2220\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2220\", \"reference_number\": \"2220\", \"raw_tail\": \"2220 \\\\div 30 = 74\\\\).\\n\\nNo smaller number works (two-digit options are 20 or 00; three-digit options like 200, 220 have digit sums not divisible by 3).\\n\\n#### 2220\"}"
+  },
+  "timings": {
+    "agent_s": 9.315,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='A multiple of 30 must be divisible by 2, 3, and 5.\\n\\n- **Divisible by 5:** The last digit must be 0 or 5. Since only digi' attempts=1"
+  ]
+}

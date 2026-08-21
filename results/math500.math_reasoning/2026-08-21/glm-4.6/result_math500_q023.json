@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q023",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The equation is \\\\(x = \\\\sqrt{11 - 2x} + 4\\\\).  \\n\\n**Step 1: Determine the domain.**  \\nThe square root requires \\\\(11 - 2x \\\\ge 0\\\\), so \\\\(x \\\\le \\\\frac{11}{2} = 5.5\\\\).  \\nSince \\\\(\\\\sqrt{11-2x} \\\\ge 0\\\\), the right-hand side is at least \\\\(4\\\\), so \\\\(x \\\\ge 4\\\\).  \\nThus, any solution must satisfy \\\\(4 \\\\le x \\\\le 5.5\\\\).\\n\\n**Step 2: Isolate the square root.**  \\nSubtract \\\\(4\\\\) from both sides:  \\n\\\\(x - 4 = \\\\sqrt{11 - 2x}\\\\).\\n\\n**Step 3: Square both sides.**  \\n\\\\((x - 4)^2 = 11 - 2x\\\\).\\n\\n**Step 4: Expand and simplify.**  \\n\\\\(x^2 - 8x + 16 = 11 - 2x\\\\)  \\n\\\\(x^2 - 8x + 16 - 11 + 2x = 0\\\\)  \\n\\\\(x^2 - 6x + 5 = 0\\\\).\\n\\n**Step 5: Solve the quadratic.**  \\n\\\\(x^2 - 6x + 5 = (x-1)(x-5) = 0\\\\)  \\nSo \\\\(x = 1\\\\) or \\\\(x = 5\\\\).\\n\\n**Step 6: Check for extraneous solutions.**  \\n- For \\\\(x = 1\\\\):  \\n  Left-hand side: \\\\(1\\\\).  \\n  Right-hand side: \\\\(\\\\sqrt{11 - 2\\\\cdot1} + 4 = \\\\sqrt{9} + 4 = 3 + 4 = 7\\\\).  \\n  Not equal, so \\\\(x = 1\\\\) is extraneous.  \\n- For \\\\(x = 5\\\\):  \\n  Left-hand side: \\\\(5\\\\).  \\n  Right-hand side: \\\\(\\\\sqrt{11 - 2\\\\cdot5} + 4 = \\\\sqrt{1} + 4 = 1 + 4 = 5\\\\).  \\n  Valid and lies in the domain.\\n\\nThus, the only solution is \\\\(x = 5\\\\).\\n\\n\\\\boxed{5}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"5\", \"reference_number\": \"x=5\", \"raw_tail\": \" \\n  Right-hand side: \\\\(\\\\sqrt{11 - 2\\\\cdot5} + 4 = \\\\sqrt{1} + 4 = 1 + 4 = 5\\\\).  \\n  Valid and lies in the domain.\\n\\nThus, the only solution is \\\\(x = 5\\\\).\\n\\n\\\\boxed{5}\"}"
+  },
+  "timings": {
+    "agent_s": 20.629,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The equation is \\\\(x = \\\\sqrt{11 - 2x} + 4\\\\).  \\n\\n**Step 1: Determine the domain.**  \\nThe square root requires \\\\(11 - 2x \\\\g' attempts=1"
+  ]
+}

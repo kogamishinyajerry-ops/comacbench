@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q122",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"# Setting Up the Proportion\\n\\nSince the popularity (number of sales) is **inversely proportional** to cost, I can write:\\n\\n$$S = \\\\frac{k}{C}$$\\n\\nwhere $S$ is the number of sales, $C$ is the cost, and $k$ is a constant.\\n\\nThis means: $S_1 \\\\cdot C_1 = S_2 \\\\cdot C_2$\\n\\n# Solving for the Constant\\n\\nUsing the given information (15 customers buy a $1500 TV):\\n\\n$$k = S_1 \\\\cdot C_1 = 15 \\\\times 1500 = 22{,}500$$\\n\\n# Finding Sales at $2500\\n\\n$$S_2 = \\\\frac{k}{C_2} = \\\\frac{22{,}500}{2500} = 9$$\\n\\n# Verification\\n\\n- $15 \\\\times 1500 = 22{,}500$ ✓\\n- $9 \\\\times 2500 = 22{,}500$ ✓\\n\\nThe constant of proportionality is preserved, confirming that **9 customers** would buy the $2500 television.\\n\\n$$\\\\boxed{9}$$\\n\\n#### 9\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"9\", \"reference_number\": \"9\", \"raw_tail\": \" \\\\times 2500 = 22{,}500$ ✓\\n\\nThe constant of proportionality is preserved, confirming that **9 customers** would buy the $2500 television.\\n\\n$$\\\\boxed{9}$$\\n\\n#### 9\"}"
+  },
+  "timings": {
+    "agent_s": 3.404,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='# Setting Up the Proportion\\n\\nSince the popularity (number of sales) is **inversely proportional** to cost, I can write:\\n' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_067",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import re\\n\\ndef fruit_distribution(s, n):\\n    \\\"\\\"\\\"\\n    Given a string describing the number of apples and oranges in a basket,\\n    and an integer representing the total number of fruits in the basket,\\n    return the number of mango fruits.\\n\\n    The string format is like \\\"5 apples and 6 oranges\\\". All integer values\\n    found in the string are summed and subtracted from the total number of\\n    fruits to obtain the count of mangoes.\\n\\n    Parameters\\n    ----------\\n    s : str\\n        Description of the number of apples and oranges.\\n    n : int\\n        Total number of fruits in the basket.\\n\\n    Returns\\n    -------\\n    int\\n        Number of mango fruits in the basket.\\n\\n    Examples\\n    --------\\n    >>> fruit_distribution(\\\"5 apples and 6 oranges\\\", 19)\\n    8\\n    >>> fruit_distribution(\\\"0 apples and 1 oranges\\\", 3)\\n    2\\n    >>> fruit_distribution(\\\"2 apples and 3 oranges\\\", 100)\\n    95\\n    >>> fruit_distribution(\\\"100 apples and 1 oranges\\\", 120)\\n    19\\n    \\\"\\\"\\\"\\n    # Extract all integer numbers from the input string\\n    numbers = re.findall(r'\\\\d+', s)\\n    # Convert them to int and sum them (apples + oranges)\\n    non_mango_total = sum(map(int, numbers))\\n    # The remainder corresponds to mangoes\\n    return n - non_mango_total\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 6.594,
+    "setup_s": 0.0,
+    "grade_s": 0.161
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

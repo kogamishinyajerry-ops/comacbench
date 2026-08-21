@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q436",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $n$ such that when $n$ fair 6-sided dice are rolled, the probability of exactly two showing a non-1 value equals $\\\\frac{25}{216}$.\\n\\n## Setting Up the Probability\\n\\nFor each die:\\n- Probability of showing a number other than 1: $\\\\frac{5}{6}$\\n- Probability of showing 1: $\\\\frac{1}{6}$\\n\\nFor exactly 2 dice to show non-1 values and the remaining $n-2$ dice to show 1:\\n$$P = \\\\binom{n}{2}\\\\left(\\\\frac{5}{6}\\\\right)^2\\\\left(\\\\frac{1}{6}\\\\right)^{n-2} = \\\\frac{25}{216}$$\\n\\n## Solving the Equation\\n\\nExpanding the probability:\\n$$P = \\\\binom{n}{2} \\\\cdot \\\\frac{25}{36} \\\\cdot \\\\frac{1}{6^{n-2}} = \\\\frac{25}{216}$$\\n\\nDividing both sides by 25:\\n$$\\\\binom{n}{2} \\\\cdot \\\\frac{1}{36 \\\\cdot 6^{n-2}} = \\\\frac{1}{216}$$\\n\\nCross-multiplying:\\n$$36 \\\\cdot 6^{n-2} = 216 \\\\cdot \\\\binom{n}{2}$$\\n\\nSince $36 \\\\cdot 6^{n-2} = 6^n$ and $\\\\binom{n}{2} = \\\\frac{n(n-1)}{2}$:\\n$$6^n = 216 \\\\cdot \\\\frac{n(n-1)}{2} = 108 \\\\cdot n(n-1)$$\\n\\n## Testing Values\\n\\n| $n$ | $6^n$ | $108 \\\\cdot n(n-1)$ |\\n|-----|-------|---------------------|\\n| 2   | 36    | 216                 |\\n| 3   | 216   | 648                 |\\n| **4** | **1296** | **1296** ✓ |\\n| 5   | 7776  | 2160                |\\n\\nFor $n \\\\geq 5$, $6^n$ grows much faster than $108 \\\\cdot n(n-1)$, so $n=4$ is the unique solution.\\n\\n## Verification\\n\\nWith $n=4$:\\n$$P = \\\\binom{4}{2}\\\\left(\\\\frac{5}{6}\\\\right)^2\\\\left(\\\\frac{1}{6}\\\\right)^2 = 6 \\\\cdot \\\\frac{25}{36} \\\\cdot \\\\frac{1}{36} = \\\\frac{150}{1296} = \\\\frac{25}{216} \\\\checkmark$$\\n\\n#### 4\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"4\", \"reference_number\": \"4\", \"raw_tail\": \"om{4}{2}\\\\left(\\\\frac{5}{6}\\\\right)^2\\\\left(\\\\frac{1}{6}\\\\right)^2 = 6 \\\\cdot \\\\frac{25}{36} \\\\cdot \\\\frac{1}{36} = \\\\frac{150}{1296} = \\\\frac{25}{216} \\\\checkmark$$\\n\\n#### 4\"}"
+  },
+  "timings": {
+    "agent_s": 14.211,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $n$ such that when $n$ fair 6-sided dice are rolled, the probability of exactly ' attempts=1"
+  ]
+}

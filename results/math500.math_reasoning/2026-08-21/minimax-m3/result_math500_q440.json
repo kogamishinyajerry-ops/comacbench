@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q440",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to expand both products and then subtract.\\n\\n## Expanding the First Product\\n\\n$(u+4)(u-1)$\\n\\nUsing FOIL:\\n- First: $u \\\\cdot u = u^2$\\n- Outer: $u \\\\cdot (-1) = -u$\\n- Inner: $4 \\\\cdot u = 4u$\\n- Last: $4 \\\\cdot (-1) = -4$\\n\\n$$u^2 + 3u - 4$$\\n\\n## Expanding the Second Product\\n\\n$(u-3)(u+6)$\\n\\nUsing FOIL:\\n- First: $u \\\\cdot u = u^2$\\n- Outer: $u \\\\cdot 6 = 6u$\\n- Inner: $(-3) \\\\cdot u = -3u$\\n- Last: $(-3) \\\\cdot 6 = -18$\\n\\n$$u^2 + 3u - 18$$\\n\\n## Subtracting\\n\\n$$(u^2 + 3u - 4) - (u^2 + 3u - 18)$$\\n\\nDistributing the negative sign:\\n$$u^2 + 3u - 4 - u^2 - 3u + 18$$\\n\\nCombining like terms:\\n- $u^2 - u^2 = 0$\\n- $3u - 3u = 0$\\n- $-4 + 18 = 14$\\n\\n#### 14\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"14\", \"reference_number\": \"14\", \"raw_tail\": \" 3u - 18)$$\\n\\nDistributing the negative sign:\\n$$u^2 + 3u - 4 - u^2 - 3u + 18$$\\n\\nCombining like terms:\\n- $u^2 - u^2 = 0$\\n- $3u - 3u = 0$\\n- $-4 + 18 = 14$\\n\\n#### 14\"}"
+  },
+  "timings": {
+    "agent_s": 4.232,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to expand both products and then subtract.\\n\\n## Expanding the First Product\\n\\n$(u+4)(u-1)$' attempts=1"
+  ]
+}

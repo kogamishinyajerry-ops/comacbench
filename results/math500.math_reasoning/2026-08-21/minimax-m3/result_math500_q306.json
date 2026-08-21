@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q306",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find quadratic equations $x^2 + ax + b = 0$ where applying $f(x) = x^2 - 2$ to any root produces another root.\\n\\n## Setting Up the Problem\\n\\nLet $r_1, r_2$ be the roots. The condition requires $f(\\\\{r_1, r_2\\\\}) \\\\subseteq \\\\{r_1, r_2\\\\}$, meaning $f$ restricted to the root set maps it into itself.\\n\\n**Fixed points of $f$:** Solving $r^2 - 2 = r$ gives $(r-2)(r+1) = 0$, so $r = 2$ or $r = -1$.\\n\\n## Case Analysis\\n\\n**Case 1: Repeated root** ($r_1 = r_2 = r$)\\n\\nThen $f(r) = r$, so $r \\\\in \\\\{2, -1\\\\}$:\\n- $(x-2)^2 = 0$: ✓ ($f(2) = 2$)\\n- $(x+1)^2 = 0$: ✓ ($f(-1) = -1$)\\n\\n**Case 2: Distinct roots** — four possible functions from $\\\\{r_1, r_2\\\\}$ to itself:\\n\\n**Identity:** $r_1, r_2 \\\\in \\\\{2, -1\\\\}$ distinct, giving $\\\\{r_1, r_2\\\\} = \\\\{2, -1\\\\}$:\\n- $(x-2)(x+1) = x^2 - x - 2 = 0$: ✓\\n\\n**Swap:** $f(r_1) = r_2$ and $f(r_2) = r_1$.\\n\\nSubtracting: $(r_1 - r_2)(r_1 + r_2 + 1) = 0$, so $r_1 + r_2 = -1$.\\n\\nAdding: $r_1^2 + r_2^2 - 4 = r_1 + r_2 = -1$, so $r_1^2 + r_2^2 = 3$.\\n\\nThen $1 - 2r_1r_2 = 3$, giving $r_1r_2 = -1$.\\n- $x^2 + x - 1 = 0$: ✓ (Verified: roots $\\\\frac{-1\\\\pm\\\\sqrt{5}}{2}$ swap)\\n\\n**Constant $r_1$:** $f(r_1) = r_1$, $f(r_2) = r_1$, with $r_2 \\\\neq r_1$.\\n\\n- If $r_1 = 2$: $r_2^2 = 4$, so $r_2 = -2$, giving $x^2 - 4 = 0$: ✓ ($f(-2) = 2$ ✓)\\n- If $r_1 = -1$: $r_2^2 = 1$, so $r_2 = 1$, giving $x^2 - 1 = 0$: ✓ ($f(1) = -1$ ✓)\\n\\n**Constant $r_2$:** By symmetry, gives the same equations as above.\\n\\n## Verification Table\\n\\n| Equation | Roots | $f(c)$ for each root |\\n|----------|-------|---------------------|\\n| $x^2 - 4x + 4$ | $\\\\{2, 2\\\\}$ | $2 \\\\mapsto 2$ ✓ |\\n| $x^2 + 2x + 1$ | $\\\\{-1, -1\\\\}$ | $-1 \\\\mapsto -1$ ✓ |\\n| $x^2 - x - 2$ | $\\\\{2, -1\\\\}$ | $2 \\\\mapsto 2$, $-1 \\\\mapsto -1$ ✓ |\\n| $x^2 + x - 1$ | $\\\\{\\\\frac{-1\\\\pm\\\\sqrt{5}}{2}\\\\}$ | Swap ✓ |\\n| $x^2 - 4$ | $\\\\{2, -2\\\\}$ | $2 \\\\mapsto 2$, $-2 \\\\mapsto 2$ ✓ |\\n| $x^2 - 1$ | $\\\\{1, -1\\\\}$ | $1 \\\\mapsto -1$, $-1 \\\\mapsto -1$ ✓ |\\n\\n## Counting\\n\\nAll six equations are distinct (different $(a,b)$ pairs: $(-4,4)$, $(2,1)$, $(-1,-2)$, $(1,-1)$, $(0,-4)$, $(0,-1)$).\\n\\n$$#### 6$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"6\", \"reference_number\": \"6\", \"raw_tail\": \" \\\\mapsto -1$ ✓ |\\n\\n## Counting\\n\\nAll six equations are distinct (different $(a,b)$ pairs: $(-4,4)$, $(2,1)$, $(-1,-2)$, $(1,-1)$, $(0,-4)$, $(0,-1)$).\\n\\n$$#### 6$$\"}"
+  },
+  "timings": {
+    "agent_s": 231.983,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find quadratic equations $x^2 + ax + b = 0$ where applying $f(x) = x^2 - 2$ to any ro' attempts=1"
+  ]
+}

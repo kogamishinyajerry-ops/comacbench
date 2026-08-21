@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q100",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the interior angle α at vertex D of a hexagon inscribed in a circle.\\n\\n## Setting Up Arc Relationships\\n\\nFor a cyclic hexagon ABCDEF with vertices in order, I'll denote the arcs between consecutive vertices:\\n- arc(AB) = a\\n- arc(BC) = b  \\n- arc(CD) = c\\n- arc(DE) = d\\n- arc(EF) = e\\n- arc(FA) = f\\n\\nThese arcs sum to 360°.\\n\\n## Key Inscribed Angle Formula\\n\\nFor a cyclic polygon, the interior angle at a vertex equals half the arc intercepted by the angle, which is the arc on the **opposite side** from that vertex:\\n\\n$$\\\\angle V = \\\\frac{1}{2}(360° - \\\\text{arcs adjacent to } V)$$\\n\\n**Verification using the figure:** Computing the actual arcs from the coordinates:\\n- arc(AB) = 70°, arc(BC) = 70°, arc(CD) = 40°, arc(DE) = 30°, arc(EF) = 80°, arc(FA) = 70°\\n\\n## Applying the Formula\\n\\n**At vertex F** (interior angle 105°):\\n$$\\\\angle F = \\\\frac{1}{2}(360° - e - f) = 105°$$\\n$$e + f = 360° - 210° = 150°$$\\n\\n**At vertex B** (interior angle 110°):\\n$$\\\\angle B = \\\\frac{1}{2}(360° - a - b) = 110°$$\\n$$a + b = 360° - 220° = 140°$$\\n\\n**At vertex D** (interior angle α):\\n$$\\\\angle D = \\\\frac{1}{2}(360° - c - d) = \\\\alpha$$\\n$$c + d = 360° - 2\\\\alpha$$\\n\\n## Solving for α\\n\\nSince all arcs sum to 360°:\\n$$(a + b) + (c + d) + (e + f) = 360°$$\\n\\nSubstituting:\\n$$140° + (360° - 2\\\\alpha) + 150° = 360°$$\\n\\n$$650° - 2\\\\alpha = 360°$$\\n\\n$$2\\\\alpha = 290°$$\\n\\n$$\\\\alpha = 145°$$\\n\\n## Verification\\n\\nChecking with the figure's actual arcs: ∠D = ½(arc CB + arc BA + arc AF + arc FE) = ½(70 + 70 + 70 + 80) = ½(290) = 145° ✓\\n\\n#### 145\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"145\", \"reference_number\": \"145^\\\\circ\", \"raw_tail\": \" = 145°$$\\n\\n## Verification\\n\\nChecking with the figure's actual arcs: ∠D = ½(arc CB + arc BA + arc AF + arc FE) = ½(70 + 70 + 70 + 80) = ½(290) = 145° ✓\\n\\n#### 145\"}"
+  },
+  "timings": {
+    "agent_s": 33.85,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the interior angle α at vertex D of a hexagon inscribed in a circle.\\n\\n## Setting' attempts=1"
+  ]
+}

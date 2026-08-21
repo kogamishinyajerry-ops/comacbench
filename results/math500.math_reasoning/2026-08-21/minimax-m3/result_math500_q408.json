@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q408",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the line of reflection, then apply it to $(-2, 3)$.\\n\\n## Setting Up the Line of Reflection\\n\\nThe line of reflection is the perpendicular bisector of the segment from $(5, 0)$ to $(4, 3)$.\\n\\n**Midpoint:** $M = \\\\left(\\\\dfrac{9}{2}, \\\\dfrac{3}{2}\\\\right)$\\n\\n**Direction of segment:** $(4-5, 3-0) = (-1, 3)$\\n\\nThe reflection line is perpendicular to $(-1, 3)$, so it has normal vector $(1, -3)$. Using point-normal form:\\n$$1\\\\left(x - \\\\tfrac{9}{2}\\\\right) - 3\\\\left(y - \\\\tfrac{3}{2}\\\\right) = 0 \\\\implies x - 3y = 0$$\\n\\nSo the reflection line is $x = 3y$.\\n\\n## Applying the Reflection\\n\\nUsing the reflection formula across line $x - 3y = 0$:\\n$$P' = P - 2\\\\cdot\\\\frac{aP_x + bP_y + c}{a^2 + b^2}(a, b)$$\\n\\nWith $a=1$, $b=-3$, $c=0$ and $P = (-2, 3)$:\\n\\n**Compute numerator:** $(1)(-2) + (-3)(3) + 0 = -11$\\n\\n**Denominator:** $a^2 + b^2 = 1 + 9 = 10$\\n\\n$$P' = \\\\begin{pmatrix} -2 \\\\\\\\ 3 \\\\end{pmatrix} - 2 \\\\cdot \\\\frac{-11}{10}\\\\begin{pmatrix} 1 \\\\\\\\ -3 \\\\end{pmatrix} = \\\\begin{pmatrix} -2 \\\\\\\\ 3 \\\\end{pmatrix} + \\\\frac{11}{5}\\\\begin{pmatrix} 1 \\\\\\\\ -3 \\\\end{pmatrix}$$\\n\\n$$P' = \\\\begin{pmatrix} -2 + 11/5 \\\\\\\\ 3 - 33/5 \\\\end{pmatrix} = \\\\begin{pmatrix} 1/5 \\\\\\\\ -18/5 \\\\end{pmatrix}$$\\n\\n## Verification\\n\\n**Check that $(5,0)$ reflects to $(4,3)$:**\\n- Compute: $(5,0) - \\\\frac{2 \\\\cdot 5}{10}(1,-3) = (5,0) - (1,-3) = (4,3)$ ✓\\n\\n**Check that the midpoint of $(-2, 3)$ and $(1/5, -18/5)$ lies on the line:**\\n- Midpoint: $\\\\left(-\\\\dfrac{9}{10}, -\\\\dfrac{3}{10}\\\\right)$, and $-\\\\dfrac{9}{10} = 3\\\\left(-\\\\dfrac{3}{10}\\\\right)$ ✓\\n\\n**Check the connecting segment is perpendicular to the line:**\\n- Direction $(11/5, -33/5)$ is parallel to $(1, -3)$, the normal of the line ✓\\n\\n#### $\\\\begin{pmatrix} 1/5 \\\\\\\\ -18/5 \\\\end{pmatrix}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} 1/5 \\\\\\\\ -18/5 \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} 1/5 \\\\\\\\ -18/5 \\\\end{pmatrix}\", \"raw_tail\": \"s perpendicular to the line:**\\n- Direction $(11/5, -33/5)$ is parallel to $(1, -3)$, the normal of the line ✓\\n\\n#### $\\\\begin{pmatrix} 1/5 \\\\\\\\ -18/5 \\\\end{pmatrix}$\"}"
+  },
+  "timings": {
+    "agent_s": 12.896,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the line of reflection, then apply it to $(-2, 3)$.\\n\\n## Setting Up the Line of R' attempts=1"
+  ]
+}

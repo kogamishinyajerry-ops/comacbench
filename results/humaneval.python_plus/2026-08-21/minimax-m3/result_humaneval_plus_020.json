@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_020",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List, Tuple\\n\\n\\ndef find_closest_elements(numbers: List[float]) -> Tuple[float, float]:\\n    \\\"\\\"\\\" From a supplied list of numbers (of length at least two) select and return two that are the closest to each\\n    other and return them in order (smaller number, larger number).\\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.2])\\n    (2.0, 2.2)\\n    >>> find_closest_elements([1.0, 2.0, 3.0, 4.0, 5.0, 2.0])\\n    (2.0, 2.0)\\n    \\\"\\\"\\\"\\n    sorted_numbers = sorted(numbers)\\n    min_diff = float('inf')\\n    closest_pair = (sorted_numbers[0], sorted_numbers[1])\\n    \\n    for i in range(len(sorted_numbers) - 1):\\n        diff = sorted_numbers[i + 1] - sorted_numbers[i]\\n        if diff < min_diff:\\n            min_diff = diff\\n            closest_pair = (sorted_numbers[i], sorted_numbers[i + 1])\\n    \\n    return closest_pair\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.12}"
+  },
+  "timings": {
+    "agent_s": 6.399,
+    "setup_s": 0.0,
+    "grade_s": 0.207
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.12s"
+  ]
+}

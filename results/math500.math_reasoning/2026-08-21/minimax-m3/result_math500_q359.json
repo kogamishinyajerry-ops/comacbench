@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q359",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $xy + yz + zx$ given three symmetric-looking equations.\\n\\n## Setting Up Notation\\n\\nLet me define:\\n- $s = x + y + z$\\n- $p = xy + yz + zx$ (what I want to find)\\n- $q = xyz = 4$\\n\\n## Analyzing the Second Equation\\n\\nThe expression $xy^2 + x^2y + xz^2 + x^2z + yz^2 + y^2z$ can be rewritten by grouping:\\n$$xy(x+y) + xz(x+z) + yz(y+z) = 12$$\\n\\nI can relate this to $s$ and $p$ by expanding $(x+y+z)(xy+yz+zx)$:\\n$$sp = (x^2y + xy^2 + x^2z + xz^2 + y^2z + yz^2) + 3xyz$$\\n\\nSo:\\n$$sp = 12 + 3(4) = 24$$\\n\\n## Analyzing the First Equation\\n\\nUsing the identity $x^3 + y^3 + z^3 - 3xyz = s(s^2 - 3p)$, where $x^2+y^2+z^2 = s^2 - 2p$:\\n\\n$$4 - 3(4) = s(s^2 - 3p)$$\\n$$-8 = s(s^2 - 3p)$$\\n\\n## Solving the System\\n\\nSubstituting $s = \\\\frac{24}{p}$ into the equation $-8 = s(s^2 - 3p)$:\\n\\n$$-8 = \\\\frac{24}{p}\\\\left(\\\\frac{576}{p^2} - 3p\\\\right) = \\\\frac{24(576 - 3p^3)}{p^3}$$\\n\\nMultiplying both sides by $p^3$:\\n$$-8p^3 = 24(576 - 3p^3)$$\\n$$-8p^3 = 13824 - 72p^3$$\\n$$64p^3 = 13824$$\\n$$p^3 = 216$$\\n$$p = 6$$\\n\\n## Verification\\n\\nWith $p = 6$ and $s = 24/6 = 4$:\\n- $x^3 + y^3 + z^3 = s^3 - 3sp + 3q = 64 - 72 + 12 = 4$ ✓\\n- $xyz = 4$ ✓\\n\\n#### 6\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"6\", \"reference_number\": \"6\", \"raw_tail\": \"824$$\\n$$p^3 = 216$$\\n$$p = 6$$\\n\\n## Verification\\n\\nWith $p = 6$ and $s = 24/6 = 4$:\\n- $x^3 + y^3 + z^3 = s^3 - 3sp + 3q = 64 - 72 + 12 = 4$ ✓\\n- $xyz = 4$ ✓\\n\\n#### 6\"}"
+  },
+  "timings": {
+    "agent_s": 6.327,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $xy + yz + zx$ given three symmetric-looking equations.\\n\\n## Setting Up Notation\\n' attempts=1"
+  ]
+}

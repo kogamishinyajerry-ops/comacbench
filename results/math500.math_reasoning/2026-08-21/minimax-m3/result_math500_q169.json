@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q169",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the area of an isosceles triangle with sides 5, 5, and 6.\\n\\n## Setting Up the Solution\\n\\nSince two sides are equal (5 and 5), I can drop a perpendicular from the vertex between these equal sides to the base of length 6.\\n\\nThis perpendicular:\\n- Splits the base into two equal segments of 3 units each\\n- Creates two congruent right triangles\\n\\n## Finding the Height\\n\\nUsing the Pythagorean theorem on one right triangle:\\n$$\\\\text{height} = \\\\sqrt{5^2 - 3^2} = \\\\sqrt{25 - 9} = \\\\sqrt{16} = 4$$\\n\\n## Calculating the Area\\n\\n$$\\\\text{Area} = \\\\frac{1}{2} \\\\times \\\\text{base} \\\\times \\\\text{height} = \\\\frac{1}{2} \\\\times 6 \\\\times 4 = 12$$\\n\\n## Verification with Heron's Formula\\n\\nWith semi-perimeter $s = \\\\frac{5+5+6}{2} = 8$:\\n$$\\\\text{Area} = \\\\sqrt{8(8-5)(8-5)(8-6)} = \\\\sqrt{8 \\\\cdot 3 \\\\cdot 3 \\\\cdot 2} = \\\\sqrt{144} = 12 ✓$$\\n\\n#### 12\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"12\", \"reference_number\": \"12\", \"raw_tail\": \"ormula\\n\\nWith semi-perimeter $s = \\\\frac{5+5+6}{2} = 8$:\\n$$\\\\text{Area} = \\\\sqrt{8(8-5)(8-5)(8-6)} = \\\\sqrt{8 \\\\cdot 3 \\\\cdot 3 \\\\cdot 2} = \\\\sqrt{144} = 12 ✓$$\\n\\n#### 12\"}"
+  },
+  "timings": {
+    "agent_s": 3.717,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the area of an isosceles triangle with sides 5, 5, and 6.\\n\\n## Setting Up the Sol' attempts=1"
+  ]
+}

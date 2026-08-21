@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q409",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a hyperbola with given asymptotes passing through a specific point.\\n\\n## Setting Up the Coordinate System\\n\\n**Finding the center:** The asymptotes intersect where $2x - 3 = 17 - 2x$, giving $x = 5$ and $y = 7$. So the center is at $(5, 7)$.\\n\\n**Translating coordinates:** Let $X = x - 5$ and $Y = y - 7$. Then the asymptotes become:\\n$$Y = 2X \\\\quad \\\\text{and} \\\\quad Y = -2X$$\\n\\n## Identifying the Hyperbola Form\\n\\nSince the asymptotes have slopes $\\\\pm 2$, I'll consider the form:\\n$$\\\\frac{X^2}{a^2} - \\\\frac{Y^2}{b^2} = 1$$\\nwith asymptotes $Y = \\\\pm\\\\frac{b}{a}X$, requiring $\\\\frac{b}{a} = 2$, so $b = 2a$.\\n\\nThe point $(4, 7)$ corresponds to $(X, Y) = (-1, 0)$.\\n\\n**Substituting:**\\n$$\\\\frac{(-1)^2}{a^2} - \\\\frac{0}{b^2} = 1 \\\\implies \\\\frac{1}{a^2} = 1 \\\\implies a^2 = 1$$\\n\\nSo $a = 1$ and $b^2 = 4$.\\n\\n**Verification with other form:** The form $\\\\frac{Y^2}{a^2} - \\\\frac{X^2}{b^2} = 1$ would require $\\\\frac{a}{b} = 2$, giving $0 - \\\\frac{1}{b^2} = 1$ at the point — impossible.\\n\\n## Finding the Distance Between Foci\\n\\nFor a hyperbola, $c^2 = a^2 + b^2$:\\n$$c^2 = 1 + 4 = 5 \\\\implies c = \\\\sqrt{5}$$\\n\\nThe distance between the foci is:\\n$$2c = 2\\\\sqrt{5}$$\\n\\n#### 2\\\\sqrt{5}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\\\\sqrt{5}\", \"reference_number\": \"2 \\\\sqrt{5}\", \"raw_tail\": \"etween Foci\\n\\nFor a hyperbola, $c^2 = a^2 + b^2$:\\n$$c^2 = 1 + 4 = 5 \\\\implies c = \\\\sqrt{5}$$\\n\\nThe distance between the foci is:\\n$$2c = 2\\\\sqrt{5}$$\\n\\n#### 2\\\\sqrt{5}\"}"
+  },
+  "timings": {
+    "agent_s": 8.243,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a hyperbola with given asymptotes passing through a specific point.\\n\\n## Setting ' attempts=1"
+  ]
+}

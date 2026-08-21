@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q145",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given that \\\\(z + \\\\frac{1}{z} = \\\\frac{1 + \\\\sqrt{5}}{2}\\\\). Let \\\\(\\\\phi = \\\\frac{1 + \\\\sqrt{5}}{2}\\\\), the golden ratio.\\n\\nIf \\\\(z\\\\) is real, then \\\\(z + \\\\frac{1}{z} \\\\ge 2\\\\) (for \\\\(z>0\\\\)) or \\\\(\\\\le -2\\\\) (for \\\\(z<0\\\\)). Since \\\\(\\\\phi \\\\approx 1.618 < 2\\\\), \\\\(z\\\\) cannot be real. Write \\\\(z = re^{i\\\\theta}\\\\) with \\\\(r>0\\\\). Then\\n\\\\[\\nz + \\\\frac{1}{z} = re^{i\\\\theta} + \\\\frac{1}{r}e^{-i\\\\theta}.\\n\\\\]\\nFor this to be real, the imaginary part must vanish:\\n\\\\[\\nr\\\\sin\\\\theta - \\\\frac{1}{r}\\\\sin\\\\theta = \\\\sin\\\\theta\\\\left(r - \\\\frac{1}{r}\\\\right) = 0.\\n\\\\]\\nSince \\\\(\\\\sin\\\\theta \\\\neq 0\\\\) (otherwise \\\\(z\\\\) would be real), we must have \\\\(r = \\\\frac{1}{r}\\\\), so \\\\(r=1\\\\). Thus \\\\(|z|=1\\\\) and \\\\(z = e^{i\\\\theta}\\\\). Then\\n\\\\[\\nz + \\\\frac{1}{z} = e^{i\\\\theta} + e^{-i\\\\theta} = 2\\\\cos\\\\theta = \\\\phi,\\n\\\\]\\nso \\\\(\\\\cos\\\\theta = \\\\frac{\\\\phi}{2} = \\\\frac{1+\\\\sqrt{5}}{4} = \\\\cos 36^\\\\circ = \\\\cos\\\\frac{\\\\pi}{5}\\\\). Hence \\\\(\\\\theta = \\\\pm \\\\frac{\\\\pi}{5} + 2\\\\pi k\\\\) for integer \\\\(k\\\\). The two essentially distinct values are \\\\(z = e^{i\\\\pi/5}\\\\) and \\\\(z = e^{-i\\\\pi/5}\\\\).\\n\\nNow compute \\\\(z^{85} + \\\\frac{1}{z^{85}}\\\\). For \\\\(z = e^{i\\\\pi/5}\\\\),\\n\\\\[\\nz^{85} = e^{i85\\\\pi/5} = e^{i17\\\\pi} = e^{i\\\\pi} = -1,\\n\\\\]\\nand similarly \\\\(\\\\frac{1}{z^{85}} = e^{-i17\\\\pi} = e^{-i\\\\pi} = -1\\\\). Thus the sum is \\\\(-2\\\\). The same result holds for \\\\(z = e^{-i\\\\pi/5}\\\\).\\n\\nTherefore,\\n\\\\[\\nz^{85} + \\\\frac{1}{z^{85}} = -2.\\n\\\\]\\n\\n\\\\boxed{-2}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-2\", \"reference_number\": \"-2\", \"raw_tail\": \"i17\\\\pi} = e^{-i\\\\pi} = -1\\\\). Thus the sum is \\\\(-2\\\\). The same result holds for \\\\(z = e^{-i\\\\pi/5}\\\\).\\n\\nTherefore,\\n\\\\[\\nz^{85} + \\\\frac{1}{z^{85}} = -2.\\n\\\\]\\n\\n\\\\boxed{-2}\"}"
+  },
+  "timings": {
+    "agent_s": 47.166,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given that \\\\(z + \\\\frac{1}{z} = \\\\frac{1 + \\\\sqrt{5}}{2}\\\\). Let \\\\(\\\\phi = \\\\frac{1 + \\\\sqrt{5}}{2}\\\\), the golden ratio.' attempts=1"
+  ]
+}

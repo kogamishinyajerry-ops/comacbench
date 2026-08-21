@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q281",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the angle at point $A$, which is the intersection of two extended sides of the regular pentagon.\\n\\n## Setting Up the Problem\\n\\nFrom the figure, point $A$ is formed by extending:\\n- Side $FG$ beyond vertex $F$\\n- Side $IJ$ beyond vertex $J$\\n\\nThese two extensions meet at point $A$, creating a star point.\\n\\n## Using Triangle Properties\\n\\nI'll examine triangle $AFJ$ formed by the star point $A$ and the pentagon vertices $F$ and $J$.\\n\\n**Finding angle at $F$:**\\n\\nSince $A$ lies on the extension of $FG$ beyond $F$, the angle $\\\\angle AFJ$ is supplementary to the interior angle $\\\\angle JFG$ of the pentagon.\\n\\nThe interior angle of a regular pentagon is:\\n$$\\\\angle JFG = \\\\frac{(5-2) \\\\cdot 180°}{5} = 108°$$\\n\\nTherefore:\\n$$\\\\angle AFJ = 180° - 108° = 72°$$\\n\\n**Finding angle at $J$:**\\n\\nBy the same reasoning, since $A$ lies on the extension of $IJ$ beyond $J$:\\n$$\\\\angle AJF = 180° - \\\\angle IJF = 180° - 108° = 72°$$\\n\\n## Calculating Angle $A$\\n\\nUsing the triangle angle sum in $\\\\triangle AFJ$:\\n$$\\\\angle A + \\\\angle AFJ + \\\\angle AJF = 180°$$\\n$$\\\\angle A + 72° + 72° = 180°$$\\n$$\\\\angle A = 36°$$\\n\\n## Verification with Coordinates\\n\\nUsing the Asymptote coordinates: $A(-42.4, 30.8)$, $F(-10, 30.8)$, $J(-16.2, 11.8)$.\\n- Vector $\\\\vec{AF} = (32.4, 0)$\\n- Vector $\\\\vec{AJ} = (26.2, -19)$\\n\\n$$\\\\cos(\\\\angle A) = \\\\frac{32.4 \\\\cdot 26.2}{32.4 \\\\cdot \\\\sqrt{26.2^2 + 19^2}} = \\\\frac{849.0}{1048.5} \\\\approx 0.8097$$\\n\\nThis gives $\\\\angle A \\\\approx 36°$, confirming the result.\\n\\n#### 36\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"36\", \"reference_number\": \"36^\\\\circ\", \"raw_tail\": \"ac{32.4 \\\\cdot 26.2}{32.4 \\\\cdot \\\\sqrt{26.2^2 + 19^2}} = \\\\frac{849.0}{1048.5} \\\\approx 0.8097$$\\n\\nThis gives $\\\\angle A \\\\approx 36°$, confirming the result.\\n\\n#### 36\"}"
+  },
+  "timings": {
+    "agent_s": 83.514,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the angle at point $A$, which is the intersection of two extended sides of the r' attempts=1"
+  ]
+}

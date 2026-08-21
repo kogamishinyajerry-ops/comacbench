@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_022",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"from typing import List, Any\\n\\n\\ndef filter_integers(values: List[Any]) -> List[int]:\\n    \\\"\\\"\\\" Filter given list of any python values only for integers\\n    >>> filter_integers(['a', 3.14, 5])\\n    [5]\\n    >>> filter_integers([1, 2, 3, 'abc', {}, []])\\n    [1, 2, 3]\\n    \\\"\\\"\\\"\\n    return [x for x in values if isinstance(x, int)]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [[True, False, None, 0, -10, 'test', [], {}, 3.14]]\"}], \"determinism\": 1.0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 9.826,
+    "setup_s": 0.0,
+    "grade_s": 0.18
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s"
+  ]
+}

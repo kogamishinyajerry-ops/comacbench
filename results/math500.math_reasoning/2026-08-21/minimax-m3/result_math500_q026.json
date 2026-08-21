@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q026",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to count circular seating arrangements of 7 people where no two of Pierre, Rosa, and Thomas sit next to each other.\\n\\n**Method 1: Inclusion-Exclusion**\\n\\nTotal circular arrangements: $(7-1)! = 6! = 720$.\\n\\nLet:\\n- $A$ = arrangements where Pierre and Rosa are adjacent\\n- $B$ = arrangements where Pierre and Thomas are adjacent  \\n- $C$ = arrangements where Rosa and Thomas are adjacent\\n\\nFor each event, treat the adjacent pair as a block (2 internal arrangements). With the block plus 5 other people, there are 6 entities giving $(6-1)! = 5! = 120$ circular arrangements:\\n$$|A| = |B| = |C| = 2 \\\\times 120 = 240$$\\n\\nFor intersections like $A \\\\cap B$ (Pierre adjacent to both Rosa and Thomas), Pierre must be between them: Rosa–Pierre–Thomas or Thomas–Pierre–Rosa (2 arrangements). The block of 3 plus 4 others gives 5 entities with $(5-1)! = 4! = 24$ arrangements:\\n$$|A \\\\cap B| = |A \\\\cap C| = |B \\\\cap C| = 2 \\\\times 24 = 48$$\\n\\nFor $A \\\\cap B \\\\cap C$: all three pairs adjacent is impossible in a circular arrangement (three consecutive people cannot be pairwise adjacent), so $|A \\\\cap B \\\\cap C| = 0$.\\n\\nBy inclusion-exclusion:\\n$$|A \\\\cup B \\\\cup C| = 3(240) - 3(48) + 0 = 720 - 144 = 576$$\\n\\nValid arrangements: $720 - 576 = 144$.\\n\\n**Method 2: Gap Method**\\n\\nArrange the 4 other people in a circle: $(4-1)! = 6$ ways. This creates 4 gaps. Place Pierre, Rosa, and Thomas into 3 of these 4 gaps (one person per gap ensures no two sit together):\\n$$P(4,3) = 4 \\\\times 3 \\\\times 2 = 24 \\\\text{ ways}$$\\n\\nTotal: $6 \\\\times 24 = 144$.\\n\\nBoth methods give 144.\\n\\n#### 144\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"144\", \"reference_number\": \"144\", \"raw_tail\": \"e person per gap ensures no two sit together):\\n$$P(4,3) = 4 \\\\times 3 \\\\times 2 = 24 \\\\text{ ways}$$\\n\\nTotal: $6 \\\\times 24 = 144$.\\n\\nBoth methods give 144.\\n\\n#### 144\"}"
+  },
+  "timings": {
+    "agent_s": 10.101,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to count circular seating arrangements of 7 people where no two of Pierre, Rosa, and Thomas sit next to each oth' attempts=1"
+  ]
+}

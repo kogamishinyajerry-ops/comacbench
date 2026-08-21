@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q349",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We count the number of distinct seatings of 8 people around a square table with 2 seats on each side, where two seatings are considered the same if one can be rotated to the other.\\n\\nFirst, treat the 8 seats as distinct positions around the table. Without considering symmetry, there are \\\\(8! = 40320\\\\) ways to assign the 8 distinct people to the 8 seats.\\n\\nThe square table is invariant under rotations by \\\\(0^\\\\circ\\\\), \\\\(90^\\\\circ\\\\), \\\\(180^\\\\circ\\\\), and \\\\(270^\\\\circ\\\\). These rotations form a group \\\\(G\\\\) of order 4. We need the number of orbits of the set of seatings under the action of \\\\(G\\\\). By Burnside’s Lemma, the number of orbits is\\n\\\\[\\n\\\\frac{1}{|G|}\\\\sum_{g\\\\in G} \\\\operatorname{Fix}(g),\\n\\\\]\\nwhere \\\\(\\\\operatorname{Fix}(g)\\\\) is the number of seatings unchanged by the rotation \\\\(g\\\\).\\n\\n- Identity rotation: fixes all seatings, so \\\\(\\\\operatorname{Fix}(\\\\text{id}) = 8!\\\\).\\n- Rotation by \\\\(90^\\\\circ\\\\) (and similarly \\\\(270^\\\\circ\\\\)): This rotation permutes the seats in two disjoint 4‑cycles. For a seating to be fixed, each cycle would require the same person in all four seats of that cycle, which is impossible because the people are distinct. Hence \\\\(\\\\operatorname{Fix}(90^\\\\circ) = \\\\operatorname{Fix}(270^\\\\circ) = 0\\\\).\\n- Rotation by \\\\(180^\\\\circ\\\\): This permutes the seats in four disjoint 2‑cycles. A fixed seating would need the two seats in each transposition to contain the same person, which is again impossible. Thus \\\\(\\\\operatorname{Fix}(180^\\\\circ) = 0\\\\).\\n\\nTherefore,\\n\\\\[\\n\\\\text{Number of distinct seatings} = \\\\frac{1}{4}(8! + 0 + 0 + 0) = \\\\frac{40320}{4} = 10080.\\n\\\\]\\n\\n\\\\boxed{10080}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10080\", \"reference_number\": \"10080\", \"raw_tail\": \"operatorname{Fix}(180^\\\\circ) = 0\\\\).\\n\\nTherefore,\\n\\\\[\\n\\\\text{Number of distinct seatings} = \\\\frac{1}{4}(8! + 0 + 0 + 0) = \\\\frac{40320}{4} = 10080.\\n\\\\]\\n\\n\\\\boxed{10080}\"}"
+  },
+  "timings": {
+    "agent_s": 152.325,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We count the number of distinct seatings of 8 people around a square table with 2 seats on each side, where two seatings' attempts=1"
+  ]
+}

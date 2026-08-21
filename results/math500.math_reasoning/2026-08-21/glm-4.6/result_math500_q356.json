@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q356",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The inequality is $-4 < x^4 + 4x^2 < 21$. Since $x^4 + 4x^2 = x^2(x^2 + 4) \\\\ge 0$ for all real $x$, the left part $-4 < x^4 + 4x^2$ holds automatically. Therefore we only need $x^4 + 4x^2 < 21$.\\n\\nLet $t = x^2 \\\\ge 0$. Then $x^4 + 4x^2 = t^2 + 4t$. The inequality becomes\\n\\\\[\\nt^2 + 4t - 21 < 0.\\n\\\\]\\nSolve $t^2 + 4t - 21 = 0$:\\n\\\\[\\nt = \\\\frac{-4 \\\\pm \\\\sqrt{16 + 84}}{2} = \\\\frac{-4 \\\\pm 10}{2} = 3 \\\\text{ or } -7.\\n\\\\]\\nThus $t^2 + 4t - 21 = (t - 3)(t + 7) < 0$. Since $t \\\\ge 0$, $t + 7 > 0$, so the inequality reduces to $t - 3 < 0$, i.e., $t < 3$.\\n\\nHence $x^2 < 3$, which gives $-\\\\sqrt{3} < x < \\\\sqrt{3}$.\\n\\nIn interval notation, the solution set is $\\\\boxed{(-\\\\sqrt{3},\\\\sqrt{3})}$.\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(-\\\\sqrt{3},\\\\sqrt{3})\", \"reference_number\": \"(-\\\\sqrt{3}, \\\\sqrt{3})\", \"raw_tail\": \"$t - 3 < 0$, i.e., $t < 3$.\\n\\nHence $x^2 < 3$, which gives $-\\\\sqrt{3} < x < \\\\sqrt{3}$.\\n\\nIn interval notation, the solution set is $\\\\boxed{(-\\\\sqrt{3},\\\\sqrt{3})}$.\"}"
+  },
+  "timings": {
+    "agent_s": 66.078,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The inequality is $-4 < x^4 + 4x^2 < 21$. Since $x^4 + 4x^2 = x^2(x^2 + 4) \\\\ge 0$ for all real $x$, the left part $-4 < ' attempts=1"
+  ]
+}

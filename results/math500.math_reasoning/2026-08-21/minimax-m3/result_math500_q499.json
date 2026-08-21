@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q499",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the angle at the orthocenter H of triangle ABC.\\n\\n## Setting Up the Problem\\n\\n**Finding the third angle:**\\nSince the angles of triangle ABC sum to 180°:\\n$$\\\\angle ACB = 180° - 54° - 52° = 74°$$\\n\\n## Using the Orthocenter Property\\n\\nFor altitudes AD and BE intersecting at the orthocenter H, I'll use a key property: **angle AHB equals 180° minus the third angle of the triangle.**\\n\\n**Verification using quadrilateral CDHE:**\\nSince AD ⊥ BC, we have ∠HDC = 90°.\\nSince BE ⊥ AC, we have ∠HEC = 90°.\\n\\nIn quadrilateral CDHE, the angles sum to 360°:\\n$$\\\\angle DHE + \\\\angle HEC + \\\\angle ECD + \\\\angle CDH = 360°$$\\n$$\\\\angle DHE + 90° + 74° + 90° = 360°$$\\n$$\\\\angle DHE = 106°$$\\n\\nSince ∠AHB and ∠DHE are vertical angles:\\n$$\\\\angle AHB = \\\\angle DHE = 106°$$\\n\\n## Answer\\n\\n$$\\\\angle AHB = 180° - 74° = 106°$$\\n\\n#### 106\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"106\", \"reference_number\": \"106^\\\\circ\", \"raw_tail\": \"0°$$\\n$$\\\\angle DHE = 106°$$\\n\\nSince ∠AHB and ∠DHE are vertical angles:\\n$$\\\\angle AHB = \\\\angle DHE = 106°$$\\n\\n## Answer\\n\\n$$\\\\angle AHB = 180° - 74° = 106°$$\\n\\n#### 106\"}"
+  },
+  "timings": {
+    "agent_s": 4.291,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the angle at the orthocenter H of triangle ABC.\\n\\n## Setting Up the Problem\\n\\n**Fi' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q330",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to form a subcommittee of 5 members from 8 Republicans and 6 Democrats, with at least one member from each party.\\n\\nTotal ways to choose any 5 members from the 14 members is \\\\(\\\\binom{14}{5} = 2002\\\\).\\n\\nThe only selections that violate the condition are those that consist entirely of Republicans or entirely of Democrats.\\n\\n- Number of all-Republican subcommittees: \\\\(\\\\binom{8}{5} = 56\\\\).\\n- Number of all-Democrat subcommittees: \\\\(\\\\binom{6}{5} = 6\\\\).\\n\\nSince these two cases are disjoint, the number of valid subcommittees is\\n\\n\\\\[\\n2002 - 56 - 6 = 1940.\\n\\\\]\\n\\nAlternatively, we can count directly by considering the possible numbers of Republicans (1 through 4):\\n\\n\\\\[\\n\\\\begin{aligned}\\nk=1\\\\ \\\\text{Republican}:&\\\\ \\\\binom{8}{1}\\\\binom{6}{4} = 8 \\\\times 15 = 120,\\\\\\\\\\nk=2:&\\\\ \\\\binom{8}{2}\\\\binom{6}{3} = 28 \\\\times 20 = 560,\\\\\\\\\\nk=3:&\\\\ \\\\binom{8}{3}\\\\binom{6}{2} = 56 \\\\times 15 = 840,\\\\\\\\\\nk=4:&\\\\ \\\\binom{8}{4}\\\\binom{6}{1} = 70 \\\\times 6 = 420.\\n\\\\end{aligned}\\n\\\\]\\n\\nSumming: \\\\(120 + 560 + 840 + 420 = 1940\\\\).\\n\\nThus the number of ways is \\\\(1940\\\\).\\n\\n\\\\boxed{1940}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1940\", \"reference_number\": \"1940\", \"raw_tail\": \"\\\\ \\\\binom{8}{4}\\\\binom{6}{1} = 70 \\\\times 6 = 420.\\n\\\\end{aligned}\\n\\\\]\\n\\nSumming: \\\\(120 + 560 + 840 + 420 = 1940\\\\).\\n\\nThus the number of ways is \\\\(1940\\\\).\\n\\n\\\\boxed{1940}\"}"
+  },
+  "timings": {
+    "agent_s": 26.712,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to form a subcommittee of 5 members from 8 Republicans and 6 Democrats, with at least one member from each party' attempts=1"
+  ]
+}

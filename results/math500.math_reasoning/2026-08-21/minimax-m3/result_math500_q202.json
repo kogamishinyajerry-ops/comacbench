@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q202",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the probability that Alice eventually wins.\\n\\n## Setting Up the Problem\\n\\nLet me define what happens on each turn:\\n\\n**Alice's turn:** She wins with probability 1/2 (heads); otherwise (probability 1/2) it becomes Bob's turn.\\n\\n**Bob's turn:** He wins with probability 1/2 (tails); otherwise (probability 1/2) it becomes Alice's turn.\\n\\nNotice that after both Alice and Bob fail once, the game returns to the original state (Alice's turn). So I can use a self-referencing equation.\\n\\n## Solving with Recursion\\n\\nLet $P$ = probability Alice wins given it is Alice's turn.\\n\\n$$P = \\\\frac{1}{2} + \\\\frac{1}{2} \\\\cdot \\\\frac{1}{2} \\\\cdot P$$\\n\\nThe breakdown:\\n- With probability $\\\\frac{1}{2}$: Alice flips heads and wins immediately\\n- With probability $\\\\frac{1}{2} \\\\cdot \\\\frac{1}{2} = \\\\frac{1}{4}$: Alice flips tails, Bob flips heads, and we're back to Alice's turn\\n\\nSolving:\\n$$P - \\\\frac{1}{4}P = \\\\frac{1}{2}$$\\n$$\\\\frac{3}{4}P = \\\\frac{1}{2}$$\\n$$P = \\\\frac{2}{3}$$\\n\\n## Verification\\n\\nIn each \\\"round\\\" (Alice + Bob):\\n- Alice wins with probability $\\\\frac{1}{2}$\\n- Bob wins with probability $\\\\frac{1}{4}$  \\n- The game continues with probability $\\\\frac{1}{4}$\\n\\n$$P(\\\\text{Alice wins}) = \\\\frac{1/2}{1/2 + 1/4} = \\\\frac{1/2}{3/4} = \\\\frac{2}{3} ✓$$\\n\\n#### \\\\boxed{2/3}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2/3\", \"reference_number\": \"\\\\frac{2}{3}\", \"raw_tail\": \"{4}$  \\n- The game continues with probability $\\\\frac{1}{4}$\\n\\n$$P(\\\\text{Alice wins}) = \\\\frac{1/2}{1/2 + 1/4} = \\\\frac{1/2}{3/4} = \\\\frac{2}{3} ✓$$\\n\\n#### \\\\boxed{2/3}\"}"
+  },
+  "timings": {
+    "agent_s": 4.37,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the probability that Alice eventually wins.\\n\\n## Setting Up the Problem\\n\\nLet me d' attempts=1"
+  ]
+}

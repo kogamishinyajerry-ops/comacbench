@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q078",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given \\\\(f(x) = x^3 + 3x^2 + 1\\\\) and real numbers \\\\(a \\\\neq 0\\\\), \\\\(b\\\\) such that\\n\\n\\\\[\\nf(x) - f(a) = (x - a)^2 (x - b)\\n\\\\]\\n\\nholds as an identity in \\\\(x\\\\). Compute \\\\(f(x) - f(a)\\\\):\\n\\n\\\\[\\nf(x) - f(a) = (x^3 - a^3) + 3(x^2 - a^2) = (x-a)(x^2 + ax + a^2) + 3(x-a)(x+a) = (x-a)\\\\bigl[x^2 + ax + a^2 + 3x + 3a\\\\bigr].\\n\\\\]\\n\\nThus\\n\\n\\\\[\\nf(x) - f(a) = (x-a)\\\\bigl[x^2 + (a+3)x + (a^2+3a)\\\\bigr].\\n\\\\]\\n\\nSet this equal to \\\\((x-a)^2 (x-b)\\\\) and cancel the common factor \\\\((x-a)\\\\) (valid as a polynomial identity):\\n\\n\\\\[\\nx^2 + (a+3)x + (a^2+3a) = (x-a)(x-b) = x^2 - (a+b)x + ab.\\n\\\\]\\n\\nCompare coefficients:\\n\\n- Coefficient of \\\\(x\\\\): \\\\(a+3 = -(a+b)\\\\) \\\\(\\\\implies\\\\) \\\\(a+3 = -a - b\\\\) \\\\(\\\\implies\\\\) \\\\(2a + b + 3 = 0\\\\) \\\\(\\\\implies\\\\) \\\\(b = -2a - 3\\\\).\\n\\n- Constant term: \\\\(a^2+3a = ab\\\\).\\n\\nSubstitute the expression for \\\\(b\\\\):\\n\\n\\\\[\\na^2 + 3a = a(-2a - 3) = -2a^2 - 3a.\\n\\\\]\\n\\nBring all terms to one side:\\n\\n\\\\[\\na^2 + 3a + 2a^2 + 3a = 0 \\\\quad\\\\Longrightarrow\\\\quad 3a^2 + 6a = 0 \\\\quad\\\\Longrightarrow\\\\quad 3a(a+2) = 0.\\n\\\\]\\n\\nThus \\\\(a = 0\\\\) or \\\\(a = -2\\\\). Since \\\\(a \\\\neq 0\\\\), we take \\\\(a = -2\\\\). Then\\n\\n\\\\[\\nb = -2(-2) - 3 = 4 - 3 = 1.\\n\\\\]\\n\\nHence the ordered pair is \\\\((a,b) = (-2,1)\\\\).\\n\\n\\\\[\\n\\\\boxed{(-2,1)}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(-2,1)\", \"reference_number\": \"(-2,1)\", \"raw_tail\": \"\\\\(a = -2\\\\). Since \\\\(a \\\\neq 0\\\\), we take \\\\(a = -2\\\\). Then\\n\\n\\\\[\\nb = -2(-2) - 3 = 4 - 3 = 1.\\n\\\\]\\n\\nHence the ordered pair is \\\\((a,b) = (-2,1)\\\\).\\n\\n\\\\[\\n\\\\boxed{(-2,1)}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 44.142,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given \\\\(f(x) = x^3 + 3x^2 + 1\\\\) and real numbers \\\\(a \\\\neq 0\\\\), \\\\(b\\\\) such that\\n\\n\\\\[\\nf(x) - f(a) = (x - a)^2 (x - b' attempts=1"
+  ]
+}

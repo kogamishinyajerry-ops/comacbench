@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q063",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The polynomial \\\\(x^8 + 3x^4 - 4\\\\) factors over the integers as\\n\\\\[\\n(x^4+4)(x^4-1) = (x^2+2x+2)(x^2-2x+2)(x^2+1)(x+1)(x-1).\\n\\\\]\\nAll factors are monic, have integer coefficients, and are irreducible over the integers. Evaluating each at \\\\(x=1\\\\):\\n\\\\[\\n\\\\begin{aligned}\\nx-1 &\\\\to 0,\\\\\\\\\\nx+1 &\\\\to 2,\\\\\\\\\\nx^2+1 &\\\\to 1^2+1 = 2,\\\\\\\\\\nx^2+2x+2 &\\\\to 1^2+2\\\\cdot1+2 = 5,\\\\\\\\\\nx^2-2x+2 &\\\\to 1^2-2\\\\cdot1+2 = 1.\\n\\\\end{aligned}\\n\\\\]\\nThe sum is \\\\(0+2+2+5+1 = 10\\\\).\\n\\n\\\\[\\n\\\\boxed{10}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \"\\\\\\\\\\nx^2+1 &\\\\to 1^2+1 = 2,\\\\\\\\\\nx^2+2x+2 &\\\\to 1^2+2\\\\cdot1+2 = 5,\\\\\\\\\\nx^2-2x+2 &\\\\to 1^2-2\\\\cdot1+2 = 1.\\n\\\\end{aligned}\\n\\\\]\\nThe sum is \\\\(0+2+2+5+1 = 10\\\\).\\n\\n\\\\[\\n\\\\boxed{10}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 16.967,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial \\\\(x^8 + 3x^4 - 4\\\\) factors over the integers as\\n\\\\[\\n(x^4+4)(x^4-1) = (x^2+2x+2)(x^2-2x+2)(x^2+1)(x+1)(x-1)' attempts=1"
+  ]
+}

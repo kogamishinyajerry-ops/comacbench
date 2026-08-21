@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q006",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the smallest positive perfect cube equal to a sum of three consecutive integers.\\n\\n## Setting Up the Equation\\n\\nLet the three consecutive integers be $n-1$, $n$, and $n+1$. Their sum is:\\n$$(n-1) + n + (n+1) = 3n$$\\n\\nSo I need $3n = k^3$ for some positive integer $k$, which gives:\\n$$n = \\\\frac{k^3}{3}$$\\n\\n## Finding the Constraint\\n\\nFor $n$ to be an integer, $3$ must divide $k^3$, which requires $3 \\\\mid k$.\\n\\nLetting $k = 3m$ where $m \\\\geq 1$:\\n$$k^3 = 27m^3$$\\n\\n## Checking the Smallest Case\\n\\n**When $m = 1$:** $k^3 = 27 = 3^3$, giving $n = 9$\\n\\nThe three consecutive integers are $8, 9, 10$:\\n$$8 + 9 + 10 = 27 \\\\checkmark$$\\n\\n## Verification\\n\\nI check that no smaller positive perfect cube works. Since any sum of three consecutive integers is divisible by 3, the cube must be divisible by 3. The only perfect cubes divisible by 3 are $27, 216, 729, \\\\ldots$, and $27$ is the smallest.\\n\\n#### 27\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"27\", \"reference_number\": \"27\", \"raw_tail\": \"ntegers is divisible by 3, the cube must be divisible by 3. The only perfect cubes divisible by 3 are $27, 216, 729, \\\\ldots$, and $27$ is the smallest.\\n\\n#### 27\"}"
+  },
+  "timings": {
+    "agent_s": 9.997,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the smallest positive perfect cube equal to a sum of three consecutive integers.' attempts=1"
+  ]
+}

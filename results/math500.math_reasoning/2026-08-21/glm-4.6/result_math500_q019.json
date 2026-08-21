@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q019",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The polynomial \\\\(x^3 + a x^2 + a x + 1 = 0\\\\) has reciprocal coefficients, so if \\\\(x\\\\) is a root then \\\\(1/x\\\\) is also a root. Since the polynomial is cubic, one root must satisfy \\\\(x = 1/x\\\\), i.e., \\\\(x = \\\\pm 1\\\\). Checking:\\n\\n- \\\\(x = 1\\\\): \\\\(1 + a + a + 1 = 2 + 2a \\\\neq 0\\\\) for \\\\(a > 0\\\\).\\n- \\\\(x = -1\\\\): \\\\(-1 + a - a + 1 = 0\\\\), so \\\\(-1\\\\) is always a root.\\n\\nThus the polynomial factors as \\\\((x+1)(x^2 + (a-1)x + 1)\\\\). The remaining two roots are the solutions of the quadratic \\\\(x^2 + (a-1)x + 1 = 0\\\\). For all three roots to be real, this quadratic must have real roots, i.e., its discriminant must be nonnegative:\\n\\n\\\\[\\n\\\\Delta = (a-1)^2 - 4 \\\\ge 0.\\n\\\\]\\n\\nThis gives \\\\((a-1)^2 \\\\ge 4\\\\), so \\\\(|a-1| \\\\ge 2\\\\). Hence \\\\(a-1 \\\\ge 2\\\\) or \\\\(a-1 \\\\le -2\\\\), i.e., \\\\(a \\\\ge 3\\\\) or \\\\(a \\\\le -1\\\\). Since \\\\(a > 0\\\\), we need \\\\(a \\\\ge 3\\\\).\\n\\nWhen \\\\(a = 3\\\\), the quadratic becomes \\\\(x^2 + 2x + 1 = (x+1)^2\\\\), giving a double root at \\\\(x = -1\\\\). Thus all three roots are \\\\(-1\\\\) (triple root), all real. For any \\\\(a < 3\\\\) (but positive), the discriminant is negative, leading to two non-real complex conjugate roots. Therefore the smallest possible value of \\\\(a\\\\) is \\\\(3\\\\).\\n\\n\\\\[\\n\\\\boxed{3}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3\", \"reference_number\": \"3\", \"raw_tail\": \"itive), the discriminant is negative, leading to two non-real complex conjugate roots. Therefore the smallest possible value of \\\\(a\\\\) is \\\\(3\\\\).\\n\\n\\\\[\\n\\\\boxed{3}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 34.399,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial \\\\(x^3 + a x^2 + a x + 1 = 0\\\\) has reciprocal coefficients, so if \\\\(x\\\\) is a root then \\\\(1/x\\\\) is also a r' attempts=1"
+  ]
+}

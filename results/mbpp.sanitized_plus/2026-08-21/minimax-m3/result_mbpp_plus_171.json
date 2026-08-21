@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_171",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"def perimeter_pentagon(side_length):\\n    \\\"\\\"\\\"\\n    Calculate the perimeter of a regular pentagon.\\n    \\n    Parameters:\\n    side_length (numeric): The length of one side of the pentagon.\\n                          Must be a positive number.\\n    \\n    Returns:\\n    numeric: The perimeter of the pentagon (5 * side_length).\\n    \\\"\\\"\\\"\\n    if not isinstance(side_length, (int, float)):\\n        raise TypeError(\\\"Side length must be a numeric value.\\\")\\n    if side_length < 0:\\n        raise ValueError(\\\"Side length must be non-negative.\\\")\\n    \\n    return 5 * side_length\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"ValueError: Side length must be non-negative.\"}], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 2.373,
+    "setup_s": 0.0,
+    "grade_s": 0.142
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

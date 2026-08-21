@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_095",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def check_dict_case(dict):\\n    \\\"\\\"\\\"\\n    Given a dictionary, return True if all keys are strings in lower \\n    case or all keys are strings in upper case, else return False.\\n    The function should return False is the given dictionary is empty.\\n    Examples:\\n    check_dict_case({\\\"a\\\":\\\"apple\\\", \\\"b\\\":\\\"banana\\\"}) should return True.\\n    check_dict_case({\\\"a\\\":\\\"apple\\\", \\\"A\\\":\\\"banana\\\", \\\"B\\\":\\\"banana\\\"}) should return False.\\n    check_dict_case({\\\"a\\\":\\\"apple\\\", 8:\\\"banana\\\", \\\"a\\\":\\\"apple\\\"}) should return False.\\n    check_dict_case({\\\"Name\\\":\\\"John\\\", \\\"Age\\\":\\\"36\\\", \\\"City\\\":\\\"Houston\\\"}) should return False.\\n    check_dict_case({\\\"STATE\\\":\\\"NC\\\", \\\"ZIP\\\":\\\"12345\\\" }) should return True.\\n    \\\"\\\"\\\"\\n    if len(dict) == 0:\\n        return False\\n    \\n    # Check if all keys are strings\\n    for key in dict.keys():\\n        if not isinstance(key, str):\\n            return False\\n    \\n    # Check if all keys are lowercase or all keys are uppercase\\n    all_lower = all(key.islower() for key in dict.keys())\\n    all_upper = all(key.isupper() for key in dict.keys())\\n    \\n    return all_lower or all_upper\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 8.928,
+    "setup_s": 0.0,
+    "grade_s": 0.158
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

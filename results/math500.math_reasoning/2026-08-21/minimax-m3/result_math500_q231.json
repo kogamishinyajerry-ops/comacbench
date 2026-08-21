@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q231",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to set up equations based on the given conditions.\\n\\n## Setting Up Variables\\n\\nLet me define:\\n- A = Amy's current age\\n- B = Ben's current age  \\n- C = Chris's current age\\n\\n## Translating the Conditions\\n\\n**Condition 1:** Average age is 6\\n$$\\\\frac{A + B + C}{3} = 6 \\\\implies A + B + C = 18$$\\n\\n**Condition 2:** Four years ago, Chris was the same age as Amy is now\\n$$C - 4 = A \\\\implies C = A + 4$$\\n\\n**Condition 3:** In four years, Ben's age will be $\\\\frac{3}{5}$ of Amy's age at that time\\n$$B + 4 = \\\\frac{3}{5}(A + 4)$$\\n\\n## Solving the System\\n\\n**Substituting** C = A + 4 into equation 1:\\n$$A + B + (A + 4) = 18 \\\\implies 2A + B = 14 \\\\implies B = 14 - 2A$$\\n\\n**From condition 3**, solving for B:\\n$$5(B + 4) = 3(A + 4)$$\\n$$5B + 20 = 3A + 12$$\\n$$B = \\\\frac{3A - 8}{5}$$\\n\\n**Setting the two expressions for B equal:**\\n$$14 - 2A = \\\\frac{3A - 8}{5}$$\\n\\nMultiplying both sides by 5:\\n$$70 - 10A = 3A - 8$$\\n$$78 = 13A$$\\n$$A = 6$$\\n\\n## Finding Chris's Age\\n\\nSince C = A + 4:\\n$$C = 6 + 4 = 10$$\\n\\n## Verification\\n\\n- Average: $\\\\frac{6 + 2 + 10}{3} = \\\\frac{18}{3} = 6$ ✓\\n- Four years ago, Chris was 6, matching Amy's current age of 6 ✓\\n- In four years: Ben will be 6, Amy will be 10, and $\\\\frac{3}{5}(10) = 6$ ✓\\n\\n#### 10\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \"{3} = 6$ ✓\\n- Four years ago, Chris was 6, matching Amy's current age of 6 ✓\\n- In four years: Ben will be 6, Amy will be 10, and $\\\\frac{3}{5}(10) = 6$ ✓\\n\\n#### 10\"}"
+  },
+  "timings": {
+    "agent_s": 3.953,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to set up equations based on the given conditions.\\n\\n## Setting Up Variables\\n\\nLet me defi' attempts=1"
+  ]
+}

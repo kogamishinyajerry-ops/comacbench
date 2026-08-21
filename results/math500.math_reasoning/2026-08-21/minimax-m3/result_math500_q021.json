@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q021",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $(\\\\sqrt{7} + \\\\sqrt{5})^6$ without a calculator.\\n\\n## Setting Up with Conjugates\\n\\nLet me define two quantities:\\n- $x = \\\\sqrt{7} + \\\\sqrt{5}$\\n- $y = \\\\sqrt{7} - \\\\sqrt{5}$\\n\\n**Computing $x^2$ and $y^2$:**\\n$$x^2 = 7 + 2\\\\sqrt{35} + 5 = 12 + 2\\\\sqrt{35}$$\\n$$y^2 = 7 - 2\\\\sqrt{35} + 5 = 12 - 2\\\\sqrt{35}$$\\n\\n**Computing $x^4$ and $y^4$:**\\n$$x^4 = (12 + 2\\\\sqrt{35})^2 = 144 + 48\\\\sqrt{35} + 140 = 284 + 48\\\\sqrt{35}$$\\n$$y^4 = (12 - 2\\\\sqrt{35})^2 = 144 - 48\\\\sqrt{35} + 140 = 284 - 48\\\\sqrt{35}$$\\n\\n## Computing $x^6$\\n\\n$$x^6 = x^4 \\\\cdot x^2 = (284 + 48\\\\sqrt{35})(12 + 2\\\\sqrt{35})$$\\n\\nExpanding:\\n- $284 \\\\cdot 12 = 3408$\\n- $284 \\\\cdot 2\\\\sqrt{35} = 568\\\\sqrt{35}$  \\n- $48\\\\sqrt{35} \\\\cdot 12 = 576\\\\sqrt{35}$\\n- $48\\\\sqrt{35} \\\\cdot 2\\\\sqrt{35} = 96 \\\\cdot 35 = 3360$\\n\\n$$x^6 = (3408 + 3360) + (568 + 576)\\\\sqrt{35} = 6768 + 1144\\\\sqrt{35}$$\\n\\n## Computing $y^6$\\n\\nBy similar expansion (with alternating signs):\\n$$y^6 = 6768 - 1144\\\\sqrt{35}$$\\n\\n## Finding the Integer Bound\\n\\n**Key observation:** Since $y = \\\\sqrt{7} - \\\\sqrt{5} \\\\approx 0.41$, I have $0 < y < 1$, which gives $0 < y^6 < 1$.\\n\\nAdding the two expressions:\\n$$x^6 + y^6 = 2(6768) = 13536$$\\n\\nTherefore:\\n$$x^6 = 13536 - y^6$$\\n\\nSince $0 < y^6 < 1$:\\n$$13535 < x^6 < 13536$$\\n\\nThe greatest integer less than $(\\\\sqrt{7} + \\\\sqrt{5})^6$ is:\\n\\n$$\\\\boxed{13535}$$\\n\\n#### 13535\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13535\", \"reference_number\": \"13535\", \"raw_tail\": \"$$x^6 = 13536 - y^6$$\\n\\nSince $0 < y^6 < 1$:\\n$$13535 < x^6 < 13536$$\\n\\nThe greatest integer less than $(\\\\sqrt{7} + \\\\sqrt{5})^6$ is:\\n\\n$$\\\\boxed{13535}$$\\n\\n#### 13535\"}"
+  },
+  "timings": {
+    "agent_s": 12.416,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $(\\\\sqrt{7} + \\\\sqrt{5})^6$ without a calculator.\\n\\n## Setting Up with Conjugates\\n\\n' attempts=1"
+  ]
+}

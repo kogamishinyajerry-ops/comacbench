@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q390",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to minimize the distance from the origin to a point \\\\((x,y)\\\\) on the curve \\\\(y = \\\\frac{1}{\\\\sqrt{2}}(x^2-3)\\\\). The squared distance is\\n\\n\\\\[\\nd^2 = x^2 + y^2 = x^2 + \\\\frac{(x^2-3)^2}{2}.\\n\\\\]\\n\\nExpand and simplify:\\n\\n\\\\[\\nd^2 = x^2 + \\\\frac{1}{2}(x^4 - 6x^2 + 9) = \\\\frac{1}{2}x^4 - 2x^2 + \\\\frac{9}{2}.\\n\\\\]\\n\\nLet \\\\(f(x) = \\\\frac{1}{2}x^4 - 2x^2 + \\\\frac{9}{2}\\\\). Find critical points by differentiating:\\n\\n\\\\[\\nf'(x) = 2x^3 - 4x = 2x(x^2 - 2).\\n\\\\]\\n\\nSet \\\\(f'(x)=0\\\\): \\\\(x = 0,\\\\; x = \\\\pm\\\\sqrt{2}\\\\).\\n\\nSecond derivative: \\\\(f''(x) = 6x^2 - 4\\\\). At \\\\(x = 0\\\\), \\\\(f''(0) = -4 < 0\\\\) (local maximum). At \\\\(x = \\\\pm\\\\sqrt{2}\\\\), \\\\(f''(\\\\pm\\\\sqrt{2}) = 6(2) - 4 = 8 > 0\\\\) (local minima).\\n\\nEvaluate \\\\(f\\\\) at the minima:\\n\\n\\\\[\\nf(\\\\sqrt{2}) = \\\\frac{1}{2}(\\\\sqrt{2})^4 - 2(\\\\sqrt{2})^2 + \\\\frac{9}{2} = \\\\frac{1}{2}\\\\cdot4 - 2\\\\cdot2 + \\\\frac{9}{2} = 2 - 4 + \\\\frac{9}{2} = \\\\frac{5}{2}.\\n\\\\]\\n\\nThus the minimum squared distance is \\\\(\\\\frac{5}{2}\\\\), so the minimum distance is\\n\\n\\\\[\\nd = \\\\sqrt{\\\\frac{5}{2}} = \\\\frac{\\\\sqrt{5}}{\\\\sqrt{2}} = \\\\frac{\\\\sqrt{10}}{2}.\\n\\\\]\\n\\nThis is of the form \\\\(\\\\frac{\\\\sqrt{a}}{b}\\\\) with \\\\(a = 10\\\\) and \\\\(b = 2\\\\). The integer \\\\(10\\\\) is not divisible by any square greater than one. Then \\\\(a + b = 10 + 2 = 12\\\\).\\n\\n\\\\boxed{12}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"12\", \"reference_number\": \"12\", \"raw_tail\": \"frac{\\\\sqrt{a}}{b}\\\\) with \\\\(a = 10\\\\) and \\\\(b = 2\\\\). The integer \\\\(10\\\\) is not divisible by any square greater than one. Then \\\\(a + b = 10 + 2 = 12\\\\).\\n\\n\\\\boxed{12}\"}"
+  },
+  "timings": {
+    "agent_s": 42.424,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to minimize the distance from the origin to a point \\\\((x,y)\\\\) on the curve \\\\(y = \\\\frac{1}{\\\\sqrt{2}}(x^2-3)\\\\). Th' attempts=1"
+  ]
+}

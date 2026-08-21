@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q297",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The number of pages is twice the number of leaves, so if the leaves are \\\\(n\\\\), then pages = \\\\(2n\\\\).  \\nGiven that the number of pages is 3 more than a multiple of 7, we have \\\\(2n \\\\equiv 3 \\\\pmod{7}\\\\).  \\nMultiplying both sides by the modular inverse of 2 modulo 7 (which is 4 because \\\\(2 \\\\cdot 4 = 8 \\\\equiv 1 \\\\pmod{7}\\\\)) gives  \\n\\\\(n \\\\equiv 12 \\\\equiv 5 \\\\pmod{7}\\\\).  \\nThus \\\\(n = 7k + 5\\\\) for some integer \\\\(k \\\\ge 0\\\\).  \\n\\nWe also require \\\\(n > 100\\\\).  \\nSolve \\\\(7k + 5 > 100\\\\) → \\\\(7k > 95\\\\) → \\\\(k > 95/7 \\\\approx 13.57\\\\).  \\nThe smallest integer \\\\(k\\\\) satisfying this is \\\\(k = 14\\\\), yielding  \\n\\\\(n = 7 \\\\cdot 14 + 5 = 98 + 5 = 103\\\\).  \\n\\nCheck: pages = \\\\(2 \\\\cdot 103 = 206\\\\); \\\\(206 \\\\div 7 = 29\\\\) remainder 3, so condition holds.  \\n\\nTherefore, the smallest possible number of leaves is 103.\\n\\n\\\\boxed{103}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"103\", \"reference_number\": \"103\", \"raw_tail\": \"k: pages = \\\\(2 \\\\cdot 103 = 206\\\\); \\\\(206 \\\\div 7 = 29\\\\) remainder 3, so condition holds.  \\n\\nTherefore, the smallest possible number of leaves is 103.\\n\\n\\\\boxed{103}\"}"
+  },
+  "timings": {
+    "agent_s": 11.966,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The number of pages is twice the number of leaves, so if the leaves are \\\\(n\\\\), then pages = \\\\(2n\\\\).  \\nGiven that the num' attempts=1"
+  ]
+}

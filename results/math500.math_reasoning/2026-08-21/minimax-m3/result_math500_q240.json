@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q240",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to identify the relationships between the parallel lines and transversals.\\n\\n## Setting Up the Problem\\n\\n**Given information:**\\n- $PT \\\\parallel QR$\\n- $\\\\angle QPT = x°$ (at point $P$)\\n- $\\\\angle PTR = 2x°$ (at point $T$)  \\n- $\\\\angle TRX = 128°$ (at point $R$, where $X$ is on the extension of $QR$ beyond $R$)\\n\\n## Finding x Using Alternate Interior Angles\\n\\nSince $PT \\\\parallel QR$ with transversal $TR$:\\n- $\\\\angle PTR$ is at $T$ in the interior region, on the **left** side of the transversal\\n- $\\\\angle TRX$ is at $R$ in the interior region, on the **right** side of the transversal\\n\\nThese are **alternate interior angles**, so they are equal:\\n$$\\\\angle PTR = \\\\angle TRX$$\\n$$2x° = 128°$$\\n$$x = 64°$$\\n\\n## Finding ∠PQR Using Co-Interior Angles\\n\\nSince $PT \\\\parallel QR$ with transversal $PQ$:\\n- $\\\\angle TPQ$ is at $P$ in the interior region, on the right side of the transversal\\n- $\\\\angle PQR$ is at $Q$ in the interior region, on the right side of the transversal\\n\\nThese are **co-interior (same-side interior) angles**, so they sum to $180°$:\\n$$\\\\angle TPQ + \\\\angle PQR = 180°$$\\n$$x° + \\\\angle PQR = 180°$$\\n$$64° + \\\\angle PQR = 180°$$\\n$$\\\\angle PQR = 116°$$\\n\\n## Verification\\n\\nI can verify using the quadrilateral $QPTR$, where interior angles sum to $360°$:\\n$$x° + 2x° + \\\\angle QRT + \\\\angle PQR = 360°$$\\n\\nSince $\\\\angle QRT = 180° - 128° = 52°$:\\n$$64° + 128° + 52° + 116° = 360° \\\\checkmark$$\\n\\n#### 116\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"116\", \"reference_number\": \"116\", \"raw_tail\": \"es sum to $360°$:\\n$$x° + 2x° + \\\\angle QRT + \\\\angle PQR = 360°$$\\n\\nSince $\\\\angle QRT = 180° - 128° = 52°$:\\n$$64° + 128° + 52° + 116° = 360° \\\\checkmark$$\\n\\n#### 116\"}"
+  },
+  "timings": {
+    "agent_s": 167.84,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to identify the relationships between the parallel lines and transversals.\\n\\n## Setting U' attempts=1"
+  ]
+}

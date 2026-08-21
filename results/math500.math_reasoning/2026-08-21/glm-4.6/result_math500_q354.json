@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q354",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The sum of 27 consecutive positive integers is \\\\(3^7\\\\). Let the integers be \\\\(a, a+1, \\\\dots, a+26\\\\). Their sum is\\n\\n\\\\[\\n27 \\\\cdot \\\\frac{a + (a+26)}{2} = 27(a+13).\\n\\\\]\\n\\nSince \\\\(27 = 3^3\\\\) and \\\\(3^7 = 27(a+13)\\\\),\\n\\n\\\\[\\na+13 = \\\\frac{3^7}{3^3} = 3^4 = 81.\\n\\\\]\\n\\nThus the median, which is the middle term (the 14th term), equals \\\\(a+13 = 81\\\\). Alternatively, the median equals the average \\\\(\\\\frac{3^7}{27} = 81\\\\).\\n\\n\\\\[\\n\\\\boxed{81}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"81\", \"reference_number\": \"81\", \"raw_tail\": \" median, which is the middle term (the 14th term), equals \\\\(a+13 = 81\\\\). Alternatively, the median equals the average \\\\(\\\\frac{3^7}{27} = 81\\\\).\\n\\n\\\\[\\n\\\\boxed{81}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 14.579,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The sum of 27 consecutive positive integers is \\\\(3^7\\\\). Let the integers be \\\\(a, a+1, \\\\dots, a+26\\\\). Their sum is\\n\\n\\\\[\\n27' attempts=1"
+  ]
+}

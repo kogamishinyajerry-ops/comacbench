@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q028",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to rotate the complex number $7 + 2i$ by $90°$ counter-clockwise around the origin.\\n\\n## Setting Up the Rotation\\n\\nA rotation by $90°$ counter-clockwise around the origin corresponds to multiplication by $i$. This is because multiplying a complex number $a + bi$ by $i$ gives:\\n$$(a + bi) \\\\cdot i = ai + bi^2 = -b + ai$$\\n\\nThis effectively swaps the components and negates the real part — exactly what a $90°$ counter-clockwise rotation does.\\n\\n## Applying the Rotation\\n\\nMultiplying $7 + 2i$ by $i$:\\n\\n$$(7 + 2i) \\\\cdot i = 7i + 2i^2$$\\n\\nSince $i^2 = -1$:\\n\\n$$7i + 2(-1) = -2 + 7i$$\\n\\n## Verification\\n\\nThe point $(7, 2)$ rotated $90°$ counter-clockwise becomes $(-2, 7)$, which corresponds to the complex number $-2 + 7i$. ✓\\n\\n#### -2 + 7i\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-2 + 7i\", \"reference_number\": \"-2 + 7i\", \"raw_tail\": \" 7i$$\\n\\n## Verification\\n\\nThe point $(7, 2)$ rotated $90°$ counter-clockwise becomes $(-2, 7)$, which corresponds to the complex number $-2 + 7i$. ✓\\n\\n#### -2 + 7i\"}"
+  },
+  "timings": {
+    "agent_s": 2.431,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to rotate the complex number $7 + 2i$ by $90°$ counter-clockwise around the origin.\\n\\n## ' attempts=1"
+  ]
+}

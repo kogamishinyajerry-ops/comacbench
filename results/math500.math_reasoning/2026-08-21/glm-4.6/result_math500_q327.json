@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q327",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given a monic cubic polynomial \\\\(P(x)\\\\). When divided by \\\\((x-1)(x-4)\\\\), the remainder is \\\\(R(x)\\\\); when divided by \\\\((x-2)(x-3)\\\\), the remainder is \\\\(2R(x)\\\\). Since each divisor is quadratic, the remainders are at most linear, so let \\\\(R(x)=ax+b\\\\).\\n\\nWrite the division algorithms with quotients that are linear (because degree \\\\(P = 3\\\\)). Because the divisors are monic, the quotients must also be monic to keep \\\\(P\\\\) monic. Thus\\n\\n\\\\[\\n\\\\begin{aligned}\\nP(x) &= (x^2-5x+4)(x+p) + (ax+b), \\\\\\\\[4pt]\\nP(x) &= (x^2-5x+6)(x+q) + 2(ax+b),\\n\\\\end{aligned}\\n\\\\]\\n\\nwhere \\\\(p,q\\\\) are constants.\\n\\nExpand both expressions:\\n\\n\\\\[\\n\\\\begin{aligned}\\nP(x) &= x^3 + (-5+p)x^2 + (4-5p+a)x + (4p+b), \\\\\\\\[4pt]\\nP(x) &= x^3 + (-5+q)x^2 + (6-5q+2a)x + (6q+2b).\\n\\\\end{aligned}\\n\\\\]\\n\\nEquating coefficients gives\\n\\n\\\\[\\n\\\\begin{cases}\\n-5+p = -5+q \\\\quad\\\\Rightarrow\\\\quad p = q,\\\\\\\\[4pt]\\n4-5p+a = 6-5q+2a,\\\\\\\\[4pt]\\n4p+b = 6q+2b.\\n\\\\end{cases}\\n\\\\]\\n\\nLet \\\\(p=q=t\\\\). Then the second equation simplifies to\\n\\n\\\\[\\n4-5t+a = 6-5t+2a \\\\;\\\\Longrightarrow\\\\; 4+a = 6+2a \\\\;\\\\Longrightarrow\\\\; a = -2.\\n\\\\]\\n\\nThe third equation becomes\\n\\n\\\\[\\n4t+b = 6t+2b \\\\;\\\\Longrightarrow\\\\; -2t - b = 0 \\\\;\\\\Longrightarrow\\\\; b = -2t.\\n\\\\]\\n\\nNow use \\\\(P(0)=5\\\\). From the first expansion, \\\\(P(0)=4p+b = 4t -2t = 2t\\\\). Hence\\n\\n\\\\[\\n2t = 5 \\\\;\\\\Longrightarrow\\\\; t = \\\\frac{5}{2}.\\n\\\\]\\n\\nThen \\\\(b = -2t = -5\\\\). We now have all parameters: \\\\(a=-2\\\\), \\\\(b=-5\\\\), \\\\(t=5/2\\\\).\\n\\nCompute \\\\(P(5)\\\\) using the first expression:\\n\\n\\\\[\\n\\\\begin{aligned}\\nP(5) &= (5^2-5\\\\cdot5+4)(5+t) + a\\\\cdot5 + b \\\\\\\\\\n&= (25-25+4)\\\\left(5+\\\\frac{5}{2}\\\\right) + (-2)\\\\cdot5 + (-5) \\\\\\\\\\n&= 4 \\\\cdot \\\\frac{15}{2} -10 -5 = 30 -15 = 15.\\n\\\\end{aligned}\\n\\\\]\\n\\n(Verification with the second expression gives the same result.)\\n\\nThus \\\\(P(5)=15\\\\).\\n\\n\\\\[\\n\\\\boxed{15}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"15\", \"reference_number\": \"15\", \"raw_tail\": \"\\\\cdot \\\\frac{15}{2} -10 -5 = 30 -15 = 15.\\n\\\\end{aligned}\\n\\\\]\\n\\n(Verification with the second expression gives the same result.)\\n\\nThus \\\\(P(5)=15\\\\).\\n\\n\\\\[\\n\\\\boxed{15}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 45.311,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given a monic cubic polynomial \\\\(P(x)\\\\). When divided by \\\\((x-1)(x-4)\\\\), the remainder is \\\\(R(x)\\\\); when divided ' attempts=1"
+  ]
+}

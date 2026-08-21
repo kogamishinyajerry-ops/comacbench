@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_078",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def hex_key(num):\\n    \\\"\\\"\\\"Count the number of hexadecimal digits that correspond to prime numbers.\\n    \\n    The prime decimal values that can appear as a single hexadecimal digit are:\\n    2, 3, 5, 7, 11 (B), and 13 (D). All other hexadecimal digits are non‑prime.\\n    \\n    Parameters\\n    ----------\\n    num : str\\n        A hexadecimal number represented as a string (uppercase A‑F).\\n        May be empty.\\n    \\n    Returns\\n    -------\\n    int\\n        The count of digits in `num` that are prime.\\n    \\\"\\\"\\\"\\n    # Set of hex characters that represent prime decimal numbers.\\n    prime_hex_digits = {'2', '3', '5', '7', 'B', 'D'}\\n    \\n    # Count how many characters belong to this set.\\n    return sum(1 for ch in num if ch in prime_hex_digits)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 6.285,
+    "setup_s": 0.0,
+    "grade_s": 0.156
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

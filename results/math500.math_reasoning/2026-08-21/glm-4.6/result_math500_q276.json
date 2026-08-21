@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q276",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to find the number of real values of \\\\(x\\\\) such that \\\\(\\\\sqrt{120-\\\\sqrt{x}}\\\\) is an integer.\\n\\nLet \\\\(n = \\\\sqrt{120-\\\\sqrt{x}}\\\\), where \\\\(n\\\\) is an integer and \\\\(n \\\\ge 0\\\\) (since the square root is non‑negative).  \\nSquare both sides: \\\\(n^2 = 120 - \\\\sqrt{x}\\\\).  \\nSolve for \\\\(\\\\sqrt{x}\\\\): \\\\(\\\\sqrt{x} = 120 - n^2\\\\).\\n\\nFor \\\\(\\\\sqrt{x}\\\\) to be real and defined we require \\\\(x \\\\ge 0\\\\) and the square root to be the principal (non‑negative) value.  \\nThus \\\\(120 - n^2 \\\\ge 0\\\\), i.e., \\\\(n^2 \\\\le 120\\\\).  \\nBecause \\\\(n\\\\) is a non‑negative integer, this gives \\\\(n = 0, 1, 2, \\\\dots, 10\\\\) (since \\\\(10^2 = 100 \\\\le 120\\\\) and \\\\(11^2 = 121 > 120\\\\)).\\n\\nFor each such \\\\(n\\\\), we have \\\\(\\\\sqrt{x} = 120 - n^2 \\\\ge 0\\\\), so squaring gives \\\\(x = (120 - n^2)^2\\\\).  \\nAll these \\\\(x\\\\) are distinct real numbers and satisfy the original equation.\\n\\nTherefore, there are \\\\(11\\\\) real values of \\\\(x\\\\).\\n\\n\\\\boxed{11}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"11\", \"reference_number\": \"11\", \"raw_tail\": \"= (120 - n^2)^2\\\\).  \\nAll these \\\\(x\\\\) are distinct real numbers and satisfy the original equation.\\n\\nTherefore, there are \\\\(11\\\\) real values of \\\\(x\\\\).\\n\\n\\\\boxed{11}\"}"
+  },
+  "timings": {
+    "agent_s": 38.944,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to find the number of real values of \\\\(x\\\\) such that \\\\(\\\\sqrt{120-\\\\sqrt{x}}\\\\) is an integer.\\n\\nLet \\\\(n = \\\\sqrt{120' attempts=1"
+  ]
+}

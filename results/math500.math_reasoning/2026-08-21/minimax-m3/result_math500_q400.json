@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q400",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the radius of the smaller semicircle inscribed in the region near vertex A.\\n\\n## Setting Up Coordinates\\n\\nLet me place Q at the origin, with:\\n- A = (0, 14) on the positive y-axis\\n- B = (-14, 0) on the negative x-axis\\n\\nThe quarter circle in the third quadrant (where x ≤ 0, y ≤ 0) has radius 14.\\n\\n## Identifying the Two Semicircles\\n\\n**Larger semicircle (along BQ):** Its diameter lies on the x-axis from (-14, 0) to (0, 0), so its center is at (-7, 0) with radius 7.\\n\\n**Smaller semicircle (along AQ):** Its diameter lies on the y-axis from (0, 0) to (0, 14). Let its radius be *r*, so its center is at (0, 7) with radius *r*.\\n\\n## Tangency Condition\\n\\nThe semicircles must be **internally tangent** to each other (and to the quarter circle). Let me find where the smaller semicircle is tangent to the larger one.\\n\\n**For internal tangency:** The distance between centers equals the difference of radii.\\n\\n$$\\\\text{distance} = |R - r|$$\\n\\nWith center of large = (-7, 0) and center of small = (0, 7):\\n$$\\\\sqrt{49 + 49} = 7\\\\sqrt{2}$$\\n\\nSetting up the equation:\\n$$7\\\\sqrt{2} = 7 - r$$\\n\\n$$r = 7 - 7\\\\sqrt{2}$$\\n\\nSince $7\\\\sqrt{2} \\\\approx 9.9 > 7$, this gives r < 0 — **not valid**.\\n\\n## Correcting the Tangency Type\\n\\nThe semicircles must be **externally tangent**. Setting distance equal to sum of radii:\\n\\n$$7\\\\sqrt{2} = 7 + r$$\\n\\n$$r = 7\\\\sqrt{2} - 7 = 7(\\\\sqrt{2} - 1)$$\\n\\n## Verification\\n\\n**Check tangency with quarter circle:**\\n- Distance from Q to center of large semicircle: $\\\\sqrt{49 + 0} = 7 = 14 - 7$ ✓\\n- Distance from Q to center of small semicircle: $\\\\sqrt{0 + 49} = 7 = 14 - r$ ✓\\n\\nBoth semicircles are internally tangent to the\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": 14.0, \"reference_number\": \"\\\\frac{14}{3}\", \"raw_tail\": \": $\\\\sqrt{49 + 0} = 7 = 14 - 7$ ✓\\n- Distance from Q to center of small semicircle: $\\\\sqrt{0 + 49} = 7 = 14 - r$ ✓\\n\\nBoth semicircles are internally tangent to the\"}"
+  },
+  "timings": {
+    "agent_s": 246.352,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the radius of the smaller semicircle inscribed in the region near vertex A.\\n\\n## ' attempts=2"
+  ]
+}

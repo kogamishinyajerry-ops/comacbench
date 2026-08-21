@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q264",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We place the figure on a coordinate plane. Let the base line be the $x$-axis. Choose $D=(0,0)$ and, because $C$ is left of $D$ and $CD=3$, set $C=(-3,0)$. The square $CDEG$ then gives $G=(-3,3)$ and $E=(0,3)$. Let $B=(b,0)$ with $b<-3$ (since $B$ is left of $C$). The length $BE$ is given as $5$, so\\n\\\\[\\n\\\\sqrt{(0-b)^2+(3-0)^2}=\\\\sqrt{b^2+9}=5\\\\quad\\\\Longrightarrow\\\\quad b^2+9=25\\\\quad\\\\Longrightarrow\\\\quad b^2=16.\\n\\\\]\\nBecause $b<-3$, we take $b=-4$, so $B=(-4,0)$.\\n\\nQuadrilateral $BEFH$ is a rectangle with vertices $B$, $E$, $F$, $H$ in that order. Since $BE$ and $FH$ are opposite sides, they are parallel. Points $F$ and $H$ lie on line $AG$, so $AG$ must be parallel to $BE$. The slope of $BE$ is\\n\\\\[\\n\\\\frac{3-0}{0-(-4)}=\\\\frac{3}{4}.\\n\\\\]\\nThus $AG$ also has slope $\\\\frac34$. $G=(-3,3)$, so the line through $G$ with slope $\\\\frac34$ is $y-3=\\\\frac34(x+3)$. Its intersection with the $x$-axis ($y=0$) gives $A$:\\n\\\\[\\n0-3=\\\\frac34(x_A+3)\\\\quad\\\\Longrightarrow\\\\quad -3=\\\\frac34(x_A+3)\\\\quad\\\\Longrightarrow\\\\quad -12=3(x_A+3)\\\\quad\\\\Longrightarrow\\\\quad x_A=-7.\\n\\\\]\\nHence $A=(-7,0)$ and the line $AG$ has equation $y=\\\\frac34(x+7)$.\\n\\nNow $BH$ is a side of the rectangle, so it is perpendicular to $BE$. The slope of a line perpendicular to $BE$ (slope $\\\\frac34$) is $-\\\\frac43$. The line through $B$ with this slope is\\n\\\\[\\ny = -\\\\frac43(x+4).\\n\\\\]\\nIntersect this with $AG$ to find $H$:\\n\\\\[\\n\\\\frac34(x+7)=-\\\\frac43(x+4).\\n\\\\]\\nMultiply by $12$:\\n\\\\[\\n9(x+7)=-16(x+4)\\\\quad\\\\Longrightarrow\\\\quad 9x+63=-16x-64\\\\quad\\\\Longrightarrow\\\\quad 25x=-127\\\\quad\\\\Longrightarrow\\\\quad x=-\\\\frac{127}{25}.\\n\\\\]\\nThen\\n\\\\[\\ny=\\\\frac34\\\\left(-\\\\frac{127}{25}+7\\\\right)=\\\\frac34\\\\left(\\\\frac{-127+175}{25}\\\\right)=\\\\frac34\\\\cdot\\\\frac{48}{25}=\\\\frac{36}{25}.\\n\\\\]\\nSo $H=\\\\left(-\\\\frac{127}{25},\\\\frac{36}{25}\\\\right)$.\\n\\nThe distance $BH$ is\\n\\\\[\\nBH=\\\\sqrt{\\\\left(-\\\\frac{127}{25}+4\\\\right)^2+\\\\left(\\\\frac{36}{25}\\\\right)^2}=\\\\sqrt{\\\\left(-\\\\frac{27}{25}\\\\right)^2+\\\\left(\\\\frac{36}{25}\\\\right)^2}=\\\\sqrt{\\\\frac{729+1296}{625}}=\\\\sqrt{\\\\frac{2025}{625}}=\\\\frac{45}{25}=\\\\frac{9}{5}.\\n\\\\]\\n\\nExpressed as a mixed number, $\\\\frac95 = 1\\\\frac45$.\\n\\n#### 1\\\\frac{4}{5}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1\\\\frac{4}{5}\", \"reference_number\": \"1\\\\frac{4}{5}\", \"raw_tail\": \"ght)^2}=\\\\sqrt{\\\\frac{729+1296}{625}}=\\\\sqrt{\\\\frac{2025}{625}}=\\\\frac{45}{25}=\\\\frac{9}{5}.\\n\\\\]\\n\\nExpressed as a mixed number, $\\\\frac95 = 1\\\\frac45$.\\n\\n#### 1\\\\frac{4}{5}\"}"
+  },
+  "timings": {
+    "agent_s": 334.086,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We place the figure on a coordinate plane. Let the base line be the $x$-axis. Choose $D=(0,0)$ and, because $C$ is left ' attempts=1"
+  ]
+}

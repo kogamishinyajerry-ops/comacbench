@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q355",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given positive real numbers \\\\(a, b, c\\\\) and the expression\\n\\\\[\\nE = \\\\frac{(a + b + c)\\\\big[(a + b)^2 + (a + b + 4c)^2\\\\big]}{abc}.\\n\\\\]\\nWe want its minimum value.\\n\\n---\\n\\n### Step 1: Symmetry and reduction\\n\\nThe expression is symmetric in \\\\(a\\\\) and \\\\(b\\\\).  Let\\n\\\\[\\nS = a + b, \\\\qquad P = ab.\\n\\\\]\\nThen\\n\\\\[\\nE = \\\\frac{(S + c)\\\\big[S^2 + (S + 4c)^2\\\\big]}{P\\\\,c}.\\n\\\\]\\n\\nFor fixed \\\\(S\\\\) and \\\\(c\\\\), the numerator is positive and the denominator contains \\\\(P\\\\).  Since \\\\(a,b>0\\\\), the AM–GM inequality gives\\n\\\\[\\nP \\\\le \\\\frac{S^2}{4},\\n\\\\]\\nwith equality when \\\\(a = b\\\\).  Because \\\\(E\\\\) is decreasing in \\\\(P\\\\), the smallest possible value for given \\\\(S,c\\\\) occurs when \\\\(P\\\\) is maximal, i.e., when \\\\(a = b\\\\).  Hence we may set \\\\(a = b = t\\\\) (with \\\\(t>0\\\\)) without loss of generality when searching for the minimum.\\n\\n---\\n\\n### Step 2: Substitute \\\\(a = b = t\\\\)\\n\\nWith \\\\(a = b = t\\\\), we have \\\\(S = 2t\\\\) and \\\\(P = t^2\\\\).  Then\\n\\\\[\\nE = \\\\frac{(2t + c)\\\\big[(2t)^2 + (2t + 4c)^2\\\\big]}{t^2 c}.\\n\\\\]\\nCompute\\n\\\\[\\n(2t)^2 = 4t^2,\\\\qquad (2t + 4c)^2 = 4(t+2c)^2 = 4t^2 + 16tc + 16c^2,\\n\\\\]\\nso\\n\\\\[\\n(2t)^2 + (2t+4c)^2 = 8t^2 + 16tc + 16c^2 = 8(t^2 + 2tc + 2c^2).\\n\\\\]\\nTherefore,\\n\\\\[\\nE = \\\\frac{(2t + c) \\\\cdot 8(t^2 + 2tc + 2c^2)}{t^2 c}\\n    = \\\\frac{8(2t + c)(t^2 + 2tc + 2c^2)}{t^2 c}.\\n\\\\]\\n\\n---\\n\\n### Step 3: Use homogeneity to reduce to one variable\\n\\nThe expression is homogeneous of degree 0 (scaling all variables by the same factor leaves it unchanged).  We can therefore set \\\\(c = 1\\\\) (or, equivalently, introduce the ratio \\\\(u = t/c\\\\)).  Setting \\\\(c = 1\\\\) gives\\n\\\\[\\nE = \\\\frac{8(2t + 1)(t^2 + 2t + 2)}{t^2}.\\n\\\\]\\nExpand the numerator:\\n\\\\[\\n(2t + 1)(t^2 + 2t + 2) = 2t^3 + 5t^2 + 6t + 2.\\n\\\\]\\nThus\\n\\\\[\\nE = 8\\\\left(\\\\frac{2t^3 + 5t^2 + 6t + 2}{t^2}\\\\right)\\n   = 8\\\\left(2t + 5 + \\\\frac{6}{t} + \\\\frac{2}{t^2}\\\\right)\\n   = 16t + 40 + \\\\frac{48}{t} + \\\\frac{16}{t^2}.\\n\\\\]\\n\\n---\\n\\n### Step 4: Minimize the function of \\\\(t\\\\)\\n\\nDefine\\n\\\\[\\nf(t) = 16t + 40 + \\\\frac{48}{t} + \\\\frac{16}{t^2},\\\\qquad t>0.\\n\\\\]\\nDifferentiate:\\n\\\\[\\nf'(t) = 16 - \\\\frac{48}{t^2} - \\\\frac{32}{t^3}.\\n\\\\]\\nSet \\\\(f'(t)=0\\\\):\\n\\\\[\\n16 - \\\\frac{48}{t^2} - \\\\frac{32}{t^3} = 0\\n\\\\;\\\\Longrightarrow\\\\;\\n16 t^3 - 48 t - 32 = 0\\n\\\\;\\\\Longrightarrow\\\\;\\nt^3 - 3t - 2 = 0.\\n\\\\]\\nFactor:\\n\\\\[\\nt^3 - 3t - 2 = (t-2)(t+1)^2 = 0.\\n\\\\]\\nSince \\\\(t>0\\\\), the only critical point is \\\\(t = 2\\\\).  The second derivative\\n\\\\[\\nf''(t) = \\\\frac{96}{t^3} + \\\\frac{96}{t^4} > 0 \\\\quad (t>0)\\n\\\\]\\nshows that \\\\(t=2\\\\) gives a local minimum, and because \\\\(f\\\\) is convex it is the global minimum.\\n\\nCompute the value:\\n\\\\[\\nf(2) = 16\\\\cdot2 + 40 + \\\\frac{48}{2} + \\\\frac{16}{4}\\n     = 32 + 40 + 24 + 4 = 100.\\n\\\\]\\n\\n---\\n\\n### Step 5: Verify achievability\\n\\nThe minimum is attained when \\\\(a = b = t = 2c\\\\) (since we set \\\\(c=1\\\\) but the ratio is \\\\(t:c = 2:1\\\\)).  For example, take \\\\(a = b = 2\\\\), \\\\(c = 1\\\\).  Then\\n\\\\[\\nE = \\\\frac{(2+2+1)\\\\big[(2+2)^2 + (2+2+4)^2\\\\big]}{2\\\\cdot2\\\\cdot1}\\n   = \\\\frac{5\\\\cdot(16 + 64)}{4} = \\\\frac{5\\\\cdot80}{4} = 100.\\n\\\\]\\nAny positive multiples of \\\\((2,2,1)\\\\) (i.e., \\\\(a = b = 2k,\\\\; c = k\\\\)) give the same value because of homogeneity.\\n\\n---\\n\\n### Conclusion\\n\\nThe minimum value of the given expression is \\\\(\\\\boxed{100}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"100\", \"reference_number\": \"100\", \"raw_tail\": \" (i.e., \\\\(a = b = 2k,\\\\; c = k\\\\)) give the same value because of homogeneity.\\n\\n---\\n\\n### Conclusion\\n\\nThe minimum value of the given expression is \\\\(\\\\boxed{100}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 171.621,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given positive real numbers \\\\(a, b, c\\\\) and the expression\\n\\\\[\\nE = \\\\frac{(a + b + c)\\\\big[(a + b)^2 + (a + b + 4c)^' attempts=1"
+  ]
+}

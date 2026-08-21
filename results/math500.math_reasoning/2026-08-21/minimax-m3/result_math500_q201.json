@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q201",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find values of $N < 50$ that satisfy two congruence conditions.\\n\\n## Setting Up the Congruences\\n\\nThe conditions translate to:\\n- $N \\\\equiv 5 \\\\pmod{8}$ (groups of 8, remainder 5)\\n- $N \\\\equiv 3 \\\\pmod{6}$ (groups of 6, remainder 3)\\n\\n## Solving the System\\n\\nFrom the first condition: $N = 8k + 5$ for some non-negative integer $k$.\\n\\nSubstituting into the second condition:\\n$$8k + 5 \\\\equiv 3 \\\\pmod{6}$$\\n$$8k \\\\equiv -2 \\\\pmod{6}$$\\n$$2k \\\\equiv 4 \\\\pmod{6}$$\\n$$k \\\\equiv 2 \\\\pmod{3}$$\\n\\nSo $k = 3j + 2$, which gives:\\n$$N = 8(3j + 2) + 5 = 24j + 21$$\\n\\n## Finding Valid Values\\n\\nApplying the constraint $N < 50$:\\n$$24j + 21 < 50 \\\\implies j < \\\\frac{29}{24} \\\\approx 1.21$$\\n\\nSo $j = 0$ or $j = 1$:\\n- **$j = 0$:** $N = 21$ → Check: $21 = 2(8) + 5$ ✓ and $21 = 3(6) + 3$ ✓\\n- **$j = 1$:** $N = 45$ → Check: $45 = 5(8) + 5$ ✓ and $45 = 7(6) + 3$ ✓\\n\\n## Computing the Sum\\n\\n$$21 + 45 = 66$$\\n\\n#### 66\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"66\", \"reference_number\": \"66\", \"raw_tail\": \"21 = 2(8) + 5$ ✓ and $21 = 3(6) + 3$ ✓\\n- **$j = 1$:** $N = 45$ → Check: $45 = 5(8) + 5$ ✓ and $45 = 7(6) + 3$ ✓\\n\\n## Computing the Sum\\n\\n$$21 + 45 = 66$$\\n\\n#### 66\"}"
+  },
+  "timings": {
+    "agent_s": 6.289,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find values of $N < 50$ that satisfy two congruence conditions.\\n\\n## Setting Up the Co' attempts=1"
+  ]
+}

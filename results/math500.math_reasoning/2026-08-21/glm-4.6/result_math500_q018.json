@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q018",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We place the configuration on a coordinate grid for clarity. Let the line through \\\\(A\\\\) be the \\\\(x\\\\)-axis, and let the line through \\\\(B\\\\) and \\\\(C\\\\) (parallel to it) be \\\\(y = -h\\\\) with \\\\(h>0\\\\). Put \\\\(A\\\\) at the origin. Let \\\\(B = (b,-h)\\\\) and \\\\(C = (c,-h)\\\\) with \\\\(c > b > 0\\\\) (as shown in the diagram).\\n\\nLet \\\\(\\\\theta\\\\) be the acute angle that \\\\(\\\\overline{AB}\\\\) makes with the positive \\\\(x\\\\)-axis (the ray to the right). Then \\\\(\\\\tan\\\\theta = \\\\dfrac{h}{b}\\\\).\\n\\nThe angle marked \\\\(124^\\\\circ\\\\) is the angle between the negative \\\\(x\\\\)-axis (the ray to the left) and \\\\(\\\\overline{AB}\\\\). Since the negative \\\\(x\\\\)-axis is opposite the positive \\\\(x\\\\)-axis, this angle equals \\\\(180^\\\\circ - \\\\theta\\\\). Hence\\n\\\\[\\n180^\\\\circ - \\\\theta = 124^\\\\circ \\\\quad\\\\Longrightarrow\\\\quad \\\\theta = 56^\\\\circ.\\n\\\\]\\n\\nLet \\\\(x\\\\) be the angle between the positive \\\\(x\\\\)-axis and \\\\(\\\\overline{AC}\\\\); denote this angle by \\\\(\\\\varphi\\\\). Then \\\\(\\\\tan\\\\varphi = \\\\dfrac{h}{c}\\\\), so \\\\(\\\\varphi = x\\\\).\\n\\nWe are given that \\\\(AB = BC\\\\). Compute:\\n\\\\[\\nAB = \\\\sqrt{b^2 + h^2} = b\\\\sec\\\\theta \\\\qquad (\\\\text{since } \\\\sec\\\\theta = \\\\sqrt{1+\\\\tan^2\\\\theta} = \\\\frac{\\\\sqrt{b^2+h^2}}{b}),\\n\\\\]\\n\\\\[\\nBC = c - b.\\n\\\\]\\nThus\\n\\\\[\\nb\\\\sec\\\\theta = c - b. \\\\tag{1}\\n\\\\]\\n\\nExpress \\\\(c\\\\) in terms of \\\\(h\\\\) and \\\\(\\\\varphi\\\\): \\\\(c = \\\\dfrac{h}{\\\\tan\\\\varphi}\\\\). Substitute \\\\(h = b\\\\tan\\\\theta\\\\):\\n\\\\[\\nc = \\\\frac{b\\\\tan\\\\theta}{\\\\tan\\\\varphi}.\\n\\\\]\\nThen\\n\\\\[\\nBC = c - b = b\\\\left(\\\\frac{\\\\tan\\\\theta}{\\\\tan\\\\varphi} - 1\\\\right). \\\\tag{2}\\n\\\\]\\n\\nEquate (1) and (2) and cancel \\\\(b>0\\\\):\\n\\\\[\\n\\\\sec\\\\theta = \\\\frac{\\\\tan\\\\theta}{\\\\tan\\\\varphi} - 1\\n\\\\quad\\\\Longrightarrow\\\\quad \\\\frac{\\\\tan\\\\theta}{\\\\tan\\\\varphi} = \\\\sec\\\\theta + 1\\n\\\\quad\\\\Longrightarrow\\\\quad \\\\tan\\\\varphi = \\\\frac{\\\\tan\\\\theta}{\\\\sec\\\\theta + 1}.\\n\\\\]\\n\\nUsing the half‑angle identity \\\\(\\\\tan\\\\frac{\\\\theta}{2} = \\\\dfrac{\\\\sin\\\\theta}{1+\\\\cos\\\\theta} = \\\\dfrac{\\\\tan\\\\theta}{\\\\sec\\\\theta+1}\\\\), we obtain\\n\\\\[\\n\\\\tan\\\\varphi = \\\\tan\\\\frac{\\\\theta}{2}.\\n\\\\]\\nSince \\\\(0<\\\\varphi<90^\\\\circ\\\\) and \\\\(\\\\theta = 56^\\\\circ\\\\), we have \\\\(\\\\varphi = \\\\frac{56^\\\\circ}{2} = 28^\\\\circ\\\\). Therefore \\\\(x = 28^\\\\circ\\\\).\\n\\n\\\\boxed{28}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"28\", \"reference_number\": \"28\", \"raw_tail\": \"eta}{2}.\\n\\\\]\\nSince \\\\(0<\\\\varphi<90^\\\\circ\\\\) and \\\\(\\\\theta = 56^\\\\circ\\\\), we have \\\\(\\\\varphi = \\\\frac{56^\\\\circ}{2} = 28^\\\\circ\\\\). Therefore \\\\(x = 28^\\\\circ\\\\).\\n\\n\\\\boxed{28}\"}"
+  },
+  "timings": {
+    "agent_s": 350.98,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We place the configuration on a coordinate grid for clarity. Let the line through \\\\(A\\\\) be the \\\\(x\\\\)-axis, and let the l' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q494",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find when $x^4 + ax^3 - bx^2 + ax + 1 = 0$ has a real root, where $0 \\\\le a, b \\\\le 1$.\\n\\n## Setting Up the Substitution\\n\\nSince $x = 0$ gives $1 \\\\neq 0$, I divide by $x^2$:\\n$$x^2 + ax - b + \\\\frac{a}{x} + \\\\frac{1}{x^2} = 0$$\\n\\nGrouping terms: $\\\\left(x^2 + \\\\frac{1}{x^2}\\\\right) + a\\\\left(x + \\\\frac{1}{x}\\\\right) - b = 0$\\n\\nLet $u = x + \\\\frac{1}{x}$. Then $u^2 = x^2 + 2 + \\\\frac{1}{x^2}$, so $x^2 + \\\\frac{1}{x^2} = u^2 - 2$.\\n\\nThis gives the quadratic: $u^2 + au - (b+2) = 0$\\n\\n## Analyzing the Range of $u$\\n\\nFor real $x \\\\neq 0$: $u = x + \\\\frac{1}{x} \\\\in (-\\\\infty, -2] \\\\cup [2, \\\\infty)$\\n\\nBy Vieta's formulas, the roots satisfy:\\n- Sum: $u_+ + u_- = -a$\\n- Product: $u_+ \\\\cdot u_- = -(b+2) < 0$\\n\\nSo one root is positive and one is negative. The quartic has a real root iff $u_+ \\\\geq 2$ OR $u_- \\\\leq -2$.\\n\\n## Checking Each Case\\n\\n**Case 1: $u_+ \\\\geq 2$**\\n$$\\\\frac{-a + \\\\sqrt{a^2 + 4(b+2)}}{2} \\\\geq 2 \\\\implies \\\\sqrt{a^2 + 4(b+2)} \\\\geq 4 + a$$\\n\\nSquaring (RHS positive since $a \\\\geq 0$):\\n$$4b + 8 \\\\geq 16 + 8a \\\\implies b \\\\geq 2 + 2a$$\\n\\nThis requires $b \\\\geq 2$, impossible since $b \\\\leq 1$. **No solutions here.**\\n\\n**Case 2: $u_- \\\\leq -2$**\\n$$\\\\frac{-a - \\\\sqrt{a^2 + 4(b+2)}}{2} \\\\leq -2 \\\\implies \\\\sqrt{a^2 + 4(b+2)} \\\\geq 4 - a$$\\n\\nSince $a \\\\leq 1$, RHS is positive. Squaring:\\n$$a^2 + 4b + 8 \\\\geq 16 - 8a + a^2 \\\\implies 4b \\\\geq 8 - 8a \\\\implies b \\\\geq 2 - 2a$$\\n\\n## Identifying the Region $S$\\n\\nThe conditions are $b \\\\geq 2 - 2a$ together with $0 \\\\leq a, b \\\\leq 1$:\\n\\n- **When $0 \\\\leq a < 1/2$:** $2 - 2a > 1$, so $b \\\\geq 2 - 2a$ is impossible.\\n- **When $1/2 \\\\leq a \\\\leq 1$:** $0 \\\\leq 2 - 2a \\\\leq 1$, so $b \\\\in [2 - 2a, 1]$.\\n\\n## Computing the Area\\n\\nThe region is a triangle with vertices:\\n- $(1/2, 1)$ — intersection of $b = 2 - 2a$ and $b = 1$\\n- $(1, 0)$ — intersection of $a = 1$ and $b = 2 - 2a$  \\n- $(1, 1)$ — intersection of $a = 1$ and $b = 1$\\n\\n**Verification:** At $(a,b) = (1,0)$: $x^4 + x^3 + x + 1 = (x+1)(x^3+1) = (x+1)^2(x^2-x+1)$, which has root $x = -1$. ✓\\n\\n**Area computation:**\\n$$\\\\text{Area} = \\\\int_{1/2}^{1} (1 - (2 - 2a))\\\\, da = \\\\int_{1/2}^{1} (2a - 1)\\\\, da$$\\n\\n$$= \\\\left[a^2 - a\\\\right]_{1/2}^{1} = (1 - 1) - \\\\left(\\\\frac{1}{4} - \\\\frac{1}{2}\\\\right) = 0 - \\\\left(-\\\\frac{1}{4}\\\\right) = \\\\frac{1}{4}$$\\n\\n**Geometric check:** Triangle with base $1/2$ (along $b=1$) and height $1$ (along $a=1$):\\n$$\\\\text{Area} = \\\\frac{1}{2} \\\\cdot \\\\frac{1}{2} \\\\cdot 1 = \\\\frac{1}{4} ✓$$\\n\\n## Answer\\n\\n$$\\\\boxed{\\\\dfrac{1}{4}}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\dfrac{1}{4}\", \"reference_number\": \"\\\\frac{1}{4}\", \"raw_tail\": \"e $1/2$ (along $b=1$) and height $1$ (along $a=1$):\\n$$\\\\text{Area} = \\\\frac{1}{2} \\\\cdot \\\\frac{1}{2} \\\\cdot 1 = \\\\frac{1}{4} ✓$$\\n\\n## Answer\\n\\n$$\\\\boxed{\\\\dfrac{1}{4}}$$\"}"
+  },
+  "timings": {
+    "agent_s": 42.601,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find when $x^4 + ax^3 - bx^2 + ax + 1 = 0$ has a real root, where $0 \\\\le a, b \\\\le 1$.' attempts=1"
+  ]
+}

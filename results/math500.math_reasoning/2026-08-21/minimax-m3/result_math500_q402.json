@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q402",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to rotate the point $3$ by $90°$ clockwise around the center $c = -4 - 5i$.\\n\\n## Setting Up the Rotation\\n\\nA rotation around a point $c$ follows this process:\\n$$z_{\\\\text{new}} = (z - c) \\\\cdot (\\\\text{rotation}) + c$$\\n\\n**Key fact:** A $90°$ clockwise rotation about the origin corresponds to multiplication by $-i$ in the complex plane.\\n\\n## Step 1: Translate (move center to origin)\\n\\n$$z - c = 3 - (-4 - 5i) = 7 + 5i$$\\n\\n## Step 2: Apply the rotation (multiply by $-i$)\\n\\n$$(7 + 5i)(-i) = -7i - 5i^2 = -7i + 5 = 5 - 7i$$\\n\\n## Step 3: Translate back (move origin to center)\\n\\n$$5 - 7i + (-4 - 5i) = 1 - 12i$$\\n\\n## Verification\\n\\nThe vector from center to point had magnitude $\\\\sqrt{49 + 25} = \\\\sqrt{74}$. The new vector from center $1 - 12i$ to point $5 - 7i$ is $4 + 5i$, which has magnitude $\\\\sqrt{16+25} = \\\\sqrt{74}$ ✓. The original displacement was $7 + 5i$ (pointing up-right); the new displacement is $4 + 5i$ — rotated clockwise by $90°$ ✓.\\n\\n#### $1 - 12i$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1 - 12i\", \"reference_number\": \"1 - 12i\", \"raw_tail\": \"25} = \\\\sqrt{74}$ ✓. The original displacement was $7 + 5i$ (pointing up-right); the new displacement is $4 + 5i$ — rotated clockwise by $90°$ ✓.\\n\\n#### $1 - 12i$\"}"
+  },
+  "timings": {
+    "agent_s": 6.407,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to rotate the point $3$ by $90°$ clockwise around the center $c = -4 - 5i$.\\n\\n## Setting ' attempts=1"
+  ]
+}

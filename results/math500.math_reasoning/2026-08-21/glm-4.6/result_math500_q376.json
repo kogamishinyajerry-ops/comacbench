@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q376",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are asked to find a point \\\\(P\\\\) on the line \\\\(y = -x + 6\\\\) such that the distances from \\\\(P\\\\) to \\\\(A(10,-10)\\\\) and to the origin \\\\(O(0,0)\\\\) are equal.\\n\\nLet \\\\(P = (x, y)\\\\). Since \\\\(P\\\\) lies on the given line, we have \\\\(y = -x + 6\\\\).\\n\\nThe distance from \\\\(P\\\\) to \\\\(O\\\\) is\\n\\\\[\\nPO = \\\\sqrt{(x-0)^2 + (y-0)^2} = \\\\sqrt{x^2 + y^2}.\\n\\\\]\\nThe distance from \\\\(P\\\\) to \\\\(A\\\\) is\\n\\\\[\\nPA = \\\\sqrt{(x-10)^2 + (y - (-10))^2} = \\\\sqrt{(x-10)^2 + (y+10)^2}.\\n\\\\]\\n\\nSetting \\\\(PA = PO\\\\) and squaring both sides gives\\n\\\\[\\nx^2 + y^2 = (x-10)^2 + (y+10)^2.\\n\\\\]\\n\\nExpand the right-hand side:\\n\\\\[\\n(x-10)^2 = x^2 - 20x + 100,\\\\qquad (y+10)^2 = y^2 + 20y + 100.\\n\\\\]\\nThus,\\n\\\\[\\nx^2 + y^2 = x^2 + y^2 - 20x + 20y + 200.\\n\\\\]\\n\\nCancel \\\\(x^2 + y^2\\\\) from both sides:\\n\\\\[\\n0 = -20x + 20y + 200.\\n\\\\]\\n\\nDivide by 20:\\n\\\\[\\n0 = -x + y + 10 \\\\quad\\\\Longrightarrow\\\\quad y = x - 10.\\n\\\\]\\n\\nNow we have two equations for \\\\(y\\\\):\\n\\\\[\\ny = -x + 6 \\\\quad\\\\text{(from the line)}\\\\qquad\\\\text{and}\\\\qquad y = x - 10 \\\\quad\\\\text{(from equidistance)}.\\n\\\\]\\n\\nSet them equal:\\n\\\\[\\nx - 10 = -x + 6 \\\\quad\\\\Longrightarrow\\\\quad 2x = 16 \\\\quad\\\\Longrightarrow\\\\quad x = 8.\\n\\\\]\\n\\nThen substitute into \\\\(y = -x + 6\\\\) (or \\\\(y = x - 10\\\\)):\\n\\\\[\\ny = -8 + 6 = -2.\\n\\\\]\\n\\nThus \\\\(P = (8, -2)\\\\). Check distances:\\n\\\\[\\nPO = \\\\sqrt{8^2 + (-2)^2} = \\\\sqrt{64 + 4} = \\\\sqrt{68},\\n\\\\]\\n\\\\[\\nPA = \\\\sqrt{(8-10)^2 + (-2+10)^2} = \\\\sqrt{(-2)^2 + 8^2} = \\\\sqrt{4 + 64} = \\\\sqrt{68}.\\n\\\\]\\nThey are equal, confirming the solution.\\n\\nThe coordinates are \\\\((8,-2)\\\\).\\n\\n\\\\boxed{(8,-2)}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(8,-2)\", \"reference_number\": \"(8,-2)\", \"raw_tail\": \")^2 + (-2+10)^2} = \\\\sqrt{(-2)^2 + 8^2} = \\\\sqrt{4 + 64} = \\\\sqrt{68}.\\n\\\\]\\nThey are equal, confirming the solution.\\n\\nThe coordinates are \\\\((8,-2)\\\\).\\n\\n\\\\boxed{(8,-2)}\"}"
+  },
+  "timings": {
+    "agent_s": 21.065,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are asked to find a point \\\\(P\\\\) on the line \\\\(y = -x + 6\\\\) such that the distances from \\\\(P\\\\) to \\\\(A(10,-10)\\\\) and to' attempts=1"
+  ]
+}

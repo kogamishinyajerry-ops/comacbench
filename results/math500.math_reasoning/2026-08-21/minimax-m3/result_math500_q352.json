@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q352",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I'll set up coordinates and use trigonometric relationships.\\n\\n## Setting Up Coordinates\\n\\nPlace $M$ at the origin with $A = (0, 11)$ on the positive $y$-axis. Then $D = (0, 1)$ since $AD = 10$.\\n\\nLet $B = (-x, 0)$ and $C = (x, 0)$, so $BM = CM = x$ and $BC = 2x$.\\n\\n## Defining the Angles\\n\\nLet $\\\\angle BAC = 2\\\\alpha$. Since $M$ is the midpoint of $BC$:\\n$$\\\\tan\\\\alpha = \\\\frac{x}{11}$$\\n\\nFor $\\\\angle BDC$: Since $DM = 1 \\\\perp BC$, by symmetry $\\\\angle BDM = \\\\angle CDM$, so:\\n$$\\\\tan(\\\\angle BDM) = \\\\frac{x}{1} = x \\\\implies \\\\angle BDC = 2\\\\arctan(x)$$\\n\\n## Applying the Given Condition\\n\\nSince $\\\\angle BDC = 3\\\\angle BAC = 6\\\\alpha$:\\n$$2\\\\arctan(x) = 6\\\\alpha \\\\implies \\\\arctan(x) = 3\\\\alpha$$\\n\\nLet $t = \\\\alpha$, so $x = 11\\\\tan t$ and we need:\\n$$\\\\arctan(11\\\\tan t) = 3t \\\\implies 11\\\\tan t = \\\\tan(3t)$$\\n\\n## Solving the Equation\\n\\nUsing $\\\\tan(3t) = \\\\dfrac{3\\\\tan t - \\\\tan^3 t}{1 - 3\\\\tan^2 t}$ with $u = \\\\tan t$:\\n\\n$$11u = \\\\frac{3u - u^3}{1 - 3u^2}$$\\n\\n$$11u(1 - 3u^2) = 3u - u^3$$\\n\\n$$11u - 33u^3 = 3u - u^3$$\\n\\n$$8u - 32u^3 = 0 \\\\implies 8u(1 - 4u^2) = 0$$\\n\\nSince $u \\\\neq 0$: $u = \\\\tan\\\\alpha = \\\\frac{1}{2}$.\\n\\n## Computing the Perimeter\\n\\nWith $\\\\tan\\\\alpha = \\\\frac{1}{2}$:\\n- $x = 11 \\\\cdot \\\\frac{1}{2} = \\\\frac{11}{2}$\\n- $BC = 2x = 11$\\n\\nFor sides $AB$ and $AC$:\\n$$AB = \\\\sqrt{x^2 + 11^2} = \\\\sqrt{\\\\frac{121}{4} + 121} = \\\\sqrt{\\\\frac{605}{4}} = \\\\frac{11\\\\sqrt{5}}{2}$$\\n\\n**Verification:** $\\\\sin\\\\alpha = \\\\frac{1}{\\\\sqrt{5}}, \\\\cos\\\\alpha = \\\\frac{2}{\\\\sqrt{5}}$, giving $\\\\cos(2\\\\alpha) = \\\\frac{3}{5}$ and $\\\\sin(2\\\\alpha) = \\\\frac{4}{5}$. Check $\\\\tan(3\\\\alpha) = \\\\frac{3(1/2) - (1/2)^3}{1 - 3(1/2)^2} = \\\\frac{11/8}{1/4} = \\\\frac{11}{2}$ ✓\\n\\n## Final Calculation\\n\\n$$\\\\text{Perimeter} = AB + AC + BC = 2 \\\\cdot \\\\frac{11\\\\sqrt{5}}{2} + 11 = 11\\\\sqrt{5} + 11$$\\n\\n$$\\\\boxed{11 + 11\\\\sqrt{5}}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"11 + 11\\\\sqrt{5}\", \"reference_number\": \"11 \\\\sqrt{5} + 11\", \"raw_tail\": \" = \\\\frac{11}{2}$ ✓\\n\\n## Final Calculation\\n\\n$$\\\\text{Perimeter} = AB + AC + BC = 2 \\\\cdot \\\\frac{11\\\\sqrt{5}}{2} + 11 = 11\\\\sqrt{5} + 11$$\\n\\n$$\\\\boxed{11 + 11\\\\sqrt{5}}$$\"}"
+  },
+  "timings": {
+    "agent_s": 13.822,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I'll set up coordinates and use trigonometric relationships.\\n\\n## Setting Up Coordinates\\n\\nPlace \" attempts=1"
+  ]
+}

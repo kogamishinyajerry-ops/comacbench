@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q365",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The greatest common divisor is \\\\(d = \\\\gcd(a,b) = 210\\\\). Write \\\\(a = d x\\\\), \\\\(b = d y\\\\) with \\\\(\\\\gcd(x,y) = 1\\\\). Then\\n\\n\\\\[\\n\\\\operatorname{lcm}(a,b) = d \\\\cdot \\\\operatorname{lcm}(x,y) = d \\\\cdot x y = 210^3.\\n\\\\]\\n\\nSince \\\\(d = 210\\\\), we have \\\\(d \\\\cdot x y = d^3\\\\), so \\\\(x y = d^2 = 210^2 = (2\\\\cdot3\\\\cdot5\\\\cdot7)^2 = 2^2 3^2 5^2 7^2\\\\).\\n\\nBecause \\\\(\\\\gcd(x,y)=1\\\\), for each prime factor its entire exponent must go to either \\\\(x\\\\) or \\\\(y\\\\); otherwise the prime would appear in both and the gcd would exceed 1. Thus for each of the four primes \\\\(\\\\{2,3,5,7\\\\}\\\\) we decide whether its square goes to \\\\(x\\\\) or to \\\\(y\\\\). Hence there are \\\\(2^4 = 16\\\\) ordered pairs \\\\((x,y)\\\\) satisfying \\\\(x y = 210^2\\\\) and \\\\(\\\\gcd(x,y)=1\\\\).\\n\\nThe condition \\\\(a < b\\\\) is equivalent to \\\\(x < y\\\\). Since \\\\(x = y\\\\) is impossible (it would require splitting exponents and would break coprimality), exactly half of the 16 ordered pairs have \\\\(x < y\\\\). Therefore there are \\\\(8\\\\) valid values for \\\\(x\\\\), each giving a distinct \\\\(a = 210x\\\\).\\n\\nThus the number of possible values for \\\\(a\\\\) is \\\\(8\\\\).\\n\\n\\\\boxed{8}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8\", \"reference_number\": \"8\", \"raw_tail\": \"< y\\\\). Therefore there are \\\\(8\\\\) valid values for \\\\(x\\\\), each giving a distinct \\\\(a = 210x\\\\).\\n\\nThus the number of possible values for \\\\(a\\\\) is \\\\(8\\\\).\\n\\n\\\\boxed{8}\"}"
+  },
+  "timings": {
+    "agent_s": 73.073,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The greatest common divisor is \\\\(d = \\\\gcd(a,b) = 210\\\\). Write \\\\(a = d x\\\\), \\\\(b = d y\\\\) with \\\\(\\\\gcd(x,y) = 1\\\\). Then\\n\\n\\\\[\\n' attempts=1"
+  ]
+}

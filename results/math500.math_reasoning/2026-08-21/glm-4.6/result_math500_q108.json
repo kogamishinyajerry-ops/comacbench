@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q108",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The ellipse is \\\\(k x^2 + y^2 = 1\\\\) with \\\\(k>1\\\\). Rewriting in standard form:  \\n\\\\[\\n\\\\frac{x^2}{1/k} + \\\\frac{y^2}{1} = 1.\\n\\\\]  \\nThus \\\\(a^2 = 1/k\\\\) (semi‑minor axis along \\\\(x\\\\)) and \\\\(b^2 = 1\\\\) (semi‑major axis along \\\\(y\\\\)). The foci are on the \\\\(y\\\\)-axis at \\\\((0,\\\\pm c)\\\\) where  \\n\\\\[\\nc^2 = b^2 - a^2 = 1 - \\\\frac{1}{k} = \\\\frac{k-1}{k}.\\n\\\\]\\n\\nThe ellipse meets the \\\\(x\\\\)-axis when \\\\(y=0\\\\): \\\\(k x^2 = 1 \\\\Rightarrow x = \\\\pm 1/\\\\sqrt{k}\\\\). Denote  \\n\\\\[\\nA = \\\\left(\\\\frac{1}{\\\\sqrt{k}},0\\\\right),\\\\qquad B = \\\\left(-\\\\frac{1}{\\\\sqrt{k}},0\\\\right).\\n\\\\]  \\nAt these points the tangent is vertical because the gradient \\\\(\\\\nabla(kx^2+y^2-1) = (2kx,2y)\\\\) is horizontal.\\n\\nLet the circle have center \\\\((h,v)\\\\) and radius \\\\(R\\\\). Because it passes through \\\\(F_1=(0,c)\\\\) and \\\\(F_2=(0,-c)\\\\), the center must lie on the perpendicular bisector of the segment \\\\(F_1F_2\\\\), i.e., on the \\\\(x\\\\)-axis. Hence \\\\(v=0\\\\) and the center is \\\\((h,0)\\\\).\\n\\nThe circle is tangent to the ellipse at two points on the \\\\(x\\\\)-axis; those points can only be \\\\(A\\\\) and \\\\(B\\\\). For tangency at \\\\(A\\\\) the circle must pass through \\\\(A\\\\) and have a vertical tangent there. With center \\\\((h,0)\\\\), the radius to \\\\(A\\\\) is horizontal, so the tangent is vertical automatically. Thus the condition reduces to requiring that both \\\\(A\\\\) and \\\\(B\\\\) lie on the circle.\\n\\nTherefore:\\n\\\\[\\n|h - a| = R,\\\\qquad |h + a| = R, \\\\quad\\\\text{where } a = \\\\frac{1}{\\\\sqrt{k}}.\\n\\\\]  \\nSquaring and equating gives \\\\((h-a)^2 = (h+a)^2 \\\\Rightarrow -4ah = 0 \\\\Rightarrow h = 0\\\\).\\n\\nSo the center is \\\\((0,0)\\\\) and \\\\(R = |0 - a| = a\\\\). Also, from the foci we have  \\n\\\\[\\nR = \\\\text{distance from }(0,0)\\\\text{ to }(0,c) = c.\\n\\\\]  \\nThus \\\\(a = c\\\\):\\n\\\\[\\n\\\\frac{1}{\\\\sqrt{k}} = \\\\sqrt{\\\\frac{k-1}{k}}.\\n\\\\]  \\nSquaring both sides: \\\\(\\\\frac{1}{k} = \\\\frac{k-1}{k} \\\\Rightarrow 1 = k-1 \\\\Rightarrow k = 2\\\\).\\n\\nFor \\\\(k=2\\\\) the ellipse is \\\\(2x^2+y^2=1\\\\), foci at \\\\((0,\\\\pm1/\\\\sqrt2)\\\\), and the circle \\\\(x^2+y^2 = 1/2\\\\) passes through the foci and is tangent to the ellipse at \\\\((\\\\pm1/\\\\sqrt2,0)\\\\). All conditions are satisfied.\\n\\n\\\\[\\n\\\\boxed{2}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\", \"reference_number\": \"2\", \"raw_tail\": \"), and the circle \\\\(x^2+y^2 = 1/2\\\\) passes through the foci and is tangent to the ellipse at \\\\((\\\\pm1/\\\\sqrt2,0)\\\\). All conditions are satisfied.\\n\\n\\\\[\\n\\\\boxed{2}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 336.532,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The ellipse is \\\\(k x^2 + y^2 = 1\\\\) with \\\\(k>1\\\\). Rewriting in standard form:  \\n\\\\[\\n\\\\frac{x^2}{1/k} + \\\\frac{y^2}{1} = 1.\\n\\\\' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q361",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The parabola is given by \\\\(x^2 = 8y\\\\), or \\\\(y = \\\\frac{x^2}{8}\\\\). Its vertex is at \\\\((0,0)\\\\). Let the three vertices of the equilateral triangle be \\\\(A = (0,0)\\\\), \\\\(B = \\\\left(t_1, \\\\frac{t_1^2}{8}\\\\right)\\\\), and \\\\(C = \\\\left(t_2, \\\\frac{t_2}{8}^2\\\\right)\\\\). Because the triangle is equilateral, we have \\\\(AB = AC\\\\). Computing these distances:\\n\\n\\\\[\\nAB^2 = t_1^2 + \\\\left(\\\\frac{t_1^2}{8}\\\\right)^2 = t_1^2 + \\\\frac{t_1^4}{64},\\n\\\\]\\n\\\\[\\nAC^2 = t_2^2 + \\\\left(\\\\frac{t_2^2}{8}\\\\right)^2 = t_2^2 + \\\\frac{t_2^4}{64}.\\n\\\\]\\n\\nSetting them equal gives \\\\(t_1^2 + \\\\frac{t_1^4}{64} = t_2^2 + \\\\frac{t_2^4}{64}\\\\). The function \\\\(f(t) = t^2 + \\\\frac{t^4}{64}\\\\) is even and strictly increasing for \\\\(t>0\\\\). Therefore, for distinct \\\\(t_1\\\\) and \\\\(t_2\\\\) we must have \\\\(t_2 = -t_1\\\\) (with \\\\(t_1 \\\\neq 0\\\\)). So \\\\(B = (a, a^2/8)\\\\) and \\\\(C = (-a, a^2/8)\\\\) for some \\\\(a > 0\\\\).\\n\\nNow the side lengths are:\\n\\n\\\\[\\nAB = \\\\sqrt{a^2 + \\\\frac{a^4}{64}}, \\\\qquad BC = \\\\text{distance between } (a, a^2/8) \\\\text{ and } (-a, a^2/8) = 2a.\\n\\\\]\\n\\nFor an equilateral triangle, \\\\(AB = BC\\\\):\\n\\n\\\\[\\n\\\\sqrt{a^2 + \\\\frac{a^4}{64}} = 2a.\\n\\\\]\\n\\nSquaring both sides:\\n\\n\\\\[\\na^2 + \\\\frac{a^4}{64} = 4a^2 \\\\quad\\\\Longrightarrow\\\\quad \\\\frac{a^4}{64} = 3a^2 \\\\quad\\\\Longrightarrow\\\\quad a^4 = 192a^2 \\\\quad\\\\Longrightarrow\\\\quad a^2(a^2 - 192) = 0.\\n\\\\]\\n\\nThus \\\\(a^2 = 192\\\\) (since \\\\(a>0\\\\)), so \\\\(a = \\\\sqrt{192} = 8\\\\sqrt{3}\\\\). The side length of the triangle is \\\\(BC = 2a = 16\\\\sqrt{3}\\\\).\\n\\nTherefore, the side length is \\\\(\\\\boxed{16\\\\sqrt{3}}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"16\\\\sqrt{3}\", \"reference_number\": \"16 \\\\sqrt{3}\", \"raw_tail\": \"\\\\(a>0\\\\)), so \\\\(a = \\\\sqrt{192} = 8\\\\sqrt{3}\\\\). The side length of the triangle is \\\\(BC = 2a = 16\\\\sqrt{3}\\\\).\\n\\nTherefore, the side length is \\\\(\\\\boxed{16\\\\sqrt{3}}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 224.054,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The parabola is given by \\\\(x^2 = 8y\\\\), or \\\\(y = \\\\frac{x^2}{8}\\\\). Its vertex is at \\\\((0,0)\\\\). Let the three vertices of t' attempts=1"
+  ]
+}

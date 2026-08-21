@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_100",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def next_smallest_palindrome(n: int) -> int:\\n    \\\"\\\"\\\"\\n    Return the smallest palindrome that is strictly greater than the given integer n.\\n\\n    Parameters\\n    ----------\\n    n : int\\n        A non‑negative integer.\\n\\n    Returns\\n    -------\\n    int\\n        The next palindrome greater than n.\\n    \\\"\\\"\\\"\\n    s = str(n)\\n    k = len(s)\\n\\n    # Special case: when every digit is '9' the next palindrome is 1 followed by zeros and a 1.\\n    if s.count('9') == k:\\n        return int('1' + '0' * (k - 1) + '1')\\n\\n    half = k // 2\\n    left = s[:half]\\n\\n    # Build a palindrome by mirroring the left side onto the right side.\\n    if k % 2 == 0:\\n        pal = left + left[::-1]\\n    else:\\n        pal = left + s[half] + left[::-1]\\n\\n    # If this mirrored palindrome is already larger, we are done.\\n    if int(pal) > n:\\n        return int(pal)\\n\\n    # Otherwise we need to increment the middle part and mirror again.\\n    if k % 2 == 0:\\n        # Even length: increment the left half.\\n        new_left = str(int(left) + 1)\\n        # If increment caused an overflow (e.g., 99…99), handle it.\\n        if len(new_left) > half:\\n            return int('1' + '0' * (k - 1) + '1')\\n        pal = new_left + new_left[::-1]\\n    else:\\n        # Odd length: increment the left half including the middle digit.\\n        left_mid = s[:half] + s[half]\\n        new_left_mid = str(int(left_mid) + 1)\\n        if len(new_left_mid) > half + 1:\\n            return int('1' + '0' * (k - 1) + '1')\\n        left = new_left_mid[:-1]\\n        mid = new_left_mid[-1]\\n        pal = left + mid + left[::-1]\\n\\n    return int(pal)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 69.69,
+    "setup_s": 0.0,
+    "grade_s": 0.144
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q160",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let the two consecutive positive even integers be $n$ and $n+2$, where $n$ is even.\\n\\nSetting up the equation:\\n$$n(n+2) = 288$$\\n$$n^2 + 2n - 288 = 0$$\\n\\nUsing the quadratic formula:\\n$$n = \\\\frac{-2 \\\\pm \\\\sqrt{4 + 4 \\\\cdot 288}}{2} = \\\\frac{-2 \\\\pm \\\\sqrt{1156}}{2} = \\\\frac{-2 \\\\pm 34}{2}$$\\n\\nTaking the positive root:\\n$$n = \\\\frac{32}{2} = 16$$\\n\\nSo the two integers are $16$ and $18$.\\n\\n**Check:** $16 \\\\times 18 = 288$ ✓\\n\\n#### 18\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"18\", \"reference_number\": \"18\", \"raw_tail\": \"= \\\\frac{-2 \\\\pm 34}{2}$$\\n\\nTaking the positive root:\\n$$n = \\\\frac{32}{2} = 16$$\\n\\nSo the two integers are $16$ and $18$.\\n\\n**Check:** $16 \\\\times 18 = 288$ ✓\\n\\n#### 18\"}"
+  },
+  "timings": {
+    "agent_s": 3.725,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let the two consecutive positive even integers be $n$ and $n+2$, where $n$ is even.\\n\\nSetting up the equation:\\n$$n(n+2) =' attempts=1"
+  ]
+}

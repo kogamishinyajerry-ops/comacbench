@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q104",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the intersection points of the circle and hyperbola, then sum their distances to $(-3, 2)$.\\n\\n## Setting Up the Curves\\n\\n**Circle:** Completing the square gives $(x+3)^2 + (y-12)^2 = 81$ — center $(-3, 12)$, radius $9$.\\n\\n**Hyperbola:** Rearranging $x^2 - y^2 + 6x + 16y - 46 = 0$:\\n$$(x+3)^2 - (y-8)^2 = -9 \\\\implies (y-8)^2 - (x+3)^2 = 9$$\\nCenter $(-3, 8)$, with $a^2 = b^2 = 9$.\\n\\n## Coordinate Shift\\n\\nLet $X = x+3$, $Y = y-8$. Then the point $(-3, 2)$ becomes $(0, -6)$, and the curves become:\\n- **Circle:** $X^2 + (Y-4)^2 = 81$\\n- **Hyperbola:** $Y^2 - X^2 = 9$\\n\\nThe distance from $(X, Y)$ to $(0, -6)$ is:\\n$$d^2 = X^2 + (Y+6)^2$$\\n\\n## Finding Intersection Points\\n\\nFrom the hyperbola: $X^2 = Y^2 - 9$. Substituting into the circle:\\n$$(Y^2 - 9) + (Y-4)^2 = 81$$\\n$$2Y^2 - 8Y + 7 = 81 \\\\implies Y^2 - 4Y - 37 = 0$$\\n\\nSo $Y_1 + Y_2 = 4$ and $Y_1 Y_2 = -37$.\\n\\n## Computing the Distance Function\\n\\nUsing $Y^2 = 4Y + 37$ from the quadratic:\\n$$P(Y) = 2Y^2 + 12Y + 27 = 2(4Y + 37) + 12Y + 27 = 20Y + 101$$\\n\\nSo $d^2 = 20Y + 101$ for each intersection point.\\n\\n## Computing the Sum of Distances\\n\\nThe four points pair by $Y$-value: two points with $Y_1$ and two with $Y_2$. By symmetry, both points in each pair have equal distance. The sum is:\\n$$S = 2(\\\\sqrt{20Y_1 + 101} + \\\\sqrt{20Y_2 + 101})$$\\n\\n**Sum of squared distances:**\\n$$d_1^2 + d_2^2 = 20(Y_1 + Y_2) + 202 = 80 + 202 = 282$$\\n\\n**Product of squared distances:**\\n$$d_1^2 \\\\cdot d_2^2 = (20Y_1 + 101)(20Y_2 + 101) = 400Y_1Y_2 + 2020(Y_1 + Y_2) + 10201$$\\n$$= 400(-37) + 2020(4) + 10201 = -14800 + 8080 + 10201 = 3481 = 59^2$$\\n\\nSo $d_1 \\\\cdot d_2 = 59$.\\n\\n**Computing $(d_1 + d_2)^2$:**\\n$$(d_1 + d_2)^2 = 282 + 2(59) = 400 \\\\implies d_1 + d_2 = 20$$\\n\\n## Final Answer\\n\\n$$S = 2 \\\\cdot 20 = 40$$\\n\\n#### 40\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"40\", \"reference_number\": \"40\", \"raw_tail\": \"cdot d_2 = 59$.\\n\\n**Computing $(d_1 + d_2)^2$:**\\n$$(d_1 + d_2)^2 = 282 + 2(59) = 400 \\\\implies d_1 + d_2 = 20$$\\n\\n## Final Answer\\n\\n$$S = 2 \\\\cdot 20 = 40$$\\n\\n#### 40\"}"
+  },
+  "timings": {
+    "agent_s": 32.771,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the intersection points of the circle and hyperbola, then sum their distances to' attempts=1"
+  ]
+}

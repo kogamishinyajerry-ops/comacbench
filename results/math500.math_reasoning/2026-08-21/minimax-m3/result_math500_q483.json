@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q483",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $\\\\tan A$ given that the area of triangle $ABC$ equals $a^2 - (b-c)^2$.\\n\\n## Setting Up Equations\\n\\n**Area formula:** $\\\\text{Area} = \\\\frac{1}{2}bc\\\\sin A$\\n\\n**Law of Cosines:** $a^2 = b^2 + c^2 - 2bc\\\\cos A$\\n\\n## Simplifying the Given Expression\\n\\nI'll rewrite $a^2 - (b-c)^2$ using the Law of Cosines:\\n$$a^2 - (b-c)^2 = (b^2 + c^2 - 2bc\\\\cos A) - (b^2 - 2bc + c^2)$$\\n$$= 2bc - 2bc\\\\cos A = 2bc(1-\\\\cos A)$$\\n\\n## Solving for $\\\\tan A$\\n\\nSince the area equals both expressions:\\n$$\\\\frac{1}{2}bc\\\\sin A = 2bc(1-\\\\cos A)$$\\n\\nDividing by $bc$ (positive):\\n$$\\\\frac{1}{2}\\\\sin A = 2(1-\\\\cos A)$$\\n$$\\\\sin A = 4(1-\\\\cos A) = 4 - 4\\\\cos A$$\\n\\n## Applying the Pythagorean Identity\\n\\nUsing $\\\\sin^2 A + \\\\cos^2 A = 1$:\\n$$(4 - 4\\\\cos A)^2 + \\\\cos^2 A = 1$$\\n$$16 - 32\\\\cos A + 16\\\\cos^2 A + \\\\cos^2 A = 1$$\\n$$17\\\\cos^2 A - 32\\\\cos A + 15 = 0$$\\n\\n## Solving the Quadratic\\n\\n$$\\\\cos A = \\\\frac{32 \\\\pm \\\\sqrt{1024 - 1020}}{34} = \\\\frac{32 \\\\pm 2}{34}$$\\n\\nThis gives $\\\\cos A = 1$ (rejected, as $A$ would be 0) or $\\\\cos A = \\\\frac{15}{17}$.\\n\\n## Computing $\\\\sin A$ and $\\\\tan A$\\n\\n$$\\\\sin A = 4 - 4 \\\\cdot \\\\frac{15}{17} = \\\\frac{68 - 60}{17} = \\\\frac{8}{17}$$\\n\\n**Verification:** $\\\\left(\\\\frac{8}{17}\\\\right)^2 + \\\\left(\\\\frac{15}{17}\\\\right)^2 = \\\\frac{64 + 225}{289} = 1$ ✓\\n\\n$$\\\\tan A = \\\\frac{\\\\sin A}{\\\\cos A} = \\\\frac{8/17}{15/17} = \\\\frac{8}{15}$$\\n\\n#### 8/15\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8/15\", \"reference_number\": \"\\\\frac{8}{15}\", \"raw_tail\": \"{8}{17}\\\\right)^2 + \\\\left(\\\\frac{15}{17}\\\\right)^2 = \\\\frac{64 + 225}{289} = 1$ ✓\\n\\n$$\\\\tan A = \\\\frac{\\\\sin A}{\\\\cos A} = \\\\frac{8/17}{15/17} = \\\\frac{8}{15}$$\\n\\n#### 8/15\"}"
+  },
+  "timings": {
+    "agent_s": 18.904,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $\\\\tan A$ given that the area of triangle $ABC$ equals $a^2 - (b-c)^2$.\\n\\n## Setti' attempts=1"
+  ]
+}

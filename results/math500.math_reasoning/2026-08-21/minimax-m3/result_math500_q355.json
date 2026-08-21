@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q355",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the minimum of $\\\\frac{(a+b+c)[(a+b)^2 + (a+b+4c)^2]}{abc}$ over positive reals.\\n\\n## Setting Up with Sum Substitution\\n\\nLet me set $s = a + b$. The expression becomes:\\n$$\\\\frac{(s+c)[s^2 + (s+4c)^2]}{abc}$$\\n\\n**Key observation:** For fixed $s$ and $c$, the expression is decreasing in $ab$. By AM-GM, $ab \\\\leq s^2/4$ with equality when $a = b = s/2$. So the minimum for each fixed $(s, c)$ occurs at $a = b$.\\n\\n## Reducing to One Variable\\n\\nSetting $a = b$, so $s = 2a$ and $ab = a^2$:\\n$$E = \\\\frac{(2a+c)[(2a)^2 + (2a+4c)^2]}{a^2 c}$$\\n\\nExpanding: $(2a+c)(8a^2 + 16ac + 16c^2) = 16a^3 + 40a^2c + 48ac^2 + 16c^3$\\n\\nThis gives:\\n$$E = \\\\frac{16a^3 + 40a^2c + 48ac^2 + 16c^3}{a^2c} = \\\\frac{16a}{c} + 40 + \\\\frac{48c}{a} + \\\\frac{16c^2}{a^2}$$\\n\\n## Substituting $t = a/c$\\n\\n$$f(t) = 16t + 40 + \\\\frac{48}{t} + \\\\frac{16}{t^2}$$\\n\\nTaking the derivative:\\n$$f'(t) = 16 - \\\\frac{48}{t^2} - \\\\frac{32}{t^3} = 0$$\\n\\nMultiplying by $t^3$:\\n$$16t^3 - 48t - 32 = 0 \\\\implies t^3 - 3t - 2 = 0$$\\n\\nFactoring:\\n$$t^3 - 3t - 2 = (t-2)(t+1)^2 = 0$$\\n\\nSo $t = 2$ is the unique positive critical point.\\n\\n## Verifying the Minimum\\n\\nSecond derivative check: $f''(t) = \\\\frac{96}{t^3} + \\\\frac{96}{t^4} > 0$, confirming minimum.\\n\\nComputing the value:\\n$$f(2) = 16(2) + 40 + \\\\frac{48}{2} + \\\\frac{16}{4} = 32 + 40 + 24 + 4 = 100$$\\n\\n## Verification\\n\\nWith $a = b = 2$, $c = 1$:\\n- $a+b+c = 5$\\n- $(a+b)^2 + (a+b+4c)^2 = 16 + 64 = 80$  \\n- Numerator: $5 \\\\cdot 80 = 400$\\n- $abc = 4$\\n- Quotient: $400/4 = 100$ ✓\\n\\n#### 100\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"100\", \"reference_number\": \"100\", \"raw_tail\": \" $a = b = 2$, $c = 1$:\\n- $a+b+c = 5$\\n- $(a+b)^2 + (a+b+4c)^2 = 16 + 64 = 80$  \\n- Numerator: $5 \\\\cdot 80 = 400$\\n- $abc = 4$\\n- Quotient: $400/4 = 100$ ✓\\n\\n#### 100\"}"
+  },
+  "timings": {
+    "agent_s": 31.749,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the minimum of $\\\\frac{(a+b+c)[(a+b)^2 + (a+b+4c)^2]}{abc}$ over positive reals.\\n' attempts=1"
+  ]
+}

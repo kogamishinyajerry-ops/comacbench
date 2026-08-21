@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q047",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The function is \\\\(f(x)=\\\\frac{2x}{x^2-5x-14}\\\\).  \\nFirst, factor the denominator:  \\n\\\\(x^2-5x-14 = (x-7)(x+2)\\\\).  \\n\\nVertical asymptotes occur where the denominator is zero and the numerator is non-zero.  \\nSetting denominator to zero: \\\\((x-7)(x+2)=0\\\\) gives \\\\(x=7\\\\) and \\\\(x=-2\\\\).  \\nBoth values make the numerator \\\\(2x\\\\) non-zero (at \\\\(x=7\\\\), \\\\(2\\\\cdot7=14\\\\neq0\\\\); at \\\\(x=-2\\\\), \\\\(2\\\\cdot(-2)=-4\\\\neq0\\\\)).  \\nThus the vertical asymptotes are \\\\(x=a=-2\\\\) and \\\\(x=b=7\\\\) (order does not matter). So \\\\(a+b = -2+7 = 5\\\\).  \\n\\nHorizontal asymptote: Compare the degrees of numerator and denominator.  \\nNumerator degree = 1, denominator degree = 2. Since the denominator’s degree is greater, the horizontal asymptote is \\\\(y=0\\\\). Hence \\\\(c=0\\\\).  \\n\\nTherefore, \\\\(a+b+c = 5+0 = 5\\\\).  \\n\\n\\\\boxed{5}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"5\", \"reference_number\": \"5\", \"raw_tail\": \"nator degree = 2. Since the denominator’s degree is greater, the horizontal asymptote is \\\\(y=0\\\\). Hence \\\\(c=0\\\\).  \\n\\nTherefore, \\\\(a+b+c = 5+0 = 5\\\\).  \\n\\n\\\\boxed{5}\"}"
+  },
+  "timings": {
+    "agent_s": 70.072,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The function is \\\\(f(x)=\\\\frac{2x}{x^2-5x-14}\\\\).  \\nFirst, factor the denominator:  \\n\\\\(x^2-5x-14 = (x-7)(x+2)\\\\).  \\n\\nVertica' attempts=1"
+  ]
+}

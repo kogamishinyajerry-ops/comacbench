@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q339",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the coefficients of both the original and reflected parabolas, then sum them.\\n\\n## Setting Up the Original Parabola\\n\\nSince the vertex is $(h, k)$, I'll write the parabola in vertex form:\\n$$y = a(x-h)^2 + k$$\\n\\nExpanding to standard form $y = ax^2 + bx + c$:\\n$$y = ax^2 - 2ahx + (ah^2 + k)$$\\n\\nSo:\\n- $a = a$\\n- $b = -2ah$  \\n- $c = ah^2 + k$\\n\\n## Reflecting About $y = k$\\n\\nReflection about the horizontal line $y = k$ maps $(x, y) \\\\to (x, 2k - y)$.\\n\\n**Substituting** $y = 2k - Y$ into the original equation:\\n$$2k - Y = a(x-h)^2 + k$$\\n$$Y = -a(x-h)^2 + k$$\\n\\nExpanding $y = -ax^2 + 2ahx + (-ah^2 + k)$:\\n- $d = -a$\\n- $e = 2ah$\\n- $f = -ah^2 + k$\\n\\n## Computing the Sum\\n\\n$$a + b + c + d + e + f$$\\n\\nGrouping like terms:\\n$$(a + d) + (b + e) + (c + f)$$\\n$$= (a - a) + (-2ah + 2ah) + (ah^2 - ah^2 + k + k)$$\\n$$= 0 + 0 + 2k$$\\n$$= 2k$$\\n\\n**Verification with example:** Let $a=1$, $h=2$, $k=3$. Original: $y = (x-2)^2 + 3 = x^2 - 4x + 7$. Reflected: $y = -(x-2)^2 + 3 = -x^2 + 4x - 1$. Sum: $(1-4+7) + (-1+4-1) = 4 + 2 = 6 = 2k$. ✓\\n\\n#### $2k$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2k\", \"reference_number\": \"2k\", \"raw_tail\": \"h=2$, $k=3$. Original: $y = (x-2)^2 + 3 = x^2 - 4x + 7$. Reflected: $y = -(x-2)^2 + 3 = -x^2 + 4x - 1$. Sum: $(1-4+7) + (-1+4-1) = 4 + 2 = 6 = 2k$. ✓\\n\\n#### $2k$\"}"
+  },
+  "timings": {
+    "agent_s": 4.009,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the coefficients of both the original and reflected parabolas, then sum them.\\n\\n#' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q060",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The polynomial \\\\(f(x) = x^3 - 3x^2 + 4x - 1\\\\) is a factor of \\\\(g(x) = x^9 + p x^6 + q x^3 + r\\\\). To find \\\\(p, q, r\\\\), we compute the remainder when \\\\(g(x)\\\\) is divided by \\\\(f(x)\\\\) and set it to zero.\\n\\nUsing the relation \\\\(x^3 \\\\equiv 3x^2 - 4x + 1 \\\\pmod{f(x)}\\\\), we reduce powers:\\n\\n\\\\[\\n\\\\begin{aligned}\\nx^3 &\\\\equiv 3x^2 - 4x + 1,\\\\\\\\\\nx^6 &\\\\equiv -5x^2 - 11x + 4,\\\\\\\\\\nx^9 &\\\\equiv -63x^2 + 190x - 54.\\n\\\\end{aligned}\\n\\\\]\\n\\nSubstituting into \\\\(g(x)\\\\):\\n\\n\\\\[\\ng(x) \\\\equiv (-63x^2 + 190x - 54) + p(-5x^2 - 11x + 4) + q(3x^2 - 4x + 1) + r.\\n\\\\]\\n\\nCollecting coefficients:\\n\\n\\\\[\\n\\\\begin{aligned}\\nx^2&:\\\\quad -63 -5p + 3q,\\\\\\\\\\nx&:\\\\quad 190 -11p -4q,\\\\\\\\\\n\\\\text{constant}&:\\\\quad -54 + 4p + q + r.\\n\\\\end{aligned}\\n\\\\]\\n\\nFor \\\\(f(x)\\\\) to divide \\\\(g(x)\\\\), these must all be zero:\\n\\n\\\\[\\n\\\\begin{cases}\\n-63 -5p + 3q = 0,\\\\\\\\\\n190 -11p -4q = 0,\\\\\\\\\\n-54 + 4p + q + r = 0.\\n\\\\end{cases}\\n\\\\]\\n\\nSolving the first two equations:\\n\\n\\\\[\\n\\\\begin{aligned}\\n-5p + 3q &= 63,\\\\\\\\\\n11p + 4q &= 190.\\n\\\\end{aligned}\\n\\\\]\\n\\nMultiply the first by \\\\(11\\\\) and the second by \\\\(5\\\\):\\n\\n\\\\[\\n\\\\begin{aligned}\\n-55p + 33q &= 693,\\\\\\\\\\n55p + 20q &= 950.\\n\\\\end{aligned}\\n\\\\]\\n\\nAdding gives \\\\(53q = 1643\\\\), so \\\\(q = 31\\\\). Substituting into \\\\(-5p + 3(31) = 63\\\\) yields \\\\(-5p + 93 = 63\\\\), hence \\\\(p = 6\\\\). Then from the third equation:\\n\\n\\\\[\\n4(6) + 31 + r = 54 \\\\implies 24 + 31 + r = 54 \\\\implies r = -1.\\n\\\\]\\n\\nThus the ordered triple is \\\\((p, q, r) = (6, 31, -1)\\\\).\\n\\n\\\\boxed{(6,31,-1)}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(6,31,-1)\", \"reference_number\": \"(6,31,-1)\", \"raw_tail\": \"third equation:\\n\\n\\\\[\\n4(6) + 31 + r = 54 \\\\implies 24 + 31 + r = 54 \\\\implies r = -1.\\n\\\\]\\n\\nThus the ordered triple is \\\\((p, q, r) = (6, 31, -1)\\\\).\\n\\n\\\\boxed{(6,31,-1)}\"}"
+  },
+  "timings": {
+    "agent_s": 123.894,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial \\\\(f(x) = x^3 - 3x^2 + 4x - 1\\\\) is a factor of \\\\(g(x) = x^9 + p x^6 + q x^3 + r\\\\). To find \\\\(p, q, r\\\\), we' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q401",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"**Step 1.** Let \\\\(z\\\\) be a complex number with \\\\(|z|=1\\\\). Write \\\\(z = e^{i\\\\theta}\\\\), \\\\(\\\\theta\\\\in\\\\mathbb{R}\\\\).\\n\\n**Step 2.** Compute the first term:\\n\\\\[\\n|1+z| = |1+e^{i\\\\theta}| = |e^{i\\\\theta/2}(e^{-i\\\\theta/2}+e^{i\\\\theta/2})| = |2\\\\cos(\\\\theta/2)| = 2|\\\\cos(\\\\theta/2)|.\\n\\\\]\\n\\n**Step 3.** For the second term, use the identity \\\\(1+z^3 = (1+z)(1-z+z^2)\\\\). If \\\\(z\\\\neq -1\\\\),\\n\\\\[\\n|1-z+z^2| = \\\\frac{|1+z^3|}{|1+z|}.\\n\\\\]\\nSince \\\\(|1+z^3| = |1+e^{3i\\\\theta}| = 2|\\\\cos(3\\\\theta/2)|\\\\), we have\\n\\\\[\\n|1-z+z^2| = \\\\frac{2|\\\\cos(3\\\\theta/2)|}{2|\\\\cos(\\\\theta/2)|} = \\\\frac{|\\\\cos(3\\\\theta/2)|}{|\\\\cos(\\\\theta/2)|}.\\n\\\\]\\n\\n**Step 4.** Thus for \\\\(z\\\\neq -1\\\\),\\n\\\\[\\nf(\\\\theta) = |1+z| + |1-z+z^2| = 2|\\\\cos(\\\\theta/2)| + \\\\frac{|\\\\cos(3\\\\theta/2)|}{|\\\\cos(\\\\theta/2)|}.\\n\\\\]\\n\\n**Step 5.** Use the triple‑angle formula \\\\(\\\\cos(3\\\\alpha) = 4\\\\cos^3\\\\alpha - 3\\\\cos\\\\alpha\\\\) with \\\\(\\\\alpha = \\\\theta/2\\\\):\\n\\\\[\\n\\\\cos(3\\\\theta/2) = \\\\cos\\\\alpha\\\\,(4\\\\cos^2\\\\alpha - 3).\\n\\\\]\\nTaking absolute values,\\n\\\\[\\n|\\\\cos(3\\\\theta/2)| = |\\\\cos(\\\\theta/2)|\\\\cdot|4\\\\cos^2(\\\\theta/2)-3|.\\n\\\\]\\n\\n**Step 6.** Let \\\\(c = \\\\cos(\\\\theta/2)\\\\) and set \\\\(u = |c| \\\\in [0,1]\\\\). Then\\n\\\\[\\nf = 2u + |4u^2-3|.\\n\\\\]\\n\\n**Step 7.** Analyse the function \\\\(g(u) = 2u + |4u^2-3|\\\\) on \\\\([0,1]\\\\).\\n\\n- When \\\\(0 \\\\le u \\\\le \\\\sqrt{3}/2\\\\), we have \\\\(4u^2-3 \\\\le 0\\\\), so \\\\(|4u^2-3| = 3-4u^2\\\\). Hence\\n  \\\\[\\n  g(u) = 3 + 2u - 4u^2.\\n  \\\\]\\n  This is a concave quadratic with vertex at \\\\(u = 1/4\\\\). Its value there is\\n  \\\\[\\n  g(1/4) = 3 + \\\\frac12 - 4\\\\cdot\\\\frac1{16} = 3.25 = \\\\frac{13}{4}.\\n  \\\\]\\n  At the endpoints: \\\\(g(0)=3\\\\), \\\\(g(\\\\sqrt{3}/2)=\\\\sqrt{3}\\\\approx1.732\\\\).\\n\\n- When \\\\(\\\\sqrt{3}/2 \\\\le u \\\\le 1\\\\), we have \\\\(4u^2-3 \\\\ge 0\\\\), so \\\\(|4u^2-3| = 4u^2-3\\\\). Hence\\n  \\\\[\\n  g(u) = 4u^2 + 2u - 3.\\n  \\\\]\\n  This is increasing on the interval, with maximum at \\\\(u=1\\\\):\\n  \\\\[\\n  g(1) = 4 + 2 - 3 = 3.\\n  \\\\]\\n\\n**Step 8.** The special case \\\\(z=-1\\\\) (i.e., \\\\(u=0\\\\)) gives directly\\n\\\\[\\n|1+z|+|1-z+z^2| = 0 + |3| = 3,\\n\\\\]\\nwhich is less than \\\\(\\\\frac{13}{4}\\\\).\\n\\n**Step 9.** Therefore the maximum value is \\\\(\\\\frac{13}{4}\\\\).\\n\\n\\\\[\\n\\\\boxed{\\\\frac{13}{4}}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{13}{4}\", \"reference_number\": \"\\\\frac{13}{4}\", \"raw_tail\": \"|1+z|+|1-z+z^2| = 0 + |3| = 3,\\n\\\\]\\nwhich is less than \\\\(\\\\frac{13}{4}\\\\).\\n\\n**Step 9.** Therefore the maximum value is \\\\(\\\\frac{13}{4}\\\\).\\n\\n\\\\[\\n\\\\boxed{\\\\frac{13}{4}}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 158.634,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='**Step 1.** Let \\\\(z\\\\) be a complex number with \\\\(|z|=1\\\\). Write \\\\(z = e^{i\\\\theta}\\\\), \\\\(\\\\theta\\\\in\\\\mathbb{R}\\\\).\\n\\n**Step 2.' attempts=1"
+  ]
+}

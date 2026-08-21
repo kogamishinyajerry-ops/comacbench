@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q099",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We are given \\\\(\\\\mathbf{a} = \\\\begin{pmatrix} 1 \\\\\\\\ 1 \\\\\\\\ 1 \\\\end{pmatrix}\\\\) and need \\\\(\\\\mathbf{v} = \\\\begin{pmatrix} x \\\\\\\\ y \\\\\\\\ z \\\\end{pmatrix}\\\\) such that\\n\\n\\\\[\\n\\\\mathbf{a} \\\\cdot \\\\mathbf{v} = x + y + z = 2 \\\\tag{1}\\n\\\\]\\n\\nand\\n\\n\\\\[\\n\\\\mathbf{a} \\\\times \\\\mathbf{v} = \\\\begin{pmatrix} 1 \\\\\\\\ -2 \\\\\\\\ 1 \\\\end{pmatrix}.\\n\\\\]\\n\\nCompute the cross product:\\n\\n\\\\[\\n\\\\mathbf{a} \\\\times \\\\mathbf{v} = \\\\begin{vmatrix}\\n\\\\mathbf{i} & \\\\mathbf{j} & \\\\mathbf{k} \\\\\\\\\\n1 & 1 & 1 \\\\\\\\\\nx & y & z\\n\\\\end{vmatrix}\\n= (z - y,\\\\; x - z,\\\\; y - x).\\n\\\\]\\n\\nSet equal to \\\\((1, -2, 1)\\\\):\\n\\n\\\\[\\nz - y = 1, \\\\qquad x - z = -2, \\\\qquad y - x = 1. \\\\tag{2}\\n\\\\]\\n\\nFrom \\\\(z - y = 1\\\\) we get \\\\(z = y + 1\\\\). From \\\\(x - z = -2\\\\) we get \\\\(x = z - 2 = (y+1) - 2 = y - 1\\\\). The third equation \\\\(y - x = y - (y-1) = 1\\\\) is automatically satisfied. Thus\\n\\n\\\\[\\n\\\\mathbf{v} = \\\\begin{pmatrix} y-1 \\\\\\\\ y \\\\\\\\ y+1 \\\\end{pmatrix}.\\n\\\\]\\n\\nSubstitute into the dot product condition (1):\\n\\n\\\\[\\n(y-1) + y + (y+1) = 3y = 2 \\\\quad \\\\Longrightarrow \\\\quad y = \\\\frac{2}{3}.\\n\\\\]\\n\\nThen \\\\(x = y - 1 = -\\\\frac{1}{3}\\\\) and \\\\(z = y + 1 = \\\\frac{5}{3}\\\\).\\n\\nTherefore\\n\\n\\\\[\\n\\\\mathbf{v} = \\\\begin{pmatrix} -\\\\frac{1}{3} \\\\\\\\[2pt] \\\\frac{2}{3} \\\\\\\\[2pt] \\\\frac{5}{3} \\\\end{pmatrix}.\\n\\\\]\\n\\nWe can verify:\\n\\n- Dot product: \\\\(-\\\\frac{1}{3} + \\\\frac{2}{3} + \\\\frac{5}{3} = \\\\frac{6}{3} = 2\\\\).\\n- Cross product: \\\\((z-y, x-z, y-x) = \\\\left(\\\\frac{5}{3}-\\\\frac{2}{3},\\\\; -\\\\frac{1}{3}-\\\\frac{5}{3},\\\\; \\\\frac{2}{3}-(-\\\\frac{1}{3})\\\\right) = (1, -2, 1)\\\\).\\n\\nThus the solution is correct.\\n\\n\\\\boxed{\\\\begin{pmatrix} -\\\\frac{1}{3} \\\\\\\\[2pt] \\\\frac{2}{3} \\\\\\\\[2pt] \\\\frac{5}{3} \\\\end{pmatrix}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} -\\\\frac{1}{3} \\\\\\\\[2pt] \\\\frac{2}{3} \\\\\\\\[2pt] \\\\frac{5}{3} \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} -1/3 \\\\\\\\ 2/3 \\\\\\\\ 5/3 \\\\end{pmatrix}\", \"raw_tail\": \"(-\\\\frac{1}{3})\\\\right) = (1, -2, 1)\\\\).\\n\\nThus the solution is correct.\\n\\n\\\\boxed{\\\\begin{pmatrix} -\\\\frac{1}{3} \\\\\\\\[2pt] \\\\frac{2}{3} \\\\\\\\[2pt] \\\\frac{5}{3} \\\\end{pmatrix}}\"}"
+  },
+  "timings": {
+    "agent_s": 57.251,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given \\\\(\\\\mathbf{a} = \\\\begin{pmatrix} 1 \\\\\\\\ 1 \\\\\\\\ 1 \\\\end{pmatrix}\\\\) and need \\\\(\\\\mathbf{v} = \\\\begin{pmatrix} x \\\\\\\\ y \\\\' attempts=1"
+  ]
+}

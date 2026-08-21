@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q095",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The projection of vector \\\\( \\\\mathbf{v} = \\\\begin{pmatrix} 2 \\\\\\\\ y \\\\\\\\ -5 \\\\end{pmatrix} \\\\) onto \\\\( \\\\mathbf{u} = \\\\begin{pmatrix} 1 \\\\\\\\ -2 \\\\\\\\ 1 \\\\end{pmatrix} \\\\) is given by the formula\\n\\\\[\\n\\\\operatorname{proj}_{\\\\mathbf{u}}(\\\\mathbf{v}) = \\\\frac{\\\\mathbf{v} \\\\cdot \\\\mathbf{u}}{\\\\mathbf{u} \\\\cdot \\\\mathbf{u}} \\\\, \\\\mathbf{u}.\\n\\\\]\\nWe are told that this projection equals \\\\( \\\\frac{5}{6} \\\\mathbf{u} \\\\), so\\n\\\\[\\n\\\\frac{\\\\mathbf{v} \\\\cdot \\\\mathbf{u}}{\\\\mathbf{u} \\\\cdot \\\\mathbf{u}} = \\\\frac{5}{6}.\\n\\\\]\\n\\nFirst compute \\\\(\\\\mathbf{u} \\\\cdot \\\\mathbf{u}\\\\):\\n\\\\[\\n\\\\mathbf{u} \\\\cdot \\\\mathbf{u} = 1^2 + (-2)^2 + 1^2 = 1 + 4 + 1 = 6.\\n\\\\]\\n\\nThus\\n\\\\[\\n\\\\frac{\\\\mathbf{v} \\\\cdot \\\\mathbf{u}}{6} = \\\\frac{5}{6} \\\\quad \\\\Longrightarrow \\\\quad \\\\mathbf{v} \\\\cdot \\\\mathbf{u} = 5.\\n\\\\]\\n\\nNow compute the dot product \\\\(\\\\mathbf{v} \\\\cdot \\\\mathbf{u}\\\\):\\n\\\\[\\n\\\\mathbf{v} \\\\cdot \\\\mathbf{u} = (2)(1) + y(-2) + (-5)(1) = 2 - 2y - 5 = -3 - 2y.\\n\\\\]\\n\\nSet this equal to 5:\\n\\\\[\\n-3 - 2y = 5 \\\\quad \\\\Longrightarrow \\\\quad -2y = 8 \\\\quad \\\\Longrightarrow \\\\quad y = -4.\\n\\\\]\\n\\nTherefore, the value of \\\\(y\\\\) is \\\\(-4\\\\).\\n\\n#### -4\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-4\", \"reference_number\": \"-4\", \"raw_tail\": \"et this equal to 5:\\n\\\\[\\n-3 - 2y = 5 \\\\quad \\\\Longrightarrow \\\\quad -2y = 8 \\\\quad \\\\Longrightarrow \\\\quad y = -4.\\n\\\\]\\n\\nTherefore, the value of \\\\(y\\\\) is \\\\(-4\\\\).\\n\\n#### -4\"}"
+  },
+  "timings": {
+    "agent_s": 43.684,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The projection of vector \\\\( \\\\mathbf{v} = \\\\begin{pmatrix} 2 \\\\\\\\ y \\\\\\\\ -5 \\\\end{pmatrix} \\\\) onto \\\\( \\\\mathbf{u} = \\\\begin{pmatr' attempts=1"
+  ]
+}

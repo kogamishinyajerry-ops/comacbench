@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q337",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find three consecutive integers where:\\n- Their product equals 120\\n- Their product divided by their mean equals 24\\n\\n## Setting Up the Problem\\n\\nLet the three consecutive integers be $(n-1)$, $n$, $(n+1)$, where $n$ is the middle integer (mean).\\n\\n**Product:** $(n-1) \\\\cdot n \\\\cdot (n+1) = n(n^2 - 1) = n^3 - n$\\n\\n**Mean:** $n$\\n\\n## Applying the Second Condition\\n\\nSince the product divided by the mean equals 24:\\n$$\\\\frac{n^3 - n}{n} = 24$$\\n\\n$$n^2 - 1 = 24$$\\n\\n$$n^2 = 25 \\\\implies n = \\\\pm 5$$\\n\\n## Checking Each Case\\n\\n**Case 1: $n = 5$**\\n- Integers: $4, 5, 6$\\n- Product: $4 \\\\cdot 5 \\\\cdot 6 = 120$ ✓\\n- Product ÷ mean: $120 \\\\div 5 = 24$ ✓\\n\\n**Case 2: $n = -5$**\\n- Integers: $-6, -5, -4$\\n- Product: $(-6)(-5)(-4) = -120 \\\\neq 120$ ✗\\n\\n## Conclusion\\n\\nOnly $n = 5$ satisfies both conditions, giving integers $4, 5, 6$.\\n\\nThe largest of the three consecutive integers is:\\n\\n$$\\\\boxed{6}$$\\n\\n#### 6\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"6\", \"reference_number\": \"6\", \"raw_tail\": \"$ ✗\\n\\n## Conclusion\\n\\nOnly $n = 5$ satisfies both conditions, giving integers $4, 5, 6$.\\n\\nThe largest of the three consecutive integers is:\\n\\n$$\\\\boxed{6}$$\\n\\n#### 6\"}"
+  },
+  "timings": {
+    "agent_s": 3.538,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find three consecutive integers where:\\n- Their product equals 120\\n- Their product div' attempts=1"
+  ]
+}

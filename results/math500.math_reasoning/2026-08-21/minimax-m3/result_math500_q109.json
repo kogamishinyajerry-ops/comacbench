@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q109",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to simplify the complex fraction using angle addition formulas.\\n\\n## Setting Up the Expression\\n\\n**Numerator:** I'll group terms strategically:\\n$$\\\\cos 5^\\\\circ \\\\cos 20^\\\\circ + \\\\cos 35^\\\\circ \\\\cos 50^\\\\circ - \\\\sin 5^\\\\circ \\\\sin 20^\\\\circ - \\\\sin 35^\\\\circ \\\\sin 50^\\\\circ$$\\n\\nRegrouping as pairs:\\n$$(\\\\cos 5^\\\\circ \\\\cos 20^\\\\circ - \\\\sin 5^\\\\circ \\\\sin 20^\\\\circ) + (\\\\cos 35^\\\\circ \\\\cos 50^\\\\circ - \\\\sin 35^\\\\circ \\\\sin 50^\\\\circ)$$\\n\\nUsing $\\\\cos(A+B) = \\\\cos A \\\\cos B - \\\\sin A \\\\sin B$:\\n$$= \\\\cos 25^\\\\circ + \\\\cos 85^\\\\circ$$\\n\\n**Denominator:** Similarly grouping:\\n$$(\\\\sin 5^\\\\circ \\\\cos 20^\\\\circ + \\\\cos 5^\\\\circ \\\\sin 20^\\\\circ) - (\\\\sin 35^\\\\circ \\\\cos 50^\\\\circ + \\\\cos 35^\\\\circ \\\\sin 50^\\\\circ)$$\\n\\nUsing $\\\\sin(A+B) = \\\\sin A \\\\cos B + \\\\cos A \\\\sin B$:\\n$$= \\\\sin 25^\\\\circ - \\\\sin 85^\\\\circ$$\\n\\n## Applying Sum-to-Product Formulas\\n\\nWith $A = 25^\\\\circ$ and $B = 85^\\\\circ$:\\n\\n$$\\\\cos 25^\\\\circ + \\\\cos 85^\\\\circ = 2\\\\cos 55^\\\\circ \\\\cos(-30^\\\\circ) = 2\\\\cos 55^\\\\circ \\\\cos 30^\\\\circ$$\\n\\n$$\\\\sin 25^\\\\circ - \\\\sin 85^\\\\circ = 2\\\\cos 55^\\\\circ \\\\sin(-30^\\\\circ) = -2\\\\cos 55^\\\\circ \\\\sin 30^\\\\circ$$\\n\\n## Computing the Ratio\\n\\n$$\\\\tan\\\\theta = \\\\frac{2\\\\cos 55^\\\\circ \\\\cos 30^\\\\circ}{-2\\\\cos 55^\\\\circ \\\\sin 30^\\\\circ} = -\\\\cot 30^\\\\circ = -\\\\sqrt{3}$$\\n\\n## Finding θ\\n\\nSince $\\\\tan\\\\theta = -\\\\sqrt{3}$, the solutions are $\\\\theta = 120^\\\\circ + 180^\\\\circ k$.\\n\\nThe least positive value is $\\\\theta = 120^\\\\circ$.\\n\\n**Verification:** $\\\\tan 120^\\\\circ = -\\\\sqrt{3}$ ✓\\n\\n#### 120\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"120\", \"reference_number\": \"120^\\\\circ\", \"raw_tail\": \"solutions are $\\\\theta = 120^\\\\circ + 180^\\\\circ k$.\\n\\nThe least positive value is $\\\\theta = 120^\\\\circ$.\\n\\n**Verification:** $\\\\tan 120^\\\\circ = -\\\\sqrt{3}$ ✓\\n\\n#### 120\"}"
+  },
+  "timings": {
+    "agent_s": 7.691,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to simplify the complex fraction using angle addition formulas.\\n\\n## Setting Up the Expre' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_120",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def maximum(arr, k):\\n    \\\"\\\"\\\"\\n    Given an array arr of integers and a positive integer k, return a sorted list \\n    of length k with the maximum k numbers in arr.\\n\\n    Example 1:\\n\\n        Input: arr = [-3, -4, 5], k = 3\\n        Output: [-4, -3, 5]\\n\\n    Example 2:\\n\\n        Input: arr = [4, -4, 4], k = 2\\n        Output: [4, 4]\\n\\n    Example 3:\\n\\n        Input: arr = [-3, 2, 1, 2, -1, -2, 1], k = 1\\n        Output: [2]\\n\\n    Note:\\n        1. The length of the array will be in the range of [1, 1000].\\n        2. The elements in the array will be in the range of [-1000, 1000].\\n        3. 0 <= k <= len(arr)\\n    \\\"\\\"\\\"\\n    # Sort in descending order to get the k largest values first,\\n    # then sort those k values in ascending order for the final result.\\n    return sorted(sorted(arr, reverse=True)[:k])\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 12, \"cases_total\": 12, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 9.58,
+    "setup_s": 0.0,
+    "grade_s": 0.152
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

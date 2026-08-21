@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q164",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to simplify $\\\\tan 100^\\\\circ + 4\\\\sin 100^\\\\circ$.\\n\\n## Setting Up the Expression\\n\\nI'll combine the terms over a common denominator:\\n$$\\\\tan 100^\\\\circ + 4\\\\sin 100^\\\\circ = \\\\frac{\\\\sin 100^\\\\circ}{\\\\cos 100^\\\\circ} + \\\\frac{4\\\\sin 100^\\\\circ \\\\cos 100^\\\\circ}{\\\\cos 100^\\\\circ}$$\\n\\n$$= \\\\frac{\\\\sin 100^\\\\circ + 2\\\\sin 200^\\\\circ}{\\\\cos 100^\\\\circ}$$\\n\\n## Applying Reduction Formulas\\n\\nUsing $\\\\sin 200^\\\\circ = -\\\\sin 20^\\\\circ$, $\\\\sin 100^\\\\circ = \\\\sin 80^\\\\circ$, and $\\\\cos 100^\\\\circ = -\\\\cos 80^\\\\circ$:\\n\\n$$= \\\\frac{\\\\sin 80^\\\\circ - 2\\\\sin 20^\\\\circ}{-\\\\cos 80^\\\\circ} = -\\\\frac{\\\\sin 80^\\\\circ - 2\\\\sin 20^\\\\circ}{\\\\cos 80^\\\\circ}$$\\n\\n## Simplifying the Numerator\\n\\nExpanding $\\\\sin 80^\\\\circ = \\\\sin(60^\\\\circ + 20^\\\\circ)$:\\n$$\\\\sin 80^\\\\circ = \\\\frac{\\\\sqrt{3}}{2}\\\\cos 20^\\\\circ + \\\\frac{1}{2}\\\\sin 20^\\\\circ$$\\n\\nSo:\\n$$\\\\sin 80^\\\\circ - 2\\\\sin 20^\\\\circ = \\\\frac{\\\\sqrt{3}}{2}\\\\cos 20^\\\\circ - \\\\frac{3}{2}\\\\sin 20^\\\\circ$$\\n\\nFactoring out $\\\\sqrt{3}$:\\n$$= \\\\sqrt{3}\\\\left(\\\\frac{1}{2}\\\\cos 20^\\\\circ - \\\\frac{\\\\sqrt{3}}{2}\\\\sin 20^\\\\circ\\\\right) = \\\\sqrt{3}\\\\cos(20^\\\\circ + 60^\\\\circ) = \\\\sqrt{3}\\\\cos 80^\\\\circ$$\\n\\n## Final Computation\\n\\nSubstituting back:\\n$$-\\\\frac{\\\\sin 80^\\\\circ - 2\\\\sin 20^\\\\circ}{\\\\cos 80^\\\\circ} = -\\\\frac{\\\\sqrt{3}\\\\cos 80^\\\\circ}{\\\\cos 80^\\\\circ} = -\\\\sqrt{3}$$\\n\\n**Verification numerically:** $\\\\tan 100^\\\\circ \\\\approx -5.671$ and $4\\\\sin 100^\\\\circ \\\\approx 3.939$, giving $-1.732 \\\\approx -\\\\sqrt{3}$ ✓\\n\\n#### $-\\\\sqrt{3}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-\\\\sqrt{3}\", \"reference_number\": \"-\\\\sqrt{3}\", \"raw_tail\": \"t{3}$$\\n\\n**Verification numerically:** $\\\\tan 100^\\\\circ \\\\approx -5.671$ and $4\\\\sin 100^\\\\circ \\\\approx 3.939$, giving $-1.732 \\\\approx -\\\\sqrt{3}$ ✓\\n\\n#### $-\\\\sqrt{3}$\"}"
+  },
+  "timings": {
+    "agent_s": 6.098,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"Looking at this problem, I need to simplify $\\\\tan 100^\\\\circ + 4\\\\sin 100^\\\\circ$.\\n\\n## Setting Up the Expression\\n\\nI'll comb\" attempts=1"
+  ]
+}

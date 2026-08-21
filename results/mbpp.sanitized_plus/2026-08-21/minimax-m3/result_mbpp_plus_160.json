@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_160",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef find_solution(a, b, n):\\n    if a == 0 and b == 0:\\n        return (0, 0) if n == 0 else None\\n    \\n    if a == 0:\\n        if n % b == 0:\\n            return (0, n // b)\\n        else:\\n            return None\\n    \\n    if b == 0:\\n        if n % a == 0:\\n            return (n // a, 0)\\n        else:\\n            return None\\n    \\n    g = math.gcd(abs(a), abs(b))\\n    if n % g != 0:\\n        return None\\n    \\n    # Extended Euclidean algorithm for positive integers\\n    def egcd(a, b):\\n        if b == 0:\\n            return (a, 1, 0)\\n        else:\\n            g, x1, y1 = egcd(b, a % b)\\n            x = y1\\n            y = x1 - (a // b) * y1\\n            return (g, x, y)\\n    \\n    abs_a, abs_b = abs(a), abs(b)\\n    _, x_prime, y_prime = egcd(abs_a, abs_b)\\n    \\n    # Adjust signs to get solution for original a, b\\n    x0 = x_prime if a > 0 else -x_prime\\n    y0 = y_prime if b > 0 else -y_prime\\n    \\n    # Scale to get solution for n\\n    scale = n // g\\n    x = x0 * scale\\n    y = y0 * scale\\n    \\n    # Adjust x to canonical range [0, |b/g|-1]\\n    step_x = b // g\\n    if step_x != 0:\\n        abs_step = abs(step_x)\\n        x_new = x % abs_step\\n        t = (x_new - x) // step_x\\n        x = x_new\\n        y = y - t * (a // g)\\n    \\n    return (x, y)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [25, 123, 7]\"}], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 111.871,
+    "setup_s": 0.0,
+    "grade_s": 0.143
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

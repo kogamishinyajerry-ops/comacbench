@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q129",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the area of triangle $ACD$ where $D$ is the foot of the altitude from $C$ to $AB$.\\n\\n## Setting Up Coordinates\\n\\nFirst, I notice that $AC^2 + BC^2 = 64 + 225 = 289 = 17^2 = AB^2$, so triangle $ABC$ is a **right triangle** with the right angle at $C$.\\n\\nI'll place $A = (0, 0)$ and $B = (17, 0)$, then find $C = (x, y)$ using:\\n- $x^2 + y^2 = 64$ (from $AC = 8$)\\n- $(x-17)^2 + y^2 = 225$ (from $BC = 15$)\\n\\n## Finding Point C\\n\\nSubtracting the equations:\\n$$(x-17)^2 - x^2 = 161$$\\n$$-34x + 289 = 161$$\\n$$x = \\\\frac{128}{34} = \\\\frac{64}{17}$$\\n\\nThen:\\n$$y^2 = 64 - \\\\left(\\\\frac{64}{17}\\\\right)^2 = \\\\frac{64 \\\\cdot 289 - 4096}{289} = \\\\frac{14400}{289}$$\\n$$y = \\\\frac{120}{17}$$\\n\\nSo $C = \\\\left(\\\\frac{64}{17}, \\\\frac{120}{17}\\\\right)$.\\n\\n## Finding Point D\\n\\nSince $D$ is the foot of the perpendicular from $C$ to $AB$ (the x-axis):\\n$$D = \\\\left(\\\\frac{64}{17}, 0\\\\right)$$\\n\\nThis gives:\\n- $AD = \\\\frac{64}{17}$\\n- $CD = \\\\frac{120}{17}$\\n\\n## Computing the Area\\n\\nTriangle $ACD$ is right-angled at $D$, so:\\n$$\\\\text{Area} = \\\\frac{1}{2} \\\\cdot AD \\\\cdot CD = \\\\frac{1}{2} \\\\cdot \\\\frac{64}{17} \\\\cdot \\\\frac{120}{17} = \\\\frac{3840}{289}$$\\n\\n**Verification:** The total area is $\\\\frac{1}{2}(8)(15) = 60 = \\\\frac{17340}{289}$, and the area of $\\\\triangle BCD = \\\\frac{1}{2}(17 - \\\\frac{64}{17})(\\\\frac{120}{17}) = \\\\frac{13500}{289}$. Sum: $\\\\frac{3840 + 13500}{289} = \\\\frac{17340}{289}$ ✓\\n\\n$$\\\\boxed{\\\\dfrac{3840}{289}}$$\\n\\n#### 3840/289\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\dfrac{3840}{289}\", \"reference_number\": \"\\\\frac{3840}{289}\", \"raw_tail\": \"2}(17 - \\\\frac{64}{17})(\\\\frac{120}{17}) = \\\\frac{13500}{289}$. Sum: $\\\\frac{3840 + 13500}{289} = \\\\frac{17340}{289}$ ✓\\n\\n$$\\\\boxed{\\\\dfrac{3840}{289}}$$\\n\\n#### 3840/289\"}"
+  },
+  "timings": {
+    "agent_s": 10.722,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the area of triangle $ACD$ where $D$ is the foot of the altitude from $C$ to $AB' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q166",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the angle $\\\\angle BAC$ where $B$ is a vertex of the regular heptagon adjacent to $A$, and $C$ is the vertex of the square adjacent to $A$ (both on the same side of side $\\\\overline{AD}$).\\n\\n## Setting Up the Problem\\n\\n**Interior angles:**\\n- Regular heptagon interior angle: $\\\\frac{(7-2) \\\\cdot 180°}{7} = \\\\frac{900°}{7}$\\n- Square interior angle: $90°$\\n\\n**Position of vertices:** From the Asymptote code, going around the heptagon counterclockwise, the vertices $B$, $A$, $D$ are consecutive. Setting up coordinates with $\\\\omega = e^{2\\\\pi i/7}$:\\n- $A = i\\\\omega^3$\\n- $B = i\\\\omega^2$  \\n- $D = i\\\\omega^4$\\n\\n## Computing the Vectors\\n\\n**Vector $\\\\vec{AC}$:** Since $C = A + i(D-A)$ (rotating $D-A$ by 90° CCW):\\n$$\\\\vec{AC} = i(D-A) = i \\\\cdot i(\\\\omega^4 - \\\\omega^3) = -(\\\\omega^4 - \\\\omega^3) = \\\\omega^3(1-\\\\omega)$$\\n\\n**Vector $\\\\vec{AB}$:**\\n$$\\\\vec{AB} = B - A = i(\\\\omega^2 - \\\\omega^3) = i\\\\omega^2(1-\\\\omega)$$\\n\\n## Finding the Angle\\n\\nComputing the ratio:\\n$$\\\\frac{\\\\vec{AC}}{\\\\vec{AB}} = \\\\frac{\\\\omega^3(1-\\\\omega)}{i\\\\omega^2(1-\\\\omega)} = \\\\frac{\\\\omega}{i} = -i\\\\omega$$\\n\\nThe argument is:\\n$$\\\\arg(-i\\\\omega) = \\\\arg(-i) + \\\\arg(\\\\omega) = -\\\\frac{\\\\pi}{2} + \\\\frac{2\\\\pi}{7} = -\\\\frac{3\\\\pi}{14}$$\\n\\nThe magnitude of this angle is $\\\\frac{3\\\\pi}{14} = \\\\frac{270°}{7}$.\\n\\n## Verification\\n\\nSetting $\\\\theta = 2\\\\pi/7$:\\n- $A \\\\approx (-0.434, -0.901)$\\n- $B \\\\approx (-0.975, -0.222)$  \\n- $C \\\\approx (-0.434, -0.034)$\\n\\nComputing the angle directly:\\n- Direction of $\\\\vec{AB}$: $128.57°$\\n- Direction of $\\\\vec{AC}$: $90°$\\n- $\\\\angle BAC = 128.57° - 90° = 38.57°$ ✓\\n\\n**Algebraic verification:** Since both rays point to the same side of $\\\\overline{AD}$:\\n$$\\\\angle BAC = \\\\frac{900°}{7} - 90° = \\\\frac{900° - 630°}{7} = \\\\frac{270°}{7}$$\\n\\n#### $\\\\frac{270}{7}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{270}{7}\", \"reference_number\": \"\\\\frac{270}7\\\\text{ degrees}\", \"raw_tail\": \" Since both rays point to the same side of $\\\\overline{AD}$:\\n$$\\\\angle BAC = \\\\frac{900°}{7} - 90° = \\\\frac{900° - 630°}{7} = \\\\frac{270°}{7}$$\\n\\n#### $\\\\frac{270}{7}$\"}"
+  },
+  "timings": {
+    "agent_s": 161.453,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the angle $\\\\angle BAC$ where $B$ is a vertex of the regular heptagon adjacent to' attempts=1"
+  ]
+}

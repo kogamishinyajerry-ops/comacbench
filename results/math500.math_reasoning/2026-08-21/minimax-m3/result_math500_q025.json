@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q025",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find all integers $n$ where $f(n) = n$.\\n\\n## Setting Up the Function\\n\\n**Finding $f(0)$:** Setting $x = y = 0$:\\n$$2f(0) = f(0) - 1 \\\\implies f(0) = -1$$\\n\\n**Finding a recurrence:** Setting $y = 1$:\\n$$f(x) + 1 = f(x+1) - x - 1 \\\\implies f(x+1) = f(x) + x + 2$$\\n\\n**Solving the functional equation:** I assume $f(x) = \\\\frac{x^2}{2} + ax + b$ and substitute:\\n$$\\\\frac{x^2+y^2}{2} + a(x+y) + 2b = \\\\frac{x^2+y^2}{2} + xy + a(x+y) + b - 1$$\\n\\nThis gives $b = -1$, so $f(x) = \\\\frac{x^2}{2} + ax - 1$.\\n\\nUsing $f(1) = 1$: $\\\\frac{1}{2} + a - 1 = 1$, so $a = \\\\frac{3}{2}$.\\n\\nTherefore: $$f(x) = \\\\frac{x^2 + 3x - 2}{2}$$\\n\\n**Verification:** The general solution is $f(x) = \\\\frac{x^2+3x-2}{2} + g(x)$ where $g$ is additive. Since $g(1) = 0$, $g(n) = 0$ for all integers, confirming the formula.\\n\\n## Computing Values\\n\\nUsing the recurrence $f(n+1) = f(n) + n + 2$:\\n- $f(0) = -1$\\n- $f(1) = 1$ ✓\\n- $f(2) = 4$\\n- $f(-1) = -2$ (since $f(0) = f(-1) + 1$)\\n- $f(-2) = f(-1) = -2$\\n- $f(-3) = f(-2) + 1 = -1$\\n- $f(-4) = f(-3) + 2 = 1$\\n\\n## Solving $f(n) = n$\\n\\nSetting $\\\\frac{n^2 + 3n - 2}{2} = n$:\\n$$n^2 + 3n - 2 = 2n$$\\n$$n^2 + n - 2 = 0$$\\n$$(n+2)(n-1) = 0$$\\n\\nThis gives $n = -2$ or $n = 1$.\\n\\n**Checking values:**\\n- $n = 1$: $f(1) = 1$ ✓\\n- $n = -2$: $f(-2) = -2$ ✓\\n- $n = 0$: $f(0) = -1 \\\\neq 0$\\n- $n = 2$: $f(2) = 4 \\\\neq 2$\\n- For $|n| \\\\geq 3$, the parabola grows faster than $n$, giving no additional solutions.\\n\\n#### -2,1\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-2,1\", \"reference_number\": \"1,-2\", \"raw_tail\": \" ✓\\n- $n = 0$: $f(0) = -1 \\\\neq 0$\\n- $n = 2$: $f(2) = 4 \\\\neq 2$\\n- For $|n| \\\\geq 3$, the parabola grows faster than $n$, giving no additional solutions.\\n\\n#### -2,1\"}"
+  },
+  "timings": {
+    "agent_s": 41.743,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find all integers $n$ where $f(n) = n$.\\n\\n## Setting Up the Function\\n\\n**Finding $f(0)$' attempts=1"
+  ]
+}

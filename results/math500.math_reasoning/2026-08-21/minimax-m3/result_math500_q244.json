@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q244",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the number of sides of a convex polygon where the sum of all but one interior angle equals 1070°.\\n\\n## Setting Up the Equation\\n\\nFor a convex polygon with $n$ sides, the sum of all interior angles is:\\n$$S = (n-2) \\\\times 180°$$\\n\\nIf the missing angle is $x$, then:\\n$$(n-2) \\\\times 180° - x = 1070°$$\\n\\nSolving for $x$:\\n$$x = (n-2) \\\\times 180° - 1070°$$\\n\\n## Applying the Convexity Constraint\\n\\nFor a convex polygon, every interior angle must satisfy:\\n$$0° < x < 180°$$\\n\\nSubstituting:\\n$$0° < (n-2) \\\\times 180° - 1070° < 180°$$\\n\\nAdding 1070° to all parts:\\n$$1070° < (n-2) \\\\times 180° < 1250°$$\\n\\nDividing by 180°:\\n$$5.944... < n-2 < 6.944...$$\\n\\nSince $n-2$ must be an integer:\\n$$n-2 = 6 \\\\implies n = 8$$\\n\\n## Verification\\n\\nFor an octagon ($n = 8$):\\n- Total sum of interior angles: $(8-2) \\\\times 180° = 1080°$\\n- Missing angle: $1080° - 1070° = 10°$\\n- Since $0° < 10° < 180°$, this satisfies the convex polygon requirement ✓\\n\\n**Checking other values:**\\n- $n = 7$: Sum is only $900°$, which is less than $1070°$ — impossible\\n- $n = 9$: Missing angle would be $1260° - 1070° = 190°$, which exceeds $180°$ — not convex\\n\\n#### 8\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8\", \"reference_number\": \"8\", \"raw_tail\": \" Sum is only $900°$, which is less than $1070°$ — impossible\\n- $n = 9$: Missing angle would be $1260° - 1070° = 190°$, which exceeds $180°$ — not convex\\n\\n#### 8\"}"
+  },
+  "timings": {
+    "agent_s": 5.393,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the number of sides of a convex polygon where the sum of all but one interior an' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q364",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The reflection of a point \\\\((x, y)\\\\) about \\\\((4,1)\\\\) is given by \\\\((x', y') = (8 - x, 2 - y)\\\\). Substituting \\\\(x = 8 - x'\\\\) and \\\\(y = 2 - y'\\\\) into the circle equation \\\\(x^2 + y^2 = 25\\\\) yields\\n\\n\\\\[\\n(8 - x')^2 + (2 - y')^2 = 25.\\n\\\\]\\n\\nExpanding and simplifying:\\n\\n\\\\[\\n64 - 16x' + x'^2 + 4 - 4y' + y'^2 = 25 \\\\implies x'^2 + y'^2 - 16x' - 4y' + 68 = 25 \\\\implies x'^2 + y'^2 - 16x' - 4y' + 43 = 0.\\n\\\\]\\n\\nRenaming \\\\((x', y')\\\\) as \\\\((x, y)\\\\), the equation becomes\\n\\n\\\\[\\nx^2 + y^2 - 16x - 4y + 43 = 0.\\n\\\\]\\n\\nComparing with the required form \\\\(x^2 + a y^2 + b x + c y + d = 0\\\\) gives \\\\(a = 1\\\\), \\\\(b = -16\\\\), \\\\(c = -4\\\\), and \\\\(d = 43\\\\).\\n\\nThus the ordered quadruple is \\\\((a, b, c, d) = (1, -16, -4, 43)\\\\).\\n\\n\\\\boxed{(1,-16,-4,43)}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(1,-16,-4,43)\", \"reference_number\": \"(1,-16,-4,43)\", \"raw_tail\": \"y + d = 0\\\\) gives \\\\(a = 1\\\\), \\\\(b = -16\\\\), \\\\(c = -4\\\\), and \\\\(d = 43\\\\).\\n\\nThus the ordered quadruple is \\\\((a, b, c, d) = (1, -16, -4, 43)\\\\).\\n\\n\\\\boxed{(1,-16,-4,43)}\"}"
+  },
+  "timings": {
+    "agent_s": 49.969,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"The reflection of a point \\\\((x, y)\\\\) about \\\\((4,1)\\\\) is given by \\\\((x', y') = (8 - x, 2 - y)\\\\). Substituting \\\\(x = 8 - x\" attempts=1"
+  ]
+}

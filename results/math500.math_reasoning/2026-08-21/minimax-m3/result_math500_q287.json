@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q287",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find when both gears simultaneously return to their starting position.\\n\\n## Setting Up the Rates\\n\\n**Gear 1:** Turns 33⅓ = 100/3 times per minute\\n\\nConverting to revolutions per second:\\n$$\\\\frac{100}{3} \\\\div 60 = \\\\frac{100}{180} = \\\\frac{5}{9} \\\\text{ rev/sec}$$\\n\\n**Gear 2:** Turns 45 times per minute\\n\\nConverting to revolutions per second:\\n$$45 \\\\div 60 = \\\\frac{3}{4} \\\\text{ rev/sec}$$\\n\\n## Finding the Time\\n\\nAfter $T$ seconds:\\n- Gear 1 completes: $\\\\frac{5T}{9}$ revolutions\\n- Gear 2 completes: $\\\\frac{3T}{4}$ revolutions\\n\\nFor both marks to point north, I need **both** quantities to be integers.\\n\\n**Condition for Gear 1:** $\\\\frac{5T}{9} \\\\in \\\\mathbb{Z}$ → since gcd(5,9) = 1, need $T$ to be a multiple of **9**.\\n\\n**Condition for Gear 2:** $\\\\frac{3T}{4} \\\\in \\\\mathbb{Z}$ → since gcd(3,4) = 1, need $T$ to be a multiple of **4**.\\n\\n## Computing the LCM\\n\\nThe smallest time satisfying both conditions is:\\n$$\\\\text{lcm}(9, 4) = 36 \\\\text{ seconds}$$\\n\\n## Verification\\n\\nAt $T = 36$ seconds:\\n- Gear 1: $\\\\frac{5(36)}{9} = 20$ revolutions ✓\\n- Gear 2: $\\\\frac{3(36)}{4} = 27$ revolutions ✓\\n\\nBoth integers, so both marks point due north.\\n\\n#### 36\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"36\", \"reference_number\": \"36\", \"raw_tail\": \"$ seconds:\\n- Gear 1: $\\\\frac{5(36)}{9} = 20$ revolutions ✓\\n- Gear 2: $\\\\frac{3(36)}{4} = 27$ revolutions ✓\\n\\nBoth integers, so both marks point due north.\\n\\n#### 36\"}"
+  },
+  "timings": {
+    "agent_s": 6.939,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find when both gears simultaneously return to their starting position.\\n\\n## Setting Up' attempts=1"
+  ]
+}

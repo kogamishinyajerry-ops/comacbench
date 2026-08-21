@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_126",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from math import gcd\\n\\ndef sum(a, b):\\n    # Common divisors of a and b are exactly the divisors of gcd(a, b)\\n    g = gcd(a, b)\\n    total = 0\\n    i = 1\\n    while i * i <= g:\\n        if g % i == 0:\\n            total += i\\n            if i != g // i:\\n                total += g // i\\n        i += 1\\n    return total\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 8.91,
+    "setup_s": 0.0,
+    "grade_s": 0.171
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s"
+  ]
+}

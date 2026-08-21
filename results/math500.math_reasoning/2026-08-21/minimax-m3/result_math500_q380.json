@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q380",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find where the fraction is negative.\\n\\n## Setting Up the Analysis\\n\\n**Numerator:** $|x^2 - 81| \\\\geq 0$ always (absolute value), with $|x^2 - 81| = 0$ only when $x = \\\\pm 9$.\\n\\n**For the fraction to be strictly negative**, I need:\\n- Numerator $> 0$ (if numerator $= 0$, the fraction equals $0$, which is not $< 0$)\\n- Denominator $< 0$\\n\\n## Solving Each Condition\\n\\n**Condition 1:** $|x^2 - 81| > 0 \\\\iff x \\\\neq \\\\pm 9$\\n\\n**Condition 2:** $x^2 - 36x < 0$\\n$$x(x - 36) < 0 \\\\iff 0 < x < 36$$\\n\\n## Combining Conditions\\n\\nI need $0 < x < 36$ AND $x \\\\neq \\\\pm 9$.\\n\\nSince $-9 \\\\notin (0, 36)$, the only excluded point in this interval is $x = 9$.\\n\\n## Verification\\n\\n- $x = 1$: $\\\\frac{|1-81|}{1-36} = \\\\frac{80}{-35} < 0$ ✓\\n- $x = 9$: $\\\\frac{0}{-243} = 0$ (not $< 0$) ✓ (correctly excluded)\\n- $x = 10$: $\\\\frac{19}{-260} < 0$ ✓\\n- $x = 37$: $\\\\frac{1288}{37} > 0$ ✓ (correctly excluded)\\n\\n## Solution\\n\\n$$x \\\\in (0, 9) \\\\cup (9, 36)$$\\n\\n$\\\\boxed{(0, 9) \\\\cup (9, 36)}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(0, 9) \\\\cup (9, 36)\", \"reference_number\": \"(0,9) \\\\cup (9,36)\", \"raw_tail\": \"10$: $\\\\frac{19}{-260} < 0$ ✓\\n- $x = 37$: $\\\\frac{1288}{37} > 0$ ✓ (correctly excluded)\\n\\n## Solution\\n\\n$$x \\\\in (0, 9) \\\\cup (9, 36)$$\\n\\n$\\\\boxed{(0, 9) \\\\cup (9, 36)}$\"}"
+  },
+  "timings": {
+    "agent_s": 12.744,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find where the fraction is negative.\\n\\n## Setting Up the Analysis\\n\\n**Numerator:** $|x^' attempts=1"
+  ]
+}

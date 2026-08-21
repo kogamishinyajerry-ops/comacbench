@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q289",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We apply the Cauchy-Schwarz inequality to the vectors $(\\\\sqrt{a},\\\\sqrt{b},\\\\sqrt{c},\\\\sqrt{d})$ and $\\\\left(\\\\frac{1}{\\\\sqrt{a}},\\\\frac{1}{\\\\sqrt{b}},\\\\frac{1}{\\\\sqrt{c}},\\\\frac{1}{\\\\sqrt{d}}\\\\right)$:\\n\\n\\\\[\\n(a+b+c+d)\\\\left(\\\\frac{1}{a}+\\\\frac{1}{b}+\\\\frac{1}{c}+\\\\frac{1}{d}\\\\right) \\\\ge \\\\left( \\\\sqrt{a}\\\\cdot\\\\frac{1}{\\\\sqrt{a}} + \\\\sqrt{b}\\\\cdot\\\\frac{1}{\\\\sqrt{b}} + \\\\sqrt{c}\\\\cdot\\\\frac{1}{\\\\sqrt{c}} + \\\\sqrt{d}\\\\cdot\\\\frac{1}{\\\\sqrt{d}} \\\\right)^2 = (1+1+1+1)^2 = 16.\\n\\\\]\\n\\nEquality holds when $\\\\frac{\\\\sqrt{a}}{1/\\\\sqrt{a}} = \\\\frac{\\\\sqrt{b}}{1/\\\\sqrt{b}} = \\\\frac{\\\\sqrt{c}}{1/\\\\sqrt{c}} = \\\\frac{\\\\sqrt{d}}{1/\\\\sqrt{d}}$, i.e., when $a=b=c=d$. Since $a,b,c,d$ are positive real numbers, this condition is achievable (e.g., $a=b=c=d=1$). Therefore the minimum value is $16$.\\n\\nAlternatively, by the AM-HM inequality:\\n\\n\\\\[\\n\\\\frac{a+b+c+d}{4} \\\\ge \\\\frac{4}{\\\\frac{1}{a}+\\\\frac{1}{b}+\\\\frac{1}{c}+\\\\frac{1}{d}},\\n\\\\]\\n\\nwhich rearranges to the same bound.\\n\\nThus the minimum value is\\n\\n\\\\[\\n\\\\boxed{16}.\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"16\", \"reference_number\": \"16\", \"raw_tail\": \"a+b+c+d}{4} \\\\ge \\\\frac{4}{\\\\frac{1}{a}+\\\\frac{1}{b}+\\\\frac{1}{c}+\\\\frac{1}{d}},\\n\\\\]\\n\\nwhich rearranges to the same bound.\\n\\nThus the minimum value is\\n\\n\\\\[\\n\\\\boxed{16}.\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 14.19,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We apply the Cauchy-Schwarz inequality to the vectors $(\\\\sqrt{a},\\\\sqrt{b},\\\\sqrt{c},\\\\sqrt{d})$ and $\\\\left(\\\\frac{1}{\\\\sqrt{' attempts=1"
+  ]
+}

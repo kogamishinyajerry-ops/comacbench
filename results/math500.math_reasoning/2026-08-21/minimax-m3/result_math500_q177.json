@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q177",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the angles of triangle PQS using the positions of centers P, Q, R, S.\\n\\n## Setting Up Coordinates\\n\\nFrom the diagram:\\n- R = (0, 0)\\n- Q = (-2, 0)  \\n- S = (2, 0)\\n- P = (1, √3)\\n\\n## Verifying the Configuration\\n\\nSince each circle has radius 1, two circles are externally tangent when their centers are distance 2 apart. Checking distances:\\n- PR = √(1² + (√3)²) = √4 = 2 ✓\\n- QR = 2 ✓\\n- RS = 2 ✓\\n- PS = √(1² + (√3)²) = 2 ✓\\n- PQ = √(3² + (√3)²) = √12 = 2√3\\n- QS = 4\\n\\n## Finding the Sides of Triangle PQS\\n\\n- PQ = 2√3\\n- PS = 2\\n- QS = 4\\n\\n## Finding the Angles\\n\\n**Checking the Pythagorean relationship:**\\n$$PQ^2 + PS^2 = (2\\\\sqrt{3})^2 + 2^2 = 12 + 4 = 16 = 4^2 = QS^2$$\\n\\nTriangle PQS is a **right triangle** with the right angle at P.\\n\\n**Finding angle at Q:** Using tan(Q) = opposite/adjacent:\\n$$\\\\tan(Q) = \\\\frac{PS}{PQ} = \\\\frac{2}{2\\\\sqrt{3}} = \\\\frac{1}{\\\\sqrt{3}}$$\\n\\nSo angle Q = 30°.\\n\\n**Angle at S:** 180° - 90° - 30° = 60°.\\n\\n## Conclusion\\n\\nThe three angles of triangle PQS are 30°, 60°, and 90°. The smallest angle is:\\n\\n$$\\\\boxed{30}$$\\n\\n#### 30\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"30\", \"reference_number\": \"30^\\\\circ\", \"raw_tail\": \"\\n**Angle at S:** 180° - 90° - 30° = 60°.\\n\\n## Conclusion\\n\\nThe three angles of triangle PQS are 30°, 60°, and 90°. The smallest angle is:\\n\\n$$\\\\boxed{30}$$\\n\\n#### 30\"}"
+  },
+  "timings": {
+    "agent_s": 14.298,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the angles of triangle PQS using the positions of centers P, Q, R, S.\\n\\n## Settin' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_142",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def count_samepair(list1, list2, list3):\\n    \\\"\\\"\\\"\\n    Count the number of positions where all three input lists contain the same value.\\n\\n    Parameters\\n    ----------\\n    list1, list2, list3 : iterable\\n        The three lists (or any iterables) to compare element‑wise.\\n\\n    Returns\\n    -------\\n    int\\n        Number of indices i for which list1[i] == list2[i] == list3[i].\\n    \\\"\\\"\\\"\\n    # Use zip to iterate over the three sequences simultaneously.\\n    # zip stops at the shortest sequence, which handles mismatched lengths gracefully.\\n    matches = sum(1 for a, b, c in zip(list1, list2, list3) if a == b == c)\\n    return matches\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 8.456,
+    "setup_s": 0.0,
+    "grade_s": 0.152
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q101",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We start from the equation\\n\\n\\\\[\\nx^{10}+(13x-1)^{10}=0.\\n\\\\]\\n\\nSince \\\\(x=0\\\\) is not a root, we divide by \\\\(x^{10}\\\\):\\n\\n\\\\[\\n\\\\left(\\\\frac{13x-1}{x}\\\\right)^{10} = -1.\\n\\\\]\\n\\nSet \\\\(t = \\\\frac{13x-1}{x} = 13 - \\\\frac{1}{x}\\\\). Then \\\\(t^{10} = -1\\\\), so \\\\(t\\\\) runs over the ten distinct tenth roots of \\\\(-1\\\\). Solving for \\\\(x\\\\) gives\\n\\n\\\\[\\nx = \\\\frac{1}{13 - t}.\\n\\\\]\\n\\nThus the ten roots of the original equation are exactly \\\\(x_k = 1/(13 - t_k)\\\\), where \\\\(t_k\\\\) are the tenth roots of \\\\(-1\\\\).\\n\\nFor each root we have\\n\\n\\\\[\\n|x|^2 = \\\\frac{1}{|13 - t|^2} \\\\quad\\\\Longrightarrow\\\\quad \\\\frac{1}{|x|^2} = |13 - t|^2.\\n\\\\]\\n\\nWe need\\n\\n\\\\[\\nS = \\\\sum_{i=1}^{5} \\\\frac{1}{r_i\\\\overline{r}_i},\\n\\\\]\\n\\nwhere the roots are paired as \\\\(r_i, \\\\overline{r}_i\\\\). Because each pair contributes twice the same value, the sum over all ten roots is \\\\(T = \\\\sum_{\\\\text{all roots}} 1/|x|^2 = 2S\\\\).\\n\\nNow compute \\\\(T\\\\) using the \\\\(t_k\\\\):\\n\\n\\\\[\\nT = \\\\sum_{t^{10}=-1} |13 - t|^2.\\n\\\\]\\n\\nFor any complex number \\\\(t\\\\) on the unit circle (\\\\(|t|=1\\\\)),\\n\\n\\\\[\\n|13 - t|^2 = (13 - t)(13 - \\\\overline{t}) = 169 - 13(t+\\\\overline{t}) + t\\\\overline{t} = 169 - 26\\\\operatorname{Re}(t) + 1 = 170 - 26\\\\operatorname{Re}(t).\\n\\\\]\\n\\nHence\\n\\n\\\\[\\nT = \\\\sum_{k=0}^{9} \\\\bigl(170 - 26\\\\operatorname{Re}(t_k)\\\\bigr) = 10\\\\cdot 170 - 26\\\\sum_{k=0}^{9}\\\\operatorname{Re}(t_k).\\n\\\\]\\n\\nThe numbers \\\\(t_k\\\\) are the roots of \\\\(t^{10}+1=0\\\\); the coefficient of \\\\(t^9\\\\) is \\\\(0\\\\), so the sum of all \\\\(t_k\\\\) is \\\\(0\\\\). Consequently, the sum of their real parts is also \\\\(0\\\\):\\n\\n\\\\[\\n\\\\sum_{k=0}^{9}\\\\operatorname{Re}(t_k) = 0.\\n\\\\]\\n\\nTherefore \\\\(T = 1700\\\\). Finally,\\n\\n\\\\[\\nS = \\\\frac{T}{2} = \\\\frac{1700}{2} = 850.\\n\\\\]\\n\\n\\\\[\\n\\\\boxed{850}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"850\", \"reference_number\": \"850\", \"raw_tail\": \"also \\\\(0\\\\):\\n\\n\\\\[\\n\\\\sum_{k=0}^{9}\\\\operatorname{Re}(t_k) = 0.\\n\\\\]\\n\\nTherefore \\\\(T = 1700\\\\). Finally,\\n\\n\\\\[\\nS = \\\\frac{T}{2} = \\\\frac{1700}{2} = 850.\\n\\\\]\\n\\n\\\\[\\n\\\\boxed{850}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 88.733,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We start from the equation\\n\\n\\\\[\\nx^{10}+(13x-1)^{10}=0.\\n\\\\]\\n\\nSince \\\\(x=0\\\\) is not a root, we divide by \\\\(x^{10}\\\\):\\n\\n\\\\[\\n\\\\lef' attempts=1"
+  ]
+}

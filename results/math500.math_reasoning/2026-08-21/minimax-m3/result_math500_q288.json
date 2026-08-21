@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q288",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the distance between two parallel lines.\\n\\n## Setting Up the Problem\\n\\n**Line 1:** $\\\\vec{P_1} = (3, -10, 1)$ with direction $\\\\vec{d} = (2, -9, -2)$\\n\\n**Line 2:** $\\\\vec{P_2} = (-5, -3, 6)$ with direction $(4, -18, -4)$\\n\\n**Verifying parallelism:** $(4, -18, -4) = 2(2, -9, -2)$ ✓\\n\\n## Distance Formula for Parallel Lines\\n\\nFor parallel lines, the distance is:\\n$$d = \\\\frac{|\\\\overrightarrow{P_1P_2} \\\\times \\\\vec{d}|}{|\\\\vec{d}|}$$\\n\\n## Step 1: Find $\\\\overrightarrow{P_1P_2}$\\n\\n$$\\\\overrightarrow{P_1P_2} = \\\\vec{P_2} - \\\\vec{P_1} = (-5-3, -3-(-10), 6-1) = (-8, 7, 5)$$\\n\\n## Step 2: Compute the Cross Product\\n\\n$$\\\\overrightarrow{P_1P_2} \\\\times \\\\vec{d} = \\\\begin{vmatrix} \\\\vec{i} & \\\\vec{j} & \\\\vec{k} \\\\\\\\ -8 & 7 & 5 \\\\\\\\ 2 & -9 & -2 \\\\end{vmatrix}$$\\n\\n- **$\\\\vec{i}$ component:** $(7)(-2) - (5)(-9) = -14 + 45 = 31$\\n- **$\\\\vec{j}$ component:** $-[(-8)(-2) - (5)(2)] = -(16 - 10) = -6$  \\n- **$\\\\vec{k}$ component:** $(-8)(-9) - (7)(2) = 72 - 14 = 58$\\n\\nSo $\\\\overrightarrow{P_1P_2} \\\\times \\\\vec{d} = (31, -6, 58)$\\n\\n## Step 3: Compute the Magnitudes\\n\\n$$|\\\\overrightarrow{P_1P_2} \\\\times \\\\vec{d}| = \\\\sqrt{31^2 + 6^2 + 58^2} = \\\\sqrt{961 + 36 + 3364} = \\\\sqrt{4361}$$\\n\\n$$|\\\\vec{d}| = \\\\sqrt{2^2 + 9^2 + 2^2} = \\\\sqrt{4 + 81 + 4} = \\\\sqrt{89}$$\\n\\n## Step 4: Calculate the Distance\\n\\n$$d = \\\\frac{\\\\sqrt{4361}}{\\\\sqrt{89}} = \\\\sqrt{\\\\frac{4361}{89}}$$\\n\\nChecking: $89 \\\\times 49 = 4450 - 89 = 4361$ ✓\\n\\n$$d = \\\\sqrt{49} = 7$$\\n\\n#### 7\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"7\", \"reference_number\": \"7\", \"raw_tail\": \"ulate the Distance\\n\\n$$d = \\\\frac{\\\\sqrt{4361}}{\\\\sqrt{89}} = \\\\sqrt{\\\\frac{4361}{89}}$$\\n\\nChecking: $89 \\\\times 49 = 4450 - 89 = 4361$ ✓\\n\\n$$d = \\\\sqrt{49} = 7$$\\n\\n#### 7\"}"
+  },
+  "timings": {
+    "agent_s": 12.569,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the distance between two parallel lines.\\n\\n## Setting Up the Problem\\n\\n**Line 1:**' attempts=1"
+  ]
+}

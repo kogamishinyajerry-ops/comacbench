@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q190",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the probability that the sum of two randomly chosen primes (from the first six) is even.\\n\\n## Setting Up the Problem\\n\\nThe first six primes are: **2, 3, 5, 7, 11, 13**\\n\\nFor a sum of two numbers to be **even**, both numbers must have the same parity:\\n- Both even, OR\\n- Both odd\\n\\n## Counting by Parity\\n\\nAmong the six primes:\\n- **Even primes:** {2} → 1 number\\n- **Odd primes:** {3, 5, 7, 11, 13} → 5 numbers\\n\\n## Counting Outcomes\\n\\nEach person chooses independently from 6 primes, giving:\\n$$\\\\text{Total outcomes} = 6 \\\\times 6 = 36$$\\n\\n**Favorable outcomes:**\\n- Both choose an even prime: $1 \\\\times 1 = 1$ way\\n- Both choose an odd prime: $5 \\\\times 5 = 25$ ways\\n\\n$$\\\\text{Favorable outcomes} = 1 + 25 = 26$$\\n\\n## Computing the Probability\\n\\n$$P(\\\\text{even sum}) = \\\\frac{26}{36} = \\\\frac{13}{18}$$\\n\\n#### 13/18\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13/18\", \"reference_number\": \"\\\\frac{13}{18}\", \"raw_tail\": \"imes 5 = 25$ ways\\n\\n$$\\\\text{Favorable outcomes} = 1 + 25 = 26$$\\n\\n## Computing the Probability\\n\\n$$P(\\\\text{even sum}) = \\\\frac{26}{36} = \\\\frac{13}{18}$$\\n\\n#### 13/18\"}"
+  },
+  "timings": {
+    "agent_s": 2.787,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the probability that the sum of two randomly chosen primes (from the first six) ' attempts=1"
+  ]
+}

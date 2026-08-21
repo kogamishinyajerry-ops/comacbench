@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q075",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Two fair six-sided dice are thrown. The product of the two numbers is a multiple of 5 if and only if at least one die shows a 5, because 5 is prime and the only numbers on the dice that contain the factor 5 are the 5 itself.\\n\\nTotal number of possible outcomes when rolling two dice: \\\\(6 \\\\times 6 = 36\\\\).\\n\\nNumber of outcomes where at least one die is a 5:\\n- First die is 5, second die any number: \\\\(1 \\\\times 6 = 6\\\\) outcomes.\\n- Second die is 5, first die any number: \\\\(6 \\\\times 1 = 6\\\\) outcomes.\\n- But the outcome (5,5) is counted twice, so subtract 1.\\nThus total favorable outcomes = \\\\(6 + 6 - 1 = 11\\\\).\\n\\nAlternatively, the probability that neither die is a 5 is \\\\(\\\\left(\\\\frac{5}{6}\\\\right) \\\\times \\\\left(\\\\frac{5}{6}\\\\right) = \\\\frac{25}{36}\\\\), so the probability that at least one die is a 5 is \\\\(1 - \\\\frac{25}{36} = \\\\frac{11}{36}\\\\).\\n\\nTherefore, the probability that the product is a multiple of 5 is \\\\(\\\\frac{11}{36}\\\\).\\n\\n\\\\boxed{11/36}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"11/36\", \"reference_number\": \"\\\\frac{11}{36}\", \"raw_tail\": \"st one die is a 5 is \\\\(1 - \\\\frac{25}{36} = \\\\frac{11}{36}\\\\).\\n\\nTherefore, the probability that the product is a multiple of 5 is \\\\(\\\\frac{11}{36}\\\\).\\n\\n\\\\boxed{11/36}\"}"
+  },
+  "timings": {
+    "agent_s": 23.978,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Two fair six-sided dice are thrown. The product of the two numbers is a multiple of 5 if and only if at least one die sh' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q278",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The largest eight-digit base 2 integer is the binary number with all eight digits equal to 1: \\\\(11111111_2\\\\). To convert this to base 10, compute the sum of powers of 2:\\n\\n\\\\[\\n11111111_2 = 2^7 + 2^6 + 2^5 + 2^4 + 2^3 + 2^2 + 2^1 + 2^0 = 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255.\\n\\\\]\\n\\nAlternatively, note that an \\\\(n\\\\)-digit binary number consisting entirely of 1's equals \\\\(2^n - 1\\\\). For \\\\(n = 8\\\\), this is \\\\(2^8 - 1 = 256 - 1 = 255\\\\).\\n\\nThus, the largest eight-digit base 2 integer expressed in base 10 is \\\\(255\\\\).\\n\\n\\\\boxed{255}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"255\", \"reference_number\": \"255\", \"raw_tail\": \"als \\\\(2^n - 1\\\\). For \\\\(n = 8\\\\), this is \\\\(2^8 - 1 = 256 - 1 = 255\\\\).\\n\\nThus, the largest eight-digit base 2 integer expressed in base 10 is \\\\(255\\\\).\\n\\n\\\\boxed{255}\"}"
+  },
+  "timings": {
+    "agent_s": 30.907,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The largest eight-digit base 2 integer is the binary number with all eight digits equal to 1: \\\\(11111111_2\\\\). To convert' attempts=1"
+  ]
+}

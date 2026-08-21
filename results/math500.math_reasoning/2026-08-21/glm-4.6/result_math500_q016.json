@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q016",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The given series is:\\n\\n\\\\[\\n1 - 2 + 3 - 4 + 5 - \\\\dots + 99 - 100.\\n\\\\]\\n\\nWe can group the terms in pairs:\\n\\n\\\\[\\n(1 - 2) + (3 - 4) + (5 - 6) + \\\\dots + (99 - 100).\\n\\\\]\\n\\nEach pair simplifies to:\\n\\n\\\\[\\n1 - 2 = -1,\\\\quad 3 - 4 = -1,\\\\quad \\\\dots,\\\\quad 99 - 100 = -1.\\n\\\\]\\n\\nSince there are \\\\(100\\\\) numbers, there are \\\\(100/2 = 50\\\\) pairs. Therefore, the sum is:\\n\\n\\\\[\\n50 \\\\times (-1) = -50.\\n\\\\]\\n\\nAlternatively, the sum can be expressed as \\\\(\\\\sum_{k=1}^{100} (-1)^{k-1} k\\\\), and for an even number of terms \\\\(n\\\\), the sum is \\\\(-n/2\\\\). With \\\\(n = 100\\\\), we again get \\\\(-50\\\\).\\n\\nThus, the result is \\\\(-50\\\\).\\n\\n\\\\boxed{-50}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-50\", \"reference_number\": \"-50\", \"raw_tail\": \"} (-1)^{k-1} k\\\\), and for an even number of terms \\\\(n\\\\), the sum is \\\\(-n/2\\\\). With \\\\(n = 100\\\\), we again get \\\\(-50\\\\).\\n\\nThus, the result is \\\\(-50\\\\).\\n\\n\\\\boxed{-50}\"}"
+  },
+  "timings": {
+    "agent_s": 22.08,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The given series is:\\n\\n\\\\[\\n1 - 2 + 3 - 4 + 5 - \\\\dots + 99 - 100.\\n\\\\]\\n\\nWe can group the terms in pairs:\\n\\n\\\\[\\n(1 - 2) + (3 - 4' attempts=1"
+  ]
+}

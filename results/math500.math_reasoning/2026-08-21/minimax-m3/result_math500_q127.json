@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q127",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"To convert 555 from base 10 to base 5, I'll repeatedly divide by 5 and record the remainders.\\n\\n**Step 1:** Divide 555 by 5\\n$$555 \\\\div 5 = 111 \\\\text{ remainder } 0$$\\n\\n**Step 2:** Divide 111 by 5\\n$$111 \\\\div 5 = 22 \\\\text{ remainder } 1$$\\n\\n**Step 3:** Divide 22 by 5\\n$$22 \\\\div 5 = 4 \\\\text{ remainder } 2$$\\n\\n**Step 4:** Divide 4 by 5\\n$$4 \\\\div 5 = 0 \\\\text{ remainder } 4$$\\n\\nReading the remainders from bottom to top gives **4210₅**.\\n\\n**Verification:**\\n$$4(5^3) + 2(5^2) + 1(5^1) + 0(5^0) = 500 + 50 + 5 + 0 = 555 ✓$$\\n\\n#### 4210\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"4210\", \"reference_number\": \"4210_{5}\", \"raw_tail\": \"} 4$$\\n\\nReading the remainders from bottom to top gives **4210₅**.\\n\\n**Verification:**\\n$$4(5^3) + 2(5^2) + 1(5^1) + 0(5^0) = 500 + 50 + 5 + 0 = 555 ✓$$\\n\\n#### 4210\"}"
+  },
+  "timings": {
+    "agent_s": 2.789,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"To convert 555 from base 10 to base 5, I'll repeatedly divide by 5 and record the remainders.\\n\\n**Step 1:** Divide 555 by\" attempts=1"
+  ]
+}

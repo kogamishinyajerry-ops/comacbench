@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_132",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.96665,
+  "artifacts": {
+    "code": "\"def is_nested(string):\\n    \\\"\\\"\\\"\\n    Returns True if there exists a subsequence of the given bracket string\\n    that is a valid bracket sequence containing at least one nested pair.\\n    The input string contains only square brackets '[' and ']'.\\n    \\\"\\\"\\\"\\n    # Find the index of the second '['\\n    count_open = 0\\n    pos_second_open = -1\\n    for i, ch in enumerate(string):\\n        if ch == '[':\\n            count_open += 1\\n            if count_open == 2:\\n                pos_second_open = i\\n                break\\n    # If there are fewer than two '[', we cannot have a nested subsequence\\n    if pos_second_open == -1:\\n        return False\\n    # Count the number of ']' after the second '['\\n    close_count = string[pos_second_open+1:].count(']')\\n    # Need at least two ']' after the second '[' to form \\\"[[]]\\\"\\n    return close_count >= 2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 14, \"cases_total\": 15, \"failed_cases\": [{\"case\": 15, \"pass\": false, \"err\": \"AssertionError: mismatch on ['[][][]']\"}], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 246.411,
+    "setup_s": 0.0,
+    "grade_s": 0.142
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

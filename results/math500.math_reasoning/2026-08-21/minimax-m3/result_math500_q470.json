@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q470",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to maximize $ab^2c^3d^4$ subject to $a+b+c+d = 10$.\\n\\n## Setting Up with AM-GM\\n\\nThe exponents 1, 2, 3, 4 sum to 10, so I'll create a list of 10 terms where each variable appears with its corresponding multiplicity:\\n$$a, \\\\frac{b}{2}, \\\\frac{b}{2}, \\\\frac{c}{3}, \\\\frac{c}{3}, \\\\frac{c}{3}, \\\\frac{d}{4}, \\\\frac{d}{4}, \\\\frac{d}{4}, \\\\frac{d}{4}$$\\n\\n**Applying AM-GM** to these 10 positive terms:\\n$$\\\\frac{a + \\\\frac{b}{2} + \\\\frac{b}{2} + \\\\frac{c}{3} + \\\\frac{c}{3} + \\\\frac{c}{3} + \\\\frac{d}{4} + \\\\frac{d}{4} + \\\\frac{d}{4} + \\\\frac{d}{4}}{10} \\\\geq \\\\sqrt[10]{a \\\\cdot \\\\left(\\\\frac{b}{2}\\\\right)^2 \\\\cdot \\\\left(\\\\frac{c}{3}\\\\right)^3 \\\\cdot \\\\left(\\\\frac{d}{4}\\\\right)^4}$$\\n\\n## Simplifying\\n\\nThe left side becomes:\\n$$\\\\frac{a + b + c + d}{10} = \\\\frac{10}{10} = 1$$\\n\\nThe right side becomes:\\n$$\\\\sqrt[10]{a \\\\cdot \\\\frac{b^2}{4} \\\\cdot \\\\frac{c^3}{27} \\\\cdot \\\\frac{d^4}{256}} = \\\\sqrt[10]{\\\\frac{ab^2c^3d^4}{4 \\\\cdot 27 \\\\cdot 256}}$$\\n\\nSo I have:\\n$$1 \\\\geq \\\\sqrt[10]{\\\\frac{ab^2c^3d^4}{27648}}$$\\n\\nRaising to the 10th power:\\n$$ab^2c^3d^4 \\\\leq 27648$$\\n\\n## Verifying Equality Condition\\n\\nEquality in AM-GM holds when all terms are equal:\\n$$a = \\\\frac{b}{2} = \\\\frac{c}{3} = \\\\frac{d}{4}$$\\n\\nLet this common value be $k$. Then $a = k$, $b = 2k$, $c = 3k$, $d = 4k$, and:\\n$$k + 2k + 3k + 4k = 10k = 10 \\\\implies k = 1$$\\n\\nSo $a = 1$, $b = 2$, $c = 3$, $d = 4$ are all positive, confirming the maximum is achieved.\\n\\n**Checking:** $ab^2c^3d^4 = (1)(2^2)(3^3)(4^4) = 1 \\\\cdot 4 \\\\cdot 27 \\\\cdot 256 = 27648$ ✓\\n\\n#### 27648\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"27648\", \"reference_number\": \"27648\", \"raw_tail\": \"= 4$ are all positive, confirming the maximum is achieved.\\n\\n**Checking:** $ab^2c^3d^4 = (1)(2^2)(3^3)(4^4) = 1 \\\\cdot 4 \\\\cdot 27 \\\\cdot 256 = 27648$ ✓\\n\\n#### 27648\"}"
+  },
+  "timings": {
+    "agent_s": 15.73,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to maximize $ab^2c^3d^4$ subject to $a+b+c+d = 10$.\\n\\n## Setting Up with AM-GM\\n\\nThe expon' attempts=1"
+  ]
+}

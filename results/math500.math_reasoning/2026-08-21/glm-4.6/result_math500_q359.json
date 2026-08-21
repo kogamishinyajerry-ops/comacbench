@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q359",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We are given the following system of equations for $x, y, z$:\\n1. $xyz = 4$\\n2. $x^3 + y^3 + z^3 = 4$\\n3. $xy^2 + x^2 y + xz^2 + x^2 z + yz^2 + y^2 z = 12$\\n\\nLet $S_1 = x+y+z$, $S_2 = xy+yz+zx$, and $S_3 = xyz$.\\nWe are given $S_3 = 4$.\\nThe third equation can be rewritten by factoring:\\n$xy^2 + x^2 y + xz^2 + x^2 z + yz^2 + y^2 z = (x+y)(y+z)(z+x) - 2xyz$.\\nSubstituting the known values:\\n$12 = (x+y)(y+z)(z+x) - 2(4)$\\n$12 = (x+y)(y+z)(z+x) - 8$\\n$20 = (x+y)(y+z)(z+x)$.\\n\\nWe know the identity:\\n$(x+y)(y+z)(z+x) = (x+y+z)(xy+yz+zx) - xyz = S_1 S_2 - S_3$.\\nSubstituting the known values:\\n$20 = S_1 S_2 - 4$\\n$S_1 S_2 = 24$.\\n\\nNow consider the second equation: $x^3 + y^3 + z^3 = 4$.\\nWe use the identity:\\n$x^3 + y^3 + z^3 - 3xyz = (x+y+z)(x^2+y^2+z^2 - (xy+yz+zx))$.\\nSubstitute $S_1, S_2, S_3$:\\n$4 - 3(4) = S_1 ( (S_1^2 - 2S_2) - S_2 )$\\n$4 - 12 = S_1 (S_1^2 - 3S_2)$\\n$-8 = S_1 (S_1^2 - 3S_2)$.\\n\\nFrom $S_1 S_2 = 24$, we have $S_2 = \\\\frac{24}{S_1}$. Substitute this into the equation above:\\n$-8 = S_1 \\\\\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": 1.0, \"reference_number\": \"6\", \"raw_tail\": \"- 12 = S_1 (S_1^2 - 3S_2)$\\n$-8 = S_1 (S_1^2 - 3S_2)$.\\n\\nFrom $S_1 S_2 = 24$, we have $S_2 = \\\\frac{24}{S_1}$. Substitute this into the equation above:\\n$-8 = S_1 \\\\\"}"
+  },
+  "timings": {
+    "agent_s": 1224.125,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the following system of equations for $x, y, z$:\\n1. $xyz = 4$\\n2. $x^3 + y^3 + z^3 = 4$\\n3. $xy^2 + x^2 y + x' attempts=3"
+  ]
+}

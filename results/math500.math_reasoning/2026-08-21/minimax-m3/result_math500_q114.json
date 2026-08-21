@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q114",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find integers C and D that satisfy the equation, then compute their product.\\n\\n## Setting Up the Equation\\n\\nFirst, I'll factor the denominator on the right side:\\n$$x^2 + 5x - 24 = (x-3)(x+8)$$\\n\\nSo the equation becomes:\\n$$\\\\frac{C}{x-3} + \\\\frac{D}{x+8} = \\\\frac{4x-23}{(x-3)(x+8)}$$\\n\\n## Solving for C and D\\n\\nMultiplying both sides by $(x-3)(x+8)$:\\n$$C(x+8) + D(x-3) = 4x - 23$$\\n\\nExpanding the left side:\\n$$Cx + 8C + Dx - 3D = 4x - 23$$\\n\\nGrouping like terms:\\n$$(C+D)x + (8C - 3D) = 4x - 23$$\\n\\n## Matching Coefficients\\n\\n**Coefficient of x:**\\n$$C + D = 4$$\\n\\n**Constant term:**\\n$$8C - 3D = -23$$\\n\\n## Solving the System\\n\\nFrom the first equation: $D = 4 - C$\\n\\nSubstituting into the second equation:\\n$$8C - 3(4-C) = -23$$\\n$$8C - 12 + 3C = -23$$\\n$$11C = -11$$\\n$$C = -1$$\\n\\nThen $D = 4 - (-1) = 5$\\n\\n## Verification\\n\\nCheck: $\\\\frac{-1}{x-3} + \\\\frac{5}{x+8} = \\\\frac{-1(x+8) + 5(x-3)}{(x-3)(x+8)} = \\\\frac{-x-8+5x-15}{(x-3)(x+8)} = \\\\frac{4x-23}{(x-3)(x+8)}$ ✓\\n\\n## Computing the Product\\n\\n$$CD = (-1)(5) = -5$$\\n\\n#### -5\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-5\", \"reference_number\": \"-5\", \"raw_tail\": \"8} = \\\\frac{-1(x+8) + 5(x-3)}{(x-3)(x+8)} = \\\\frac{-x-8+5x-15}{(x-3)(x+8)} = \\\\frac{4x-23}{(x-3)(x+8)}$ ✓\\n\\n## Computing the Product\\n\\n$$CD = (-1)(5) = -5$$\\n\\n#### -5\"}"
+  },
+  "timings": {
+    "agent_s": 10.73,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find integers C and D that satisfy the equation, then compute their product.\\n\\n## Sett' attempts=1"
+  ]
+}

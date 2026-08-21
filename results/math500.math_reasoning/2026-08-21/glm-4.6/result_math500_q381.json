@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q381",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We select $x$ and $y$ uniformly at random from the interval $(0,3)$. The sample space is the square $(0,3)\\\\times(0,3)$, whose area is $3\\\\cdot 3 = 9$.\\n\\nA triangle with side lengths $1$, $x$, $y$ exists if and only if the triangle inequalities hold:\\n\\\\[\\n1 + x > y,\\\\qquad 1 + y > x,\\\\qquad x + y > 1.\\n\\\\]\\nThe first two inequalities are equivalent to $|x - y| < 1$. Thus the conditions become\\n\\\\[\\n|x - y| < 1 \\\\quad \\\\text{and} \\\\quad x + y > 1.\\n\\\\]\\n\\nWe need the area of the region $R = \\\\{(x,y)\\\\in(0,3)^2 : |x-y|<1,\\\\; x+y>1\\\\}$.\\n\\n**Area of the strip $|x-y|<1$ inside the square.**  \\nThe complement consists of two right triangles where $y > x+1$ (above the line $y=x+1$) and where $y < x-1$ (below the line $y=x-1$). For a square of side $3$ and strip width $1$, each excluded triangle has legs of length $3-1=2$, so each area is $\\\\frac{1}{2}\\\\cdot 2\\\\cdot 2 = 2$. Total excluded area = $4$. Hence the strip area = $9 - 4 = 5$.\\n\\n**Intersection with $x+y>1$.**  \\nThe condition $x+y>1$ excludes the right triangle with vertices $(0,0)$, $(1,0)$, $(0,1)$, whose area is $\\\\frac{1}{2}$. This triangle lies entirely inside the strip because any point with $x+y\\\\le1$ has $x,y\\\\le1$, so $|x-y|\\\\le1$ (strictly $<1$ for interior points). Therefore,\\n\\\\[\\n\\\\text{area}(R) = \\\\text{area(strip)} - \\\\text{area}(x+y\\\\le1) = 5 - \\\\frac{1}{2} = \\\\frac{9}{2}.\\n\\\\]\\n\\nFinally, the probability is\\n\\\\[\\n\\\\frac{\\\\text{area}(R)}{\\\\text{area of square}} = \\\\frac{9/2}{9} = \\\\frac{1}{2}.\\n\\\\]\\n\\n\\\\boxed{\\\\frac{1}{2}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{1}{2}\", \"reference_number\": \"\\\\frac{1}{2}\", \"raw_tail\": \"frac{1}{2} = \\\\frac{9}{2}.\\n\\\\]\\n\\nFinally, the probability is\\n\\\\[\\n\\\\frac{\\\\text{area}(R)}{\\\\text{area of square}} = \\\\frac{9/2}{9} = \\\\frac{1}{2}.\\n\\\\]\\n\\n\\\\boxed{\\\\frac{1}{2}}\"}"
+  },
+  "timings": {
+    "agent_s": 191.8,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We select $x$ and $y$ uniformly at random from the interval $(0,3)$. The sample space is the square $(0,3)\\\\times(0,3)$, ' attempts=1"
+  ]
+}

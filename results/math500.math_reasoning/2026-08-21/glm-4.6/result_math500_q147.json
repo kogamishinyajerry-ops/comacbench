@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q147",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We use the weighted AM-GM inequality. Let \\\\(\\\\lambda_1 = a\\\\), \\\\(\\\\lambda_2 = 2a\\\\), \\\\(\\\\lambda_3 = a\\\\) with \\\\(a>0\\\\). Write the expression as\\n\\n\\\\[\\nf = x^4 + 4y^2 + 4z^4 = a\\\\cdot\\\\frac{x^4}{a} + 2a\\\\cdot\\\\frac{4y^2}{2a} + a\\\\cdot\\\\frac{4z^4}{a}.\\n\\\\]\\n\\nApplying weighted AM-GM to the three terms \\\\(\\\\frac{x^4}{a}, \\\\frac{4y^2}{2a}, \\\\frac{4z^4}{a}\\\\) with respective weights \\\\(a, 2a, a\\\\):\\n\\n\\\\[\\nf \\\\ge (a+2a+a)\\\\left(\\\\left(\\\\frac{x^4}{a}\\\\right)^a \\\\left(\\\\frac{4y^2}{2a}\\\\right)^{2a} \\\\left(\\\\frac{4z^4}{a}\\\\right)^a\\\\right)^{\\\\frac{1}{a+2a+a}}.\\n\\\\]\\n\\nSimplify the product:\\n\\n\\\\[\\n\\\\begin{aligned}\\n\\\\left(\\\\frac{x^4}{a}\\\\right)^a &= x^{4a}a^{-a},\\\\\\\\\\n\\\\left(\\\\frac{4y^2}{2a}\\\\right)^{2a} &= \\\\left(\\\\frac{2}{a}y^2\\\\right)^{2a} = 2^{2a}a^{-2a}y^{4a},\\\\\\\\\\n\\\\left(\\\\frac{4z^4}{a}\\\\right)^a &= 4^{a}z^{4a}a^{-a} = 2^{2a}z^{4a}a^{-a}.\\n\\\\end{aligned}\\n\\\\]\\n\\nMultiplying gives\\n\\n\\\\[\\nx^{4a}y^{4a}z^{4a} \\\\cdot a^{-4a} \\\\cdot 2^{4a} = (xyz)^{4a}\\\\left(\\\\frac{2}{a}\\\\right)^{4a}.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\nf \\\\ge 4a \\\\cdot \\\\left((xyz)^{4a}\\\\left(\\\\frac{2}{a}\\\\right)^{4a}\\\\right)^{\\\\frac{1}{4a}} = 4a \\\\cdot (xyz)\\\\cdot \\\\frac{2}{a} = 8\\\\,(xyz).\\n\\\\]\\n\\nSince \\\\(xyz = 2\\\\), we obtain \\\\(f \\\\ge 8 \\\\cdot 2 = 16\\\\).\\n\\nEquality holds when\\n\\n\\\\[\\n\\\\frac{x^4}{a} = \\\\frac{4y^2}{2a} = \\\\frac{4z^4}{a},\\n\\\\]\\n\\ni.e., \\\\(x^4 = 2y^2 = 4z^4\\\\). Solving together with \\\\(xyz=2\\\\) gives \\\\(x=\\\\sqrt2,\\\\; y=\\\\sqrt2,\\\\; z=1\\\\), which indeed yields \\\\(f=16\\\\). Therefore the minimum value is \\\\(16\\\\).\\n\\n\\\\[\\n\\\\boxed{16}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"16\", \"reference_number\": \"16\", \"raw_tail\": \"). Solving together with \\\\(xyz=2\\\\) gives \\\\(x=\\\\sqrt2,\\\\; y=\\\\sqrt2,\\\\; z=1\\\\), which indeed yields \\\\(f=16\\\\). Therefore the minimum value is \\\\(16\\\\).\\n\\n\\\\[\\n\\\\boxed{16}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 245.712,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We use the weighted AM-GM inequality. Let \\\\(\\\\lambda_1 = a\\\\), \\\\(\\\\lambda_2 = 2a\\\\), \\\\(\\\\lambda_3 = a\\\\) with \\\\(a>0\\\\). Write t' attempts=1"
+  ]
+}

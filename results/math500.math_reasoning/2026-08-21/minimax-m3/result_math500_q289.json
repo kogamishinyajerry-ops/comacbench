@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q289",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the minimum of $(a+b+c+d)\\\\left(\\\\frac{1}{a}+\\\\frac{1}{b}+\\\\frac{1}{c}+\\\\frac{1}{d}\\\\right)$ for positive reals $a,b,c,d$.\\n\\n## Setting Up the Inequality\\n\\nI'll apply the **Cauchy-Schwarz Inequality**, which states that for positive reals:\\n$$(x_1^2 + x_2^2 + \\\\cdots + x_n^2)(y_1^2 + y_2^2 + \\\\cdots + y_n^2) \\\\geq (x_1 y_1 + x_2 y_2 + \\\\cdots + x_n y_n)^2$$\\n\\nSetting $x_i = \\\\sqrt{a_i}$ and $y_i = \\\\frac{1}{\\\\sqrt{a_i}}$, I get:\\n\\n$$(a+b+c+d)\\\\left(\\\\frac{1}{a}+\\\\frac{1}{b}+\\\\frac{1}{c}+\\\\frac{1}{d}\\\\right) \\\\geq \\\\left(\\\\sqrt{a}\\\\cdot\\\\frac{1}{\\\\sqrt{a}} + \\\\sqrt{b}\\\\cdot\\\\frac{1}{\\\\sqrt{b}} + \\\\sqrt{c}\\\\cdot\\\\frac{1}{\\\\sqrt{c}} + \\\\sqrt{d}\\\\cdot\\\\frac{1}{\\\\sqrt{d}}\\\\right)^2$$\\n\\n## Simplifying\\n\\nEach term $\\\\sqrt{a} \\\\cdot \\\\frac{1}{\\\\sqrt{a}} = 1$, so the right side becomes:\\n$$(1+1+1+1)^2 = 16$$\\n\\n## Verifying Equality\\n\\nEquality in Cauchy-Schwarz holds when $\\\\frac{x_i}{y_i}$ is constant, i.e., when $a = b = c = d$.\\n\\n**Check:** Let $a = b = c = d = 1$:\\n$$(1+1+1+1)\\\\left(1+1+1+1\\\\right) = 4 \\\\cdot 4 = 16 ✓$$\\n\\n## Conclusion\\n\\nThe minimum value is $\\\\boxed{16}$.\\n\\n#### 16\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"16\", \"reference_number\": \"16\", \"raw_tail\": \" = c = d$.\\n\\n**Check:** Let $a = b = c = d = 1$:\\n$$(1+1+1+1)\\\\left(1+1+1+1\\\\right) = 4 \\\\cdot 4 = 16 ✓$$\\n\\n## Conclusion\\n\\nThe minimum value is $\\\\boxed{16}$.\\n\\n#### 16\"}"
+  },
+  "timings": {
+    "agent_s": 3.709,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the minimum of $(a+b+c+d)\\\\left(\\\\frac{1}{a}+\\\\frac{1}{b}+\\\\frac{1}{c}+\\\\frac{1}{d}\\\\r' attempts=1"
+  ]
+}

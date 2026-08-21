@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q024",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The worker deposits \\\\$20,000 at the end of each year for three years. The future value of these deposits after the third deposit is given by the ordinary annuity formula:\\n\\n\\\\[\\nFV = P \\\\frac{(1+r)^3 - 1}{r},\\n\\\\]\\n\\nwhere \\\\(P = 20000\\\\) and \\\\(r\\\\) is the annual interest rate (as a decimal). We require \\\\(FV \\\\ge 66200\\\\). The minimal \\\\(r\\\\) satisfies equality:\\n\\n\\\\[\\n20000 \\\\frac{(1+r)^3 - 1}{r} = 66200.\\n\\\\]\\n\\nDividing both sides by 20000:\\n\\n\\\\[\\n\\\\frac{(1+r)^3 - 1}{r} = 3.31.\\n\\\\]\\n\\nMultiplying by \\\\(r\\\\):\\n\\n\\\\[\\n(1+r)^3 - 1 = 3.31r.\\n\\\\]\\n\\nExpanding \\\\((1+r)^3 = 1 + 3r + 3r^2 + r^3\\\\):\\n\\n\\\\[\\n1 + 3r + 3r^2 + r^3 - 1 = 3.31r,\\n\\\\]\\n\\\\[\\n3r + 3r^2 + r^3 = 3.31r,\\n\\\\]\\n\\\\[\\nr^3 + 3r^2 + (3 - 3.31)r = 0,\\n\\\\]\\n\\\\[\\nr^3 + 3r^2 - 0.31r = 0,\\n\\\\]\\n\\\\[\\nr(r^2 + 3r - 0.31) = 0.\\n\\\\]\\n\\nThe solution \\\\(r = 0\\\\) is not valid because it gives a future value of \\\\$60,000. Solving the quadratic:\\n\\n\\\\[\\nr^2 + 3r - 0.31 = 0,\\n\\\\]\\n\\\\[\\nr = \\\\frac{-3 \\\\pm \\\\sqrt{9 + 4 \\\\cdot 0.31}}{2} = \\\\frac{-3 \\\\pm \\\\sqrt{10.24}}{2} = \\\\frac{-3 \\\\pm 3.2}{2}.\\n\\\\]\\n\\nThe positive root is\\n\\n\\\\[\\nr = \\\\frac{-3 + 3.2}{2} = \\\\frac{0.2}{2} = 0.1.\\n\\\\]\\n\\nThus the minimal annual interest rate is \\\\(0.1 = 10\\\\%\\\\). Expressed as a percentage without the percent sign, the answer is 10.\\n\\n\\\\boxed{10}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \"ac{0.2}{2} = 0.1.\\n\\\\]\\n\\nThus the minimal annual interest rate is \\\\(0.1 = 10\\\\%\\\\). Expressed as a percentage without the percent sign, the answer is 10.\\n\\n\\\\boxed{10}\"}"
+  },
+  "timings": {
+    "agent_s": 32.38,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The worker deposits \\\\$20,000 at the end of each year for three years. The future value of these deposits after the third' attempts=1"
+  ]
+}

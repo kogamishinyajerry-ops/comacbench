@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q010",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The least positive integer multiple of 30 using only digits 0 and 2 must end in 0 (divisible by 10) and have a digit sum divisible by 3 (divisible by 3). Since the only non‑zero digit allowed is 2, the number of 2’s must be a multiple of 3. The smallest such positive number is with exactly three 2’s and a trailing 0, giving the 4‑digit number 2220. Checking: \\\\(2220 \\\\div 30 = 74\\\\), so it is a multiple of 30. No smaller number (1‑, 2‑, or 3‑digit) satisfies both conditions, and any number with more digits is larger.\\n\\n\\\\boxed{2220}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2220\", \"reference_number\": \"2220\", \"raw_tail\": \"30 = 74\\\\), so it is a multiple of 30. No smaller number (1‑, 2‑, or 3‑digit) satisfies both conditions, and any number with more digits is larger.\\n\\n\\\\boxed{2220}\"}"
+  },
+  "timings": {
+    "agent_s": 57.862,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The least positive integer multiple of 30 using only digits 0 and 2 must end in 0 (divisible by 10) and have a digit sum' attempts=1"
+  ]
+}

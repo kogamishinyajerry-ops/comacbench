@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q034",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the constant term in the expansion of $\\\\left(10x^3-\\\\frac{1}{2x^2}\\\\right)^{5}$.\\n\\n## Setting Up the General Term\\n\\nUsing the binomial theorem, the general term is:\\n$$T_{k+1} = \\\\binom{5}{k}(10x^3)^{5-k}\\\\left(-\\\\frac{1}{2x^2}\\\\right)^k$$\\n\\nExpanding this:\\n$$T_{k+1} = \\\\binom{5}{k} \\\\cdot 10^{5-k} \\\\cdot \\\\left(-\\\\frac{1}{2}\\\\right)^k \\\\cdot x^{3(5-k)} \\\\cdot x^{-2k}$$\\n\\n$$T_{k+1} = \\\\binom{5}{k} \\\\cdot 10^{5-k} \\\\cdot \\\\left(-\\\\frac{1}{2}\\\\right)^k \\\\cdot x^{15-5k}$$\\n\\n## Finding the Constant Term\\n\\nFor a constant term, I need the exponent of $x$ to equal zero:\\n$$15 - 5k = 0 \\\\implies k = 3$$\\n\\n## Computing the Value\\n\\nSubstituting $k = 3$:\\n$$T_{4} = \\\\binom{5}{3} \\\\cdot 10^{5-3} \\\\cdot \\\\left(-\\\\frac{1}{2}\\\\right)^3$$\\n\\n$$= \\\\binom{5}{3} \\\\cdot 10^2 \\\\cdot \\\\left(-\\\\frac{1}{8}\\\\right)$$\\n\\n$$= 10 \\\\cdot 100 \\\\cdot \\\\left(-\\\\frac{1}{8}\\\\right)$$\\n\\n$$= -\\\\frac{1000}{8} = -125$$\\n\\n$$\\\\boxed{-125}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-125\", \"reference_number\": \"-125\", \"raw_tail\": \"$= \\\\binom{5}{3} \\\\cdot 10^2 \\\\cdot \\\\left(-\\\\frac{1}{8}\\\\right)$$\\n\\n$$= 10 \\\\cdot 100 \\\\cdot \\\\left(-\\\\frac{1}{8}\\\\right)$$\\n\\n$$= -\\\\frac{1000}{8} = -125$$\\n\\n$$\\\\boxed{-125}$$\"}"
+  },
+  "timings": {
+    "agent_s": 10.979,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the constant term in the expansion of $\\\\left(10x^3-\\\\frac{1}{2x^2}\\\\right)^{5}$.\\n\\n' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q376",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a point $P$ on the line $y = -x + 6$ that is equidistant from $A(10, -10)$ and the origin $O(0,0)$.\\n\\n## Setting Up the Equation\\n\\nLet $P = (a, b)$ be a point on the line, so $b = -a + 6$.\\n\\n**Distance condition** $PA = PO$ means $PA^2 = PO^2$:\\n\\n$$(a-10)^2 + (b-(-10))^2 = a^2 + b^2$$\\n\\nExpanding the left side:\\n$$(a-10)^2 + (b+10)^2 = a^2 - 20a + 100 + b^2 + 20b + 100$$\\n\\nSetting this equal to $a^2 + b^2$:\\n$$a^2 - 20a + 100 + b^2 + 20b + 100 = a^2 + b^2$$\\n\\nSimplifying:\\n$$-20a + 20b + 200 = 0$$\\n$$b = a - 10$$\\n\\n## Solving the System\\n\\nI now have two equations:\\n- $b = a - 10$ (perpendicular bisector of $AO$)\\n- $b = -a + 6$ (given line)\\n\\nSetting them equal:\\n$$a - 10 = -a + 6$$\\n$$2a = 16$$\\n$$a = 8$$\\n\\nThen $b = -8 + 6 = -2$.\\n\\n## Verification\\n\\n- $PA^2 = (8-10)^2 + (-2+10)^2 = 4 + 64 = 68$\\n- $PO^2 = 8^2 + (-2)^2 = 64 + 4 = 68$ ✓\\n\\nThe point is $(8, -2)$.\\n\\n$$\\\\boxed{(8, -2)}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(8, -2)\", \"reference_number\": \"(8,-2)\", \"raw_tail\": \"+ 6 = -2$.\\n\\n## Verification\\n\\n- $PA^2 = (8-10)^2 + (-2+10)^2 = 4 + 64 = 68$\\n- $PO^2 = 8^2 + (-2)^2 = 64 + 4 = 68$ ✓\\n\\nThe point is $(8, -2)$.\\n\\n$$\\\\boxed{(8, -2)}$$\"}"
+  },
+  "timings": {
+    "agent_s": 4.297,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a point $P$ on the line $y = -x + 6$ that is equidistant from $A(10, -10)$ and t' attempts=1"
+  ]
+}

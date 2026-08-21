@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q271",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find an integer $x$ such that $997x \\\\equiv 1 \\\\pmod{1000}$.\\n\\n## Setting Up the Problem\\n\\nSince $997 \\\\equiv -3 \\\\pmod{1000}$, the equation $997x \\\\equiv 1 \\\\pmod{1000}$ becomes:\\n$$-3x \\\\equiv 1 \\\\pmod{1000}$$\\n$$3x \\\\equiv -1 \\\\equiv 999 \\\\pmod{1000}$$\\n\\n## Finding $3^{-1} \\\\pmod{1000}$\\n\\nUsing the Extended Euclidean Algorithm:\\n$$1000 = 333 \\\\cdot 3 + 1$$\\n$$1 = 1000 - 333 \\\\cdot 3$$\\n\\nSo $3 \\\\cdot (-333) \\\\equiv 1 \\\\pmod{1000}$, which gives:\\n$$3^{-1} \\\\equiv -333 \\\\equiv 667 \\\\pmod{1000}$$\\n\\n**Verification:** $3 \\\\cdot 667 = 2001 = 2(1000) + 1$ ✓\\n\\n## Solving for $x$\\n\\n$$x \\\\equiv 999 \\\\cdot 667 \\\\pmod{1000}$$\\n\\nComputing $999 \\\\cdot 667$:\\n$$999 \\\\cdot 667 = (1000-1)(667) = 667000 - 667 = 666333$$\\n\\nTherefore:\\n$$x \\\\equiv 666333 \\\\equiv 333 \\\\pmod{1000}$$\\n\\n## Verification\\n\\nCheck that $997 \\\\cdot 333 \\\\equiv 1 \\\\pmod{1000}$:\\n$$997 \\\\cdot 333 = (1000-3)(333) = 333000 - 999 = 332001$$\\n\\n$$332001 = 332(1000) + 1 \\\\equiv 1 \\\\pmod{1000} ✓$$\\n\\n#### 333\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"333\", \"reference_number\": \"333\", \"raw_tail\": \"hat $997 \\\\cdot 333 \\\\equiv 1 \\\\pmod{1000}$:\\n$$997 \\\\cdot 333 = (1000-3)(333) = 333000 - 999 = 332001$$\\n\\n$$332001 = 332(1000) + 1 \\\\equiv 1 \\\\pmod{1000} ✓$$\\n\\n#### 333\"}"
+  },
+  "timings": {
+    "agent_s": 9.518,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find an integer $x$ such that $997x \\\\equiv 1 \\\\pmod{1000}$.\\n\\n## Setting Up the Problem' attempts=1"
+  ]
+}

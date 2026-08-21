@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q156",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the maximum angle $\\\\angle APB$ as runners $A$ and $B$ move along the track.\\n\\n## Setting Up Coordinates\\n\\nI'll place $O$ at the origin with the track along the positive $x$-axis and $P = (0, p)$ for some height $p > 0$.\\n\\n**At time $t$:**\\n- Runner $A$ is at position $(vt, 0)$ (speed $v$)\\n- Runner $B$ is at position $(3vt, 0)$ (speed $3v$)\\n\\nLet $a = vt$, so runner $A$ is at $(a, 0)$ and runner $B$ is at $(3a, 0)$, with $a > 0$.\\n\\n## Computing the Angle\\n\\nSince $B$ is farther from $O$ than $A$, I'll define:\\n- $\\\\alpha = \\\\angle APO$ (angle from $PO$ to $PA$)  \\n- $\\\\beta = \\\\angle BPO$ (angle from $PO$ to $PB$)\\n\\nThen $\\\\angle APB = \\\\beta - \\\\alpha$, where:\\n$$\\\\tan \\\\alpha = \\\\frac{a}{p}, \\\\qquad \\\\tan \\\\beta = \\\\frac{3a}{p}$$\\n\\n## Maximizing the Angle\\n\\nLet $u = a/p > 0$. I need to maximize:\\n$$f(u) = \\\\arctan(3u) - \\\\arctan(u)$$\\n\\nTaking the derivative:\\n$$f'(u) = \\\\frac{3}{1+9u^2} - \\\\frac{1}{1+u^2}$$\\n\\nSetting $f'(u) = 0$:\\n$$\\\\frac{3}{1+9u^2} = \\\\frac{1}{1+u^2}$$\\n\\n$$3(1+u^2) = 1+9u^2$$\\n\\n$$3 + 3u^2 = 1 + 9u^2$$\\n\\n$$6u^2 = 2 \\\\implies u^2 = \\\\frac{1}{3} \\\\implies u = \\\\frac{1}{\\\\sqrt{3}}$$\\n\\n## Verifying the Maximum\\n\\nChecking boundary behavior:\\n- At $u = 0$: $f(0) = 0$\\n- As $u \\\\to \\\\infty$: $f(u) \\\\to \\\\frac{\\\\pi}{2} - \\\\frac{\\\\pi}{2} = 0$\\n\\nSince $f$ is continuous, positive in between, and vanishes at both endpoints, this critical point is a maximum.\\n\\n## Computing the Maximum Value\\n\\nAt $u = \\\\frac{1}{\\\\sqrt{3}}$:\\n\\n$$\\\\tan \\\\alpha = \\\\frac{1}{\\\\sqrt{3}} \\\\implies \\\\alpha = 30°$$\\n\\n$$\\\\tan \\\\beta = \\\\frac{3}{\\\\sqrt{3}} = \\\\sqrt{3} \\\\implies \\\\beta = 60°$$\\n\\nTherefore:\\n$$\\\\angle APB = 60° - 30° = 30°$$\\n\\n## Answer\\n\\n$$\\\\boxed{30}$$\\n\\n#### 30\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"30\", \"reference_number\": \"30^\\\\circ\", \"raw_tail\": \"ha = 30°$$\\n\\n$$\\\\tan \\\\beta = \\\\frac{3}{\\\\sqrt{3}} = \\\\sqrt{3} \\\\implies \\\\beta = 60°$$\\n\\nTherefore:\\n$$\\\\angle APB = 60° - 30° = 30°$$\\n\\n## Answer\\n\\n$$\\\\boxed{30}$$\\n\\n#### 30\"}"
+  },
+  "timings": {
+    "agent_s": 7.94,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the maximum angle $\\\\angle APB$ as runners $A$ and $B$ move along the track.\\n\\n## ' attempts=1"
+  ]
+}

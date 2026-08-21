@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q084",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find values of $a$ and $b$ by expanding the product and comparing coefficients.\\n\\n## Setting Up the Expansion\\n\\nExpanding $(3t^2+5t+a)(4t^2+bt-2)$:\\n\\n$$3t^2(4t^2+bt-2) + 5t(4t^2+bt-2) + a(4t^2+bt-2)$$\\n\\n$$= 12t^4 + 3bt^3 - 6t^2 + 20t^3 + 5bt^2 - 10t + 4at^2 + abt - 2a$$\\n\\nCombining like terms:\\n$$= 12t^4 + (3b+20)t^3 + (5b+4a-6)t^2 + (ab-10)t + (-2a)$$\\n\\n## Matching Coefficients\\n\\n**Coefficient of $t^3$:**\\n$$3b + 20 = 26 \\\\implies 3b = 6 \\\\implies b = 2$$\\n\\n**Coefficient of $t^0$ (constant):**\\n$$-2a = 6 \\\\implies a = -3$$\\n\\n**Verification with $t^2$ coefficient:**\\n$$5(2) + 4(-3) - 6 = 10 - 12 - 6 = -8 ✓$$\\n\\n**Verification with $t^1$ coefficient:**\\n$$(2)(-3) - 10 = -6 - 10 = -16 ✓$$\\n\\n## Checking the Full Product\\n\\n$$(3t^2+5t-3)(4t^2+2t-2)$$\\n$$= 12t^4 + 6t^3 - 6t^2 + 20t^3 + 10t^2 - 10t - 12t^2 - 6t + 6$$\\n$$= 12t^4 + 26t^3 - 8t^2 - 16t + 6 ✓$$\\n\\n## Final Answer\\n\\n$$a + b = -3 + 2 = -1$$\\n\\n#### -1\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-1\", \"reference_number\": \"-1\", \"raw_tail\": \"-2)$$\\n$$= 12t^4 + 6t^3 - 6t^2 + 20t^3 + 10t^2 - 10t - 12t^2 - 6t + 6$$\\n$$= 12t^4 + 26t^3 - 8t^2 - 16t + 6 ✓$$\\n\\n## Final Answer\\n\\n$$a + b = -3 + 2 = -1$$\\n\\n#### -1\"}"
+  },
+  "timings": {
+    "agent_s": 7.128,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find values of $a$ and $b$ by expanding the product and comparing coefficients.\\n\\n## S' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q096",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The equation can be rewritten in terms of \\\\(y = x^2 - 2x\\\\):\\n\\n\\\\[\\n\\\\frac{(x+1)(x-3)}{5(x+2)(x-4)} = \\\\frac{y - 3}{5(y - 8)}, \\\\quad\\n\\\\frac{(x+3)(x-5)}{9(x+4)(x-6)} = \\\\frac{y - 15}{9(y - 24)}, \\\\quad\\n\\\\frac{2(x+5)(x-7)}{13(x+6)(x-8)} = \\\\frac{2(y - 35)}{13(y - 48)}.\\n\\\\]\\n\\nThus the equation becomes:\\n\\n\\\\[\\n\\\\frac{y - 3}{5(y - 8)} + \\\\frac{y - 15}{9(y - 24)} - \\\\frac{2(y - 35)}{13(y - 48)} = \\\\frac{92}{585}.\\n\\\\]\\n\\nRewrite each fraction as:\\n\\n\\\\[\\n\\\\frac{y - 3}{5(y - 8)} = \\\\frac{1}{5} + \\\\frac{1}{y - 8}, \\\\quad\\n\\\\frac{y - 15}{9(y - 24)} = \\\\frac{1}{9} + \\\\frac{1}{y - 24}, \\\\quad\\n\\\\frac{2(y - 35)}{13(y - 48)} = \\\\frac{2}{13} + \\\\frac{2}{y - 48}.\\n\\\\]\\n\\nSubstituting into the equation:\\n\\n\\\\[\\n\\\\left(\\\\frac{1}{5} + \\\\frac{1}{9} - \\\\frac{2}{13}\\\\right) + \\\\left(\\\\frac{1}{y - 8} + \\\\frac{1}{y - 24} - \\\\frac{2}{y - 48}\\\\right) = \\\\frac{92}{585}.\\n\\\\]\\n\\nThe constant term simplifies to:\\n\\n\\\\[\\n\\\\frac{1}{5} + \\\\frac{1}{9} - \\\\frac{2}{13} = \\\\frac{14}{45} - \\\\frac{2}{13} = \\\\frac{182 - 90}{585} = \\\\frac{92}{585}.\\n\\\\]\\n\\nTherefore, the equation reduces to:\\n\\n\\\\[\\n\\\\frac{1}{y - 8} + \\\\frac{1}{y - 24} - \\\\frac{2}{y - 48} = 0.\\n\\\\]\\n\\nCombine the first two terms:\\n\\n\\\\[\\n\\\\frac{(y - 24) + (y - 8)}{(y - 8)(y - 24)} = \\\\frac{2(y - 16)}{(y - 8)(y - 24)} = \\\\frac{2}{y - 48}.\\n\\\\]\\n\\nCancel the factor of 2:\\n\\n\\\\[\\n\\\\frac{y - 16}{(y - 8)(y - 24)} = \\\\frac{1}{y - 48}.\\n\\\\]\\n\\nCross-multiply:\\n\\n\\\\[\\n(y - 16)(y - 48) = (y - 8)(y - 24).\\n\\\\]\\n\\nExpand both sides:\\n\\n\\\\[\\ny^2 - 64y + 768 = y^2 - 32y + 192.\\n\\\\]\\n\\nCancel \\\\(y^2\\\\) and solve:\\n\\n\\\\[\\n-64y + 768 = -32y + 192 \\\\implies -32y = -576 \\\\implies y = 18.\\n\\\\]\\n\\nRecall \\\\(y = x^2 - 2x\\\\), so:\\n\\n\\\\[\\nx^2 - 2x = 18 \\\\implies x^2 - 2x - 18 = 0.\\n\\\\]\\n\\nSolve using the quadratic formula:\\n\\n\\\\[\\nx = \\\\frac{2 \\\\pm \\\\sqrt{4 + 72}}{2} = \\\\frac{2 \\\\pm \\\\sqrt{76}}{2} = 1 \\\\pm \\\\sqrt{19}.\\n\\\\]\\n\\nNeither root makes any denominator zero, so both are valid.\\n\\n\\\\boxed{1-\\\\sqrt{19}, 1+\\\\sqrt{19}}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1-\\\\sqrt{19}, 1+\\\\sqrt{19}\", \"reference_number\": \"1 \\\\pm \\\\sqrt{19}\", \"raw_tail\": \"qrt{4 + 72}}{2} = \\\\frac{2 \\\\pm \\\\sqrt{76}}{2} = 1 \\\\pm \\\\sqrt{19}.\\n\\\\]\\n\\nNeither root makes any denominator zero, so both are valid.\\n\\n\\\\boxed{1-\\\\sqrt{19}, 1+\\\\sqrt{19}}\"}"
+  },
+  "timings": {
+    "agent_s": 29.058,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The equation can be rewritten in terms of \\\\(y = x^2 - 2x\\\\):\\n\\n\\\\[\\n\\\\frac{(x+1)(x-3)}{5(x+2)(x-4)} = \\\\frac{y - 3}{5(y - 8)},' attempts=1"
+  ]
+}

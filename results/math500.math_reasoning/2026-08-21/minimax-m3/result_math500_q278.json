@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q278",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the largest 8-digit (8-bit) binary number and convert it to base 10.\\n\\n## Setting Up the Problem\\n\\nThe largest 8-digit base 2 integer has all eight digits equal to 1:\\n$$11111111_2$$\\n\\n## Converting to Base 10\\n\\nI'll convert by expanding each digit as a power of 2:\\n\\n$$11111111_2 = 2^7 + 2^6 + 2^5 + 2^4 + 2^3 + 2^2 + 2^1 + 2^0$$\\n\\nComputing each term:\\n- $2^7 = 128$\\n- $2^6 = 64$\\n- $2^5 = 32$\\n- $2^4 = 16$\\n- $2^3 = 8$\\n- $2^2 = 4$\\n- $2^1 = 2$\\n- $2^0 = 1$\\n\\n## Adding the Values\\n\\n$$128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255$$\\n\\n**Verification:** This matches the well-known result that the maximum value of an unsigned 8-bit integer is $2^8 - 1 = 256 - 1 = 255$. ✓\\n\\n$$\\\\boxed{255}$$\\n\\n#### 255\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"255\", \"reference_number\": \"255\", \"raw_tail\": \"erification:** This matches the well-known result that the maximum value of an unsigned 8-bit integer is $2^8 - 1 = 256 - 1 = 255$. ✓\\n\\n$$\\\\boxed{255}$$\\n\\n#### 255\"}"
+  },
+  "timings": {
+    "agent_s": 5.261,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the largest 8-digit (8-bit) binary number and convert it to base 10.\\n\\n## Setting' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q478",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find all complex solutions and sum them.\\n\\n## Setting Up the Manipulation\\n\\nI notice that I can rewrite each fraction:\\n$$\\\\frac{k}{x^2-k} = \\\\frac{-(x^2-k) + x^2}{x^2-k} = -1 + \\\\frac{x^2}{x^2-k}$$\\n\\nSumming over $k = 1, 2, 3, 4$:\\n$$\\\\sum_{k=1}^{4} \\\\frac{k}{x^2-k} = -4 + x^2\\\\sum_{k=1}^{4}\\\\frac{1}{x^2-k}$$\\n\\nThe equation becomes:\\n$$-4 + x^2\\\\sum_{k=1}^{4}\\\\frac{1}{x^2-k} = 2010x - 4 \\\\implies x^2\\\\sum_{k=1}^{4}\\\\frac{1}{x^2-k} = 2010x$$\\n\\n## Finding x = 0 as a Solution\\n\\nIf $x = 0$: LHS $= 0$, RHS $= 0$ ✓. Checking directly:\\n$$\\\\frac{1}{-1}+\\\\frac{2}{-2}+\\\\frac{3}{-3}+\\\\frac{4}{-4} = -4 = 2010(0)-4 \\\\checkmark$$\\n\\n## The Nonzero Solutions\\n\\nFor $x \\\\neq 0$, dividing by $x$:\\n$$\\\\sum_{k=1}^{4}\\\\frac{x}{x^2-k} = 2010$$\\n\\nMultiplying by $Q(x^2) = (x^2-1)(x^2-2)(x^2-3)(x^2-4)$:\\n$$x\\\\sum_{k=1}^{4}\\\\prod_{j\\\\neq k}(x^2-j) = 2010\\\\,Q(x^2)$$\\n\\nUsing the identity $\\\\sum_{k=1}^{4}\\\\prod_{j\\\\neq k}(a-j) = Q'(a)$ where $Q(a) = (a-1)(a-2)(a-3)(a-4)$:\\n\\n$$Q(a) = a^4 - 10a^3 + 35a^2 - 50a + 24, \\\\quad Q'(a) = 4a^3 - 30a^2 + 70a - 50$$\\n\\nThe equation becomes:\\n$$x \\\\cdot Q'(x^2) = 2010\\\\,Q(x^2)$$\\n\\n## Computing the Sum of All Roots\\n\\nExpanding the original equation by clearing denominators completely, I get a degree-9 polynomial. Computing the LHS $\\\\sum k\\\\prod_{j\\\\neq k}(x^2-j)$:\\n\\nFor each $k$, computing $\\\\prod_{j\\\\neq k}(a-j)$ and summing with weights $k$:\\n$$\\\\sum_{k=1}^{4} k\\\\prod_{j\\\\neq k}(a-j) = 10a^3 - 70a^2 + 150a - 96$$\\n\\nWith $a = x^2$: $10x^6 - 70x^4 + 150x^2 - 96$.\\n\\nFor the RHS:\\n$$(2010x - 4)Q(x^2) = 2010x^9 - 4x^8 - 20100x^7 + 40x^6 + 70350x^5 - 140x^4 - 100500x^3 + 200x^2 + 48240x - 96$$\\n\\nThe polynomial equation LHS − RHS = 0 gives:\\n$$-2010x^9 + 4x^8 + 20100x^7 - 30x^6 - 70350x^5 + 70x^4 + 100500x^3 - 50x^2 - 48240x = 0$$\\n\\n**Verification of $x = 0$:** Factoring out $x$:\\n$$x\\\\left(2010x^8 - 4x^7 - 20100x^6 + 30x^5 + 70350x^4 - 70x^3 - 100500x^2 + 50x + 48240\\\\right) = 0$$\\n\\nThis confirms $x = 0$ is a root, with the other 8 roots from the degree-8 factor.\\n\\n## Applying Vieta's Formulas\\n\\nFor the degree-9 polynomial $2010x^9 - 4x^8 - \\\\ldots$, the sum of all 9 roots is:\\n$$-\\\\frac{-4}{2010} = \\\\frac{4}{2010} = \\\\frac{2}{1005}$$\\n\\nThis equals (sum of 8 nonzero roots) + 0 = $\\\\frac{2}{1005}$.\\n\\n## Answer\\n\\n$$\\\\boxed{\\\\dfrac{2}{1005}}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\dfrac{2}{1005}\", \"reference_number\": \"\\\\frac{2}{1005}\", \"raw_tail\": \"is:\\n$$-\\\\frac{-4}{2010} = \\\\frac{4}{2010} = \\\\frac{2}{1005}$$\\n\\nThis equals (sum of 8 nonzero roots) + 0 = $\\\\frac{2}{1005}$.\\n\\n## Answer\\n\\n$$\\\\boxed{\\\\dfrac{2}{1005}}$$\"}"
+  },
+  "timings": {
+    "agent_s": 71.059,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find all complex solutions and sum them.\\n\\n## Setting Up the Manipulation\\n\\nI notice th' attempts=1"
+  ]
+}

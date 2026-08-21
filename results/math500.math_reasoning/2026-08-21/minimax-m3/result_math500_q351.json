@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q351",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The expression is\\n\\\\[P = \\\\cos \\\\left( \\\\frac{2 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{4 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{8 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{16 \\\\pi}{15} \\\\right).\\\\]\\n\\nFirst, note that $\\\\frac{16\\\\pi}{15} = \\\\pi + \\\\frac{\\\\pi}{15}$. Using the identity $\\\\cos(\\\\pi + x) = -\\\\cos x$, we have\\n\\\\[\\\\cos \\\\left( \\\\frac{16 \\\\pi}{15} \\\\right) = -\\\\cos \\\\left( \\\\frac{\\\\pi}{15} \\\\right).\\\\]\\nThus,\\n\\\\[P = -\\\\cos \\\\left( \\\\frac{\\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{2 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{4 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{8 \\\\pi}{15} \\\\right).\\\\]\\n\\nLet $Q = \\\\cos \\\\left( \\\\frac{\\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{2 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{4 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{8 \\\\pi}{15} \\\\right)$.\\nWe use the identity for the product of cosines of angles in geometric progression:\\n\\\\[\\\\prod_{k=0}^{n-1} \\\\cos(2^k \\\\theta) = \\\\frac{\\\\sin(2^n \\\\theta)}{2^n \\\\sin \\\\theta}.\\\\]\\nWith $\\\\theta = \\\\frac{\\\\pi}{15}$ and $n=4$, we get\\n\\\\[Q = \\\\frac{\\\\sin \\\\left( 2^4 \\\\cdot \\\\frac{\\\\pi}{15} \\\\right)}{2^4 \\\\sin \\\\left( \\\\frac{\\\\pi}{15} \\\\right)} = \\\\frac{\\\\sin \\\\left( \\\\frac{16\\\\pi}{15} \\\\right)}{16 \\\\sin \\\\left( \\\\frac{\\\\pi}{15} \\\\right)}.\\\\]\\nSince $\\\\frac{16\\\\pi}{15} = \\\\pi + \\\\frac{\\\\pi}{15}$, we have $\\\\sin\\\\left(\\\\frac{16\\\\pi}{15}\\\\right) = \\\\sin\\\\left(\\\\pi + \\\\frac{\\\\pi}{15}\\\\right) = -\\\\sin\\\\left(\\\\frac{\\\\pi}{15}\\\\right)$. Therefore,\\n\\\\[Q = \\\\frac{-\\\\sin \\\\left( \\\\frac{\\\\pi}{15} \\\\right)}{16 \\\\sin \\\\left( \\\\frac{\\\\pi}{15} \\\\right)} = -\\\\frac{1}{16}.\\\\]\\n\\nFinally,\\n\\\\[P = -Q = -\\\\left(-\\\\frac{1}{16}\\\\right) = \\\\frac{1}{16}.\\\\]\\n\\n\\\\boxed{\\\\frac{1}{16}}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{1}{16}\", \"reference_number\": \"\\\\frac{1}{16}\", \"raw_tail\": \"{15} \\\\right)}{16 \\\\sin \\\\left( \\\\frac{\\\\pi}{15} \\\\right)} = -\\\\frac{1}{16}.\\\\]\\n\\nFinally,\\n\\\\[P = -Q = -\\\\left(-\\\\frac{1}{16}\\\\right) = \\\\frac{1}{16}.\\\\]\\n\\n\\\\boxed{\\\\frac{1}{16}}\"}"
+  },
+  "timings": {
+    "agent_s": 25.94,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The expression is\\n\\\\[P = \\\\cos \\\\left( \\\\frac{2 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{4 \\\\pi}{15} \\\\right) \\\\cos \\\\left( \\\\frac{8 \\\\p' attempts=1"
+  ]
+}

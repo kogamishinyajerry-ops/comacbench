@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q131",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the function \\\\(f(x)=ax^4 - bx^2 + x + 5\\\\) and the condition \\\\(f(-3)=2\\\\).\\n\\nFirst, compute \\\\(f(-3)\\\\):\\n\\\\[\\nf(-3) = a(-3)^4 - b(-3)^2 + (-3) + 5 = a\\\\cdot81 - b\\\\cdot9 -3 + 5 = 81a - 9b + 2.\\n\\\\]\\nSet this equal to 2:\\n\\\\[\\n81a - 9b + 2 = 2 \\\\implies 81a - 9b = 0.\\n\\\\]\\nDivide by 9:\\n\\\\[\\n9a - b = 0 \\\\implies b = 9a.\\n\\\\]\\n\\nNow compute \\\\(f(3)\\\\):\\n\\\\[\\nf(3) = a(3)^4 - b(3)^2 + 3 + 5 = a\\\\cdot81 - b\\\\cdot9 + 8 = 81a - 9b + 8.\\n\\\\]\\nSubstitute \\\\(b = 9a\\\\):\\n\\\\[\\nf(3) = 81a - 9(9a) + 8 = 81a - 81a + 8 = 8.\\n\\\\]\\n\\nTherefore, the value of \\\\(f(3)\\\\) is 8.\\n\\n\\\\boxed{8}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8\", \"reference_number\": \"8\", \"raw_tail\": \"t81 - b\\\\cdot9 + 8 = 81a - 9b + 8.\\n\\\\]\\nSubstitute \\\\(b = 9a\\\\):\\n\\\\[\\nf(3) = 81a - 9(9a) + 8 = 81a - 81a + 8 = 8.\\n\\\\]\\n\\nTherefore, the value of \\\\(f(3)\\\\) is 8.\\n\\n\\\\boxed{8}\"}"
+  },
+  "timings": {
+    "agent_s": 22.35,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the function \\\\(f(x)=ax^4 - bx^2 + x + 5\\\\) and the condition \\\\(f(-3)=2\\\\).\\n\\nFirst, compute \\\\(f(-3)\\\\):\\n\\\\[\\nf(-3' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q136",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given positive real numbers \\\\(a_1, a_2, \\\\dots, a_n\\\\) satisfying\\n\\\\[\\n\\\\sum_{i=1}^n a_i = 96,\\\\qquad \\\\sum_{i=1}^n a_i^2 = 144,\\\\qquad \\\\sum_{i=1}^n a_i^3 = 216.\\n\\\\]\\n\\nFirst, by the Cauchy–Schwarz inequality,\\n\\\\[\\n\\\\left(\\\\sum_{i=1}^n a_i\\\\right)^2 \\\\le n \\\\sum_{i=1}^n a_i^2 \\\\;\\\\Longrightarrow\\\\; 96^2 \\\\le n \\\\cdot 144 \\\\;\\\\Longrightarrow\\\\; n \\\\ge \\\\frac{9216}{144} = 64.\\n\\\\]\\n\\nNext, we prove a universal inequality: For any nonnegative numbers \\\\(x_i\\\\),\\n\\\\[\\n\\\\left(\\\\sum_{i=1}^n x_i^3\\\\right)\\\\!\\\\left(\\\\sum_{i=1}^n x_i\\\\right) \\\\ge \\\\left(\\\\sum_{i=1}^n x_i^2\\\\right)^2.\\n\\\\]\\nIndeed,\\n\\\\[\\n\\\\left(\\\\sum x_i^3\\\\right)\\\\!\\\\left(\\\\sum x_i\\\\right) - \\\\left(\\\\sum x_i^2\\\\right)^2 = \\\\sum_{i\\\\neq j} x_i^2 x_j (x_i - x_j).\\n\\\\]\\nPairing the terms \\\\((i,j)\\\\) and \\\\((j,i)\\\\) gives \\\\(x_i x_j (x_i - x_j)^2 \\\\ge 0\\\\), so the whole sum is nonnegative. Equality holds iff for every \\\\(i \\\\neq j\\\\), \\\\(x_i x_j (x_i - x_j)^2 = 0\\\\). Since all \\\\(a_i > 0\\\\), equality forces \\\\(a_i = a_j\\\\) for all \\\\(i,j\\\\); i.e., all numbers are equal.\\n\\nPlugging in the given sums,\\n\\\\[\\n\\\\left(\\\\sum a_i^3\\\\right)\\\\!\\\\left(\\\\sum a_i\\\\right) = 216 \\\\cdot 96 = 20736, \\\\qquad \\\\left(\\\\sum a_i^2\\\\right)^2 = 144^2 = 20736,\\n\\\\]\\nso equality holds. Therefore all \\\\(a_i\\\\) are equal to some constant \\\\(c > 0\\\\).\\n\\nLet \\\\(a_i = c\\\\) for all \\\\(i\\\\). Then\\n\\\\[\\nn c = 96,\\\\qquad n c^2 = 144,\\\\qquad n c^3 = 216.\\n\\\\]\\nDividing the second equation by the first gives \\\\(c = \\\\frac{144}{96} = \\\\frac{3}{2}\\\\). Substituting into the first yields \\\\(n = \\\\frac{96}{3/2} = 64\\\\). The third equation is automatically satisfied: \\\\(64 \\\\cdot (3/2)^3 = 64 \\\\cdot \\\\frac{27}{8} = 216\\\\).\\n\\nThus the only possible value of \\\\(n\\\\) is \\\\(64\\\\). The sum of all possible values of \\\\(n\\\\) is therefore \\\\(64\\\\).\\n\\n\\\\[\\n\\\\boxed{64}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"64\", \"reference_number\": \"64\", \"raw_tail\": \" 64 \\\\cdot \\\\frac{27}{8} = 216\\\\).\\n\\nThus the only possible value of \\\\(n\\\\) is \\\\(64\\\\). The sum of all possible values of \\\\(n\\\\) is therefore \\\\(64\\\\).\\n\\n\\\\[\\n\\\\boxed{64}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 93.507,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given positive real numbers \\\\(a_1, a_2, \\\\dots, a_n\\\\) satisfying\\n\\\\[\\n\\\\sum_{i=1}^n a_i = 96,\\\\qquad \\\\sum_{i=1}^n a_i^' attempts=1"
+  ]
+}

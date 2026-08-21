@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q112",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to simplify $\\\\frac{1+\\\\sqrt{2}}{2+\\\\sqrt{3}}$ by rationalizing the denominator.\\n\\n## Setting Up Rationalization\\n\\nI'll multiply numerator and denominator by the conjugate $2-\\\\sqrt{3}$:\\n\\n$$\\\\frac{1+\\\\sqrt{2}}{2+\\\\sqrt{3}} \\\\cdot \\\\frac{2-\\\\sqrt{3}}{2-\\\\sqrt{3}}$$\\n\\n**Denominator:** $(2+\\\\sqrt{3})(2-\\\\sqrt{3}) = 4 - 3 = 1$ ✓\\n\\n**Numerator:** \\n$$(1+\\\\sqrt{2})(2-\\\\sqrt{3}) = 2 - \\\\sqrt{3} + 2\\\\sqrt{2} - \\\\sqrt{2}\\\\cdot\\\\sqrt{3}$$\\n$$= 2 - \\\\sqrt{3} + 2\\\\sqrt{2} - \\\\sqrt{6}$$\\n\\n## Converting to Required Form\\n\\nThe result is:\\n$$2 + 2\\\\sqrt{2} - \\\\sqrt{3} - \\\\sqrt{6}$$\\n\\nI can group this as:\\n$$2(1 + \\\\sqrt{2}) - (\\\\sqrt{3} + \\\\sqrt{6})$$\\n\\nComparing with $A(1+\\\\sqrt{B}) - (\\\\sqrt{C}+\\\\sqrt{D})$:\\n- $A = 2$\\n- $B = 2$  \\n- $C = 3$\\n- $D = 6$\\n\\n## Computing the Sum\\n\\n$$A + B + C + D = 2 + 2 + 3 + 6 = 13$$\\n\\n\\\\boxed{13}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13\", \"reference_number\": \"13\", \"raw_tail\": \" with $A(1+\\\\sqrt{B}) - (\\\\sqrt{C}+\\\\sqrt{D})$:\\n- $A = 2$\\n- $B = 2$  \\n- $C = 3$\\n- $D = 6$\\n\\n## Computing the Sum\\n\\n$$A + B + C + D = 2 + 2 + 3 + 6 = 13$$\\n\\n\\\\boxed{13}\"}"
+  },
+  "timings": {
+    "agent_s": 3.961,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to simplify $\\\\frac{1+\\\\sqrt{2}}{2+\\\\sqrt{3}}$ by rationalizing the denominator.\\n\\n## Settin' attempts=1"
+  ]
+}

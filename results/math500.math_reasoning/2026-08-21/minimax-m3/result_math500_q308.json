@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q308",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find where a specific plane cuts a regular tetrahedron with side length 2, then calculate the surface area of one resulting piece.\\n\\n## Setting Up Coordinates\\n\\nI place the regular tetrahedron with vertices:\\n- $A = (0, 0, 0)$, $B = (2, 0, 0)$  \\n- $C = (1, \\\\sqrt{3}, 0)$, $D = (1, \\\\frac{\\\\sqrt{3}}{3}, \\\\frac{2\\\\sqrt{6}}{3})$\\n\\n**Checking opposite edges:** $\\\\vec{AB} = (2,0,0)$ and $\\\\vec{CD} = (0, -\\\\frac{2\\\\sqrt{3}}{3}, \\\\frac{2\\\\sqrt{6}}{3})$. Their dot product is 0, confirming opposite edges are perpendicular.\\n\\n**Distance between AB and CD:** Using the cross product formula, I get $\\\\sqrt{2}$.\\n\\n## Finding the Cutting Plane\\n\\nThe plane parallel to both $AB$ and $CD$, halfway between them, passes through the midpoint of the common perpendicular segment connecting the midpoints of $AB$ and $CD$.\\n\\n**Midpoints:** $M_{AB} = (1,0,0)$ and $M_{CD} = (1, \\\\frac{2\\\\sqrt{3}}{3}, \\\\frac{\\\\sqrt{6}}{3})$.\\n\\n**Plane equation:** $\\\\sqrt{2}y + z = \\\\frac{\\\\sqrt{6}}{2}$\\n\\n## Finding Intersection Points\\n\\nTesting each edge of the tetrahedron (the plane is parallel to $AB$ and $CD$, so it doesn't meet them):\\n\\n| Edge | Parameter | Intersection Point |\\n|------|-----------|-------------------|\\n| $AC$ | $t = 1/2$ | $P_1 = (1/2, \\\\sqrt{3}/2, 0)$ |\\n| $AD$ | $t = 1/2$ | $P_4 = (1/2, \\\\sqrt{3}/6, \\\\sqrt{6}/3)$ |\\n| $BC$ | $u = 1/2$ | $P_2 = (3/2, \\\\sqrt{3}/2, 0)$ |\\n| $BD$ | $u = 1/2$ | $P_3 = (3/2, \\\\sqrt{3}/6, \\\\sqrt{6}/3)$ |\\n\\nThe plane cuts all four non-parallel edges at their **midpoints**.\\n\\n## Analyzing the Cross-Section\\n\\nThe quadrilateral $P_1P_2P_3P_4$ has:\\n- $\\\\vec{P_1P_2} = (1, 0, 0)$ — parallel to $AB$, length 1\\n- $\\\\vec{P_1P_4} = (0, -\\\\frac{\\\\sqrt{3}}{3}, \\\\frac{\\\\sqrt{6}}{3})$ — parallel to $CD$, length 1\\n- Dot product = 0, so it's a **square with side 1** and area **1**\\n\\n## Computing the Surface Area\\n\\nThe piece containing vertices $A$ and $B$ has 5 faces:\\n\\n**1. Trapezoid on face $ABC$:** Parallel sides $AB = 2$ and $P_1P_2 = 1$, height $\\\\frac{\\\\sqrt{3}}{2}$\\n$$\\\\text{Area} = \\\\frac{1}{2}(2+1)\\\\cdot\\\\frac{\\\\sqrt{3}}{2} = \\\\frac{3\\\\sqrt{3}}{4}$$\\n\\n**2. Trapezoid on face $ABD$:** Parallel sides $AB = 2$ and $P_4P_3 = 1$, height $\\\\frac{\\\\sqrt{3}}{2}$\\n$$\\\\text{Area} = \\\\frac{3\\\\sqrt{3}}{4}$$\\n\\n**3. Triangle $AP_1P_4$ on face $ACD$:** All sides equal 1, equilateral\\n$$\\\\text{Area} = \\\\frac{\\\\sqrt{3}}{4}$$\\n\\n**4. Triangle $BP_2P_3$ on face $BCD$:** All sides equal 1, equilateral\\n$$\\\\text{Area} = \\\\frac{\\\\sqrt{3}}{4}$$\\n\\n**5. Square cross-section $P_1P_2P_3P_4$:**\\n$$\\\\text{Area} = 1$$\\n\\n## Total Surface Area\\n\\n$$\\\\text{Total} = \\\\frac{3\\\\sqrt{3}}{4} + \\\\frac{3\\\\sqrt{3}}{4} + \\\\frac{\\\\sqrt{3}}{4} + \\\\frac{\\\\sqrt{3}}{4} + 1 = \\\\frac{8\\\\sqrt{3}}{4} + 1 = 2\\\\sqrt{3} + 1$$\\n\\n**Verification:** The original tetrahedron has total surface area $4\\\\sqrt{3}$. The cut adds twice the cross-section area (once for each piece):\\n$$\\\\frac{4\\\\sqrt{3} + 2 \\\\cdot 1}{2} = 2\\\\sqrt{3} + 1 \\\\checkmark$$\\n\\n#### $2\\\\sqrt{3}+1$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\\\\sqrt{3}+1\", \"reference_number\": \"1+2\\\\sqrt{3}\", \"raw_tail\": \"$4\\\\sqrt{3}$. The cut adds twice the cross-section area (once for each piece):\\n$$\\\\frac{4\\\\sqrt{3} + 2 \\\\cdot 1}{2} = 2\\\\sqrt{3} + 1 \\\\checkmark$$\\n\\n#### $2\\\\sqrt{3}+1$\"}"
+  },
+  "timings": {
+    "agent_s": 157.189,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find where a specific plane cuts a regular tetrahedron with side length 2, then calcu' attempts=1"
+  ]
+}

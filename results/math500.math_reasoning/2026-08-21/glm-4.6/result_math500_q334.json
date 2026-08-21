@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q334",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the system:\\n\\n\\\\[\\n\\\\begin{cases}\\na+b = 8,\\\\\\\\\\nb+c = -3,\\\\\\\\\\na+c = -5.\\n\\\\end{cases}\\n\\\\]\\n\\nAdd the three equations:\\n\\n\\\\[\\n(a+b)+(b+c)+(a+c) = 8 + (-3) + (-5) = 0,\\n\\\\]\\n\\nwhich simplifies to\\n\\n\\\\[\\n2a + 2b + 2c = 2(a+b+c) = 0 \\\\quad\\\\Longrightarrow\\\\quad a+b+c = 0.\\n\\\\]\\n\\nNow we can find each variable:\\n\\n- Subtract \\\\(a+b = 8\\\\) from \\\\(a+b+c = 0\\\\) to get \\\\(c = 0 - 8 = -8\\\\).\\n- From \\\\(b+c = -3\\\\), substitute \\\\(c = -8\\\\): \\\\(b + (-8) = -3 \\\\Rightarrow b = -3 + 8 = 5\\\\).\\n- From \\\\(a+b = 8\\\\), substitute \\\\(b = 5\\\\): \\\\(a + 5 = 8 \\\\Rightarrow a = 3\\\\).\\n\\n(Check: \\\\(a+c = 3 + (-8) = -5\\\\), which matches.)\\n\\nFinally, compute the product:\\n\\n\\\\[\\nabc = 3 \\\\times 5 \\\\times (-8) = 15 \\\\times (-8) = -120.\\n\\\\]\\n\\n\\\\boxed{-120}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-120\", \"reference_number\": \"-120\", \"raw_tail\": \"3\\\\).\\n\\n(Check: \\\\(a+c = 3 + (-8) = -5\\\\), which matches.)\\n\\nFinally, compute the product:\\n\\n\\\\[\\nabc = 3 \\\\times 5 \\\\times (-8) = 15 \\\\times (-8) = -120.\\n\\\\]\\n\\n\\\\boxed{-120}\"}"
+  },
+  "timings": {
+    "agent_s": 37.241,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the system:\\n\\n\\\\[\\n\\\\begin{cases}\\na+b = 8,\\\\\\\\\\nb+c = -3,\\\\\\\\\\na+c = -5.\\n\\\\end{cases}\\n\\\\]\\n\\nAdd the three equations:\\n\\n\\\\[' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q175",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find integers $m$ and $n$ satisfying $3m + 4n = 100$ while minimizing $|m-n|$.\\n\\n## Setting Up the Problem\\n\\nLet me set $d = m - n$, so $m = n + d$. Substituting into the equation:\\n$$3(n+d) + 4n = 100$$\\n$$7n + 3d = 100$$\\n\\n**Using modular arithmetic (mod 7):**\\n$$3d \\\\equiv 100 \\\\pmod{7}$$\\n$$3d \\\\equiv 2 \\\\pmod{7}$$\\n\\nSince $3 \\\\cdot 5 = 15 \\\\equiv 1 \\\\pmod 7$, the inverse of 3 is 5:\\n$$d \\\\equiv 5 \\\\cdot 2 \\\\equiv 10 \\\\equiv 3 \\\\pmod 7$$\\n\\nSo $d = 7k + 3$ for some integer $k$, meaning possible values are: $\\\\ldots, -11, -4, 3, 10, 17, \\\\ldots$\\n\\n## Finding the Minimum\\n\\nThe smallest absolute value is $|d| = 3$ when $k = 0$.\\n\\n**Verification:** With $d = 3$:\\n$$7n = 100 - 9 = 91 \\\\implies n = 13, \\\\; m = 16$$\\n\\n**Check:** $3(16) + 4(13) = 48 + 52 = 100$ ✓\\n\\nAnd $|m - n| = |16 - 13| = 3$ ✓\\n\\nThe next closest possibility $d = -4$ gives $|m-n| = 4$, which is larger.\\n\\n#### 3\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3\", \"reference_number\": \"3\", \"raw_tail\": \"**Check:** $3(16) + 4(13) = 48 + 52 = 100$ ✓\\n\\nAnd $|m - n| = |16 - 13| = 3$ ✓\\n\\nThe next closest possibility $d = -4$ gives $|m-n| = 4$, which is larger.\\n\\n#### 3\"}"
+  },
+  "timings": {
+    "agent_s": 11.929,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find integers $m$ and $n$ satisfying $3m + 4n = 100$ while minimizing $|m-n|$.\\n\\n## Se' attempts=1"
+  ]
+}

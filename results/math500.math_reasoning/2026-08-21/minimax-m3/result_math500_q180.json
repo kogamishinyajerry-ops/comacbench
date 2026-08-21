@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q180",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find positive two-digit integers that divide both 100 and 150.\\n\\n## Setting Up with GCD\\n\\nA number that divides both 100 and 150 must divide their greatest common divisor.\\n\\n**Finding gcd(100, 150):**\\n- $100 = 2^2 \\\\times 5^2$\\n- $150 = 2 \\\\times 3 \\\\times 5^2$\\n- $\\\\gcd(100, 150) = 2 \\\\times 5^2 = 50$\\n\\n## Finding Two-Digit Factors of 50\\n\\nThe factors of 50 are: $1, 2, 5, 10, 25, 50$\\n\\nThe two-digit factors are: $10, 25, 50$\\n\\n## Verification\\n\\n- **10:** $100 \\\\div 10 = 10$ ✓ and $150 \\\\div 10 = 15$ ✓\\n- **25:** $100 \\\\div 25 = 4$ ✓ and $150 \\\\div 25 = 6$ ✓  \\n- **50:** $100 \\\\div 50 = 2$ ✓ and $150 \\\\div 50 = 3$ ✓\\n\\nThere are **3** such integers.\\n\\n#### 3\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3\", \"reference_number\": \"3\", \"raw_tail\": \"10 = 15$ ✓\\n- **25:** $100 \\\\div 25 = 4$ ✓ and $150 \\\\div 25 = 6$ ✓  \\n- **50:** $100 \\\\div 50 = 2$ ✓ and $150 \\\\div 50 = 3$ ✓\\n\\nThere are **3** such integers.\\n\\n#### 3\"}"
+  },
+  "timings": {
+    "agent_s": 2.983,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find positive two-digit integers that divide both 100 and 150.\\n\\n## Setting Up with GC' attempts=1"
+  ]
+}

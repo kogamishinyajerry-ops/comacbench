@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q041",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The three given points are \\\\((5,3)\\\\), \\\\((6,8)\\\\), and \\\\((7,4)\\\\). For any three vertices of a parallelogram, the fourth vertex can be found by using the vector relationships:\\n\\n- If the missing vertex is opposite the point \\\\((6,8)\\\\), then \\\\((x,y) = (5,3)+(7,4)-(6,8) = (6,-1)\\\\).  \\n- If the missing vertex is opposite \\\\((7,4)\\\\), then \\\\((x,y) = (5,3)+(6,8)-(7,4) = (4,7)\\\\).  \\n- If the missing vertex is opposite \\\\((5,3)\\\\), then \\\\((x,y) = (6,8)+(7,4)-(5,3) = (8,9)\\\\).\\n\\nOnly the third candidate satisfies \\\\(x > 7\\\\), giving \\\\((x,y) = (8,9)\\\\). Hence \\\\(x + y = 8 + 9 = 17\\\\).\\n\\n\\\\boxed{17}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"17\", \"reference_number\": \"17\", \"raw_tail\": \", then \\\\((x,y) = (6,8)+(7,4)-(5,3) = (8,9)\\\\).\\n\\nOnly the third candidate satisfies \\\\(x > 7\\\\), giving \\\\((x,y) = (8,9)\\\\). Hence \\\\(x + y = 8 + 9 = 17\\\\).\\n\\n\\\\boxed{17}\"}"
+  },
+  "timings": {
+    "agent_s": 72.701,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The three given points are \\\\((5,3)\\\\), \\\\((6,8)\\\\), and \\\\((7,4)\\\\). For any three vertices of a parallelogram, the fourth ve' attempts=1"
+  ]
+}

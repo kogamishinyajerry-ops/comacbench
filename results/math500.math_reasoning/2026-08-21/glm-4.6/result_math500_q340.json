@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q340",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given vectors \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{b}\\\\) with the angle between them \\\\(29^\\\\circ\\\\). Define \\\\(\\\\mathbf{c} = \\\\mathbf{a} - \\\\mathbf{b}\\\\). Then \\\\(\\\\mathbf{a} = \\\\mathbf{b} + \\\\mathbf{c}\\\\). The angle between \\\\(\\\\mathbf{b}\\\\) and \\\\(\\\\mathbf{c}\\\\) is \\\\(84^\\\\circ\\\\). We need the angle between \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{c}\\\\).\\n\\nConsider the vector addition \\\\(\\\\mathbf{a} = \\\\mathbf{b} + \\\\mathbf{c}\\\\). Place \\\\(\\\\mathbf{b}\\\\) from the origin \\\\(O\\\\) to point \\\\(B\\\\). From \\\\(B\\\\), place \\\\(\\\\mathbf{c}\\\\) to point \\\\(A\\\\), so that \\\\(\\\\overrightarrow{BA} = \\\\mathbf{c}\\\\). Then \\\\(\\\\overrightarrow{OA} = \\\\mathbf{a}\\\\). This forms triangle \\\\(OBA\\\\) with sides \\\\(OB = |\\\\mathbf{b}|\\\\), \\\\(BA = |\\\\mathbf{c}|\\\\), and \\\\(OA = |\\\\mathbf{a}|\\\\).\\n\\n- Angle at \\\\(O\\\\) is the angle between \\\\(\\\\overrightarrow{OB}\\\\) and \\\\(\\\\overrightarrow{OA}\\\\), i.e., between \\\\(\\\\mathbf{b}\\\\) and \\\\(\\\\mathbf{a}\\\\), which is \\\\(29^\\\\circ\\\\).\\n- At vertex \\\\(B\\\\), the sides are \\\\(\\\\overrightarrow{BO} = -\\\\mathbf{b}\\\\) and \\\\(\\\\overrightarrow{BA} = \\\\mathbf{c}\\\\). The angle between \\\\(-\\\\mathbf{b}\\\\) and \\\\(\\\\mathbf{c}\\\\) is \\\\(180^\\\\circ - \\\\angle(\\\\mathbf{b},\\\\mathbf{c}) = 180^\\\\circ - 84^\\\\circ = 96^\\\\circ\\\\). Hence \\\\(\\\\angle OBA = 96^\\\\circ\\\\).\\n\\nThe sum of angles in triangle \\\\(OBA\\\\) is \\\\(180^\\\\circ\\\\), so the angle at \\\\(A\\\\) is\\n\\\\[\\n\\\\angle BAO = 180^\\\\circ - 29^\\\\circ - 96^\\\\circ = 55^\\\\circ.\\n\\\\]\\n\\nNow, \\\\(\\\\angle BAO\\\\) is the angle between \\\\(\\\\overrightarrow{AB} = -\\\\mathbf{c}\\\\) and \\\\(\\\\overrightarrow{AO} = -\\\\mathbf{a}\\\\). The angle between \\\\(-\\\\mathbf{a}\\\\) and \\\\(-\\\\mathbf{c}\\\\) equals the angle between \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{c}\\\\). Therefore, the angle between \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{a} - \\\\mathbf{b}\\\\) is \\\\(55^\\\\circ\\\\).\\n\\n\\\\[\\n\\\\boxed{55}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"55\", \"reference_number\": \"55^\\\\circ\", \"raw_tail\": \" angle between \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{c}\\\\). Therefore, the angle between \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{a} - \\\\mathbf{b}\\\\) is \\\\(55^\\\\circ\\\\).\\n\\n\\\\[\\n\\\\boxed{55}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 299.086,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given vectors \\\\(\\\\mathbf{a}\\\\) and \\\\(\\\\mathbf{b}\\\\) with the angle between them \\\\(29^\\\\circ\\\\). Define \\\\(\\\\mathbf{c} = \\\\' attempts=1"
+  ]
+}

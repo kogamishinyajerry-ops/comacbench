@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q140",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the greatest possible value of $\\\\gcd(n+7, 2n+1)$ for positive integers $n$.\\n\\n## Setting Up the Key Divisibility\\n\\nLet $d = \\\\gcd(n+7, 2n+1)$. Since $d$ divides both $n+7$ and $2n+1$, it must divide any linear combination of them.\\n\\nI'll compute:\\n$$2(n+7) - (2n+1) = 2n + 14 - 2n - 1 = 13$$\\n\\nTherefore $d \\\\mid 13$.\\n\\n## Finding the Maximum\\n\\nSince 13 is prime, the possible values of $d$ are $1$ or $13$.\\n\\n**Checking that $d = 13$ is achievable:** I need $n+7 \\\\equiv 0 \\\\pmod{13}$, which means $n \\\\equiv 6 \\\\pmod{13}$.\\n\\nTesting $n = 6$:\\n- $n + 7 = 13$\\n- $2n + 1 = 13$\\n- $\\\\gcd(13, 13) = 13$ ✓\\n\\nSince $13$ is achievable and $d$ cannot exceed $13$, the greatest possible value is:\\n\\n$$\\\\boxed{13}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13\", \"reference_number\": \"13\", \"raw_tail\": \"6$:\\n- $n + 7 = 13$\\n- $2n + 1 = 13$\\n- $\\\\gcd(13, 13) = 13$ ✓\\n\\nSince $13$ is achievable and $d$ cannot exceed $13$, the greatest possible value is:\\n\\n$$\\\\boxed{13}$$\"}"
+  },
+  "timings": {
+    "agent_s": 2.96,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the greatest possible value of $\\\\gcd(n+7, 2n+1)$ for positive integers $n$.\\n\\n## ' attempts=1"
+  ]
+}

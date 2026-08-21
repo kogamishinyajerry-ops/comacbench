@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q437",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find four different integers from 1 to 9 that satisfy all three equations.\\n\\n## Setting Up the Equations\\n\\nLet me label the unknowns:\\n- △ + □ = ♣\\n- 2△ = 5◇ (since △+△ = ◇+◇+◇+◇+◇)\\n- 2△ = ♣ + ◇\\n\\n## Solving for △\\n\\nFrom equation 2: ◇ = 2△/5\\n\\nSince ◇ must be a positive integer, 2△ must be divisible by 5. Since gcd(2, 5) = 1, this means **△ must be a multiple of 5**.\\n\\nThe only multiple of 5 in the range 1-9 is **△ = 5**.\\n\\n## Solving for ◇\\n\\n$$\\\\diamond = \\\\frac{2(5)}{5} = 2$$\\n\\n## Solving for ♣\\n\\nFrom equation 3:\\n$$\\\\clubsuit = 2\\\\triangle - \\\\diamond = 2(5) - 2 = 8$$\\n\\n## Solving for □\\n\\nFrom equation 1:\\n$$\\\\square = \\\\clubsuit - \\\\triangle = 8 - 5 = 3$$\\n\\n## Verification\\n\\n- △ + □ = 5 + 3 = 8 = ♣ ✓\\n- △ + △ = 10 = 5(2) = 5◇ ✓  \\n- △ + △ = 10 = 8 + 2 = ♣ + ◇ ✓\\n\\nAll values {3, 5, 2, 8} are different integers from 1 to 9. ✓\\n\\n#### 3\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3\", \"reference_number\": \"3\", \"raw_tail\": \"on\\n\\n- △ + □ = 5 + 3 = 8 = ♣ ✓\\n- △ + △ = 10 = 5(2) = 5◇ ✓  \\n- △ + △ = 10 = 8 + 2 = ♣ + ◇ ✓\\n\\nAll values {3, 5, 2, 8} are different integers from 1 to 9. ✓\\n\\n#### 3\"}"
+  },
+  "timings": {
+    "agent_s": 5.378,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find four different integers from 1 to 9 that satisfy all three equations.\\n\\n## Settin' attempts=1"
+  ]
+}

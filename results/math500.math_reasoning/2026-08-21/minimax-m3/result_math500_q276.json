@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q276",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find all real values of $x$ that make $\\\\sqrt{120-\\\\sqrt{x}}$ an integer.\\n\\n## Setting Up the Equation\\n\\nLet $\\\\sqrt{120-\\\\sqrt{x}} = n$, where $n$ is a non-negative integer (since the principal square root is non-negative).\\n\\nSquaring both sides:\\n$$120 - \\\\sqrt{x} = n^2$$\\n\\nSolving for $\\\\sqrt{x}$:\\n$$\\\\sqrt{x} = 120 - n^2$$\\n\\n## Finding Constraints\\n\\nFor $\\\\sqrt{x}$ to be defined and real, I need:\\n$$120 - n^2 \\\\geq 0 \\\\implies n^2 \\\\leq 120$$\\n\\nSince $n \\\\geq 0$, this means $n \\\\leq \\\\sqrt{120}$.\\n\\nChecking: $10^2 = 100 \\\\leq 120$ ✓ and $11^2 = 121 > 120$ ✗\\n\\nSo $n \\\\in \\\\{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10\\\\}$.\\n\\n## Counting Solutions\\n\\nFor each valid integer $n$, I get a unique value:\\n$$x = (120 - n^2)^2$$\\n\\n**Verification with boundary cases:**\\n- $n = 0$: $\\\\sqrt{x} = 120$, so $x = 14400$. Check: $\\\\sqrt{120-120} = \\\\sqrt{0} = 0$ ✓\\n- $n = 10$: $\\\\sqrt{x} = 20$, so $x = 400$. Check: $\\\\sqrt{120-20} = \\\\sqrt{100} = 10$ ✓\\n\\nEach value of $n$ produces a distinct value of $x$, giving **11** values total.\\n\\n#### 11\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"11\", \"reference_number\": \"11\", \"raw_tail\": \"qrt{x} = 20$, so $x = 400$. Check: $\\\\sqrt{120-20} = \\\\sqrt{100} = 10$ ✓\\n\\nEach value of $n$ produces a distinct value of $x$, giving **11** values total.\\n\\n#### 11\"}"
+  },
+  "timings": {
+    "agent_s": 8.443,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find all real values of $x$ that make $\\\\sqrt{120-\\\\sqrt{x}}$ an integer.\\n\\n## Setting U' attempts=1"
+  ]
+}

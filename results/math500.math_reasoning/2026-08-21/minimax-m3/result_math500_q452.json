@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q452",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a two-digit number where:\\n- The digits sum to 13\\n- The number minus its reverse equals 27\\n\\n## Setting Up Equations\\n\\nLet the two-digit number have tens digit $a$ and units digit $b$.\\n- Original number: $10a + b$\\n- Reversed number: $10b + a$\\n\\n**Equation 1** (digit sum): $a + b = 13$\\n\\n**Equation 2** (difference): $(10a + b) - (10b + a) = 27$\\n\\n## Solving the System\\n\\nSimplifying Equation 2:\\n$$9a - 9b = 27 \\\\implies a - b = 3$$\\n\\nNow I have the system:\\n- $a + b = 13$\\n- $a - b = 3$\\n\\n**Adding:** $2a = 16 \\\\implies a = 8$\\n\\n**Subtracting:** $2b = 10 \\\\implies b = 5$\\n\\nSo the original number is **85** and the reversed number is **58**.\\n\\n## Verification\\n- Digit sum: $8 + 5 = 13$ ✓\\n- Difference: $85 - 58 = 27$ ✓\\n\\n## Finding the Sum\\n\\n$$85 + 58 = 143$$\\n\\n**Quick check using the formula:** The sum of a number and its digit-reversal equals $11(a+b) = 11 \\\\times 13 = 143$ ✓\\n\\n#### 143\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"143\", \"reference_number\": \"143\", \"raw_tail\": \"ding the Sum\\n\\n$$85 + 58 = 143$$\\n\\n**Quick check using the formula:** The sum of a number and its digit-reversal equals $11(a+b) = 11 \\\\times 13 = 143$ ✓\\n\\n#### 143\"}"
+  },
+  "timings": {
+    "agent_s": 5.282,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a two-digit number where:\\n- The digits sum to 13\\n- The number minus its reverse ' attempts=1"
+  ]
+}

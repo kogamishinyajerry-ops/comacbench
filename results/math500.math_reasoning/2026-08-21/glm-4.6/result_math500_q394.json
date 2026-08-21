@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q394",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The function is \\\\(z = (2x - y)^2 - 2y^2 - 3y\\\\). For a fixed \\\\(x\\\\), expand:\\n\\\\[\\nz = 4x^2 - 4xy + y^2 - 2y^2 - 3y = 4x^2 - 4xy - y^2 - 3y.\\n\\\\]\\nThis is a quadratic in \\\\(y\\\\) with a negative coefficient for \\\\(y^2\\\\), so it is concave and attains a maximum. The maximum over \\\\(y\\\\) occurs at the critical point:\\n\\\\[\\n\\\\frac{\\\\partial z}{\\\\partial y} = -4x - 2y - 3 = 0 \\\\quad\\\\Longrightarrow\\\\quad y = -\\\\frac{4x+3}{2}.\\n\\\\]\\nSubstituting back gives the value of the game for a given \\\\(x\\\\):\\n\\\\[\\nV(x) = z\\\\!\\\\left(x, -\\\\frac{4x+3}{2}\\\\right) = 8x^2 + 6x + \\\\frac{9}{4}.\\n\\\\]\\nArchimedes chooses \\\\(x\\\\) to minimize \\\\(V(x)\\\\). Since \\\\(V\\\\) is a convex quadratic (\\\\(8>0\\\\)), the minimum is at\\n\\\\[\\nV'(x) = 16x + 6 = 0 \\\\quad\\\\Longrightarrow\\\\quad x = -\\\\frac{3}{8}.\\n\\\\]\\nThus the optimal choice for Archimedes is \\\\(x = -\\\\dfrac{3}{8}\\\\).\\n\\n\\\\boxed{-\\\\frac{3}{8}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-\\\\frac{3}{8}\", \"reference_number\": \"-\\\\frac{3}{8}\", \"raw_tail\": \" at\\n\\\\[\\nV'(x) = 16x + 6 = 0 \\\\quad\\\\Longrightarrow\\\\quad x = -\\\\frac{3}{8}.\\n\\\\]\\nThus the optimal choice for Archimedes is \\\\(x = -\\\\dfrac{3}{8}\\\\).\\n\\n\\\\boxed{-\\\\frac{3}{8}}\"}"
+  },
+  "timings": {
+    "agent_s": 45.092,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The function is \\\\(z = (2x - y)^2 - 2y^2 - 3y\\\\). For a fixed \\\\(x\\\\), expand:\\n\\\\[\\nz = 4x^2 - 4xy + y^2 - 2y^2 - 3y = 4x^2 - ' attempts=1"
+  ]
+}

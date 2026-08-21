@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q324",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to identify the shaded regions and set up an equation for the total shaded area.\\n\\n## Setting Up the Problem\\n\\nLet $\\\\angle ADC = \\\\theta$ (in radians). The larger circle has area $\\\\pi(2)^2 = 4\\\\pi$, so the shaded area equals:\\n$$\\\\frac{5}{12} \\\\cdot 4\\\\pi = \\\\frac{5\\\\pi}{3}$$\\n\\n## Identifying the Shaded Regions\\n\\n**Region 1** (annular sector): Bounded by the radial line from $A$ to $A/2$, the small circle arc from $A/2$ to $C/2$, the radial line from $C/2$ to $C$, and the large circle arc from $C$ to $A$. This is the annular sector between the two circles with central angle $\\\\theta$.\\n\\nArea of Region 1:\\n$$\\\\frac{\\\\theta}{2\\\\pi} \\\\cdot \\\\pi(2^2 - 1^2) = \\\\frac{\\\\theta}{2\\\\pi} \\\\cdot 3\\\\pi = \\\\frac{3\\\\theta}{2}$$\\n\\n**Region 2** (major sector of small circle): Bounded by the large arc of the small circle (going counterclockwise from $A/2$ to $C/2$, with central angle $2\\\\pi - \\\\theta$) and the radial segments from $C/2$ to $D$ to $A/2$.\\n\\nArea of Region 2:\\n$$\\\\frac{2\\\\pi - \\\\theta}{2\\\\pi} \\\\cdot \\\\pi(1)^2 = \\\\frac{2\\\\pi - \\\\theta}{2}$$\\n\\n## Setting Up the Equation\\n\\nTotal shaded area:\\n$$\\\\frac{3\\\\theta}{2} + \\\\frac{2\\\\pi - \\\\theta}{2} = \\\\frac{3\\\\theta + 2\\\\pi - \\\\theta}{2} = \\\\frac{2\\\\theta + 2\\\\pi}{2} = \\\\theta + \\\\pi$$\\n\\nSetting this equal to $\\\\frac{5\\\\pi}{3}$:\\n$$\\\\theta + \\\\pi = \\\\frac{5\\\\pi}{3}$$\\n$$\\\\theta = \\\\frac{5\\\\pi}{3} - \\\\pi = \\\\frac{2\\\\pi}{3}$$\\n\\n## Verification\\n\\nThe unshaded area should be $4\\\\pi - \\\\frac{5\\\\pi}{3} = \\\\frac{7\\\\pi}{3}$.\\n\\nUnshaded regions: small sector of inner circle + annular sector with central angle $2\\\\pi - \\\\theta$\\n$$\\\\frac{\\\\theta}{2} + \\\\frac{3(2\\\\pi - \\\\theta)}{2} = \\\\frac{\\\\theta + 6\\\\pi - 3\\\\theta}{2} = 3\\\\pi - \\\\theta$$\\n\\nSetting $3\\\\pi - \\\\theta = \\\\frac{7\\\\pi}{3}$ gives $\\\\theta = \\\\frac{2\\\\pi}{3}$ ✓\\n\\n## Converting to Degrees\\n\\n$$\\\\theta = \\\\frac{2\\\\pi}{3} \\\\cdot \\\\frac{180°}{\\\\pi} = 120°$$\\n\\n#### 120\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"120\", \"reference_number\": \"120\", \"raw_tail\": \"3\\\\pi - \\\\theta = \\\\frac{7\\\\pi}{3}$ gives $\\\\theta = \\\\frac{2\\\\pi}{3}$ ✓\\n\\n## Converting to Degrees\\n\\n$$\\\\theta = \\\\frac{2\\\\pi}{3} \\\\cdot \\\\frac{180°}{\\\\pi} = 120°$$\\n\\n#### 120\"}"
+  },
+  "timings": {
+    "agent_s": 31.835,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to identify the shaded regions and set up an equation for the total shaded area.\\n\\n## Set' attempts=1"
+  ]
+}

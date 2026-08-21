@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q100",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given a convex cyclic hexagon \\\\(ABCDEF\\\\) with vertices on a circle in that order. The interior angles at \\\\(F\\\\) and \\\\(B\\\\) are \\\\(105^\\\\circ\\\\) and \\\\(110^\\\\circ\\\\) respectively, and we need the interior angle \\\\(\\\\alpha\\\\) at \\\\(D\\\\).\\n\\nLet the arcs between consecutive vertices (along the circle) be:\\n\\\\[\\nAB = a,\\\\; BC = b,\\\\; CD = c,\\\\; DE = d,\\\\; EF = e,\\\\; FA = f,\\n\\\\]\\nso that \\\\(a+b+c+d+e+f = 360^\\\\circ\\\\).\\n\\nFor any cyclic polygon, the interior angle at a vertex equals half the measure of the arc opposite it, i.e.,\\n\\\\[\\n\\\\angle V_i = \\\\frac{1}{2}\\\\bigl(360^\\\\circ - (\\\\text{arc before }V_i + \\\\text{arc after }V_i)\\\\bigr).\\n\\\\]\\n\\nThus,\\n\\\\[\\n\\\\angle B = \\\\frac{1}{2}(360^\\\\circ - (a+b)) = 110^\\\\circ \\\\;\\\\Rightarrow\\\\; 360^\\\\circ - (a+b) = 220^\\\\circ \\\\;\\\\Rightarrow\\\\; a+b = 140^\\\\circ. \\\\tag{1}\\n\\\\]\\n\\\\[\\n\\\\angle F = \\\\frac{1}{2}(360^\\\\circ - (e+f)) = 105^\\\\circ \\\\;\\\\Rightarrow\\\\; 360^\\\\circ - (e+f) = 210^\\\\circ \\\\;\\\\Rightarrow\\\\; e+f = 150^\\\\circ. \\\\tag{2}\\n\\\\]\\n\\\\[\\n\\\\angle D = \\\\frac{1}{2}(360^\\\\circ - (c+d)) = \\\\alpha. \\\\tag{3}\\n\\\\]\\n\\nFrom the total arc sum,\\n\\\\[\\n(a+b)+(c+d)+(e+f)=360^\\\\circ.\\n\\\\]\\nSubstituting (1) and (2):\\n\\\\[\\n140^\\\\circ + (c+d) + 150^\\\\circ = 360^\\\\circ \\\\;\\\\Rightarrow\\\\; c+d = 70^\\\\circ.\\n\\\\]\\n\\nNow plug into (3):\\n\\\\[\\n\\\\alpha = \\\\frac{1}{2}(360^\\\\circ - 70^\\\\circ) = \\\\frac{1}{2}\\\\cdot 290^\\\\circ = 145^\\\\circ.\\n\\\\]\\n\\nTherefore, the measure of \\\\(\\\\alpha\\\\) is \\\\(145^\\\\circ\\\\).\\n\\n#### 145\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"145\", \"reference_number\": \"145^\\\\circ\", \"raw_tail\": \"3):\\n\\\\[\\n\\\\alpha = \\\\frac{1}{2}(360^\\\\circ - 70^\\\\circ) = \\\\frac{1}{2}\\\\cdot 290^\\\\circ = 145^\\\\circ.\\n\\\\]\\n\\nTherefore, the measure of \\\\(\\\\alpha\\\\) is \\\\(145^\\\\circ\\\\).\\n\\n#### 145\"}"
+  },
+  "timings": {
+    "agent_s": 227.724,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given a convex cyclic hexagon \\\\(ABCDEF\\\\) with vertices on a circle in that order. The interior angles at \\\\(F\\\\) an' attempts=1"
+  ]
+}

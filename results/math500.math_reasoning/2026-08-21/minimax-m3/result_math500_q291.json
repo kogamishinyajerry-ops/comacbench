@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q291",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to count lattice points strictly inside the rectangle.\\n\\n## Setting Up the Bounds\\n\\nThe rectangle has vertices at $(5,4)$, $(-5,4)$, $(-5,-4)$, $(5,-4)$, which means:\\n- $x$ ranges from $-5$ to $5$ (boundaries inclusive)\\n- $y$ ranges from $-4$ to $4$ (boundaries inclusive)\\n\\n## Counting Integer Values\\n\\n**For $x$:** Strictly between $-5$ and $5$:\\n$$x \\\\in \\\\{-4, -3, -2, -1, 0, 1, 2, 3, 4\\\\} \\\\quad \\\\text{(9 values)}$$\\n\\n**For $y$:** Strictly between $-4$ and $4$:\\n$$y \\\\in \\\\{-3, -2, -1, 0, 1, 2, 3\\\\} \\\\quad \\\\text{(7 values)}$$\\n\\n## Computing the Total\\n\\nThe total number of interior lattice points is:\\n$$9 \\\\times 7 = 63$$\\n\\n#### 63\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"63\", \"reference_number\": \"63\", \"raw_tail\": \"y \\\\in \\\\{-3, -2, -1, 0, 1, 2, 3\\\\} \\\\quad \\\\text{(7 values)}$$\\n\\n## Computing the Total\\n\\nThe total number of interior lattice points is:\\n$$9 \\\\times 7 = 63$$\\n\\n#### 63\"}"
+  },
+  "timings": {
+    "agent_s": 5.007,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to count lattice points strictly inside the rectangle.\\n\\n## Setting Up the Bounds\\n\\nThe re' attempts=1"
+  ]
+}

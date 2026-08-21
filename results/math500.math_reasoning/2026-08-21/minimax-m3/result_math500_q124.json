@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q124",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to solve the equation $|x+5| - |3x-6| = 0$, which means $|x+5| = |3x-6|$.\\n\\n**Method: Square both sides**\\n\\n$$(x+5)^2 = (3x-6)^2$$\\n\\nExpanding both sides:\\n$$x^2 + 10x + 25 = 9x^2 - 36x + 36$$\\n\\nRearranging:\\n$$0 = 8x^2 - 46x + 11$$\\n\\n**Apply the quadratic formula:**\\n$$x = \\\\frac{46 \\\\pm \\\\sqrt{(-46)^2 - 4(8)(11)}}{2(8)} = \\\\frac{46 \\\\pm \\\\sqrt{2116 - 352}}{16} = \\\\frac{46 \\\\pm \\\\sqrt{1764}}{16} = \\\\frac{46 \\\\pm 42}{16}$$\\n\\nThis gives two solutions:\\n- $x_1 = \\\\frac{46 + 42}{16} = \\\\frac{88}{16} = \\\\frac{11}{2}$\\n- $x_2 = \\\\frac{46 - 42}{16} = \\\\frac{4}{16} = \\\\frac{1}{4}$\\n\\n**Verification for $x = \\\\frac{11}{2}$:**\\n- $|x+5| = \\\\left|\\\\frac{11}{2} + \\\\frac{10}{2}\\\\right| = \\\\frac{21}{2}$\\n- $|3x-6| = \\\\left|\\\\frac{33}{2} - \\\\frac{12}{2}\\\\right| = \\\\frac{21}{2}$ ✓\\n\\nThe largest possible value is $\\\\frac{11}{2}$.\\n\\n\\\\boxed{\\\\dfrac{11}{2}}\\n\\n#### 11/2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\dfrac{11}{2}\", \"reference_number\": \"\\\\frac{11}{2}\", \"raw_tail\": \"{21}{2}$\\n- $|3x-6| = \\\\left|\\\\frac{33}{2} - \\\\frac{12}{2}\\\\right| = \\\\frac{21}{2}$ ✓\\n\\nThe largest possible value is $\\\\frac{11}{2}$.\\n\\n\\\\boxed{\\\\dfrac{11}{2}}\\n\\n#### 11/2\"}"
+  },
+  "timings": {
+    "agent_s": 4.273,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to solve the equation $|x+5| - |3x-6| = 0$, which means $|x+5| = |3x-6|$.\\n\\n**Method: Square both sides**\\n\\n$$(x+5' attempts=1"
+  ]
+}

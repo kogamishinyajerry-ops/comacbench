@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q205",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $\\\\mathbf{A}\\\\mathbf{v}$ where $\\\\mathbf{v} = (-13, 3, 4)^T$ using the two given transformations.\\n\\n## Setting Up the Linear Combination\\n\\nI'll check if $\\\\mathbf{v}$ can be written as a linear combination of the two input vectors.\\n\\nSuppose $\\\\mathbf{v} = a\\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + b\\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix}$\\n\\nThis gives the system:\\n$$\\\\begin{cases} 3a - 5b = -13 \\\\\\\\ a + 2b = 3 \\\\\\\\ 2b = 4 \\\\end{cases}$$\\n\\n**Solving:** From the third equation, $b = 2$. Then from the second: $a + 4 = 3$, so $a = -1$.\\n\\n**Verification:** $3(-1) - 5(2) = -3 - 10 = -13$ ✓\\n\\nSo $\\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix} = -\\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + 2\\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix}$\\n\\n## Applying the Matrix\\n\\nUsing linearity of matrix multiplication:\\n\\n$$\\\\mathbf{A}\\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix} = -\\\\mathbf{A}\\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + 2\\\\mathbf{A}\\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix}$$\\n\\n$$= -\\\\begin{pmatrix} 2 \\\\\\\\ 4 \\\\\\\\ -3 \\\\end{pmatrix} + 2\\\\begin{pmatrix} 0 \\\\\\\\ -5 \\\\\\\\ -5 \\\\end{pmatrix}$$\\n\\n$$= \\\\begin{pmatrix} -2 \\\\\\\\ -4 \\\\\\\\ 3 \\\\end{pmatrix} + \\\\begin{pmatrix} 0 \\\\\\\\ -10 \\\\\\\\ -10 \\\\end{pmatrix}$$\\n\\n$$= \\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}$$\\n\\n#### $\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}\", \"raw_tail\": \"ix} + \\\\begin{pmatrix} 0 \\\\\\\\ -10 \\\\\\\\ -10 \\\\end{pmatrix}$$\\n\\n$$= \\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}$$\\n\\n#### $\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}$\"}"
+  },
+  "timings": {
+    "agent_s": 7.024,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $\\\\mathbf{A}\\\\mathbf{v}$ where $\\\\mathbf{v} = (-13, 3, 4)^T$ using the two given tr' attempts=1"
+  ]
+}

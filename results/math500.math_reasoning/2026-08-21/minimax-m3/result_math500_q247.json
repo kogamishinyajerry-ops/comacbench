@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q247",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a quadratic polynomial with integer coefficients that has $4 - \\\\sqrt{11}$ as a root, then evaluate the ratio $p(3)/p(4)$.\\n\\n## Setting Up the Polynomial\\n\\nSince $p(x)$ has integer coefficients (rational coefficients), if $4 - \\\\sqrt{11}$ is a root, its conjugate $4 + \\\\sqrt{11}$ must also be a root.\\n\\nTherefore:\\n$$p(x) = a(x - (4-\\\\sqrt{11}))(x - (4+\\\\sqrt{11}))$$\\n\\nExpanding using the difference of squares:\\n$$p(x) = a\\\\left((x-4)^2 - (\\\\sqrt{11})^2\\\\right) = a(x^2 - 8x + 16 - 11) = a(x^2 - 8x + 5)$$\\n\\nwhere $a$ is an integer (to ensure integer coefficients).\\n\\n## Computing the Ratio\\n\\n**Evaluating $p(3)$:**\\n$$p(3) = a(3^2 - 8(3) + 5) = a(9 - 24 + 5) = -10a$$\\n\\n**Evaluating $p(4)$:**\\n$$p(4) = a(4^2 - 8(4) + 5) = a(16 - 32 + 5) = -11a$$\\n\\n## Final Computation\\n\\n$$\\\\frac{p(3)}{p(4)} = \\\\frac{-10a}{-11a} = \\\\frac{10}{11}$$\\n\\n#### $\\\\frac{10}{11}$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{10}{11}\", \"reference_number\": \"\\\\frac{10}{11}\", \"raw_tail\": \"$:**\\n$$p(4) = a(4^2 - 8(4) + 5) = a(16 - 32 + 5) = -11a$$\\n\\n## Final Computation\\n\\n$$\\\\frac{p(3)}{p(4)} = \\\\frac{-10a}{-11a} = \\\\frac{10}{11}$$\\n\\n#### $\\\\frac{10}{11}$\"}"
+  },
+  "timings": {
+    "agent_s": 5.354,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a quadratic polynomial with integer coefficients that has $4 - \\\\sqrt{11}$ as a r' attempts=1"
+  ]
+}

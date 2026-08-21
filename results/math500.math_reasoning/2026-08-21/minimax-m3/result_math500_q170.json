@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q170",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find all intersection points of the parabola $y = x^2 - 8$ and the sideways parabola $y^2 = -5x + 44$.\\n\\n## Setting Up the Equation\\n\\nSubstituting $y = x^2 - 8$ into $y^2 = -5x + 44$:\\n$$(x^2 - 8)^2 = -5x + 44$$\\n$$x^4 - 16x^2 + 64 = -5x + 44$$\\n$$x^4 - 16x^2 + 5x + 20 = 0$$\\n\\n## Factoring the Polynomial\\n\\n**Testing x = -1:** $1 - 16 - 5 + 20 = 0$ ✓\\n\\nDividing by $(x+1)$:\\n$$x^4 - 16x^2 + 5x + 20 = (x+1)(x^3 - x^2 - 15x + 20)$$\\n\\n**Testing x = -4:** $-64 - 16 + 60 + 20 = 0$ ✓\\n\\nDividing $x^3 - x^2 - 15x + 20$ by $(x+4)$:\\n$$x^3 - x^2 - 15x + 20 = (x+4)(x^2 - 5x + 5)$$\\n\\nSo the full factorization is:\\n$$(x+1)(x+4)(x^2 - 5x + 5) = 0$$\\n\\n## Finding All Solutions\\n\\nThe x-values are:\\n- $x_1 = -1$, giving $y_1 = 1 - 8 = -7$\\n- $x_2 = -4$, giving $y_2 = 16 - 8 = 8$  \\n- $x_3 = \\\\frac{5+\\\\sqrt{5}}{2}$, giving $y_3 = \\\\frac{-1+5\\\\sqrt{5}}{2}$\\n- $x_4 = \\\\frac{5-\\\\sqrt{5}}{2}$, giving $y_4 = \\\\frac{-1-5\\\\sqrt{5}}{2}$\\n\\n**Verification:** For $(x_1, y_1) = (-1, -7)$: $y^2 = 49$ and $-5(1) + 44 = 49$ ✓\\n\\n## Computing the Product\\n\\n$$y_1 \\\\cdot y_2 \\\\cdot y_3 \\\\cdot y_4 = (-7)(8) \\\\cdot \\\\frac{(-1+5\\\\sqrt{5})}{2} \\\\cdot \\\\frac{(-1-5\\\\sqrt{5})}{2}$$\\n\\nUsing the difference of squares pattern:\\n$$\\\\frac{(-1)^2 - (5\\\\sqrt{5})^2}{4} = \\\\frac{1 - 125}{4} = -31$$\\n\\nTherefore:\\n$$\\\\text{Product} = (-7)(8)(-31) = 56 \\\\times 31 = 1736$$\\n\\n#### 1736\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1736\", \"reference_number\": \"1736\", \"raw_tail\": \"f squares pattern:\\n$$\\\\frac{(-1)^2 - (5\\\\sqrt{5})^2}{4} = \\\\frac{1 - 125}{4} = -31$$\\n\\nTherefore:\\n$$\\\\text{Product} = (-7)(8)(-31) = 56 \\\\times 31 = 1736$$\\n\\n#### 1736\"}"
+  },
+  "timings": {
+    "agent_s": 8.046,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find all intersection points of the parabola $y = x^2 - 8$ and the sideways parabola ' attempts=1"
+  ]
+}

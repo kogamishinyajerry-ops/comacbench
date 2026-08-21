@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q082",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the maximum slope of a line connecting point $A$ in the square $[0,2] \\\\times [0,2]$ to point $B$ in the square $[4,5] \\\\times [2,3]$.\\n\\n## Setting Up the Optimization\\n\\nThe slope of the line through $A = (x_1, y_1)$ and $B = (x_2, y_2)$ is:\\n$$m = \\\\frac{y_2 - y_1}{x_2 - x_1}$$\\n\\nTo maximize this slope, I need to:\\n- **Maximize the numerator** $y_2 - y_1$: take $y_2$ as large as possible and $y_1$ as small as possible\\n- **Minimize the denominator** $x_2 - x_1$: take $x_2$ as small as possible and $x_1$ as large as possible\\n\\n## Checking the Constraints\\n\\n**For the numerator** with $y_1 \\\\in [0, 2]$ and $y_2 \\\\in [2, 3]$:\\n- Maximum: $y_2 - y_1 = 3 - 0 = 3$\\n\\n**For the denominator** with $x_1 \\\\in [0, 2]$ and $x_2 \\\\in [4, 5]$:\\n- Minimum: $x_2 - x_1 = 4 - 2 = 2$\\n\\n## Verifying Simultaneous Achievement\\n\\nThe extreme values can be achieved at the same time by selecting corner points:\\n- $A = (2, 0)$: right-bottom corner of the first square ✓\\n- $B = (4, 3)$: left-top corner of the second square ✓\\n\\n## Computing the Maximum Slope\\n\\n$$m = \\\\frac{3 - 0}{4 - 2} = \\\\frac{3}{2}$$\\n\\n**Verification that no other configuration does better:**\\n- If $y_1$ increases (e.g., to $0.5$): slope becomes $\\\\frac{2.5}{2} = 1.25 < \\\\frac{3}{2}$\\n- If $x_2$ increases (e.g., to $4.1$): slope becomes $\\\\frac{3}{2.1} \\\\approx 1.43 < \\\\frac{3}{2}$\\n- If $x_1$ decreases (e.g., to $1.9$): slope becomes $\\\\frac{3}{2.1} \\\\approx 1.43 < \\\\frac{3}{2}$\\n\\n#### 3/2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3/2\", \"reference_number\": \"\\\\frac{3}{2}\", \"raw_tail\": \"ope becomes $\\\\frac{3}{2.1} \\\\approx 1.43 < \\\\frac{3}{2}$\\n- If $x_1$ decreases (e.g., to $1.9$): slope becomes $\\\\frac{3}{2.1} \\\\approx 1.43 < \\\\frac{3}{2}$\\n\\n#### 3/2\"}"
+  },
+  "timings": {
+    "agent_s": 10.864,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the maximum slope of a line connecting point $A$ in the square $[0,2] \\\\times [0,' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q001",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to evaluate the double sum by changing how I organize the terms.\\n\\n## Setting Up the Substitution\\n\\nLet me substitute $n = j + k$. Since $j \\\\geq 1$ and $k \\\\geq 1$, we have $n \\\\geq 2$.\\n\\n**Counting pairs:** For each fixed $n \\\\geq 2$, the pairs $(j,k)$ with $j \\\\geq 1$, $k \\\\geq 1$, and $j+k = n$ are:\\n$$(1, n-1), (2, n-2), \\\\ldots, (n-1, 1)$$\\n\\nThis gives exactly $n - 1$ pairs.\\n\\n## Converting the Double Sum\\n\\nRewriting the sum over $n$ instead of $(j,k)$:\\n$$S = \\\\sum_{n=2}^{\\\\infty} \\\\frac{n-1}{n^3}$$\\n\\n## Splitting the Sum\\n\\nUsing partial fractions:\\n$$\\\\frac{n-1}{n^3} = \\\\frac{1}{n^2} - \\\\frac{1}{n^3}$$\\n\\nTherefore:\\n$$S = \\\\sum_{n=2}^{\\\\infty} \\\\frac{1}{n^2} - \\\\sum_{n=2}^{\\\\infty} \\\\frac{1}{n^3}$$\\n\\n## Expressing in Terms of $p$ and $q$\\n\\nSeparating off the $n=1$ terms:\\n$$\\\\sum_{n=2}^{\\\\infty} \\\\frac{1}{n^2} = p - 1, \\\\qquad \\\\sum_{n=2}^{\\\\infty} \\\\frac{1}{n^3} = q - 1$$\\n\\nSo:\\n$$S = (p - 1) - (q - 1) = p - q$$\\n\\n#### p - q\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"p - q\", \"reference_number\": \"p - q\", \"raw_tail\": \" $n=1$ terms:\\n$$\\\\sum_{n=2}^{\\\\infty} \\\\frac{1}{n^2} = p - 1, \\\\qquad \\\\sum_{n=2}^{\\\\infty} \\\\frac{1}{n^3} = q - 1$$\\n\\nSo:\\n$$S = (p - 1) - (q - 1) = p - q$$\\n\\n#### p - q\"}"
+  },
+  "timings": {
+    "agent_s": 4.405,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to evaluate the double sum by changing how I organize the terms.\\n\\n## Setting Up the Subs' attempts=1"
+  ]
+}

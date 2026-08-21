@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_091",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.875,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.9375,
+  "artifacts": {
+    "code": "\"import re\\n\\ndef is_bored(S):\\n    \\\"\\\"\\\"\\n    You'll be given a string of words, and your task is to count the number\\n    of boredoms. A boredom is a sentence that starts with the word \\\"I\\\".\\n    Sentences are delimited by '.', '?' or '!'.\\n   \\n    For example:\\n    >>> is_bored(\\\"Hello world\\\")\\n    0\\n    >>> is_bored(\\\"The sky is blue. The sun is shining. I love this weather\\\")\\n    1\\n    \\\"\\\"\\\"\\n    # Split the string into sentences using '.', '?' or '!' as delimiters\\n    sentences = re.split(r'[.!?]', S)\\n    \\n    count = 0\\n    for sentence in sentences:\\n        stripped = sentence.strip()\\n        # Check if sentence starts with \\\"I\\\" as a standalone word\\n        # This means either the sentence is exactly \\\"I\\\" or starts with \\\"I \\\"\\n        if stripped == 'I' or stripped.startswith('I '):\\n            count += 1\\n    \\n    return count\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 8, \"failed_cases\": [{\"case\": 8, \"pass\": false, \"err\": \"AssertionError: mismatch on ['I']\"}], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 13.611,
+    "setup_s": 0.0,
+    "grade_s": 0.144
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

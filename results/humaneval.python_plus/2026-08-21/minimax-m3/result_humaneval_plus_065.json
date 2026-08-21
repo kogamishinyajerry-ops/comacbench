@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_065",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def circular_shift(x, shift):\\n    \\\"\\\"\\\"Circular shift the digits of the integer x, shift the digits right by shift\\n    and return the result as a string.\\n    If shift > number of digits, return digits reversed.\\n    >>> circular_shift(12, 1)\\n    \\\"21\\\"\\n    >>> circular_shift(12, 2)\\n    \\\"12\\\"\\n    \\\"\\\"\\\"\\n    # Convert integer to string to access its digits\\n    s = str(x)\\n    n = len(s)\\n\\n    # If the shift exceeds the number of digits, return the digits reversed\\n    if shift > n:\\n        return s[::-1]\\n\\n    # If shift is 0 or equal to the number of digits, the string remains unchanged\\n    if shift == 0 or shift == n:\\n        return s\\n\\n    # Perform a right circular shift: the last `shift` digits move to the front\\n    return s[-shift:] + s[:-shift]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 14.403,
+    "setup_s": 0.0,
+    "grade_s": 0.268
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s"
+  ]
+}

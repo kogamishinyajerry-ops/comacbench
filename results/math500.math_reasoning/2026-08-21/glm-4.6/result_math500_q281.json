@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q281",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The problem asks for the measure of angle $A$ in a figure constructed by extending the sides of a regular pentagon $FGHIJ$.\\n\\n1.  **Analyze the Geometry**:\\n    *   The vertices $F, G, H, I, J$ form a regular pentagon. Therefore, the interior angle at each vertex is $\\\\frac{(5-2) \\\\times 180^\\\\circ}{5} = 108^\\\\circ$.\\n    *   The lines $AF$ and $AG$ are extensions of the sides of the pentagon from vertex $F$. Since the pentagon is regular and symmetric, the line segment $AG$ is an extension of side $JF$.\\n    *   The triangle $AFG$ is an isosceles triangle. The apex is at vertex $F$ of the pentagon. The base is $AG$.\\n    *   The vertex at $F$ is formed by the intersection of the extension of side $JF$ (line $FA$) and the side $FG$.\\n    *   Since $JFG$ is a straight line (as $A$ is formed by extending the sides), the interior angle of the triangle $\\\\triangle AFG$ at vertex $F$ is the supplement of the interior angle of the pentagon at $F$.\\n    *   Angle $\\\\angle AFG = 180^\\\\circ - 108^\\\\circ = 72^\\\\circ$.\\n\\n2.  **Calculate Angle A**:\\n    *   Let $\\\\angle A$ be $x$. Since $\\\\triangle AFG$ is isosceles with $AF = AG$ (derived from the symmetry and properties of the regular pentagon star), the base angles are equal.\\n    *   The sum of angles in $\\\\triangle AFG$ is $180^\\\\circ$.\\n    *   Therefore, $\\\\angle A + \\\\angle G + \\\\angle F = 180^\\\\circ$.\\n    *   $x + x + 72^\\\\circ = 180^\\\\circ$.\\n    *   $2x = 180^\\\\circ - 72^\\\\circ$.\\n    *   $2x = 108^\\\\circ$.\\n    *   $x = 54^\\\\circ$.\\n\\n3.  **Final Answer**:\\n    The measure of angle $A$ is $54^\\\\circ$.\\n\\n\\\\boxed{54}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": \"54\", \"reference_number\": \"36^\\\\circ\", \"raw_tail\": \"   $2x = 180^\\\\circ - 72^\\\\circ$.\\n    *   $2x = 108^\\\\circ$.\\n    *   $x = 54^\\\\circ$.\\n\\n3.  **Final Answer**:\\n    The measure of angle $A$ is $54^\\\\circ$.\\n\\n\\\\boxed{54}\"}"
+  },
+  "timings": {
+    "agent_s": 320.049,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The problem asks for the measure of angle $A$ in a figure constructed by extending the sides of a regular pentagon $FGHI' attempts=2"
+  ]
+}

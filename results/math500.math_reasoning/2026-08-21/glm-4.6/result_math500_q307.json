@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q307",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We need to find the range of \\\\(y = \\\\log_2(\\\\sqrt{\\\\sin x})\\\\) for \\\\(0^\\\\circ < x < 180^\\\\circ\\\\).\\n\\n**Step 1: Domain**  \\nThe function involves a square root and a logarithm.  \\n\\\\(\\\\sqrt{\\\\sin x}\\\\) requires \\\\(\\\\sin x \\\\ge 0\\\\), and \\\\(\\\\log_2(\\\\cdot)\\\\) requires a positive argument, so we need \\\\(\\\\sin x > 0\\\\).  \\nFor \\\\(0^\\\\circ < x < 180^\\\\circ\\\\), \\\\(\\\\sin x > 0\\\\) (since \\\\(\\\\sin 0^\\\\circ = 0\\\\), \\\\(\\\\sin 180^\\\\circ = 0\\\\), and inside the open interval sine is positive).  \\nThus the domain is exactly \\\\((0^\\\\circ, 180^\\\\circ)\\\\).\\n\\n**Step 2: Simplify the expression**  \\n\\\\(\\\\sqrt{\\\\sin x} = (\\\\sin x)^{1/2}\\\\).  \\nTherefore  \\n\\\\[\\ny = \\\\log_2\\\\big((\\\\sin x)^{1/2}\\\\big) = \\\\frac{1}{2} \\\\log_2(\\\\sin x).\\n\\\\]\\n\\n**Step 3: Determine the possible values of \\\\(\\\\sin x\\\\)**  \\nOn the interval \\\\((0^\\\\circ, 180^\\\\circ)\\\\), \\\\(\\\\sin x\\\\) takes all values in \\\\((0,1]\\\\).  \\n- At \\\\(x = 90^\\\\circ\\\\), \\\\(\\\\sin x = 1\\\\).  \\n- As \\\\(x \\\\to 0^+\\\\) or \\\\(x \\\\to 180^-\\\\), \\\\(\\\\sin x \\\\to 0^+\\\\).  \\nHence \\\\(\\\\sin x \\\\in (0,1]\\\\).\\n\\n**Step 4: Find the range of \\\\(\\\\log_2(\\\\sin x)\\\\)**  \\nThe logarithm base 2 is an increasing function.  \\n- When \\\\(\\\\sin x = 1\\\\), \\\\(\\\\log_2(1) = 0\\\\).  \\n- As \\\\(\\\\sin x \\\\to 0^+\\\\), \\\\(\\\\log_2(\\\\sin x) \\\\to -\\\\infty\\\\).  \\nTherefore \\\\(\\\\log_2(\\\\sin x) \\\\in (-\\\\infty, 0]\\\\).\\n\\n**Step 5: Scale by \\\\(\\\\frac{1}{2}\\\\)**  \\nMultiplying by \\\\(\\\\frac{1}{2}\\\\) preserves order and endpoints:  \\n\\\\[\\ny = \\\\frac{1}{2} \\\\log_2(\\\\sin x) \\\\in \\\\left(-\\\\infty, 0\\\\right].\\n\\\\]\\n\\n**Conclusion**  \\nThe range of the function is all real numbers less than or equal to \\\\(0\\\\), i.e., \\\\((-\\\\infty, 0]\\\\).\\n\\n#### (-∞, 0]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(-∞, 0]\", \"reference_number\": \"(-\\\\infty, 0]\", \"raw_tail\": \"n \\\\left(-\\\\infty, 0\\\\right].\\n\\\\]\\n\\n**Conclusion**  \\nThe range of the function is all real numbers less than or equal to \\\\(0\\\\), i.e., \\\\((-\\\\infty, 0]\\\\).\\n\\n#### (-∞, 0]\"}"
+  },
+  "timings": {
+    "agent_s": 102.843,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to find the range of \\\\(y = \\\\log_2(\\\\sqrt{\\\\sin x})\\\\) for \\\\(0^\\\\circ < x < 180^\\\\circ\\\\).\\n\\n**Step 1: Domain**  \\nThe fu' attempts=1"
+  ]
+}

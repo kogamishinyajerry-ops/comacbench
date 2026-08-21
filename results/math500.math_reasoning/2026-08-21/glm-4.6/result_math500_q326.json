@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q326",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let \\\\(a = \\\\arcsin 0.4\\\\) and \\\\(b = \\\\arcsin 0.5\\\\). Then \\\\(\\\\sin a = 0.4 = \\\\frac{2}{5}\\\\) and \\\\(\\\\sin b = 0.5 = \\\\frac{1}{2}\\\\).  \\nSince both values are positive and within \\\\([-1,1]\\\\), \\\\(a\\\\) and \\\\(b\\\\) lie in the first quadrant, so their cosines are positive:  \\n\\\\[\\n\\\\cos a = \\\\sqrt{1 - \\\\sin^2 a} = \\\\sqrt{1 - \\\\frac{4}{25}} = \\\\sqrt{\\\\frac{21}{25}} = \\\\frac{\\\\sqrt{21}}{5},\\n\\\\]\\n\\\\[\\n\\\\cos b = \\\\sqrt{1 - \\\\sin^2 b} = \\\\sqrt{1 - \\\\frac{1}{4}} = \\\\sqrt{\\\\frac{3}{4}} = \\\\frac{\\\\sqrt{3}}{2}.\\n\\\\]\\n\\nNow compute each sine term using addition formulas:\\n\\\\[\\n\\\\sin(a+b) = \\\\sin a \\\\cos b + \\\\cos a \\\\sin b = \\\\frac{2}{5}\\\\cdot\\\\frac{\\\\sqrt{3}}{2} + \\\\frac{\\\\sqrt{21}}{5}\\\\cdot\\\\frac{1}{2} = \\\\frac{2\\\\sqrt{3}}{10} + \\\\frac{\\\\sqrt{21}}{10} = \\\\frac{\\\\sqrt{21} + 2\\\\sqrt{3}}{10},\\n\\\\]\\n\\\\[\\n\\\\sin(b-a) = \\\\sin b \\\\cos a - \\\\cos b \\\\sin a = \\\\frac{1}{2}\\\\cdot\\\\frac{\\\\sqrt{21}}{5} - \\\\frac{\\\\sqrt{3}}{2}\\\\cdot\\\\frac{2}{5} = \\\\frac{\\\\sqrt{21}}{10} - \\\\frac{2\\\\sqrt{3}}{10} = \\\\frac{\\\\sqrt{21} - 2\\\\sqrt{3}}{10}.\\n\\\\]\\n\\nThe product is\\n\\\\[\\n\\\\sin(a+b) \\\\cdot \\\\sin(b-a) = \\\\frac{\\\\sqrt{21} + 2\\\\sqrt{3}}{10} \\\\cdot \\\\frac{\\\\sqrt{21} - 2\\\\sqrt{3}}{10} = \\\\frac{(\\\\sqrt{21})^2 - (2\\\\sqrt{3})^2}{100} = \\\\frac{21 - 12}{100} = \\\\frac{9}{100}.\\n\\\\]\\n\\nThus the value of the expression is \\\\(\\\\frac{9}{100}\\\\).\\n\\n\\\\boxed{\\\\frac{9}{100}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{9}{100}\", \"reference_number\": \"\\\\frac{9}{100}\", \"raw_tail\": \"rac{(\\\\sqrt{21})^2 - (2\\\\sqrt{3})^2}{100} = \\\\frac{21 - 12}{100} = \\\\frac{9}{100}.\\n\\\\]\\n\\nThus the value of the expression is \\\\(\\\\frac{9}{100}\\\\).\\n\\n\\\\boxed{\\\\frac{9}{100}}\"}"
+  },
+  "timings": {
+    "agent_s": 40.837,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let \\\\(a = \\\\arcsin 0.4\\\\) and \\\\(b = \\\\arcsin 0.5\\\\). Then \\\\(\\\\sin a = 0.4 = \\\\frac{2}{5}\\\\) and \\\\(\\\\sin b = 0.5 = \\\\frac{1}{2}\\\\).' attempts=1"
+  ]
+}

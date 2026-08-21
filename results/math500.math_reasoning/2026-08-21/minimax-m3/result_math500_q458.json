@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q458",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the number of students (between 30 and 50) that satisfies both conditions.\\n\\n## Setting Up the Conditions\\n\\n**Condition 1:** Betty cannot divide the students into multiple groups of equal size.\\n\\nThis means the number of students $n$ cannot be factored as $a \\\\times b$ where both $a, b \\\\geq 2$. In other words, **$n$ must be prime**.\\n\\n**Condition 2:** When Betty and Wilma both join, the total $n + 2$ archers still cannot be divided into equal-sized groups.\\n\\nThis means **$n + 2$ must also be prime**.\\n\\n## Finding Primes in the Range\\n\\nThe primes between 30 and 50 are: **31, 37, 41, 43, 47**\\n\\nI need to check which of these has the property that $n + 2$ is also prime:\\n\\n| $n$ | $n+2$ | Is $n+2$ prime? |\\n|-----|-------|-----------------|\\n| 31  | 33    | $33 = 3 \\\\times 11$ ❌ |\\n| 37  | 39    | $39 = 3 \\\\times 13$ ❌ |\\n| 41  | 43    | Prime! ✓ |\\n| 43  | 45    | $45 = 5 \\\\times 9$ ❌ |\\n| 47  | 49    | $49 = 7^2$ ❌ |\\n\\n## Verification\\n\\nFor $n = 41$:\\n- **Betty's observation:** 41 is prime, so 41 students cannot be split into multiple equal-sized groups ✓\\n- **Wilma's observation:** With both instructors, $41 + 2 = 43$ archers, which is also prime, so still cannot be split into equal groups ✓\\n- **Range check:** $30 \\\\leq 41 \\\\leq 50$ ✓\\n\\n#### 41\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"41\", \"reference_number\": \"41\", \"raw_tail\": \"th both instructors, $41 + 2 = 43$ archers, which is also prime, so still cannot be split into equal groups ✓\\n- **Range check:** $30 \\\\leq 41 \\\\leq 50$ ✓\\n\\n#### 41\"}"
+  },
+  "timings": {
+    "agent_s": 31.522,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the number of students (between 30 and 50) that satisfies both conditions.\\n\\n## S' attempts=1"
+  ]
+}

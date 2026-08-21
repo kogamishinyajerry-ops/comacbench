@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_105",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def by_length(arr):\\n    # Filter numbers that are between 1 and 9 inclusive\\n    filtered = [x for x in arr if 1 <= x <= 9]\\n    # Sort the filtered list\\n    filtered.sort()\\n    # Reverse the sorted list\\n    filtered = filtered[::-1]\\n    # Mapping from digit to its corresponding name\\n    mapping = {\\n        1: \\\"One\\\",\\n        2: \\\"Two\\\",\\n        3: \\\"Three\\\",\\n        4: \\\"Four\\\",\\n        5: \\\"Five\\\",\\n        6: \\\"Six\\\",\\n        7: \\\"Seven\\\",\\n        8: \\\"Eight\\\",\\n        9: \\\"Nine\\\"\\n    }\\n    # Replace each digit by its corresponding name\\n    return [mapping[x] for x in filtered]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 7.512,
+    "setup_s": 0.0,
+    "grade_s": 0.196
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.11s"
+  ]
+}

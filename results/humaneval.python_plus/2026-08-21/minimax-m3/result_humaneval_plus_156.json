@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_156",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def int_to_mini_roman(number):\\n    \\\"\\\"\\\"\\n    Given a positive integer, obtain its roman numeral equivalent as a string,\\n    and return it in lowercase.\\n    Restrictions: 1 <= num <= 1000\\n\\n    Examples:\\n    >>> int_to_mini_roman(19) == 'xix'\\n    >>> int_to_mini_roman(152) == 'clii'\\n    >>> int_to_mini_roman(426) == 'cdxxvi'\\n    \\\"\\\"\\\"\\n    if not isinstance(number, int):\\n        raise TypeError(\\\"number must be an integer\\\")\\n    if not (1 <= number <= 1000):\\n        raise ValueError(\\\"number must be between 1 and 1000 inclusive\\\")\\n\\n    # Mapping of integer values to their Roman numeral representations (uppercase)\\n    val_sym = [\\n        (1000, 'M'),\\n        (900, 'CM'),\\n        (500, 'D'),\\n        (400, 'CD'),\\n        (100, 'C'),\\n        (90, 'XC'),\\n        (50, 'L'),\\n        (40, 'XL'),\\n        (10, 'X'),\\n        (9, 'IX'),\\n        (5, 'V'),\\n        (4, 'IV'),\\n        (1, 'I')\\n    ]\\n\\n    result = []\\n    for value, sym in val_sym:\\n        while number >= value:\\n            result.append(sym)\\n            number -= value\\n\\n    return ''.join(result).lower()\\n\\n\\n# Simple self‑test (not required for the solution but useful for verification)\\nif __name__ == \\\"__main__\\\":\\n    assert int_to_mini_roman(19) == 'xix'\\n    assert int_to_mini_roman(152) == 'clii'\\n    assert int_to_mini_roman(426) == 'cdxxvi'\\n    assert int_to_mini_roman(1) == 'i'\\n    assert int_to_mini_roman(1000) == 'm'\\n    print(\\\"All tests passed.\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 16, \"cases_total\": 16, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 9.429,
+    "setup_s": 0.0,
+    "grade_s": 0.153
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

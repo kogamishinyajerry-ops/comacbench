@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q323",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The points are chosen independently and uniformly on the circle. With probability 1 they are distinct.  \\nTwo chords \\\\(AB\\\\) and \\\\(CD\\\\) intersect inside the circle exactly when the four points are in alternating order around the circle: e.g., A, C, B, D or A, D, B, C (in either clockwise or counterclockwise direction).  \\n\\nBecause the points are i.i.d. uniform, the circular order (counterclockwise) of the four labeled points is uniformly distributed among the \\\\((4-1)! = 6\\\\) possible oriented cyclic orders.  \\nFixing A as a reference, the six cyclic orders correspond to the \\\\(3! = 6\\\\) permutations of B, C, D after A in counterclockwise order:  \\n\\\\((A,B,C,D),\\\\ (A,B,D,C),\\\\ (A,C,B,D),\\\\ (A,C,D,B),\\\\ (A,D,B,C),\\\\ (A,D,C,B).\\\\)  \\n\\nOnly \\\\((A,C,B,D)\\\\) and \\\\((A,D,B,C)\\\\) satisfy the alternating condition. Hence the probability is \\\\(2/6 = 1/3\\\\).  \\n\\nEquivalently, sort the points by increasing angle to obtain a linear permutation of the labels. All \\\\(4! = 24\\\\) permutations are equally likely. The chords intersect iff in the cyclic order A and B are opposite positions (separated by exactly one point on each side). There are \\\\(2\\\\) opposite pairs, \\\\(2!\\\\) ways to place A and B in the chosen pair, and \\\\(2!\\\\) ways to place C and D in the remaining positions, giving \\\\(2 \\\\times 2 \\\\times 2 = 8\\\\) favorable permutations. Thus probability \\\\(= 8/24 = 1/3\\\\).\\n\\n\\\\boxed{\\\\frac{1}{3}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{1}{3}\", \"reference_number\": \"\\\\frac{1}{3}\", \"raw_tail\": \" to place C and D in the remaining positions, giving \\\\(2 \\\\times 2 \\\\times 2 = 8\\\\) favorable permutations. Thus probability \\\\(= 8/24 = 1/3\\\\).\\n\\n\\\\boxed{\\\\frac{1}{3}}\"}"
+  },
+  "timings": {
+    "agent_s": 157.995,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The points are chosen independently and uniformly on the circle. With probability 1 they are distinct.  \\nTwo chords \\\\(AB' attempts=1"
+  ]
+}

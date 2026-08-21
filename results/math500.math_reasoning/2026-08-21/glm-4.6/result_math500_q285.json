@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q285",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The polynomial \\\\(P(x)=2x^3-2ax^2+(a^2-81)x-c\\\\) has positive integer roots \\\\(r,s,t\\\\). Expanding \\\\(2(x-r)(x-s)(x-t)\\\\) and comparing coefficients gives:\\n\\n\\\\[\\n\\\\begin{aligned}\\nr+s+t &= a, \\\\\\\\\\n2(rs+st+tr) &= a^2-81, \\\\\\\\\\n2rst &= c.\\n\\\\end{aligned}\\n\\\\]\\n\\nFrom these, \\\\(r^2+s^2+t^2 = (r+s+t)^2 - 2(rs+st+tr) = a^2 - (a^2-81) = 81\\\\). Thus the roots must be positive integers whose squares sum to \\\\(81\\\\). Enumerating all possibilities yields the unordered triples:\\n\\n\\\\[\\n(8,4,1),\\\\quad (7,4,4),\\\\quad (6,6,3).\\n\\\\]\\n\\nTheir sums and corresponding \\\\(c = 2rst\\\\) are:\\n\\n\\\\[\\n\\\\begin{aligned}\\n(8,4,1): &\\\\quad a = 13,\\\\; c = 2\\\\cdot8\\\\cdot4\\\\cdot1 = 64,\\\\\\\\\\n(7,4,4): &\\\\quad a = 15,\\\\; c = 2\\\\cdot7\\\\cdot4\\\\cdot4 = 224,\\\\\\\\\\n(6,6,3): &\\\\quad a = 15,\\\\; c = 2\\\\cdot6\\\\cdot6\\\\cdot3 = 216.\\n\\\\end{aligned}\\n\\\\]\\n\\nInitially there is more than one polynomial (three possibilities). When Steve reveals \\\\(a\\\\), Jon still sees two possible \\\\(c\\\\) only if \\\\(a = 15\\\\). The two \\\\(c\\\\) values are \\\\(224\\\\) and \\\\(216\\\\), and their sum is \\\\(440\\\\).\\n\\n\\\\[\\n\\\\boxed{440}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"440\", \"reference_number\": \"440\", \"raw_tail\": \" reveals \\\\(a\\\\), Jon still sees two possible \\\\(c\\\\) only if \\\\(a = 15\\\\). The two \\\\(c\\\\) values are \\\\(224\\\\) and \\\\(216\\\\), and their sum is \\\\(440\\\\).\\n\\n\\\\[\\n\\\\boxed{440}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 117.377,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial \\\\(P(x)=2x^3-2ax^2+(a^2-81)x-c\\\\) has positive integer roots \\\\(r,s,t\\\\). Expanding \\\\(2(x-r)(x-s)(x-t)\\\\) and ' attempts=1"
+  ]
+}

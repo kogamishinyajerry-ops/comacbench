@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q263",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the number of sides of a regular polygon where the interior angle is 6.5 times the exterior angle.\\n\\n## Setting Up the Equations\\n\\nFor a regular polygon with $n$ sides:\\n- **Interior angle** + **Exterior angle** = $180°$ (they form a linear pair)\\n\\n**Given relationship:** Interior angle = 6.5 × Exterior angle\\n\\n## Solving for the Exterior Angle\\n\\nLet the exterior angle = $x$\\n\\nThen the interior angle = $6.5x$\\n\\nUsing the linear pair relationship:\\n$$6.5x + x = 180°$$\\n$$7.5x = 180°$$\\n$$x = 24°$$\\n\\n## Finding the Number of Sides\\n\\nThe exterior angle of a regular polygon with $n$ sides is $\\\\frac{360°}{n}$:\\n\\n$$\\\\frac{360°}{n} = 24°$$\\n\\n$$n = \\\\frac{360}{24} = 15$$\\n\\n## Verification\\n\\n- Interior angle: $(15-2) \\\\times 180°/15 = 13 \\\\times 12° = 156°$\\n- Exterior angle: $24°$\\n- Check: $156° = 6.5 \\\\times 24° = 156°$ ✓\\n\\n#### 15\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"15\", \"reference_number\": \"15\", \"raw_tail\": \"$$\\n\\n## Verification\\n\\n- Interior angle: $(15-2) \\\\times 180°/15 = 13 \\\\times 12° = 156°$\\n- Exterior angle: $24°$\\n- Check: $156° = 6.5 \\\\times 24° = 156°$ ✓\\n\\n#### 15\"}"
+  },
+  "timings": {
+    "agent_s": 3.189,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the number of sides of a regular polygon where the interior angle is 6.5 times t' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q251",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to count the number of ways six distinct cars, arriving in a fixed order (car 1, car 2, …, car 6), can choose one of three lanes (left, straight, right) such that after all six have arrived, every lane has at least one car.\\n\\nEach car independently chooses one of the three lanes, giving \\\\(3^6 = 729\\\\) total possible assignments. To ensure all three lanes are occupied, we subtract assignments where at least one lane is empty using inclusion–exclusion.\\n\\n- Assignments missing a specific lane: only the other two lanes are available → \\\\(2^6 = 64\\\\).\\n- There are 3 choices for the missing lane, so subtract \\\\(3 \\\\times 64 = 192\\\\).\\n- Assignments missing two lanes (i.e., all cars go to the same single lane) have been subtracted twice, so add them back. For each of the 3 lanes, there is exactly 1 such assignment (all cars choose that lane) → add \\\\(3 \\\\times 1 = 3\\\\).\\n\\nThus the number of assignments where all three lanes are occupied is\\n\\\\[\\n729 - 192 + 3 = 540.\\n\\\\]\\n\\nAlternatively, this is \\\\(3! \\\\cdot S(6,3)\\\\) where \\\\(S(6,3) = 90\\\\) is a Stirling number of the second kind, confirming the result.\\n\\nTherefore, the number of ways is \\\\(\\\\boxed{540}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"540\", \"reference_number\": \"540\", \"raw_tail\": \" is \\\\(3! \\\\cdot S(6,3)\\\\) where \\\\(S(6,3) = 90\\\\) is a Stirling number of the second kind, confirming the result.\\n\\nTherefore, the number of ways is \\\\(\\\\boxed{540}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 40.578,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to count the number of ways six distinct cars, arriving in a fixed order (car 1, car 2, …, car 6), can choose on' attempts=1"
+  ]
+}

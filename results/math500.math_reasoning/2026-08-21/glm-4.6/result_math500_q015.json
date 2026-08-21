@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q015",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The rotation of point \\\\(z\\\\) about center \\\\(c\\\\) by angle \\\\(\\\\theta\\\\) counterclockwise is given by  \\n\\\\[\\nw = c + (z - c) e^{i\\\\theta}.\\n\\\\]\\n\\nHere, \\\\(z = 2 + \\\\sqrt{2} - (3 + 3\\\\sqrt{2})i\\\\), \\\\(c = 2 - 3i\\\\), and \\\\(\\\\theta = \\\\frac{\\\\pi}{4}\\\\).\\n\\nFirst compute \\\\(z - c\\\\):\\n\\\\[\\n\\\\begin{aligned}\\nz - c &= \\\\bigl((2+\\\\sqrt{2}) - 2\\\\bigr) + \\\\bigl(-(3+3\\\\sqrt{2}) - (-3)\\\\bigr)i \\\\\\\\\\n&= \\\\sqrt{2} + (-3\\\\sqrt{2})i \\\\\\\\\\n&= \\\\sqrt{2}\\\\,(1 - 3i).\\n\\\\end{aligned}\\n\\\\]\\n\\nNow \\\\(e^{i\\\\pi/4} = \\\\frac{1+i}{\\\\sqrt{2}}\\\\). Multiply:\\n\\\\[\\n(z - c) e^{i\\\\pi/4} = \\\\sqrt{2}\\\\,(1 - 3i) \\\\cdot \\\\frac{1+i}{\\\\sqrt{2}} = (1 - 3i)(1 + i).\\n\\\\]\\n\\nCompute the product:\\n\\\\[\\n(1 - 3i)(1 + i) = 1 + i - 3i - 3i^2 = 1 - 2i + 3 = 4 - 2i.\\n\\\\]\\n\\nFinally add \\\\(c\\\\):\\n\\\\[\\nw = c + (4 - 2i) = (2 - 3i) + (4 - 2i) = 6 - 5i.\\n\\\\]\\n\\nThus,\\n\\\\[\\n\\\\boxed{6-5i}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"6-5i\", \"reference_number\": \"6 - 5i\", \"raw_tail\": \" - 3i)(1 + i) = 1 + i - 3i - 3i^2 = 1 - 2i + 3 = 4 - 2i.\\n\\\\]\\n\\nFinally add \\\\(c\\\\):\\n\\\\[\\nw = c + (4 - 2i) = (2 - 3i) + (4 - 2i) = 6 - 5i.\\n\\\\]\\n\\nThus,\\n\\\\[\\n\\\\boxed{6-5i}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 49.282,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The rotation of point \\\\(z\\\\) about center \\\\(c\\\\) by angle \\\\(\\\\theta\\\\) counterclockwise is given by  \\n\\\\[\\nw = c + (z - c) e^{' attempts=1"
+  ]
+}

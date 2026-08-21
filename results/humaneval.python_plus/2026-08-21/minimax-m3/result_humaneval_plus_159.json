@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_159",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def eat(number, need, remaining):\\n    \\\"\\\"\\\"\\n    You're a hungry rabbit, and you already have eaten a certain number of carrots,\\n    but now you need to eat more carrots to complete the day's meals.\\n    you should return an array of [ total number of eaten carrots after your meals,\\n                                    the number of carrots left after your meals ]\\n    if there are not enough remaining carrots, you will eat all remaining carrots, but will still be hungry.\\n    \\n    Example:\\n    * eat(5, 6, 10) -> [11, 4]\\n    * eat(4, 8, 9) -> [12, 1]\\n    * eat(1, 10, 10) -> [11, 0]\\n    * eat(2, 11, 5) -> [7, 0]\\n    \\n    Variables:\\n    @number : integer\\n        the number of carrots that you have eaten.\\n    @need : integer\\n        the number of carrots that you need to eat.\\n    @remaining : integer\\n        the number of remaining carrots thet exist in stock\\n    \\n    Constrain:\\n    * 0 <= number <= 1000\\n    * 0 <= need <= 1000\\n    * 0 <= remaining <= 1000\\n\\n    Have fun :)\\n    \\\"\\\"\\\"\\n    eaten_now = min(need, remaining)\\n    return [number + eaten_now, remaining - eaten_now]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 8.835,
+    "setup_s": 0.0,
+    "grade_s": 0.158
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

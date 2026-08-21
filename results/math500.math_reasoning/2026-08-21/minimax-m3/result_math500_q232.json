@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q232",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to evaluate a sum of reciprocals involving powers of $\\\\omega$, where $\\\\omega$ is a non-trivial 1997th root of unity.\\n\\n## Setting Up the Sum\\n\\nSince $\\\\omega^{1997} = 1$, I know that $\\\\{\\\\omega^k : k = 1, 2, \\\\ldots, 1997\\\\}$ equals $\\\\{\\\\omega^k : k = 0, 1, \\\\ldots, 1996\\\\}$ — all 1997th roots of unity. So:\\n$$T = \\\\sum_{k=1}^{1997} \\\\frac{1}{1 + \\\\omega^k} = \\\\sum_{k=0}^{1996} \\\\frac{1}{1 + \\\\omega^k}$$\\n\\n## Using the Cyclotomic Polynomial\\n\\nThe 1997th roots of unity are roots of $P(x) = x^{1997} - 1$, so:\\n$$P(x) = \\\\prod_{k=0}^{1996}(x - \\\\omega^k)$$\\n\\nTaking the logarithmic derivative:\\n$$\\\\frac{P'(x)}{P(x)} = \\\\sum_{k=0}^{1996} \\\\frac{1}{x - \\\\omega^k}$$\\n\\n## Evaluating at $x = -1$\\n\\nSubstituting $x = -1$:\\n$$\\\\frac{P'(-1)}{P(-1)} = \\\\sum_{k=0}^{1996} \\\\frac{1}{-1 - \\\\omega^k} = -\\\\sum_{k=0}^{1996} \\\\frac{1}{1 + \\\\omega^k} = -T$$\\n\\nTherefore $T = -\\\\dfrac{P'(-1)}{P(-1)}$.\\n\\n**Computing the values:**\\n- $P(-1) = (-1)^{1997} - 1 = -1 - 1 = -2$\\n- $P'(x) = 1997x^{1996}$, so $P'(-1) = 1997 \\\\cdot (-1)^{1996} = 1997$\\n\\n## Computing the Answer\\n\\n$$T = -\\\\frac{1997}{-2} = \\\\frac{1997}{2}$$\\n\\n## Verification\\n\\nFor $n = 3$ with $\\\\omega = e^{2\\\\pi i/3}$: direct computation gives $\\\\frac{1}{1+\\\\omega} + \\\\frac{1}{1+\\\\omega^2} = \\\\frac{1-i\\\\sqrt{3}}{2} + \\\\frac{1+i\\\\sqrt{3}}{2} = 1$, and adding $\\\\frac{1}{1+\\\\omega^3} = \\\\frac{1}{2}$ yields $\\\\frac{3}{2}$, matching the formula.\\n\\n$$\\\\boxed{\\\\dfrac{1997}{2}}$$\\n\\n#### 1997/2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\dfrac{1997}{2}\", \"reference_number\": \"\\\\frac{1997}{2}\", \"raw_tail\": \"frac{1+i\\\\sqrt{3}}{2} = 1$, and adding $\\\\frac{1}{1+\\\\omega^3} = \\\\frac{1}{2}$ yields $\\\\frac{3}{2}$, matching the formula.\\n\\n$$\\\\boxed{\\\\dfrac{1997}{2}}$$\\n\\n#### 1997/2\"}"
+  },
+  "timings": {
+    "agent_s": 20.799,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to evaluate a sum of reciprocals involving powers of $\\\\omega$, where $\\\\omega$ is a non-t' attempts=1"
+  ]
+}

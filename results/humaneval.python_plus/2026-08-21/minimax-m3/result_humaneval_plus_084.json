@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_084",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def solve(N):\\n    \\\"\\\"\\\"Return the binary representation of the sum of the decimal digits of N.\\n\\n    Examples\\n    --------\\n    >>> solve(1000)\\n    '1'\\n    >>> solve(150)\\n    '110'\\n    >>> solve(147)\\n    '1100'\\n    \\\"\\\"\\\"\\n    # Compute the sum of the decimal digits of N\\n    digit_sum = sum(int(d) for d in str(N))\\n\\n    # Special case for zero, since bin(0) is '0b0'\\n    if digit_sum == 0:\\n        return \\\"0\\\"\\n\\n    # Convert the sum to binary and strip the '0b' prefix\\n    return bin(digit_sum)[2:]\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 7.15,
+    "setup_s": 0.0,
+    "grade_s": 0.141
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q392",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We place the regular octahedron with its center at the origin and its vertices at \\\\((\\\\pm a,0,0)\\\\), \\\\((0,\\\\pm a,0)\\\\), \\\\((0,0,\\\\pm a)\\\\) for some \\\\(a>0\\\\). Let the point be \\\\(P=(x,y,z)\\\\). For the pair of opposite vertices on the \\\\(x\\\\)-axis, the squared distances satisfy\\n\\\\[\\nd_{x}^2 + d_{-x}^2 = 2(x^2+y^2+z^2+a^2).\\n\\\\]\\nThe same holds for the \\\\(y\\\\)- and \\\\(z\\\\)-axes, so the three sums of squares for opposite pairs are all equal.\\n\\nWe are given distances to five vertices: \\\\(3,7,8,9,11\\\\). Since there are six vertices in three opposite pairs, having five known distances forces two opposite pairs to be completely known (four numbers) and the third pair to have one known distance (the fifth number). For the two complete pairs the sums of squares must be equal. Compute the squares:\\n\\\\[\\n3^2=9,\\\\;7^2=49,\\\\;8^2=64,\\\\;9^2=81,\\\\;11^2=121.\\n\\\\]\\nLooking for two disjoint pairs among these five numbers whose squares sum to the same value, we find:\\n\\\\[\\n3^2+11^2 = 9+121 = 130,\\\\qquad 7^2+9^2 = 49+81 = 130.\\n\\\\]\\nThese are the only two disjoint pairs with equal sum of squares. Hence the two complete opposite pairs are \\\\(\\\\{3,11\\\\}\\\\) and \\\\(\\\\{7,9\\\\}\\\\). The remaining known distance is \\\\(8\\\\), which belongs to the third opposite pair. Let the missing distance be \\\\(d\\\\). Then for that pair we must have\\n\\\\[\\n8^2 + d^2 = 130 \\\\quad\\\\Longrightarrow\\\\quad d^2 = 130 - 64 = 66.\\n\\\\]\\nThus \\\\(d = \\\\sqrt{66}\\\\).\\n\\nTherefore, the distance from \\\\(P\\\\) to the sixth vertex is \\\\(\\\\boxed{\\\\sqrt{66}}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\sqrt{66}\", \"reference_number\": \"\\\\sqrt{66}\", \"raw_tail\": \" 130 \\\\quad\\\\Longrightarrow\\\\quad d^2 = 130 - 64 = 66.\\n\\\\]\\nThus \\\\(d = \\\\sqrt{66}\\\\).\\n\\nTherefore, the distance from \\\\(P\\\\) to the sixth vertex is \\\\(\\\\boxed{\\\\sqrt{66}}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 255.688,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We place the regular octahedron with its center at the origin and its vertices at \\\\((\\\\pm a,0,0)\\\\), \\\\((0,\\\\pm a,0)\\\\), \\\\((0' attempts=1"
+  ]
+}

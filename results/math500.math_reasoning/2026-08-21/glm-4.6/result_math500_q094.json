@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q094",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Based on the geometric properties of the quadrilateral and the angle trisections, we determined the measures of the angles at vertices A and D. The angles $BAD$ and $CDA$ are $120^\\\\circ$ and $120^\\\\circ$ respectively. Points $E$ and $F$ are on the angle trisectors such that the angle measures are $x=40^\\\\circ$ and $y=40^\\\\circ$. The configuration of points implies that quadrilateral $ABCD$ is a trapezoid with sides $AB \\\\parallel CD$ (supported by the isosceles trapezoid calculation yielding integer angle $y=40$). The intersection point $F$ of the secondary trisectors lies inside the quadrilateral. Due to the symmetry of the trapezoid and the equal trisection angles ($40^\\\\circ$), the point $F$ lies on the line of symmetry of the isosceles trapezoid formed by the trapezoid $AB'CD'$ where $B', D'$ are the feet of perpendiculars. Consequently, $AF = DF$, making triangle $AFD$ isosceles. In a triangle with vertex angle $120^\\\\circ$ formed by two equal sides, the base angles are equal: $\\\\angle FAD = \\\\angle FDA = (180^\\\\circ - 120^\\\\circ)/2 = 30^\\\\circ$. However, the problem asks for the degree measure of angle $AFD$, which is the vertex angle at $F$ opposite side $AD$. Wait, looking at standard geometry problems of this type (angle chasing with trisectors in a trapezoid), the angle at $F$ is the one that is sought and is typically the unique value independent of the parallel nature for specific sums. Let's re-evaluate the angle $\\\\angle AFD$ specifically.\\n\\nLet $\\\\angle EAD = x$ and $\\\\angle ADF = y$. Then $\\\\angle FAD = 2x$ and $\\\\angle FDA = 2y$.\\nIn $\\\\triangle AFD$, $\\\\angle AFD = 180^\\\\circ - 2x - 2y = 180^\\\\circ - 2(x+y)$.\\nWe found $x=40^\\\\circ$ and $y=40^\\\\circ$.\\nThus, $\\\\angle AFD = 180^\\\\circ - 2(40^\\\\circ + 40^\\\\circ) = 180^\\\\circ - 160^\\\\circ = 20^\\\\\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": 20.0, \"reference_number\": \"80\", \"raw_tail\": \"c - 2x - 2y = 180^\\\\circ - 2(x+y)$.\\nWe found $x=40^\\\\circ$ and $y=40^\\\\circ$.\\nThus, $\\\\angle AFD = 180^\\\\circ - 2(40^\\\\circ + 40^\\\\circ) = 180^\\\\circ - 160^\\\\circ = 20^\\\\\"}"
+  },
+  "timings": {
+    "agent_s": 308.598,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Based on the geometric properties of the quadrilateral and the angle trisections, we determined the measures of the angl' attempts=2"
+  ]
+}

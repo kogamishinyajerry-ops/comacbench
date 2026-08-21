@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q306",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We consider quadratic equations \\\\(x^2+ax+b=0\\\\) with roots \\\\(r\\\\) and \\\\(s\\\\) (allowing \\\\(r=s\\\\)). The condition states: whenever \\\\(c\\\\) is a root, \\\\(c^2-2\\\\) is also a root. Since there are exactly two roots (counting multiplicity), for each root we have:\\n\\n\\\\[\\nr^2-2 \\\\in \\\\{r,s\\\\},\\\\qquad s^2-2 \\\\in \\\\{r,s\\\\}.\\n\\\\]\\n\\nWe examine all possibilities.\\n\\n---\\n\\n### Case 1: Both roots satisfy \\\\(c^2-2 = c\\\\).\\n\\nThen \\\\(c^2-c-2=0\\\\), so \\\\(c = 2\\\\) or \\\\(c = -1\\\\). Hence the unordered root sets are\\n\\\\[\\n\\\\{2,2\\\\},\\\\quad \\\\{-1,-1\\\\},\\\\quad \\\\{2,-1\\\\}.\\n\\\\]\\n\\n---\\n\\n### Cases 2 & 3: One root fixed, the other maps to it.\\n\\nWithout loss, suppose \\\\(r^2-2 = r\\\\) (so \\\\(r = 2\\\\) or \\\\(-1\\\\)) and \\\\(s^2-2 = r\\\\). Then \\\\(s^2 = r+2\\\\).\\n\\n- If \\\\(r=2\\\\): \\\\(s^2 = 4 \\\\Rightarrow s = \\\\pm 2\\\\).  \\n  Sets: \\\\(\\\\{2,2\\\\}\\\\) (already counted) and \\\\(\\\\{2,-2\\\\}\\\\).\\n- If \\\\(r=-1\\\\): \\\\(s^2 = 1 \\\\Rightarrow s = \\\\pm 1\\\\).  \\n  Sets: \\\\(\\\\{-1,-1\\\\}\\\\) (already counted) and \\\\(\\\\{-1,1\\\\}\\\\).\\n\\nThe symmetric situation (s fixed, r maps to s) gives the same new sets: \\\\(\\\\{2,-2\\\\}\\\\) and \\\\(\\\\{-1,1\\\\}\\\\).\\n\\n---\\n\\n### Case 4: Roots form a 2‑cycle: \\\\(r^2-2 = s\\\\) and \\\\(s^2-2 = r\\\\).\\n\\nThen \\\\(r = (r^2-2)^2-2 = r^4-4r^2+2\\\\), so\\n\\\\[\\nr^4-4r^2 - r + 2 = 0.\\n\\\\]\\nFactoring gives \\\\((r+1)(r-2)(r^2+r-1)=0\\\\).  \\n- \\\\(r=-1\\\\) or \\\\(r=2\\\\) lead to \\\\(s = r\\\\) (fixed points, already counted).  \\n- The quadratic \\\\(r^2+r-1=0\\\\) yields \\\\(r = \\\\frac{-1\\\\pm\\\\sqrt5}{2}\\\\), and then \\\\(s = r^2-2\\\\) gives the other root. Thus the unordered set is\\n\\\\[\\n\\\\left\\\\{\\\\frac{-1+\\\\sqrt5}{2},\\\\,\\\\frac{-1-\\\\sqrt5}{2}\\\\right\\\\}.\\n\\\\]\\n\\n---\\n\\nCollecting all distinct unordered root sets, we have six:\\n\\n1. \\\\(\\\\{2,2\\\\}\\\\)\\n2. \\\\(\\\\{-1,-1\\\\}\\\\)\\n3. \\\\(\\\\{2,-1\\\\}\\\\)\\n4. \\\\(\\\\{2,-2\\\\}\\\\)\\n5. \\\\(\\\\{-1,1\\\\}\\\\)\\n6. \\\\(\\\\left\\\\{\\\\frac{-1+\\\\sqrt5}{2},\\\\,\\\\frac{-1-\\\\sqrt5}{2}\\\\right\\\\}\\\\)\\n\\nEach set determines a unique quadratic \\\\(x^2+ax+b=0\\\\) via \\\\(a = -(r+s)\\\\), \\\\(b = rs\\\\). All coefficients are real, and the six pairs \\\\((a,b)\\\\) are distinct.\\n\\nThus the number of such quadratic equations is \\\\(\\\\boxed{6}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"6\", \"reference_number\": \"6\", \"raw_tail\": \" \\\\(a = -(r+s)\\\\), \\\\(b = rs\\\\). All coefficients are real, and the six pairs \\\\((a,b)\\\\) are distinct.\\n\\nThus the number of such quadratic equations is \\\\(\\\\boxed{6}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 145.373,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We consider quadratic equations \\\\(x^2+ax+b=0\\\\) with roots \\\\(r\\\\) and \\\\(s\\\\) (allowing \\\\(r=s\\\\)). The condition states: when' attempts=1"
+  ]
+}

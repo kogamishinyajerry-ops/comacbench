@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q460",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find ∠STR given that ST ∥ QR, ∠P = 40°, and ∠Q = 35°.\\n\\n## Setting Up the Triangle\\n\\nIn triangle PQR, the three angles sum to 180°:\\n$$\\\\angle P + \\\\angle Q + \\\\angle R = 180°$$\\n$$40° + 35° + \\\\angle R = 180°$$\\n$$\\\\angle R = 105°$$\\n\\n## Using the Parallel Lines\\n\\nSince ST ∥ QR, and line PR is a transversal cutting both parallel lines:\\n- At point R, line PR meets QR forming angle ∠PRQ = 105°\\n- At point T, line PR meets ST\\n\\nRays TP and TR are opposite rays (since T lies on segment PR), and rays TS and RQ are parallel and point in the same direction. This means ∠PRQ and ∠STR are **consecutive interior angles**, which are supplementary:\\n\\n$$\\\\angle STR + \\\\angle PRQ = 180°$$\\n\\n## Solving for ∠STR\\n\\n$$\\\\angle STR = 180° - 105° = 75°$$\\n\\n**Verification:** In triangle PST (where ST ∥ QR makes it similar to triangle PQR):\\n- ∠P = 40°\\n- ∠PST = ∠Q = 35° (corresponding angles)\\n- ∠PTS = 180° - 40° - 35° = 105°\\n\\nSince ∠STR is supplementary to ∠PTS (as P, T, R are collinear):\\n$$\\\\angle STR = 180° - 105° = 75°$$\\n\\n## Answer\\n\\n$$\\\\boxed{75}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"75\", \"reference_number\": \"75^\\\\circ\", \"raw_tail\": \"\\n- ∠PTS = 180° - 40° - 35° = 105°\\n\\nSince ∠STR is supplementary to ∠PTS (as P, T, R are collinear):\\n$$\\\\angle STR = 180° - 105° = 75°$$\\n\\n## Answer\\n\\n$$\\\\boxed{75}$$\"}"
+  },
+  "timings": {
+    "agent_s": 38.294,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find ∠STR given that ST ∥ QR, ∠P = 40°, and ∠Q = 35°.\\n\\n## Setting Up the Triangle\\n\\nIn' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q428",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to minimize $\\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d}$ subject to $a + b + c + d = 1$.\\n\\n## Setting Up the Approach\\n\\nI'll rewrite the expression so the coefficients become perfect squares:\\n$$\\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d} = \\\\frac{1^2}{a} + \\\\frac{1^2}{b} + \\\\frac{2^2}{c} + \\\\frac{4^2}{d}$$\\n\\n## Applying Cauchy-Schwarz (Titu's Lemma)\\n\\nBy the Cauchy-Schwarz inequality in Engel form:\\n$$(a + b + c + d)\\\\left(\\\\frac{1^2}{a} + \\\\frac{1^2}{b} + \\\\frac{2^2}{c} + \\\\frac{4^2}{d}\\\\right) \\\\geq (1 + 1 + 2 + 4)^2 = 64$$\\n\\nSince $a + b + c + d = 1$, this gives:\\n$$\\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d} \\\\geq 64$$\\n\\n## Finding the Equality Case\\n\\nEquality in Cauchy-Schwarz holds when:\\n$$\\\\frac{a}{1} = \\\\frac{b}{1} = \\\\frac{c}{2} = \\\\frac{d}{4}$$\\n\\nLet this common ratio be $k$. Then $a = k$, $b = k$, $c = 2k$, $d = 4k$.\\n\\nSubstituting into the constraint:\\n$$k + k + 2k + 4k = 8k = 1 \\\\implies k = \\\\frac{1}{8}$$\\n\\nSo $a = \\\\frac{1}{8}$, $b = \\\\frac{1}{8}$, $c = \\\\frac{1}{4}$, $d = \\\\frac{1}{2}$.\\n\\n## Verification\\n\\n$$\\\\frac{1}{1/8} + \\\\frac{1}{1/8} + \\\\frac{4}{1/4} + \\\\frac{16}{1/2} = 8 + 8 + 16 + 32 = 64 \\\\checkmark$$\\n\\n#### 64\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"64\", \"reference_number\": \"64\", \"raw_tail\": \"\\\\frac{1}{4}$, $d = \\\\frac{1}{2}$.\\n\\n## Verification\\n\\n$$\\\\frac{1}{1/8} + \\\\frac{1}{1/8} + \\\\frac{4}{1/4} + \\\\frac{16}{1/2} = 8 + 8 + 16 + 32 = 64 \\\\checkmark$$\\n\\n#### 64\"}"
+  },
+  "timings": {
+    "agent_s": 8.057,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to minimize $\\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d}$ subject to $a + b +' attempts=1"
+  ]
+}

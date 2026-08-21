@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q012",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the sum of the proper divisors of 284, then find the sum of the proper divisors of that result.\\n\\n## Step 1: Find the sum of proper divisors of 284\\n\\nFactoring: 284 = 2² × 71\\n\\nThe proper divisors of 284 are: 1, 2, 4, 71, 142\\n\\nSum = 1 + 2 + 4 + 71 + 142 = **220**\\n\\n**Verification:** σ(284) = (1 + 2 + 4)(1 + 71) = 7 × 72 = 504, and 504 − 284 = 220 ✓\\n\\n## Step 2: Find the sum of proper divisors of 220\\n\\nFactoring: 220 = 2² × 5 × 11\\n\\nThe proper divisors of 220 are: 1, 2, 4, 5, 10, 11, 20, 22, 44, 55, 110\\n\\nSum = 1 + 2 + 4 + 5 + 10 + 11 + 20 + 22 + 44 + 55 + 110\\n\\nAdding step by step:\\n- 1 + 2 = 3\\n- 3 + 4 = 7\\n- 7 + 5 = 12\\n- 12 + 10 = 22\\n- 22 + 11 = 33\\n- 33 + 20 = 53\\n- 53 + 22 = 75\\n- 75 + 44 = 119\\n- 119 + 55 = 174\\n- 174 + 110 = **284**\\n\\n**Verification:** σ(220) = (1 + 2 + 4)(1 + 5)(1 + 11) = 7 × 6 × 12 = 504, and 504 − 220 = 284 ✓\\n\\n## Answer\\n\\n#### 284\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"284\", \"reference_number\": \"284\", \"raw_tail\": \"119\\n- 119 + 55 = 174\\n- 174 + 110 = **284**\\n\\n**Verification:** σ(220) = (1 + 2 + 4)(1 + 5)(1 + 11) = 7 × 6 × 12 = 504, and 504 − 220 = 284 ✓\\n\\n## Answer\\n\\n#### 284\"}"
+  },
+  "timings": {
+    "agent_s": 6.938,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the sum of the proper divisors of 284, then find the sum of the proper divisors ' attempts=1"
+  ]
+}

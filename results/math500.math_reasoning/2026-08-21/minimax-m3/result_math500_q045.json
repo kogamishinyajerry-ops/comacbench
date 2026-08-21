@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q045",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $\\\\tan A$ given that $\\\\sin A = 2\\\\cos A$ in a right triangle with $\\\\angle B = 90°$.\\n\\n## Setting Up the Relationship\\n\\nI'll use the fundamental definition:\\n$$\\\\tan A = \\\\frac{\\\\sin A}{\\\\cos A}$$\\n\\n## Solving for tan A\\n\\nStarting from the given condition:\\n$$\\\\sin A = 2\\\\cos A$$\\n\\nDividing both sides by $\\\\cos A$:\\n$$\\\\frac{\\\\sin A}{\\\\cos A} = 2$$\\n\\nTherefore:\\n$$\\\\tan A = 2$$\\n\\n## Verification\\n\\nIn right triangle $ABC$ with $\\\\angle B = 90°$:\\n- $\\\\sin A = \\\\frac{BC}{AC}$ (opposite over hypotenuse)  \\n- $\\\\cos A = \\\\frac{AB}{AC}$ (adjacent over hypotenuse)\\n\\nThe condition $\\\\sin A = 2\\\\cos A$ means $\\\\frac{BC}{AC} = 2 \\\\cdot \\\\frac{AB}{AC}$, so $BC = 2AB$.\\n\\nThen $\\\\tan A = \\\\frac{BC}{AB} = \\\\frac{2AB}{AB} = 2$ ✓\\n\\n#### 2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\", \"reference_number\": \"2\", \"raw_tail\": \"e)\\n\\nThe condition $\\\\sin A = 2\\\\cos A$ means $\\\\frac{BC}{AC} = 2 \\\\cdot \\\\frac{AB}{AC}$, so $BC = 2AB$.\\n\\nThen $\\\\tan A = \\\\frac{BC}{AB} = \\\\frac{2AB}{AB} = 2$ ✓\\n\\n#### 2\"}"
+  },
+  "timings": {
+    "agent_s": 4.807,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $\\\\tan A$ given that $\\\\sin A = 2\\\\cos A$ in a right triangle with $\\\\angle B = 90°$' attempts=1"
+  ]
+}

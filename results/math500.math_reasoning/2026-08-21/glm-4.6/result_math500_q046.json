@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q046",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The polynomial is \\\\(z^4 + z^2 + 1 = 0\\\\). Factor it as \\\\((z^2+z+1)(z^2 - z +1) = 0\\\\).\\n\\n- The roots of \\\\(z^2+z+1 = 0\\\\) are \\\\(z = e^{2\\\\pi i/3}\\\\) and \\\\(z = e^{4\\\\pi i/3}\\\\). Both have order \\\\(3\\\\).\\n- The roots of \\\\(z^2 - z + 1 = 0\\\\) are \\\\(z = e^{\\\\pi i/3}\\\\) and \\\\(z = e^{5\\\\pi i/3}\\\\). Both have order \\\\(6\\\\).\\n\\nThus the four roots have orders \\\\(3, 3, 6, 6\\\\). For a root to be an \\\\(n\\\\)th root of unity, its order must divide \\\\(n\\\\). Therefore \\\\(n\\\\) must be a common multiple of \\\\(3\\\\) and \\\\(6\\\\). The least common multiple is \\\\(6\\\\).\\n\\nNo smaller positive integer works: e.g., for \\\\(n=3\\\\) the roots of order \\\\(6\\\\) do not satisfy \\\\(z^3=1\\\\).\\n\\nHence the smallest positive integer \\\\(n\\\\) is \\\\(6\\\\).\\n\\n\\\\boxed{6}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"6\", \"reference_number\": \"6\", \"raw_tail\": \"ler positive integer works: e.g., for \\\\(n=3\\\\) the roots of order \\\\(6\\\\) do not satisfy \\\\(z^3=1\\\\).\\n\\nHence the smallest positive integer \\\\(n\\\\) is \\\\(6\\\\).\\n\\n\\\\boxed{6}\"}"
+  },
+  "timings": {
+    "agent_s": 44.458,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial is \\\\(z^4 + z^2 + 1 = 0\\\\). Factor it as \\\\((z^2+z+1)(z^2 - z +1) = 0\\\\).\\n\\n- The roots of \\\\(z^2+z+1 = 0\\\\) are' attempts=1"
+  ]
+}

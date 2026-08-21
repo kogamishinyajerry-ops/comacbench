@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_110",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def exchange(lst1, lst2):\\n    \\\"\\\"\\\"Determine if we can exchange elements between lst1 and lst2 so that\\n    all elements in lst1 become even.\\n\\n    The exchange is unrestricted in number: any element from lst1 can be\\n    swapped with any element from lst2. To make lst1 contain only even\\n    numbers, each odd element in lst1 must be replaced by an even element\\n    taken from lst2. Therefore, the condition for success is that the\\n    number of odd values in lst1 does not exceed the number of even values\\n    in lst2.\\n\\n    Parameters\\n    ----------\\n    lst1 : list[int]\\n        First list of numbers.\\n    lst2 : list[int]\\n        Second list of numbers.\\n\\n    Returns\\n    -------\\n    str\\n        \\\"YES\\\" if the required exchange is possible, otherwise \\\"NO\\\".\\n    \\\"\\\"\\\"\\n    # Count odd numbers in lst1\\n    odd_in_lst1 = sum(1 for x in lst1 if x % 2 != 0)\\n    # Count even numbers in lst2\\n    even_in_lst2 = sum(1 for x in lst2 if x % 2 == 0)\\n\\n    # If we have enough evens in lst2 to replace all odds in lst1,\\n    # the transformation is possible.\\n    return \\\"YES\\\" if odd_in_lst1 <= even_in_lst2 else \\\"NO\\\"\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 15.113,
+    "setup_s": 0.0,
+    "grade_s": 0.162
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

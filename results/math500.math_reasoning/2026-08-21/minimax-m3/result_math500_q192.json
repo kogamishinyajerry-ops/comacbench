@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q192",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the median QM in triangle PQR where PQ = QR = 34 and PR = 32.\\n\\n## Setting Up the Problem\\n\\nSince PQ = QR = 34, triangle PQR is **isosceles** with Q as the apex. The median QM from Q to side PR has a special property in isosceles triangles: it is also the **altitude** to PR.\\n\\n## Finding the Length\\n\\nBecause M is the midpoint of PR:\\n$$PM = MR = \\\\frac{PR}{2} = \\\\frac{32}{2} = 16$$\\n\\nSince QM ⊥ PR in this isosceles triangle, I can apply the Pythagorean theorem in right triangle QMP:\\n$$QM^2 + PM^2 = QP^2$$\\n\\n$$QM^2 + 16^2 = 34^2$$\\n\\n$$QM^2 = 1156 - 256 = 900$$\\n\\n$$QM = 30$$\\n\\n## Verification Using the Median Formula\\n\\nThe general median length formula confirms this:\\n$$QM^2 = \\\\frac{2(QP^2 + QR^2) - PR^2}{4} = \\\\frac{2(1156 + 1156) - 1024}{4} = \\\\frac{4624 - 1024}{4} = \\\\frac{3600}{4} = 900$$\\n\\nSo QM = 30. ✓\\n\\n$\\\\boxed{30}$\\n\\n#### 30\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"30\", \"reference_number\": \"30\", \"raw_tail\": \"$QM^2 = \\\\frac{2(QP^2 + QR^2) - PR^2}{4} = \\\\frac{2(1156 + 1156) - 1024}{4} = \\\\frac{4624 - 1024}{4} = \\\\frac{3600}{4} = 900$$\\n\\nSo QM = 30. ✓\\n\\n$\\\\boxed{30}$\\n\\n#### 30\"}"
+  },
+  "timings": {
+    "agent_s": 4.679,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the median QM in triangle PQR where PQ = QR = 34 and PR = 32.\\n\\n## Setting Up the' attempts=1"
+  ]
+}

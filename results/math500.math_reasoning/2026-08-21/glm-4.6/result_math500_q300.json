@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q300",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Each pair of distinct circles can intersect in at most two points. With four circles, there are \\\\(\\\\binom{4}{2}=6\\\\) pairs. Therefore, an upper bound on the number of intersection points (counting each point once even if it lies on more than two circles) is \\\\(2 \\\\times 6 = 12\\\\).\\n\\nTo achieve this maximum, we need a configuration where every pair of circles intersect in two distinct points and no three circles pass through the same point. Such a configuration is possible by choosing four circles with generic centers and radii; for example, take circles with centers at \\\\((0,0), (5,0), (0,5), (5,5)\\\\) and radii adjusted so that each pair intersects (e.g., all radii between 5 and 7). Then all 12 intersection points are distinct.\\n\\nThus the maximum number of points where at least two of the circles intersect is \\\\(12\\\\).\\n\\n\\\\boxed{12}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"12\", \"reference_number\": \"12\", \"raw_tail\": \"en 5 and 7). Then all 12 intersection points are distinct.\\n\\nThus the maximum number of points where at least two of the circles intersect is \\\\(12\\\\).\\n\\n\\\\boxed{12}\"}"
+  },
+  "timings": {
+    "agent_s": 27.586,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Each pair of distinct circles can intersect in at most two points. With four circles, there are \\\\(\\\\binom{4}{2}=6\\\\) pairs' attempts=1"
+  ]
+}

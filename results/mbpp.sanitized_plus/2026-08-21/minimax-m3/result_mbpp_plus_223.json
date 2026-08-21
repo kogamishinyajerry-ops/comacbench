@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_223",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"def binary_search(arr, low, high, x):\\n    \\\"\\\"\\\"Find the first occurrence of x in sorted array arr[low..high].\\\"\\\"\\\"\\n    if high >= low:\\n        mid = (low + high) // 2\\n        # Check if mid is the first occurrence of x\\n        if (mid == 0 or x > arr[mid - 1]) and arr[mid] == x:\\n            return mid\\n        elif arr[mid] < x:\\n            return binary_search(arr, mid + 1, high, x)\\n        else:\\n            return binary_search(arr, low, mid - 1, x)\\n    return -1\\n\\n\\ndef is_majority(arr, n, x):\\n    \\\"\\\"\\\"\\n    Returns True if x is the majority element in sorted array arr of length n.\\n    The majority element is the element that occurs more than n/2 times.\\n    \\\"\\\"\\\"\\n    # Step 1: Find the first occurrence of x using binary search\\n    first = binary_search(arr, 0, n - 1, x)\\n\\n    # If x is not present in the array\\n    if first == -1:\\n        return False\\n\\n    # Step 2: If x is the majority element, the element at index\\n    # (first + n/2) must also be x. This is because in a sorted array,\\n    # all occurrences of x are contiguous, so if x occurs more than n/2\\n    # times, the element n/2 positions ahead of the first occurrence\\n    # must still be x.\\n    if first + n // 2 < n and arr[first + n // 2] == x:\\n        return True\\n    else:\\n        return False\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"IndexError: list index out of range\"}], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 9.756,
+    "setup_s": 0.0,
+    "grade_s": 0.147
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

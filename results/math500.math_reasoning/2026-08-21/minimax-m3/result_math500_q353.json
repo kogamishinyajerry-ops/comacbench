@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q353",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to arrange 6 different books on a shelf so that the 2 math books are not adjacent.\\n\\n## Setting Up the Approach\\n\\nI'll use the **gap method**: first arrange the non-math books to create gaps, then place the math books in separate gaps.\\n\\n## Step 1: Arrange the Non-Math Books\\n\\nI have 4 non-math books to arrange. These can be ordered in:\\n$$4! = 24 \\\\text{ ways}$$\\n\\nThis creates an arrangement with **5 gaps** (including the two ends):\\n$$\\\\underline{\\\\phantom{B}}\\\\ B\\\\ \\\\underline{\\\\phantom{B}}\\\\ B\\\\ \\\\underline{\\\\phantom{B}}\\\\ B\\\\ \\\\underline{\\\\phantom{B}}\\\\ B\\\\ \\\\underline{\\\\phantom{B}}$$\\n\\n## Step 2: Place the Math Books\\n\\nTo ensure the math books are **not adjacent**, I must place each math book into a **different gap**.\\n\\n- Choose a gap for the first math book: 5 choices\\n- Choose a different gap for the second math book: 4 choices\\n\\nSince the math books are distinguishable:\\n$$5 \\\\times 4 = 20 \\\\text{ ways}$$\\n\\n## Step 3: Combine the Choices\\n\\n$$\\\\text{Total} = 4! \\\\times 5 \\\\times 4 = 24 \\\\times 20 = 480$$\\n\\n## Verification (Subtraction Method)\\n\\n- Total arrangements: $6! = 720$\\n- Arrangements with math books adjacent (treat as one block): $5! \\\\times 2! = 240$\\n- Non-adjacent arrangements: $720 - 240 = 480$ ✓\\n\\n$$\\\\boxed{480}$$\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"480\", \"reference_number\": \"480\", \"raw_tail\": \" $6! = 720$\\n- Arrangements with math books adjacent (treat as one block): $5! \\\\times 2! = 240$\\n- Non-adjacent arrangements: $720 - 240 = 480$ ✓\\n\\n$$\\\\boxed{480}$$\"}"
+  },
+  "timings": {
+    "agent_s": 6.507,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to arrange 6 different books on a shelf so that the 2 math books are not adjacent.\\n\\n## S' attempts=1"
+  ]
+}

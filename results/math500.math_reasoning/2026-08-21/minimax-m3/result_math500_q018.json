@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q018",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to identify the relationships in the figure:\\n- The top line (through A) is parallel to line BC\\n- Triangle ABC has AB = BC (isosceles)\\n- The 124° angle is at vertex A between the leftward ray of the top line and segment AB\\n- The angle x is at vertex A between the rightward ray of the top line and segment AC\\n\\n## Setting Up the Angles\\n\\n**Finding the angle between AB and the rightward top line:**\\nSince the top line is straight, the angles on either side of A sum to 180°:\\n$$\\\\text{Angle between rightward top line and } AB = 180° - 124° = 56°$$\\n\\n**Using the parallel lines (alternate interior angles):**\\nSince the top line is parallel to BC, and AC is a transversal:\\n$$x = \\\\angle BCA$$\\n\\nThe angle x at A (between rightward top line and AC) equals the alternate interior angle at C (between leftward bottom line and CA), which is ∠BCA.\\n\\n## Applying the Isosceles Triangle Property\\n\\nSince AB = BC, the base angles opposite these sides are equal:\\n$$\\\\angle BAC = \\\\angle BCA$$\\n\\nFrom the alternate interior angles: $\\\\angle BCA = x$\\n\\nTherefore: $\\\\angle BAC = x$\\n\\n**Finding the relationship at vertex A:**\\nThe angle between the rightward top line and AC equals:\\n$$\\\\text{(angle to AB)} - \\\\text{(angle between AB and AC)} = 56° - \\\\angle BAC = 56° - x$$\\n\\nBut this angle is exactly x:\\n$$x = 56° - x$$\\n$$2x = 56°$$\\n$$x = 28°$$\\n\\n## Verification\\n- ∠BAC = ∠BCA = 28°\\n- ∠ABC = 180° - 28° - 28° = 124° ✓\\n- The 124° angle and ∠ABC are co-interior angles, summing to 180° + 124° = 304°? \\n\\nWait, checking: Co-interior angles (same-side interior) sum to 180°. \\n- At A: 124° (interior, left of AB)\\n- At B: ∠ABC = 124° (interior, right of AB)\\n- These are alternate interior angles, so they should be equal, not supplementary. ✓\\n\\n#### 28\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"28\", \"reference_number\": \"28\", \"raw_tail\": \"(interior, left of AB)\\n- At B: ∠ABC = 124° (interior, right of AB)\\n- These are alternate interior angles, so they should be equal, not supplementary. ✓\\n\\n#### 28\"}"
+  },
+  "timings": {
+    "agent_s": 304.712,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to identify the relationships in the figure:\\n- The top line (through A) is parallel to l' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q284",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We let \\\\(\\\\theta = \\\\tan^{-1}(x)\\\\) and \\\\(\\\\varphi = \\\\cot^{-1}(1/x)\\\\).  \\nUsing the principal values \\\\(\\\\tan^{-1}(x)\\\\in(-\\\\pi/2,\\\\pi/2)\\\\) and \\\\(\\\\cot^{-1}(y)\\\\in(0,\\\\pi)\\\\) (with \\\\(\\\\cot^{-1}(y)=\\\\pi/2-\\\\tan^{-1}(y)\\\\)), we have  \\n\\n\\\\[\\n\\\\sin\\\\theta = \\\\frac{x}{\\\\sqrt{1+x^2}}, \\\\quad \\\\cos\\\\theta = \\\\frac{1}{\\\\sqrt{1+x^2}}.\\n\\\\]\\n\\nTo express \\\\(\\\\varphi\\\\) in terms of \\\\(x\\\\), note  \\n\\n\\\\[\\n\\\\varphi = \\\\cot^{-1}(1/x) = \\\\frac{\\\\pi}{2} - \\\\tan^{-1}(1/x).\\n\\\\]\\n\\nNow use the identity for \\\\(\\\\tan^{-1}(1/x)\\\\):  \\n\\n- If \\\\(x>0\\\\), \\\\(\\\\tan^{-1}(1/x) = \\\\frac{\\\\pi}{2} - \\\\tan^{-1}(x)\\\\), so \\\\(\\\\varphi = \\\\tan^{-1}(x)\\\\).  \\n- If \\\\(x<0\\\\), \\\\(\\\\tan^{-1}(1/x) = -\\\\frac{\\\\pi}{2} - \\\\tan^{-1}(x)\\\\), so \\\\(\\\\varphi = \\\\pi + \\\\tan^{-1}(x)\\\\).\\n\\nHence  \\n\\n\\\\[\\n\\\\theta+\\\\varphi = \\n\\\\begin{cases}\\n2\\\\tan^{-1}(x), & x>0,\\\\\\\\[4pt]\\n\\\\pi + 2\\\\tan^{-1}(x), & x<0.\\n\\\\end{cases}\\n\\\\]\\n\\nThen  \\n\\n\\\\[\\n\\\\sin(\\\\theta+\\\\varphi) = \\n\\\\begin{cases}\\n\\\\sin(2\\\\tan^{-1}(x)), & x>0,\\\\\\\\[4pt]\\n\\\\sin(\\\\pi+2\\\\tan^{-1}(x)) = -\\\\sin(2\\\\tan^{-1}(x)), & x<0.\\n\\\\end{cases}\\n\\\\]\\n\\nWe know \\\\(\\\\sin(2\\\\tan^{-1}(x)) = \\\\dfrac{2x}{1+x^2}\\\\) for all real \\\\(x\\\\). Therefore the equation \\\\(\\\\sin(\\\\theta+\\\\varphi) = \\\\frac13\\\\) becomes  \\n\\n\\\\[\\n\\\\begin{cases}\\n\\\\dfrac{2x}{1+x^2} = \\\\dfrac13, & x>0,\\\\\\\\[8pt]\\n-\\\\dfrac{2x}{1+x^2} = \\\\dfrac13 \\\\quad\\\\Longrightarrow\\\\quad \\\\dfrac{2x}{1+x^2} = -\\\\dfrac13, & x<0.\\n\\\\end{cases}\\n\\\\]\\n\\nSolve each case.  \\n\\n**For \\\\(x>0\\\\):**  \\n\\\\[\\n\\\\frac{2x}{1+x^2} = \\\\frac13 \\\\;\\\\Longrightarrow\\\\; 6x = 1 + x^2 \\\\;\\\\Longrightarrow\\\\; x^2 - 6x + 1 = 0.\\n\\\\]  \\nThe solutions are \\\\(x = 3 \\\\pm 2\\\\sqrt{2}\\\\), both positive and therefore valid.\\n\\n**For \\\\(x<0\\\\):**  \\n\\\\[\\n\\\\frac{2x}{1+x^2} = -\\\\frac13 \\\\;\\\\Longrightarrow\\\\; 6x = -1 - x^2 \\\\;\\\\Longrightarrow\\\\; x^2 + 6x + 1 = 0.\\n\\\\]  \\nThe solutions are \\\\(x = -3 \\\\pm 2\\\\sqrt{2}\\\\), both negative and therefore valid.\\n\\nThe case \\\\(x=0\\\\) is excluded because \\\\(\\\\cot^{-1}(1/x)\\\\) is undefined.\\n\\nThus all solutions are  \\n\\n\\\\[\\nx = 3 - 2\\\\sqrt{2},\\\\; 3 + 2\\\\sqrt{2},\\\\; -3 - 2\\\\sqrt{2},\\\\; -3 + 2\\\\sqrt{2}.\\n\\\\]\\n\\n\\\\boxed{-3-2\\\\sqrt{2},\\\\; -3+2\\\\sqrt{2},\\\\; 3-2\\\\sqrt{2},\\\\; 3+2\\\\sqrt{2}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-3-2\\\\sqrt{2},\\\\; -3+2\\\\sqrt{2},\\\\; 3-2\\\\sqrt{2},\\\\; 3+2\\\\sqrt{2}\", \"reference_number\": \"3 \\\\pm 2 \\\\sqrt{2}\", \"raw_tail\": \"lutions are  \\n\\n\\\\[\\nx = 3 - 2\\\\sqrt{2},\\\\; 3 + 2\\\\sqrt{2},\\\\; -3 - 2\\\\sqrt{2},\\\\; -3 + 2\\\\sqrt{2}.\\n\\\\]\\n\\n\\\\boxed{-3-2\\\\sqrt{2},\\\\; -3+2\\\\sqrt{2},\\\\; 3-2\\\\sqrt{2},\\\\; 3+2\\\\sqrt{2}}\"}"
+  },
+  "timings": {
+    "agent_s": 210.486,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We let \\\\(\\\\theta = \\\\tan^{-1}(x)\\\\) and \\\\(\\\\varphi = \\\\cot^{-1}(1/x)\\\\).  \\nUsing the principal values \\\\(\\\\tan^{-1}(x)\\\\in(-\\\\pi/2' attempts=1"
+  ]
+}

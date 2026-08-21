@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q331",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We start by simplifying the expression:\\n\\n\\\\[\\n\\\\sqrt{\\\\dfrac{\\\\dfrac{5}{\\\\sqrt{80}}+\\\\dfrac{\\\\sqrt{845}}{9}+\\\\sqrt{45}}{\\\\sqrt5}}.\\n\\\\]\\n\\nFirst, simplify each square root:\\n\\n- \\\\(\\\\sqrt{80} = \\\\sqrt{16 \\\\cdot 5} = 4\\\\sqrt{5}\\\\).\\n- \\\\(\\\\sqrt{845} = \\\\sqrt{169 \\\\cdot 5} = 13\\\\sqrt{5}\\\\).\\n- \\\\(\\\\sqrt{45} = \\\\sqrt{9 \\\\cdot 5} = 3\\\\sqrt{5}\\\\).\\n\\nSubstitute these into the numerator:\\n\\n\\\\[\\n\\\\frac{5}{\\\\sqrt{80}} + \\\\frac{\\\\sqrt{845}}{9} + \\\\sqrt{45}\\n= \\\\frac{5}{4\\\\sqrt{5}} + \\\\frac{13\\\\sqrt{5}}{9} + 3\\\\sqrt{5}.\\n\\\\]\\n\\nNow the whole fraction inside the square root is:\\n\\n\\\\[\\n\\\\frac{\\\\frac{5}{4\\\\sqrt{5}} + \\\\frac{13\\\\sqrt{5}}{9} + 3\\\\sqrt{5}}{\\\\sqrt{5}}.\\n\\\\]\\n\\nDivide each term by \\\\(\\\\sqrt{5}\\\\):\\n\\n\\\\[\\n\\\\frac{\\\\frac{5}{4\\\\sqrt{5}}}{\\\\sqrt{5}} = \\\\frac{5}{4\\\\sqrt{5} \\\\cdot \\\\sqrt{5}} = \\\\frac{5}{4 \\\\cdot 5} = \\\\frac{5}{20} = \\\\frac{1}{4},\\n\\\\]\\n\\n\\\\[\\n\\\\frac{\\\\frac{13\\\\sqrt{5}}{9}}{\\\\sqrt{5}} = \\\\frac{13\\\\sqrt{5}}{9\\\\sqrt{5}} = \\\\frac{13}{9},\\n\\\\]\\n\\n\\\\[\\n\\\\frac{3\\\\sqrt{5}}{\\\\sqrt{5}} = 3.\\n\\\\]\\n\\nThus the expression under the square root becomes:\\n\\n\\\\[\\n\\\\frac{1}{4} + \\\\frac{13}{9} + 3.\\n\\\\]\\n\\nAdd the fractions. Write \\\\(3\\\\) as \\\\(\\\\frac{108}{36}\\\\):\\n\\n\\\\[\\n\\\\frac{1}{4} = \\\\frac{9}{36},\\\\quad \\\\frac{13}{9} = \\\\frac{52}{36},\\\\quad 3 = \\\\frac{108}{36}.\\n\\\\]\\n\\nSumming:\\n\\n\\\\[\\n\\\\frac{9}{36} + \\\\frac{52}{36} + \\\\frac{108}{36} = \\\\frac{169}{36}.\\n\\\\]\\n\\nNow take the square root:\\n\\n\\\\[\\n\\\\sqrt{\\\\frac{169}{36}} = \\\\frac{\\\\sqrt{169}}{\\\\sqrt{36}} = \\\\frac{13}{6}.\\n\\\\]\\n\\nThus the simplified fraction is \\\\(\\\\frac{13}{6}\\\\).\\n\\n#### 13/6\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13/6\", \"reference_number\": \"\\\\frac{13}{6}\", \"raw_tail\": \" take the square root:\\n\\n\\\\[\\n\\\\sqrt{\\\\frac{169}{36}} = \\\\frac{\\\\sqrt{169}}{\\\\sqrt{36}} = \\\\frac{13}{6}.\\n\\\\]\\n\\nThus the simplified fraction is \\\\(\\\\frac{13}{6}\\\\).\\n\\n#### 13/6\"}"
+  },
+  "timings": {
+    "agent_s": 42.196,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We start by simplifying the expression:\\n\\n\\\\[\\n\\\\sqrt{\\\\dfrac{\\\\dfrac{5}{\\\\sqrt{80}}+\\\\dfrac{\\\\sqrt{845}}{9}+\\\\sqrt{45}}{\\\\sqrt5}}.' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_415",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"def max_Product(arr):\\n    \\\"\\\"\\\"Return a tuple (a, b) from the input list whose product is maximal.\\n    The pair is returned in ascending order.\\n    \\\"\\\"\\\"\\n    if len(arr) < 2:\\n        raise ValueError(\\\"Array must contain at least two integers.\\\")\\n\\n    # Track the two largest and two smallest numbers\\n    max1 = float('-inf')\\n    max2 = float('-inf')\\n    min1 = float('inf')\\n    min2 = float('inf')\\n\\n    for num in arr:\\n        # Update two largest numbers\\n        if num > max1:\\n            max2 = max1\\n            max1 = num\\n        elif num > max2:\\n            max2 = num\\n\\n        # Update two smallest numbers\\n        if num < min1:\\n            min2 = min1\\n            min1 = num\\n        elif num < min2:\\n            min2 = num\\n\\n    # Compare the products of the two largest vs the two smallest\\n    product_max = max1 * max2\\n    product_min = min1 * min2\\n\\n    if product_max >= product_min:\\n        pair = (max2, max1)          # pair of two largest numbers\\n    else:\\n        pair = (min1, min2)          # pair of two smallest (most negative) numbers\\n\\n    # Return the pair sorted in ascending order\\n    return tuple(sorted(pair))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 2, \"cases_total\": 4, \"failed_cases\": [{\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [[0, -1, -2, -4, 5, 0, -6]]\"}], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 67.926,
+    "setup_s": 0.0,
+    "grade_s": 0.144
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_129",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List\\n\\ndef minPath(grid: List[List[int]], k: int) -> List[int]:\\n    \\\"\\\"\\\"\\n    Returns the lexicographically smallest path of length k in the given grid.\\n    The path starts at the cell containing value 1 (the smallest possible first\\n    element) and at each subsequent step moves to the neighbor with the smallest\\n    value. Because we can always return to a previously visited cell, this greedy\\n    choice yields the globally lexicographically minimal sequence.\\n    \\n    Parameters\\n    ----------\\n    grid : List[List[int]]\\n        N x N grid containing a permutation of the numbers 1 .. N*N (N >= 2).\\n    k : int\\n        Length of the required path (k >= 1).\\n    \\n    Returns\\n    -------\\n    List[int]\\n        The list of values on the cells of the minimal path.\\n    \\\"\\\"\\\"\\n    n = len(grid)\\n    \\n    # Locate the cell containing the smallest value 1\\n    start_i = start_j = -1\\n    for i in range(n):\\n        for j in range(n):\\n            if grid[i][j] == 1:\\n                start_i, start_j = i, j\\n                break\\n        if start_i != -1:\\n            break\\n    \\n    # The path always begins with 1\\n    path = [1]\\n    ci, cj = start_i, start_j\\n    \\n    # Directions for the four orthogonal neighbours\\n    directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]\\n    \\n    # Build the path greedily\\n    for _ in range(k - 1):\\n        best_val = None\\n        best_pos = None\\n        for di, dj in directions:\\n            ni, nj = ci + di, cj + dj\\n            if 0 <= ni < n and 0 <= nj < n:\\n                val = grid[ni][nj]\\n                if best_val is None or val < best_val:\\n                    best_val = val\\n                    best_pos = (ni, nj)\\n        # Move to the neighbour with the smallest value\\n        ci, cj = best_pos\\n        path.append(best_val)\\n    \\n    return path\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 12, \"cases_total\": 12, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 85.842,
+    "setup_s": 0.0,
+    "grade_s": 0.14
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

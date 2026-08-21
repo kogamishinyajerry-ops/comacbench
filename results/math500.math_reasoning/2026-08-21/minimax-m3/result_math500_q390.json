@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q390",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to minimize the distance from the origin to a point on the curve $y=\\\\frac{1}{\\\\sqrt{2}}(x^2-3)$.\\n\\n## Setting Up the Distance Function\\n\\nThe squared distance from the origin to point $(x, y)$ is:\\n$$D^2 = x^2 + y^2 = x^2 + \\\\frac{1}{2}(x^2-3)^2$$\\n\\nExpanding:\\n$$D^2 = x^2 + \\\\frac{1}{2}(x^4 - 6x^2 + 9) = \\\\frac{1}{2}x^4 - 2x^2 + \\\\frac{9}{2}$$\\n\\n## Finding Critical Points\\n\\nTaking the derivative and setting it equal to zero:\\n$$\\\\frac{d(D^2)}{dx} = 2x^3 - 4x = 2x(x^2 - 2) = 0$$\\n\\nThis gives $x = 0$ or $x = \\\\pm\\\\sqrt{2}$.\\n\\n## Evaluating at Critical Points\\n\\n**At $x = 0$:**\\n$$D^2 = \\\\frac{1}{2}(0) - 2(0) + \\\\frac{9}{2} = \\\\frac{9}{2}$$\\n\\n**At $x = \\\\pm\\\\sqrt{2}$:**\\n$$D^2 = \\\\frac{1}{2}(4) - 2(2) + \\\\frac{9}{2} = 2 - 4 + \\\\frac{9}{2} = \\\\frac{5}{2}$$\\n\\n**Verification** at $x = \\\\sqrt{2}$: $y = \\\\frac{1}{\\\\sqrt{2}}(2-3) = -\\\\frac{1}{\\\\sqrt{2}}$\\n$$D^2 = (\\\\sqrt{2})^2 + \\\\left(-\\\\frac{1}{\\\\sqrt{2}}\\\\right)^2 = 2 + \\\\frac{1}{2} = \\\\frac{5}{2} ✓$$\\n\\n## Computing the Minimum Distance\\n\\nThe minimum distance is:\\n$$D = \\\\sqrt{\\\\frac{5}{2}} = \\\\frac{\\\\sqrt{5}}{\\\\sqrt{2}} = \\\\frac{\\\\sqrt{10}}{2}$$\\n\\n## Identifying $a$ and $b$\\n\\nThe minimum distance has the form $\\\\frac{\\\\sqrt{a}}{b}$ where:\\n- $a = 10$ (square-free ✓)\\n- $b = 2$\\n\\nTherefore:\\n$$a + b = 10 + 2 = 12$$\\n\\n#### 12\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"12\", \"reference_number\": \"12\", \"raw_tail\": \"ing $a$ and $b$\\n\\nThe minimum distance has the form $\\\\frac{\\\\sqrt{a}}{b}$ where:\\n- $a = 10$ (square-free ✓)\\n- $b = 2$\\n\\nTherefore:\\n$$a + b = 10 + 2 = 12$$\\n\\n#### 12\"}"
+  },
+  "timings": {
+    "agent_s": 6.202,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to minimize the distance from the origin to a point on the curve $y=\\\\frac{1}{\\\\sqrt{2}}(x' attempts=1"
+  ]
+}

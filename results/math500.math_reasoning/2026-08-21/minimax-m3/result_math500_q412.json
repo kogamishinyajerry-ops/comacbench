@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q412",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a quadratic polynomial $P(x)$ sandwiched between two specific quadratics.\\n\\n## Setting Up Key Observations\\n\\n**Computing both bounds at $x = 1$:**\\n- $f(1) = 1 - 2 + 2 = 1$\\n- $g(1) = 2 - 4 + 3 = 1$\\n\\nSince $f(1) = g(1) = 1$, the squeeze gives us $P(1) = 1$.\\n\\n**Noting the relationship:** $g(x) - f(x) = (x-1)^2$, so the bounds differ only by $(x-1)^2$.\\n\\n## Analyzing the Constraints\\n\\nLet $P(x) = ax^2 + bx + c$ with $a + b + c = 1$.\\n\\n**Lower bound** $P(x) - f(x) \\\\geq 0$: Substituting $u = x-1$:\\n$$P(x) - f(x) = (a-1)u^2 + (2a+b)u = u[(a-1)u + (2a+b)]$$\\n\\nFor this to be $\\\\geq 0$ for all $u$:\\n- If $a \\\\leq 1$, the negative leading coefficient fails for large $|u|$\\n- If $a = 1$: requires $b = -2$, giving $P = f$ (rejected, since $P(11) \\\\neq 101$)\\n- If $a > 1$: discriminant $\\\\leq 0$ gives $(2a+b)^2 \\\\leq 0$, so $b = -2a$\\n\\n**Upper bound** $g(x) - P(x) \\\\geq 0$: Substituting $u = x-1$:\\n$$g(x) - P(x) = (2-a)u^2 - (2a+b)u = u[(2-a)u - (2a+b)]$$\\n\\nFor this to be $\\\\geq 0$ for all $u$:\\n- If $a = 2$: requires $b = -4$, giving $P = g$ (rejected, since $P(11) \\\\neq 201$)\\n- If $a < 2$: discriminant $\\\\leq 0$ gives $b = -2a$\\n\\n## Determining $P(x)$\\n\\nBoth constraints force $b = -2a$ with $1 < a < 2$. From $P(1) = 1$:\\n$$a - 2a + c = 1 \\\\implies c = 1 + a$$\\n\\nTherefore: $P(x) = ax^2 - 2ax + (1+a)$\\n\\n**Verification with bounds:** \\n- $P(x) - f(x) = (a-1)(x-1)^2 \\\\geq 0$ ✓\\n- $g(x) - P(x) = (2-a)(x-1)^2 \\\\geq 0$ ✓\\n\\n## Using $P(11) = 181$\\n\\n$$P(11) = 121a - 22a + 1 + a = 100a + 1 = 181$$\\n$$a = \\\\frac{180}{100} = \\\\frac{9}{5}$$\\n\\nThis satisfies $1 < \\\\frac{9}{5} < 2$. ✓\\n\\n## Computing $P(16)$\\n\\n$$P(x) = \\\\frac{9}{5}x^2 - \\\\frac{18}{5}x + \\\\frac{14}{5}$$\\n\\n$$P(16) = \\\\frac{9(256) - 18(16) + 14}{5} = \\\\frac{2304 - 288 + 14}{5} = \\\\frac{2030}{5} = 406$$\\n\\n**Verification:** $P(11) = \\\\frac{9(121) - 18(11) + 14}{5} = \\\\frac{1089 - 198 + 14}{5} = \\\\frac{905}{5} = 181$ ✓\\n\\n#### 406\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"406\", \"reference_number\": \"406\", \"raw_tail\": \" 288 + 14}{5} = \\\\frac{2030}{5} = 406$$\\n\\n**Verification:** $P(11) = \\\\frac{9(121) - 18(11) + 14}{5} = \\\\frac{1089 - 198 + 14}{5} = \\\\frac{905}{5} = 181$ ✓\\n\\n#### 406\"}"
+  },
+  "timings": {
+    "agent_s": 25.961,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a quadratic polynomial $P(x)$ sandwiched between two specific quadratics.\\n\\n## Se' attempts=1"
+  ]
+}

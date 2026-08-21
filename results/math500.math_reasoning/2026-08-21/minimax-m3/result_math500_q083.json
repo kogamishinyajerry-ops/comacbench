@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q083",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find $x$ where $3^{2x} + 19 = 10^x$.\\n\\n## Setting Up the Equation\\n\\nSince $3^{2x} = (3^2)^x = 9^x$, I can rewrite the equation as:\\n$$9^x + 19 = 10^x \\\\quad \\\\Longleftrightarrow \\\\quad 10^x - 9^x = 19$$\\n\\n## Testing Integer Values\\n\\n**For $x = 1$:** $10 - 9 = 1 \\\\neq 19$\\n\\n**For $x = 2$:** $100 - 81 = 19$ ✓\\n\\nSo $x = 2$ works: $3^{4} + 19 = 81 + 19 = 100 = 10^2$ ✓\\n\\n## Proving Uniqueness\\n\\nDefine $f(x) = 10^x - 9^x - 19$.\\n\\n**For $x \\\\leq 0$:** Since $10^x < 9^x$ (as $10 > 9$), I have $f(x) = 10^x - 9^x - 19 < 0$. No solutions exist.\\n\\n**For $x > 0$:** The derivative is:\\n$$f'(x) = 10^x \\\\ln 10 - 9^x \\\\ln 9$$\\n\\nSince $10^x > 9^x$ and $\\\\ln 10 > \\\\ln 9 > 0$, we have $f'(x) > 0$ for all $x > 0$.\\n\\nThis means $f$ is **strictly increasing** on $(0, \\\\infty)$, so $f(x) = 0$ has exactly one solution there.\\n\\nSince $f(1) = -18 < 0$ and $f(2) = 0$, and $f(3) = 252 > 0$, the unique solution is $x = 2$.\\n\\n#### 2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\", \"reference_number\": \"2\", \"raw_tail\": \"0, \\\\infty)$, so $f(x) = 0$ has exactly one solution there.\\n\\nSince $f(1) = -18 < 0$ and $f(2) = 0$, and $f(3) = 252 > 0$, the unique solution is $x = 2$.\\n\\n#### 2\"}"
+  },
+  "timings": {
+    "agent_s": 14.07,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find $x$ where $3^{2x} + 19 = 10^x$.\\n\\n## Setting Up the Equation\\n\\nSince $3^{2x} = (3^' attempts=1"
+  ]
+}

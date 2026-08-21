@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q316",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find integers $A$ and $B$ such that $10x^2 - x - 24 = (Ax - 8)(Bx + 3)$.\\n\\n## Setting Up the Equations\\n\\nExpanding the right side:\\n$$(Ax - 8)(Bx + 3) = ABx^2 + 3Ax - 8Bx - 24 = ABx^2 + (3A - 8B)x - 24$$\\n\\nComparing coefficients with $10x^2 - x - 24$:\\n- **Coefficient of $x^2$:** $AB = 10$\\n- **Coefficient of $x$:** $3A - 8B = -1$\\n- **Constant term:** $-24$ ✓\\n\\n## Finding $A$ and $B$\\n\\nI need integer pairs where $AB = 10$. Testing $(A, B) = (5, 2)$:\\n$$3(5) - 8(2) = 15 - 16 = -1 \\\\checkmark$$\\n\\n**Verification:** $(5x - 8)(2x + 3) = 10x^2 + 15x - 16x - 24 = 10x^2 - x - 24$ ✓\\n\\n## Computing the Answer\\n\\n$$AB + B = (5)(2) + 2 = 10 + 2 = 12$$\\n\\n#### 12\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"12\", \"reference_number\": \"12\", \"raw_tail\": \"ark$$\\n\\n**Verification:** $(5x - 8)(2x + 3) = 10x^2 + 15x - 16x - 24 = 10x^2 - x - 24$ ✓\\n\\n## Computing the Answer\\n\\n$$AB + B = (5)(2) + 2 = 10 + 2 = 12$$\\n\\n#### 12\"}"
+  },
+  "timings": {
+    "agent_s": 7.885,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find integers $A$ and $B$ such that $10x^2 - x - 24 = (Ax - 8)(Bx + 3)$.\\n\\n## Setting ' attempts=1"
+  ]
+}

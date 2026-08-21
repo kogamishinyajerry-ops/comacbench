@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q212",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find the number of questions Frank answered correctly.\\n\\n## Setting Up Variables\\n\\nLet me define:\\n- $c$ = number of correct answers\\n- $i$ = number of incorrect answers  \\n- $u$ = number of unanswered questions\\n\\n## Setting Up Equations\\n\\nFrom the problem, I can establish three equations:\\n\\n**Equation 1** (questions answered):\\n$$c + i = 80$$\\n\\n**Equation 2** (total questions):\\n$$c + i + u = 100$$\\n\\n**Equation 3** (total score):\\n$$5c - 2i = 232$$\\n\\n## Solving the System\\n\\nFrom Equation 1: $i = 80 - c$\\n\\nSubstituting into Equation 3:\\n$$5c - 2(80 - c) = 232$$\\n$$5c - 160 + 2c = 232$$\\n$$7c = 392$$\\n$$c = 56$$\\n\\n## Verification\\n\\n- Correct: $56$, Incorrect: $80 - 56 = 24$, Unanswered: $100 - 80 = 20$\\n- Score: $5(56) - 2(24) = 280 - 48 = 232$ ✓\\n\\n\\\\boxed{56}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"56\", \"reference_number\": \"56\", \"raw_tail\": \"2$$\\n$$c = 56$$\\n\\n## Verification\\n\\n- Correct: $56$, Incorrect: $80 - 56 = 24$, Unanswered: $100 - 80 = 20$\\n- Score: $5(56) - 2(24) = 280 - 48 = 232$ ✓\\n\\n\\\\boxed{56}\"}"
+  },
+  "timings": {
+    "agent_s": 7.168,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find the number of questions Frank answered correctly.\\n\\n## Setting Up Variables\\n\\nLet ' attempts=1"
+  ]
+}

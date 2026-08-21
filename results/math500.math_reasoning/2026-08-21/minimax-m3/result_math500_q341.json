@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q341",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Looking at this problem, I need to find a number $x$ such that $x$ equals one less than twice its reciprocal.\\n\\n## Setting Up the Equation\\n\\nThe condition \\\"one less than twice its reciprocal\\\" translates to:\\n$$x = 2 \\\\cdot \\\\frac{1}{x} - 1$$\\n\\n## Solving the Equation\\n\\nMultiplying both sides by $x$:\\n$$x^2 = 2 - x$$\\n\\nRearranging:\\n$$x^2 + x - 2 = 0$$\\n\\nFactoring:\\n$$(x+2)(x-1) = 0$$\\n\\nThis gives solutions $x = 1$ or $x = -2$.\\n\\n## Verification\\n\\n**For $x = 1$:** Twice its reciprocal is $2 \\\\cdot \\\\frac{1}{1} = 2$. One less than $2$ is $1$. ✓\\n\\n**For $x = -2$:** Twice its reciprocal is $2 \\\\cdot \\\\frac{1}{-2} = -1$. One less than $-1$ is $-2$. ✓\\n\\n## Answer\\n\\nThe smallest number is $-2$.\\n\\n#### -2\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-2\", \"reference_number\": \"-2\", \"raw_tail\": \"s $1$. ✓\\n\\n**For $x = -2$:** Twice its reciprocal is $2 \\\\cdot \\\\frac{1}{-2} = -1$. One less than $-1$ is $-2$. ✓\\n\\n## Answer\\n\\nThe smallest number is $-2$.\\n\\n#### -2\"}"
+  },
+  "timings": {
+    "agent_s": 6.972,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Looking at this problem, I need to find a number $x$ such that $x$ equals one less than twice its reciprocal.\\n\\n## Settin' attempts=1"
+  ]
+}

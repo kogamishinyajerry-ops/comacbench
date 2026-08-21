@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_160",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def do_algebra(operator, operand):\\n    \\\"\\\"\\\"\\n    Given two lists operator, and operand. The first list has basic algebra operations, and \\n    the second list is a list of integers. Use the two given lists to build the algebric \\n    expression and return the evaluation of this expression.\\n\\n    The basic algebra operations:\\n    Addition ( + ) \\n    Subtraction ( - ) \\n    Multiplication ( * ) \\n    Floor division ( // ) \\n    Exponentiation ( ** ) \\n\\n    Example:\\n    operator['+', '*', '-']\\n    array = [2, 3, 4, 5]\\n    result = 2 + 3 * 4 - 5\\n    => result = 9\\n\\n    Note:\\n        The length of operator list is equal to the length of operand list minus one.\\n        Operand is a list of of non-negative integers.\\n        Operator list has at least one operator, and operand list has at least two operands.\\n\\n    \\\"\\\"\\\"\\n    # Build the algebraic expression as a string\\n    expression = str(operand[0])\\n    for i in range(len(operator)):\\n        expression += operator[i] + str(operand[i + 1])\\n    \\n    # Evaluate the expression using Python's eval (respects standard operator precedence)\\n    return eval(expression)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 11.938,
+    "setup_s": 0.0,
+    "grade_s": 0.157
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

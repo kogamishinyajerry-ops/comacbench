@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q092",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The probability that exactly 4 out of 7 islands have treasure, given each island independently has a probability of \\\\(\\\\frac{1}{5}\\\\) of having treasure, is given by the binomial probability formula:\\n\\n\\\\[\\nP(X=4) = \\\\binom{7}{4} \\\\left(\\\\frac{1}{5}\\\\right)^4 \\\\left(\\\\frac{4}{5}\\\\right)^3.\\n\\\\]\\n\\nCompute each part:\\n\\n\\\\[\\n\\\\binom{7}{4} = 35, \\\\quad \\\\left(\\\\frac{1}{5}\\\\right)^4 = \\\\frac{1}{625}, \\\\quad \\\\left(\\\\frac{4}{5}\\\\right)^3 = \\\\frac{64}{125}.\\n\\\\]\\n\\nThus,\\n\\n\\\\[\\nP = 35 \\\\cdot \\\\frac{1}{625} \\\\cdot \\\\frac{64}{125} = \\\\frac{35 \\\\times 64}{625 \\\\times 125} = \\\\frac{2240}{78125}.\\n\\\\]\\n\\nReduce the fraction by dividing numerator and denominator by their greatest common divisor, which is 5:\\n\\n\\\\[\\n\\\\frac{2240 \\\\div 5}{78125 \\\\div 5} = \\\\frac{448}{15625}.\\n\\\\]\\n\\nNo further simplification is possible.\\n\\nTherefore, the probability is \\\\(\\\\frac{448}{15625}\\\\).\\n\\n\\\\boxed{\\\\frac{448}{15625}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{448}{15625}\", \"reference_number\": \"\\\\frac{448}{15625}\", \"raw_tail\": \"}{78125 \\\\div 5} = \\\\frac{448}{15625}.\\n\\\\]\\n\\nNo further simplification is possible.\\n\\nTherefore, the probability is \\\\(\\\\frac{448}{15625}\\\\).\\n\\n\\\\boxed{\\\\frac{448}{15625}}\"}"
+  },
+  "timings": {
+    "agent_s": 24.209,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The probability that exactly 4 out of 7 islands have treasure, given each island independently has a probability of \\\\(\\\\f' attempts=1"
+  ]
+}

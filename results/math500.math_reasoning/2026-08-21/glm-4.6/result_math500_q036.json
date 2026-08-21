@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q036",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the equation \\\\((x - 3)^3 + (x - 7)^3 = (2x - 10)^3\\\\).\\n\\nLet \\\\(a = x - 3\\\\) and \\\\(b = x - 7\\\\). Then \\\\(a + b = (x-3)+(x-7) = 2x - 10\\\\). The equation becomes\\n\\n\\\\[\\na^3 + b^3 = (a+b)^3.\\n\\\\]\\n\\nRecall the identity \\\\((a+b)^3 = a^3 + b^3 + 3ab(a+b)\\\\). Substituting,\\n\\n\\\\[\\na^3 + b^3 = a^3 + b^3 + 3ab(a+b).\\n\\\\]\\n\\nSubtract \\\\(a^3 + b^3\\\\) from both sides:\\n\\n\\\\[\\n0 = 3ab(a+b).\\n\\\\]\\n\\nThus \\\\(ab(a+b) = 0\\\\). Hence at least one factor is zero:\\n\\n- \\\\(a = 0\\\\) gives \\\\(x - 3 = 0 \\\\Rightarrow x = 3\\\\).\\n- \\\\(b = 0\\\\) gives \\\\(x - 7 = 0 \\\\Rightarrow x = 7\\\\).\\n- \\\\(a + b = 0\\\\) gives \\\\(2x - 10 = 0 \\\\Rightarrow x = 5\\\\).\\n\\nAll three values satisfy the original equation. Therefore, the roots are \\\\(x = 3, 5, 7\\\\).\\n\\n\\\\[\\n\\\\boxed{3,5,7}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3,5,7\", \"reference_number\": \"3, 5, 7\", \"raw_tail\": \"b = 0\\\\) gives \\\\(2x - 10 = 0 \\\\Rightarrow x = 5\\\\).\\n\\nAll three values satisfy the original equation. Therefore, the roots are \\\\(x = 3, 5, 7\\\\).\\n\\n\\\\[\\n\\\\boxed{3,5,7}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 39.164,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the equation \\\\((x - 3)^3 + (x - 7)^3 = (2x - 10)^3\\\\).\\n\\nLet \\\\(a = x - 3\\\\) and \\\\(b = x - 7\\\\). Then \\\\(a + b = ' attempts=1"
+  ]
+}

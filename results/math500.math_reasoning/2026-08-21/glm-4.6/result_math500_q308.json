@@ -1,0 +1,38 @@
+{
+  "task_id": "math500_q308",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"A regular tetrahedron $ABCD$ has side length $s=2$. We consider the plane $P$ parallel to edges $AB$ and $CD$ and lying halfway between them. This plane cuts the tetrahedron into two congruent polyhedra. We want to find the surface area of one of these pieces.\\n\\nLet the position vectors of the vertices be $\\\\mathbf{A}, \\\\mathbf{B}, \\\\mathbf{C}, \\\\mathbf{D}$.\\nThe plane is parallel to $\\\\mathbf{B}-\\\\mathbf{A}$ and $\\\\mathbf{D}-\\\\mathbf{C}$.\\nSince $AB$ and $CD$ are skew, the vector connecting any point on $AB$ to any point on $CD$ is not necessarily perpendicular to them. However, in a regular tetrahedron, the line connecting the midpoints of $AB$ and $CD$ is perpendicular to both $AB$ and $CD$.\\nLet $M$ be the midpoint of $AB$ and $N$ be the midpoint of $CD$. The vector $\\\\mathbf{N}-\\\\mathbf{M}$ is perpendicular to the plane $P$. The plane $P$ lies halfway between the lines $AB$ and $CD$. Since the distance between the lines is the length of segment $MN$, and $P$ is halfway, $P$ passes through the midpoint of $MN$. Let's call this point $O$. Thus $O$ is the center of the tetrahedron.\\n\\nThe plane $P$ intersects the 6 edges of the tetrahedron.\\n1.  It cuts $AB$ at its midpoint $M$. (Since $P$ is halfway between the lines, and $M$ is on $AB$, the closest point to $M$ on $CD$ is $N$. The plane passes through the midpoint of $MN$, but also cuts $AB$. Actually, the plane is parallel to $AB$ and contains the center $O$. Since $O$ lies in the plane connecting midpoints, and $AB$ is parallel to $CD$, the plane containing $O$ and parallel to $AB$ must intersect the segment connecting midpoints of $AB$ and $CD$ at $O$. Wait, $O$ is the midpoint of $MN$. So $P$ passes through $O$. Since $P$ is parallel to $AB$, and $AB$ passes through $M$, the\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": null, \"reference_number\": \"1+2\\\\sqrt{3}\", \"raw_tail\": \"midpoints of $AB$ and $CD$ at $O$. Wait, $O$ is the midpoint of $MN$. So $P$ passes through $O$. Since $P$ is parallel to $AB$, and $AB$ passes through $M$, the\"}"
+  },
+  "timings": {
+    "agent_s": 370.426,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='A regular tetrahedron $ABCD$ has side length $s=2$. We consider the plane $P$ parallel to edges $AB$ and $CD$ and lying ' attempts=2"
+  ]
+}

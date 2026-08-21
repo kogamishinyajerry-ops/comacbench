@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q062",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let\\n\\\\[\\nA=\\\\begin{pmatrix}2&3\\\\\\\\0&-2\\\\end{pmatrix}.\\n\\\\]\\nThe squared operator norm of \\\\(A\\\\) is the largest eigenvalue of \\\\(A^TA\\\\):\\n\\\\[\\nA^TA=\\n\\\\begin{pmatrix}\\n4&6\\\\\\\\\\n6&13\\n\\\\end{pmatrix}.\\n\\\\]\\nIts characteristic polynomial is\\n\\\\[\\n\\\\det(A^TA-\\\\lambda I)\\n=(4-\\\\lambda)(13-\\\\lambda)-36\\n=\\\\lambda^2-17\\\\lambda+16\\n=(\\\\lambda-1)(\\\\lambda-16).\\n\\\\]\\nThus the largest singular value is \\\\(\\\\sqrt{16}=4\\\\), so \\\\(C=4\\\\) works.\\n\\nIt is also the smallest possible constant: for\\n\\\\[\\n\\\\mathbf v=\\\\begin{pmatrix}1\\\\\\\\2\\\\end{pmatrix},\\n\\\\qquad\\nA\\\\mathbf v=\\\\begin{pmatrix}8\\\\\\\\-4\\\\end{pmatrix},\\n\\\\]\\nand hence\\n\\\\[\\n\\\\frac{\\\\|A\\\\mathbf v\\\\|}{\\\\|\\\\mathbf v\\\\|}\\n=\\\\frac{\\\\sqrt{64+16}}{\\\\sqrt{1+4}}\\n=4.\\n\\\\]\\nTherefore every admissible \\\\(C\\\\) must be at least \\\\(4\\\\).\\n\\n#### 4\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"4\", \"reference_number\": \"4\", \"raw_tail\": \"},\\n\\\\]\\nand hence\\n\\\\[\\n\\\\frac{\\\\|A\\\\mathbf v\\\\|}{\\\\|\\\\mathbf v\\\\|}\\n=\\\\frac{\\\\sqrt{64+16}}{\\\\sqrt{1+4}}\\n=4.\\n\\\\]\\nTherefore every admissible \\\\(C\\\\) must be at least \\\\(4\\\\).\\n\\n#### 4\"}"
+  },
+  "timings": {
+    "agent_s": 22.576,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let\\n\\\\[\\nA=\\\\begin{pmatrix}2&3\\\\\\\\0&-2\\\\end{pmatrix}.\\n\\\\]\\nThe squared operator norm of \\\\(A\\\\) is the largest eigenvalue of \\\\(A^T' attempts=1"
+  ]
+}
