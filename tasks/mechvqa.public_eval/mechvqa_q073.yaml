@@ -1,0 +1,57 @@
+id: mechvqa_q073
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q073.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/1b/1b1c701621bce10b1cd7fe31578d89e06d618eb9.png
+    digest: ced045850f47546152e8cb98e984d688e8c425c2fd659ad8f1fb7c7c7a54e342
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 478
+  reference_answer: The annotation "2-C2" in the front view indicates that this part
+    has **2 chamfers at 45°**, with each chamfer having two perpendicular sides of
+    length **2 mm** (i.e., both the chamfer width and height are 2 mm). This annotation
+    is located at the end of the stepped shaft on the left side, corresponding to
+    two symmetrical chamfer features.
+  capability: Recognition
+  difficulty: Easy
+  subcategory: Dimension & Annotation
+  language: 英文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

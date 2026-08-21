@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_shaft_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Dimensions (mm)\\nd1 = 36.0   # Segment 1 diameter\\nd2 = 24.0   # Segment 2 diameter\\nd3 = 14.0   # Segment 3 diameter\\ndbore = 6.0 # Central bore diameter\\nr1 = d1 / 2\\nr2 = d2 / 2\\nr3 = d3 / 2\\nrbore = dbore / 2\\n\\nh1 = 25.0   # Segment 1 height\\nh2 = 30.0   # Segment 2 height\\nh3 = 18.0   # Segment 3 height\\ntotal_h = h1 + h2 + h3  # 73.0\\n\\n# Build stepped shaft and cut central bore in one fluent chain\\nresult = (\\n    cq.Workplane(\\\"XY\\\")\\n    .circle(r1).extrude(h1)                                # Segment 1\\n    .faces(\\\">Z\\\").workplane().circle(r2).extrude(h2)        # Segment 2 stacked on Segment 1\\n    .faces(\\\">Z\\\").workplane().circle(r3).extrude(h3)        # Segment 3 stacked on Segment 2\\n    .faces(\\\">Z\\\").workplane().circle(rbore).cutThruAll()    # Central through bore\\n)\\n\\n# Export final single solid\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.58}, {\"exit\": 0, \"duration_s\": 2.57}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 39725.439101, \"bbox_len\": [36.0, 36.0, 73.000001], \"n_faces\": 8, \"n_solids\": 1, \"cyl_radii\": [3.0, 7.0, 12.0, 18.0]}, \"reference\": {\"volume_mm3\": 39725.439101, \"bbox_len\": [36.0, 36.0, 73.000001]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 39725.439101, \"ref\": 39725.439101}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 36.0, \"ref\": 36.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 36.0, \"ref\": 36.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 73.000001, \"ref\": 73.000001}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 3.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 18.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 12.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 7.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 62.322,
+    "setup_s": 0.0,
+    "grade_s": 5.158
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=861",
+    "run1 exit=0 2.58s",
+    "run2 exit=0 2.57s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

@@ -1,0 +1,58 @@
+id: mechvqa_q168
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q168.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/c9/c95859a4d64aff8b170ea8ed39c9011dd0ca9474.jpg
+    digest: 9257ad431e8bfafb87b1ce2ef73633636404bee6ca6e5bcd6351ad1d4b69cb8a
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 1126
+  reference_answer: "当 d1 = 52 mm 时，图纸对应的 d4 为 37 mm，二者的尺寸差值为 **15 mm**（直径差），相当于 **7.5 mm**\
+    \ 的半径差。该差值直接反映了零件主体外径与中间台阶外径之间的环形凸台（环形台阶）结构：\n\n1. **几何意义**：形成一个径向厚度为 7.5 mm 的环形凸缘，构成零件边缘的台阶宽度。\n\
+    2. **功能作用**：\n   - **轴向定位**：凸台提供与外壳或盖板的接触基准，确保装配时的轴向位置准确。\n   - **装配间隙控制**：通过固定的\
+    \ 15 mm 差值，为与相邻部件（如可拆式盖、夹头等）预留合适的配合间隙，防止过盈或松动。\n   - **结构强度**：环形凸台增加边缘刚度，提高抗扭、抗弯能力，适用于需要承受转矩的旋钮或类似零件。\n\
+    3. **设计一致性**：在参数表中，d1 为 62 mm 时对应 d4 为 47 mm，差值同样为 15 mm，说明该差值是固定的设计参数，用于保持不同规格零件的比例和装配兼容性。\n\
+    \n**结论**：尺寸差值为 15 mm，体现了零件的环形台阶结构，关键作用包括轴向定位、装配配合及结构强化，是保证零件功能可靠的核心几何特征。"
+  capability: Reasoning
+  difficulty: Hard
+  subcategory: Geometric Calculation
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

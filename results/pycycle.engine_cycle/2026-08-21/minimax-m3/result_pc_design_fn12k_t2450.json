@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# ====================================================================\\n# Design point: SL, Fn_target=12000 lbf, T4=2450 degR, OPR=14.0\\n# Simple turbojet: Inlet + AXI5 Compressor + Combustor + LPT2269 Turbine + CD Nozzle + Shaft\\n# Thermo: AIR_JETA_TAB_SPEC (tabular)\\n# ====================================================================\\n\\nFN_DES = 12000.0   # lbf, target net thrust\\nT4_DES = 2450.0    # degR, combustor exit (turbine inlet) temperature\\nOPR_DES = 14.0     # compressor pressure ratio\\nMN = 0.0           # Mach number (static, sea-level)\\nALT = 0.0          # ft, sea level\\n\\n# Tabular thermo package\\nthermo = pyc.thermo.tabular.TabularThermo('AIR_JETA_TAB_SPEC')\\n\\n# ----------------------------------------------------------------\\n# Build the cycle as a Group so we can wrap it with a BalanceComp\\n# ----------------------------------------------------------------\\nprob = om.Problem()\\ncycle = prob.model.add_subsystem('cycle', om.Group())\\n\\n# Components\\ncycle.add_subsystem('fc',    pyc.FlightCondition(thermo_data=thermo))\\ncycle.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo))\\ncycle.add_subsystem('comp',  pyc.Compressor(map_data=pyc.AXI5,    design=True,\\n                                            thermo_data=thermo))\\ncycle.add_subsystem('comb',  pyc.Combustor(thermo_data=thermo))\\ncycle.add_subsystem('turb',  pyc.Turbine(map_data=pyc.LPT2269, design=True,\\n                                         thermo_data=thermo))\\ncycle.add_subsystem('nozz',  pyc.Nozzle(thermo_data=thermo))\\ncycle.add_subsystem('shaft', pyc.Shaft())\\n\\n# Flow-station connections\\ncycle.connect('fc.Fl_O',    'inlet.Fl_I')\\ncycle.connect('inlet.Fl_O', 'comp.Fl_I')\\ncycle.connect('comp.Fl_O',  'comb.Fl_I')\\ncycle.connect('comb.Fl_O',  'turb.Fl_I')\\ncycle.connect('turb.Fl_O',  'nozz.Fl_I')\\n\\n# Mechanical (shaft torque balance)\\ncycle.connect('comp.trq', 'shaft.trq_in')\\ncycle.connect('turb.trq', 'shaft.trq_out')\\n\\n# Shaft-computed Nmech drives the rotating machinery\\ncycle.connect('shaft.Nmech', 'comp.Nmech')\\ncycle.connect('shaft.Nmech', 'inlet.Nmech')\\ncycle.connect('shaft.Nmech', 'turb.Nmech')\\n\\n# ----------------------------------------------------------------\\n# Implicit balance: pick the inlet mass-flow W so that Fn = 12000 lbf\\n# ----------------------------------------------------------------\\nbal = om.BalanceComp()\\nbal.add_balance('W', val=100.0, units='lbm/s', lower=10.0, upper=600.0)\\nprob.model.add_subsystem('FN_bal', bal)\\n\\nprob.model.connect('cycle.nozz.Fn', 'FN_bal.lhs', src_indices=[0])\\nprob.model.connect('FN_bal.W',      'cycle.fc.W')\\n\\n# Constant target for the balance (rhs)\\nprob.model.add_subsystem('FN_target',\\n                         om.IndepVarComp('FN', val=FN_DES, units='lbf'))\\nprob.model.connect('FN_target.FN', 'FN_bal.rhs')\\n\\n# ----------------------------------------------------------------\\n# Input defaults (flight condition, component knobs)\\n# ----------------------------------------------------------------\\nprob.model.set_input_defaults('cycle.fc.MN',              MN)\\nprob.model.set_input_defaults('cycle.fc.alt',            ALT)\\nprob.model.set_input_defaults('cycle.fc.W',              100.0)\\nprob.model.set_input_defaults('cycle.inlet.ram_recovery', 1.0)\\nprob.model.set_input_defaults('cycle.shaft.Nmech',       8000.0, units='rpm')\\nprob.model.set_input_defaults('cycle.comb.dPqP',         0.05)\\nprob.model.set_input_defaults('cycle.comb.turbFuelInj_eta', 1.0)\\nprob.model.set_input_defaults('cycle.comb.temperature',  T4_DES)\\nprob.model.set_input_defaults('cycle.nozz.Cv',           0.99)\\n\\n# ----------------------------------------------------------------\\n# Solver\\n# ----------------------------------------------------------------\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['maxiter'] = 100\\nprob.model.nonlinear_solver.options['iprint']   = 2\\nprob.model.linear_solver = om.DirectSolver()\\n\\nprob.setup()\\n\\n# Burn-in iteration: simple successive subs\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_0c353dl3/solve.py\\\", line 19, in <module>\\n    thermo = pyc.thermo.tabular.TabularThermo('AIR_JETA_TAB_SPEC')\\n             ^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'thermo'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 308.734,
+    "setup_s": 0.0,
+    "grade_s": 1.081
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.08s"
+  ]
+}

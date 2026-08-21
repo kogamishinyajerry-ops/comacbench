@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_002",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Create the base plate: 100 (X) x 60 (Y) x 8 (Z)\\n# Centered on origin in XY, base face at z=0, thickness along Z\\nplate = cq.Workplane(\\\"XY\\\").box(100, 60, 8, centered=(True, True, False))\\n\\n# Select the four vertical edges (parallel to Z axis)\\nvertical_edges = plate.edges(\\\"|Z\\\").vals()\\n\\n# Fillet all four vertical edges with radius 8\\nresult = plate.fillet(8, vertical_edges)\\n\\n# Add four through holes of diameter 6, axes parallel to Z, through full thickness\\n# Centered at (+/-35, +/-15)\\nresult = (result.faces(\\\">Z\\\").workplane()\\n          .pushpoints([(35, 15), (-35, 15), (35, -15), (-35, -15)])\\n          .circle(3)\\n          .cutThruAll())\\n\\n# Export the final single solid to part.step in the current working directory\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_hui2hj9z/model.py\\\", line 11, in <module>\\n    result = plate.fillet(8, vertical_edges)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nTypeError: Workplane.fillet() takes 2 positional arguments but 3 were given\\n\"}"
+  },
+  "timings": {
+    "agent_s": 190.566,
+    "setup_s": 0.0,
+    "grade_s": 3.059
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=783",
+    "run1 exit=1 3.06s"
+  ]
+}

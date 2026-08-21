@@ -42,20 +42,30 @@ const RUNNER_OF_ADAPTER = {
   code_exec: "runners.code_exec",
   simulation_agent: "runners.simulation_agent",
   field_prediction: "runners.field_prediction",
+  design_artifact: "runners.design_artifact",
 };
-// 解释器特例：pycycle 需要 .venv 的 om-pycycle 钉子栈；其余系统 python3 即可
-const INTERP_OF_RID = { "pycycle.engine_cycle": path.join(HOME, ".venv/bin/python") };
+// 解释器特例：各钉子栈 venv（PROVENANCE 见各 data/*/ 目录）；其余系统 python3
+// 2026-08-21：.venv 只留 om-pycycle；aviary 1.0.1 栈装 .venv-aviary；cadquery/OCP 装 .venv-cad
+const INTERP_OF_RID = {
+  "pycycle.engine_cycle": path.join(HOME, ".venv/bin/python"),
+  "aviary.transport_mission": path.join(HOME, ".venv-aviary/bin/python"),
+  "cadgen.local_validity": path.join(HOME, ".venv-cad/bin/python"),
+};
 // 环境要求提示（起跑前检查并如实报告，不静默降级）
 const ENV_NEEDS = {
   "cfdllm.foam_basic": { docker: true, note: "判分需 docker OpenFOAM（场 NMSE 比对）" },
   "pycycle.engine_cycle": { venv: true, note: "需仓库 .venv（om-pycycle 钉子栈）" },
+  "aviary.transport_mission": { venv: true, note: "需仓库 .venv-aviary（aviary 1.0.1 + openmdao 3.45 栈）" },
+  "cadgen.local_validity": { venv: true, note: "需仓库 .venv-cad（cadquery 2.8 + OCP，判分侧几何检查）" },
 };
 // provider → keychain service（起跑时注入 env；离线 provider 不需要）
+// glmvl = GLM 视觉通道（multimodal_only 任务准入；免费档 glm-4v-flash 实测可用）
 const KEYCHAIN_OF_PROVIDER = {
   glm: { env: "GLM_API_KEY", service: "glm-api-key" },
+  glmvl: { env: "GLM_API_KEY", service: "glm-api-key" },
   minimax: { env: "MINIMAX_M3_API_KEY", service: "minimax-m3-api-key" },
 };
-const PROVIDERS = ["stub", "oracle", "glm", "minimax", "openai_compat", "ml_superwing", "ml_hilift"];
+const PROVIDERS = ["stub", "oracle", "glm", "glmvl", "minimax", "openai_compat", "ml_superwing", "ml_hilift"];
 
 // ---------- 小工具 ----------
 
@@ -133,10 +143,15 @@ function envCheck(rid, provider) {
 }
 
 function keychainKey(service) {
-  const r = spawnSync("security",
-    ["find-generic-password", "-a", os.userInfo().username, "-s", service, "-w"],
-    { encoding: "utf8", timeout: 8000 });
-  return r.status === 0 ? r.stdout.trim() : null;
+  // 2026-08-21 实测：security 偶发返回 rc=0 但 stdout 为空（ACL 竞态）——
+  // 空串等于无密钥（注入后全部调用 401），重试 3 次仍空才判缺失。
+  for (let i = 0; i < 3; i++) {
+    const r = spawnSync("security",
+      ["find-generic-password", "-a", os.userInfo().username, "-s", service, "-w"],
+      { encoding: "utf8", timeout: 8000 });
+    if (r.status === 0 && r.stdout && r.stdout.trim()) return r.stdout.trim();
+  }
+  return null;
 }
 
 /** 从 result JSON 重算 gate / 失败模式分布 + 均分 */
@@ -212,7 +227,7 @@ export function apply(ctx) {
       "LLM 全量基线是小时级长跑——起跑后用 comac_run_status 轮询。",
     parameters: { type: "object", properties: {
       registry_id: { type: "string", description: "目标基准" },
-      provider: { type: "string", description: "stub | oracle | glm | minimax | openai_compat | ml_superwing | ml_hilift" },
+      provider: { type: "string", description: "stub | oracle | glm | glmvl | minimax | openai_compat | ml_superwing | ml_hilift" },
       model: { type: "string", description: "可选: 模型名(缺省用 provider 预设)" },
       date: { type: "string", description: "可选: 结果日期目录(缺省当天, 如 2026-08-19)" },
       seed: { type: "integer", description: "缺省 0" },

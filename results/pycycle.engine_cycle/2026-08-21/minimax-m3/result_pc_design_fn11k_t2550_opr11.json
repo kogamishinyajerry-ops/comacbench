@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn11k_t2550_opr11",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef build_turbojet():\\n    prob = om.Problem()\\n\\n    # Use TABULAR thermodynamic library with AIR_JETA_TAB_SPEC\\n    prob.model.add_subsystem(\\n        \\\"flow\\\", pyc.Cycle(thermo_method=\\\"TABULAR\\\", thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n    )\\n\\n    # Cycle components\\n    indep = prob.model.add_subsystem(\\\"indep\\\", om.IndepVarComp())\\n    # Inlet\\n    prob.model.add_subsystem(\\\"inlet\\\", pyc.Inlet())\\n    # Compressor\\n    prob.model.add_subsystem(\\\"comp\\\", pyc.AXI5())\\n    # Combustor\\n    prob.model.add_subsystem(\\\"burn\\\", pyc.Combustor())\\n    # Turbine\\n    prob.model.add_subsystem(\\\"turb\\\", pyc.LPT2269())\\n    # Nozzle\\n    prob.model.add_subsystem(\\\"noz\\\", pyc.CDnozzle())\\n    # Shaft\\n    prob.model.add_subsystem(\\\"shaft\\\", pyc.Shaft())\\n\\n    # Connect flow path\\n    pyc.connect_flow(prob.model, \\\"flow.s_in0\\\", \\\"inlet.Fl_I\\\")\\n    pyc.connect_flow(prob.model, \\\"inlet.Fl_O\\\", \\\"comp.Fl_I\\\")\\n    pyc.connect_flow(prob.model, \\\"comp.Fl_O\\\", \\\"burn.Fl_I\\\")\\n    pyc.connect_flow(prob.model, \\\"burn.Fl_O\\\", \\\"turb.Fl_I\\\")\\n    pyc.connect_flow(prob.model, \\\"turb.Fl_O\\\", \\\"noz.Fl_I\\\")\\n\\n    # Connect shaft\\n    prob.model.connect(\\\"comp.trq\\\", \\\"shaft.trq_in\\\")\\n    prob.model.connect(\\\"turb.trq\\\", \\\"shaft.trq_out\\\")\\n\\n    # Set up inlet conditions - SL, MN~0, alt 0 ft\\n    prob.model.set_input_defaults(\\\"inlet.MN\\\", 0.001)\\n    prob.model.set_input_defaults(\\\"inlet.alt\\\", 0.0, units=\\\"ft\\\")\\n\\n    # Design targets\\n    prob.model.add_subsystem(\\\"fc\\\", pyc.Fn_Static())\\n    prob.model.add_subsystem(\\\"wburn\\\", pyc.WBurn())\\n\\n    # Net thrust = nozzle thrust - inlet ram drag\\n    prob.model.connect(\\\"inlet.F_ram\\\", \\\"fc.F_ram\\\")\\n    prob.model.connect(\\\"noz.Fg\\\", \\\"fc.Fg\\\")\\n\\n    # Fuel flow\\n    prob.model.connect(\\\"burn.Wfuel\\\", \\\"wburn.Wfuel\\\")\\n\\n    # Parameterize\\n    prob.model.add_subsystem(\\\"param\\\", om.IndepVarComp())\\n    prob.model.connect(\\\"noz.PR\\\", \\\"param.PR_noz\\\")\\n    prob.model.connect(\\\"burn.dPqP\\\", \\\"param.dPqP_burn\\\")\\n\\n    # Add balance\\n    prob.model.add_subsystem(\\\"bal\\\", pyc.Balance())\\n    prob.model.connect(\\\"bal.HP\\\", \\\"comp.map.HP\\\")\\n    prob.model.connect(\\\"bal.shaft_pwr\\\", \\\"shaft.pwr_out\\\")\\n    prob.model.connect(\\\"bal.Nmech\\\", \\\"shaft.Nmech\\\")\\n\\n    # Add pcm solver\\n    prob.model.add_subsystem(\\\"pcm\\\", pyc.PCM())\\n\\n    # Solver setup\\n    prob.setup()\\n\\n    # Set design point inputs\\n    prob[\\\"indep.OPR\\\"] = 11.0\\n    prob[\\\"indep.T4\\\"] = 2550.0  # degR\\n    prob[\\\"indep.Fn_target\\\"] = 11000.0  # lbf\\n    prob[\\\"indep.W\\\"] = 100.0  # initial guess\\n    prob[\\\"indep.turb_PR\\\"] = 4.0\\n    prob[\\\"indep.comp_PR\\\"] = 11.0\\n    prob[\\\"indep.burn_dPqP\\\"] = 0.05\\n    prob[\\\"indep.noz_PR\\\"] = 1.0\\n    prob[\\\"indep.Nmech\\\"] = 8000.0\\n\\n    return prob\\n\\n\\ndef solve_design(prob):\\n    # Use Newton solver for the cycle\\n    prob.model.set_solver_print(level=-1)\\n    prob.model.nonlinear_solver = om.NewtonSolver()\\n    prob.model.nonlinear_solver.options[\\\"atol\\\"] = 1e-8\\n    prob.model.nonlinear_solver.options[\\\"rtol\\\"] = 1e-8\\n    prob.model.nonlinear_solver.options[\\\"maxiter\\\"] = 50\\n    prob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\n    prob.model.linear_solver = om.DirectSolver()\\n\\n    # First solve the flow\\n    prob.run_model()\\n\\n\\ndef main():\\n    prob = build_turbojet()\\n\\n    # Need to set initial guesses for the design point\\n    # These will be set through the add_set_input calls\\n\\n    # First, define design inputs\\n    prob[\\\"indep.OPR\\\"] = 11.0\\n    prob[\\\"indep.T4\\\"] = 2550.0\\n    prob[\\\"indep.Fn_target\\\"] = 11000.0\\n    prob[\\\"indep.W\\\"] = 100.0\\n    prob[\\\"indep.comp_PR\\\"] = 11.0\\n    prob[\\\"indep.turb_PR\\\"] = 4.0\\n    prob[\\\"indep.burn_dPqP\\\"] = 0.05\\n    prob[\\\"indep.noz_PR\\\"] = 1.0\\n    prob[\\\"indep.Nmech\\\"] = 8000.0\\n\\n    solve_design(prob)\\n\\n    # Extract results\\n    Fn_lbf = float(prob[\\\"fc.Fn\\\"])\\n    Wfuel = float(prob[\\\"wburn.Wfuel\\\"])\\n    OPR = float(prob[\\\"indep.OPR\\\"])\\n    W = float(prob[\\\"indep.W\\\"])\\n    TSFC = Wfuel / Fn_lbf  # lbm/s / lbf\\n\\n    result = {\\n        \\\"Fn_lbf\\\": Fn_lbf,\\n        \\\"TSFC\\\": TSFC,\\n        \\\"OPR\\\": OPR,\\n        \\\"Wfuel_lbm_s\\\": Wfuel,\\n    }\\n\\n    with open(\\\"result.json\\\", \\\"w\\\") as f:\\n        json.dump(result, f, \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_w0230itz/solve.py\\\", line 140, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_w0230itz/solve.py\\\", line 101, in main\\n    prob = build_turbojet()\\n           ^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_w0230itz/solve.py\\\", line 19, in build_turbojet\\n    prob.model.add_subsystem(\\\"comp\\\", pyc.AXI5())\\n                                     ^^^^^^^^^^\\nTypeError: 'MapData' object is not callable\\n\"}"
+  },
+  "timings": {
+    "agent_s": 16.142,
+    "setup_s": 0.0,
+    "grade_s": 1.065
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

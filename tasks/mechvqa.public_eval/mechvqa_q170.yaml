@@ -1,0 +1,60 @@
+id: mechvqa_q170
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q170.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/47/47936b7583b6acda9fb2c3b12704ddd685d739ab.jpg
+    digest: 4e589e371046fd5342b4481d272d80540b8fdb9f98f07fd77de9fcdf01b31449
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 1131
+  reference_answer: "根据图纸参数表的数据，d₁ 与 h 并不存在近似的比例关系。具体分析如下：\n\n1. **关键数据计算**\n   -\
+    \ 当 d₁ = 30 mm 时，h = 28.5 mm，比例 h/d₁ = 28.5 / 30 ≈ **0.95**。\n   - 当 d₁ = 40 mm\
+    \ 时，h = 28 mm，比例 h/d₁ = 28 / 40 = **0.70**。\n   - 两组比例相差约 0.25（相对误差约 26%），远超工程中常接受的\
+    \ ±5%~10% 范围。\n\n2. **趋势矛盾**\n   - d₁ 从 30 mm 增加到 40 mm（+33%），而 h 却从 28.5 mm 下降到\
+    \ 28 mm（‑1.8%），表现为 **非正相关**，与正比例关系的基本特征相悖。\n   - 进一步查看其他规格（如 d₁=50 mm 时 h 仍为 28 mm，d₁=70 mm\
+    \ 时 h 突升至 43 mm），h 的变化并未随 d₁ 的线性变化而规律性变化。\n\n3. **工程意义**\n   - h 受螺纹配合长度、安装面厚度、操作空间等多因素约束，不能仅由\
+    \ d₁ 决定。\n\n**结论**：d₁ 与 h 没有近似的比例关系；以 d₁=30 mm 与 d₁=40 mm 为例，比例差异明显且趋势相反，说明 h\
+    \ 的取值需依据具体设计要求而独立确定，而非通过简单的比例推导。"
+  capability: Reasoning
+  difficulty: Hard
+  subcategory: Geometric Calculation
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

@@ -1,0 +1,63 @@
+id: mechvqa_q007
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q007.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/2e/2e5727a54475d036d990a13cd315d8375204806e.png
+    digest: 4f236625fb8589830caf85c75819db3a34292c5df92af7b360c2c277bd9bf159
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 52
+  reference_answer: '图5-72（配气盘）和图5-73（配气盘垫）在装配时应采用**粘合剂粘接**的方式。理由如下：
+
+    1. **技术要求明确**——图5-73的技术要求第3条直接规定“本件与配气盘用粘合剂粘接”。
+
+    2. **结构匹配**——两件均为圆形平面，外径Φ34，接触面大，定位孔（2×Φ4 通孔）仅用于对齐，无螺纹或销孔，适合粘接后固定。
+
+    3. **材料适配**——配气盘为 LY12 铝合金，经氧化处理提升表面附着力；配气盘垫为硬度 40‑45 HSD 的橡胶，金属‑橡胶组合常采用粘合剂实现可靠密封，避免螺栓等机械紧固导致橡胶变形或应力集中。
+
+    4. **排除其他方式**——橡胶无法焊接，图纸未提供螺纹、键槽等机械连接特征，且粘接能够满足气动系统的密封需求。
+
+    综上，粘合剂粘接是唯一符合设计意图、材料特性和功能要求的连接方式。'
+  capability: Reasoning
+  difficulty: Hard
+  subcategory: Assembly Relationship
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

@@ -14,6 +14,10 @@
                 base 读 GLM_BASE_URL（缺省 coding 端点），模型缺省 glm-4.6。
   minimax       MiniMax（api.minimaxi.com/v1，OpenAI 兼容）。key 依次读
                 MINIMAX_M3_API_KEY / MINIMAX_API_KEY，模型缺省 MiniMax-M3。
+  glmvl         GLM 视觉通道（bigmodel paas v4，OpenAI 兼容多模态）。key 依次读
+                GLMVL_API_KEY / GLM_API_KEY，模型缺省 glm-4v-flash（免费档，
+                2026-08-21 实测可用）；GLM-4.6V/4.5V 为有效名但账户欠费中，
+                充值后 --model 覆写升级。唯一 vlm=True 预设（multimodal 准入）。
   ml_superwing  superwing ML 正例基线（RF，几何+工况→系数），非被测 LLM。
   ml_hilift     hilift ML 正例基线（RF 同款；保留集由任务 YAML 反推，见
                 _train_hilift_ml docstring）。
@@ -66,6 +70,23 @@ PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
         "extra_body": {"max_tokens": 32768},
         # thinking 开关在 MiniMax 端点同样有效（实测 disabled 后直接输出答案）
         "escalate": {"thinking": {"type": "disabled"}, "max_tokens": 512},
+    },
+    # VLM 通道（2026-08-21 接入，mechvqa 多模态用）：
+    #   glm-4v-flash 免费档实测直连可用（1x1 图探针返回正常）；
+    #   GLM-4.6V / GLM-4.5V 为有效模型名但当前账户余额不足（1113）——
+    #   充值后 --model glm-4.6v 覆写即可升级，不改代码。
+    #   MiniMax 端点无 VL 模型（MiniMax-VL-01 报 2013 unknown model）；
+    #   Gemini key 区域封锁（FAILED_PRECONDITION）——故 VLM 单通道。
+    "glmvl": {
+        "base_env": "GLMVL_BASE_URL",
+        "base_default": "https://open.bigmodel.cn/api/paas/v4",
+        "key_envs": ["GLMVL_API_KEY", "GLM_API_KEY"],
+        "model_default": "glm-4v-flash",
+        "keychain_hint": "security find-generic-password -s glm-api-key -w",
+        "vlm": True,                       # 支持图像输入（multimodal_only 任务准入）
+        # glm-4v-flash 实测 max_tokens 上限 1024（>1024 报 1210 参数非法）；
+        # VQA 一两句中文短答 1024 token 足够（≈500+ 汉字）
+        "extra_body": {"max_tokens": 1024},
     },
 }
 
@@ -175,21 +196,31 @@ def _chat_completions_answer(
     label: str, extra_body: dict[str, Any] | None = None,
     escalate_body: dict[str, Any] | None = None,
     expect: str = "mcq",
+    images: list[str] | None = None,
 ) -> dict[str, Any]:
     system = {"mcq": _SYSTEM_PROMPT,
               "free_text": _SYSTEM_PROMPT_FREE_TEXT,
+              "free_vqa": _SYSTEM_PROMPT_FREE_TEXT,   # VQA 复用中性系统提示
               "code": _SYSTEM_PROMPT_CODE,
               "json": _SYSTEM_PROMPT_JSON,
               "math_answer": _SYSTEM_PROMPT_MATH}[expect]
 
     def make_body(patch: dict[str, Any] | None) -> bytes:
+        if images:
+            # OpenAI 兼容多模态 content：图在前文在后（bigmodel 实测可用；
+            # images 为 data:image/...;base64 URI，由 adapter 侧加载生成）
+            user_content: Any = (
+                [{"type": "image_url", "image_url": {"url": u}} for u in images]
+                + [{"type": "text", "text": prompt}])
+        else:
+            user_content = prompt
         req_body: dict[str, Any] = {
             "model": model,
             "temperature": 0.0,
             "max_tokens": 16384,   # 思考 token 计入 completion；2048 实测会被长思考耗尽
             "messages": [
                 {"role": "system", "content": system},
-                {"role": "user", "content": prompt},
+                {"role": "user", "content": user_content},
             ],
         }
         req_body.update(extra_body or {})
@@ -245,7 +276,8 @@ def _chat_completions_answer(
 
 
 def _preset_answer(provider: str, prompt: str, max_attempts: int,
-                   model: str | None, expect: str) -> dict[str, Any]:
+                   model: str | None, expect: str,
+                   images: list[str] | None = None) -> dict[str, Any]:
     p = PROVIDER_PRESETS[provider]
     base = os.environ.get(p["base_env"]) if p["base_env"] else None
     base = base or p["base_default"]
@@ -254,12 +286,16 @@ def _preset_answer(provider: str, prompt: str, max_attempts: int,
         raise ProviderError(
             f"{provider} 未配置: 缺环境变量 {p['key_envs']}。"
             f"（本机 Keychain 取法: {p['keychain_hint']}，注入后重跑，密钥不落盘）")
+    if images and not p.get("vlm"):
+        raise ProviderError(
+            f"{provider} 不支持图像输入（预设未声明 vlm）；"
+            "multimodal_only 任务须用 glmvl 或 openai_compat（VLM 端点）")
     model = model or p["model_default"]
     return _chat_completions_answer(prompt, max_attempts, base=base, key=key,
                                     model=model, label=provider,
                                     extra_body=p.get("extra_body") or None,
                                     escalate_body=p.get("escalate") or None,
-                                    expect=expect)
+                                    expect=expect, images=images)
 
 
 def _oracle_free_text(task: TaskSpec) -> str:
@@ -404,12 +440,25 @@ def _ml_hilift_predict(task: TaskSpec) -> dict[str, float]:
 def get_answer(
     provider: str, task: TaskSpec, prompt: str, *, seed: int, max_attempts: int,
     model: str | None = None, expect: str = "mcq",
+    images: list[str] | None = None,
 ) -> dict[str, Any]:
     """返回 {answer, raw, attempts, meta}；无法给出 answer 时抛错。
 
     expect="mcq"       answer=int(1..4)；
     expect="free_text" answer=str（剥思考后的原文，结构解析由 grader 负责）。
+    expect="free_vqa"  answer=str（图文 VQA 自由短答，中文感知判分在 qa_grounded）。
+    images             data:image/...;base64 URI 列表（多模态任务由 adapter 传入；
+                       纯文本 preset 收到即抛错——multimodal_only 准入纪律）。
     """
+    if expect == "free_vqa":
+        if provider == "stub":
+            raw = _stub_free_text(task, seed, prompt)
+            return {"answer": raw, "raw": raw, "attempts": 1,
+                    "meta": {"provider": "stub", "seed": seed, "note": "vqa stub=无意义文本，仅打通管线"}}
+        if provider == "oracle":
+            raw = str(task["reference"]["reference_answer"]).strip()
+            return {"answer": raw, "raw": raw, "attempts": 1,
+                    "meta": {"provider": "oracle", "note": "vqa 参考答案回显"}}
     if provider == "stub":
         if expect == "code":
             return {"answer": "pass\n", "raw": "pass", "attempts": 1,
@@ -470,7 +519,8 @@ def get_answer(
         return {"answer": int(ref), "raw": str(ref), "attempts": 1,
                 "meta": {"provider": "oracle"}}
     if provider in PROVIDER_PRESETS:
-        return _preset_answer(provider, prompt, max_attempts, model, expect)
+        return _preset_answer(provider, prompt, max_attempts, model, expect,
+                              images=images)
     if provider == "openai_compat":
         base = os.environ.get("BM_API_BASE")
         key = os.environ.get("BM_API_KEY")
@@ -481,5 +531,5 @@ def get_answer(
             raise ProviderError(f"openai_compat 未配置: 缺 {missing}")
         return _chat_completions_answer(prompt, max_attempts, base=base, key=key,
                                         model=model, label="openai_compat",
-                                        expect=expect)
+                                        expect=expect, images=images)
     raise ProviderError(f"未知 provider: {provider}")

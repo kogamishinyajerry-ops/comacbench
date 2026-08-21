@@ -1,0 +1,40 @@
+{
+  "task_id": "cg_lbracket_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport cadquery as cq\\n\\n# Parameters\\nleg_length_x = 120.0\\nleg_height_z = 80.0\\nthickness = 10.0\\nwidth_y = 60.0\\nfillet_radius = 15.0\\nhole_diameter = 10.0\\nhole_radius = hole_diameter / 2.0\\n\\n# Build the L-bracket as an extrusion with a 2D profile, then fillet inner concave corner\\n# 2D profile in XY plane (Z is the extrusion direction)\\n# Outer profile: starts at (thickness, 0) -> (leg_length_x, 0) -> (leg_length_x, width_y) ->\\n# (thickness, width_y) -> (0, width_y) -> (0, leg_height_z) -> (thickness, leg_height_z) -> (thickness, 0)\\n# Then fillet the concave inner corner at (thickness, thickness) — i.e., the corner on the\\n# inner edge between the top of the horizontal leg and the inner face of the vertical leg.\\n\\npts = [\\n    (thickness, 0),\\n    (leg_length_x, 0),\\n    (leg_length_x, width_y),\\n    (thickness, width_y),\\n    (thickness, leg_height_z),\\n    (0, leg_height_z),\\n    (0, 0),\\n]\\n\\nprofile = cq.Workplane(\\\"XY\\\").polyline(pts).close()\\n\\n# Fillet the concave inner corner. Vertices are listed in order of creation.\\n# The inner concave corner is at vertex index 3 -> (thickness, width_y) ... actually\\n# re-check: profile vertices order (polyline) are:\\n# 0: (thickness, 0)            - outer bottom-right of vertical leg base / right end of horiz leg bottom\\n# 1: (leg_length_x, 0)         - outer bottom-right of horizontal leg\\n# 2: (leg_length_x, width_y)   - outer top-right of horizontal leg\\n# 3: (thickness, width_y)      - inner corner top-of-horiz-leg meeting inner face of vert leg  <-- CONCAVE\\n# 4: (thickness, leg_height_z) - outer top-left of vertical leg\\n# 5: (0, leg_height_z)         - outer top-left corner\\n# 6: (0, 0)                    - outer\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "grade_details": "{\"syntax_error\": true}"
+  },
+  "timings": {
+    "agent_s": 170.232,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "provider=minimax code_len=1671"
+  ]
+}

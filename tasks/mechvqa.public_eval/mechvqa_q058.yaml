@@ -1,0 +1,54 @@
+id: mechvqa_q058
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q058.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/f9/f90d22170923a0d1b4f26d6a3910da4fa9bfe0c4.png
+    digest: 6b8217525f0f6005d1b42cbca42ce28deb1a1bc9721539dbd34217a8a952f4fd
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 409
+  reference_answer: 根据图纸，零件右侧同心圆结构的外圆直径为 Ø70，内圆直径为 Ø40。壁厚计算公式为 (外圆直径 - 内圆直径) / 2，代入数值后得到壁厚为
+    15（单位与图纸一致，通常为毫米）。
+  capability: Reasoning
+  difficulty: Easy
+  subcategory: Geometric Calculation
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_bossplate_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Parameters (all in mm)\\nPLATE_X = 90\\nPLATE_Y = 60\\nPLATE_Z = 10\\n\\nBOSS_DIAMETER = 30\\nBOSS_HEIGHT = 20\\n\\nHOLE_DIAMETER = 8\\nHOLE_OFFSET_X = 33\\nHOLE_OFFSET_Y = 18\\n\\n# Create base plate: centered on origin in XY, base face at z=0\\nresult = cq.Workplane(\\\"XY\\\").box(PLATE_X, PLATE_Y, PLATE_Z, centered=(True, True, False))\\n\\n# Add cylindrical boss on top face (boss top at z = PLATE_Z + BOSS_HEIGHT = 30)\\nresult = (\\n    result.faces(\\\">Z\\\")\\n    .workplane()\\n    .circle(BOSS_DIAMETER / 2)\\n    .extrude(BOSS_HEIGHT)\\n)\\n\\n# Add four through holes (axes parallel to Z, through plate thickness only)\\n# Bolt holes are far enough from the boss axis that cutThruAll only affects the plate\\nresult = (\\n    result.faces(\\\"<Z\\\")\\n    .workplane()\\n    .pushPoints([\\n        (+HOLE_OFFSET_X, +HOLE_OFFSET_Y),\\n        (+HOLE_OFFSET_X, -HOLE_OFFSET_Y),\\n        (-HOLE_OFFSET_X, +HOLE_OFFSET_Y),\\n        (-HOLE_OFFSET_X, -HOLE_OFFSET_Y),\\n    ])\\n    .circle(HOLE_DIAMETER / 2)\\n    .cutThruAll()\\n)\\n\\n# Export final single solid\\ncq.exporters.export(result.val(), \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.92}, {\"exit\": 0, \"duration_s\": 2.93}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 66126.547643, \"bbox_len\": [90.0, 60.0, 30.0], \"n_faces\": 12, \"n_solids\": 1, \"cyl_radii\": [4.0, 4.0, 4.0, 4.0, 15.0]}, \"reference\": {\"volume_mm3\": 66126.547643, \"bbox_len\": [90.0, 60.0, 30.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 66126.547643, \"ref\": 66126.547643}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 90.0, \"ref\": 90.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 30.0, \"ref\": 30.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.0, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 15.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 12, \"got\": 12, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 96.453,
+    "setup_s": 0.0,
+    "grade_s": 5.873
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1059",
+    "run1 exit=0 2.92s",
+    "run2 exit=0 2.93s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

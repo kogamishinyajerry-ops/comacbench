@@ -1,4 +1,4 @@
-"""gen_tasks_aviary.py — 自建 aviary.transport_mission 任务集（M3）。
+"""gen_tasks_aviary.py — 自建 aviary.transport_mission 任务集（M3；2026-08-21 扩题 8→27）。
 
 产出（幂等，--check 校验；参考值由 gold 脚本在本机预计算锁定）：
   data/aviary/transport_mission/base/aircraft_for_bench_GwGm.csv   基准模型（v1.0.1 venv 内拷贝）
@@ -14,6 +14,24 @@
   requirements = result.json 必填键存在率
   objective/robustness = N/A（静态任务，权重 0）
 模型输出契约：单个 ```python 脚本，在 cwd 写出 result.json（键与容差在题面声明）。
+
+2026-08-21 扩题与修复（append-only + gold 路径可移植性修复）：
+  - 新增 19 题：任务分析 range×mach 网格 10 + 总重权衡 2 + 总重扫描敏感度 1 +
+    燃油比 2 + 航程扫描 2 + 模型修复 2；全部 gold 在收敛域内真实跑通；
+  - 存量 8 题的 YAML/MD/references/派生 CSV 逐字节冻结（已存在即不重写）；
+    gold 脚本全量重写为路径可移植版（不再内嵌仓库绝对路径——建集日后仓库搬迁使
+    旧绝对路径失效；修复后旧 gold 逐一重跑对锁定 references 等效验证，见 PROVENANCE）；
+  - 【解释器变更】_venv_python() 由 .venv 改指 .venv-aviary/bin/python
+    （.venv 2026-08-21 起为 pycycle 钉子栈，不含 aviary；.venv-aviary = aviary 1.0.1 +
+    openmdao 3.45.0 + numpy 2.5.2，与 2026-08-19 建集环境同代）。本生成器须用
+    .venv-aviary/bin/python 运行（顶部 import aviary 定位基准 CSV）；
+  - 隐藏动态（hidden/）冻结：answers.b64 已在库即不重算；
+  - seed / REL_TOL / ASSETS_REVISION / 判分口径均不变。
+
+已知模型口径（如实记录，沿用存量 8 题同一事实）：two_dof GwGm 分析模式
+（run_driver=False）下燃油对 range/mach 不敏感（巡航时长冻结于 initial_guesses），
+仅 design:gross_mass 真实影响燃油——range/mach 类题与存量 T1-T3 同口径（判分仍
+对各自锁定参考），真正非退化族为总重权衡/扫描/修复。详见 PROVENANCE 扩题节。
 
 隐藏动态（评审件）：generator.py 以固定种子采样 (range, mach, gross_mass)，
 答案由 gold 预计算后 base64 隔离存 answers.b64（不入明文库；泄漏监控见 scoring §5）。
@@ -51,7 +69,8 @@ BASE_CSV_NAME = "aircraft_for_bench_GwGm.csv"
 
 
 def _venv_python() -> str:
-    return str(BENCH / ".venv/bin/python")
+    # 2026-08-21：.venv 已重建为 pycycle 钉子栈（无 aviary），aviary 栈在 .venv-aviary
+    return str(BENCH / ".venv-aviary/bin/python")
 
 
 def _modify_csv(src: str, edits: dict[str, str]) -> str:
@@ -72,11 +91,15 @@ def _modify_csv(src: str, edits: dict[str, str]) -> str:
     return "\n".join(out) + "\n"
 
 
+# gold 头（2026-08-21 起路径可移植：CSV 以 data/aviary/transport_mission 相对定位，
+# 锚点 = gold 文件目录（仓库内）/ cwd / aviary 包位置（沙箱内 venv 装在仓库下），
+# 逐级上溯定位仓库根——不再内嵌仓库绝对路径）
 _GOLD_HEADER = '''"""gold 解（aviary 分析模式）。判分参考预计算用；模型不可见。"""
 import json
 import os
 import warnings
 from copy import deepcopy
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
@@ -84,7 +107,25 @@ from aviary.interface.run_aviary import run_aviary
 from aviary.models.missions.two_dof_default import phase_info
 from aviary.variable_info.variables import Mission
 
-BASE = {base_csv!r}
+
+def _tm_root() -> Path:
+    """定位 data/aviary/transport_mission（路径可移植：不内嵌仓库绝对路径）。"""
+    cands = [Path(__file__).resolve().parent, Path.cwd()]
+    try:
+        import aviary as _av
+        cands.append(Path(_av.__file__).resolve().parent)
+    except Exception:
+        pass
+    for _c in cands:
+        for _anc in [_c] + list(_c.parents)[:10]:
+            if (_anc / "data" / "aviary" / "transport_mission").is_dir():
+                return _anc / "data" / "aviary" / "transport_mission"
+    raise RuntimeError("data/aviary/transport_mission not found "
+                       "(anchors: __file__ / cwd / aviary-package)")
+
+
+def _p(rel: str) -> str:
+    return str(_tm_root() / rel)
 
 
 def solve(csv_path: str, mach: float):
@@ -94,7 +135,7 @@ def solve(csv_path: str, mach: float):
                       verbosity=0, make_plots=False)
     fuel = float(prob.get_val(Mission.TOTAL_FUEL_MASS, units="lbm")[0])
     final = float(prob.get_val(Mission.FINAL_MASS, units="lbm")[0])
-    return {{"fuel_burn_lbm": fuel, "final_mass_lbm": final}}
+    return {"fuel_burn_lbm": fuel, "final_mass_lbm": final}
 '''
 
 
@@ -105,37 +146,42 @@ def _mk_derived(base_csv: str, edits: dict[str, str]) -> str:
 # ---------------------------------------------------------------- 任务定义
 
 def task_defs(base_csv: str, derived_dir: Path) -> list[dict]:
-    """返回任务描述列表（含派生 CSV 落盘与 gold 脚本内容）。"""
+    """返回任务描述列表（含派生 CSV 落盘与 gold 脚本内容）。
+
+    derived() 写派生 CSV（幂等：同 base 同 edits 字节不变），返回
+    (绝对路径, 仓库相对 data/aviary/transport_mission 路径) 二元组。
+    """
     T = []
 
-    def derived(name: str, edits: dict[str, str]) -> str:
-        """写派生 CSV，返回绝对路径（gold 在任意 cwd 下可读）。"""
+    def derived(name: str, edits: dict[str, str]) -> tuple[str, str]:
         p = derived_dir / f"{name}.csv"
         p.write_text(_mk_derived(base_csv, edits), encoding="utf-8")
-        return str(p.resolve())
+        rel = f"derived/{name}.csv"
+        return str(p.resolve()), rel
 
-    # ---- T1-T3 任务分析：range × mach ----
+    # ---- T1-T3 任务分析：range × mach（存量，gold 重渲染为可移植路径）----
     for tid, rng, mach in (("av_range_3000_m80", 3000, 0.80),
                            ("av_range_2500_m75", 2500, 0.75),
                            ("av_range_3200_m785", 3200, 0.785)):
-        rel = derived(tid, {"aircraft:design:range": str(rng)})
+        rel_pair = derived(tid, {"aircraft:design:range": str(rng)})
         T.append({
-            "tid": tid, "kind": "analysis", "csv": rel, "mach": mach,
+            "tid": tid, "kind": "analysis", "csv": rel_pair[0], "csv_rel": rel_pair[1],
+            "mach": mach,
             "keys": ["fuel_burn_lbm", "final_mass_lbm"],
             "title": f"任务分析：航程 {rng} NM、巡航马赫 {mach}",
             "ask": (f"Using the aircraft model CSV provided and Aviary (installed), run a "
                     f"forward mission analysis (run_driver=False) at cruise Mach {mach}. "
                     f"Write result.json with keys fuel_burn_lbm (total mission fuel, lbm) "
                     f"and final_mass_lbm (landing mass, lbm). Numeric tolerance: 1% relative."),
-            "gold": _GOLD_HEADER.format(base_csv=rel) + f'''
+            "gold": _GOLD_HEADER + f'''
 
 if __name__ == "__main__":
-    r = solve(BASE, {mach})
+    r = solve(_p({rel_pair[1]!r}), {mach})
     json.dump(r, open("result.json", "w"), indent=1)
 ''',
         })
 
-    # ---- T4 总重权衡：三总重同任务 ----
+    # ---- T4 总重权衡：三总重同任务（存量）----
     name = "av_grossmass_trade"
     variants = {}
     for gm in (165400, 175400, 185400):
@@ -149,12 +195,12 @@ if __name__ == "__main__":
                 "Write result.json with keys fuel_165400_lbm, fuel_175400_lbm, fuel_185400_lbm "
                 "and min_fuel_grossmass_lbm (the gross-mass value of the lowest-fuel variant, lbm). "
                 "Numeric tolerance: 1% relative (min key: exact value match)."),
-        "gold": _GOLD_HEADER.format(base_csv=variants[175400]) + f'''
+        "gold": _GOLD_HEADER + f'''
 
 if __name__ == "__main__":
     fuels = {{}}
-    for gm, csv in {sorted(variants.items())!r}:
-        fuels[gm] = solve(csv, 0.80)["fuel_burn_lbm"]
+    for gm, csv in {sorted({gm: rel for gm, (_, rel) in variants.items()}.items())!r}:
+        fuels[gm] = solve(_p(csv), 0.80)["fuel_burn_lbm"]
     r = {{
         "fuel_165400_lbm": fuels[165400],
         "fuel_175400_lbm": fuels[175400],
@@ -165,7 +211,7 @@ if __name__ == "__main__":
 ''',
     })
 
-    # ---- T5 航程扫描 + 敏感度 ----
+    # ---- T5 航程扫描 + 敏感度（存量）----
     name = "av_range_sweep"
     ranges = (2400, 2800, 3200, 3600)
     variants = {}
@@ -180,12 +226,12 @@ if __name__ == "__main__":
                 "keys fuel_2400_lbm, fuel_2800_lbm, fuel_3200_lbm, fuel_3600_lbm and "
                 "dfuel_drange_lbm_per_nm = least-squares slope of fuel vs range "
                 "(lbm per NM). Numeric tolerance: 1% relative."),
-        "gold": _GOLD_HEADER.format(base_csv=variants[3200]) + f'''
+        "gold": _GOLD_HEADER + f'''
 
 if __name__ == "__main__":
     fuels = {{}}
-    for rg, csv in {sorted(variants.items())!r}:
-        fuels[rg] = solve(csv, 0.80)["fuel_burn_lbm"]
+    for rg, csv in {sorted({rg: rel for rg, (_, rel) in variants.items()}.items())!r}:
+        fuels[rg] = solve(_p(csv), 0.80)["fuel_burn_lbm"]
     xs = {list(ranges)!r}
     ys = [fuels[x] for x in xs]
     n = len(xs)
@@ -197,7 +243,7 @@ if __name__ == "__main__":
 ''',
     })
 
-    # ---- T6/T7 模型修复 ----
+    # ---- T6/T7 模型修复（存量）----
     ref_true = {"aircraft:design:range": "3200", "aircraft:design:gross_mass": "175400"}
     corrupt_specs = [
         ("av_repair_range", "aircraft:design:range", "4000", "3200",
@@ -212,7 +258,8 @@ if __name__ == "__main__":
         csv_corrupt = derived(tid + "_corrupt", edits)
         csv_clean = derived(tid + "_clean", ref_true)
         T.append({
-            "tid": tid, "kind": "repair", "csv": csv_corrupt, "mach": 0.80,
+            "tid": tid, "kind": "repair", "csv": csv_corrupt[0], "csv_rel": csv_corrupt[1],
+            "mach": 0.80,
             "keys": ["corrupted_param", "restored_value"],
             "title": f"模型修复：{param}",
             "ask": (
@@ -224,18 +271,18 @@ if __name__ == "__main__":
                 "Identify the corrupted parameter by testing restorations with Aviary and write "
                 "result.json with keys corrupted_param (exact CSV key string) and restored_value "
                 "(the true numeric value as float). Exact-match grading."),
-            "gold": _GOLD_HEADER.format(base_csv=csv_clean) + f'''
+            "gold": _GOLD_HEADER + f'''
 
 if __name__ == "__main__":
     # repair 参考：gold 直接给出真值（模型侧需通过 Aviary 实验识别）
     r = {{"corrupted_param": {param!r}, "restored_value": float({good!r})}}
     json.dump(r, open("result.json", "w"), indent=1)
 ''',
-            "repair_extra": {"clean_csv": csv_clean, "corrupt_csv": csv_corrupt,
+            "repair_extra": {"clean_csv": csv_clean[1], "corrupt_csv": csv_corrupt[1],
                              "param": param, "true": good},
         })
 
-    # ---- T8 燃油比 ----
+    # ---- T8 燃油比（存量）----
     name = "av_fuel_ratio"
     variants = {rg: derived(f"{name}_{rg}", {"aircraft:design:range": str(rg)})
                 for rg in (2400, 3600)}
@@ -246,14 +293,203 @@ if __name__ == "__main__":
         "ask": ("Run forward mission analyses (run_driver=False, cruise Mach 0.80) for the two "
                 "range-variant CSVs provided (2400 and 3600 NM). Write result.json with key "
                 "fuel_ratio_3600_over_2400 = fuel(3600)/fuel(2400). Numeric tolerance: 1% relative."),
-        "gold": _GOLD_HEADER.format(base_csv=variants[2400]) + f'''
+        "gold": _GOLD_HEADER + f'''
 
 if __name__ == "__main__":
-    f24 = solve({variants[2400]!r}, 0.80)["fuel_burn_lbm"]
-    f36 = solve({variants[3600]!r}, 0.80)["fuel_burn_lbm"]
+    f24 = solve(_p({variants[2400][1]!r}), 0.80)["fuel_burn_lbm"]
+    f36 = solve(_p({variants[3600][1]!r}), 0.80)["fuel_burn_lbm"]
     json.dump({{"fuel_ratio_3600_over_2400": f36 / f24}}, open("result.json", "w"), indent=1)
 ''',
     })
+
+    # ================= 2026-08-21 扩题（+19，append-only）=================
+    # ---- F1 任务分析 range×mach 网格（+10；避开存量 3 组合）----
+    for tid, rng, mach in (
+        ("av_range_2400_m72", 2400, 0.72),
+        ("av_range_2600_m75", 2600, 0.75),
+        ("av_range_2800_m78", 2800, 0.78),
+        ("av_range_3000_m82", 3000, 0.82),
+        ("av_range_3400_m72", 3400, 0.72),
+        ("av_range_3400_m80", 3400, 0.80),
+        ("av_range_3600_m78", 3600, 0.78),
+        ("av_range_2600_m82", 2600, 0.82),
+        ("av_range_2800_m75", 2800, 0.75),
+        ("av_range_3600_m82", 3600, 0.82),
+    ):
+        rel_pair = derived(tid, {"aircraft:design:range": str(rng)})
+        T.append({
+            "tid": tid, "kind": "analysis", "csv": rel_pair[0], "csv_rel": rel_pair[1],
+            "mach": mach,
+            "keys": ["fuel_burn_lbm", "final_mass_lbm"],
+            "title": f"任务分析：航程 {rng} NM、巡航马赫 {mach}",
+            "ask": (f"Using the aircraft model CSV provided and Aviary (installed), run a "
+                    f"forward mission analysis (run_driver=False) at cruise Mach {mach}. "
+                    f"Write result.json with keys fuel_burn_lbm (total mission fuel, lbm) "
+                    f"and final_mass_lbm (landing mass, lbm). Numeric tolerance: 1% relative."),
+            "gold": _GOLD_HEADER + f'''
+
+if __name__ == "__main__":
+    r = solve(_p({rel_pair[1]!r}), {mach})
+    json.dump(r, open("result.json", "w"), indent=1)
+''',
+        })
+
+    # ---- F2 总重权衡（+2；分析模式下 design:gross_mass 为唯一真实敏感参数）----
+    for tid, gms in (("av_grossmass_trade2", (167400, 172400, 177400)),
+                     ("av_grossmass_trade3", (179400, 180400, 182400))):
+        variants = {}
+        for gm in gms:
+            variants[gm] = derived(f"{tid}_{gm}", {"aircraft:design:gross_mass": str(gm)})
+        keys = [f"fuel_{gm}_lbm" for gm in gms] + ["min_fuel_grossmass_lbm"]
+        T.append({
+            "tid": tid, "kind": "trade", "csv": None, "mach": 0.80,
+            "keys": keys,
+            "title": f"总重权衡：三种设计总重下的燃油（{gms[0]}/{gms[1]}/{gms[2]} lbm）",
+            "ask": (f"Run forward mission analyses (run_driver=False, cruise Mach 0.80) for the three "
+                    f"aircraft CSVs provided (design gross mass {gms[0]} / {gms[1]} / {gms[2]} lbm). "
+                    f"Write result.json with keys {', '.join(f'fuel_{gm}_lbm' for gm in gms)} "
+                    f"and min_fuel_grossmass_lbm (the gross-mass value of the lowest-fuel variant, lbm). "
+                    f"Numeric tolerance: 1% relative (min key: exact value match)."),
+            "gold": _GOLD_HEADER + f'''
+
+if __name__ == "__main__":
+    fuels = {{}}
+    for gm, csv in {sorted({gm: rel for gm, (_, rel) in variants.items()}.items())!r}:
+        fuels[gm] = solve(_p(csv), 0.80)["fuel_burn_lbm"]
+    r = {{f"fuel_{{gm}}_lbm": fuels[gm] for gm in {gms!r}}}
+    r["min_fuel_grossmass_lbm"] = float(min(fuels, key=fuels.get))
+    json.dump(r, open("result.json", "w"), indent=1)
+''',
+        })
+
+    # ---- F3 总重扫描 + 敏感度（+1）----
+    name = "av_grossmass_sweep"
+    masses = (165400, 170400, 175400, 180400, 185400)
+    variants = {}
+    for gm in masses:
+        variants[gm] = derived(f"{name}_{gm}", {"aircraft:design:gross_mass": str(gm)})
+    T.append({
+        "tid": name, "kind": "sweep", "csv": None, "mach": 0.80,
+        "keys": [f"fuel_{gm}_lbm" for gm in masses] + ["dfuel_dgrossmass_lbm_per_lbm"],
+        "title": "总重扫描与燃油敏感度",
+        "ask": ("Run forward mission analyses (run_driver=False, cruise Mach 0.80) for the five "
+                "gross-mass-variant CSVs provided (165400/170400/175400/180400/185400 lbm). "
+                "Write result.json with keys fuel_165400_lbm, fuel_170400_lbm, fuel_175400_lbm, "
+                "fuel_180400_lbm, fuel_185400_lbm and dfuel_dgrossmass_lbm_per_lbm = "
+                "least-squares slope of fuel vs gross mass (lbm per lbm). "
+                "Numeric tolerance: 1% relative."),
+        "gold": _GOLD_HEADER + f'''
+
+if __name__ == "__main__":
+    fuels = {{}}
+    for gm, csv in {sorted({gm: rel for gm, (_, rel) in variants.items()}.items())!r}:
+        fuels[gm] = solve(_p(csv), 0.80)["fuel_burn_lbm"]
+    xs = {list(masses)!r}
+    ys = [fuels[x] for x in xs]
+    n = len(xs)
+    slope = (n * sum(x * y for x, y in zip(xs, ys)) - sum(xs) * sum(ys)) / (
+        n * sum(x * x for x in xs) - sum(xs) ** 2)
+    r = {{f"fuel_{{gm}}_lbm": fuels[gm] for gm in {masses!r}}}
+    r["dfuel_dgrossmass_lbm_per_lbm"] = slope
+    json.dump(r, open("result.json", "w"), indent=1)
+''',
+    })
+
+    # ---- F4 燃油比（+2）----
+    for tid, rg_lo, rg_hi in (("av_fuel_ratio_3500_over_2500", 2500, 3500),
+                              ("av_fuel_ratio_3300_over_2700", 2700, 3300)):
+        variants = {rg: derived(f"{tid}_{rg}", {"aircraft:design:range": str(rg)})
+                    for rg in (rg_lo, rg_hi)}
+        key = f"fuel_ratio_{rg_hi}_over_{rg_lo}"
+        T.append({
+            "tid": tid, "kind": "ratio", "csv": None, "mach": 0.80,
+            "keys": [key],
+            "title": f"远近航程燃油比（{rg_hi} vs {rg_lo} NM）",
+            "ask": (f"Run forward mission analyses (run_driver=False, cruise Mach 0.80) for the two "
+                    f"range-variant CSVs provided ({rg_lo} and {rg_hi} NM). Write result.json with key "
+                    f"{key} = fuel({rg_hi})/fuel({rg_lo}). Numeric tolerance: 1% relative."),
+            "gold": _GOLD_HEADER + f'''
+
+if __name__ == "__main__":
+    flo = solve(_p({variants[rg_lo][1]!r}), 0.80)["fuel_burn_lbm"]
+    fhi = solve(_p({variants[rg_hi][1]!r}), 0.80)["fuel_burn_lbm"]
+    json.dump({{{key!r}: fhi / flo}}, open("result.json", "w"), indent=1)
+''',
+        })
+
+    # ---- F5 航程扫描（换基点/加密，+2）----
+    for tid, rgs, mach in (("av_range_sweep_m78", (2400, 2600, 2800, 3000), 0.78),
+                           ("av_range_sweep_fine", (3000, 3200, 3400, 3600), 0.80)):
+        variants = {}
+        for rg in rgs:
+            variants[rg] = derived(f"{tid}_{rg}", {"aircraft:design:range": str(rg)})
+        T.append({
+            "tid": tid, "kind": "sweep", "csv": None, "mach": mach,
+            "keys": [f"fuel_{r}_lbm" for r in rgs] + ["dfuel_drange_lbm_per_nm"],
+            "title": f"航程扫描与燃油敏感度（{rgs[0]}-{rgs[-1]} NM @ M{mach}）",
+            "ask": (f"Run forward mission analyses (run_driver=False, cruise Mach {mach}) for the four "
+                    f"range-variant CSVs provided ({'/'.join(str(r) for r in rgs)} NM). "
+                    f"Write result.json with keys {', '.join(f'fuel_{r}_lbm' for r in rgs)} and "
+                    f"dfuel_drange_lbm_per_nm = least-squares slope of fuel vs range "
+                    f"(lbm per NM). Numeric tolerance: 1% relative."),
+            "gold": _GOLD_HEADER + f'''
+
+if __name__ == "__main__":
+    fuels = {{}}
+    for rg, csv in {sorted({rg: rel for rg, (_, rel) in variants.items()}.items())!r}:
+        fuels[rg] = solve(_p(csv), {mach})["fuel_burn_lbm"]
+    xs = {list(rgs)!r}
+    ys = [fuels[x] for x in xs]
+    n = len(xs)
+    slope = (n * sum(x * y for x, y in zip(xs, ys)) - sum(xs) * sum(ys)) / (
+        n * sum(x * x for x in xs) - sum(xs) ** 2)
+    r = {{f"fuel_{{rg}}_lbm": fuels[rg] for rg in {rgs!r}}}
+    r["dfuel_drange_lbm_per_nm"] = slope
+    json.dump(r, open("result.json", "w"), indent=1)
+''',
+        })
+
+    # ---- F6 模型修复变体（+2）----
+    repair_specs = [
+        ("av_repair_grossmass_v2", "aircraft:design:gross_mass", "180400", "175400",
+         {"aircraft:design:range": "3000"}, {"aircraft:design:range": "3000",
+          "aircraft:design:gross_mass": "175400"},
+         {"aircraft:design:range": "range mislabeled 3000 NM (true 3400 NM)",
+          "aircraft:design:gross_mass": "gross mass mislabeled 180400 lbm (true 175400 lbm)"}),
+        ("av_repair_range_v2", "aircraft:design:range", "2500", "3400",
+         {"aircraft:design:gross_mass": "175400"}, {"aircraft:design:range": "3400",
+          "aircraft:design:gross_mass": "175400"},
+         {"aircraft:design:range": "range mislabeled 2500 NM (true 3400 NM)",
+          "aircraft:design:gross_mass": "gross mass mislabeled (true 180400 lbm)"}),
+    ]
+    for tid, param, bad, good, corrupt_other, ref_true_v2, cand_desc in repair_specs:
+        edits = {k: (bad if k == param else v) for k, v in ref_true_v2.items()}
+        csv_corrupt = derived(tid + "_corrupt", edits)
+        csv_clean = derived(tid + "_clean", ref_true_v2)
+        T.append({
+            "tid": tid, "kind": "repair", "csv": csv_corrupt[0], "csv_rel": csv_corrupt[1],
+            "mach": 0.80,
+            "keys": ["corrupted_param", "restored_value"],
+            "title": f"模型修复：{param}（新数值组）",
+            "ask": (
+                "You are given ONE corrupted aircraft CSV and ONE clean reference table below. "
+                "A reference forward analysis (cruise Mach 0.80, run_driver=False) of the TRUE model "
+                f"yields the reference fuel burn already provided in result-reference.json. "
+                "Exactly one row of the corrupted CSV differs from the true model. Candidates:\n"
+                + "\n".join(f"- {k}: {v}" for k, v in cand_desc.items()) + "\n"
+                "Identify the corrupted parameter by testing restorations with Aviary and write "
+                "result.json with keys corrupted_param (exact CSV key string) and restored_value "
+                "(the true numeric value as float). Exact-match grading."),
+            "gold": _GOLD_HEADER + f'''
+
+if __name__ == "__main__":
+    # repair 参考：gold 直接给出真值（模型侧需通过 Aviary 实验识别）
+    r = {{"corrupted_param": {param!r}, "restored_value": float({good!r})}}
+    json.dump(r, open("result.json", "w"), indent=1)
+''',
+            "repair_extra": {"clean_csv": csv_clean[1], "corrupt_csv": csv_corrupt[1],
+                             "param": param, "true": good},
+        })
     return T
 
 
@@ -372,17 +608,20 @@ def main() -> int:
 
     tasks = task_defs(base_txt, DATA / "derived")
 
-    # 资产摘要（base + 全部 derived + references 索引）
+    # 资产摘要（base + 全部 derived）
     from .common import sha256_file
     digests = {}
     for p in sorted((DATA).glob("base/*.csv")) + sorted((DATA).glob("derived/*.csv")):
         digests[f"data/aviary/transport_mission/{p.relative_to(DATA).as_posix()}"] = sha256_file(p)
 
     drift = []
+    frozen = 0
     for t in tasks:
         gold_path = DATA / "gold" / f"{t['tid']}.py"
         ref_path = DATA / "references" / f"{t['tid']}.json"
+        yaml_path = TASKS_DIR / f"{t['tid']}.yaml"
         if not args.check:
+            # gold 全量重写（含存量 8 题：路径可移植性修复，见模块 docstring）
             gold_path.write_text(t["gold"], encoding="utf-8")
 
         if args.check:
@@ -390,17 +629,21 @@ def main() -> int:
                 drift.append(t["tid"])
             continue
 
+        # 存量任务（YAML 已在库）冻结：refs/YAML/MD 不重写（等效性另由重跑验证保证）
+        if yaml_path.exists():
+            frozen += 1
+            print(f"[frozen] {t['tid']} (存量不重写 YAML/MD/refs；gold 已按可移植路径重写)")
+            continue
         # 参考预计算（repair 任务需附 result-reference.json）
         extra_files = None
         if t["kind"] == "repair":
             clean_csv_rel = t["repair_extra"]["clean_csv"]
             with tempfile.TemporaryDirectory() as td:
                 tmp = Path(td)
-                # clean 参考：跑 clean gold 语义（range 3200/gross 175400 已在派生 csv）
-                g2 = _GOLD_HEADER.format(base_csv=str((DATA / clean_csv_rel).resolve())) + f"""
+                g2 = _GOLD_HEADER + f"""
 
 if __name__ == "__main__":
-    r = solve({str((DATA / clean_csv_rel).resolve())!r}, 0.80)
+    r = solve(_p({clean_csv_rel!r}), 0.80)
     json.dump(r, open("result.json", "w"), indent=1)
 """
                 ref_clean = run_gold(g2, tmp)
@@ -410,8 +653,7 @@ if __name__ == "__main__":
                 extra_files["result-reference.json"], encoding="utf-8")
         if args.force_refs or not ref_path.exists():
             with tempfile.TemporaryDirectory() as td:
-                # gold 内 BASE 相对 data 目录：切 cwd 到 DATA 保证相对路径可读
-                refs = run_gold(t["gold"], DATA, extra_files=None)
+                refs = run_gold(t["gold"], Path(td), extra_files=None)
             ref_path.write_text(json.dumps(refs, indent=1, sort_keys=True), encoding="utf-8")
         refs = json.loads(ref_path.read_text())
 
@@ -433,9 +675,12 @@ if __name__ == "__main__":
         (TASKS_DIR / f"{t['tid']}.md").write_text(prompt, encoding="utf-8")
         print(f"[gen] {t['tid']}: refs={sorted(refs.keys())}")
 
-    # ---- 隐藏动态生成器（评审件 + 3 例试点）----
+    # ---- 隐藏动态生成器（评审件）——2026-08-21 起冻结：answers.b64 已在库即不重算 ----
     if not args.check:
-        build_hidden(base_txt)
+        if not (DATA / "hidden" / "answers.b64").exists():
+            build_hidden(base_txt)
+        else:
+            print("[hidden] answers.b64 已在库，冻结不重算")
 
     if args.check:
         if drift:
@@ -443,7 +688,7 @@ if __name__ == "__main__":
             return 1
         print(f"[check] {len(tasks)} 个任务与镜像一致")
         return 0
-    print(f"[gen] {len(tasks)} tasks -> {TASKS_DIR}")
+    print(f"[gen] {len(tasks)} tasks ({frozen} frozen) -> {TASKS_DIR}")
     return 0
 
 
@@ -498,10 +743,10 @@ print(json.dumps(payload, indent=1))
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
             (tmp / "hidden_case.csv").write_text(csv_txt, encoding="utf-8")
-            g = _GOLD_HEADER.format(base_csv=str(tmp / "hidden_case.csv")) + f"""
+            g = _GOLD_HEADER + f"""
 
 if __name__ == "__main__":
-    r = solve({str(tmp / 'hidden_case.csv')!r}, {mach})
+    r = solve(str({str(tmp / 'hidden_case.csv')!r}), {mach})
     json.dump(r, open("result.json", "w"), indent=1)
 """
             res = run_gold(g, tmp)
@@ -510,7 +755,7 @@ if __name__ == "__main__":
     (hidden / "answers.b64").write_text(
         base64.b64encode(json.dumps(blob).encode()).decode(), encoding="utf-8")
     (hidden / "README.md").write_text(
-        "# 隐藏动态题（隔离方案）\n\n"
+        "# aviary 隐藏动态题（隔离方案）\n\n"
         "- `generator.py`：参数空间与采样策略（版本化；种子轮换即新评测周期）。\n"
         "- `answers.b64`：base64 编码的预计算参考（防明文泄漏的一层隔离；参考答案不进任务明文）。\n"
         "- 隔离边界：模型题面只含 (range, mach, gross_mass) 三元组，不含答案；判分读 answers.b64。\n"

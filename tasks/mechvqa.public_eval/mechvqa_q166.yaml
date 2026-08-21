@@ -1,0 +1,71 @@
+id: mechvqa_q166
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q166.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/1b/1b8843cb05128d325777d25e731791798dd2697b.jpg
+    digest: 186e75993b25acd6f5bc49b3ff564ec26b08d010076559c5c31eca255bb36be1
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 1105
+  reference_answer: '### 比值变化趋势
+
+    当 d₁ 从 M12 增至 M36 时，**l/d₁ 的比值始终为 1.5**，即长度 l 与公称直径 d₁ 成固定的等比例关系，整个系列没有变化趋势。
+
+
+    ### 工程意义
+
+    1. **结构强度一致性**：固定的 1.5 比值保证不同规格的螺纹连接件在受力时拥有相似的应力分布，避免因长度过短导致强度不足或因过长导致材料冗余。
+
+    2. **标准化与互换性**：等比例缩放实现系列化设计，简化计算、降低生产成本，并确保不同规格零件的互换性，符合 ISO、GB 等行业标准。
+
+    3. **材料效率与可靠性**：1.5 的比例是经验与力学分析的优化结果，兼顾强度、重量和成本的平衡，避免了比值过小导致啮合不足或比值过大导致材料浪费和应力集中。
+
+    4. **制造工艺适配**：该比例与常用螺纹加工工艺（车削、滚压）匹配，提升成形质量、降低废品率。
+
+    5. **符合设计规范**：螺纹长度与直径的比值通常建议在 1.2~2.0 之间，本设计取 1.5，既满足强度需求，又实现轻量化。
+
+
+    **结论**：l/d₁ 比值恒定为 1.5，体现了机械设计中对结构强度、标准化、材料利用和制造效率的综合考量，是该系列螺纹件可靠运行的关键参数。'
+  capability: Reasoning
+  difficulty: Hard
+  subcategory: Geometric Calculation
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

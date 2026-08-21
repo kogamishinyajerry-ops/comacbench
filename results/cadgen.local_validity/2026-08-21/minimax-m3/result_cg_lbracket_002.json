@@ -1,0 +1,40 @@
+{
+  "task_id": "cg_lbracket_002",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport cadquery as cq\\n\\n# Dimensions\\nL_h = 100.0   # horizontal leg length along X\\nT = 12.0      # thickness of both legs\\nL_v = 70.0    # vertical leg height along Z\\nW = 50.0      # width along Y\\nR = 10.0      # fillet radius\\nH_d = 10.0    # hole diameter\\nH_r = H_d / 2.0\\n\\n# Build the L-bracket as a single solid\\n# Start with horizontal leg: box from x=0..L_h, y=0..W, z=0..T\\n# Then add vertical leg: box from x=0..T, y=0..W, z=0..L_v\\nresult = (\\n    cq.Workplane(\\\"XY\\\")\\n    .box(L_h, W, T)               # horizontal leg\\n    .faces(\\\">Y\\\").workplane()\\n    .transformed(offset=(0, 0, 0))\\n)\\n\\n# Simpler: build with two boxes unioned\\nwp = cq.Workplane(\\\"XY\\\")\\nh_leg = wp.box(L_h, W, T)        # horizontal leg\\nv_leg = wp.box(T, W, L_v)        # vertical leg\\n\\nbracket = h_leg.union(v_leg)\\n\\n# Add inner fillet at the inner concave corner\\n# Inner corner is at (x=T, z=T) on the XZ plane (y=0..W).\\n# The fillet should be tangent to the top face of horizontal leg (z=T) and\\n# tangent to the inner face of vertical leg (x=T). \\n# This is a concave (inside) fillet in the XZ plane.\\n# CadQuery's edge selection: edges parallel to Y at the inner corner.\\n# Select edges at x=T, z=T (intersection of two inner faces)\\nedges = (\\n    bracket.edges(\\\"|Y\\\")\\n    .edges(cq.NearestToPointSelector((T, 0, T)))\\n)\\n\\n# Actually there may be two edges parallel to Y at (T,*,T): top and bottom.\\n# Select both and fillet.\\nedges = (\\n    bracket.edges(\\\"|Y\\\")\\n    .edges(cq.NearestToPointSelector((T, 0, T)))\\n)\\n\\n# Use filter to get both edges at that corner\\nedges = bracket.edges(\\\"|Y\\\").edges(cq.NearestTo\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "grade_details": "{\"syntax_error\": true}"
+  },
+  "timings": {
+    "agent_s": 305.677,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "provider=minimax code_len=1571"
+  ]
+}

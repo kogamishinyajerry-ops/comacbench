@@ -1,0 +1,67 @@
+id: mechvqa_q169
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q169.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/d8/d81a1e2923d232e1d4e647336cbae824cef12c32.jpg
+    digest: 25300ce9cb378d814b3b39b5997736aa8af2e881486987371f430bbbf9151c8e
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 1127
+  reference_answer: '根据机械图纸的中间侧视图以及图纸下方的参数表格，当 l₁=270 mm、l₂=27 mm 时，链条总长度中包含 **10
+    个滚轮单元**。
+
+
+    **计算依据**：
+
+    1. 参数表格中对应 l₁=270 mm、l₂=27 mm 的行明确标注 “Rollers per track = 10”。
+
+    2. 中间侧视图显示链条为单轨道结构，滚轮单元沿链条长度方向连续排列，因而该数值直接代表链条总长度内的滚轮单元数量。
+
+    3. 若使用链长公式 l₁ = (滚轮单元数 × 单元宽度) + 2×l₃（其中 d=25 mm 为单元宽度，l₃=13.5 mm），代入 10 个单元得到
+    277 mm，略高于标注的 270 mm，属于设计公差或四舍五入误差，不影响表格中给出的 10 个滚轮单元的结论。
+
+
+    因此，答案为 **10 个滚轮单元**。'
+  capability: Reasoning
+  difficulty: Hard
+  subcategory: Geometric Calculation
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

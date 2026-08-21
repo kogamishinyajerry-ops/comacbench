@@ -1,0 +1,55 @@
+id: mechvqa_q138
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q138.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/da/da12dccac6da4d2e4869de4e45895c7bc8751610.png
+    digest: e2e1ebd8f0baa8b19f3a2a68e19cd79aeb7cdcf2ad379062ce9b7b15135617cd
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 905
+  reference_answer: In the first image (Fig. 5-16 Threaded Insert), the datum C1 annotation
+    is located at the lower-left side of the side view, with the leader line pointing
+    near the lower edge of the left end face.
+  capability: Recognition
+  difficulty: Medium
+  subcategory: Item Localization
+  language: 英文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

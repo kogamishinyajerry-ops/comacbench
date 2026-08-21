@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Plate dimensions\\nplate_length = 90.0\\nplate_width = 70.0\\nplate_thickness = 6.0\\n\\n# Edge fillet radius\\nedge_fillet_radius = 9.0\\n\\n# Hole parameters\\nhole_diameter = 7.0\\nhole_radius = hole_diameter / 2.0\\nhole_positions = [(29, 19), (29, -19), (-29, 19), (-29, -19)]\\n\\n# Create the rectangular plate\\n# Centered on origin in XY, with base face at z=0\\nresult = cq.Workplane(\\\"XY\\\").box(\\n    plate_length, \\n    plate_width, \\n    plate_thickness, \\n    centered=(True, True, False)\\n)\\n\\n# Apply fillets to all four vertical (Z-parallel) edges\\nresult = result.edges(\\\"|Z\\\").fillet(edge_fillet_radius)\\n\\n# Create the four through holes\\nresult = (\\n    result.faces(\\\">Z\\\")\\n    .workplane()\\n    .pushpoints(hole_positions)\\n    .circle(hole_radius)\\n    .cutThruAll()\\n)\\n\\n# Export the result as a STEP file\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_07h74wj_/model.py\\\", line 32, in <module>\\n    .pushpoints(hole_positions)\\n     ^^^^^^^^^^\\nAttributeError: 'Workplane' object has no attribute 'pushpoints'. Did you mean: 'pushPoints'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 435.48,
+    "setup_s": 0.0,
+    "grade_s": 2.57
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=843",
+    "run1 exit=1 2.57s"
+  ]
+}

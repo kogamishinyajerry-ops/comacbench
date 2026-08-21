@@ -1,0 +1,59 @@
+id: mechvqa_q144
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q144.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/39/39e3860b0cbcda69b6288ffda79131a59f8d9943.png
+    digest: d0e55374199483416a7dbc39e1e2e47e7e0987b2bb531d30a1f65bcba7170463
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 970
+  reference_answer: '首先观察左侧2D机械图纸，其为“连杆（LJT05.07）”，整体呈细长杆状结构，一端有连接头，中间存在特定轮廓过渡，标注了杆体长度（245）、孔径（如φ32K7、φ20H7）等典型连杆特征尺寸，且图纸标题明确为“连杆”。
+
+
+    再看右侧3D轴测图，零件呈环形对称结构，带有多个凸缘和孔，无细长杆体特征，整体形态更接近轮盘或法兰类零件，与“连杆”的典型杆状结构形态明显不符。
+
+
+    通过对比两者的核心结构特征：2D图纸的细长杆状形态与3D图的环形紧凑结构存在根本性差异，尺寸标注与几何特征也无法对应。因此可以判断二者**不是**同一个零件。'
+  capability: Judging
+  difficulty: Medium
+  subcategory: Consistency Judgment
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

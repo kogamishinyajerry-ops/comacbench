@@ -1,0 +1,56 @@
+id: mechvqa_q050
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q050.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/b3/b3d6b262f96e5f8b40309cedd22482b2c6ee0928.jpg
+    digest: 684ca2ba7ee032524918a0db30ab5d4ab0ca288aaa9f8fb63d1c1c5677dd78a6
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 354
+  reference_answer: 'The total length from the center of the first bolt hole to the
+    center of the fourth bolt hole is **135 mm**. Calculation basis: The parameter
+    table gives the hole spacing l₃ = 45 mm, there are 3 intervals between the four
+    holes, therefore 3 × 45 mm = 135 mm.'
+  capability: Reasoning
+  difficulty: Medium
+  subcategory: Geometric Calculation
+  language: 英文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

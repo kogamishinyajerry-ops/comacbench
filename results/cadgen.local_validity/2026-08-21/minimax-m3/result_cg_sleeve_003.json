@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_sleeve_003",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Sleeve parameters (mm)\\nouter_diameter = 100.0\\ninner_diameter = 70.0\\nheight = 30.0\\nouter_radius = outer_diameter / 2.0  # 50\\ninner_radius = inner_diameter / 2.0  # 35\\n\\n# Create outer cylinder solid (centered at origin, base at z=0)\\nouter = cq.Workplane(\\\"XY\\\").circle(outer_radius).extrude(height)\\n\\n# Create inner cylinder (cutting tool for the bore)\\ninner = cq.Workplane(\\\"XY\\\").circle(inner_radius).extrude(height)\\n\\n# Boolean cut to produce the hollow annular sleeve\\nresult = outer.cut(inner)\\n\\n# Export the final single solid as a STEP file\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.54}, {\"exit\": 0, \"duration_s\": 2.44}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 120165.919, \"bbox_len\": [100.0, 100.0, 30.0], \"n_faces\": 4, \"n_solids\": 1, \"cyl_radii\": [35.0, 50.0]}, \"reference\": {\"volume_mm3\": 120165.919, \"bbox_len\": [100.0, 100.0, 30.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 120165.919, \"ref\": 120165.919}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 100.0, \"ref\": 100.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 100.0, \"ref\": 100.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 30.0, \"ref\": 30.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 50.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 35.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 4, \"got\": 4, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 64.831,
+    "setup_s": 0.0,
+    "grade_s": 4.994
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=603",
+    "run1 exit=0 2.54s",
+    "run2 exit=0 2.44s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

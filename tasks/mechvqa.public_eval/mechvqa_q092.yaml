@@ -1,0 +1,59 @@
+id: mechvqa_q092
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q092.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/8d/8db9b6b42e8a2c8c23e2628a1663781a0cac612b.png
+    digest: 1095aebbe39d8e9059b24e627564ed180a4e57d623e51862a30869b729042502
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 613
+  reference_answer: '首先，确定子图的排列顺序：从左至右、从上至下。组合图中第一行有1张图（阀杆），第二行有2张图（从左至右依次为定位片、上盖）。因此第2张图是第二行左侧的“定位片”图。
+
+
+    观察该图的视图内容：图中包含多个表达形式，其中**左上方的小视图**带有剖面线（交叉斜线），且标注了尺寸和结构细节，属于剖视图；其余视图（如C形主视图、轴测图）均未体现剖切特征。经逐一核对，仅存在1个符合剖视图定义的视图。
+
+
+    综上，该组合图中的第2张图包含1个剖视图。'
+  capability: Judging
+  difficulty: Medium
+  subcategory: Anomaly Detection
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

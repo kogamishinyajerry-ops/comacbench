@@ -1,0 +1,68 @@
+id: cg_plate_004
+registry_id: cadgen.local_validity
+domain: cad_design
+task_type: design_artifact
+model_profile: plain_llm
+assets_revision: cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- cadquery
+input:
+  prompt_file: tasks/cadgen.local_validity/cg_plate_004.md
+  prompt_sha256: b544129d770334cb79b0e72d42a415214ee88bc5f4345e14e0a956a231a13889
+  assets: []
+output_contract:
+- part.step
+reference:
+  source: gold 脚本预计算（自建参数化 CAD 任务，cadquery 2.8.0 + OCP 本地测量）
+  revision: cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0
+  values:
+    bbox_len_x: 90.0000002
+    bbox_len_y: 70.0000002
+    bbox_len_z: 6.000000200000001
+    n_cyl_faces_radius_3.5: 4
+    n_cyl_faces_radius_9: 4
+    n_faces_total: 14
+    volume_mm3: 36459.18578948954
+  rel_tol: 0.01
+  uncertainty_note: 确定性几何；容差覆盖 STEP 精度与建模口径差（1e-7 量级）
+grader:
+  answer_format: code
+  exec_kind: cadgen_local_validity
+  validity_gate: true
+  numeric_rel_tol: 0.01
+  interface_checks:
+  - check: n_cyl_faces_with_radius
+    radius: 3.5
+    expect: 4
+  - check: n_cyl_faces_with_radius
+    radius: 9.0
+    expect: 4
+  - check: n_faces_total
+    expect: 14
+  oracle_source: data/cadgen/local_validity/gold/cg_plate_004.py
+  sandbox:
+    banned: network/process/ctypes
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=体积+包围盒三边相对误差命中均值（各 1/4，1% 容差）；requirements=interface_checks 通过率（圆柱面数
+    ±1%/总面数精确）
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: 自建参数化任务（未使用 CADGenBench 输入/GT）+ cadquery (Apache-2.0)
+  license: 任务文本与 gold 自建；cadquery Apache-2.0
+  status: confirmed-repo
+  revision: cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0
+  mirror_allowed: true
+  attribution: cadquery, github.com/CadQuery/cadquery（仅作为建模库依赖）

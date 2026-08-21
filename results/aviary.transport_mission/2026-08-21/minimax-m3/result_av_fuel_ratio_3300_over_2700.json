@@ -1,0 +1,40 @@
+{
+  "task_id": "av_fuel_ratio_3300_over_2700",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nRun forward mission analyses for two range-variant CSVs (2700 NM and 3300 NM)\\nand compute the fuel ratio. Writes result.json to the current working directory.\\n\\\"\\\"\\\"\\nimport os\\nimport json\\nimport glob\\nfrom copy import deepcopy\\n\\nfrom aviary.interface.run_aviary import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n\\ndef find_csv_for_range(range_nm, search_dir=\\\".\\\"):\\n    \\\"\\\"\\\"Locate the aircraft definition CSV file for the given design range (NM).\\\"\\\"\\\"\\n    patterns = [\\n        f\\\"*{range_nm}*.csv\\\",\\n        f\\\"*{range_nm}nm*.csv\\\",\\n        f\\\"*{range_nm}_*.csv\\\",\\n        f\\\"aircraft_{range_nm}.csv\\\",\\n        f\\\"aircraft_{range_nm}nm.csv\\\",\\n        f\\\"{range_nm}.csv\\\",\\n        f\\\"{range_nm}nm.csv\\\",\\n    ]\\n    for pattern in patterns:\\n        matches = sorted(glob.glob(os.path.join(search_dir, pattern)))\\n        if matches:\\n            return matches[0]\\n    raise FileNotFoundError(\\n        f\\\"Could not find aircraft CSV for {range_nm} NM in '{search_dir}'. \\\"\\n        f\\\"Searched patterns: {patterns}\\\"\\n    )\\n\\n\\ndef run_case(csv_path, phase_info):\\n    \\\"\\\"\\\"Run a single forward mission analysis and return key outputs.\\\"\\\"\\\"\\n    prob = run_aviary(\\n        csv_path,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False,\\n    )\\n    fuel_mass = float(prob.get_val(\\\"mission:total_fuel_mass\\\", units=\\\"lbm\\\")[0])\\n    final_mass = float(prob.get_val(\\\"mission:final_mass\\\", units=\\\"lbm\\\")[0])\\n    range_nm = float(prob.get_val(\\\"mission:range\\\", units=\\\"NM\\\")[0])\\n    return fuel_mass, final_mass, range_nm\\n\\n\\ndef main():\\n    # Deepcopy the default 2DOF phase info and set cruise Mach to 0.80.\\n    phase_info = deepcopy(default_phase_info)\\n    phase_info[\\\"cruise\\\"][\\\"user_options\\\"][\\\"mach_cruise\\\"] = 0.80\\n\\n    # Locate the provided range-variant CSVs in the current working directory.\\n    csv_2700 = find_csv_for_range(2700)\\n    csv_3300 = find_csv_for_range(3300)\\n    print(f\\\"Using CSV for 2700 NM: {csv_2700}\\\")\\n    print(f\\\"Using CSV for 3300 NM: {csv_3300}\\\")\\n\\n    # Run both forward mission analyses.\\n    fuel_2700, final_mass_2700, range_2700 = run_case(csv_2700, phase_info)\\n    fuel_3300, final_mass_3300, range_3300 = run_case(csv_3300, phase_info)\\n\\n    # Compute the fuel ratio (3300 NM / 2700 NM).\\n    fuel_ratio = fuel_3300 / fuel_2700\\n\\n    # Build the result payload.\\n    result = {\\n        \\\"fuel_ratio_3300_over_2700\\\": fuel_ratio,\\n        \\\"fuel_2700_lbm\\\": fuel_2700,\\n        \\\"fuel_3300_lbm\\\": fuel_3300,\\n        \\\"final_mass_2700_lbm\\\": final_mass_2700,\\n        \\\"final_mass_3300_lbm\\\": final_mass_3300,\\n        \\\"range_2700_NM\\\": range_2700,\\n        \\\"range_3300_NM\\\": range_3300,\\n    }\\n\\n    # Write result.json to the current working directory.\\n    out_path = os.path.join(os.getcwd(), \\\"result.json\\\")\\n    with open(out_path, \\\"w\\\") as f:\\n        json.dump(result, f, indent=2)\\n\\n    print(\\\"\\\\nResults:\\\")\\n    print(f\\\"  Fuel (2700 NM): {fuel_2700:.1f} lbm\\\")\\n    print(f\\\"  Fuel (3300 NM): {fuel_3300:.1f} lbm\\\")\\n    print(f\\\"  Final mass (2700 NM): {final_mass_2700:.1f} lbm\\\")\\n    print(f\\\"  Final mass (3300 NM): {final_mass_3300:.1f} lbm\\\")\\n    print(f\\\"  Range (2700 NM): {range_2700:.1f} NM\\\")\\n    print(f\\\"  Range (3300 NM): {range_3300:.1f} NM\\\")\\n    print(f\\\"  Fuel ratio (3300/2700): {fuel_ratio:.6f}\\\")\\n    print(f\\\"\\\\nResult written to {out_path}\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_2is4an96/solve.py\\\", line 97, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_2is4an96/solve.py\\\", line 57, in main\\n    csv_2700 = find_csv_for_range(2700)\\n               ^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_2is4an96/solve.py\\\", line 29, in find_csv_for_range\\n    raise FileNotFoundError(\\nFileNotFoundError: Could not find aircraft CSV for 2700 NM in '.'. Searched patterns: ['*2700*.csv', '*2700nm*.csv', '*2700_*.csv', 'aircraft_2700.csv', 'aircraft_2700nm.csv', '2700.csv', '2700nm.csv']\\n\"}"
+  },
+  "timings": {
+    "agent_s": 64.917,
+    "setup_s": 0.0,
+    "grade_s": 0.209
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.21s"
+  ]
+}

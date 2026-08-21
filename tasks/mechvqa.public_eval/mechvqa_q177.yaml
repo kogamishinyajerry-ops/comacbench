@@ -1,0 +1,56 @@
+id: mechvqa_q177
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q177.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/39/39c72719f7ade29800a30c97025e289a4e4a06cc.png
+    digest: 5cbc321b4cc1165b3bd3d29072f89a0b93617d3f275a9e09f7163890c4d71421
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 1162
+  reference_answer: 'According to the drawing, the outer diameter of the central annular
+    region is Φ120 and the inner diameter is Φ70. The annular width is defined as
+    the outer circle radius minus the inner circle radius: \[\text{Width}=\frac{120-70}{2}=25\,\text{mm}\]
+    Therefore, the width of this region is **25 mm**.'
+  capability: Reasoning
+  difficulty: Easy
+  subcategory: Geometric Calculation
+  language: 英文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

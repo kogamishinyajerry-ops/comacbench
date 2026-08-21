@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_design_fn13k_t2650_opr13",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef build_turbojet():\\n    p = om.Problem()\\n\\n    # Cycle design parameters\\n    p.set_val(\\\"DESIGN.Fn_target\\\", 13000.0, units=\\\"lbf\\\")\\n    p.set_val(\\\"DESIGN.T4_target\\\", 2650.0, units=\\\"degR\\\")\\n    p.set_val(\\\"DESIGN.alt\\\", 0.0, units=\\\"ft\\\")\\n    p.set_val(\\\"DESIGN.MN\\\", 0.0)\\n    p.set_val(\\\"DESIGN.opr\\\", 13.0)\\n\\n    # Build the simple turbojet\\n    cycle = p.model.add_subsystem(\\\"DESIGN\\\", pyc.SimpleTurbojet())\\n\\n    # Static design sub-problem so performance metrics get evaluated\\n    cycle.design_perf = pyc.CyclePerformance()\\n    cycle.od_balance = pyc.CyclePerformance()\\n    cycle.od_dummy = pyc.CyclePerformance()\\n\\n    # Configure thermo/elements\\n    cycle.pyc_add_cycle_param(\\\"fuel.LHV\\\", 18400.0, units=\\\"Btu/lbm\\\")\\n    cycle.air = pyc.AIR_JETA_TAB_SPEC\\n\\n    # Flow stations / components for a basic turbojet\\n    cycle.inlet = pyc.Inlet()\\n    cycle.compressor = pyc.Compressor(map_data=pyc.AXI5)\\n    cycle.compressor.Nmech = 5000.0\\n    cycle.compressor.Nmech_target = 5000.0\\n    cycle.burner = pyc.Combustor(fuel_type=\\\"Tabular\\\",\\n                                tabl_name=\\\"JP7\\\",\\n                                mix_data=cycle.air)\\n    cycle.turbine = pyc.Turbine(map_data=pyc.LPT2269)\\n    cycle.shaft = pyc.Shaft()\\n    cycle.nozzle = pyc.Nozzle(nozzType=\\\"CD\\\", lossCoef=0.99)\\n\\n    # Set initial guesses\\n    p.set_val(\\\"DESIGN.inlet.P_ram\\\", 14.696, units=\\\"psi\\\")\\n    p.set_val(\\\"DESIGN.compressor.PR\\\", 13.0)\\n    p.set_val(\\\"DESIGN.burner.Wfuel\\\", 1.0, units=\\\"lbm/s\\\")\\n    p.set_val(\\\"DESIGN.turbine.PR\\\", 3.0)\\n    p.set_val(\\\"DESIGN.nozzle.Ps_ex\""
+  },
+  "timings": {
+    "agent_s": 260.424,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

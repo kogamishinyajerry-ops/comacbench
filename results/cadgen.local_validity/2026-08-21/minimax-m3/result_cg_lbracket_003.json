@@ -1,0 +1,40 @@
+{
+  "task_id": "cg_lbracket_003",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport cadquery as cq\\n\\n# Parameters\\nLEG_LEN_X = 60.0       # horizontal leg length along +X\\nLEG_HEIGHT_Z = 50.0    # vertical leg height along +Z\\nLEG_WIDTH_Y = 30.0      # width along +Y\\nTHICKNESS = 8.0         # leg thickness\\n\\nFILLET_RADIUS = 8.0     # inner concave fillet radius\\n\\nHOLE_DIA = 8.0\\nHOLE_RADIUS = HOLE_DIA / 2.0\\n\\n# Hole centers\\nH_HOLE_X = 34.0\\nH_HOLE_Y = 15.0\\n\\nV_HOLE_Y = 15.0\\nV_HOLE_Z = 29.0\\n\\n# Build the L-bracket as a single solid\\nresult = (\\n    cq.Workplane(\\\"XY\\\")\\n    # Horizontal leg: x: 0..60, y: 0..30, z: 0..8\\n    .transformed((0, 0, 0))\\n    .moveTo(0, 0)\\n    .lineTo(LEG_LEN_X, 0)\\n    .lineTo(LEG_LEN_X, LEG_WIDTH_Y)\\n    .lineTo(0, LEG_WIDTH_Y)\\n    .close()\\n    .extrude(THICKNESS)\\n    # Vertical leg: x: 0..8, y: 0..30, z: 0..50\\n    .faces(\\\">Z\\\").workplane(centerOption=\\\"ProjectedOrigin\\\", origin=(0, LEG_WIDTH_Y / 2, 0))\\n    .moveTo(0, -LEG_WIDTH_Y / 2)\\n    .rect(THICKNESS, LEG_WIDTH_Y)\\n    .extrude(LEG_HEIGHT_Z - THICKNESS, both=False)\\n)\\n\\n# Apply inner concave fillet on the inner edge where the two legs meet.\\n# The inner edge runs along Y direction at x = THICKNESS, z = THICKNESS,\\n# from y = 0..LEG_WIDTH_Y. The fillet center is at (THICKNESS - R, THICKNESS + R)\\n# and the cylinder axis is parallel to Y.\\nresult = (\\n    result\\n    .faces(\\\">Y\\\")\\n    .edges(\\\"|Y\\\")\\n    .edges(cq.NearestToPointSelector((THICKNESS - 1, 0, THICKNESS - 1)))\\n    .fillet(FILLET_R\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "grade_details": "{\"syntax_error\": true}"
+  },
+  "timings": {
+    "agent_s": 299.124,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "provider=minimax code_len=1394"
+  ]
+}

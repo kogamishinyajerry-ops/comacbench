@@ -1,0 +1,54 @@
+id: mechvqa_q094
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q094.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/cf/cf732b15c1d6a4cc3eb40400462c7444f8f40125.png
+    digest: d150d7a08eb7e2e3e57711a44b2f493bd3fc2cdc47fcfc87b93f08ead2879c30
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 619
+  reference_answer: "第1张图（十字连接块）中，按照从左至右、从上至下的顺序，其特殊视图包括：  \n1. 剖视图（主视图部分，带有剖面线和A-A剖切标注）；\
+    \  \n2. 轴测图（立体图，用于直观展示零件三维结构）。  \n\n这些视图分别用于表达零件的内部结构和整体立体形态。"
+  capability: Judging
+  difficulty: Easy
+  subcategory: Anomaly Detection
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

@@ -132,10 +132,10 @@ entries:
     scoring: 可执行模型 + 约束满足 + 目标函数阈值 + 单位与审计记录
     env: Python + OpenMDAO/Aviary 固定版本（Phase-B 导入清单，见 env-matrix.md；手工导入离线 wheel）
     hidden_dynamic: true     # 隐藏商载-航程-跑道组合动态出题
-    assets_revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1   # 2026-08-19 自建 8 静态任务 + 隐藏生成器试点 3 例（base64 隔离），见 data/aviary/transport_mission/PROVENANCE.md
+    assets_revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1   # 2026-08-19 自建 8 静态任务 + 隐藏生成器试点 3 例（base64 隔离）；2026-08-21 扩题至 27（见 PROVENANCE 扩题节）
     risks: [参考答案需预计算并锁版本（已做：references/ 锁定，rel_tol 1%）]
     status: integrated
-    integrated_note: 2026-08-19 simulation_agent（aviary_mission 分支）跑通（dev 终端 venv）；oracle 8/8；stub + GLM（3/8，0.375）+ M3（2/8，0.250）双基线落盘；隐藏动态题生成器评审件交付（hidden/，试点 3 例隔离）
+    integrated_note: 2026-08-19 simulation_agent（aviary_mission 分支）跑通（dev 终端 venv）；oracle 8/8；stub + GLM（3/8，0.375）+ M3（2/8，0.250）双基线落盘；隐藏动态题生成器评审件交付（hidden/，试点 3 例隔离）。2026-08-21 扩题 8→27（任务分析网格/总重权衡/燃油比/航程扫描/模型修复 +19），gold 全量重算锁定；存量 gold 内嵌旧仓库绝对路径修复（__file__ 锚定）+ 等效验证 8/8（对 references 0.0 偏差）；stub 27/27 地板 + oracle 27/27 满分回归；解释器迁移 .venv-aviary（aviary 1.0.1+openmdao 3.45 栈，pyvista import 走 runners/vendor_shim/pyvista_shim）
 
   - id: superwing.coeff_lite
     name: SuperWing-Coeff-Lite（自建子集）
@@ -225,10 +225,10 @@ entries:
     self_built: true
     content: 设计点/非设计点匹配、最小耗油率、模型修复、喘振裕度等约束判断、与 Aviary 回传联算
     env: Python + OpenMDAO/pyCycle 固定版本（Phase-B 导入清单，见 env-matrix.md）
-    assets_revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src   # 2026-08-19 自建 7 任务（SL 设计点收敛域）+ vendored 官方 turbojet 引擎 + 隐藏试点 1 例，见 data/pycycle/engine_cycle/PROVENANCE.md
+    assets_revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src   # 2026-08-19 自建 7 任务（SL 设计点收敛域）+ vendored 官方 turbojet 引擎 + 隐藏试点 1 例；2026-08-21 扩题至 28（见 PROVENANCE 扩题节）
     hidden_dynamic: true
     status: integrated
-    integrated_note: 2026-08-19 simulation_agent（pycycle_cycle 分支）跑通（dev venv om-pycycle 源码装）；oracle 7/7；stub + M3 基线（0/7：5 code_not_executable + 2 missing_output——M3 幻觉 pycycle API，真实能力边界）；沙箱裸 system( 子串误封 add_subsystem 已修
+    integrated_note: 2026-08-19 simulation_agent（pycycle_cycle 分支）跑通（dev venv om-pycycle 源码装）；oracle 7/7；stub + M3 基线（0/7：5 code_not_executable + 2 missing_output——M3 幻觉 pycycle API，真实能力边界）；沙箱裸 system( 子串误封 add_subsystem 已修。2026-08-21 扩题 7→28（设计点网格/扫描敏感性/油耗比/修复题 +21），gold 全量重算锁定；存量 gold 内嵌旧仓库绝对路径修复（__file__ 锚定）+ 等效验证 7/7（max rel 1.5e-10）；stub 28/28 地板 + oracle 28/28 满分回归（.venv 钉子栈不变）
 
   - id: cadgen.local_validity
     name: CADGenBench 本地可复现子集
@@ -244,7 +244,8 @@ entries:
     env: Python + OCCT (cadquery/OCP wheel，Phase-D 导入清单)
     risks: [私有 GT 相似度分数不得伪装成本地可复现结果]
     paused_env_note: 2026-08-19 探查——代码 Apache-2.0/输入 ODC-BY 可镜像；GT 私有持有（cadgenbench-data-gt 空仓）+ 输入含 text+image（多模态通道缺失同 mechvqa）；本地可复现子集（B-Rep 有效性/接口尺寸检查器，pythonocc）需 design_artifact adapter——batch-2 末位待排
-    status: proposed
+    status: integrated
+    integrated_note: 2026-08-21 design_artifact adapter 落地（runners/design_artifact.py：五 gate=可执行/产物在/STEP 可解析+BRepCheck/体积>0/双执行复现一致 + physics=体积与包围盒 1% + requirements=圆柱面接口检查）。任务集：自建参数化 6 族 22 题（法兰/矩形板/L 角支架/套筒/阶梯轴/凸台底板，未镜像 ODC-BY 输入、未用私有 GT，判分 100% 本地可复现，环境 .venv-cad=cadquery 2.8.0+OCP）。基线：stub 22/22=0.0 地板 / oracle 22/22=1.0 满分自检 / minimax-m3 均分 0.7083（满分 15/22，gate 16/22：5 code_not_executable + 1 invalid_geometry）。负路径：nondeterministic_artifact 3/3 命中（pid 驱动随机；time_ns 毫秒粒度假随机教训见 PROVENANCE）
 
   - id: simjeb.structure
     name: SimJEB
@@ -291,8 +292,8 @@ entries:
     license_status: confirmed-repo
     content: 工程图/装配图理解（尺寸标注、零部件关系、剖视图、视觉推理）
     constraints: multimodal_only（纯文本模型不进入主分）；客观题规则判分优先，LLM judge 仅评解释质量
-    status: staged
-    staged_note: 2026-08-19 仓库镜像完成（Apache-2.0 核验，1185 题 benchmark_data 含图纸）；**多模态接入 blocked**——现 provider 层无图片输入通道（GLM-4.6 不支持图、M3 需 multimodal 扩展），qa_grounded 需扩展图文混合 expect 模式；进待议
+    status: integrated
+    integrated_note: 2026-08-21 VLM 通道打通——providers 新增 glmvl 预设（bigmodel paas v4，glm-4v-flash 免费档实测可用；GLM-4.6V/4.5V 为有效模型名、账户欠费中，充值后 --model 覆写升级）；qa_grounded 支持 grader.answer_format=free_vqa（中文感知 Exact/数值容差/token-F1）+ role=image 资产自动转 data URI。任务集：1117 行 qs==1.0 池按 capability×difficulty 最大余数法分层抽 180 题（seed 20260821，生成器 runners/gen_tasks_mechvqa.py）。基线：stub 0.0692 地板 / oracle 1.0000×180 满分自检 / glm-4v-flash 均分 0.3504（满分率 20.6%，Recognition-Easy 0.486 最强 / Judging-Hard 0.127 最弱）。MiniMax 端点无 VL 模型（2013）、Gemini key 区域封锁——VLM 单通道为环境事实。staged 期镜像与许可核验见 staged_note 历史（2026-08-19）
 
   - id: nasa_tmr.verification
     name: NASA TMR 精选案例（求解器自适应改造）

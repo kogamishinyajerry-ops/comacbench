@@ -3,6 +3,7 @@ import json
 import os
 import warnings
 from copy import deepcopy
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
@@ -10,7 +11,25 @@ from aviary.interface.run_aviary import run_aviary
 from aviary.models.missions.two_dof_default import phase_info
 from aviary.variable_info.variables import Mission
 
-BASE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_3200.csv'
+
+def _tm_root() -> Path:
+    """定位 data/aviary/transport_mission（路径可移植：不内嵌仓库绝对路径）。"""
+    cands = [Path(__file__).resolve().parent, Path.cwd()]
+    try:
+        import aviary as _av
+        cands.append(Path(_av.__file__).resolve().parent)
+    except Exception:
+        pass
+    for _c in cands:
+        for _anc in [_c] + list(_c.parents)[:10]:
+            if (_anc / "data" / "aviary" / "transport_mission").is_dir():
+                return _anc / "data" / "aviary" / "transport_mission"
+    raise RuntimeError("data/aviary/transport_mission not found "
+                       "(anchors: __file__ / cwd / aviary-package)")
+
+
+def _p(rel: str) -> str:
+    return str(_tm_root() / rel)
 
 
 def solve(csv_path: str, mach: float):
@@ -25,8 +44,8 @@ def solve(csv_path: str, mach: float):
 
 if __name__ == "__main__":
     fuels = {}
-    for rg, csv in [(2400, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_2400.csv'), (2800, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_2800.csv'), (3200, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_3200.csv'), (3600, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_sweep_3600.csv')]:
-        fuels[rg] = solve(csv, 0.80)["fuel_burn_lbm"]
+    for rg, csv in [(2400, 'derived/av_range_sweep_2400.csv'), (2800, 'derived/av_range_sweep_2800.csv'), (3200, 'derived/av_range_sweep_3200.csv'), (3600, 'derived/av_range_sweep_3600.csv')]:
+        fuels[rg] = solve(_p(csv), 0.80)["fuel_burn_lbm"]
     xs = [2400, 2800, 3200, 3600]
     ys = [fuels[x] for x in xs]
     n = len(xs)

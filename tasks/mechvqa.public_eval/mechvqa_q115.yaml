@@ -1,0 +1,53 @@
+id: mechvqa_q115
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q115.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/5c/5c444d9cc15d0ba3b60acbfc22c909c104b1f03d.png
+    digest: d1744c53f73dfada300ae8e832e14f8a5e857c843015806ff0505fad84fd7106
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 766
+  reference_answer: 该图纸的主视图位于左上角（左上区域）。该视图完整展示了蜗轮壳的主体轮廓及关键尺寸（如Φ110通孔、R55圆弧、总高95、总长128等），并且剖切符号A‑A标注在此视图上，其他视图（如剖视图、俯视图）均以此视图为投影基准，符合机械制图的布局规范。
+  capability: Recognition
+  difficulty: Medium
+  subcategory: Item Localization
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

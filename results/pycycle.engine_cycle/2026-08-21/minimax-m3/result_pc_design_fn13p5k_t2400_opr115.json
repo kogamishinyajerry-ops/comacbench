@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn13p5k_t2400_opr115",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# Create the problem\\nprob = om.Problem()\\n\\n# Thermodynamic property system (Tabular with JETA spec for air)\\nthermo = pyc.TabularThermo(pyc.AIR_JETA_TAB_SPEC, bTableWithReConstruction=True)\\n\\n# Add the cycle\\ncycle = prob.model.add_subsystem('cycle', pyc.Cycle())\\n\\n# Add the turbojet elements\\ncycle.add_subsystem('inlet', pyc.Inlet())\\ncycle.add_subsystem('compressor', pyc.Compressor(map_data=pyc.AXI5, bleed_names=[]))\\ncycle.add_subsystem('combustor', pyc.Combustor(thermo=thermo))\\ncycle.add_subsystem('turbine', pyc.Turbine(map_data=pyc.LPT2269))\\ncycle.add_subsystem('shaft', pyc.Shaft())\\ncycle.add_subsystem('nozzle', pyc.Nozzle())\\n\\n# Connect the flow path\\ncycle.connect('inlet.Fl_O', 'compressor.Fl_I')\\ncycle.connect('compressor.Fl_O', 'combustor.Fl_I')\\ncycle.connect('combustor.Fl_O', 'turbine.Fl_I')\\ncycle.connect('turbine.Fl_O', 'nozzle.Fl_I')\\n\\n# Connect the shaft (compressor driven by turbine)\\ncycle.connect('compressor.trq', 'shaft.trq_in')\\ncycle.connect('turbine.trq', 'shaft.trq_out')\\n\\n# Add the design solver\\nDESIGN = prob.model.add_subsystem('DESIGN', pyc.Design(cycle))\\n\\n# Setup the problem\\nprob.setup()\\n\\n# Set SL design flight conditions\\nprob['cycle.alt'] = 0.0           # ft\\nprob['cycle.MN'] = 0.0            # Mach number\\nprob['cycle.inlet.ram_recovery'] = 1.0\\n\\n# Initial guesses\\nprob['cycle.shaft.Nmech'] = 10000.0  # rpm\\n\\n# Design point targets\\nprob['DESIGN.compressor.PR_target'] = 11.5     # OPR\\nprob['DESIGN.turbine.Tt_target']   = 2400.0    # degR (T4)\\nprob['DESIGN.thrust.Fn_target']    = 13500.0   # lbf\\n\\n# Solve\\nprob.run_model()\\n\\n# Extract results\\nFn_lbf     = float(prob.get_val('cycle.nozzle.Fn'))\\nWfuel_lbm  = float(prob.get_val('cycle.combustor.Wfuel'))\\nOPR        = float(prob.get_val('cycle.compressor.PR'))\\nTSFC_hr    = (Wfuel_lbm / Fn_lbf) * 3600.0  # lbm/(lbf*hr)\\n\\nresult = {\\n    'Fn_lbf':       Fn_lbf,\\n    'TSFC':         TSFC_hr,\\n    'OPR':          OPR,\\n    'Wfuel_lbm_s':  Wfuel_lbm,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_1rst6dei/solve.py\\\", line 9, in <module>\\n    thermo = pyc.TabularThermo(pyc.AIR_JETA_TAB_SPEC, bTableWithReConstruction=True)\\n             ^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'TabularThermo'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 85.7,
+    "setup_s": 0.0,
+    "grade_s": 1.073
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.07s"
+  ]
+}

@@ -1,0 +1,62 @@
+id: mechvqa_q146
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q146.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/0f/0f07f1c292b7345d62e4062db7dd44ba7b369a66.png
+    digest: 1148e6d6aff1332ac6c0d1b12329a428db8424ced68cbdb4281c37cba6107246
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 983
+  reference_answer: '判断：侧视图中高度尺寸未标注不属于尺寸遗漏，符合机械制图规范。理由如下：
+
+    1. **尺寸标注原则**：同一方向的尺寸只需在最能清晰表达该方向特征的视图中标注一次，避免重复和矛盾。主视图已经标注了整体高度30，侧视图的高度可由主视图直接传递，无需再次标注。
+
+    2. **投影关系**：依据 GB/T 4457.4‑2002/4458.4‑2003 等标准，三视图之间遵循“高平齐”原则，侧视图的高度应与主视图保持一致，因而侧视图不标注高度是合理的。
+
+    3. **规范依据**：GB/T 机械制图标准规定，尺寸应标注在最能清晰反映结构特征的视图上，同一方向的尺寸仅标注一次即可。
+
+
+    **结论**：侧视图仅标注宽度15而未标注高度，并不构成尺寸遗漏，符合机械制图的标准要求。'
+  capability: Judging
+  difficulty: Hard
+  subcategory: Consistency Judgment
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

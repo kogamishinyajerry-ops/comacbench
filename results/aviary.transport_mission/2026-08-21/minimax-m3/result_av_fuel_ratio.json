@@ -1,0 +1,40 @@
+{
+  "task_id": "av_fuel_ratio",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport json\\nimport copy\\nimport glob\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions import two_dof_default\\n\\n\\ndef find_range_csv(range_nm):\\n    \\\"\\\"\\\"Find a CSV file that corresponds to the requested design range.\\\"\\\"\\\"\\n    patterns = [\\n        f'*{range_nm}*.csv',\\n        f'*{range_nm}NM*.csv',\\n        f'*_{range_nm}.csv',\\n        f'*_{range_nm}_*.csv',\\n        f'*{range_nm}_NM*.csv',\\n    ]\\n\\n    # 1) current working directory (non-recursive)\\n    for pat in patterns:\\n        matches = sorted(glob.glob(pat))\\n        if matches:\\n            return matches[0]\\n\\n    # 2) recursive search from cwd\\n    for pat in patterns:\\n        matches = sorted(glob.glob('**/' + pat, recursive=True))\\n        if matches:\\n            return matches[0]\\n\\n    # 3) search within the installed aviary package\\n    try:\\n        import aviary\\n        aviary_dir = os.path.dirname(aviary.__file__)\\n        search_dirs = [\\n            os.path.join(aviary_dir, 'examples'),\\n            os.path.join(aviary_dir, 'models'),\\n            os.path.join(aviary_dir, '..', 'examples'),\\n            os.path.join(aviary_dir, '..', 'models'),\\n        ]\\n        for sd in search_dirs:\\n            if os.path.isdir(sd):\\n                for pat in patterns:\\n                    matches = sorted(glob.glob(os.path.join(sd, '**', pat), recursive=True))\\n                    if matches:\\n                        return matches[0]\\n    except Exception:\\n        pass\\n\\n    raise FileNotFoundError(f\\\"Could not locate a CSV for {range_nm} NM range.\\\")\\n\\n\\n# Locate the two range-variant aircraft CSVs\\ncsv_2400 = find_range_csv(2400)\\ncsv_3600 = find_range_csv(3600)\\n\\nprint(f\\\"2400 NM aircraft CSV: {csv_2400}\\\")\\nprint(f\\\"3600 NM aircraft CSV: {csv_3600}\\\")\\n\\n# Build phase_info: deepcopy the 2DOF default and set cruise Mach to 0.80\\nphase_info = copy.deepcopy(two_dof_default.phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Common run_aviary kwargs (SLSQP because pyoptsparse/IPOPT is unavailable)\\ncommon_kwargs = dict(\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\n# ---- 2400 NM mission ----\\nprob_2400 = run_aviary(csv_2400, phase_info, **common_kwargs)\\nfuel_2400 = float(prob_2400.get_val('mission:total_fuel_mass', units='lbm')[0])\\nfinal_mass_2400 = float(prob_2400.get_val('mission:final_mass', units='lbm')[0])\\nrange_2400 = float(prob_2400.get_val('mission:range', units='NM')[0])\\n\\n# ---- 3600 NM mission ----\\nprob_3600 = run_aviary(csv_3600, phase_info, **common_kwargs)\\nfuel_3600 = float(prob_3600.get_val('mission:total_fuel_mass', units='lbm')[0])\\nfinal_mass_3600 = float(prob_3600.get_val('mission:final_mass', units='lbm')[0])\\nrange_3600 = float(prob_3600.get_val('mission:range', units='NM')[0])\\n\\n# Fuel ratio\\nfuel_ratio = fuel_3600 / fuel_2400\\n\\nprint(f\\\"Fuel 2400 NM : {fuel_2400:.3f} lbm  (final mass {final_mass_2400:.3f} lbm, range {range_2400:.3f} NM)\\\")\\nprint(f\\\"Fuel 3600 NM : {fuel_3600:.3f} lbm  (final mass {final_mass_3600:.3f} lbm, range {range_3600:.3f} NM)\\\")\\nprint(f\\\"fuel_ratio_3600_over_2400 = {fuel_ratio:.6f}\\\")\\n\\n# Write result.json in the current working directory\\nresult = {\\n    \\\"fuel_ratio_3600_over_2400\\\": fuel_ratio,\\n}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(\\\"Wrote result.json\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_zyd1b1qi/solve.py\\\", line 55, in <module>\\n    csv_2400 = find_range_csv(2400)\\n               ^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_zyd1b1qi/solve.py\\\", line 51, in find_range_csv\\n    raise FileNotFoundError(f\\\"Could not locate a CSV for {range_nm} NM range.\\\")\\nFileNotFoundError: Could not locate a CSV for 2400 NM range.\\n\"}"
+  },
+  "timings": {
+    "agent_s": 72.563,
+    "setup_s": 0.0,
+    "grade_s": 1.028
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_lbracket_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 0.6667,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.58335,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Dimensions (mm)\\nh_len = 80    # horizontal leg length along X\\nh_thk = 10    # horizontal leg thickness along Z\\nv_hgt = 60    # vertical leg height along Z\\nv_thk = 10    # vertical leg thickness along X\\nw = 40        # width along Y\\nr = 12        # inner fillet radius\\nhole_d = 9    # hole diameter\\nhole_r = hole_d / 2\\n\\n# Create horizontal leg: box (0,0,0) to (h_len, w, h_thk)\\nhoriz = cq.Workplane(\\\"XY\\\").box(h_len, w, h_thk, centered=(False, False, False))\\n\\n# Create vertical leg: box (0,0,0) to (v_thk, w, v_hgt)\\nvert = cq.Workplane(\\\"XY\\\").box(v_thk, w, v_hgt, centered=(False, False, False))\\n\\n# Union to form L-shape\\nbracket = horiz.union(vert)\\n\\n# Add inner concave fillet: quarter-cylinder along Y centered at (v_thk+r, *, h_thk+r)\\n# Cylinder is tangent to z=h_thk (top of horizontal leg) at x=v_thk+r\\n# and tangent to x=v_thk (inner face of vertical leg) at z=h_thk+r\\nfillet = (cq.Workplane(\\\"XZ\\\")\\n          .center(v_thk + r, h_thk + r)\\n          .circle(r)\\n          .extrude(w))\\nbracket = bracket.union(fillet)\\n\\n# Horizontal leg hole: axis along Z, center (x=45, y=20), diameter 9\\nh_hole = (cq.Workplane(\\\"XY\\\")\\n          .center(45, 20)\\n          .circle(hole_r)\\n          .extrude(h_thk))\\nbracket = bracket.cut(h_hole)\\n\\n# Vertical leg hole: axis along X, center (y=20, z=35), diameter 9\\nv_hole = (cq.Workplane(\\\"YZ\\\")\\n          .center(20, 35)\\n          .circle(hole_r)\\n          .extrude(v_thk))\\nbracket = bracket.cut(v_hole)\\n\\n# Export final single solid to part.step\\ncq.exporters.export(bracket, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.58}, {\"exit\": 0, \"duration_s\": 2.66}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 68823.22866, \"bbox_len\": [80.0, 80.0, 60.0], \"n_faces\": 13, \"n_solids\": 2, \"cyl_radii\": [4.5, 4.5, 12.0]}, \"reference\": {\"volume_mm3\": 51963.761554, \"bbox_len\": [80.0, 40.0, 60.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.324446626, \"ok\": false, \"got\": 68823.22866, \"ref\": 51963.761554}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}, \"bbox_len_y\": {\"rel_err\": 0.999999995, \"ok\": false, \"got\": 80.0, \"ref\": 40.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}}, \"physics_score\": 0.5, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.5, \"expect\": 2, \"got\": 2, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 12.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 11, \"got\": 13, \"ok\": false}], \"requirements_score\": 0.6667, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 134.851,
+    "setup_s": 0.0,
+    "grade_s": 5.263
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1538",
+    "run1 exit=0 2.58s",
+    "run2 exit=0 2.66s",
+    "physics=0.5 requirements=0.6667 vol_rel=3.24e-01"
+  ]
+}

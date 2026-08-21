@@ -1,0 +1,36 @@
+{
+  "task_id": "mechvqa_q168",
+  "registry_id": "mechvqa.public_eval",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "vqa_free_obj",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"当 d1 = 52 mm 时，图纸对应的 d4 为 37 mm，二者的尺寸差值为 **15 mm**（直径差），相当于 **7.5 mm** 的半径差。该差值直接反映了零件主体外径与中间台阶外径之间的环形凸台（环形台阶）结构：\\n\\n1. **几何意义**：形成一个径向厚度为 7.5 mm 的环形凸缘，构成零件边缘的台阶宽度。\\n2. **功能作用**：\\n   - **轴向定位**：凸台提供与外壳或盖板的接触基准，确保装配时的轴向位置准确。\\n   - **装配间隙控制**：通过固定的 15 mm 差值，为与相邻部件（如可拆式盖、夹头等）预留合适的配合间隙，防止过盈或松动。\\n   - **结构强度**：环形凸台增加边缘刚度，提高抗扭、抗弯能力，适用于需要承受转矩的旋钮或类似零件。\\n3. **设计一致性**：在参数表中，d1 为 62 mm 时对应 d4 为 47 mm，差值同样为 15 mm，说明该差值是固定的设计参数，用于保持不同规格零件的比例和装配兼容性。\\n\\n**结论**：尺寸差值为 15 mm，体现了零件的环形台阶结构，关键作用包括轴向定位、装配配合及结构强化，是保证零件功能可靠的核心几何特征。\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"vqa 参考答案回显\"}",
+    "layer_details": "{\"kind\": \"vqa\", \"parsed_answer\": \"当 d1 = 52 mm 时，图纸对应的 d4 为 37 mm，二者的尺寸差值为 **15 mm**（直径差），相当于 **7.5 mm** 的半径差。该差值直接反映了零件主体外径与中间台阶外径之间的环形凸台（环形台阶）结构：\\n\\n1. **几何意义**：形成一个径向厚度为 7.5 mm 的环形凸缘，构成零件边缘的台阶宽度。\\n2. **功能作用**：\\n   - **轴向定位**：凸台提供与外壳或盖板\", \"reference_answer\": \"当 d1 = 52 mm 时，图纸对应的 d4 为 37 mm，二者的尺寸差值为 **15 mm**（直径差），相当于 **7.5 mm** 的半径差。该差值直接反映了零件主体外径与中间台阶外径之间的环形凸台（环形台阶）结构：\\n\\n1. **几何意义**：形成一个径向厚度为 7.5 mm 的环形凸缘，构成零件边缘的台阶宽度。\\n2. **功能作用**：\\n   - **轴向定位**：凸台提供与外壳或盖板\", \"capability\": \"Reasoning\", \"difficulty\": \"Hard\", \"subcategory\": \"Geometric Calculation\"}"
+  },
+  "timings": {
+    "agent_s": 0.0,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:a5bcef98e9697d22b4e756212bcad487b280d9e1da0e4d3caeac641adc79f463",
+  "assets_revision": "mechvqa@github-HEAD-2026-08-19",
+  "logs": [
+    "answer='当 d1 = 52\\u202fmm 时，图纸对应的 d4 为 37\\u202fmm，二者的尺寸差值为 **15\\u202fmm**（直径差），相当于 **7.5\\u202fmm** 的半径差。该差值直接反映了零件主体外径与中间台阶外径之间的环形凸台（环形台阶）结构：\\n\\n1. **' attempts=1"
+  ]
+}

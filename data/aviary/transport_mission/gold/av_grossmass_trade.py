@@ -3,6 +3,7 @@ import json
 import os
 import warnings
 from copy import deepcopy
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
@@ -10,7 +11,25 @@ from aviary.interface.run_aviary import run_aviary
 from aviary.models.missions.two_dof_default import phase_info
 from aviary.variable_info.variables import Mission
 
-BASE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_grossmass_trade_175400.csv'
+
+def _tm_root() -> Path:
+    """定位 data/aviary/transport_mission（路径可移植：不内嵌仓库绝对路径）。"""
+    cands = [Path(__file__).resolve().parent, Path.cwd()]
+    try:
+        import aviary as _av
+        cands.append(Path(_av.__file__).resolve().parent)
+    except Exception:
+        pass
+    for _c in cands:
+        for _anc in [_c] + list(_c.parents)[:10]:
+            if (_anc / "data" / "aviary" / "transport_mission").is_dir():
+                return _anc / "data" / "aviary" / "transport_mission"
+    raise RuntimeError("data/aviary/transport_mission not found "
+                       "(anchors: __file__ / cwd / aviary-package)")
+
+
+def _p(rel: str) -> str:
+    return str(_tm_root() / rel)
 
 
 def solve(csv_path: str, mach: float):
@@ -25,8 +44,8 @@ def solve(csv_path: str, mach: float):
 
 if __name__ == "__main__":
     fuels = {}
-    for gm, csv in [(165400, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_grossmass_trade_165400.csv'), (175400, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_grossmass_trade_175400.csv'), (185400, '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_grossmass_trade_185400.csv')]:
-        fuels[gm] = solve(csv, 0.80)["fuel_burn_lbm"]
+    for gm, csv in [(165400, 'derived/av_grossmass_trade_165400.csv'), (175400, 'derived/av_grossmass_trade_175400.csv'), (185400, 'derived/av_grossmass_trade_185400.csv')]:
+        fuels[gm] = solve(_p(csv), 0.80)["fuel_burn_lbm"]
     r = {
         "fuel_165400_lbm": fuels[165400],
         "fuel_175400_lbm": fuels[175400],

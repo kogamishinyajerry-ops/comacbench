@@ -1,0 +1,53 @@
+id: mechvqa_q096
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q096.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/9b/9b32e67366540b1df26f57cc4ff094c295608b27.png
+    digest: 9331e106d7f3d80f59cf118581dc566460628fdaa48b1a0028edd81a1f77f508
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 621
+  reference_answer: 该组合图中子图按从左至右、从上至下的顺序排列，第1张为左上方的“手轮”图，第2张为右上方的“中间垫片”图，第3张是下方的图。观察下方图的标注信息，其标题明确显示为“磁力座”，因此该子图对应的零件名称是磁力座。
+  capability: Judging
+  difficulty: Easy
+  subcategory: Anomaly Detection
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

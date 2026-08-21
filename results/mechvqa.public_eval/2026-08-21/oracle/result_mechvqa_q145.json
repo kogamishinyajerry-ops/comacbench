@@ -1,0 +1,36 @@
+{
+  "task_id": "mechvqa_q145",
+  "registry_id": "mechvqa.public_eval",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "vqa_free_obj",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"**判断**：主视图中分段尺寸60 + 60=120 与总长标注125 不一致，存在5 mm 的差异。 \\n\\n**可能原因**：\\n1. **标注错误或遗漏**：设计图中可能把某段实际长度（如62.5 mm）误写为60 mm，或遗漏了中间的5 mm 过渡段。 \\n2. **基准不同**：60 mm 的分段尺寸可能只针对主体部分（如法兰段），而总长125 mm 包含了端部倒角、键槽、连接过渡等未在分段标注中体现的结构。 \\n3. **公差或工艺余量**：虽然题目未给出公差，但实际制造中可能预留了5 mm 的装配间隙或余量，导致标注数值出现差异。 \\n\\n**结论**：依据图纸的标注，分段尺寸与总长不相符，建议核查原始设计意图，确认是否存在未标出的结构或标注笔误。\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"vqa 参考答案回显\"}",
+    "layer_details": "{\"kind\": \"vqa\", \"parsed_answer\": \"**判断**：主视图中分段尺寸60 + 60=120 与总长标注125 不一致，存在5 mm 的差异。 \\n\\n**可能原因**：\\n1. **标注错误或遗漏**：设计图中可能把某段实际长度（如62.5 mm）误写为60 mm，或遗漏了中间的5 mm 过渡段。 \\n2. **基准不同**：60 mm 的分段尺寸可能只针对主体部分（如法兰段），而总长125 mm 包含了端部倒角、键槽、连接过渡等未在分段标注\", \"reference_answer\": \"**判断**：主视图中分段尺寸60 + 60=120 与总长标注125 不一致，存在5 mm 的差异。 \\n\\n**可能原因**：\\n1. **标注错误或遗漏**：设计图中可能把某段实际长度（如62.5 mm）误写为60 mm，或遗漏了中间的5 mm 过渡段。 \\n2. **基准不同**：60 mm 的分段尺寸可能只针对主体部分（如法兰段），而总长125 mm 包含了端部倒角、键槽、连接过渡等未在分段标注\", \"capability\": \"Judging\", \"difficulty\": \"Hard\", \"subcategory\": \"Consistency Judgment\"}"
+  },
+  "timings": {
+    "agent_s": 0.0,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:a5bcef98e9697d22b4e756212bcad487b280d9e1da0e4d3caeac641adc79f463",
+  "assets_revision": "mechvqa@github-HEAD-2026-08-19",
+  "logs": [
+    "answer='**判断**：主视图中分段尺寸60\\u202f+\\u202f60=120 与总长标注125 不一致，存在5\\u202fmm 的差异。 \\n\\n**可能原因**：\\n1. **标注错误或遗漏**：设计图中可能把某段实际长度（如62.5\\u202fmm）误写为60\\u202fmm，或遗漏了中间的5\\u202f' attempts=1"
+  ]
+}

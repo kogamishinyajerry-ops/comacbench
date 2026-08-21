@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_flange_002",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\nimport math\\n\\n# Parameters (all in mm, hard-coded)\\nouter_diameter = 120.0\\nthickness = 12.0\\nhole_diameter = 10.0\\npcd_diameter = 94.0\\nnum_holes = 8\\n\\n# Create the base flange disc: cylinder with axis along Z,\\n# centered on origin in XY plane, base face at z=0.\\nflange = cq.Workplane(\\\"XY\\\").circle(outer_diameter / 2.0).extrude(thickness)\\n\\n# Compute the 8 hole centers on the bolt circle (PCD).\\n# First hole is on the +X axis (angle = 0), evenly spaced.\\nhole_radius = hole_diameter / 2.0\\npcd_radius = pcd_diameter / 2.0\\n\\nhole_points = []\\nfor i in range(num_holes):\\n    angle_rad = math.radians(i * 360.0 / num_holes)\\n    x = pcd_radius * math.cos(angle_rad)\\n    y = pcd_radius * math.sin(angle_rad)\\n    hole_points.append((x, y))\\n\\n# Cut the 8 through-holes parallel to Z, through the full thickness.\\nflange = (\\n    flange.faces(\\\">Z\\\")\\n    .workplane()\\n    .pushPoints(hole_points)\\n    .circle(hole_radius)\\n    .cutThruAll()\\n)\\n\\n# Export the final single solid to STEP file.\\ncq.exporters.export(flange, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.65}, {\"exit\": 0, \"duration_s\": 2.54}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 128176.980266, \"bbox_len\": [120.0, 120.0, 12.0], \"n_faces\": 11, \"n_solids\": 1, \"cyl_radii\": [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 60.0]}, \"reference\": {\"volume_mm3\": 128176.980266, \"bbox_len\": [120.0, 120.0, 12.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 128176.980266, \"ref\": 128176.980266}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 120.0, \"ref\": 120.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 120.0, \"ref\": 120.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 12.0, \"ref\": 12.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 5.0, \"expect\": 8, \"got\": 8, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 60.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 11, \"got\": 11, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 36.041,
+    "setup_s": 0.0,
+    "grade_s": 5.213
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1028",
+    "run1 exit=0 2.65s",
+    "run2 exit=0 2.54s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

@@ -1,0 +1,65 @@
+id: pc_opr_sweep_hi
+registry_id: pycycle.engine_cycle
+domain: propulsion
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- pycycle
+input:
+  prompt_file: tasks/pycycle.engine_cycle/pc_opr_sweep_hi.md
+  prompt_sha256: c91adfce8b60e6679cd607bfdfbe1f53a54611b2736da3f8f521e5e7813b4a0b
+  assets: []
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（官方 simple_turbojet 模型，om-pycycle Apache-2.0）
+  revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src
+  values:
+    dtsfc_dopr: -0.014593018464563836
+    tsfc_opr115: 0.9553206157968405
+    tsfc_opr140: 0.9153767926402447
+    tsfc_opr160: 0.8899182847828568
+  rel_tol: 0.01
+  uncertainty_note: 确定性循环求解；容差覆盖数值口径差
+grader:
+  answer_format: code
+  exec_kind: pycycle_cycle
+  validity_gate: true
+  result_keys:
+  - tsfc_opr115
+  - tsfc_opr140
+  - tsfc_opr160
+  - dtsfc_dopr
+  numeric_rel_tol: 0.01
+  exact_keys:
+  - corrupted_param
+  - restored_value
+  - best_alt_ft
+  solver_backend: pycycle-analysis-venv
+  oracle_source: data/pycycle/engine_cycle/gold/pc_opr_sweep_hi.py
+  sandbox:
+    banned: network/process/ctypes
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（1% 容差）；requirements=result.json 键完备
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: 自建任务 + om-pycycle (Apache-2.0) 官方示例模型
+  license: Apache-2.0 (pycycle 及示例)；任务文本自建
+  status: confirmed-repo
+  revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src
+  mirror_allowed: true
+  attribution: om-pycycle, github.com/openmdao/pycycle

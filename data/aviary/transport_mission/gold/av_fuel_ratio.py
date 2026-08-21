@@ -3,6 +3,7 @@ import json
 import os
 import warnings
 from copy import deepcopy
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
@@ -10,7 +11,25 @@ from aviary.interface.run_aviary import run_aviary
 from aviary.models.missions.two_dof_default import phase_info
 from aviary.variable_info.variables import Mission
 
-BASE = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_fuel_ratio_2400.csv'
+
+def _tm_root() -> Path:
+    """定位 data/aviary/transport_mission（路径可移植：不内嵌仓库绝对路径）。"""
+    cands = [Path(__file__).resolve().parent, Path.cwd()]
+    try:
+        import aviary as _av
+        cands.append(Path(_av.__file__).resolve().parent)
+    except Exception:
+        pass
+    for _c in cands:
+        for _anc in [_c] + list(_c.parents)[:10]:
+            if (_anc / "data" / "aviary" / "transport_mission").is_dir():
+                return _anc / "data" / "aviary" / "transport_mission"
+    raise RuntimeError("data/aviary/transport_mission not found "
+                       "(anchors: __file__ / cwd / aviary-package)")
+
+
+def _p(rel: str) -> str:
+    return str(_tm_root() / rel)
 
 
 def solve(csv_path: str, mach: float):
@@ -24,6 +43,6 @@ def solve(csv_path: str, mach: float):
 
 
 if __name__ == "__main__":
-    f24 = solve('/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_fuel_ratio_2400.csv', 0.80)["fuel_burn_lbm"]
-    f36 = solve('/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_fuel_ratio_3600.csv', 0.80)["fuel_burn_lbm"]
+    f24 = solve(_p('derived/av_fuel_ratio_2400.csv'), 0.80)["fuel_burn_lbm"]
+    f36 = solve(_p('derived/av_fuel_ratio_3600.csv'), 0.80)["fuel_burn_lbm"]
     json.dump({"fuel_ratio_3600_over_2400": f36 / f24}, open("result.json", "w"), indent=1)

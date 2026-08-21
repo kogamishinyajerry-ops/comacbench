@@ -1,0 +1,66 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold 解（pycycle turbojet）。判分参考预计算用；模型不可见。\\\"\\\"\\\"\\nimport json\\nimport sys\\nimport warnings\\n\\nwarnings.filterwarnings(\\\"ignore\\\")\\nimport matplotlib\\nmatplotlib.use(\\\"Agg\\\")\\n\\nimport os\\n_here = os.path.dirname(os.path.abspath(__file__))\\n_engine = None\\nfor _cand in (os.path.join(_here, \\\"turbojet_engine.py\\\"),\\n              os.path.join(_here, \\\"..\\\", \\\"turbojet_engine.py\\\")):\\n    if os.path.exists(_cand):\\n        _engine = os.path.abspath(_cand)\\n        break\\nif _engine is None:\\n    raise RuntimeError(\\\"turbojet_engine.py not found next to gold or in parent dir\\\")\\nsys.path.insert(0, os.path.dirname(_engine))\\nimport turbojet_engine as te\\n\\nif __name__ == \\\"__main__\\\":\\n    r = r = te.solve_design(15500, 2500, 13.5)\\n    json.dump(r, open(\\\"result.json\\\", \\\"w\\\"), indent=1)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"Fn_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 15499.989064915375, \"ref\": 15499.989064915375}, \"TSFC\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.8357848608384387, \"ref\": 0.8357848608384387}, \"OPR\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 13.5, \"ref\": 13.5}, \"Wfuel_lbm_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 3.5985156121160284, \"ref\": 3.5985156121160284}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 2.521,
+    "setup_s": 0.0,
+    "grade_s": 2.521
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "companion written: turbojet_engine.py (9025B)",
+    "solve exit=0 2.52s"
+  ]
+}

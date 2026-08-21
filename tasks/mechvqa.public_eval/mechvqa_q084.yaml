@@ -1,0 +1,53 @@
+id: mechvqa_q084
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q084.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/3a/3a4e151d442bd83510667f324f9720e3da300cb1.png
+    digest: db3d8107ddc39c2a19a19d5fe17e6f7b62116253eae807c8700b6424e950ab76
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 540
+  reference_answer: 在该偏心柱塞泵（ZPT19）的装配图中，需通过明细栏确认零件名称。首先定位图纸右下角的明细表，查找序号“8”对应的行。结合机械装配图的常见结构，填料通常用于轴封部位的密封功能，而序号8所指位置符合密封组件特征。经核对明细栏信息，序号8的零件名称为填料。
+  capability: Judging
+  difficulty: Easy
+  subcategory: Anomaly Detection
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

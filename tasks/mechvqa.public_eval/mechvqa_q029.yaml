@@ -1,0 +1,53 @@
+id: mechvqa_q029
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q029.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/1e/1ec53bc4d462207274cffc533f62a925b92515f0.jpg
+    digest: aa2c6dfb86dd0240528f88a3ef0da77083e96ad07e1ad5bc7f862a0421512007
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 226
+  reference_answer: 在中间下方的连接件与安装导轨装配视图中，l₅尺寸标注的是左侧端部带螺钉孔的安装导轨/端块的局部水平长度，即从该端块外侧边到其内侧边附近的距离，而不是连接件整体左右两端之间的总长度。
+  capability: Reasoning
+  difficulty: Easy
+  subcategory: Structure Understanding
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

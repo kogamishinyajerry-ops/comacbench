@@ -152,6 +152,50 @@ def grade_free_text_objective(ref_answer: str, answer_text: str,
     return round(_token_f1(ref_answer, answer_text), 4)
 
 
+# ---------------- VQA 自由短答（mechvqa 型，中文感知）----------------
+# mechvqa 参考答案为中文长句；_norm_text 只留 [a-z0-9] 会把中文全部丢光，
+# 故独立实现：归一化 = ASCII 词 + CJK 单字两种 token，F1 按混合 token 计。
+# 判分次序与 free_text 客观层同构：归一化精确 -> 数值集容差 -> token F1 部分分。
+
+def _cjk_tokens(s: str) -> list[str]:
+    import re as _re
+    toks: list[str] = []
+    for m in _re.finditer(r"[a-z0-9]+|[\u4e00-\u9fff]", s.lower()):
+        t = m.group(0)
+        if len(t) > 1:  # ASCII 词去停用词（与 _token_f1 同款停用表）
+            if t not in _STOPWORDS:
+                toks.append(t)
+        else:
+            toks.append(t)  # CJK 单字保留（含一位数字字符，数值题走上一层）
+    return toks
+
+
+def _token_f1_cjk(ref: str, ans: str) -> float:
+    rt, at = _cjk_tokens(ref), _cjk_tokens(ans)
+    if not rt or not at:
+        return 0.0
+    from collections import Counter as _Counter
+    rc, ac = _Counter(rt), _Counter(at)
+    common = sum((rc & ac).values())
+    prec, rec = common / len(at), common / len(rt)
+    return 2 * prec * rec / (prec + rec) if prec + rec else 0.0
+
+
+def grade_vqa_free(ref_answer: str, answer_text: str,
+                   numeric_rel_tol: float = 0.05) -> float:
+    """VQA 客观层（中文感知）：归一化精确 / 数值集容差 / 混合 token F1。"""
+    rtoks, atoks = _cjk_tokens(ref_answer), _cjk_tokens(answer_text)
+    if rtoks == atoks:
+        return 1.0
+    rnums, anums = _numbers(ref_answer), _numbers(answer_text)
+    if rnums and anums:
+        def close(a: float, b: float) -> bool:
+            return abs(a - b) <= numeric_rel_tol * max(abs(b), 1e-9)
+        if all(any(close(a, r) for a in anums) for r in rnums):
+            return 1.0
+    return round(_token_f1_cjk(ref_answer, answer_text), 4)
+
+
 def grade_refusal(refusal_expected: bool, refused: bool) -> float:
     """拒答层：应拒答回答了=0，正确拒答=1；应回答拒答=0，正常回答=1。"""
     return 1.0 if refusal_expected == refused else 0.0
@@ -338,6 +382,7 @@ def grade_math_boxed(ref: str, ans: str, rel_tol: float) -> float:
 def run_task(
     task: TaskSpec, *, provider: str, model: str | None, seed: int,
     env_digest: str, prompt_cache: dict[str, str],
+    image_cache: dict[str, list[str]] | None = None,
 ) -> dict[str, Any]:
     t0 = time.time()
     prompt = prompt_cache[task.id]
@@ -355,19 +400,24 @@ def run_task(
     applicability["objective"] = "distinction" if has_distinction else "merged_into_requirements"
     applicability["requirements"] = ("free_text_obj" if answer_format == "free_text"
                                      else "mcq_exact")
+    applicability["requirements"] = ("vqa_free_obj" if answer_format == "free_vqa"
+                                     else applicability["requirements"])
     applicability["robustness"] = f"samples={n_samples}" if n_samples > 1 else "N/A"
     applicability["requirements"] = ("math_numeric" if answer_format == "math_answer"
                                       else applicability["requirements"])
 
     # --- 模型调用（含采样一致性 robustness，未启用时 1 次） ---
+    # 多模态任务：images 由 main() 预加载为 data URI（digest 已在资产校验过）；
+    # 纯文本 preset 收到 images 会抛 ProviderError（multimodal_only 准入纪律）。
+    images = (image_cache or {}).get(task.id) or None
     outs = []
     try:
         for _ in range(max(1, n_samples)):
             outs.append(get_answer(provider, task, prompt, seed=seed, model=model,
                                    max_attempts=int(task["limits"]["attempts"]),
-                                   expect=answer_format))
+                                   expect=answer_format, images=images))
     except ProviderError:
-        # provider 明确失败（如 API 未配置）=> 整批终止而非静默 0 分
+        # provider 明确失败（如 API 未配置/纯文本模型进多模态任务）=> 整批终止而非静默 0 分
         raise
 
     layer_details: dict[str, Any] = {}
@@ -419,6 +469,26 @@ def run_task(
                          "objective": None, "robustness": 0.0}
             layer_details = {"parsed_answer": ans_num, "reference_number": ref_num,
                              "raw_tail": raw[-160:]}
+
+    elif answer_format == "free_vqa":
+        # ---------- VQA（mechvqa 型）：中文感知自由短答，单客观层 ----------
+        raw = str(outs[0]["answer"]).strip()
+        ref_answer = str(task["reference"]["reference_answer"])
+        if not raw:                      # 空答/解析失败 = 缺产物
+            gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+            req_score = 0.0
+        else:
+            gate, gate_failures, failure_mode = 1, [], None
+            req_score = grade_vqa_free(
+                ref_answer, raw,
+                float(task["grader"].get("numeric_rel_tol", 0.05)))
+        subscores = {"physics": None, "requirements": req_score,
+                     "objective": None, "robustness": 0.0}
+        layer_details = {"kind": "vqa", "parsed_answer": raw[:200],
+                         "reference_answer": ref_answer[:200],
+                         "capability": task["reference"].get("capability"),
+                         "difficulty": task["reference"].get("difficulty"),
+                         "subcategory": task["reference"].get("subcategory")}
 
     elif answer_format == "mcq":
         gate, gate_failures, failure_mode = validity_gate(task, outs[0])
@@ -540,6 +610,61 @@ def _write_math_summary(out_dir: Path, results: list[dict[str, Any]],
     p.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return p
 
+def _write_vqa_summary(out_dir: Path, results: list[dict[str, Any]],
+                       provider: str, model_label: str, seed: int) -> Path:
+    """mechvqa 型 VQA 报告：accuracy + F1 均值 + capability/difficulty 分层。"""
+    import json as _json
+    from collections import defaultdict as _dd
+    dist = gate_distribution(results)
+    scored = [r for r in results if r.get("failure_mode") not in common.VOIDED_FAILURE_MODES]
+    rows = []
+    for r in results:
+        det = _json.loads(r["artifacts"].get("layer_details") or "{}")
+        if det.get("kind") == "vqa":
+            rows.append((r, det))
+    lines = []
+    a = lines.append
+    a(f"# qa_grounded(free_vqa) 结果汇总（provider={provider}, model={model_label}, seed={seed}）")
+    a("")
+    a("## ValidityGate 分布（先看 gate，再看子分）")
+    a("")
+    a(f"- 任务总数: {dist['n_tasks']}")
+    a(f"- gate 通过（非空作答）: {dist['gate_passed']}")
+    a(f"- gate 失败（空答=missing_output）: {dist['gate_failed']}（直接 0 分）")
+    a(f"- gate 失败原因分布: {dist['gate_failure_reasons'] or '无'}")
+    a("")
+    a("## 客观层（requirements = 中文感知 Exact/数值容差/F1）")
+    a("")
+    full = sum(1 for r in scored if r["subscores"]["requirements"] == 1.0)
+    reqs = [r["subscores"]["requirements"] for r in scored]
+    a(f"- 满分（归一化精确或数值全命中）: {full}/{len(scored)}"
+      f"（accuracy = {full / max(1, len(scored)):.4f}）")
+    a(f"- 含部分分的均值: {sum(reqs)/max(1,len(reqs)):.4f}（F1 部分分口径）")
+    a("- 子分适用性: physics=N/A（无证据/拒答层）；objective=N/A；robustness=N/A（样本=1）")
+    a("")
+    a("## 分层（capability × difficulty）")
+    a("")
+    agg = _dd(list)
+    for r, det in rows:
+        agg[(det.get("capability") or "?", det.get("difficulty") or "?")].append(
+            r["subscores"]["requirements"])
+    a("| capability | difficulty | n | mean |")
+    a("| --- | --- | --- | --- |")
+    for (cap, dif), vals in sorted(agg.items()):
+        a(f"| {cap} | {dif} | {len(vals)} | {sum(vals)/len(vals):.4f} |")
+    a("")
+    a("## 每题明细（前 8 字符级截断）")
+    a("")
+    a("| task | gate | score | parsed |")
+    a("| --- | --- | --- | --- |")
+    for r, det in rows:
+        a(f"| {r['task_id']} | {r['validity_gate']} | {r['score']} "
+          f"| {str(det.get('parsed_answer'))[:60]} |")
+    p = out_dir / "summary.md"
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return p
+
+
 def write_summary(out_dir: Path, results: list[dict[str, Any]],
                   provider: str, model_label: str, seed: int) -> Path:
     dist = gate_distribution(results)
@@ -559,11 +684,14 @@ def write_summary(out_dir: Path, results: list[dict[str, Any]],
     a("")
 
     if layered:
-        # ---------- free_text 多层报告（aeroengqa 型）/ math 数值报告（GSM8K 型） ----------
+        # ---------- 多层报告按 layer_details 类型分派 ----------
         import json as _json
-        if any("parsed_answer" in _json.loads(r["artifacts"]["layer_details"])
+        if any("reference_number" in _json.loads(r["artifacts"]["layer_details"])
                for r in layered):
             return _write_math_summary(out_dir, results, provider, model_label, seed)
+        if all(_json.loads(r["artifacts"]["layer_details"]).get("kind") == "vqa"
+               for r in layered):
+            return _write_vqa_summary(out_dir, results, provider, model_label, seed)
         det = [(r, _json.loads(r["artifacts"]["layer_details"])) for r in layered]
         ans_tasks = [(r, d) for r, d in det if r["subscores"]["requirements"] is not None]
         unans_tasks = [(r, d) for r, d in det if r["subscores"]["requirements"] is None]
@@ -645,7 +773,8 @@ def main() -> int:
     ap.add_argument("--tasks", required=True, help="任务 YAML 目录")
     ap.add_argument("--out", required=True, help="结果输出目录 results/<registry_id>/<date>")
     ap.add_argument("--provider", default="stub",
-                    choices=["stub", "oracle", "openai_compat", "glm", "minimax"])
+                    choices=["stub", "oracle", "openai_compat", "glm", "minimax",
+                             "glmvl"])
     ap.add_argument("--model", default=None,
                     help="覆写 provider 预设模型名（缺省用 PROVIDER_PRESETS 默认）")
     ap.add_argument("--seed", type=int, default=0)
@@ -687,6 +816,25 @@ def main() -> int:
         with open(pf, encoding="utf-8", newline="") as f:
             prompt_cache[t.id] = f.read()
 
+    # 多模态图像预载：input.assets 中 role=image 的文件 -> data URI
+    # （digest 已在上面的资产校验逐个核对；mime 按扩展名，jpg 缺省 jpeg）
+    _MIME = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+             ".webp": "image/webp", ".gif": "image/gif", ".bmp": "image/bmp"}
+    import base64 as _b64
+    image_cache: dict[str, list[str]] = {}
+    for t in tasks:
+        uris = []
+        for a in t.get("input", {}).get("assets", []) or []:
+            if a.get("role") != "image":
+                continue
+            p = Path(a["path"])
+            if not p.is_absolute():
+                p = (tasks_dir.parent.parent / p).resolve()
+            mime = _MIME.get(p.suffix.lower(), "application/octet-stream")
+            uris.append("data:" + mime + ";base64,"
+                        + _b64.b64encode(p.read_bytes()).decode())
+        image_cache[t.id] = uris
+
     model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get(
         "model_default", "n/a")
 
@@ -711,7 +859,7 @@ def main() -> int:
         try:
             r = run_task(t, provider=args.provider, model=args.model,
                          seed=args.seed, env_digest=env_digest,
-                         prompt_cache=prompt_cache)
+                         prompt_cache=prompt_cache, image_cache=image_cache)
         except ProviderError as e:
             raise SystemExit(f"[终止] provider 失败: {e}")
         except Exception as e:  # noqa: BLE001 — crash 失败模式需捕获并单题作废

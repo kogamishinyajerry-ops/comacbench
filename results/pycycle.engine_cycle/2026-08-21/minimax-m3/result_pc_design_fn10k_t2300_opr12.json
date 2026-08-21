@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn10k_t2300_opr12",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# ===============================================================\\n# Simple Turbojet - DESIGN point (SL, MN ~ 0)\\n# Targets:  Fn_target = 10000 lbf,  T4_target = 2300 degR, OPR = 12.0\\n# Components: Inlet + Compressor(AXI5) + Combustor +\\n#             Turbine(LPT2269) + Nozzle + Shaft\\n# Thermo: TABULAR / AIR_JETA_TAB_SPEC (pycycle default)\\n# ===============================================================\\n\\nprob = om.Problem()\\n\\n# ----- Top-level independent (design) variables -----\\ndes_vars = prob.model.add_subsystem('des_vars', om.IndepVarComp())\\n\\ndes_vars.add_output('alt',          0.0,    units='ft')\\ndes_vars.add_output('MN',           0.0)\\ndes_vars.add_output('Fn_des',       10000.0, units='lbf')\\ndes_vars.add_output('T4_des',       2300.0,  units='degR')\\ndes_vars.add_output('OPR',          12.0)\\ndes_vars.add_output('ram_recovery', 1.0)\\ndes_vars.add_output('comp_eff',     0.9)\\ndes_vars.add_output('turb_eff',     0.9)\\ndes_vars.add_output('Cv',           0.99)\\n\\n# ----- Build the cycle -----\\ncycle = prob.model.add_subsystem('cycle', om.Group())\\n\\n# Thermodynamic tables - default is AIR_JETA (TABULAR with AIR_JETA_TAB_SPEC)\\nthermo_kwargs = {'thermo_data': pyc.AIR_JETA_TAB_SPEC, 'thermo_method': 'TABULAR'}\\n\\ncycle.add_subsystem('fc',    pyc.FlightConditions())\\ncycle.add_subsystem('inlet', pyc.Inlet())\\ncycle.add_subsystem('comp',  pyc.Compressor(map_data=pyc.AXI5,    design=True))\\ncycle.add_subsystem('comb',  pyc.Combustor())\\ncycle.add_subsystem('turb',  pyc.Turbine(map_data=pyc.LPT2269,    design=True))\\ncycle.add_subsystem('nozz',  pyc.Nozzle())                          # CD nozzle\\ncycle.add_subsystem('shaft', pyc.Shaft())\\ncycle.add_subsystem('perf',  pyc.Performance())\\n\\n# ----- Drive top-level variables into components -----\\nprob.model.connect('des_vars.alt',          'cycle.fc.alt')\\nprob.model.connect('des_vars.MN',           'cycle.fc.MN')\\nprob.model.connect('des_vars.ram_recovery', 'cycle.inlet.ram_recovery')\\nprob.model.connect('des_vars.comp_eff',     'cycle.comp.eff')\\nprob.model.connect('des_vars.turb_eff',     'cycle.turb.eff')\\nprob.model.connect('des_vars.Cv',           'cycle.nozz.Cv')\\nprob.model.connect('des_vars.OPR',          'cycle.comp.PR')\\n\\n# ----- Flow-station connections (P, T, W) -----\\nfor src, dst in [('fc', 'inlet'), ('inlet', 'comp'),\\n                 ('comp', 'comb'), ('comb', 'turb'),\\n                 ('turb', 'nozz')]:\\n    for var in ('P', 'T', 'W'):\\n        cycle.connect(f'{src}.Fl_O:tot:{var}', f'{dst}.Fl_I:tot:{var}')\\n\\n# ----- Shaft ties compressor and turbine torques -----\\ncycle.connect('comp.trq', 'shaft.trq_in')\\ncycle.connect('turb.trq', 'shaft.trq_out')\\n\\n# ----- Performance: inlet air flow & jet exit velocity -----\\ncycle.connect('inlet.Fl_O',         'perf.Fl_in')     # W_air, inlet conditions\\ncycle.connect('nozz.Fl_O:stat:V',   'perf.V_jet')     # exit velocity\\n\\n# ----- Design balances -----\\n# (1) Air-flow balance drives W so perf.Fn matches Fn_des\\nW_bal = cycle.add_subsystem('W_bal', om.BalanceComp())\\nW_bal.add_balance('W', val=100.0, units='lbm/s',\\n                 lhs_name='Fn', rhs_name='Fn_des', eq_units='lbf')\\ncycle.connect('perf.Fn',           'W_bal.Fn')\\ncycle.connect('des_vars.Fn_des',   'W_bal.Fn_des')\\ncycle.connect('W_bal.W',           'fc.W')\\n\\n# (2) Combustor-dh balance drives combustor.dh so Tt4 matches T4_des\\nT4_bal = cycle.add_subsystem('T4_bal', om.BalanceComp())\\nT4_bal.add_balance('dh', val=200.0, units='Btu/lbm',\\n                  lhs_name='Tt4', rhs_name='T4_des', eq_units='degR')\\ncycle.connect('comb.Fl_O:tot:T',   'T4_bal.Tt4')\\ncycle.connect('des_vars.T4_des',   'T4_bal.T4_des')\\ncycle.connect('T4_bal.dh',         'comb.dh')\\n\\n# ----- Non-linear solver (Newton) on the cycle -----\\ncycle.linear_solver = om.DirectSolver()\\ncycle.nonlinear_solver = om.NewtonSolver()\\ncycle.nonlinear_solver.options['maxiter'] = 100\\ncycle.nonlinear_solver.options['solve_subsystems'] = True\\ncycle.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ne repeated 3 more times]\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/chem_eq.py\\\", line 344, in setup\\n    self.thermo = species_data.Properties(self.options['spec'],\\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/species_data.py\\\", line 30, in __init__\\n    self.prod_data = self.thermo_data_module.products\\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'bool' object has no attribute 'products'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 212.981,
+    "setup_s": 0.0,
+    "grade_s": 1.066
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

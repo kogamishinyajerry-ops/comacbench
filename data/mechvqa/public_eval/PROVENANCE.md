@@ -36,3 +36,37 @@ GitHub 仓库 LICENSE = Apache-2.0（含 benchmark_data 评测集与图纸）→
 ```bash
 git clone --depth 1 https://github.com/xiaofengShi/MechVQA && cp -r MechVQA/benchmark_data .
 ```
+
+## 任务集派生（2026-08-21，runners/gen_tasks_mechvqa.py）
+
+- 池：`vqa_benchmark/mechvqa_benchmark.jsonl` 中 qualityscore==1.0 的全部 **1117** 行
+  （0-based 原始行号；1185 行中其余 68 行 qualityscore<1.0 剔除）；
+- 分配：按 (capability × difficulty) 9 格比例分配共 **180** 题，最大余数法
+  （余数并列时按格内样本数降序、格名升序定序，保证可复现）；
+- 抽样：每格内对格内原始行号列表用 `numpy.random.default_rng(20260821)` 独立打乱
+  （每格同种子重置，逐格互不影响）后取前 k 个；
+- 编号：180 题按原始行号升序编号 mechvqa_q001..mechvqa_q180（行号范围 2..1177）；
+- 产物：`tasks/mechvqa.public_eval/`（180 YAML + 180 题面 md）；每题恰 1 张图
+  （input.assets role=image，sha256 逐图锁定，180 题共覆盖 148 张唯一图——
+  少量图纸被多题共用）；`--check` 幂等校验通过（2026-08-21）。
+
+| capability | difficulty | 池（qs==1.0） | 分配 |
+| --- | --- | ---: | ---: |
+| Judging | Easy | 82 | 13 |
+| Judging | Hard | 48 | 8 |
+| Judging | Medium | 116 | 19 |
+| Reasoning | Easy | 63 | 10 |
+| Reasoning | Hard | 96 | 15 |
+| Reasoning | Medium | 106 | 17 |
+| Recognition | Easy | 419 | 68 |
+| Recognition | Hard | 21 | 3 |
+| Recognition | Medium | 166 | 27 |
+| **合计** | | **1117** | **180** |
+
+选中 180 题的边际分布：capability Recognition 98 / Reasoning 42 / Judging 40；
+difficulty Easy 91 / Medium 63 / Hard 26；语言 中文 125 / 英文 55。
+
+冒烟（results/mechvqa.public_eval/2026-08-21/，seed=0）：
+stub gate 180/180、均分 0.0692（地板；5 题因参考答案数字集 ⊆ stub 样板
+「第 N/180 题」数字集而撞数值容差层满分——grader 既有语义，非生成器缺陷）；
+oracle gate 180/180、均分 1.0000（判分管线自检通过）。

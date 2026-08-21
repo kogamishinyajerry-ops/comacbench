@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_shaft_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "invalid_geometry"
+  ],
+  "failure_mode": "invalid_geometry",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Create the stepped shaft with central bore using revolution\\n# The profile is defined in the XZ plane (y=0), with x as radial distance and z as height\\n# Revolution is performed 360 degrees around the Z axis\\n\\nresult = (\\n    cq.Workplane(\\\"XZ\\\")\\n    .moveTo(4, 0)      # Inner radius at z=0\\n    .lineTo(20, 0)     # Outer radius at z=0 (segment 1 bottom)\\n    .lineTo(20, 30)    # Outer radius at z=30 (segment 1 top)\\n    .lineTo(14, 30)    # Step down at z=30\\n    .lineTo(14, 55)    # Outer radius at z=55 (segment 2 top)\\n    .lineTo(9, 55)     # Step down at z=55\\n    .lineTo(9, 75)     # Outer radius at z=75 (segment 3 top)\\n    .lineTo(4, 75)     # Inner radius at z=75\\n    .close()           # Close back to start (4, 0) - creates inner bore wall\\n    .revolve(360, (0, 0, 0), (0, 0, 1))\\n)\\n\\n# Export the solid to STEP file\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"volume_nonpositive\": 0.0}"
+  },
+  "timings": {
+    "agent_s": 71.792,
+    "setup_s": 0.0,
+    "grade_s": 2.554
+  },
+  "environment_digest": "sha256:eab8c778e3c4e45bfb49fce61b889d131025a015b320ca2c2b8de7f93e78c5e4",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=886",
+    "run1 exit=0 2.55s"
+  ]
+}

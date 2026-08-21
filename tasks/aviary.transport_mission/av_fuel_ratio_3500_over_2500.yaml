@@ -1,0 +1,168 @@
+id: av_fuel_ratio_3500_over_2500
+registry_id: aviary.transport_mission
+domain: mdo_design
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- aviary
+input:
+  prompt_file: tasks/aviary.transport_mission/av_fuel_ratio_3500_over_2500.md
+  prompt_sha256: a43e98a4842f888b329b16c811ae855bbe87b2afedc2ad41cb314044630856b5
+  assets:
+  - path: data/aviary/transport_mission/base/aircraft_for_bench_GwGm.csv
+    digest: f9e84e7234044a6b953aa196a710a84362e3ea6304115f19b4649e90a3f2f0c1
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_2400.csv
+    digest: deea129664480823a77801593f2ecea15f75c969a0bdb5e235ef2105a5012129
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_3300_over_2700_2700.csv
+    digest: 6f1aa845f047d928a8dc0be3ad56bbf3fc202d5bdbc96d6f288e5574363ac1a6
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_3300_over_2700_3300.csv
+    digest: 6be47e5fee98e39ea27ba75b0b33bc0b318fa4efe1bb0b1a88a4d98413a04bcf
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_3500_over_2500_2500.csv
+    digest: 0a8398666b7936e45db2d6d4f362a34d5596e385559274fcabc2591471084999
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_3500_over_2500_3500.csv
+    digest: 6c2b1ca2e8394a0cf7d30b91759e16873ea4e13271570424d36ed5e5e183911a
+  - path: data/aviary/transport_mission/derived/av_fuel_ratio_3600.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_grossmass_sweep_165400.csv
+    digest: 0d1859ac221a96ad587e7db6696d884ee00a0ea37dd0b38ef063f2f3fc917022
+  - path: data/aviary/transport_mission/derived/av_grossmass_sweep_170400.csv
+    digest: 9fc1c5ae9ec1972baaa1b7e6c4dc0160614be341fbde7c03931c6f1cb89e794c
+  - path: data/aviary/transport_mission/derived/av_grossmass_sweep_175400.csv
+    digest: f9e84e7234044a6b953aa196a710a84362e3ea6304115f19b4649e90a3f2f0c1
+  - path: data/aviary/transport_mission/derived/av_grossmass_sweep_180400.csv
+    digest: 9d2720b126512f36ddc4ae63fad4732ba83f7becdf74064f05494a84208bd635
+  - path: data/aviary/transport_mission/derived/av_grossmass_sweep_185400.csv
+    digest: 2300cb33baffe03d05c88168c53a20812bcf3fbe07df7bddeebf66aa96a726e2
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade2_167400.csv
+    digest: d49fc70b9aef3ce3284389cf254d602e27730e31047ebf085dbb565d2e646749
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade2_172400.csv
+    digest: 0fefcb8d6aa50786dc6635efad4f2bfa9ecbe31adfa5706b5cb6da0e945e75e6
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade2_177400.csv
+    digest: 2cc5b386389d96cc19f05a84e9c056e506ae22d282533977c16db5265975bfc3
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade3_179400.csv
+    digest: b26809d7f4d6e77f1fdb33a5820cb0c3152a11681adcda9ef4f9588c26c99c6b
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade3_180400.csv
+    digest: 9d2720b126512f36ddc4ae63fad4732ba83f7becdf74064f05494a84208bd635
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade3_182400.csv
+    digest: fd90e022a6edebf62631a9d2e7a0ccf2c33e2e100909c070bb5606a7cc71a11e
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade_165400.csv
+    digest: 0d1859ac221a96ad587e7db6696d884ee00a0ea37dd0b38ef063f2f3fc917022
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade_175400.csv
+    digest: f9e84e7234044a6b953aa196a710a84362e3ea6304115f19b4649e90a3f2f0c1
+  - path: data/aviary/transport_mission/derived/av_grossmass_trade_185400.csv
+    digest: 2300cb33baffe03d05c88168c53a20812bcf3fbe07df7bddeebf66aa96a726e2
+  - path: data/aviary/transport_mission/derived/av_range_2400_m72.csv
+    digest: deea129664480823a77801593f2ecea15f75c969a0bdb5e235ef2105a5012129
+  - path: data/aviary/transport_mission/derived/av_range_2500_m75.csv
+    digest: 0a8398666b7936e45db2d6d4f362a34d5596e385559274fcabc2591471084999
+  - path: data/aviary/transport_mission/derived/av_range_2600_m75.csv
+    digest: 0409153dbcc08931aaecd85c8ad0772265730e9aa38bb607d825507dfa880b32
+  - path: data/aviary/transport_mission/derived/av_range_2600_m82.csv
+    digest: 0409153dbcc08931aaecd85c8ad0772265730e9aa38bb607d825507dfa880b32
+  - path: data/aviary/transport_mission/derived/av_range_2800_m75.csv
+    digest: f6dd71b7aff8a784e6aa52ebf237e40abd35f8d2e5125655809bf4e42725b443
+  - path: data/aviary/transport_mission/derived/av_range_2800_m78.csv
+    digest: f6dd71b7aff8a784e6aa52ebf237e40abd35f8d2e5125655809bf4e42725b443
+  - path: data/aviary/transport_mission/derived/av_range_3000_m80.csv
+    digest: bdb148ac360b5f355e594d6fe58d5f4c66b98d7f122a5b5ec628772ea3cb39d8
+  - path: data/aviary/transport_mission/derived/av_range_3000_m82.csv
+    digest: bdb148ac360b5f355e594d6fe58d5f4c66b98d7f122a5b5ec628772ea3cb39d8
+  - path: data/aviary/transport_mission/derived/av_range_3200_m785.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_range_3400_m72.csv
+    digest: 4a7e321204257bd96358ac6cfe9a63e10a1903c59b1ccb800cec3f0bf776e06f
+  - path: data/aviary/transport_mission/derived/av_range_3400_m80.csv
+    digest: 4a7e321204257bd96358ac6cfe9a63e10a1903c59b1ccb800cec3f0bf776e06f
+  - path: data/aviary/transport_mission/derived/av_range_3600_m78.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_range_3600_m82.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_range_sweep_2400.csv
+    digest: deea129664480823a77801593f2ecea15f75c969a0bdb5e235ef2105a5012129
+  - path: data/aviary/transport_mission/derived/av_range_sweep_2800.csv
+    digest: f6dd71b7aff8a784e6aa52ebf237e40abd35f8d2e5125655809bf4e42725b443
+  - path: data/aviary/transport_mission/derived/av_range_sweep_3200.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_range_sweep_3600.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_range_sweep_fine_3000.csv
+    digest: bdb148ac360b5f355e594d6fe58d5f4c66b98d7f122a5b5ec628772ea3cb39d8
+  - path: data/aviary/transport_mission/derived/av_range_sweep_fine_3200.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_range_sweep_fine_3400.csv
+    digest: 4a7e321204257bd96358ac6cfe9a63e10a1903c59b1ccb800cec3f0bf776e06f
+  - path: data/aviary/transport_mission/derived/av_range_sweep_fine_3600.csv
+    digest: 1663b7c2aafdbe0c1023e05b2412c281c7bee6cbea7052fc3176b2c40c147b1c
+  - path: data/aviary/transport_mission/derived/av_range_sweep_m78_2400.csv
+    digest: deea129664480823a77801593f2ecea15f75c969a0bdb5e235ef2105a5012129
+  - path: data/aviary/transport_mission/derived/av_range_sweep_m78_2600.csv
+    digest: 0409153dbcc08931aaecd85c8ad0772265730e9aa38bb607d825507dfa880b32
+  - path: data/aviary/transport_mission/derived/av_range_sweep_m78_2800.csv
+    digest: f6dd71b7aff8a784e6aa52ebf237e40abd35f8d2e5125655809bf4e42725b443
+  - path: data/aviary/transport_mission/derived/av_range_sweep_m78_3000.csv
+    digest: bdb148ac360b5f355e594d6fe58d5f4c66b98d7f122a5b5ec628772ea3cb39d8
+  - path: data/aviary/transport_mission/derived/av_repair_grossmass_clean.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_repair_grossmass_corrupt.csv
+    digest: f947ce865feab1087ad44b8dc82cdbf512f827ff061fdb1e40ad154df658244e
+  - path: data/aviary/transport_mission/derived/av_repair_grossmass_v2_clean.csv
+    digest: bdb148ac360b5f355e594d6fe58d5f4c66b98d7f122a5b5ec628772ea3cb39d8
+  - path: data/aviary/transport_mission/derived/av_repair_grossmass_v2_corrupt.csv
+    digest: 5ffc299c260cd48881073772616845b3ac94a7a45d58bd4f19a3501542dd51ec
+  - path: data/aviary/transport_mission/derived/av_repair_range_clean.csv
+    digest: 337a15e290b7035955bcab1806579243e81b077c659f11e352888180893d5267
+  - path: data/aviary/transport_mission/derived/av_repair_range_corrupt.csv
+    digest: 6ef704a85c68c53cdbdbfbfb5abf2eaba9a1e9cdcffd10b769031a01a99f8d1a
+  - path: data/aviary/transport_mission/derived/av_repair_range_v2_clean.csv
+    digest: 4a7e321204257bd96358ac6cfe9a63e10a1903c59b1ccb800cec3f0bf776e06f
+  - path: data/aviary/transport_mission/derived/av_repair_range_v2_corrupt.csv
+    digest: 0a8398666b7936e45db2d6d4f362a34d5596e385559274fcabc2591471084999
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（本 harness，aviary 1.0.1 分析模式确定性）
+  revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1
+  values:
+    fuel_ratio_3500_over_2500: 1.0
+  rel_tol: 0.01
+  uncertainty_note: 确定性正向分析；容差覆盖模型间口径差异
+grader:
+  answer_format: code
+  exec_kind: aviary_mission
+  validity_gate: true
+  result_keys:
+  - fuel_ratio_3500_over_2500
+  numeric_rel_tol: 0.01
+  exact_keys:
+  - corrupted_param
+  - restored_value
+  - min_fuel_grossmass_lbm
+  solver_backend: aviary-analysis-venv
+  oracle_source: data/aviary/transport_mission/gold/av_fuel_ratio_3500_over_2500.py
+  sandbox:
+    banned: network/process/ctypes
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（容差 1%）；requirements=result.json 键完备；objective/robustness=N/A（静态任务）权重
+    0
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 1200
+  attempts: 3
+license_provenance:
+  source: 自建任务 + NASA Aviary (Apache-2.0) 基准模型
+  license: Apache-2.0 (Aviary 及其模型)；任务文本自建
+  status: confirmed-repo
+  revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1
+  mirror_allowed: true
+  attribution: NASA Aviary, github.com/openmdao/Aviary

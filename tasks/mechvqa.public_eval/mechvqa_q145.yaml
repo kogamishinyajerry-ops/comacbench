@@ -1,0 +1,56 @@
+id: mechvqa_q145
+registry_id: mechvqa.public_eval
+domain: knowledge
+task_type: qa_grounded
+model_profile: multimodal_vlm
+hidden: false
+allowed_tools: []
+assets_revision: mechvqa@github-HEAD-2026-08-19
+input:
+  prompt_file: tasks/mechvqa.public_eval/mechvqa_q145.md
+  assets:
+  - path: data/mechvqa/public_eval/benchmark_data/images/90/903c8afec7db7ab45cef42c5a53dc8cfb60d1a64.png
+    digest: f693826c5fe7c01b01249613c67a55de581f1bb9714fad3a57e38c13f7719ca6
+    role: image
+output_contract:
+- answer
+reference:
+  source: MechVQA benchmark_data (Apache-2.0, xiaofengShi/MechVQA)
+  question_index: 979
+  reference_answer: "**判断**：主视图中分段尺寸60 + 60=120 与总长标注125 不一致，存在5 mm 的差异。 \n\n**可能原因**：\n\
+    1. **标注错误或遗漏**：设计图中可能把某段实际长度（如62.5 mm）误写为60 mm，或遗漏了中间的5 mm 过渡段。 \n2. **基准不同**：60 mm\
+    \ 的分段尺寸可能只针对主体部分（如法兰段），而总长125 mm 包含了端部倒角、键槽、连接过渡等未在分段标注中体现的结构。 \n3. **公差或工艺余量**：虽然题目未给出公差，但实际制造中可能预留了5 mm\
+    \ 的装配间隙或余量，导致标注数值出现差异。 \n\n**结论**：依据图纸的标注，分段尺寸与总长不相符，建议核查原始设计意图，确认是否存在未标出的结构或标注笔误。"
+  capability: Judging
+  difficulty: Hard
+  subcategory: Consistency Judgment
+  language: 中文
+  qualityscore: 1.0
+grader:
+  validity_gate: true
+  answer_format: free_vqa
+  objective_layer: exact_or_numeric_or_f1
+  numeric_rel_tol: 0.05
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯客观层单层任务：VQA 自由短答无证据语料/拒答/区分层（physics/objective 标注 N/A），权重经 YAML 覆写塌缩到 requirements（free_vqa
+    中文感知 Exact/数值容差/F1，adapter 契约机制）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: xiaofengShi/MechVQA
+  license: Apache-2.0
+  status: confirmed-repo
+  mirror_allowed: true
+  revision: mechvqa@github-HEAD-2026-08-19

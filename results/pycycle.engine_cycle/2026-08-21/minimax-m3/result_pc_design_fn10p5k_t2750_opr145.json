@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn10p5k_t2750_opr145",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom openmdao.api import Problem\\nimport pycycle.api as pyc\\n\\n# Design point parameters\\nFN_TARGET = 10500.0  # lbf\\nT4_TARGET = 2750.0   # degR\\nOPR_TARGET = 14.5    # overall pressure ratio\\nALT = 0.0            # ft\\nMN = 0.0             # Mach number\\n\\n# Build the cycle\\nprob = Problem()\\n\\n# Use TABULAR thermo with AIR_JETA as working fluid\\nprob.model = pyc.Cycle(\\n    'simple_turbojet',\\n    pyc.Inlet,\\n    pyc.Compressor,\\n    pyc.Combustor,\\n    pyc.Turbine,\\n    pyc.Nozzle,\\n    flow_thermo=pyc.AIR_JETA_TAB_SPEC,\\n    inlet_p_ratio_weight=0.0,\\n)\\n\\n# Define ram input\\nprob.model.set_input_defaults('inlet.ram_recovery', 1.0)\\n\\n# Subsystems / design parameters\\nprob.model.compressor.set_input_defaults('map', pyc.AXI5)\\nprob.model.turbine.set_input_defaults('map', pyc.LPT2269)\\n\\n# Design point setup\\nprob.model.design_compressor = True\\nprob.model.design_turbine = True\\n\\n# Pycycle design point using BalEqLS with target performance\\n# Use a cycle deck / perform a design point solve using the API\\n\\n# Build a more complete problem including shaft and a solver\\n\\n# Create the comprehensive problem\\nprob = Problem()\\n\\n# Add cycle as subsystem\\ncycle = prob.model\\n\\n# We'll build it manually with explicit elements\\nprob.model.add_subsystem('inlet', pyc.Inlet())\\nprob.model.add_subsystem('compressor', pyc.Compressor(map_data=pyc.AXI5))\\nprob.model.add_subsystem('combustor', pyc.Combustor(fuel_type='JP-7'))\\nprob.model.add_subsystem('turbine', pyc.Turbine(map_data=pyc.LPT2269))\\nprob.model.add_subsystem('nozzle', pyc.Nozzle(nozzType='CD'))\\n\\n# Add flow station and shaft\\nprob.model.add_subsystem('flow', pyc.FlowPath())\\nprob.model.add_subsystem('shaft', pyc.Shaft())\\n\\n# Connect flow path\\nprob.model.connect('inlet.Fl_I', 'compressor.Fl_I')\\nprob.model.connect('compressor.Fl_O', 'combustor.Fl_I')\\nprob.model.connect('combustor.Fl_O', 'turbine.Fl_I')\\nprob.model.connect('turbine.Fl_O', 'nozzle.Fl_I')\\n\\n# Connect shaft\\nprob.model.connect('compressor.trq', 'shaft.trq_0')\\nprob.model.connect('turbine.trq', 'shaft.trq_1')\\n\\n# Initialize with design parameters\\nprob.model.set_input_defaults('inlet.MN', MN)\\nprob.model.set_input_defaults('inlet.alt', ALT)\\nprob.model.set_input_defaults('inlet.dV', 0.0)\\n\\n# Compressor design point\\nprob.model.set_input_defaults('compressor.MN_out', 0.4)\\nprob.model.set_input_defaults('compressor.PR', OPR_TARGET)\\nprob.model.set_input_defaults('compressor.eff', 0.85)\\n\\n# Combustor\\nprob.model.set_input_defaults('combustor.dPqP', 0.04)\\nprob.model.set_input_defaults('combustor.Tt_out', T4_TARGET)\\n\\n# Turbine\\nprob.model.set_input_defaults('turbine.eff', 0.88)\\nprob.model.set_input_defaults('turbine.MN_out', 0.3)\\n\\n# Nozzle\\nprob.model.set_input_defaults('nozzle.dPqP', 0.02)\\nprob.model.set_input_defaults('nozzle.V_override', False)\\n\\n# Setup problem\\nprob.setup()\\n\\n# Initial guess\\nprob.set_val('inlet.MN', MN)\\nprob.set_val('inlet.alt', ALT)\\nprob.set_val('inlet.W_in', 50.0)\\nprob.set_val('compressor.PR', OPR_TARGET)\\nprob.set_val('combustor.Tt_out', T4_TARGET)\\n\\n# Run to initialize\\nprob.run_model()\\n\\n# Solve for design point: scale airflow so that net thrust = 10500 lbf\\n# Iterate on inlet.W_in to match Fn_target\\nfrom openmdao.api import NewtonSolver, BoundsEnforceLS\\n\\n# We will iterate manually\\nW_low, W_high = 1.0, 500.0\\ntol = 0.01  # 1%\\n\\nfor it in range(60):\\n    prob.set_val('inlet.W_in', W_high)\\n    prob.run_model()\\n    Fn = prob.get_val('nozzle.Fg') - prob.get_val('inlet.F_ram')\\n    err = (Fn - FN_TARGET) / FN_TARGET\\n    if abs(err) < tol:\\n        break\\n    W_low = W_high\\n    W_high = W_high * 1.0 / (1.0 + err)\\n    W_high = max(W_high, 0.1)\\n    W_high = min(W_high, 2000.0)\\n\\nprob.set_val('inlet.W_in', W_high)\\nprob.run_model()\\n\\n# Extract results\\nFn_net = prob.get_val('nozzle.Fg') - prob.get_val('inlet.F_ram')\\nWfuel = prob.get_val('combustor.Wfuel')\\nOPR_out = prob.get_val('compressor.Fl_O:stat:pressure') / prob.get_val('compressor.Fl_I:stat:pressure')\\nWair = prob.get_val('inlet.W_in')\\nTSFC = Wfuel / Fn_net  # lbm/s / lbf = lbm/(s*lbf); often displayed mu\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_jgbnuir1/solve.py\\\", line 17, in <module>\\n    prob.model = pyc.Cycle(\\n                 ^^^^^^^^^^\\nTypeError: Group.__init__() takes 1 positional argument but 7 were given\\n\"}"
+  },
+  "timings": {
+    "agent_s": 16.367,
+    "setup_s": 0.0,
+    "grade_s": 1.342
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.34s"
+  ]
+}
