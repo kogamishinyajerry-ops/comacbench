@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_2600_m82",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nfrom copy import deepcopy\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import default_2dof_phase_info\\n\\n# Path to aircraft model CSV\\ncsv_path = '/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_range_2600_m82.csv'\\n\\n# Deepcopy the default 2DOF phase info so we don't mutate the global default\\nphase_info = deepcopy(default_2dof_phase_info)\\n\\n# Set cruise Mach to 0.82\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.82\\n\\n# Run forward mission analysis (no driver, just model evaluation)\\nprob = run_aviary(\\n    csv_path,\\n    phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\n# Extract results from OpenMDAO promoted variables\\nfuel_burn_lbm = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\nfinal_mass_lbm = float(prob.get_val('mission:final_mass', units='lbm')[0])\\n\\n# Optionally also pull range for diagnostic logging (not required for output)\\ntry:\\n    range_nm = float(prob.get_val('mission:range', units='NM')[0])\\nexcept Exception:\\n    range_nm = None\\n\\n# Write result.json\\nresult = {\\n    'fuel_burn_lbm': fuel_burn_lbm,\\n    'final_mass_lbm': final_mass_lbm,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint('range_nm:', range_nm)\\nprint('fuel_burn_lbm:', fuel_burn_lbm)\\nprint('final_mass_lbm:', final_mass_lbm)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_e615uvdm/solve.py\\\", line 5, in <module>\\n    from aviary.models.missions.two_dof_default import default_2dof_phase_info\\nImportError: cannot import name 'default_2dof_phase_info' from 'aviary.models.missions.two_dof_default' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/models/missions/two_dof_default.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 7.632,
+    "setup_s": 0.0,
+    "grade_s": 1.013
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

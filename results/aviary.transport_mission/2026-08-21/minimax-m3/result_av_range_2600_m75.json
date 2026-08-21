@@ -1,0 +1,38 @@
+{
+  "task_id": "av_range_2600_m75",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Aircraft model CSV path (read-only)\\naircraft_csv = (\\n    '/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/'\\n    'data/aviary/transport_mission/derived/av_range_2600_m75.csv'\\n)\\n\\n# Deep copy the default phase info so we don't mutate the imported module object\\nphase_info = copy.deepcopy(default_phase_info)\\n\\n# Set cruise Mach to 0.75 via phase_info['cruise']['user_options']['mach_cruise']\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.75\\n\\n# Run forward mission analysis (no driver, no optimization)\\nprob = run_aviary(\\n    aircraft_csv,\\n    phase_info=phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\n# Read promoted outputs in colon style\\nfuel_burn_lbm = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\nfinal_mass_lbm = float(prob.get_val('mission:final_mass', units='lbm')[0])\\nmission_range = float(prob.get_val('mission:range', units='NM')[0])\\n\\n# Write result.json with the required keys\\nresult = {\\n    'fuel_burn_lbm': fuel_burn_lbm,\\n    'final_mass_lbm': final_mass_lbm,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(f\\\"Mission range: {mission_range:.2f} NM\\\")\\nprint(f\\\"Total fuel mass: {fuel_burn_lbm:.2f} lbm\\\")\\nprint(f\\\"Final mass:      {final_mass_lbm:.2f} lbm\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"fuel_burn_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357572943, \"ref\": 43389.55357572943}, \"final_mass_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 136000.0, \"ref\": 136000.0}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 27.374,
+    "setup_s": 0.0,
+    "grade_s": 4.121
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 4.12s"
+  ]
+}

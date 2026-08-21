@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_opr_sweep_hi",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport numpy as np\\nimport json\\n\\n\\ndef solve_opr_design_point(opr_target, Fn_target=15000.0, T4_target=2800.0):\\n    \\\"\\\"\\\"Solve a turbojet design point at given OPR for target net thrust and Tt4.\\n\\n    Returns TSFC (lbm/(lbf*s)) and Fn (lbf).\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    model = prob.model\\n\\n    # Independent variable: Fn target\\n    indep = model.add_subsystem('indep', om.IndepVarComp())\\n    indep.add_output('Fn_target', val=Fn_target, units='lbf')\\n\\n    # Flight conditions (sea level, static)\\n    model.add_subsystem('fc', pyc.FlightConditions())\\n\\n    # Cycle elements\\n    model.add_subsystem('inlet', pyc.Inlet())\\n    model.add_subsystem('comp', pyc.Compressor(map_data=pyc.LPCMap, design=True))\\n    model.add_subsystem('comb', pyc.Combustor(fuel_type='Jet-A'))\\n    model.add_subsystem('turb', pyc.Turbine(map_data=pyc.HPTMap, design=True))\\n    model.add_subsystem('noz', pyc.Nozzle())\\n    model.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n    # Balance: iterate W so that perf.Fn == Fn_target\\n    bal = model.add_subsystem('bal', om.BalanceComp())\\n    bal.add_balance('W', val=100.0, units='lbm/s', eq_units='lbf',\\n                    rhs_name='Fn_target')\\n\\n    # Performance (net thrust / TSFC)\\n    model.add_subsystem('perf', pyc.Performance(noz_EXP='noz'))\\n\\n    # ----- Connections: FC -> Inlet -----\\n    model.connect('fc.Fl_O:stat:P', 'inlet.Fl_I:stat:P')\\n    model.connect('fc.Fl_O:stat:T', 'inlet.Fl_I:stat:T')\\n    model.connect('fc.Fl_O:stat:V', 'inlet.Fl_I:stat:V')\\n    model.connect('fc.Fl_O:stat:rho', 'inlet.Fl_I:stat:rho')\\n    model.connect('fc.Fl_O:tot:h', 'inlet.Fl_I:tot:h')\\n    model.connect('fc.Fl_O:tot:S', 'inlet.Fl_I:tot:S')\\n    model.connect('fc.Fl_O:tot:P', 'inlet.Fl_I:tot:P')\\n    model.connect('fc.Fl_O:tot:T', 'inlet.Fl_I:tot:T')\\n    model.connect('bal.W', 'inlet.Fl_I:stat:W')\\n\\n    # ----- Connections: Inlet -> Compressor -----\\n    model.connect('inlet.Fl_O:tot:P', 'comp.Fl_I:tot:P')\\n    model.connect('inlet.Fl_O:tot:T', 'comp.Fl_I:tot:T')\\n    model.connect('inlet.Fl_O:tot:h', 'comp.Fl_I:tot:h')\\n    model.connect('inlet.Fl_O:tot:S', 'comp.Fl_I:tot:S')\\n    model.connect('inlet.Fl_O:stat:W', 'comp.Fl_I:stat:W')\\n    model.connect('inlet.Fl_O:stat:V', 'comp.Fl_I:stat:V')\\n\\n    # ----- Connections: Compressor -> Combustor -----\\n    model.connect('comp.Fl_O:tot:P', 'comb.Fl_I:tot:P')\\n    model.connect('comp.Fl_O:tot:T', 'comb.Fl_I:tot:T')\\n    model.connect('comp.Fl_O:tot:h', 'comb.Fl_I:tot:h')\\n    model.connect('comp.Fl_O:tot:S', 'comb.Fl_I:tot:S')\\n    model.connect('comp.Fl_O:stat:W', 'comb.Fl_I:stat:W')\\n\\n    # ----- Connections: Combustor -> Turbine -----\\n    model.connect('comb.Fl_O:tot:P', 'turb.Fl_I:tot:P')\\n    model.connect('comb.Fl_O:tot:T', 'turb.Fl_I:tot:T')\\n    model.connect('comb.Fl_O:tot:h', 'turb.Fl_I:tot:h')\\n    model.connect('comb.Fl_O:tot:S', 'turb.Fl_I:tot:S')\\n    model.connect('comb.Fl_O:stat:W', 'turb.Fl_I:stat:W')\\n\\n    # ----- Connections: Turbine -> Nozzle -----\\n    model.connect('turb.Fl_O:tot:P', 'noz.Fl_I:tot:P')\\n    model.connect('turb.Fl_O:tot:T', 'noz.Fl_I:tot:T')\\n    model.connect('turb.Fl_O:tot:h', 'noz.Fl_I:tot:h')\\n    model.connect('turb.Fl_O:tot:S', 'noz.Fl_I:tot:S')\\n    model.connect('turb.Fl_O:stat:W', 'noz.Fl_I:stat:W')\\n\\n    # ----- Shaft: turbine drives compressor -----\\n    model.connect('comp.trq', 'shaft.trq_in')\\n    model.connect('turb.trq', 'shaft.trq_out')\\n\\n    # ----- Balance: Fn target -----\\n    model.connect('perf.Fn', 'bal.lhs:W')\\n    model.connect('indep.Fn_target', 'bal.rhs:W')\\n\\n    # ----- Newton solver at top level -----\\n    model.nonlinear_solver = om.NewtonSolver()\\n    model.nonlinear_solver.options['iprint'] = -1\\n    model.nonlinear_solver.options['maxiter'] = 50\\n    model.linear_solver = om.DirectSolver()\\n\\n    prob.setup()\\n\\n    # Initial / design-point values\\n    prob['fc.alt'] = 0.0\\n    prob['fc.MN'] = 0.0\\n    prob['inlet.ram_recovery'] = 1.0\\n    prob['comp.PR'] = opr_target\\n    prob['comp.eff'] = 0.9\\n    prob['comp.eff_po\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Performance: Option 'noz_EXP' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 150.833,
+    "setup_s": 0.0,
+    "grade_s": 1.082
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.08s"
+  ]
+}

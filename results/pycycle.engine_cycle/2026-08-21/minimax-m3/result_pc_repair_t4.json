@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_t4",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import pycycle.api as pyc\\nfrom openmdao.api import Problem\\nimport json\\n\\ndef run_turbojet(t4_target):\\n    prob = Problem()\\n    prob.model = pyc.EngineCycle(model=pyc.Element, name='eng')\\n\\n    # Flight conditions\\n    prob.model.set_input_defaults('eng.fc.alt', 0.0, units='ft')\\n    prob.model.set_input_defaults('eng.fc.MN', 0.0)\\n    prob.model.set_input_defaults('eng.fc.dTs', 0.0, units='degR')\\n\\n    # Component design inputs\\n    prob.model.set_input_defaults('eng.compressor.PR', 13.5)\\n    prob.model.set_input_defaults('eng.compressor.eff', 0.9)\\n    prob.model.set_input_defaults('eng.turbine.eff', 0.9)\\n    prob.model.set_input_defaults('eng.shaft.Nmech', 8000.0, units='rpm')\\n    prob.model.set_input_defaults('eng.inlet.ram_recovery', 1.0)\\n    prob.model.set_input_defaults('eng.nozzle.Cv', 1.0)\\n\\n    # Set targets\\n    prob.model.pyc_add_cycle_param('turbine.eff', 'turb')\\n    prob.model.pyc_add_cycle_param('comp.eff', 'comp')\\n\\n    prob.model.set_input_defaults('eng.turb_target', 'TT4')\\n    prob.model.set_input_defaults('eng.t4_target', t4_target, units='degR')\\n\\n    prob.model.pyc_connect_flow('flow1', 'comp.fl_in', 'comp.fl_out')\\n    prob.model.pyc_connect_flow('flow2', 'comp.fl_out', 'burner.fl_in')\\n    prob.model.pyc_connect_flow('flow3', 'burner.fl_out', 'turb.fl_in')\\n    prob.model.pyc_connect_flow('flow4', 'turb.fl_out', 'nozzle.fl_in')\\n\\n    prob.model.pyc_connect_flow('flow5', 'nozzle.fl_out', 'fc.fl_out')\\n\\n    prob.model.pyc_connect_flow('flow_exh', 'turb.fl_out', 'comp.fl_in2')\\n    # Actually, let's use the standard turbojet setup\\n\\n    prob.setup()\\n    prob.set_val('eng.fc.W', 100.0, units='lbm/s')\\n    prob.run_model()\\n    return prob.get_val('eng.tsfc')\\n\\n# Try various standard t4_target values\\ncandidates = [2400.0, 2500.0, 2300.0, 2200.0, 2100.0, 2000.0, 1900.0, 1800.0, 2600.0, 2700.0, 2800.0, 3000.0, 1600.0]\\ntarget_tsfc = 0.79852\\n\\n# Build a proper turbojet\\ndef make_problem():\\n    prob = Problem()\\n    prob.model = pyc.EngineCycle(model=pyc.Element, name='eng')\\n\\n    prob.model.set_input_defaults('eng.fc.alt', 0.0, units='ft')\\n    prob.model.set_input_defaults('eng.fc.MN', 0.0)\\n    prob.model.set_input_defaults('eng.fc.dTs', 0.0, units='degR')\\n\\n    prob.model.set_input_defaults('eng.inlet.ram_recovery', 1.0)\\n    prob.model.set_input_defaults('eng.inlet.dPqP', 0.0)\\n    prob.model.set_input_defaults('eng.nozzle.Cv', 1.0)\\n\\n    prob.model.set_input_defaults('eng.comp.PR', 13.5)\\n    prob.model.set_input_defaults('eng.comp.eff', 0.9)\\n    prob.model.set_input_defaults('eng.burner.dPqP', 0.0)\\n    prob.model.set_input_defaults('eng.turb.eff', 0.9)\\n    prob.model.set_input_defaults('eng.shaft.Nmech', 8000.0, units='rpm')\\n    prob.model.set_input_defaults('eng.shaft.PSHP', 0.0, units='hp')\\n\\n    # Connect flows\\n    flow = pyc.FlowPath(prob.model, 'flow1')\\n    flow.add('inlet', 'fl_in')\\n    flow.add('comp', 'fl_out')\\n\\n    flow2 = pyc.FlowPath(prob.model, 'flow2')\\n    flow2.add('burner', 'fl_in')\\n    flow2.add('burner', 'fl_out')\\n\\n    flow3 = pyc.FlowPath(prob.model, 'flow3')\\n    flow3.add('turb', 'fl_in')\\n    flow3.add('turb', 'fl_out')\\n\\n    flow4 = pyc.FlowPath(prob.model, 'flow4')\\n    flow4.add('nozzle', 'fl_in')\\n    flow4.add('nozzle', 'fl_out')\\n\\n    prob.model.pyc_connect_flow('flow1', 'inlet.fl_out', 'comp.fl_in')\\n    prob.model.pyc_connect_flow('flow2', 'comp.fl_out', 'burner.fl_in')\\n    prob.model.pyc_connect_flow('flow3', 'burner.fl_out', 'turb.fl_in')\\n    prob.model.pyc_connect_flow('flow4', 'turb.fl_out', 'nozzle.fl_in')\\n\\n    prob.model.pyc_connect_flow('flow5', 'nozzle.fl_out', 'fc.fl_out')\\n\\n    # Mechanical shaft\\n    prob.model.connect('comp.shaft', 'turb.shaft')\\n\\n    # Add cycle params\\n    prob.model.pyc_add_cycle_param('turb.eff', 'turb')\\n    prob.model.pyc_add_cycle_param('comp.eff', 'comp')\\n\\n    prob.model.set_input_defaults('eng.t4_target', 2400.0, units='degR')\\n    prob.model.set_input_defaults('eng.fn_target', 10000.0, units='lbf')\\n\\n    return prob\\n\\nprob = make_problem()\\nprob.setup()\\nprob.set_val('eng.fc.W', 100.0, units\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4hvf4j24/solve.py\\\", line 104, in <module>\\n    prob = make_problem()\\n           ^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4hvf4j24/solve.py\\\", line 51, in make_problem\\n    prob.model = pyc.EngineCycle(model=pyc.Element, name='eng')\\n                 ^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'EngineCycle'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 14.884,
+    "setup_s": 0.0,
+    "grade_s": 0.981
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.98s"
+  ]
+}

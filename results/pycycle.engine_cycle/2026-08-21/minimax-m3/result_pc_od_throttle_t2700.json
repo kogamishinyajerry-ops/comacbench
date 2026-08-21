@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2700",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# Build the simple turbojet design point problem\\nprob = om.Problem()\\n\\n# Top-level cycle group (pycycle Cycle container)\\nprob.model.add_subsystem('cycle', pyc.Cycle())\\ncycle = prob.model.cycle\\n\\n# Add the thermodynamic components\\ncycle.add_subsystem('inlet', pyc.Inlet())\\ncycle.add_subsystem('comp',  pyc.AXI5())\\ncycle.add_subsystem('burner', pyc.Combustor())\\ncycle.add_subsystem('turb',  pyc.LPT2269())\\ncycle.add_subsystem('noz',   pyc.CDnozzle())\\ncycle.add_subsystem('shaft', pyc.Shaft())\\n\\n# Airflow path (Fl_O of upstream -> Fl_I of downstream)\\ncycle.connect('inlet.Fl_O', 'comp.Fl_I')\\ncycle.connect('comp.Fl_O',  'burner.Fl_I')\\ncycle.connect('burner.Fl_O','turb.Fl_I')\\ncycle.connect('turb.Fl_O',  'noz.Fl_I')\\n\\n# Mechanical shaft connections (compressor + turbine on one shaft)\\ncycle.connect('comp.shaft.Nmech',  'shaft.Nmech')\\ncycle.connect('turb.shaft.Nmech',  'shaft.Nmech')\\ncycle.connect('comp.trq', 'shaft.trq_in')\\ncycle.connect('turb.trq', 'shaft.trq_out')\\n\\n# Set up the thermodynamic cycle with AIR_JETA_TAB_SPEC tables\\ncycle.pyc_add_cycle(\\n    'flow',\\n    {\\n        'inlet':  {'Fl_I': 'inlet.Fl_I',  'Fl_O': 'inlet.Fl_O'},\\n        'comp':   {'Fl_I': 'comp.Fl_I',   'Fl_O': 'comp.Fl_O'},\\n        'burner': {'Fl_I': 'burner.Fl_I', 'Fl_O': 'burner.Fl_O'},\\n        'turb':   {'Fl_I': 'turb.Fl_I',   'Fl_O': 'turb.Fl_O'},\\n        'noz':    {'Fl_I': 'noz.Fl_I',    'Fl_O': 'noz.Fl_O'},\\n    },\\n    thermo=['AIR_JETA_TAB_SPEC']\\n)\\n\\n# ----- DESIGN POINT INPUTS (SL, MN ~ 0) -----\\nprob.model.set_input_defaults('cycle.inlet.MN',  0.0)\\nprob.model.set_input_defaults('cycle.inlet.alt', 0.0, units='ft')\\nprob.model.set_input_defaults('cycle.inlet.Fl_I:stat:W', 100.0, units='lbm/s')\\nprob.model.set_input_defaults('cycle.comp.PR',   13.5)\\nprob.model.set_input_defaults('cycle.comp.eff',  0.9)\\nprob.model.set_input_defaults('cycle.burner.dPqP', 0.05)\\nprob.model.set_input_defaults('cycle.burner.eff', 0.99)\\nprob.model.set_input_defaults('cycle.turb.eff',  0.9)\\nprob.model.set_input_defaults('cycle.noz.Cv',    0.99)\\n\\n# ----- BALANCE 1: W (inlet air flow) to hit target net thrust -----\\nprob.model.add_subsystem('thrust_balance', om.BalanceComp())\\nprob.model.thrust_balance.add_balance(\\n    'W', val=100.0, units='lbm/s', eq_units='lbf', rhs_name='Fn_target'\\n)\\nprob.model.connect('cycle.noz.Fg', 'thrust_balance.lhs')\\nprob.model.connect('thrust_balance.W', 'cycle.inlet.Fl_I:stat:W')\\n\\n# ----- BALANCE 2: Wfuel to hit target T4 -----\\nprob.model.add_subsystem('fuel_balance', om.BalanceComp())\\nprob.model.fuel_balance.add_balance(\\n    'Wfuel', val=2.0, units='lbm/s', eq_units='degR', rhs_name='T4_target'\\n)\\nprob.model.connect('cycle.burner.Fl_O:tot:T', 'fuel_balance.lhs')\\nprob.model.connect('fuel_balance.Wfuel', 'cycle.burner.Wfuel')\\n\\n# Design point targets\\nprob.model.set_input_defaults('thrust_balance.Fn_target', 11800.0, units='lbf')\\nprob.model.set_input_defaults('fuel_balance.T4_target',   2700.0, units='degR')\\n\\n# Top-level nonlinear solver to converge the two balances\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['iprint'] = 2\\nprob.model.nonlinear_solver.options['maxiter'] = 100\\nprob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\nprob.model.linear_solver = om.DirectSolver()\\n\\nprob.setup()\\nprob.run_model()\\n\\n# ----- Extract results -----\\nFn_lbf    = float(prob.get_val('cycle.noz.Fg',         units='lbf')[0])\\nWfuel     = float(prob.get_val('cycle.burner.Wfuel',   units='lbm/s')[0])\\nOPR       = float(prob.get_val('cycle.comp.PR')[0])\\nTSFC      = (Wfuel / Fn_lbf) * 3600.0  # lbm / (lbf * hr)\\n\\nresult = {\\n    'Fn_lbf':     Fn_lbf,\\n    'TSFC':       TSFC,\\n    'OPR':        OPR,\\n    'Wfuel_lbm_s': Wfuel,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox__w5pa2ui/solve.py\\\", line 14, in <module>\\n    cycle.add_subsystem('comp',  pyc.AXI5())\\n                                 ^^^^^^^^^^\\nTypeError: 'MapData' object is not callable\\n\"}"
+  },
+  "timings": {
+    "agent_s": 97.915,
+    "setup_s": 0.0,
+    "grade_s": 1.24
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.24s"
+  ]
+}

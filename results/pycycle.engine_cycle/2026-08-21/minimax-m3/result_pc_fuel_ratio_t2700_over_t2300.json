@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_t2700_over_t2300",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef run_case(Tt4_degR):\\n    \\\"\\\"\\\"Solve the SL turbojet design point for a given T4.\\\"\\\"\\\"\\n    prob = om.Problem()\\n    prob.model = pyc.Turbojet()\\n    prob.setup()\\n\\n    # Sea level static flight conditions\\n    prob.set_val('DESIGN.fc.alt', 0.0, units='ft')\\n    prob.set_val('DESIGN.fc.MN', 0.0)\\n\\n    # Initial guesses at the report point (Newton solver seed)\\n    prob.set_val('DESIGN.balance.rpt.W', 100.0, units='lbm/s')\\n    prob.set_val('DESIGN.balance.rpt.Pt', 14.696, units='psi')\\n    prob.set_val('DESIGN.balance.rpt.Tt', 518.67, units='degR')\\n\\n    # Design-point targets\\n    prob.set_val('DESIGN.balance.Fn_target', 11800.0, units='lbf')\\n    prob.set_val('DESIGN.balance.OPR_target', 13.5)\\n\\n    # Component efficiencies\\n    prob.set_val('DESIGN.comp.eff', 0.90)\\n    prob.set_val('DESIGN.comp.eff_poly', 0.90)\\n    prob.set_val('DESIGN.turb.eff', 0.90)\\n    prob.set_val('DESIGN.turb.eff_poly', 0.90)\\n    prob.set_val('DESIGN.burn.eff', 0.99)\\n\\n    # Component characteristics\\n    prob.set_val('DESIGN.inlet.ram_recovery', 1.0)\\n    prob.set_val('DESIGN.burn.dPqP', 0.05)\\n    prob.set_val('DESIGN.nozz.Cv', 0.99)\\n\\n    # Burner exit temperature (T4)\\n    prob.set_val('DESIGN.burn.Tt_out', Tt4_degR, units='degR')\\n\\n    # Shaft speed\\n    prob.set_val('DESIGN.shaft.Nmech', 5000.0, units='rpm')\\n\\n    prob.run_model()\\n\\n    Wfuel = float(prob.get_val('DESIGN.fc.Wfuel', units='lbm/s'))\\n    Fn = float(prob.get_val('DESIGN.fc.Fn', units='lbf'))\\n    OPR = float(prob.get_val('DESIGN.comp.OPR'))\\n    print(f\\\"  T4={Tt4_degR:.0f} degR -> Wfuel={Wfuel:.4f} lbm/s, Fn={Fn:.1f} lbf, OPR={OPR:.3f}\\\")\\n    return Wfuel\\n\\n\\n# Run both design points\\nprint(\\\"Solving T4 = 2300 degR ...\\\")\\nWfuel_2300 = run_case(2300.0)\\nprint(\\\"Solving T4 = 2700 degR ...\\\")\\nWfuel_2700 = run_case(2700.0)\\n\\nratio = Wfuel_2700 / Wfuel_2300\\n\\nwith open('result.json', 'w') as f:\\n    json.dump({'fuel_ratio_t2700_over_t2300': ratio}, f, indent=2)\\n\\nprint(f\\\"Wfuel(2300) = {Wfuel_2300:.4f} lbm/s\\\")\\nprint(f\\\"Wfuel(2700) = {Wfuel_2700:.4f} lbm/s\\\")\\nprint(f\\\"fuel_ratio_t2700_over_t2300 = {ratio:.4f}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_26fq2wm6/solve.py\\\", line 54, in <module>\\n    Wfuel_2300 = run_case(2300.0)\\n                 ^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_26fq2wm6/solve.py\\\", line 9, in run_case\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 53.779,
+    "setup_s": 0.0,
+    "grade_s": 1.211
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.21s"
+  ]
+}

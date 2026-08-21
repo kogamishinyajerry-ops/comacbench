@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2200",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nprob = om.Problem()\\nprob.model = pyc.Engine(name='engine', thermo_method='TABULAR', thermo_data='AIR_JETA_TAB_SPEC')\\n\\n# Add turbojet components\\nprob.model.add_subsystem('inlet', pyc.Inlet())\\nprob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, bleed_names=[]))\\nprob.model.add_subsystem('burner', pyc.Combustor(fuel_type='JetA'))\\nprob.model.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\nprob.model.add_subsystem('noz', pyc.Nozzle(nozz_type='CD', loss_coef='Cv'))\\nprob.model.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n# Flow path connections\\nprob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\nprob.model.connect('comp.Fl_O', 'burner.Fl_I')\\nprob.model.connect('burner.Fl_O', 'turb.Fl_I')\\nprob.model.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n# Mechanical (shaft) connections\\nprob.model.connect('comp.trq', 'shaft.trq_0')\\nprob.model.connect('turb.trq', 'shaft.trq_1')\\nprob.model.connect('shaft.Nmech', 'comp.Nmech')\\nprob.model.connect('shaft.Nmech', 'turb.Nmech')\\n\\n# Design point inputs (SL static, alt=0 ft, MN~0)\\nprob.model.set_input_defaults('inlet.Fl_I:tot:P', 14.696, units='psi')\\nprob.model.set_input_defaults('inlet.Fl_I:tot:T', 518.67, units='degR')\\nprob.model.set_input_defaults('inlet.Fl_I:stat:W', 100.0, units='lbm/s')\\nprob.model.set_input_defaults('comp.PR', 13.5)\\nprob.model.set_input_defaults('burner.Fuel:Heat', -17800.0, units='Btu/lbm')\\nprob.model.set_input_defaults('burner.Fl_I:FAR', 0.0)\\nprob.model.set_input_defaults('burner.dPqP', 0.05)\\nprob.model.set_input_defaults('turb.eff', 0.9)\\nprob.model.set_input_defaults('noz.Cv', 0.99)\\n\\n# Design point balance: T4 = 2200 degR via FAR adjustment\\nprob.model.add_subsystem('T4_bal', om.BalanceComp())\\nprob.model.T4_bal.add_balance('FAR', val=0.02,\\n                              lhs_name='T4', rhs_val=2200.0,\\n                              eq_units='degR', lower=1e-4, upper=0.1)\\nprob.model.connect('burner.Fl_O:tot:T', 'T4_bal.lhs:T4')\\nprob.model.connect('T4_bal.FAR', 'burner.Fl_I:FAR')\\n\\n# Design point balance: Fn = 11800 lbf via W adjustment\\nprob.model.add_subsystem('thrust_bal', om.BalanceComp())\\nprob.model.thrust_bal.add_balance('W', val=100.0, units='lbm/s',\\n                                 lhs_name='Fg', rhs_val=11800.0,\\n                                 eq_units='lbf', lower=1.0, upper=2000.0)\\nprob.model.connect('noz.Fg', 'thrust_bal.lhs:Fg')\\nprob.model.connect('thrust_bal.W', 'inlet.Fl_I:stat:W')\\n\\n# Newton solver for the implicit design-point balances\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['maxiter'] = 50\\nprob.model.nonlinear_solver.options['iprint'] = -1\\nprob.model.linear_solver = om.DirectSolver()\\n\\nprob.setup()\\nprob.set_solver_print(level=-1)\\nprob.run_model()\\n\\n# Extract design-point results\\nW = float(prob['inlet.Fl_I:stat:W'])\\nFAR = float(prob['burner.Fl_I:FAR'])\\nFn = float(prob['noz.Fg'])          # at static, gross == net thrust\\nWfuel = W * FAR                      # lbm/s\\nTSFC = Wfuel / Fn                    # (lbm/s) / lbf = lbm/(lbf*s)\\n\\nresults = {\\n    'Fn_lbf': Fn,\\n    'TSFC': TSFC,\\n    'OPR': float(prob['comp.PR']),\\n    'Wfuel_lbm_s': Wfuel,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=2)\\n\\nprint(json.dumps(results, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_m9x49mjw/solve.py\\\", line 6, in <module>\\n    prob.model = pyc.Engine(name='engine', thermo_method='TABULAR', thermo_data='AIR_JETA_TAB_SPEC')\\n                 ^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Engine'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 111.859,
+    "setup_s": 0.0,
+    "grade_s": 1.175
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.17s"
+  ]
+}

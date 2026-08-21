@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport json\\nimport pycycle.api as pyc\\n\\nprob = om.Problem()\\n\\n# Independent variables (design point inputs)\\nprob.model.add_subsystem('des_vars', om.IndepVarComp())\\nprob.model.des_vars.add_output('alt', 0.0, units='ft')\\nprob.model.des_vars.add_output('MN', 0.000001)\\nprob.model.des_vars.add_output('Tt4', 2900.0, units='degR')\\nprob.model.des_vars.add_output('OPR', 16.0)\\nprob.model.des_vars.add_output('Fn_target', 14000.0, units='lbf')\\nprob.model.des_vars.add_output('ram_recovery', 1.0)\\nprob.model.des_vars.add_output('Ps_exhaust', 14.696, units='psi')\\nprob.model.des_vars.add_output('dPqP', 0.04)\\nprob.model.des_vars.add_output('Nmech', 10000.0, units='rpm')\\n\\n# Cycle group (design point)\\nprob.model.add_subsystem('cycle', pyc.Cycle())\\nprob.model.cycle.options['thermo_method'] = 'TABULAR'\\nprob.model.cycle.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\nprob.model.cycle.options['config_name'] = 'turbojet'\\n\\n# Add components to cycle\\nprob.model.cycle.add_subsystem('fl_in', pyc.FlightConditions())\\nprob.model.cycle.add_subsystem('inlet', pyc.Inlet())\\nprob.model.cycle.add_subsystem('comp', pyc.AXI5())\\nprob.model.cycle.add_subsystem('burner', pyc.Combustor())\\nprob.model.cycle.add_subsystem('turb', pyc.LPT2269())\\nprob.model.cycle.add_subsystem('nozz', pyc.Nozzle())\\nprob.model.cycle.add_subsystem('shaft', pyc.Shaft(aero='turb', shaft='shaft'))\\n\\n# Flow path (thermodynamic stations)\\nprob.model.cycle.connect('fl_in.Fl_O', 'inlet.Fl_I')\\nprob.model.cycle.connect('inlet.Fl_O', 'comp.Fl_I')\\nprob.model.cycle.connect('comp.Fl_O', 'burner.Fl_I')\\nprob.model.cycle.connect('burner.Fl_O', 'turb.Fl_I')\\nprob.model.cycle.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n# Mechanical connections (compressor driven by turbine)\\nprob.model.cycle.connect('comp.trq', 'shaft.trq_0')\\nprob.model.cycle.connect('turb.trq', 'shaft.trq_1')\\n\\n# Promote cycle inputs to cycle level\\nprob.model.cycle.promotes('fl_in', inputs=['alt', 'MN'])\\nprob.model.cycle.promotes('inlet', inputs=['ram_recovery'])\\nprob.model.cycle.promotes('comp', inputs=['Nmech', 'OPR'])\\nprob.model.cycle.promotes('burner', inputs=['dPqP', 'Tt4'])\\nprob.model.cycle.promotes('turb', inputs=['Nmech'])\\nprob.model.cycle.promotes('nozz', inputs=['Ps_exhaust', 'dPqP'])\\nprob.model.cycle.promotes('shaft', inputs=['Nmech'])\\n\\n# Connect design variables to cycle inputs\\nprob.model.connect('des_vars.alt', 'cycle.alt')\\nprob.model.connect('des_vars.MN', 'cycle.MN')\\nprob.model.connect('des_vars.ram_recovery', 'cycle.ram_recovery')\\nprob.model.connect('des_vars.OPR', 'cycle.OPR')\\nprob.model.connect('des_vars.Tt4', 'cycle.Tt4')\\nprob.model.connect('des_vars.dPqP', 'cycle.dPqP')\\nprob.model.connect('des_vars.Ps_exhaust', 'cycle.Ps_exhaust')\\nprob.model.connect('des_vars.Nmech', 'cycle.Nmech')\\n\\n# Cycle solver (Newton for internal balances)\\nprob.model.cycle.nonlinear_solver = om.NewtonSolver()\\nprob.model.cycle.nonlinear_solver.options['atol'] = 1e-8\\nprob.model.cycle.nonlinear_solver.options['rtol'] = 1e-8\\nprob.model.cycle.linear_solver = om.DirectSolver()\\n\\n# Outer balance: solve for W such that net thrust = Fn_target\\nprob.model.add_subsystem('w_match', om.BalanceComp())\\nprob.model.w_match.add_eq('W', units='lbm/s', eq_units='lbf',\\n                         lhs_name='Fn', rhs_name='Fn_target', val=100.0)\\nprob.model.connect('cycle.nozz.Fn', 'w_match.Fn')\\nprob.model.connect('des_vars.Fn_target', 'w_match.Fn_target')\\nprob.model.connect('w_match.W', 'cycle.fl_in.W')\\n\\n# Top-level solver\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['atol'] = 1e-8\\nprob.model.nonlinear_solver.options['rtol'] = 1e-8\\nprob.model.linear_solver = om.DirectSolver()\\n\\nprob.setup()\\nprob.run_model()\\n\\n# Extract results\\nFn_lbf = float(prob.get_val('cycle.nozz.Fn')[0])\\nW_val = float(prob.get_val('w_match.W')[0])\\nFAR = float(prob.get_val('cycle.burner.Fl_O:FAR')[0])\\nWfuel = W_val * FAR\\nTSFC = Wfuel / Fn_lbf * 3600.0  # lbm/(lbf*hr)\\n\\nresult = {\\n    'Fn_lbf': float(Fn_lbf),\\n    'TSFC': float(TSFC),\\n    'OPR': 16.0,\\n    'Wfuel_lbm_s'\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"another exception occurred:\\n\\nTraceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xvp51yh8/solve.py\\\", line 23, in <module>\\n    prob.model.cycle.options['config_name'] = 'turbojet'\\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Cycle: Option 'config_name' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 180.249,
+    "setup_s": 0.0,
+    "grade_s": 1.048
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.05s"
+  ]
+}

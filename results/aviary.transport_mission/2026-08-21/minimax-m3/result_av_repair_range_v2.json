@@ -1,0 +1,37 @@
+{
+  "task_id": "av_repair_range_v2",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "sandbox_escape_attempt"
+  ],
+  "failure_mode": "sandbox_escape_attempt",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport json\\nimport shutil\\nimport tempfile\\nimport os\\nfrom copy import deepcopy\\n\\nimport numpy as np\\nimport openmdao.api as om\\nfrom dymos import Trajectory\\n\\nfrom aviary.api import Aircraft, Mission, run_aviary\\nfrom aviary.models.missions import two_dof_default\\nfrom aviary.subsystems.subsystem_builder_base import SubsystemBuilderBase\\n\\nCSV_PATH = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_repair_range_v2_corrupt.csv\\\"\\n\\n# 1) Read corrupted CSV to inspect\\nwith open(CSV_PATH, \\\"r\\\") as f:\\n    reader = csv.reader(f)\\n    rows = list(reader)\\n\\nprint(\\\"CORRUPTED CSV:\\\")\\nfor r in rows:\\n    print(r)\\n\\n# Find rows for the candidate parameters\\ndef find_row(rows, key):\\n    for r in rows:\\n        if r and r[0] == key:\\n            return r\\n    return None\\n\\nrange_row = find_row(rows, Aircraft.Design.RANGE)\\nmass_row = find_row(rows, Aircraft.Design.GROSS_MASS)\\nprint(\\\"Range row:\\\", range_row)\\nprint(\\\"Gross mass row:\\\", mass_row)\\n\\n# 2) Try restoring each candidate and see which produces fuel burn matching 43389.55 lbm\\n# Setup helpers\\nphase_info = deepcopy(two_dof_default.phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\ndef run_case(modified_csv_text, label):\\n    # Write the modified CSV to a temp file and run aviary\\n    tmpdir = tempfile.mkdtemp()\\n    tmp_csv = os.path.join(tmpdir, \\\"aircraft.csv\\\")\\n    with open(tmp_csv, \\\"w\\\", newline=\\\"\\\") as f:\\n        f.write(modified_csv_text)\\n    prob = run_aviary(\\n        tmp_csv,\\n        phase_info,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        run_driver=False,\\n        make_plots=False,\\n    )\\n    fuel = prob.get_val(\\\"mission:total_fuel_mass\\\", units=\\\"lbm\\\")[0]\\n    rng = prob.get_val(\\\"mission:range\\\", units=\\\"NM\\\")[0]\\n    final_mass = prob.get_val(\\\"mission:final_mass\\\", units=\\\"lbm\\\")[0]\\n    print(f\\\"{label}: fuel={fuel:.2f} lbm, range={rng:.2f} NM, final_mass={final_mass:.2f} lbm\\\")\\n    shutil.rmtree(tmpdir, ignore_errors=True)\\n    return fuel, rng, final_mass\\n\\n# Baseline (corrupted) run\\nwith open(CSV_PATH, \\\"r\\\") as f:\\n    baseline_text = f.read()\\n\\nprint(\\\"\\\\n--- Baseline (corrupted) ---\\\")\\nbase_fuel, base_rng, base_mass = run_case(baseline_text, \\\"baseline\\\")\\n\\n# Try restore range to 3400 NM\\nmodified_range = []\\nfor r in baseline_text.splitlines():\\n    if r.startswith(Aircraft.Design.RANGE + \\\",\\\"):\\n        modified_range.append(f\\\"{Aircraft.Design.RANGE},3400.0,NM\\\")\\n    else:\\n        modified_range.append(r)\\nmodified_range_text = \\\"\\\\n\\\".join(modified_range) + \\\"\\\\n\\\"\\n\\nprint(\\\"\\\\n--- Restore range=3400 NM ---\\\")\\nfuel_a, rng_a, _ = run_case(modified_range_text, \\\"range restored\\\")\\n\\n# Try restore gross_mass to 180400 lbm\\nmodified_mass = []\\nfor r in baseline_text.splitlines():\\n    if r.startswith(Aircraft.Design.GROSS_MASS + \\\",\\\"):\\n        modified_mass.append(f\\\"{Aircraft.Design.GROSS_MASS},180400.0,lbm\\\")\\n    else:\\n        modified_mass.append(r)\\nmodified_mass_text = \\\"\\\\n\\\".join(modified_mass) + \\\"\\\\n\\\"\\n\\nprint(\\\"\\\\n--- Restore gross_mass=180400 lbm ---\\\")\\nfuel_b, rng_b, _ = run_case(modified_mass_text, \\\"mass restored\\\")\\n\\n# Decide\\ntarget = 43389.55\\ntol = 1.0\\nerr_range = abs(fuel_a - target)\\nerr_mass = abs(fuel_b - target)\\nprint(f\\\"\\\\nError if range restored: {err_range:.2f}\\\")\\nprint(f\\\"Error if mass restored: {err_mass:.2f}\\\")\\n\\nif err_range < tol and err_range < err_mass:\\n    corrupted_param = Aircraft.Design.RANGE\\n    restored_value = 3400.0\\nelif err_mass < tol and err_mass < err_range:\\n    corrupted_param = Aircraft.Design.GROSS_MASS\\n    restored_value = 180400.0\\nelse:\\n    raise RuntimeError(\\\"Unable to determine corrupted parameter\\\")\\n\\nprint(f\\\"\\\\nCorrupted param: {corrupted_param}\\\")\\nprint(f\\\"Restored value: {restored_value}\\\")\\n\\nwith open(\\\"result.json\\\", \\\"w\\\") as f:\\n    json.dump({\\\"corrupted_param\\\": corrupted_param, \\\"restored_value\\\": float(restored_value)}, f)\\n\\nprint(\\\"Wrote result.json\\\")\""
+  },
+  "timings": {
+    "agent_s": 13.165,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=['banned_import:shutil']",
+    "syntax_ok=True"
+  ]
+}

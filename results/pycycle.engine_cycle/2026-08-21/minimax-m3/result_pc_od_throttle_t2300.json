@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2300",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# Create problem\\nprob = om.Problem()\\n\\n# Initialize simple turbojet cycle with tabular JETA thermo\\nprob.model = pyc.Turbojet(thermo=pyc.AIR_JETA_TAB_SPEC)\\n\\nprob.setup()\\n\\n# ---- Design point inputs (SL, MN ~ 0, OPR = 13.5) ----\\nprob.set_val('DESIGN.fc.alt', 0.0, units='ft')\\nprob.set_val('DESIGN.fc.MN', 0.0)\\nprob.set_val('DESIGN.inlet.ram_recovery', 1.0)\\n\\n# Compressor\\nprob.set_val('DESIGN.comp.PR', 13.5)\\nprob.set_val('DESIGN.comp.eff', 0.90)\\nprob.set_val('DESIGN.comp.Nmech', 10000.0, units='rpm')\\n\\n# Combustor\\nprob.set_val('DESIGN.burner.FAR', 0.02)\\nprob.set_val('DESIGN.burner.dPqP', 0.0)\\n\\n# Turbine\\nprob.set_val('DESIGN.turb.eff', 0.90)\\nprob.set_val('DESIGN.turb.Nmech', 10000.0, units='rpm')\\n\\n# Nozzle (convergent)\\nprob.set_val('DESIGN.nozzle.Cfg', 1.0)\\n\\n# ---- Targets for the design-point solver ----\\n# Balance closes on weight flow W and a second handle (FAR/dPqP) to match:\\n#   - Net thrust Fn  = 11800 lbf\\n#   - T4 (burner outlet / turbine inlet temp) = 2300 degR\\nprob.model.DESIGN.balance.W.set_input_defaults(100.0, units='lbm/s')\\nprob.model.DESIGN.balance.fn_target.set_input_defaults(11800.0, units='lbf')\\nprob.model.DESIGN.balance.T4_target.set_input_defaults(2300.0, units='degR')\\n\\n# ---- Solve ----\\nprob.run_model()\\n\\n# ---- Extract outputs ----\\nFn_lbf     = float(prob.get_val('DESIGN.fc.Fn',     units='lbf'))\\nTSFC       = float(prob.get_val('DESIGN.fc.TSFC'))              # lbm/(lbf*hr)\\nOPR        = float(prob.get_val('DESIGN.comp.PR'))\\nWfuel_lbm  = float(prob.get_val('DESIGN.fc.Wfuel',  units='lbm/s'))\\n\\nresult = {\\n    'Fn_lbf':       Fn_lbf,\\n    'TSFC':         TSFC,\\n    'OPR':          OPR,\\n    'Wfuel_lbm_s':  Wfuel_lbm,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_yiv0axf3/solve.py\\\", line 9, in <module>\\n    prob.model = pyc.Turbojet(thermo=pyc.AIR_JETA_TAB_SPEC)\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 63.048,
+    "setup_s": 0.0,
+    "grade_s": 1.06
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "av_fuel_ratio_3500_over_2500",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport os\\nimport aviary\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Get the path to aviary models\\naviary_path = os.path.dirname(aviary.__file__)\\naircraft_dir = os.path.join(aviary_path, 'models', 'aircraft')\\n\\n# Aircraft files for 3500 NM and 2500 NM range variants\\naircraft_3500 = os.path.join(aircraft_dir, 'LargeSingleAisle1.csv')\\naircraft_2500 = os.path.join(aircraft_dir, 'LargeSingleAisle2.csv')\\n\\n# Set up phase info with cruise Mach 0.80\\nphase_info = deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Run mission for 3500 NM\\nprob_3500 = run_aviary(\\n    aircraft_file=aircraft_3500,\\n    phase_info=phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False\\n)\\n\\n# Run mission for 2500 NM\\nprob_2500 = run_aviary(\\n    aircraft_file=aircraft_2500,\\n    phase_info=phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False\\n)\\n\\n# Get fuel masses\\nfuel_3500 = prob_3500.get_val('mission:total_fuel_mass', units='lbm')[0]\\nfuel_2500 = prob_2500.get_val('mission:total_fuel_mass', units='lbm')[0]\\n\\n# Calculate ratio\\nfuel_ratio = fuel_3500 / fuel_2500\\n\\n# Write result\\nresult = {\\n    \\\"fuel_ratio_3500_over_2500\\\": float(fuel_ratio)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f)\\n\\nprint(f\\\"Fuel 3500 NM: {fuel_3500} lbm\\\")\\nprint(f\\\"Fuel 2500 NM: {fuel_2500} lbm\\\")\\nprint(f\\\"Ratio: {fuel_ratio}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vyzeoart/solve.py\\\", line 21, in <module>\\n    prob_3500 = run_aviary(\\n                ^^^^^^^^^^^\\nTypeError: run_aviary() got an unexpected keyword argument 'aircraft_file'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 163.577,
+    "setup_s": 0.0,
+    "grade_s": 1.103
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.1s"
+  ]
+}

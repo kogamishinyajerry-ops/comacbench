@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_grossmass",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import aviary.api as av\\nimport copy\\nimport json\\nimport os\\nimport csv\\nimport tempfile\\nimport aviary.models.missions.two_dof_default as two_dof_module\\n\\ncorrupted_csv = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_grossmass_corrupt.csv'\\nreference_fuel_burn = 43389.55\\n\\n# Find the default phase_info dict from two_dof_default\\ndefault_pi = None\\nfor attr_name in ['phase_info', 'default_phase_info', 'default_mission']:\\n    if hasattr(two_dof_module, attr_name):\\n        obj = getattr(two_dof_module, attr_name)\\n        if isinstance(obj, dict):\\n            default_pi = obj\\n            break\\n\\nif default_pi is None:\\n    raise RuntimeError(\\\"Cannot find default phase_info dict in two_dof_default module\\\")\\n\\n# Deepcopy the default and set cruise Mach to 0.80\\nphase_info = copy.deepcopy(default_pi)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Candidates: (key, true_value)\\ncandidates = [\\n    ('aircraft:design:range', 3200.0),\\n    ('aircraft:design:gross_mass', 175400.0),\\n]\\n\\n\\ndef modify_csv_value(input_csv, output_csv, param, new_value):\\n    \\\"\\\"\\\"Modify the value (column 1) of a row matching param in an Aviary CSV.\\\"\\\"\\\"\\n    with open(input_csv, 'r') as fin, open(output_csv, 'w', newline='') as fout:\\n        reader = csv.reader(fin)\\n        writer = csv.writer(fout)\\n        for row in reader:\\n            if row and row[0] == param:\\n                if len(row) >= 2:\\n                    row[1] = str(new_value)\\n            writer.writerow(row)\\n\\n\\nresults = {}\\nfor param, true_value in candidates:\\n    fd, temp_csv = tempfile.mkstemp(suffix='.csv')\\n    os.close(fd)\\n    modify_csv_value(corrupted_csv, temp_csv, param, true_value)\\n\\n    prob = av.run_aviary(\\n        temp_csv,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer='SLSQP',\\n        verbosity=0,\\n        make_plots=False,\\n    )\\n\\n    fuel_burn = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\n    results[param] = fuel_burn\\n\\n    try:\\n        os.unlink(temp_csv)\\n    except OSError:\\n        pass\\n\\n    print(f'{param} -> {true_value}: fuel_burn = {fuel_burn}')\\n\\n# Determine which candidate's restoration matches the reference fuel burn\\nbest_param = None\\nbest_val = None\\nfor param, fuel_burn in results.items():\\n    if abs(fuel_burn - reference_fuel_burn) < 1.0:\\n        best_param = param\\n        for p, v in candidates:\\n            if p == param:\\n                best_val = v\\n                break\\n\\nresult = {\\n    'corrupted_param': best_param,\\n    'restored_value': best_val,\\n}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f)\\n\\nprint('Result:', result)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_mck_wiwz/solve.py\\\", line 51, in <module>\\n    modify_csv_value(corrupted_csv, temp_csv, param, true_value)\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_mck_wiwz/solve.py\\\", line 37, in modify_csv_value\\n    with open(input_csv, 'r') as fin, open(output_csv, 'w', newline='') as fout:\\n         ^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_grossmass_corrupt.csv'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 58.944,
+    "setup_s": 0.0,
+    "grade_s": 1.061
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

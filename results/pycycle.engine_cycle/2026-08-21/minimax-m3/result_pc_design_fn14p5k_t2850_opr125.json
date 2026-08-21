@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14p5k_t2850_opr125",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nSimple Turbojet Design Point using pycycle (om-pycycle)\\nSL static: Fn_target=14500 lbf, T4=2850 degR, compressor OPR=12.5\\n\\\"\\\"\\\"\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# ---------------------------------------------------------------\\n# Build the simple turbojet cycle\\n# ---------------------------------------------------------------\\nprob = om.Problem()\\nprob.model = pyc.Cycle()\\n\\n# Components\\nprob.model.add_subsystem('inlet', pyc.Inlet())\\nprob.model.add_subsystem('comp',  pyc.Compressor(map_data=pyc.AXI5))\\nprob.model.add_subsystem('comb',  pyc.Combustor(fuel_type='JetA'))\\nprob.model.add_subsystem('turb',  pyc.Turbine(map_data=pyc.LPT2269))\\nprob.model.add_subsystem('noz',   pyc.Nozzle(nozzle_type='CD'))\\nprob.model.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n# Flow path\\nprob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\nprob.model.connect('comp.Fl_O',  'comb.Fl_I')\\nprob.model.connect('comb.Fl_O',  'turb.Fl_I')\\nprob.model.connect('turb.Fl_O',  'noz.Fl_I')\\n\\n# Mechanical (single spool)\\nprob.model.connect('comp.trq', 'shaft.trq_in')\\nprob.model.connect('turb.trq', 'shaft.trq_out')\\n\\n# Tabular thermo for Air + Jet-A\\nprob.model.thermo_data = pyc.AIR_JETA_TAB_SPEC\\n\\n# Sea-level static operating conditions\\nprob.model.set_input_defaults('P',   14.696, units='psi')\\nprob.model.set_input_defaults('T',   518.67, units='degR')\\nprob.model.set_input_defaults('W',   100.0,  units='lbm/s')\\nprob.model.set_input_defaults('MN',  0.0)\\nprob.model.set_input_defaults('alt', 0.0, units='ft')\\n\\n# Design-point inputs\\nprob.model.set_input_defaults('comp.PR',  12.5)\\nprob.model.set_input_defaults('T4',       2850.0, units='degR')\\nprob.model.set_input_defaults('comp.eff', 0.9)\\nprob.model.set_input_defaults('turb.eff', 0.9)\\n\\n# Cycle solver\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['maxiter'] = 100\\nprob.model.linear_solver = om.DirectSolver()\\n\\nprob.setup()\\n\\n# ---------------------------------------------------------------\\n# Solve the design point: iterate on inlet mass flow so Fn -> target\\n# ---------------------------------------------------------------\\ntarget_Fn_lbf = 14500.0\\nW = 100.0\\n\\nfor i in range(60):\\n    prob.set_val('W', W, units='lbm/s')\\n    prob.run_model()\\n\\n    # For SL static (MN=0) net thrust equals gross thrust\\n    Fg_lbf = float(prob.get_val('noz.Fg', units='lbf')[0])\\n    err = (Fg_lbf - target_Fn_lbf) / target_Fn_lbf\\n\\n    if abs(err) < 1.0e-4:\\n        break\\n    W *= target_Fn_lbf / Fg_lbf\\n\\n# ---------------------------------------------------------------\\n# Pull results and write result.json\\n# ---------------------------------------------------------------\\nFn_lbf      = float(prob.get_val('noz.Fg',    units='lbf')[0])\\nWfuel_lbm_s = float(prob.get_val('comb.Wfuel', units='lbm/s')[0])\\nOPR         = float(prob.get_val('comp.PR'))\\n\\n# TSFC: (lbm/s) / lbf * 3600 s/hr -> lbm/(lbf*hr)\\nTSFC = Wfuel_lbm_s / Fn_lbf * 3600.0\\n\\nresult = {\\n    'Fn_lbf':      Fn_lbf,\\n    'TSFC':        TSFC,\\n    'OPR':         OPR,\\n    'Wfuel_lbm_s': Wfuel_lbm_s,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Nozzle: Option 'nozzle_type' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 185.355,
+    "setup_s": 0.0,
+    "grade_s": 1.135
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.13s"
+  ]
+}

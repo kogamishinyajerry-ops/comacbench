@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_hi",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef solve_turbojet(T4_degR, target_Fn=13000.0):\\n    \\\"\\\"\\\"Solve for W such that net thrust equals target_Fn at given T4.\\n    Returns (Wfuel, Fn, W).\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    model = prob.model\\n\\n    # Independent variables\\n    ivc = model.add_subsystem('ivc', om.IndepVarComp(), promotes=['*'])\\n    ivc.add_output('W', 100.0, units='lbm/s')\\n    ivc.add_output('alt', 0.0, units='ft')\\n    ivc.add_output('MN', 0.0)\\n    ivc.add_output('T4', T4_degR, units='degR')\\n    ivc.add_output('PR', 14.0)\\n    ivc.add_output('eff_c', 0.90)\\n    ivc.add_output('eff_t', 0.90)\\n    ivc.add_output('dPqP', 0.05)\\n\\n    # Flight conditions (sea-level static)\\n    model.add_subsystem('fc', pyc.FlightConditions())\\n    model.connect('W', 'fc.W')\\n    model.connect('alt', 'fc.alt')\\n    model.connect('MN', 'fc.MN')\\n\\n    # Inlet\\n    model.add_subsystem('inlet', pyc.Inlet())\\n    model.connect('fc.Fl_O:tot:P', 'inlet.Fl_I:tot:P')\\n    model.connect('fc.Fl_O:tot:T', 'inlet.Fl_I:tot:T')\\n    model.connect('fc.Fl_O:tot:W', 'inlet.Fl_I:tot:W')\\n    model.connect('fc.Fl_O:stat:V', 'inlet.Fl_I:stat:V')\\n\\n    # Compressor (PR and eff prescribed)\\n    model.add_subsystem('comp', pyc.Compressor())\\n    model.connect('inlet.Fl_O:tot:P', 'comp.Fl_I:tot:P')\\n    model.connect('inlet.Fl_O:tot:T', 'comp.Fl_I:tot:T')\\n    model.connect('inlet.Fl_O:tot:W', 'comp.Fl_I:tot:W')\\n    model.connect('inlet.Fl_O:stat:V', 'comp.Fl_I:stat:V')\\n    model.connect('PR', 'comp.PR')\\n    model.connect('eff_c', 'comp.eff')\\n\\n    # Combustor (Tt4 = T4; dPqP pressure loss)\\n    model.add_subsystem('burner', pyc.Combustor())\\n    model.connect('comp.Fl_O:tot:P', 'burner.Fl_I:tot:P')\\n    model.connect('comp.Fl_O:tot:T', 'burner.Fl_I:tot:T')\\n    model.connect('comp.Fl_O:tot:W', 'burner.Fl_I:tot:W')\\n    model.connect('comp.Fl_O:stat:V', 'burner.Fl_I:stat:V')\\n    model.connect('T4', 'burner.Fl_O:tot:T')\\n    model.connect('dPqP', 'burner.dPqP')\\n\\n    # Turbine (PR back-solved from shaft work balance)\\n    model.add_subsystem('turb', pyc.Turbine())\\n    model.connect('burner.Fl_O:tot:P', 'turb.Fl_I:tot:P')\\n    model.connect('burner.Fl_O:tot:T', 'turb.Fl_I:tot:T')\\n    model.connect('burner.Fl_O:tot:W', 'turb.Fl_I:tot:W')\\n    model.connect('burner.Fl_O:stat:V', 'turb.Fl_I:stat:V')\\n    model.connect('eff_t', 'turb.eff')\\n    # Shaft balance: compressor power = turbine power\\n    model.connect('comp.Wp', 'turb.Wp')\\n\\n    # Nozzle (convergent, choked at exit)\\n    model.add_subsystem('noz', pyc.Nozzle())\\n    model.connect('turb.Fl_O:tot:P', 'noz.Fl_I:tot:P')\\n    model.connect('turb.Fl_O:tot:T', 'noz.Fl_I:tot:T')\\n    model.connect('turb.Fl_O:tot:W', 'noz.Fl_I:tot:W')\\n    model.connect('turb.Fl_O:stat:V', 'noz.Fl_I:stat:V')\\n\\n    # Performance (net thrust)\\n    model.add_subsystem('perf', pyc.Performance())\\n    model.connect('fc.Fl_O:tot:P', 'perf.Fl_I:tot:P')\\n    model.connect('fc.Fl_O:tot:T', 'perf.Fl_I:tot:T')\\n    model.connect('fc.Fl_O:tot:W', 'perf.Fl_I:tot:W')\\n    model.connect('fc.Fl_O:stat:V', 'perf.Fl_I:stat:V')\\n    model.connect('noz.Fl_O:tot:P', 'perf.Fl_O:tot:P')\\n    model.connect('noz.Fl_O:tot:T', 'perf.Fl_O:tot:T')\\n    model.connect('noz.Fl_O:tot:W', 'perf.Fl_O:tot:W')\\n    model.connect('noz.Fl_O:stat:V', 'perf.Fl_O:stat:V')\\n\\n    prob.setup()\\n\\n    # Bisection on W to hit target thrust (Fn is monotonic in W)\\n    W_low, W_high = 10.0, 2000.0\\n    Fn_mid = 0.0\\n    W_mid = 100.0\\n    for _ in range(80):\\n        W_mid = 0.5 * (W_low + W_high)\\n        prob.set_val('W', W_mid)\\n        prob.run_model()\\n        Fn_mid = float(prob.get_val('perf.Fn')[0])\\n        if Fn_mid < target_Fn:\\n            W_low = W_mid\\n        else:\\n            W_high = W_mid\\n        if abs(Fn_mid - target_Fn) < 1.0:\\n            break\\n\\n    Wfuel = float(prob.get_val('burner.Wfuel')[0])\\n    Fn = float(prob.get_val('perf.Fn')[0])\\n    return Wfuel, Fn, W_mid\\n\\n\\n# Solve at T4 = 2400 degR and T4 = 2800 degR\\nWfuel_2400, Fn_2400, W_2400 = solve_turbojet(2400.0)\\nWfuel_2800, Fn_2800, W_2800 = so\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ne repeated 2 more times]\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/chem_eq.py\\\", line 344, in setup\\n    self.thermo = species_data.Properties(self.options['spec'],\\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/species_data.py\\\", line 30, in __init__\\n    self.prod_data = self.thermo_data_module.products\\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'bool' object has no attribute 'products'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 131.75,
+    "setup_s": 0.0,
+    "grade_s": 1.06
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

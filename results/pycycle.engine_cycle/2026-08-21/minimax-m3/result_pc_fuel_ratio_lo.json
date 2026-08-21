@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_lo",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef solve_turbojet(T4_target, Fn_target=11000.0, OPR=12.0):\\n    prob = om.Problem()\\n    prob.model = pyc.Turbojet()\\n\\n    prob.setup()\\n\\n    # Flight conditions - Sea Level Static (SL)\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n    prob.set_val('fc.MN', 0.0)\\n\\n    # Inlet\\n    prob.set_val('inlet.ram_recovery', 1.0)\\n\\n    # Compressor design point\\n    prob.set_val('comp.map.PRdes', OPR)\\n    prob.set_val('comp.map.effDes', 0.90)\\n\\n    # Burner\\n    prob.set_val('burner.dPqP', 0.05)\\n\\n    # Turbine design point\\n    prob.set_val('turb.map.effDes', 0.90)\\n    prob.set_val('turb.T4', T4_target, units='degR')\\n\\n    # Nozzle: converging-diverging for full expansion at high OPR\\n    prob.set_val('nozz.Cfg', 2)\\n\\n    # Shaft\\n    prob.set_val('shaft.Nmech', 8000.0, units='rpm')\\n\\n    # Design targets\\n    prob.set_val('design_balance.Fn_target', Fn_target, units='lbf')\\n    prob.set_val('design_balance.PR_target', OPR)\\n\\n    prob.run_model()\\n\\n    Wfuel = prob.get_val('balance.Wfuel', units='lbm/s')\\n    if hasattr(Wfuel, '__len__'):\\n        Wfuel = Wfuel[0]\\n    return Wfuel\\n\\n\\nWfuel_2250 = solve_turbojet(2250.0)\\nWfuel_2550 = solve_turbojet(2550.0)\\n\\nratio = Wfuel_2550 / Wfuel_2250\\n\\nresult = {\\n    'fuel_ratio_t2550_over_t2250': ratio,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(f\\\"Wfuel(2250) = {Wfuel_2250:.6f} lbm/s\\\")\\nprint(f\\\"Wfuel(2550) = {Wfuel_2550:.6f} lbm/s\\\")\\nprint(f\\\"Ratio = {ratio:.6f}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_a1dyd88r/solve.py\\\", line 48, in <module>\\n    Wfuel_2250 = solve_turbojet(2250.0)\\n                 ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_a1dyd88r/solve.py\\\", line 8, in solve_turbojet\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 139.064,
+    "setup_s": 0.0,
+    "grade_s": 1.243
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.24s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# ------------------------------------------------------------------\\n# Simple turbojet cycle: Inlet -> Compressor (AXI5) -> Combustor ->\\n#                      Turbine (LPT2269) -> Nozzle (CD) -> Shaft\\n# Thermo: TABULAR with AIR_JETA_TAB_SPEC\\n# Design point: SL, MN~0, Fn_target=15500 lbf, T4=2500 degR, OPR=13.5\\n# ------------------------------------------------------------------\\n\\nprob = om.Problem()\\n\\nprob.model = pyc.MPCycle(\\n    name='cycle',\\n    thermo_data=pyc.AIR_JETA_TAB_SPEC,\\n    elements=[\\n        pyc.Inlet,\\n        pyc.AXI5,\\n        pyc.Combustor,\\n        pyc.LPT2269,\\n        pyc.CD_nozzle,\\n    ],\\n    map_data={\\n        pyc.AXI5: pyc.AXI5Map,\\n    },\\n    shaft_elements=[\\n        (pyc.AXI5, pyc.LPT2269),\\n    ],\\n)\\n\\nprob.setup()\\n\\n# ---- Flight conditions (sea level, static) ----\\nprob.set_val('cycle.fc.alt', 0.0, units='ft')\\nprob.set_val('cycle.fc.MN', 0.0)\\n\\n# ---- Design point targets ----\\nprob.set_val('cycle.design.compressor.PR', 13.5)\\nprob.set_val('cycle.design.burner.Tt', 2500.0, units='degR')\\nprob.set_val('cycle.design.perf.Fn_target', 15500.0, units='lbf')\\n\\n# ---- Solve the design point ----\\nprob.run_model()\\n\\n# ---- Extract performance results ----\\nresult = {\\n    'Fn_lbf':      float(prob.get_val('cycle.perf.Fn',     units='lbf')),\\n    'TSFC':        float(prob.get_val('cycle.perf.TSFC',   units='1/hr')),\\n    'OPR':         float(prob.get_val('cycle.perf.OPR')),\\n    'Wfuel_lbm_s': float(prob.get_val('cycle.perf.Wfuel',  units='lbm/s')),\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(\\\"DESIGN POINT RESULTS (SL, MN=0)\\\")\\nfor k, v in result.items():\\n    print(f\\\"  {k:>12s} = {v:.6f}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_o20hzpot/solve.py\\\", line 22, in <module>\\n    pyc.CD_nozzle,\\n    ^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'CD_nozzle'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 52.572,
+    "setup_s": 0.0,
+    "grade_s": 1.017
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

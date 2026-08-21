@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_t4_v2",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\ndef run_turbojet(t4_val):\\n    \\\"\\\"\\\"Run SL turbojet design solve with given Tt4 target and return TSFC.\\\"\\\"\\\"\\n    try:\\n        prob = om.Problem()\\n        prob.model = pyc.Turbojet(design=pyc.CruiseDesign())\\n\\n        # Standard sea-level conditions\\n        prob.model.set_input_defaults('alt', 0, units='ft')\\n        prob.model.set_input_defaults('Mach', 0.8)\\n        prob.model.set_input_defaults('T', 518.67, units='degR')\\n        prob.model.set_input_defaults('P', 14.696, units='psi')\\n        prob.model.set_input_defaults('R', 1716.49, units='ft*lbf/lbm/degR')\\n        prob.model.set_input_defaults('gamma', 1.4)\\n        prob.model.set_input_defaults('Cp', 0.24, units='Btu/(lbm*degR)')\\n        prob.model.set_input_defaults('Tt4', float(t4_val), units='degR')\\n\\n        prob.model.pyc_setup_mode = 'auto'\\n\\n        prob.setup()\\n        prob.run_model()\\n\\n        tsfc = float(prob.get_val('TSFC')[0])\\n        return tsfc\\n    except Exception as e:\\n        print(f\\\"  Failed Tt4={t4_val}: {e}\\\")\\n        return None\\n\\n\\n# Sweep candidate standard Tt4 values (degR) used in pycycle turbojet examples\\ncandidates = [\\n    1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400,\\n    2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500\\n]\\n\\nresults = []\\nfor t4 in candidates:\\n    tsfc = run_turbojet(t4)\\n    if tsfc is not None:\\n        results.append((t4, tsfc))\\n        print(f\\\"Tt4={t4}: TSFC={tsfc:.6f}\\\")\\n\\ntarget_tsfc = 0.85811\\nif results:\\n    # Find best match to reference TSFC\\n    best = min(results, key=lambda x: abs(x[1] - target_tsfc))\\n    print(f\\\"\\\\nBest match: Tt4={best[0]}, TSFC={best[1]:.6f}, diff={abs(best[1]-target_tsfc):.6f}\\\")\\n\\n    # Write result\\n    result = {\\n        \\\"corrupted_param\\\": \\\"t4_target\\\",\\n        \\\"restored_value\\\": float(best[0])\\n    }\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f)\\n    print(f\\\"Written result.json: {result}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"missing\": \"result.json\"}"
+  },
+  "timings": {
+    "agent_s": 128.633,
+    "setup_s": 0.0,
+    "grade_s": 1.129
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 1.13s"
+  ]
+}

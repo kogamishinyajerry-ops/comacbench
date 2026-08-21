@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_range",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport json\\nimport copy\\nimport numpy as np\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\nfrom aviary.utils.csv_io import read_csv\\n\\n# File path to corrupted CSV\\ncsv_path = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_range_corrupt.csv'\\n\\n# Load corrupted CSV into a dictionary\\ncorrupted_data = read_csv(csv_path)\\n\\n# Get default phase info and set cruise Mach to 0.80\\nphase_info = copy.deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Reference fuel burn of the TRUE model (lbm)\\nref_fuel = 43389.55\\n\\n# Helper function to run Aviary and extract total fuel mass\\ndef get_fuel(data):\\n    prob = run_aviary(\\n        phase_info, \\n        data, \\n        run_driver=False, \\n        optimizer=\\\"SLSQP\\\", \\n        verbosity=0, \\n        make_plots=False\\n    )\\n    fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    return fuel\\n\\n# Test restoration 1: set aircraft:design:range to true value (3200 NM)\\ndata_range = copy.deepcopy(corrupted_data)\\ndata_range['aircraft:design:range'] = [3200.0]\\nfuel_range = get_fuel(data_range)\\n\\n# Test restoration 2: set aircraft:design:gross_mass to true value (175400 lbm)\\ndata_mass = copy.deepcopy(corrupted_data)\\ndata_mass['aircraft:design:gross_mass'] = [175400.0]\\nfuel_mass = get_fuel(data_mass)\\n\\n# Determine which restoration matches the reference fuel burn\\nif abs(fuel_range - ref_fuel) < abs(fuel_mass - ref_fuel):\\n    corrupted_param = 'aircraft:design:range'\\n    restored_value = 3200.0\\nelse:\\n    corrupted_param = 'aircraft:design:gross_mass'\\n    restored_value = 175400.0\\n\\n# Write result.json\\nresult = {\\n    \\\"corrupted_param\\\": corrupted_param,\\n    \\\"restored_value\\\": restored_value\\n}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox__p_azgrb/solve.py\\\", line 7, in <module>\\n    from aviary.utils.csv_io import read_csv\\nModuleNotFoundError: No module named 'aviary.utils.csv_io'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 56.897,
+    "setup_s": 0.0,
+    "grade_s": 1.02
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

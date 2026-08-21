@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_grossmass_v2",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport json\\nimport os\\nimport copy\\nimport numpy as np\\n\\nfrom openmdao.api import Problem\\nfrom aviary.api import (\\n    AviaryProblem,\\n    read_aircraft_file,\\n    create_2dof_analysis_scheme,\\n)\\nfrom aviary.models.missions.two_dof_default import default_mission_sub_systems\\nfrom aviary.mission.phase_builder import PhaseBuilder\\n\\nCSV_PATH = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_repair_grossmass_v2_corrupt.csv\\\"\\nTARGET_FUEL_BURN = 43389.55\\n\\n# Inspect the CSV first to see current values\\nprint(\\\"=== Current CSV contents ===\\\")\\nwith open(CSV_PATH, \\\"r\\\") as f:\\n    reader = csv.reader(f)\\n    for row in reader:\\n        print(row)\\n\\n# Read the aircraft data\\naircraft_data = read_aircraft_file(CSV_PATH)\\nprint(\\\"\\\\n=== Aircraft data ===\\\")\\nprint(f\\\"Current range: {aircraft_data.get('aircraft:design:range')}\\\")\\nprint(f\\\"Current gross_mass: {aircraft_data.get('aircraft:design:gross_mass')}\\\")\\n\\n# Candidates: (param_key, corrupted_value, true_value)\\ncandidates = [\\n    (\\\"aircraft:design:range\\\", 3000.0, 3400.0),\\n    (\\\"aircraft:design:gross_mass\\\", 180400.0, 175400.0),\\n]\\n\\n\\ndef run_aviary_with_value(aircraft_data, mach=0.80, verbosity=0):\\n    \\\"\\\"\\\"Run Aviary forward analysis and return fuel burn.\\\"\\\"\\\"\\n    # Get default phase_info from two_dof_default\\n    from aviary.models.missions.two_dof_default import (\\n        phase_info as default_phase_info,\\n    )\\n\\n    phase_info = copy.deepcopy(default_phase_info)\\n    phase_info['cruise']['user_options']['mach_cruise'] = mach\\n\\n    prob = Problem()\\n    prob.add_subsystem(\\n        \\\"av\\\",\\n        AviaryProblem(\\n            aircraft_data=aircraft_data,\\n            mission_data=default_mission_sub_systems,\\n            phase_info=phase_info,\\n            analysis_scheme=create_2dof_analysis_scheme,\\n        ),\\n        promotes_inputs=['aircraft:*', 'mission:*'],\\n        promotes_outputs=['mission:*'],\\n    )\\n\\n    prob.setup(verbosity=verbosity)\\n\\n    # Get default settings\\n    prob.set_val('cruise.mach', mach)\\n\\n    prob.run_model()\\n\\n    fuel_burn = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    return fuel_burn\\n\\n\\n# Test each candidate restoration\\nresults = {}\\nfor param_key, corrupted_val, true_val in candidates:\\n    # Create a copy of aircraft data with the true value restored\\n    test_data = dict(aircraft_data)\\n    test_data[param_key] = true_val\\n\\n    # Set other candidate values to their true values if needed\\n    # But since we only change one at a time, only restore the one we're testing\\n\\n    try:\\n        fuel_burn = run_aviary_with_value(test_data)\\n        print(f\\\"\\\\nWith {param_key} = {true_val}: fuel_burn = {fuel_burn}\\\")\\n        results[param_key] = (true_val, fuel_burn)\\n    except Exception as e:\\n        print(f\\\"\\\\nError running with {param_key} = {true_val}: {e}\\\")\\n        results[param_key] = (true_val, None)\\n\\n# Also run with current (corrupted) values to see baseline\\ntry:\\n    baseline_fuel = run_aviary_with_value(aircraft_data)\\n    print(f\\\"\\\\nBaseline (corrupted) fuel_burn = {baseline_fuel}\\\")\\nexcept Exception as e:\\n    print(f\\\"\\\\nError running baseline: {e}\\\")\\n    baseline_fuel = None\\n\\n# Determine which restoration matches the target\\nbest_match = None\\nbest_diff = float('inf')\\nfor param_key, (true_val, fuel_burn) in results.items():\\n    if fuel_burn is not None:\\n        diff = abs(fuel_burn - TARGET_FUEL_BURN)\\n        print(f\\\"{param_key}: fuel={fuel_burn}, diff from target={diff}\\\")\\n        if diff < best_diff:\\n            best_diff = diff\\n            best_match = param_key\\n\\nprint(f\\\"\\\\nBest match: {best_match} with restored value {results[best_match][0]}\\\")\\nprint(f\\\"Best diff: {best_diff}\\\")\\n\\n# Write result\\nresult = {\\n    \\\"corrupted_param\\\": best_match,\\n    \\\"restored_value\\\": float(results[best_match][0]),\\n}\\n\\nwith open(\\\"result.json\\\", \\\"w\\\") as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(f\\\"\\\\nResult written: {result}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_d0hj1q1b/solve.py\\\", line 8, in <module>\\n    from aviary.api import (\\nImportError: cannot import name 'read_aircraft_file' from 'aviary.api' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/api.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 16.693,
+    "setup_s": 0.0,
+    "grade_s": 1.012
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

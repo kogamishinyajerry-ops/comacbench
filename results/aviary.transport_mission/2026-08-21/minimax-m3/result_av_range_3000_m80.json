@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_3000_m80",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nfrom copy import deepcopy\\n\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\nfrom aviary.api import run_aviary\\n\\n# Absolute path to the aircraft model CSV\\naircraft_csv = (\\n    \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/\\\"\\n    \\\"transport_mission/derived/av_range_3000_m80.csv\\\"\\n)\\n\\n# Deep-copy default 2DOF phase info and set cruise Mach to 0.8\\nphase_info = deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.8\\n\\n# Forward mission analysis (run_driver=False) with SLSQP optimizer\\nprob = run_aviary(\\n    aircraft_csv,\\n    phase_info=phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False,\\n)\\n\\n# Extract mission outputs (promoted OpenMDAO names, colon style)\\ntotal_fuel_lbm = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\nfinal_mass_lbm = prob.get_val('mission:final_mass', units='lbm')[0]\\n\\n# Write result JSON to current working directory\\nresult = {\\n    \\\"fuel_burn_lbm\\\": float(total_fuel_lbm),\\n    \\\"final_mass_lbm\\\": float(final_mass_lbm),\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ry/utils/process_input_decks.py\\\", line 110, in create_vehicle\\n    vehicle_deck = get_path(vehicle_deck, verbosity)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/functions.py\\\", line 244, in get_path\\n    raise FileNotFoundError(\\nFileNotFoundError: File not found in absolute path: /Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_3000_m80.csv, relative path: /Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_3000_m80.csv, or Aviary-based path: /Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_3000_m80.csv\\n\"}"
+  },
+  "timings": {
+    "agent_s": 19.601,
+    "setup_s": 0.0,
+    "grade_s": 1.306
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.3s"
+  ]
+}

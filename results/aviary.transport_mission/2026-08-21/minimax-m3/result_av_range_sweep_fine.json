@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_sweep_fine",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom copy import deepcopy\\n\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\nfrom aviary.interface.run_aviary import run_aviary\\n\\n\\ndef run_mission(target_range_nm, tol_nm=10.0, max_iter=50):\\n    \\\"\\\"\\\"Run forward mission analysis targeting a specific range (NM) at M0.8.\\n\\n    Adjusts the cruise phase time_duration iteratively until the achieved\\n    `mission:range` falls within `tol_nm` of the target.\\n    \\\"\\\"\\\"\\n    phase_info = deepcopy(default_phase_info)\\n    # Cruise Mach\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.8\\n\\n    # Initial guess for cruise duration based on TAS at M0.8 (~470 knots)\\n    tas_knots = 470.0\\n    duration_seconds = (target_range_nm / tas_knots) * 3600.0\\n\\n    fuel = None\\n    actual_range = None\\n\\n    for _ in range(max_iter):\\n        phase_info_iter = deepcopy(phase_info)\\n        phase_info_iter['cruise']['user_options']['time_duration'] = (duration_seconds, 's')\\n\\n        prob = run_aviary(\\n            phase_info_iter,\\n            run_driver=False,\\n            optimizer=\\\"SLSQP\\\",\\n            verbosity=0,\\n            make_plots=False,\\n        )\\n\\n        actual_range = float(prob.get_val('mission:range', units='NM')[0])\\n        fuel = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\n\\n        if abs(actual_range - target_range_nm) < tol_nm:\\n            break\\n\\n        # Proportional adjustment of cruise duration to drive range toward target\\n        if actual_range > 0:\\n            duration_seconds *= target_range_nm / actual_range\\n\\n    return fuel\\n\\n\\ndef main():\\n    ranges_nm = [3000, 3200, 3400, 3600]\\n    fuels = {}\\n\\n    for rng in ranges_nm:\\n        fuels[f'fuel_{rng}_lbm'] = run_mission(rng)\\n\\n    ranges_arr = np.array(ranges_nm, dtype=float)\\n    fuels_arr = np.array([fuels[f'fuel_{r}_lbm'] for r in ranges_nm], dtype=float)\\n    # Least-squares slope of fuel vs. range (lbm per NM)\\n    slope, _intercept = np.polyfit(ranges_arr, fuels_arr, 1)\\n\\n    result = dict(fuels)\\n    result['dfuel_drange_lbm_per_nm'] = float(slope)\\n\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=2)\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/core/aviary_group.py\\\", line 245, in load_inputs\\n    aviary_inputs, self.initialization_guesses = create_vehicle(\\n                                                 ^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/process_input_decks.py\\\", line 110, in create_vehicle\\n    vehicle_deck = get_path(vehicle_deck, verbosity)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/functions.py\\\", line 212, in get_path\\n    if not path.exists():\\n           ^^^^^^^^^^^\\nAttributeError: 'dict' object has no attribute 'exists'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 203.947,
+    "setup_s": 0.0,
+    "grade_s": 1.293
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.29s"
+  ]
+}

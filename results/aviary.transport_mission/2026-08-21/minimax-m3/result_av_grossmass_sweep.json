@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_sweep",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom copy import deepcopy\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions import two_dof_default\\nfrom aviary.models.aircraft.aircraft_for_bench_FwFm import aircraft_data\\n\\n# Setup phase info with cruise Mach 0.80 (deepcopy from default)\\nphase_info = deepcopy(two_dof_default.phase_info)\\nif callable(phase_info):\\n    phase_info = phase_info()\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\ngross_masses = [165400, 170400, 175400, 180400, 185400]\\nfuels = {}\\n\\nfor gm in gross_masses:\\n    aircraft = deepcopy(aircraft_data)\\n    # Set the design gross mass for this variant (try common key locations)\\n    if isinstance(aircraft.get('aircraft'), dict) and 'design_gross_mass' in aircraft['aircraft']:\\n        aircraft['aircraft']['design_gross_mass'] = gm\\n    elif isinstance(aircraft.get('mission'), dict) and 'design_gross_mass' in aircraft['mission']:\\n        aircraft['mission']['design_gross_mass'] = gm\\n    else:\\n        aircraft.setdefault('mission', {})['design_gross_mass'] = gm\\n\\n    prob = run_aviary(\\n        aircraft_data=aircraft,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False,\\n    )\\n\\n    fuels[gm] = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n\\n# Least-squares slope of total fuel mass vs design gross mass (lbm/lbm)\\ngm_arr = np.array(gross_masses, dtype=float)\\nfuel_arr = np.array([fuels[gm] for gm in gross_masses], dtype=float)\\nslope, _intercept = np.polyfit(gm_arr, fuel_arr, 1)\\n\\nresult = {\\n    'fuel_165400_lbm': float(fuels[165400]),\\n    'fuel_170400_lbm': float(fuels[170400]),\\n    'fuel_175400_lbm': float(fuels[175400]),\\n    'fuel_180400_lbm': float(fuels[180400]),\\n    'fuel_185400_lbm': float(fuels[185400]),\\n    'dfuel_dgrossmass_lbm_per_lbm': float(slope),\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_pywe7og0/solve.py\\\", line 7, in <module>\\n    from aviary.models.aircraft.aircraft_for_bench_FwFm import aircraft_data\\nModuleNotFoundError: No module named 'aviary.models.aircraft.aircraft_for_bench_FwFm'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 122.59,
+    "setup_s": 0.0,
+    "grade_s": 1.06
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

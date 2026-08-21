@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_sweep",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Range variants to analyze (NM)\\nranges = [2400, 2800, 3200, 3600]\\nfuels = {}\\n\\nfor r in ranges:\\n    # Construct aircraft file name - assumes CSVs are named like 'aircraft_2400nm.csv'\\n    aircraft_file = f'aircraft_{r}nm.csv'\\n    \\n    # Deepcopy default phase_info to avoid mutation\\n    phase_info = deepcopy(default_phase_info)\\n    \\n    # Set cruise Mach to 0.80 as required\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Set target range for cruise phase (units: nmi)\\n    phase_info['cruise']['user_options']['target_range'] = (r, 'nmi')\\n    \\n    # Run forward mission analysis (no driver, explicit SLSQP optimizer)\\n    prob = run_aviary(\\n        aircraft_file=aircraft_file,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Extract total fuel mass in lbm\\n    fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    fuels[r] = fuel\\n\\n# Compute least-squares slope of fuel vs range (lbm per NM)\\nranges_arr = np.array(ranges)\\nfuels_arr = np.array([fuels[r] for r in ranges])\\nslope, _ = np.polyfit(ranges_arr, fuels_arr, 1)\\n\\n# Build result dictionary\\nresult = {\\n    'fuel_2400_lbm': float(fuels[2400]),\\n    'fuel_2800_lbm': float(fuels[2800]),\\n    'fuel_3200_lbm': float(fuels[3200]),\\n    'fuel_3600_lbm': float(fuels[3600]),\\n    'dfuel_drange_lbm_per_nm': float(slope)\\n}\\n\\n# Write result to JSON in current working directory\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_rbi51lpa/solve.py\\\", line 25, in <module>\\n    prob = run_aviary(\\n           ^^^^^^^^^^^\\nTypeError: run_aviary() got an unexpected keyword argument 'aircraft_file'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 64.99,
+    "setup_s": 0.0,
+    "grade_s": 1.018
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

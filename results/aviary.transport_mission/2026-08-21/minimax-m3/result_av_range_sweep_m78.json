@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_sweep_m78",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport glob\\nimport numpy as np\\nfrom copy import deepcopy\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Locate the four range-variant CSVs in the current working directory.\\ntarget_ranges = [2400, 2600, 2800, 3000]\\nrange_csvs = {}\\nfor csv_path in glob.glob('*.csv'):\\n    for r in target_ranges:\\n        if str(r) in csv_path:\\n            range_csvs[r] = csv_path\\n            break\\n\\nmissing = [r for r in target_ranges if r not in range_csvs]\\nassert not missing, f\\\"Missing CSVs for ranges {missing}; found: {list(range_csvs.values())}\\\"\\n\\n# Build phase_info from the 2DOF defaults and set cruise Mach to 0.78.\\nphase_info = deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.78\\n\\n# Run forward mission analyses (no driver) for each range variant.\\nresults = {}\\nfuels_lbm = []\\nfor r in target_ranges:\\n    prob = run_aviary(\\n        range_csvs[r],\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False,\\n    )\\n    fuel = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\n    final_mass = float(prob.get_val('mission:final_mass', units='lbm')[0])\\n    rng = float(prob.get_val('mission:range', units='NM')[0])\\n    results[f'fuel_{r}_lbm'] = fuel\\n    fuels_lbm.append(fuel)\\n    print(f\\\"Range {r} NM: fuel={fuel:.1f} lbm, final_mass={final_mass:.1f} lbm, computed_range={rng:.1f} NM\\\")\\n\\n# Least-squares slope of fuel vs range.\\nranges_arr = np.array(target_ranges, dtype=float)\\nfuels_arr = np.array(fuels_lbm, dtype=float)\\nslope, _ = np.polyfit(ranges_arr, fuels_arr, 1)\\nresults['dfuel_drange_lbm_per_nm'] = float(slope)\\n\\nprint(f\\\"dfuel/drange = {slope:.4f} lbm/NM\\\")\\n\\n# Persist result.json in the current working directory.\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=2)\\n\\nprint(\\\"Wrote result.json with keys:\\\", list(results.keys()))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_7uj46spz/solve.py\\\", line 19, in <module>\\n    assert not missing, f\\\"Missing CSVs for ranges {missing}; found: {list(range_csvs.values())}\\\"\\n           ^^^^^^^^^^^\\nAssertionError: Missing CSVs for ranges [2400, 2600, 2800, 3000]; found: []\\n\"}"
+  },
+  "timings": {
+    "agent_s": 47.185,
+    "setup_s": 0.0,
+    "grade_s": 1.107
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.1s"
+  ]
+}

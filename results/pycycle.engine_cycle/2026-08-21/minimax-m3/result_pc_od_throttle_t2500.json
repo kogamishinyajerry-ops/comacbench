@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_od_throttle_t2500",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# Build the simple turbojet element\\nprob = om.Problem()\\n\\nprob.model = pyo = pyc.CycleFlow()\\n\\n# Add flight conditions\\npyo.add('flight', pyc.FlightConditions())\\n\\n# Add inlet, compressor, combustor, turbine, nozzle\\npyo.add('inlet', pyc.Inlet())\\npyo.add('comp', pyc.AXI5())\\npyo.add('comb', pyc.Combustor())\\npyo.add('turb', pyc.LPT2269())\\npyo.add('noz', pyc.CD_nozzle())\\n\\n# Mechanical shaft connecting turbine to compressor\\npyo.add('shaft', pyc.Shaft())\\n\\n# Connect flow paths\\npyo.connect('flight.FL_I', 'inlet.Fl_I')\\npyo.connect('inlet.Fl_O', 'comp.Fl_I')\\npyo.connect('comp.Fl_O', 'comb.Fl_I')\\npyo.connect('comb.Fl_O', 'turb.Fl_I')\\npyo.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n# Connect mechanical shaft\\npyo.connect('comp.trq', 'shaft.trq_in')\\npyo.connect('turb.trq', 'shaft.trq_out')\\n\\n# Set up thermodynamic cycle\\npyo.pyc_add_cycle('shaft', {'comp': 'Nmech', 'turb': 'Nmech'})\\n\\n# Balance shaft speed between compressor and turbine\\npyo.add('shaft_eq', om.BalanceComp())\\npyo.connect('shaft_eq.Nmech', ['comp.Nmech', 'turb.Nmech'])\\npyo.connect('shaft.Nmech', 'shaft_eq.lhs')\\n\\n# Setup the cycle thermodynamic properties\\npyo.set_input_defaults('flight.FL_I', val=0., units='lbf')  # Thrust target\\npyo.set_input_defaults('flight.alt', val=0., units='ft')\\npyo.set_input_defaults('flight.MN', val=0.0)\\n\\n# Inlet defaults\\npyo.set_input_defaults('inlet.MN', val=0.0)\\n\\n# Component-specific inputs\\npyo.set_input_defaults('comp.MN', val=0.0)\\npyo.set_input_defaults('turb.MN', val=0.4)\\n\\n# Set up the propulsion equilibrium (thrust balance)\\npyo\""
+  },
+  "timings": {
+    "agent_s": 206.088,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

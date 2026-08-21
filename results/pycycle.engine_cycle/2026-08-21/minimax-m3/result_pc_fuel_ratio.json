@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef run_cycle(T4_target):\\n    \\\"\\\"\\\"Run a simple turbojet design point for given T4.\\\"\\\"\\\"\\n    prob = om.Problem()\\n    prob.model = pyc.MPCycle()\\n\\n    # Add components\\n    prob.model.add_subsystem('fc', pyc.FlightConditions())\\n    prob.model.add_subsystem('inlet', pyc.Inlet())\\n    prob.model.add_subsystem('comp', pyc.Compressor())\\n    prob.model.add_subsystem('burner', pyc.Combustor(fuel_type='JP-7'))\\n    prob.model.add_subsystem('turb', pyc.Turbine())\\n    prob.model.add_subsystem('noz', pyc.Nozzle())\\n    prob.model.add_subsystem('perf', pyc.Performance())\\n\\n    # Connect flow path\\n    prob.model.connect('fc.Fl_O', 'inlet.Fl_I')\\n    prob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\n    prob.model.connect('comp.Fl_O', 'burner.Fl_I')\\n    prob.model.connect('burner.Fl_O', 'turb.Fl_I')\\n    prob.model.connect('turb.Fl_O', 'noz.Fl_I')\\n    prob.model.connect('noz.Fl_O', 'perf.Fl_I')\\n    prob.model.connect('fc.alt', 'perf.alt')\\n    prob.model.connect('inlet.F_ram', 'perf.F_ram')\\n    prob.model.connect('comp.power', 'turb.power')\\n\\n    # Input defaults - Sea Level static (SL), OPR=13.5\\n    prob.model.set_input_defaults('fc.alt', 0.0, units='ft')\\n    prob.model.set_input_defaults('fc.MN', 0.0)\\n    prob.model.set_input_defaults('fc.W', 1.0, units='lbm/s')\\n    prob.model.set_input_defaults('inlet.ram_recovery', 1.0)\\n    prob.model.set_input_defaults('comp.PR', 13.5)\\n    prob.model.set_input_defaults('comp.eff', 0.87)\\n    prob.model.set_input_defaults('burner.Tt', T4_target, units='degR')\\n    prob.model.set_input_defaults('burner.dPqP', 0.0)\\n    prob.model.set_input_defaults('turb.eff', 0.89)\\n    prob.model.set_input_defaults('noz.Cv', 0.99)\\n\\n    prob.setup()\\n    prob.run_model()\\n\\n    Wfuel = float(prob.get_val('perf.Wfuel')[0])\\n    Fn = float(prob.get_val('perf.Fn')[0])\\n    return Wfuel, Fn\\n\\n\\n# Run both cases\\nWfuel_2200, Fn_2200 = run_cycle(2200.0)\\nWfuel_2600, Fn_2600 = run_cycle(2600.0)\\n\\n# Fuel flow scales linearly with mass flow.\\n# To match same target thrust, scale by Fn:\\n#   Wfuel_actual = (Fn_target / Fn_W1) * Wfuel_W1 = Fn_target * (Wfuel_W1 / Fn_W1)\\n# The ratio at the same target thrust is:\\n#   ratio = (Wfuel_2600/Fn_2600) / (Wfuel_2200/Fn_2200)\\nratio = (Wfuel_2600 / Fn_2600) / (Wfuel_2200 / Fn_2200)\\n\\n# Verify scaling to target thrust 11800 lbf\\nFn_target = 11800.0\\nWfuel_2200_actual = Wfuel_2200 * (Fn_target / Fn_2200)\\nWfuel_2600_actual = Wfuel_2600 * (Fn_target / Fn_2600)\\nratio_actual = Wfuel_2600_actual / Wfuel_2200_actual\\n\\nresult = {\\n    'fuel_ratio_t2600_over_t2200': float(ratio),\\n    'Wfuel_2200_at_Fn11800': Wfuel_2200_actual,\\n    'Wfuel_2600_at_Fn11800': Wfuel_2600_actual,\\n    'Fn_2200_at_W1': Fn_2200,\\n    'Fn_2600_at_W1': Fn_2600,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(f\\\"T4=2200 degR: Wfuel={Wfuel_2200:.6f} lbm/s, Fn={Fn_2200:.4f} lbf\\\")\\nprint(f\\\"T4=2600 degR: Wfuel={Wfuel_2600:.6f} lbm/s, Fn={Fn_2600:.4f} lbf\\\")\\nprint(f\\\"fuel_ratio_t2600_over_t2200 = {ratio:.6f}\\\")\\nprint(f\\\"Verified ratio at Fn=11800 lbf: {ratio_actual:.6f}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ne repeated 2 more times]\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/chem_eq.py\\\", line 344, in setup\\n    self.thermo = species_data.Properties(self.options['spec'],\\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/species_data.py\\\", line 30, in __init__\\n    self.prod_data = self.thermo_data_module.products\\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'bool' object has no attribute 'products'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 185.784,
+    "setup_s": 0.0,
+    "grade_s": 1.111
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.11s"
+  ]
+}

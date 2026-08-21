@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_opr_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef solve_turbojet_opr(opr_target, fn_target=12000.0, T4=2450.0):\\n    \\\"\\\"\\\"\\n    Solve a turbojet engine at the design point for a given overall pressure ratio.\\n\\n    Uses a standard ideal-component thermodynamic cycle model with typical\\n    component efficiencies.  Sea-level static operation, converging–diverging\\n    nozzle expanded to ambient pressure.\\n    \\\"\\\"\\\"\\n    # Sea-level standard ambient\\n    T0 = 518.67          # degR\\n    P0 = 14.696          # psia\\n    g_c = 32.174         # lbm*ft/(lbf*s^2)\\n\\n    # Component efficiencies (typical modern turbojet)\\n    eta_inlet = 0.98\\n    eta_c = 0.87\\n    eta_b = 0.99\\n    eta_t = 0.89\\n    eta_n = 0.98\\n    eta_burner = 0.95    # combustor pressure recovery\\n\\n    # Fuel lower heating value (JP-7 class)\\n    h_pr = 18500.0       # BTU/lbm\\n\\n    # Working fluid properties (constant-cp approximation)\\n    gamma_c = 1.4\\n    cp_air = 0.240       # BTU/(lbm*degR)\\n    gamma_g = 1.33\\n    cp_gas = 0.276       # BTU/(lbm*degR)\\n\\n    # 1 BTU/lbm = 778.169 ft*lbf/lbm = 778.169*g_c ft^2/s^2\\n    J_conv = 778.169 * g_c\\n\\n    # ------- Station 2: diffuser / inlet exit -------\\n    T2 = T0\\n    P2 = P0 * eta_inlet\\n\\n    # ------- Station 3: compressor exit -------\\n    P3 = opr_target * P2\\n    T3s = T2 * opr_target ** ((gamma_c - 1.0) / gamma_c)\\n    T3 = T2 + (T3s - T2) / eta_c\\n\\n    # ------- Station 4: combustor exit / turbine inlet -------\\n    P4 = P3 * eta_burner\\n\\n    # Fuel-air ratio from combustor energy balance\\n    # cp_air*T3 + f*h_pr*eta_b = (1+f)*cp_gas*T4\\n    f = (cp_gas * T4 - cp_air * T3) / (h_pr * eta_b - cp_gas * T4)\\n\\n    # ------- Station 5: turbine exit -------\\n    # Work balance: W_comp = W_turb\\n    T5 = T4 - cp_air * (T3 - T2) / ((1.0 + f) * cp_gas)\\n    T5s = T4 - (T4 - T5) / eta_t\\n    P5 = P4 / ((T4 / T5s) ** (gamma_g / (gamma_g - 1.0)))\\n\\n    # ------- Station 9: nozzle exit (CD, fully expanded to ambient) -------\\n    P9 = P0\\n    T9s = T5 * (P9 / P5) ** ((gamma_g - 1.0) / gamma_g)\\n    T9 = T5 - eta_n * (T5 - T9s)\\n\\n    # Exit velocity from delta enthalpy\\n    V9 = np.sqrt(2.0 * J_conv * cp_gas * (T5 - T9))   # ft/s\\n\\n    # Air mass flow required for the target thrust (static: F = m_dot_total*V9/g_c)\\n    m_dot_air = fn_target * g_c / ((1.0 + f) * V9)     # lbm/s\\n    m_dot_fuel = f * m_dot_air                          # lbm/s\\n\\n    # TSFC in lbm/(lbf*hr)\\n    tsfc = (m_dot_fuel / fn_target) * 3600.0\\n\\n    return tsfc\\n\\n\\n# ----- Solve at the three OPR points -----\\nopr_values = [11.0, 13.5, 16.0]\\ntsfc_values = [solve_turbojet_opr(opr) for opr in opr_values]\\n\\nfor opr, tsfc in zip(opr_values, tsfc_values):\\n    print(f\\\"OPR = {opr:5.2f}  ->  TSFC = {tsfc:8.5f} lbm/(lbf*hr)\\\")\\n\\n# ----- Least-squares slope of TSFC vs OPR -----\\nopr_arr = np.array(opr_values, dtype=float)\\ntsfc_arr = np.array(tsfc_values, dtype=float)\\nA = np.vstack([opr_arr, np.ones_like(opr_arr)]).T\\n(coeffs, _, _, _) = np.linalg.lstsq(A, tsfc_arr, rcond=None)\\nslope = float(coeffs[0])\\n\\nprint(f\\\"\\\\ndTSFC/dOPR (least squares) = {slope:.6f} lbm/(lbf*hr) per unit OPR\\\")\\n\\n# ----- Write result.json -----\\nresult = {\\n    \\\"tsfc_opr110\\\": float(tsfc_values[0]),\\n    \\\"tsfc_opr135\\\": float(tsfc_values[1]),\\n    \\\"tsfc_opr160\\\": float(tsfc_values[2]),\\n    \\\"dtsfc_dopr\\\":  slope,\\n}\\n\\nwith open(\\\"result.json\\\", \\\"w\\\") as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(\\\"\\\\nresult.json contents:\\\")\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"tsfc_opr110\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.142206, \"got\": 0.9832058512026114, \"ref\": 0.8607954008876747}, \"tsfc_opr135\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.145531, \"got\": 0.9411811281444202, \"ref\": 0.8216111135117882}, \"tsfc_opr160\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.148997, \"got\": 0.9094754767410481, \"ref\": 0.7915389089503895}, \"dtsfc_dopr\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.064599, \"got\": -0.014746074892312718, \"ref\": -0.013851298387457215}}, \"physics_hits\": \"0/4\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 231.74,
+    "setup_s": 0.0,
+    "grade_s": 1.261
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 1.26s"
+  ]
+}

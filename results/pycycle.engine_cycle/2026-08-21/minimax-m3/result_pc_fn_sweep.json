@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fn_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport numpy as np\\nimport json\\nfrom scipy.optimize import brentq\\n\\n# Build the turbojet cycle model\\nprob = om.Problem()\\nmodel = prob.model\\n\\n# Add components\\nmodel.add_subsystem('fc', pyc.FlightConditions())\\nmodel.add_subsystem('inlet', pyc.Inlet())\\nmodel.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\nmodel.add_subsystem('burn', pyc.Combustor())\\nmodel.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2265))\\nmodel.add_subsystem('noz', pyc.Nozzle())\\n\\n# Connect flow stations\\nmodel.connect('fc.Fl_O', 'inlet.Fl_I')\\nmodel.connect('inlet.Fl_O', 'comp.Fl_I')\\nmodel.connect('comp.Fl_O', 'burn.Fl_I')\\nmodel.connect('burn.Fl_O', 'turb.Fl_I')\\nmodel.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n# Connect shaft\\nmodel.connect('comp.trq', 'turb.trq')\\n\\n# Set input defaults for sea level static\\nmodel.set_input_defaults('fc.alt', 0.0, units='ft')\\nmodel.set_input_defaults('fc.MN', 0.0)\\nmodel.set_input_defaults('fc.W', 100.0, units='lbm/s')\\nmodel.set_input_defaults('inlet.ram_recovery', 1.0)\\nmodel.set_input_defaults('comp.PR', 13.5)\\nmodel.set_input_defaults('comp.eff', 0.9)\\nmodel.set_input_defaults('burn.eff', 0.95)\\nmodel.set_input_defaults('turb.eff', 0.9)\\nmodel.set_input_defaults('noz.Ps_exhaust', 14.696, units='psi')\\nmodel.set_input_defaults('noz.eff', 0.95)\\n\\nprob.setup()\\n\\n# Set T4 via dTb: first find T3, then compute required dTb\\nprob.set_val('burn.dTb', 2500.0)\\nprob.run_model()\\n\\nT3 = prob.get_val('comp.Fl_O.Tt', units='degR')[0]\\nT4_target = 2450.0\\ndTb_val = T4_target - T3\\nprob.set_val('burn.dTb', dTb_val)\\nprob.run_model()\\n\\n# Verify design point\\nT4_actual = prob.get_val('burn.Fl_O.Tt', units='degR')[0]\\nOPR_actual = prob.get_val('comp.PR')[0]\\nprint(f\\\"Design point: T4 = {T4_actual:.2f} degR, OPR = {OPR_actual:.3f}\\\")\\n\\n# Function to get thrust and fuel flow for a given airflow\\ndef get_perf(W):\\n    prob.set_val('fc.W', W, units='lbm/s')\\n    prob.run_model()\\n    Fn = prob.get_val('noz.Fg', units='lbf')[0]\\n    Wfuel = prob.get_val('burn.Wfuel', units='lbm/s')[0]\\n    return Fn, Wfuel\\n\\n# Get reference point for scaling initial guess\\nFn_ref, _ = get_perf(100.0)\\n\\n# Solve for each thrust target\\ntargets = [10500.0, 12000.0, 13500.0]\\nwfuels = []\\nfor fn_target in targets:\\n    # Initial guess by linear scaling\\n    W_guess = 100.0 * fn_target / Fn_ref\\n    \\n    def resid(W):\\n        Fn, _ = get_perf(W)\\n        return Fn - fn_target\\n    \\n    W_sol = brentq(resid, 20.0, 2000.0, xtol=0.5)\\n    _, Wf = get_perf(W_sol)\\n    wfuels.append(Wf)\\n    Fn_check, _ = get_perf(W_sol)\\n    print(f\\\"Target Fn: {fn_target:.0f} lbf -> W: {W_sol:.2f} lbm/s, Wfuel: {Wf:.4f} lbm/s, Fn_check: {Fn_check:.1f}\\\")\\n\\n# Compute least-squares slope\\nfn_arr = np.array(targets)\\nwf_arr = np.array(wfuels)\\nslope, intercept = np.polyfit(fn_arr, wf_arr, 1)\\nprint(f\\\"Slope dWfuel/dFn: {slope:.6e} (lbm/s)/lbf\\\")\\n\\n# Write results to JSON\\nresult = {\\n    'wfuel_fn10500': float(wfuels[0]),\\n    'wfuel_fn12000': float(wfuels[1]),\\n    'wfuel_fn13500': float(wfuels[2]),\\n    'dwfuel_dfn': float(slope)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(\\\"Results written to result.json\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_9_no_3wn/solve.py\\\", line 16, in <module>\\n    model.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2265))\\n                                                     ^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'LPT2265'. Did you mean: 'LPT2269'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 127.823,
+    "setup_s": 0.0,
+    "grade_s": 1.058
+  },
+  "environment_digest": "sha256:c78e4dfc55d392df8b8d61d6c74836f7d7b938f869e900a617cd94eb0db3d32d",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

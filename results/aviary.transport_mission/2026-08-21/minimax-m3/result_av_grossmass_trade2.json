@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_trade2",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport os\\nimport glob\\nimport numpy as np\\nfrom copy import deepcopy\\n\\nimport aviary.api as av\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Design gross masses to analyze (in lbm)\\ngross_masses = [167400, 172400, 177400]\\n\\n# Find CSV files for each gross mass\\ncsv_files = {}\\nfor mass in gross_masses:\\n    mass_str = str(mass)\\n    # Look for CSV files containing the mass value in the filename\\n    all_csvs = glob.glob(\\\"*.csv\\\")\\n    matches = [f for f in all_csvs if mass_str in f]\\n    if matches:\\n        csv_files[mass] = matches[0]\\n    else:\\n        # Try common naming patterns\\n        common_names = [\\n            f\\\"aircraft_{mass_str}lbm.csv\\\",\\n            f\\\"aircraft_{mass_str}.csv\\\",\\n            f\\\"design_{mass_str}.csv\\\",\\n            f\\\"{mass_str}lbm.csv\\\",\\n            f\\\"{mass_str}.csv\\\",\\n        ]\\n        for name in common_names:\\n            if os.path.exists(name):\\n                csv_files[mass] = name\\n                break\\n        else:\\n            raise FileNotFoundError(f\\\"Could not find CSV file for gross mass {mass} lbm\\\")\\n\\n# Run mission for each design gross mass\\nfuel_results = {}\\n\\nfor mass in gross_masses:\\n    csv_file = csv_files[mass]\\n    \\n    # Load aircraft data from CSV\\n    aircraft_data = av.AircraftData(filename=csv_file)\\n    \\n    # Setup phase info with cruise Mach 0.80 (deepcopy first to avoid modifying default)\\n    phase_info = deepcopy(default_phase_info)\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Run forward mission analysis\\n    prob = av.run_aviary(\\n        aircraft_data=aircraft_data,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Extract total fuel mass\\n    fuel_mass = float(prob.get_val('mission:total_fuel_mass', units='lbm')[0])\\n    fuel_results[mass] = fuel_mass\\n\\n# Prepare output dictionary\\noutput = {\\n    f'fuel_{mass}_lbm': fuel_results[mass] for mass in gross_masses\\n}\\n\\n# Find the gross mass with minimum fuel\\nmin_mass = min(fuel_results, key=fuel_results.get)\\noutput['min_fuel_grossmass_lbm'] = int(min_mass)\\n\\n# Write results to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(output, f, indent=2)\\n\\nprint(\\\"Results written to result.json:\\\")\\nprint(json.dumps(output, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_8e554crc/solve.py\\\", line 36, in <module>\\n    raise FileNotFoundError(f\\\"Could not find CSV file for gross mass {mass} lbm\\\")\\nFileNotFoundError: Could not find CSV file for gross mass 167400 lbm\\n\"}"
+  },
+  "timings": {
+    "agent_s": 59.683,
+    "setup_s": 0.0,
+    "grade_s": 1.045
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.04s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_trade",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport json\\nimport warnings\\nimport numpy as np\\nfrom copy import deepcopy\\n\\nwarnings.filterwarnings('ignore')\\n\\nfrom aviary.interface.methods_for_level1 import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Configure phase info: cruise Mach 0.80 (deep-copy the default first)\\nphase_info = deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Target design gross masses\\ntarget_masses = [165400, 175400, 185400]\\nfile_by_mass = {}\\n\\n\\ndef parse_gwm(filepath):\\n    \\\"\\\"\\\"Parse design_gross_mass from an Aviary-format CSV file.\\\"\\\"\\\"\\n    try:\\n        with open(filepath, 'r', errors='ignore') as fh:\\n            for line in fh:\\n                s = line.strip()\\n                if not s or s.startswith(','):\\n                    continue\\n                parts = [p.strip() for p in s.split(',')]\\n                if len(parts) < 2:\\n                    continue\\n                key = parts[0]\\n                val_str = parts[1]\\n                # Prefer design_gross_mass; fall back to gross_mass\\n                if key.endswith('design_gross_mass') or key == 'design_gross_mass':\\n                    try:\\n                        return float(val_str)\\n                    except ValueError:\\n                        pass\\n                elif key.endswith('gross_mass') or key == 'gross_mass':\\n                    # Avoid matching e.g. 'empty_mass' which also ends with mass\\n                    if 'empty' in key or 'max' in key or 'min' in key:\\n                        continue\\n                    try:\\n                        return float(val_str)\\n                    except ValueError:\\n                        pass\\n    except Exception:\\n        return None\\n    return None\\n\\n\\n# Build search roots (cwd first, then common locations)\\nsearch_roots = [os.getcwd()]\\nfor d in [os.path.expanduser('~'), '/data', '/work', '/workspace',\\n          '/scratch', '/tmp']:\\n    if os.path.exists(d) and d not in search_roots:\\n        search_roots.append(d)\\n\\ntry:\\n    import aviary as _av\\n    avi = os.path.dirname(_av.__file__)\\n    if avi not in search_roots:\\n        search_roots.append(avi)\\n    parent = os.path.dirname(avi)\\n    if parent not in search_roots:\\n        search_roots.append(parent)\\nexcept Exception:\\n    pass\\n\\n# Walk search roots to locate the three CSV files\\nfor start_dir in search_roots:\\n    if len(file_by_mass) >= 3 or not os.path.exists(start_dir):\\n        continue\\n    try:\\n        for dirpath, dirnames, filenames in os.walk(start_dir):\\n            # Skip cache, package and test trees\\n            dirnames[:] = [d for d in dirnames\\n                          if not d.startswith('.')\\n                          and d not in ('__pycache__', '.git',\\n                                        'site-packages', 'dist-packages',\\n                                        'dist-info', 'node_modules')]\\n            for fn in filenames:\\n                if not fn.endswith('.csv'):\\n                    continue\\n                fp = os.path.join(dirpath, fn)\\n                val = parse_gwm(fp)\\n                if val is not None and val in target_masses and val not in file_by_mass:\\n                    file_by_mass[val] = fp\\n                    if len(file_by_mass) >= 3:\\n                        break\\n            if len(file_by_mass) >= 3:\\n                break\\n    except Exception:\\n        continue\\n\\n# Also try absolute-style filenames in cwd as a last resort\\ncwd = os.getcwd()\\nif len(file_by_mass) < 3:\\n    for mass in target_masses:\\n        if mass in file_by_mass:\\n            continue\\n        for cand in [f'aircraft_{mass}.csv', f'large_single_aisle_GWM{mass}.csv',\\n                     f'GWM{mass}.csv', f'design_gross_mass_{mass}.csv']:\\n            p = os.path.join(cwd, cand)\\n            if os.path.exists(p):\\n                file_by_mass[mass] = p\\n                break\\n\\nprint(f\\\"Discovered {len(file_by_mass)} CSV files: {file_by_mass}\\\")\\n\\nif len(file_by_mass) != 3:\\n    raise RuntimeError(\\n        f\\\"Could not loc\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_e2qa8w76/solve.py\\\", line 9, in <module>\\n    from aviary.interface.methods_for_level1 import run_aviary\\nModuleNotFoundError: No module named 'aviary.interface.methods_for_level1'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 118.052,
+    "setup_s": 0.0,
+    "grade_s": 0.086
+  },
+  "environment_digest": "sha256:b347e2aa24342bb2c7534f9d92d8bdf6646abef722bc651e287f8cd73fa58a77",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.09s"
+  ]
+}
