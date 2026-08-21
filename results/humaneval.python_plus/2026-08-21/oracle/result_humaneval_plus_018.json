@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_018",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\n\\ndef how_many_times(string: str, substring: str) -> int:\\n    \\\"\\\"\\\" Find how many times a given substring can be found in the original string. Count overlaping cases.\\n    >>> how_many_times('', 'a')\\n    0\\n    >>> how_many_times('aaa', 'a')\\n    3\\n    >>> how_many_times('aaaa', 'aa')\\n    3\\n    \\\"\\\"\\\"\\n\\n\\n    occurences = 0\\n    for i in range(len(string)):\\n        if string[i:].startswith(substring):\\n            occurences += 1\\n    return occurences\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 0.134,
+    "setup_s": 0.0,
+    "grade_s": 0.134
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

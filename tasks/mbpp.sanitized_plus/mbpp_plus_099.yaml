@@ -1,0 +1,65 @@
+id: mbpp_plus_099
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_099.md
+  prompt_sha256: cc96576d72d1371a789f800e196aa6b2cbd2ca305ea14285bb3e3cf4facd3569
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_099.py
+    digest: 5f546a988411c7cc48cafeb4e4c57268e63556a085712db38e9471ded13a47eb
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 99
+  entry_point: decimal_to_binary
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: decimal_to_binary
+  tests:
+  - assert decimal_to_binary(8) == '1000'
+  - assert decimal_to_binary(18) == '10010'
+  - assert decimal_to_binary(7) == '111'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef decimal_to_binary(n): \\n    return bin(n).replace(\"0b\",\"\") \\n', _gt_ns)\n_gt = _gt_ns['decimal_to_binary']\n_inputs = [[8], [18], [7], [0], [-5], [999999999999999999999999999999999999999999], [-1000000000000000000000000000000000000000000], [-33], [False], [-1], [-1000000000000000000000000000000000000000001], [999999999999999999999999999999999999999998], [-999999999999999999999999999999999999999999], [True], [-6], [-68], [-34], [-1000000000000000000000000000000000000000002], [1000000000000000000000000000000000000000000], [2], [26], [1], [-69], [80], [-87], [-2], [-3], [79], [-7], [-1000000000000000000000000000000000000000003], [-999999999999999999999999999999999999999998], [3], [-999999999999999999999999999999999999999997], [-999999999999999999999999999999999999999996], [4], [1000000000000000000000000000000000000000001], [1000000000000000000000000000000000000000002], [25], [-97], [-35], [27], [999999999999999999999999999999999999999997], [28], [81], [-70], [-32], [55], [78], [77], [-999999999999999999999999999999999999999993], [-24], [-96], [-71], [-86], [-23], [-25], [24], [29], [-72], [86], [82], [46], [-98], [-26], [-95], [30], [23], [56], [999999999999999999999999999999999999999996], [-999999999999999999999999999999999999999995], [-4], [85], [-36], [57], [87], [58], [83], [-1000000000000000000000000000000000000000004], [999999999999999999999999999999999999999995], [84], [54], [20], [31], [-999999999999999999999999999999999999999994], [-73], [-37], [-22], [45], [13], [-74], [75], [88], [71], [-31], [-99], [-100], [22], [76], [14], [59], [-88], [74], [-1000000000000000000000000000000000000000005], [-94], [-49], [1000000000000000000000000000000000000000003], [-93]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(decimal_to_binary(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_099.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

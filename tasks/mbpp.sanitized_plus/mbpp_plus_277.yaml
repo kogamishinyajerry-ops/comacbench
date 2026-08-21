@@ -1,0 +1,65 @@
+id: mbpp_plus_277
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_277.md
+  prompt_sha256: d282ac61a4dcc195d59202eb121265ce47eb0be71b22d18b98c0d1d9abe8f8ae
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_277.py
+    digest: 0cab0b2befd774345b7aef457ad73a5f5243d3059f86c6a598d09e706dd453b2
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 277
+  entry_point: dict_filter
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: dict_filter
+  tests:
+  - 'assert dict_filter({''Cierra Vega'': 175, ''Alden Cantrell'': 180, ''Kierra Gentry'': 165, ''Pierre Cox'': 190},170)=={''Cierra Vega'': 175, ''Alden Cantrell'': 180, ''Pierre Cox'': 190}'
+  - 'assert dict_filter({''Cierra Vega'': 175, ''Alden Cantrell'': 180, ''Kierra Gentry'': 165, ''Pierre Cox'': 190},180)=={ ''Alden Cantrell'': 180, ''Pierre Cox'': 190}'
+  - 'assert dict_filter({''Cierra Vega'': 175, ''Alden Cantrell'': 180, ''Kierra Gentry'': 165, ''Pierre Cox'': 190},190)=={ ''Pierre Cox'': 190}'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef dict_filter(dict1, n):\\n    return {key : value for (key, value) in dict1.items() if value >=n}\\n', _gt_ns)\n_gt = _gt_ns['dict_filter']\n_inputs = [[{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 170], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 180], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 190], [{}, 0], [{}, -5], [{}, -10], [{}, 10], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10}, 10], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 200], [{}, 8], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grorangeape': -10}, 10], [{}, -1], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180}, 10], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 201], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180, 'Pierre': 12}, 10], [{'-1': 12, '201': -11, '-58': -5, '10': -94}, 165], [{'Cantrell': 10, 'Gentry': -31, 'apple': 44, 'Nw': -33, 'IhVdpFDGMV': 200, 'abM': 20, 'JDnQ': -11}, -5], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180}, -11], [{'-1': 12, '201': -11, '-58': -5}, 165], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Pierre Cox': 190}, 200], [{'-1': 12, '201': -11, '-58': -5}, 164], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grorangeape': -10}, -10], [{'-1': 12, '-58': -5, '10': -94}, 165], [{}, 180], [{'-72': -33}, 0], [{'-1': 12, '201': -11, '-58': -5}, -33], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, 166], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Pierre Cox': 190}, 199], [{'75.87572329200214': False, '79.71274224615752': False}, 8], [{'-1': 12, '10': -94}, 165], [{'175': False, '-57': True, '-32': True, '5': False}, 8], [{'-1': 12, '-58': 199, '10': -94}, 190], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Pierre Cox': 190}, 165], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, -1], [{'Alden Cantrell': False, 'Vega': False, 'Cierra Vega': True, 'x': True, 'abM': True}, 11], [{'-1': 12, '201': -11, '-58': -31}, 8], [{'-1': 12, '201': -11, '-58': -5, '10': -94}, True], [{'15': False}, 8], [{'-72': -34}, 20], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180}, -12], [{'Alden Cantrell': False, 'Vega': False, 'Cierra Vega': True, 'x': True, 'abM': True}, 201], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, 167], [{'Alden Cantrell': False, 'Vega': False, 'Cierra Vega': True, 'x': True, 'abM': True}, -11], [{'Cierra Vega': 176, 'Alden Cantrell': 180, 'Pierre Cox': 190}, 165], [{}, 9], [{'-1': 12, '-58': -5, '10': -94}, -58], [{'-1': 12, '201': -11, '-58': -5, '10': -94, '-57': -93, '0': -1}, True], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, 0], [{'apple': 5, 'banana': 12, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180, 'Pierre': 12, 'kikwi': 6}, 10], [{'-58': -5}, 165], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Pierre Cox': 190, 'Alden Cantrel': -57}, 200], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'wamtermelon': 11}, 10], [{'-1': 12, '-58': 199, '10': -94, '166': -93}, 190], [{'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'wamtermelon': 176, 'ore': 11}, 10], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'Cantrel': True}, 10], [{'Alden Cantrell': 180, 'Pierre Cox': 190}, 199], [{'-1': 12, '201': -11, '-58': -5}, 8], [{'Alden Cantrell': 180, 'Pierre Cox': 190}, 165], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, 20], [{'75.87572329200214': False, '79.71274224615752': False}, 9], [{'-1': 12, '201': -11, '-58': -31, '200': 12}, 9], [{'-1': 12, '-58': 199, '10': -94, '166': -93}, 189], [{'Alden Cantrell': False, 'Vega': False, 'Cierra Vega': True, 'abM': True}, -11], [{'15': False}, 15], [{'-1': 12, '-58': -5, '10': -94}, 44], [{'-1': 12, '10': -94, '0': -93}, 167], [{'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180}, -12], [{'-1': 12, '-58': -5, '10': -94, '0': -92, '-2': -32}, 166], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'Cantrel': True}, 167], [{'Pierre Cox': 190}, 198], [{'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'wamtermelon': 176, 'ore': 11, 'kiwigrape': 20}, 10], [{'-1': 12, '10': -94}, 164], [{'-1': 12, '201': -11, '-58': -5, '10': -94, '-57': -93, '0': -1}, False], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 166, 'watermelon': 20, 'kiwi': 10, 'grorangeape': -10}, 10], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, 199], [{}, 165], [{'175': False, '-57': True, '-32': True, '5': False}, -94], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, -93], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'wamtermelon': 11}, 167], [{'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180}, 9], [{'Cantrell': 10, 'Gentry': -31, 'apple': 44, 'Nw': -33, 'IhVdpFDGMV': 200, 'abM': 20, 'JDnQ': -93}, -5], [{'75.87572329200214': True, '79.71274224615752': True}, 180], [{'-58': 199, '10': -94}, 190], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'wamtermelon': 11, 'appKierrae': 5}, 167], [{'-1': 12, '10': -94, '0': -93}, -93], [{'Pierre Cox': 190}, 166], [{'-1': 12, '-58': -5, '10': -94, '190': -93}, 165], [{'-1': 12, '10': -94, '0': -93, '176': -34}, -93], [{'Alden Cantrell': False, 'Cierra Vega': True, 'x': True, 'abM': True}, 44], [{'-1': 12, '10': -94, '-2': -32}, 166], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, 11], [{'-72': -34}, -33], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180, 'Pierre': 12, 'oraCantrelnge': 44}, 10], [{'-1': 12, '-58': -5, '10': -94, '-57': -93, '0': -1}, True], [{'-1': 12, '201': -11, '-58': -5}, 5], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, -94], [{'-1': 12, '-58': -5, '10': -94, '0': -93}, -95], [{'-72': -33}, 1], [{}, 19], [{'75.87572329200214': False, '79.71274224615752': False, '95.84649191478275': False}, 9], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'grrape': 180}, 175], [{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Pierre Cox': 190, 'Alden Cantrel': -57, 'Alden CantreAldenl': -12}, 200], [{'-1': 12, '10': -94}, 180], [{'-58': 199, '10': -94, '166': -93, '176': 200}, 190], [{'-72': -34, '-73': 165}, 20], [{'75.87572329200214': True, '79.71274224615752': True}, 5], [{'-1': 12, '-58': 199, '10': -94, '-73': -94}, 190], [{'-1': 12, '-58': 199, '10': -94, '166': -93}, 191], [{'apple': 5, 'banana': 12, 'orange': 8, 'grape': 15, 'watermelon': 20, 'kiwi': 10, 'wamtermelon': 11, 'appKierrae': 5}, 166]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(dict_filter(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_277.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

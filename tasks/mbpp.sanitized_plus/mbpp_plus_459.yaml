@@ -1,0 +1,65 @@
+id: mbpp_plus_459
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_459.md
+  prompt_sha256: 65be1d356542f16c4a7e669782c80123ae5f2130f8bc5ade4710370927db8c2b
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_459.py
+    digest: 7fba3129c0a58271013b5fed0ace49a82212fbe2f307633eae7b82e1e0ac81e4
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 459
+  entry_point: remove_uppercase
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: remove_uppercase
+  tests:
+  - assert remove_uppercase('cAstyoUrFavoRitETVshoWs') == 'cstyoravoitshos'
+  - assert remove_uppercase('wAtchTheinTernEtrAdIo') == 'wtchheinerntrdo'
+  - assert remove_uppercase('VoicESeaRchAndreComMendaTionS') == 'oiceachndreomendaion'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec(\"\\ndef remove_uppercase(str1):\\n  return ''.join(c for c in str1 if c.islower())\\n\", _gt_ns)\n_gt = _gt_ns['remove_uppercase']\n_inputs = [['cAstyoUrFavoRitETVshoWs'], ['wAtchTheinTernEtrAdIo'], ['VoicESeaRchAndreComMendaTionS'], [''], ['ABCDEFG'], ['ThiS%^%!s&a(mY)TesTStR%i*ng'], ['ThiS%^%!s&a(mY)TsesTStR%i*ng'], ['ThiS%^%!%s*ng'], ['ABCDABCDEFGEFG'], ['ABFCDABCDEFGEFG'], ['CABCDEFG'], ['CACDEFG'], ['ThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ng'], ['ABFCDABCDCEEFG'], ['ABFCDABCGEFG'], ['AABCDEFGABCGEFG'], ['ThiS%^%ABCABFCDABCDCEEFGDEFG!s&a(mY)TsesTStR%i*ng'], ['ThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngABCDABCDEFGEFG'], ['ABFCDABCGEF'], ['ABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ng'], ['ThiSS%^%ABCDEFG!s&a(mY)TsesTStR%i*ng'], ['ThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(mY)TesTStR%i*ng'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTStR%i*ngABCDABCDEFGEFG'], ['AABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABCGEFG'], ['ThiS%^%ABCDEFG!ABCDEFGsTStR%i*ngABCDABCDEFGEFG'], ['ABFCDAABCCDCEEFG'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngStR%i*ngABCDABCDEFGEFG'], ['ABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(mY)TesTStR%i*ngDCEEFG'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFG'], ['ThiS%^%ABCABFCDABCDCEEFGDThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(mY)TesTStR%i*ngEFG!s&a(mY)TsesTStR%i*ng'], ['ABFCDABCDCFG'], ['CABCDEEFG'], ['AEBCDEFG'], ['ThiS%^%!s&a(mY)TsesTStR%i*nAABCDEFGABCGEFG'], ['ABCDEFGThiS%^%)!s&a(mY)TsesTAEBCDEFGStR%i*ng'], ['ThiSS%^%ABCDEFGT!s&a(mY)TsesTStR%i*ng'], ['ThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCGEFG'], ['CACDEFCG'], ['ABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFG'], ['A)TsesTStR%i*ng'], ['ThiSS%^%ABCDEFGT!s&a(mY)TsesTStR%i*ngABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ng'], ['ABFCDABCThiSS%^%ABCDEFGT!s&a(mY)TsesTStR%i*ngGEFG'], ['AABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFGCGEFG'], ['ThiS%^%!s&a(mY)TsesTStR%i*CnAABCDGABCGEFG'], ['ThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCA)TsesTStR%i*ngGEFG'], ['ThiS%^%!s&a(mY)TsesTStRs%i*nAABCDEFGABCGEFG'], ['ThThiSS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngiS%^%ABThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCGEFG%i*ngABCDABCDEFGEFG'], ['AABCDEGEFG'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)ABFCDAABCCDCEEFGTsesTStABCDEFGEFG'], ['ThiSS%^%ABCDEFG!s&a(mY)TsesTABCDEFGThiS%^%)!s%&a(mY)TsesTStR%i*ngStR%i*ng'], ['ThiSS%^%ABCDEFGAABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABCGEFGT!s&a(mY)TsesTStR%i*ngABCDEFGThiS%^%ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFG%i*ng'], ['ABFCDAABCCDDEEFG'], ['ThiS%^%ABCDEFABAABCDEGEFGDEFGThiS%^%)!s&a(mY)ABFCDAABCCDCEEFGTsesTStABCDEFGEFG'], ['ThisS%^%!s&a(mY)TsesTStRs%i*nAABCDEFGABCGEFG'], ['ThBiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngABCDABCDEFGEFG'], ['CABCDE'], ['ABCDEFGThiS%^%)!s&a(mEFGStR%i*ng'], ['ThiSS%^%ABCDEFGA(ABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABCGEFGT!s&a(mY)TsesTStR%i*ngABCDEFGThiS%^%ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesAABCDEFGABCGEFGTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFG%i*ng'], ['CACDEFCThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngAG'], ['ThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFG'], ['ThiS%^%ABCABFCDABCDCEEFGDThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(ThiS%^%!s&a(mY)TsesTStRs%i*nAABCDEFGABCGEFGmY)TesTStR%i*ngEFG!s&a(mY)TsesTStR%i*ng'], ['CABCABFCDABCThiSS%^%ABCDEFGT!s&a(mY)TsesTStR%i*ngGEFGEFG'], ['ThThiSS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngiS%^A%ABThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCGEFG%i*ngABCDABCDEFGEFG'], ['ABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)Tse%sTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFG'], ['ABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)Tse%sTStThBiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngABCDABCDEFGEFGR%i*n%!s&a(mY)TesTStR%i*ngDCEEFG'], ['ThThiSS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngiS%^%ABThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCGEFG%iS*ngABCDABCDEFGEFG'], ['AABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABABFCDABCThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFGT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFGCGEFG'], ['AAABFCDAABCCDCEEFGCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABABFCDABCThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFGT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFGCGEFG'], ['ThiS%^%!s&a(mY)TemsTStR%i*ng'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiSThiS%^%ABCABFCDABCDCEEFGDThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(ThiS%^%!s&a(mY)TsesTStRs%i*nAABCDEFGABCGEFGmY)TesTStR%i*ngEFG!s&a(mY)TsesTStR%i*ng%^%)!s&a(mY)ABFCDAABCCDCEEFGTsesTStABCDEFGEFG'], ['ThiS%^%ABCABFCDABCDCEEFGDThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(mY)TesTStR%i*ngEFG!ABFCDABCDCFGs&a(mY)TsesTStR%i*ng'], ['ThBiS%^%ABCDThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(mY)TesTStR%i*ngEFG!s&a(mY)TsesTStR%i*ngABCDABCDEFGEFG'], ['ACABCCDE'], ['ABCDFEFG'], ['ThBiS%^%ABCDEFG!s&a(mY)TsesThiS%^%ABCDEFABAABCDEGEFGDEFGThiS%^%)!s&a(mY)ABFCDAABCCDCEEFGTsesTStABCDEFGEFGTStR%i*ngABCDABCDEFGEFG'], ['ThiS%^%!s&a(mY)TemsTStR%i*ngAmCABCCDE'], ['ThiS%^%!s&a(mY)(TemsTStR%i*ngAmCABCCDE'], ['ThiSS%^%ABCDEFGA(ABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABCGEFGT!s&a(ThiSS%^%ABCDEFGAABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABCGEFGT!s&a(mY)TsesTStR%i*ngABCDDEFGThiS%^%ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFG%i*ng%ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesAABCDEFGABCGEFGTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFG%i*ng'], ['AABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABABFCDABCThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFGT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTStRCEEFGCGEFG'], ['AThBiS%^%ABCDEFG!s&a(mY)TsesThiS%^%ABCDEFABAABCDEGEFGDEFGThiS%^%)!s&a(mY)ABFCDAABCCDCEEFGTsesTStABCDEFGEFGTStR%i*ngABCDABCDEFGEFGABCDEGEFG'], ['ThiS%^%!s&a(mY)TemsTStR%i*ngABFCDABCGEFAmCABCCDE'], ['CABCDEF'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(m)Y)TsesTStABCDEFGEFG'], ['AABCDEFGABCDEFGThiS%^%)!s&aC(mY)TsesTStR%i*ngABCGEFG'], ['ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCsDEFGThiS%^%)!s&a(m)Y)TsesTStABCDEFGEFG'], ['ThThR%i*ngiS%^%ABThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCGEFG%iS*ngABCDABCDEFGEFG'], ['AABCDEFGABCDEFGThiS%^%)!s&aC(mY)TsesTStR%i*ngABCGEThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFGFG'], ['AABCDThiS%^%!s&a(mY)TemsTStR%i*ngEFGABCGEFG'], ['ABFCDAABCCDDEEEFG'], ['ABFCDABCDEFGGEFG'], ['ThiSS%^%ABCDEFGT!s&a(mY)TsesTStR%i*ngABCDEFGThiS%^%)!s&a(mY)Tse%sTStR%i*ng'], ['AABThThiSS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngiS%^%ABThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCGEFG%i*ngABCDABCDEFGEFGCDEFGABCDEFGThiS%^%)!s&aC(mY)TsesTStR%i*ngABCGEThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFGFG'], ['AABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTSetR%i*ngDCEEFGCGEFG'], ['ABFCDAABCCEDDEEFG'], ['ThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGABCA)TsesTStR%ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFGi*ngGEFG'], ['ACABCABFCDABCT%hiThiS%^%ABCDEFG!s&a(mY)Tse%sTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFGCDE'], ['AThiS%^%!s&a(mY)TsesTStR%i*nAABCDEFGABCGEFGBCDABCDG'], ['ThiSS%^%ABCDEFGAABCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABCGEFGT!s&a(mY)TsesTStR%i*ngABCDEFGThiS%^%ThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStABCThiS%^%ABCABFCDABCDCEEFGDThiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngS%^%!s&a(mY)TesTStR%i*ngEFG!s&a(mY)TsesTStR%i*ngDEFGEFG%i*ng'], ['ThiSAAABFCDAABCCDCEEFGCDEFGABCDEFGThiS%^%)!s&a(mY)TsesTStR%i*ngABSABFCDABCThiS%^%!s&a(mY)TsesTStR%i**CnAABCDGABCGEFGT%hiThiS%^%ABCDEFG!s&a(mY)TsesTStR%i*n%!s&a(mY)TesTStR%i*ngDCEEFGCGEFG%^%!s&a(mY)TsesTStR%i*ng'], ['ThThiSS%^%ABCDEFG!s&a(mY)TsesTStR%i*ngiS%^A%ABThiS%^%!s&a(mY)TsesTStR%i*CnAABCDEFGACDEFGEFG'], ['ABCDEFGThiS%^%)!s&a(mY)TsesTThiS%^%!s&a(mY)TemsTStR%i*ngABAFCDABCGEFAmCABCCDEAEBCDEFGStR%i*ng'], ['CACDEFCThiS%^%ABCDEFG!s&a(mY)TsesTStR%%i*ngAG'], ['AABFCDABCGEFG'], ['ThABFCDABCDEFGGEFGiS%^%!%sg'], ['CAThiS%^%ABCDEFABCDEFGG!s&a(mY)TsesTABCDEFGThiS%^%)!s&a(mY)TsesTStABCDEFGEFGBCDEEFG'], ['ThisS%^%!s&a(mY)ABFCDABCDEFGEFGTsesTStRs%i*nAABCDEFGABCGEFG']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(remove_uppercase(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_459.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

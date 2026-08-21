@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_003",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List\\n\\n\\ndef below_zero(operations: List[int]) -> bool:\\n    \\\"\\\"\\\" You're given a list of deposit and withdrawal operations on a bank account that starts with\\n    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and\\n    at that point function should return True. Otherwise it should return False.\\n    >>> below_zero([1, 2, 3])\\n    False\\n    >>> below_zero([1, 2, -4, 5])\\n    True\\n    \\\"\\\"\\\"\\n\\n    account = 0\\n    for operation in operations:\\n        account += operation\\n        if account < 0:\\n            return True\\n    return False\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 0.197,
+    "setup_s": 0.0,
+    "grade_s": 0.197
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.11s"
+  ]
+}

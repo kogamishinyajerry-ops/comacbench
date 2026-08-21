@@ -1,0 +1,65 @@
+id: mbpp_plus_101
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_101.md
+  prompt_sha256: f818e23816ef7e3bbc3a78ddc33cb3eb665ce9a187fb130d91bd53fe3870234e
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_101.py
+    digest: 0a87b3a00cd4b6dd21d770e80e98423e308b79b39afcc0637f7e63f5bbd12ab2
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 101
+  entry_point: kth_element
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: kth_element
+  tests:
+  - assert kth_element([12,3,5,7,19], 2) == 3
+  - assert kth_element([17,24,8,23], 3) == 8
+  - assert kth_element([16,21,25,36,4], 4) == 36
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef kth_element(arr, k):\\n  return arr[k-1]\\n', _gt_ns)\n_gt = _gt_ns['kth_element']\n_inputs = [[[12, 3, 5, 7, 19], 2], [[17, 24, 8, 23], 3], [[16, 21, 25, 36, 4], 4], [[100, 99, 98, 97, 96], 5], [[50, 40, 30, 20, 10], 1], [[1000, 999, 998, 997, 996], 3], [[1000000, 500000, 100000, 50000, 10000], 4], [[50, 40, 30, 20, 10, 40], 1], [[100, 99, 98, 20, 97, 96], 5], [[100, 99, 98, 20, 97, 96], 6], [[100, 99, 98, 97, 96, 98], 5], [[51, 40, 99, 41, 30, 41, 20, 10], 1], [[500000, 100000, 50000, 10000], 4], [[1000, 999, 998, 997, 996, 999], 3], [[100, 99, 98, 97, 96], 4], [[100, 100, 98, 20, 97, 96, 100], 7], [[500000, 500000, 100000, 50000, 10000], 4], [[50, 40, 10, 20, 10, 40], 4], [[100, 99, 98, 98, 97, 96], 5], [[100, 99, 98, 20, 97], 5], [[100, 99, 96, 20, 97, 96], 6], [[100, 99, 96, 20, 97, 96], 5], [[100, 99, 99, 98, 97, 96], 4], [[51, 40, 99, 41, 30, 41, 20, 10], 7], [[100, 96, 20, 97, 96], 4], [[1000, 3, 999, 998, 997, 996, 999], 3], [[999, 100, 99, 98, 97, 96], 5], [[100, 99, 99, 98, 97], 4], [[1000, 3, 999, 998, 997, 996, 999], 4], [[100, 99, 99, 98, 96], 4], [[100, 99, 98, 99, 20, 97], 5], [[100, 99, 98, 20, 97, 100], 5], [[1000, 999, 998, 997, 996, 999], 4], [[51, 40, 99, 20, 41, 30, 41, 20, 10], 1], [[100, 99, 98, 97, 96, 98], 6], [[1000, 3, 999, 998, 997, 996, 998], 4], [[7, 100, 100, 98, 20, 97, 96, 100], 7], [[100, 99, 98, 97, 1000000, 96], 4], [[100, 19, 96, 20, 97, 96], 4], [[7, 100, 100, 98, 97, 19, 96, 100], 7], [[100, 99, 98, 20, 7, 97, 100], 4], [[100, 99, 98, 20, 96, 96], 5], [[500000, 100000, 50000, 10000], 3], [[7, 100, 100, 98, 97, 19, 96, 100], 8], [[7, 100, 100, 98, 97, 19, 96, 100], 3], [[51, 40, 99, 41, 30, 20, 10], 1], [[50, 997, 40, 30, 20, 10], 1], [[100, 99, 98, 97, 1000000, 96], 2], [[100, 95, 1, 98, 97, 1000000, 96], 4], [[51, 40, 99, 41, 30, 20, 10], 2], [[100, 100, 98, 20, 97, 96, 10000], 1], [[100, 99, 99, 98, 97], 5], [[100, 99, 98, 98, 97, 96], 6], [[100, 100, 98, 20, 97], 5], [[100, 99, 96, 19, 97, 96], 4], [[50, 40, 30, 20, 11], 1], [[100, 96, 99, 97, 20, 97, 96], 7], [[100, 99, 96, 10000, 20, 96], 3], [[50, 40, 30, 20, 7], 1], [[1000, 3, 999, 998, 997, 996, 999, 999], 3], [[100, 99, 98, 98, 97, 96, 100], 5], [[50, 40, 6, 20, 10, 40], 2], [[7, 100, 100, 98, 20, 97, 96, 100, 97], 7], [[100, 99, 96, 19, 97, 96, 99], 4], [[100, 99, 98, 4, 96, 96], 5], [[100, 99, 98, 20, 95, 96], 5], [[100, 19, 96, 20, 97, 96, 96], 4], [[41, 100, 100, 98, 20, 97, 96, 10000], 1], [[7, 100, 100, 6, 98, 97, 19, 96, 100], 8], [[7, 100, 100, 98, 20, 97, 96, 100, 100], 7], [[50, 997, 97, 40, 30, 20, 10], 1], [[100, 96, 20, 96, 96], 5], [[1000, 998, 997, 996, 999], 3], [[7, 51, 100, 98, 20, 97, 96, 100], 7], [[100, 19, 30, 20, 97, 96], 4], [[1000, 3, 999, 998, 997, 5, 996, 999], 3], [[7, 100, 100, 98, 11, 97, 96, 100, 100], 7], [[100, 99, 96, 20, 97, 95], 6], [[7, 100, 100, 98, 20, 97, 96, 100, 100], 6], [[100, 98, 98, 97, 96], 5], [[100, 99, 98, 98, 97, 96, 100, 99], 5], [[50, 40, 20, 10, 40], 1], [[51, 40, 99, 41, 30, 41, 20, 10], 6], [[51, 40, 99, 20, 41, 30, 41, 20, 10], 7], [[7, 100, 100, 98, 20, 30, 96, 100], 7], [[7, 51, 100, 98, 20, 30, 97, 96, 100], 7], [[101, 99, 98, 97, 96], 4], [[100, 99, 99, 98, 96], 3], [[50, 40, 20, 10, 40, 20], 1], [[50, 40, 20, 7], 1], [[100, 99, 98, 20, 95, 96], 4], [[7, 100, 100, 98, 20, 97, 10000, 96, 100], 7], [[97, 100, 99, 98, 97, 96, 98], 6], [[100, 96, 20, 97, 998, 96], 4], [[51, 3, 999, 998, 997, 996, 999], 3], [[101, 99, 98, 97, 96], 1], [[7, 100, 41, 98, 20, 30, 96, 100], 7], [[7, 100, 100, 96, 97, 19, 96, 100], 8], [[7, 51, 100, 20, 20, 97, 96, 100], 7], [[6, 7, 100, 100, 98, 97, 19, 96, 100], 7], [[100, 99, 98, 4, 96], 5], [[51, 3, 999, 998, 997, 996, 999], 4], [[7, 100, 98, 97, 19, 96, 100, 100], 7], [[100, 99, 98, 20, 7, 97, 100], 5], [[1000000, 100, 96, 20, 97, 96], 4], [[100, 99, 98, 20, 95], 5], [[1000, 998, 997, 996], 3]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(kth_element(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_101.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

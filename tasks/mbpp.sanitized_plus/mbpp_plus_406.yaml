@@ -1,0 +1,65 @@
+id: mbpp_plus_406
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_406.md
+  prompt_sha256: 07e0cf92345dd746ab89593f31bd774d2752a602bb19ddcaff6c684bcd418f45
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_406.py
+    digest: f7be393f1e6bcab7568a67abf173656a85b33eee9b3a17aa5d5ca36ca9def984
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 406
+  entry_point: find_Parity
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: find_Parity
+  tests:
+  - assert find_Parity(12) == False
+  - assert find_Parity(7) == True
+  - assert find_Parity(10) == False
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef find_Parity(x): \\n    return x % 2 != 0\\n', _gt_ns)\n_gt = _gt_ns['find_Parity']\n_inputs = [[12], [7], [10], [0], [-10], [2], [9], [9876543210], [100000000000000000000000000000000000000000], [99999999999999999999999999999999999999999999999999999999999998], [100000000000000000000000000000000000000001], [-9], [3], [True], [-42], [10], [False], [99999999999999999999999999999999999999999999999999999999999997], [99999999999999999999999999999999999999999], [-8], [1], [99999999999999999999999999999999999999999999999999999999999996], [-1], [100000000000000000000000000000000000000002], [-48], [-2], [9876543211], [-11], [99999999999999999999999999999999999999999999999999999999999995], [100000000000000000000000000000000000000003], [11], [99999999999999999999999999999999999999999999999999999999999994], [13], [9876543212], [12], [4], [-47], [8], [-7], [-41], [-61], [14], [-3], [-49], [100000000000000000000000000000000000000004], [-43], [99999999999999999999999999999999999999998], [15], [40], [-44], [99999999999999999999999999999999999999999999999999999999999999], [9876543213], [7], [-60], [62], [100000000000000000000000000000000000000000000000000000000000000], [5], [17], [41], [63], [99999999999999999999999999999999999999997], [16], [42], [-59], [-46], [-45], [64], [-4], [-62], [6], [-58], [100000000000000000000000000000000000000005], [9876543214], [-12], [-63], [-40], [-50], [18], [-5], [-92], [-6], [-98], [-34], [-35], [61], [-14], [100000000000000000000000000000000000000006], [9876543215], [-38], [19], [-97], [-91], [100000000000000000000000000000000000000000000000000000000000001], [-93], [-15], [-64], [-36], [99999999999999999999999999999999999999996], [-33], [43], [20], [-95], [-30], [-37], [-13], [100000000000000000000000000000000000000007], [-16], [-99], [-32], [9876543216]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(find_Parity(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_406.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

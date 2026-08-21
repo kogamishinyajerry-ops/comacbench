@@ -1,0 +1,68 @@
+id: humaneval_plus_100
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_100.md
+  prompt_sha256: 5ce7340a3d7498106b02f3a5f39933ca72fae3756ba81a542481a39a09763583
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_100.py
+    digest: dc4896988aa014425703705b5b00274b8ea5ad68cac3fb7069ae3cfc6ce42f10
+output_contract:
+- function:make_a_pile
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/100
+  entry_point: make_a_pile
+  n_test_cases: 7
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: make_a_pile
+  tests:
+  - assert make_a_pile(3) == [3, 5, 7], 'Test 3'
+  - assert make_a_pile(4) == [4, 6, 8, 10], 'Test 4'
+  - assert make_a_pile(5) == [5, 7, 9, 11, 13]
+  - assert make_a_pile(6) == [6, 8, 10, 12, 14, 16]
+  - assert make_a_pile(8) == [8, 10, 12, 14, 16, 18, 20, 22]
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef make_a_pile(n):\\n    \"\"\"\\n    Given a positive integer n, you have to make a pile of n levels of stones.\\n    The first level has n stones.\\n    The number of stones in the next level is:\\n        - the next odd number if n is odd.\\n        - the next even number if n is even.\\n    Return the number of stones in each level in a list, where element at index\\n    i represents the number of stones in the level (i+1).\\n\\n    Examples:\\n    >>> make_a_pile(3)\\n    [3, 5, 7]\\n    \"\"\"\\n\\n\\n    ans, num = [], n\\n    for _ in range(n):\\n        ans.append(num)\\n        num += 2\\n    return ans\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['make_a_pile']\n_inputs = [[3], [4], [5], [6], [8], [1], [2], [10], [15], [20], [100], [12], [25], [50], [14], [16], [9], [24], [99], [21], [51], [52], [22], [73], [17], [3], [101], [72], [98], [97], [53], [13], [4], [96], [92], [102], [23], [11], [93], [49], [78], [86], [71], [95], [94], [70], [77], [69], [79], [103], [68], [37], [18], [36], [67], [91], [35], [8], [90], [48], [54], [87], [19], [85], [84], [55], [7], [104], [5], [38], [74], [39], [83], [66], [80], [105], [47], [109], [65], [6], [42], [89], [46], [40], [88], [82], [108], [110], [64], [111], [26], [57], [58], [63], [59], [45], [106], [41], [81], [62], [107], [56], [43], [75], [30], [32], [33], [29], [34], [31], [76], [27], [28], [44], [1000000], [60], [61]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(make_a_pile(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_100.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

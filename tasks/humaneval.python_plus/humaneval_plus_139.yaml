@@ -1,0 +1,66 @@
+id: humaneval_plus_139
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_139.md
+  prompt_sha256: 9afce9b2d0d27e645cfe332a83a0a97032e142658e450d6cbb0f8833bff427e0
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_139.py
+    digest: ce4fbdeda57f36dc1938fd7ac2d617e0bd67a7eaec11145d69613a3f08f722d3
+output_contract:
+- function:special_factorial
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/139
+  entry_point: special_factorial
+  n_test_cases: 5
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: special_factorial
+  tests:
+  - assert special_factorial(4) == 288, 'Test 4'
+  - assert special_factorial(5) == 34560, 'Test 5'
+  - assert special_factorial(7) == 125411328000, 'Test 7'
+  - assert special_factorial(1) == 1, 'Test 1'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef special_factorial(n):\\n    \"\"\"The Brazilian factorial is defined as:\\n    brazilian_factorial(n) = n! * (n-1)! * (n-2)! * ... * 1!\\n    where n > 0\\n\\n    For example:\\n    >>> special_factorial(4)\\n    288\\n\\n    The function will receive an integer as input and should return the special\\n    factorial of this integer.\\n    \"\"\"\\n\\n\\n    fac, ans = 1, 1\\n    for i in range(2, n + 1):\\n        fac *= i\\n        ans *= fac\\n    return ans\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['special_factorial']\n_inputs = [[4], [5], [7], [1], [2], [3], [6], [8], [10], [13], [20], [50], [15], [12], [11], [22], [7], [14], [4], [9], [21], [5], [51], [30], [29], [32], [49], [77], [52], [23], [48], [19], [33], [16], [53], [27], [34], [35], [17], [28], [26], [47], [74], [24], [36], [95], [18], [31], [45], [37], [38], [46], [78], [39], [73], [75], [79], [80], [72], [1], [81], [25], [76], [96], [44], [94], [40], [43], [93], [71], [42], [83], [41], [70], [97], [84], [54], [85], [92], [91], [55], [82], [69], [98], [86], [56], [99], [57], [100], [101], [58], [87], [68], [62], [59], [102], [103], [60], [88], [67], [66], [104], [63], [200], [500], [199], [198], [499], [197], [497], [501], [498], [502], [496], [201], [503], [495], [493], [196], [492], [195], [202], [504], [505], [203], [491], [204], [105], [90], [494], [89]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(special_factorial(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_139.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

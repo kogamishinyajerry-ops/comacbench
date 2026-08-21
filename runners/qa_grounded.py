@@ -250,6 +250,73 @@ def grade_math_answer(ref_num: float, ans_num: float | None,
     return 1.0 if abs(ans_num - ref_num) <= max(rel_tol * abs(ref_num), 1e-9) else 0.0
 
 
+# ---------------- boxed 数学（MATH-500 型）----------------
+# 参考答案可为表达式/分数/区间/文本（182/500 非纯数字）——greedy exact match 口径：
+# 归一化后字符串相等，或双方可数值化（数字 / a-b / a/b 形式）则数值比较。
+# 不做符号等价（symplify 级），对同值不同形答案保守——registry risks 如实标注。
+
+def extract_boxed(text: str) -> str | None:
+    """取最后一个 \\boxed{...} 内容（花括号配平扫描）。"""
+    s = strip_think_inline(text)
+    idx = s.rfind("\\boxed")
+    if idx == -1:
+        return None
+    i = idx + len("\\boxed")
+    while i < len(s) and s[i] in " \t":
+        i += 1
+    if i >= len(s):
+        return None
+    if s[i] == "{":
+        depth = 0
+        for j in range(i, len(s)):
+            if s[j] == "{":
+                depth += 1
+            elif s[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    return s[i + 1:j].strip()
+        return None            # 未闭合——取不完整内容不如判缺失
+    import re as _re
+    m = _re.match(r"\s*([^\s$]+)", s[i:])
+    return m.group(1) if m else None
+
+
+def _norm_boxed(s: str) -> str:
+    """minerva 风格轻量归一化（非符号等价）：去装饰宏/空白/货币符，统一分数宏。"""
+    t = s.strip()
+    for old, new in (("\\left", ""), ("\\right", ""), ("\\!", ""), ("\\,", ""),
+                     ("\\;", ""), ("\\ ", ""), ("$", ""), (" ", ""), ("\\dfrac", "\\frac"),
+                     ("\\tfrac", "\\frac")):
+        t = t.replace(old, new)
+    return t.rstrip(".")
+
+
+def _try_number(s: str) -> float | None:
+    """数字 / a/b / \\frac{a}{b} 形式数值化；失败 None。"""
+    import re as _re
+    t = s.strip().lstrip("$")
+    v = _parse_number(t)
+    if v is not None:
+        return v
+    for pat in (r"(-?\d+(?:\.\d+)?)\s*/\s*(-?\d+(?:\.\d+)?)",
+                r"\\frac\{(-?\d+(?:\.\d+)?)\}\{(-?\d+(?:\.\d+)?)\}"):
+        m = _re.fullmatch(pat, t)
+        if m and float(m.group(2)) != 0:
+            return float(m.group(1)) / float(m.group(2))
+    return None
+
+
+def grade_math_boxed(ref: str, ans: str, rel_tol: float) -> float:
+    """boxed 参考对候选：归一化相等 / 双方可数值化则数值比 / 否则 0。"""
+    rn, an = _norm_boxed(ref), _norm_boxed(ans)
+    if rn == an:
+        return 1.0
+    rv, av = _try_number(rn), _try_number(an)
+    if rv is not None and av is not None:
+        return 1.0 if abs(av - rv) <= max(rel_tol * abs(rv), 1e-9) else 0.0
+    return 0.0
+
+
 # ---------------------------------------------------------------- per-task run
 
 def run_task(
@@ -290,20 +357,44 @@ def run_task(
     layer_details: dict[str, Any] = {}
 
     if answer_format == "math_answer":
-        # ---------- math（GSM8K 型）：gate=数值可解析，客观层=数值精确匹配 ----------
+        # ---------- math：GSM8K 型（reference_number）/ MATH-500 型（reference_boxed） ----------
         raw = str(outs[0]["answer"])
-        ans_num = parse_math_answer(raw)
-        if ans_num is None:                     # CoT 有无无所谓，最终数抽不出=缺产物
-            gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
-        else:
-            gate, gate_failures, failure_mode = 1, [], None
-        ref_num = float(task["reference"]["reference_number"])
         rel_tol = float(task["grader"].get("numeric_rel_tol", 1e-6))
-        req_score = grade_math_answer(ref_num, ans_num, rel_tol) if gate else 0.0
-        subscores = {"physics": None, "requirements": req_score,
-                     "objective": None, "robustness": 0.0}
-        layer_details = {"parsed_answer": ans_num, "reference_number": ref_num,
-                         "raw_tail": raw[-160:]}
+        ref_boxed = task["reference"].get("reference_boxed")
+        if ref_boxed is not None:
+            # MATH-500 型：boxed 抽取为主，#### 数值为退化兜底
+            ans_box = extract_boxed(raw)
+            if ans_box is not None:
+                gate, gate_failures, failure_mode = 1, [], None
+                req_score = grade_math_boxed(str(ref_boxed), ans_box, rel_tol)
+                parsed = ans_box
+            else:
+                num = parse_math_answer(raw)
+                ref_num = _try_number(_norm_boxed(str(ref_boxed)))
+                if num is not None and ref_num is not None:
+                    gate, gate_failures, failure_mode = 1, [], None
+                    req_score = grade_math_answer(ref_num, num, rel_tol)
+                    parsed = num
+                else:
+                    gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+                    req_score, parsed = 0.0, None
+            subscores = {"physics": None, "requirements": req_score,
+                         "objective": None, "robustness": 0.0}
+            layer_details = {"parsed_answer": parsed, "reference_number": str(ref_boxed),
+                             "raw_tail": raw[-160:]}
+        else:
+            # GSM8K 型：数值路径
+            ans_num = parse_math_answer(raw)
+            if ans_num is None:                 # CoT 有无无所谓，最终数抽不出=缺产物
+                gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+            else:
+                gate, gate_failures, failure_mode = 1, [], None
+            ref_num = float(task["reference"]["reference_number"])
+            req_score = grade_math_answer(ref_num, ans_num, rel_tol) if gate else 0.0
+            subscores = {"physics": None, "requirements": req_score,
+                         "objective": None, "robustness": 0.0}
+            layer_details = {"parsed_answer": ans_num, "reference_number": ref_num,
+                             "raw_tail": raw[-160:]}
 
     elif answer_format == "mcq":
         gate, gate_failures, failure_mode = validity_gate(task, outs[0])
@@ -409,7 +500,8 @@ def _write_math_summary(out_dir: Path, results: list[dict[str, Any]],
     a("- 子分适用性: physics=N/A（无证据/拒答层）；objective=N/A（并入 requirements）；"
       "robustness=N/A（样本=1）")
     a("- 权重（任务 YAML 覆写）: score = gate × 1.0×requirements")
-    a("- 抽取口径: #### 优先 -> 显式 answer is/答案 -> 全文末数（parse_math_answer）")
+    a("- 抽取口径: GSM8K 型 #### 优先 -> answer is/答案 -> 末数（parse_math_answer）；"
+      "MATH-500 型 \\\\boxed{} 优先（花括号配平）-> #### 数值兜底，归一化后精确匹配（数值化优先）")
     a("")
     a("## 每题明细")
     a("")

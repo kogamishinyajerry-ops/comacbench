@@ -1,0 +1,65 @@
+id: mbpp_plus_264
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_264.md
+  prompt_sha256: 3ca70a3096d6771c36ae9335869c9b9c251d05788c8d61f2afb3a4964200ed6f
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_264.py
+    digest: b5871d879a176a4b5e5829096c9a12c5e8e57526a8194a2c59242a19d1404fa2
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 264
+  entry_point: dog_age
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: dog_age
+  tests:
+  - assert dog_age(12)==61
+  - assert dog_age(15)==73
+  - assert dog_age(24)==109
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef dog_age(h_age):\\n\\tif h_age <= 2:\\n\\t\\td_age = h_age * 10.5\\n\\telse:\\n\\t\\td_age = 21 + (h_age - 2) * 4\\n\\treturn d_age\\n', _gt_ns)\n_gt = _gt_ns['dog_age']\n_inputs = [[12], [15], [24], [100], [0], [30], [29], [99], [101], [28], [98], [27], [26], [True], [False], [97], [25], [24], [31], [32], [33], [23], [21], [34], [1], [35], [2], [22], [36], [3], [96], [95], [4], [102], [56], [5], [55], [54], [6], [20], [37], [39], [19], [38], [7], [53], [57], [8], [93], [43], [103], [104], [9], [18], [17], [52], [64], [16], [65], [94], [40], [66], [92], [41], [67], [58], [63], [68], [105], [60], [69], [59], [106], [51], [70], [42], [88], [89], [107], [50], [71], [91], [62], [49], [10], [48], [108], [44], [61], [87], [109], [90], [110], [111], [15], [45], [11], [46], [47], [12], [72], [112], [76], [86], [113], [114]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(dog_age(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_264.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

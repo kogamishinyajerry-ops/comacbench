@@ -1,0 +1,65 @@
+id: mbpp_plus_310
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_310.md
+  prompt_sha256: 6b0cc9fec7e718c69ae87883d841c49eb6c3ab183824bb6f34c924edc2d8fdc3
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_310.py
+    digest: ae005f84e6429d4f91474bafe68d78da957469cbf39cc48d9adda337d8196e91
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 310
+  entry_point: string_to_tuple
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: string_to_tuple
+  tests:
+  - assert string_to_tuple("python 3.0")==('p', 'y', 't', 'h', 'o', 'n', '3', '.', '0')
+  - assert string_to_tuple("item1")==('i', 't', 'e', 'm', '1')
+  - assert string_to_tuple("15.10")==('1', '5', '.', '1', '0')
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef string_to_tuple(str1):\\n    result = tuple(x for x in str1 if not x.isspace()) \\n    return result\\n', _gt_ns)\n_gt = _gt_ns['string_to_tuple']\n_inputs = [['python 3.0'], ['item1'], ['15.10'], [''], ['hello   world'], ['çèêë'], ['   Hello World!   '], ['   '], ['1234567890'], ['abcdefghijklmnopqrstuvwxyz'], ['ABCDEFGHIJKLMNOPQRSTUVWXYZ'], ['MixedCase123'], ['        '], ['\\n\\t'], ['   15.10   '], ['item1, item2, item3'], ['item2,'], ['abcdefghijklmnopqrstkuvwxpyz'], ['whelloorld'], ['whellooWorld!d'], ['whelloorled'], ['Hello'], ['   Hello World!      '], ['   Hello World!      \\n\\t'], ['item3'], ['hello   worlld'], ['hçèêëello   worlld'], ['item3 '], ['abcd   Hello World!      efghijklmnopqrstuvwxyz'], ['hello   item3 world'], [' 10   '], ['ite'], ['hello   item3 15.10ld'], ['hello    wMixedCase123orld'], ['item1e,'], [' 1item3 0   '], ['çêë'], [' 100   '], ['hello 5  item3 15.10ld'], ['abcdefghhijklmnopqrstkuvwxpyz'], ['iteworlldm3'], ['05'], ['tite'], [' 100  efghijklmnopqrstuvwxyz'], ['055'], ['itemi3'], ['hello   wo 1item3 0   ld'], ['itemabcdefghwhelloorldhijklmnopqrstkuvwxpyz3 '], ['5ite'], ['    '], ['world'], ['   515.10   '], ['1 100   '], ['itemi33'], ['100'], ['çèwhelloorldêë'], ['çèwhelloorlldêë'], ['worlld'], ['çëitemi33'], ['1234wMixedCase123orld567890'], ['it33'], ['hçèêëello   whelloorldworlld'], ['abcdefghijitem1, item2, item3klmnopqrstuvwxyz'], ['abcd worlld  Hello World!      efghijklmnopqrstuvwxyz'], ['whelllooWorld!d'], ['item1, item2, iteem3'], ['hello   item3 15 .10ld'], ['10'], ['worworlldlld'], ['itemabcdefghwhelloorldhijklmnopqrstkuvwxpyz3'], ['ABCDEFGHIJKLMNOPQRSTUVWXY'], ['abcdefghijitem1, item2, iitem1,klmnopqrstuvwxyz'], ['   He  itemabcdefghwhelloorldhijklmnopqrstkuvwxpyz3 '], ['\\n\\n\\t'], ['0whelloorled'], [' 1 0   '], ['hello   item3 15 .10l'], ['çêêë'], ['Mixe2dCase123'], ['whelllooWorldo!d'], ['   Hello World! tem3      \\n\\t'], ['hello   item3  15 .10ld'], ['ite10'], ['hello1234wMixedCase123orld567890   item3 15 .10l'], ['ABCDEFMNOPQRSTUVWXYZ'], ['hçèêëtiteello   whelloorldworlld'], ['whe    lloorlld'], ['tem3'], ['worl'], ['055item1,'], ['1'], ['12364567890'], ['hello1234wMixedCase123orld567890'], ['hçèêëello    Hello World! tem3      \\n\\t  worllld'], ['hello   item3 wor ld'], ['h4ello1234wMixedCase123orld567890   item3 15 .10l'], ['MixedCi'], ['15.10'], ['15..10'], ['12364567890ite'], ['hello   item3t wor ld'], ['item3i3'], ['abcdefghijitem1, item2, iitelmnopqrstuvwxyz'], ['hello   item3 15 .1iitelmnopqrstuvwxyz0l'], ['.10hello   worldld'], ['h4ello1234wMixedCase123orld567890   itemtite.10l'], ['worldld'], ['abefghijklmnopqrstuvwxyz'], ['abcdefzghijklmnopqrstkuvwxpyz'], ['QkkSNfeX'], ['hçèêëtiteello'], ['hello    wMixeodCase123orld'], ['imtemi3'], [' 110   '], ['.10ldMisxe2dCase123'], [' 10   1234567890']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(string_to_tuple(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_310.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

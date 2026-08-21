@@ -1,0 +1,65 @@
+id: mbpp_plus_100
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_100.md
+  prompt_sha256: f52ad825c14c4d530df928a1b662a49c24b6a195e66e3b59459924d878d00c18
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_100.py
+    digest: bf348c640fbbef54d97623b98c00ffe866ddfc742f28b1c364953ec35dda8584
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 100
+  entry_point: next_smallest_palindrome
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: next_smallest_palindrome
+  tests:
+  - assert next_smallest_palindrome(99)==101
+  - assert next_smallest_palindrome(1221)==1331
+  - assert next_smallest_palindrome(120)==121
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef next_smallest_palindrome(num):\\n    if all(digit == \\'9\\' for digit in str(num)):\\n        return num + 2\\n    else:\\n        num = [int(digit) for digit in str(num)]\\n        n = len(num)\\n        mid = n // 2\\n        left_smaller = False\\n        # if n is odd, ignore the middle digit at first\\n        i = mid - 1\\n        j = mid + 1 if n % 2 else mid\\n        while i >= 0 and num[i] == num[j]:\\n            i -= 1\\n            j += 1\\n        # stop if traverse end or difference found\\n        if i < 0 or num[i] < num[j]:\\n            left_smaller = True\\n        # copy left to right\\n        while i >= 0:\\n            num[j] = num[i]\\n            j += 1\\n            i -= 1\\n        # the middle digit must be incremented\\n        if left_smaller:\\n            carry = 1\\n            i = mid - 1\\n            if n % 2:\\n                num[mid] += carry\\n                carry = num[mid] // 10\\n                num[mid] %= 10\\n                j = mid + 1\\n            else:\\n                j = mid\\n            while i >= 0:\\n                num[i] += carry\\n                carry = num[i] // 10\\n                num[i] %= 10\\n                num[j] = num[i]\\n                j += 1\\n                i -= 1\\n    return int(\"\".join(map(str, num)))\\n', _gt_ns)\n_gt = _gt_ns['next_smallest_palindrome']\n_inputs = [[99], [1221], [120], [0], [45678], [1], [45679], [2], [3], [45681], [4], [5], [45683], [45682], [45677], [6], [45676], [45675], [45680], [34], [45674], [33], [45673], [7], [32], [8], [58], [45672], [57], [55], [9], [31], [36], [56], [45684], [30], [29], [87], [45671], [40], [45685], [54], [35], [10], [45670], [96], [45669], [28], [11], [97], [59], [98], [27], [37], [45686], [41], [60], [53], [99], [13], [26], [14], [52], [51], [25], [12], [50], [24], [85], [23], [45687], [39], [86], [88], [61], [38], [45668], [95], [84], [45667], [22], [45688], [42], [45666], [89], [15], [83], [45665], [90], [91], [49], [100], [45689], [94], [45664], [82], [62], [81], [16], [93], [101], [80], [102], [20], [48]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(next_smallest_palindrome(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_100.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

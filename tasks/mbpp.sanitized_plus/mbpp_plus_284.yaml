@@ -1,0 +1,65 @@
+id: mbpp_plus_284
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_284.md
+  prompt_sha256: 5a779cbad178ada530c17f28c6135d49956aa9e7aec397eb9c4561e25333eeef
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_284.py
+    digest: 261c43ead79fdc3130b51a9a415b741783d350c405ed6dda6f7585ee5429fe3d
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 284
+  entry_point: check_element
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: check_element
+  tests:
+  - assert check_element(["green", "orange", "black", "white"],'blue')==False
+  - assert check_element([1,2,3,4],7)==False
+  - assert check_element(["green", "green", "green", "green"],'green')==True
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef check_element(list1, element):\\n  return all(v == element for v in list1)\\n', _gt_ns)\n_gt = _gt_ns['check_element']\n_inputs = [[['green', 'orange', 'black', 'white'], 'blue'], [[1, 2, 3, 4], 7], [['green', 'green', 'green', 'green'], 'green'], [[], 'red'], [['a', 'a', 'a', 'a', 'a'], 'a'], [[], 'green'], [[], []], [[], 'a'], [['a', 'a', 'a', 'a', 'a'], 'reda'], [[], 'reda'], [['a', '', 'a', 'a', 'a'], 'a'], [[], 'gren'], [['a', '', 'a', 'a', 'a'], 'ared'], [['a', '', 'a', 'green', 'a', 'a'], 'ared'], [[], 'ared'], [['a', '', 'a', 'redaa', 'green', 'a', 'a'], 'red'], [['a', '', 'a', 'a', 'a', 'a'], 'ared'], [['a', '', 'a', 'a', 'a'], 'aredd'], [['a', '', 'a', 'a', 'a'], 'gren'], [[], ['IMSzNXr']], [[], [False, True, True, False, True, False, True, True, False]], [[], ['red', 'HwtScMmS', 'jjtLKAcXm']], [['a', '', 'a', 'redaa', 'green', 'a', 'a'], 'aa'], [['a', 'a', 'areda', 'a', 'a', 'a'], 'a'], [['a', 'a', 'a', 'a', 'a'], 'gren'], [['a', 'a', 'a', 'a', 'a', 'a', 'a'], 'gren'], [['', 'a'], 'red'], [['a', 'a', 'a', 'a', 'a'], 'HwtScMmS'], [[], 'gaan'], [['a', 'a', ''], 'gren'], [['a', '', 'a', 'a', 'a'], 'reda'], [['a', 'a', ''], 'gregren'], [['a', 'aa', 'a', 'a', 'a'], 'reda'], [[], ['red', 'HwtScMmS', 'jjtLKaredaAcXm']], [['a', 'a', 'a', 'a', 'a', 'a'], 'a'], [['a', 'a', 'areda', 'a', 'a', 'a'], 'gregren'], [['red', '', 'CeR'], 'reda'], [['a', '', 'a', 'green', 'a', 'a'], 'areed'], [['a', 'a', 'a', 'jjtLKAcXm', 'a', 'a', 'a'], 'gren'], [['', 'a', 'a', 'a', 'a'], 'gaan'], [[], ''], [[], [[56.04013492061608, 22.809175570261317, -19.209978650818854], -9.19614909867073, ['CeR', 'aa', 'reda', 'cX', 'sqkDTbEWNY', 'gaan', 'aa', 'reda'], 'reda', -9.19614909867073]], [['red', '', 'CeR'], 'rda'], [['a', '', 'a', 'redaa', 'green', 'a', 'a'], 'rd'], [['red', 'gregren', '', 'CeR'], 'rda'], [[], [-8.3015872751577, -1.6872782556751815, -37.057532027723326, 56.04013492061608, 22.809175570261317]], [[], 'gregren'], [[], [-8.3015872751577, -1.6872782556751815, -37.057532027723326, 56.04013492061608, 22.809175570261317, -37.057532027723326]], [[], [-8.3015872751577, -1.6872782556751815, -37.057532027723326, 56.04013492061608, 22.809175570261317, 22.809175570261317]], [['red', 'IMSzNXr', 'gregren', 'CeRHwtScMmS'], 'red'], [['aredaa', '', 'a', 'a', 'a'], 'green'], [['red', 'gregren', 'CeRHwtScMmS'], 'red'], [['a', 'a', 'a', 'a', 'a', 'a', 'a'], 'sqkDTbEWNY'], [['a', '', 'a', 'redaa', 'a', 'a'], 'red'], [['Zwm', 'iAz', 'IEnmyrIGhY', 'EKrcuFaZ'], 'green'], [['a', '', 'a', 'redaa', 'areedgreen', 'a', 'a'], 'aa'], [['a', 'a', 'redaaa', 'a', 'a'], 'HwtScMmS'], [['a', '', 'a', 'a', 'a', 'a'], 'ard'], [['red', 'gregren', 'CEKrcuFaZwtScMmS'], 'red'], [['a', 'a', 'a', 'a'], 'a'], [[], ['rd', 'mlOBNlC', '', 'Zwm', 'gregren', 'Zwm']], [['a', 'a', 'a', 'iAz', 'a', 'a', 'aa', 'a'], 'sqkDTbEWNY'], [[], [-8.3015872751577, -1.6872782556751815, -37.057532027723326, 56.04013492061608, 22.809175570261317, -8.3015872751577]], [['a', 'a', 'redaaa', 'a', 'a'], 'areed'], [['Zwm', 'IEnmyrIGhY', 'EKrcuFaZ'], 'green'], [['a', 'a', 'a', 'a'], 'jjtLKaredaAcXm'], [['a', '', 'a', 'a', 'a', 'a', ''], 'ard'], [[], [-19.209978650818854, -37.057532027723326, 87.86645974977819, 32.00129666267674, -1.606104157903161, -82.74767724499756, -93.4885457411899, -19.209978650818854, 56.04013492061608]], [['a', 'a', 'areda', 'a', 'a', 'a'], 'rdegren'], [['a', 'a', 'HwtScMmS'], 'gregren'], [['a', 'a', 'areda', 'a', 'a'], 'gregren'], [['a', '', 'a', 'redaa', 'green', 'a', 'a', 'a'], 'rd'], [[], ['IMSzNXr', 'IMSzNXr']], [['areed', '', 'a', 'redaa', 'a'], 'jjtLKaredaAcXma'], [['aredaa', '', 'CeR', 'CeR'], 'rda'], [[], [-14, 78, False, True, False, -17, False, -99, True, -79]], [[], [[56.04013492061608, 22.809175570261317, -19.209978650818854, -19.209978650818854], [56.04013492061608, 22.809175570261317, -19.209978650818854, -19.209978650818854], -9.19614909867073, 'reda', -9.19614909867073]], [['red', '', 'CeR'], 'red'], [['', 'jjtLKAcXm', 'aa'], 'red'], [['red', '', 'CeR', ''], 'red'], [['a', '', 'a', 'redaa', 'a', 'a'], 'IMSzNXr'], [['a', '', 'aa', 'a', 'a', 'a'], 'ard'], [['Z', 'red', 'Utyz', 'cAvkmuMOrX', 'TaK'], 'green'], [['cX', '', 'a'], 'mlOBNlC'], [['a', '', 'a', 'redaa', 'green', 'a', 'a', 'a', 'a'], 'rd'], [[], 'ggreen'], [['a', 'a', 'a'], 'jjtLKaredaAcXm'], [['red', 'IMSzNXr', 'gregren', 'CeRHwtScMmS'], 'dred'], [['Zwm', 'iAz', 'IEnmyrIGhY', 'EKrcuFaZ'], 'gereen'], [['a', 'a', 'a', 'a'], 'jjtLKaredaAcXmIMSzNXr'], [['a', 'a', 'a', 'a', 'a', 'a', 'a'], 'areda'], [[], 'redea'], [[], ['rXziNV', 'gySc', 'gyScc']], [['a', 'a', 'a', 'a', 'a'], 'jjtLKaredaAcXmIMSzNXr'], [['red', 'gregren', 'CEKrcuFaZwtScMmS'], 'redggreena'], [['red', 'IMSzNXr', 'gregren', 'CeRHwtScMmS'], 'aa'], [['areed', '', 'a', 'redaa', 'a', 'a'], 'jjtLKaredaAcXma'], [['a', '', 'a', 'redaa', 'green', 'a', 'a'], 'iAz'], [['red', 'IMSzNXr', 'gereen', 'CeRHwtScMmS'], 'red'], [['a', '', 'aa', 'Z', 'a', 'a'], 'cX'], [['a', 'ajjtLKaredaAcXma', '', 'a', 'a', 'a'], 'gren'], [['IMSzNXr', 'gregren', 'CeRHwtScMmS'], 'dred'], [['a', '', 'a', 'a', 'a'], 'IEnmyrIGhY'], [['a', '', 'a', 'a', 'a'], 'areed'], [['a', 'a', 'areda', 'a', 'a'], 'grnegren'], [['a', 'a', 'a', 'redaaa', 'a', 'a'], 'areed']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(check_element(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_284.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

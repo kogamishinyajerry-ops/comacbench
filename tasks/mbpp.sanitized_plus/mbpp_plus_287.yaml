@@ -1,0 +1,65 @@
+id: mbpp_plus_287
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_287.md
+  prompt_sha256: 3c0031ff3d07a6b5f062f46042081b4be0e390512ccdce1b18175d900543deab
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_287.py
+    digest: 4c5d0f81db8224ec940018e658aeed1d39af1e886e89a088a9f2b2863481a1c1
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 287
+  entry_point: square_Sum
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: square_Sum
+  tests:
+  - assert square_Sum(2) == 20
+  - assert square_Sum(3) == 56
+  - assert square_Sum(4) == 120
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef square_Sum(n):  \\n    return 2 * n * (n + 1) * (2 * n + 1) /3\\n', _gt_ns)\n_gt = _gt_ns['square_Sum']\n_inputs = [[2], [3], [4], [100], [0], [1], [1000000], [10], [10000], [90], [89], [1000002], [91], [1000001], [False], [True], [1000003], [2], [3], [92], [9], [17], [10001], [101], [4], [93], [99], [8], [999999], [87], [102], [9999], [94], [103], [86], [98], [105], [88], [49], [85], [50], [1000004], [9998], [104], [1000005], [51], [10002], [5], [7], [106], [52], [84], [35], [97], [11], [72], [999998], [16], [12], [1000006], [96], [48], [47], [6], [13], [999997], [95], [36], [999996], [14], [15], [1000007], [9997], [37], [1000008], [18], [999995], [81], [46], [38], [19], [82], [107], [83], [39], [45], [53], [999994], [44], [54], [55], [108], [10003], [25], [10004], [71], [999993], [28], [73], [20], [40], [26], [27], [1000009], [56], [43], [10005], [9996], [109]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(square_Sum(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_287.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

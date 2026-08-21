@@ -1,0 +1,65 @@
+id: mbpp_plus_092
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_092.md
+  prompt_sha256: 47478794e57d362d9c15de8242fa00991bd7fa2412ab7ba643f52bd7631c13b6
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_092.py
+    digest: 1981ce32d7a47e09a9fbacfe883b367b053d9891aea95949037953896b5ecf3a
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 92
+  entry_point: is_undulating
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: is_undulating
+  tests:
+  - assert is_undulating(1212121) == True
+  - assert is_undulating(1991) == False
+  - assert is_undulating(121) == True
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef is_undulating(n): \\n\\tdigits = [int(digit) for digit in str(n)]\\n\\tif len(set(digits)) != 2:\\n\\t\\treturn False\\n\\treturn all(a != b for a, b in zip(digits, digits[1:]))\\n', _gt_ns)\n_gt = _gt_ns['is_undulating']\n_inputs = [[1212121], [1991], [121], [2121212121212121], [2121212121212122], [2121212121212119], [2121212121212123], [2121212121212124], [2121212121212125], [2121212121212120], [2121212121212118], [2121212121212126], [2121212121212117], [2121212121212127], [82], [40], [83], [39], [81], [2121212121212116], [2121212121212128], [2121212121212115], [41], [80], [19], [20], [42], [84], [18], [2121212121212129], [43], [21], [62], [17], [85], [2121212121212130], [79], [12], [2121212121212131], [86], [44], [52], [16], [11], [53], [63], [10], [78], [51], [61], [87], [50], [77], [54], [92], [55], [49], [22], [96], [38], [97], [56], [23], [91], [2121212121212114], [15], [93], [24], [48], [89], [60], [64], [65], [37], [76], [59], [35], [88], [2121212121212132], [58], [14], [94], [9], [47], [95], [66], [57], [36], [8], [13], [25], [45], [90], [2121212121212113], [67], [46], [7], [68], [75], [34], [2121212121212133], [2121212121212134], [26], [74]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(is_undulating(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_092.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

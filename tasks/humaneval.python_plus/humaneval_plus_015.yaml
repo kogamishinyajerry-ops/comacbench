@@ -1,0 +1,65 @@
+id: humaneval_plus_015
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_015.md
+  prompt_sha256: 0136f688119f7de7b88a32bf70056e1af7b981f2629e418c4db8c263fa013870
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_015.py
+    digest: 292ec261945c9ab2f32e716248157a28a08a3365fc4f4bbfd161d97fe4cc35b4
+output_contract:
+- function:string_sequence
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/15
+  entry_point: string_sequence
+  n_test_cases: 4
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: string_sequence
+  tests:
+  - assert string_sequence(0) == '0'
+  - assert string_sequence(3) == '0 1 2 3'
+  - assert string_sequence(10) == '0 1 2 3 4 5 6 7 8 9 10'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\n\\ndef string_sequence(n: int) -> str:\\n    \"\"\" Return a string containing space-delimited numbers starting from 0 upto n inclusive.\\n    >>> string_sequence(0)\\n    \\'0\\'\\n    >>> string_sequence(5)\\n    \\'0 1 2 3 4 5\\'\\n    \"\"\"\\n\\n\\n    return \" \".join(map(str, range(n + 1)))\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['string_sequence']\n_inputs = [[0], [3], [10], [1], [100], [500], [2], [99], [1000], [10000], [15], [20], [50000], [49999], [101], [50001], [102], [49998], [1001], [18], [37], [36], [501], [84], [16], [10001], [65], [19], [66], [499], [83], [21], [98], [97], [17], [82], [22], [999], [67], [998], [50002], [9999], [75], [38], [498], [502], [96], [23], [50003], [9998], [76], [14], [29], [49997], [31], [85], [9997], [77], [503], [103], [13], [30], [86], [997], [1002], [35], [1003], [63], [39], [12], [68], [24], [1004], [3], [4], [95], [78], [5], [25], [28], [50004], [104], [0], [40], [9996], [64], [74], [10002], [94], [41], [105], [32], [73], [81], [26], [72], [6], [996], [42], [93], [79], [1000000], [1000001], [1000002], [999999], [1000003], [1000004], [34], [33], [27], [999998], [1000005], [999997], [87], [88], [89], [90], [1000006], [999996], [999995], [1000007], [7], [43], [44], [45], [999994], [999993], [1000008], [999992], [62], [61], [60], [59], [1000010], [999991], [1000009], [1000011]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(string_sequence(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_015.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_067
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_067.md
+  prompt_sha256: b8eae34dd46bd2f8db0f693f68dd5b306b338e2903110f88284fb42915d51d12
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_067.py
+    digest: 7ebcb33d22cb9fa943f745dface92f21a3825f00aed086ec924caf051662d9dd
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 67
+  entry_point: bell_number
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: bell_number
+  tests:
+  - assert bell_number(2)==2
+  - assert bell_number(10)==115975
+  - assert bell_number(56)==6775685320645824322581483068371419745979053216268760300
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef bell_number(n):   \\n    bell = [[0 for i in range(n+1)] for j in range(n+1)] \\n    bell[0][0] = 1\\n    for i in range(1, n+1): \\n        bell[i][0] = bell[i-1][i-1]  \\n        for j in range(1, i+1): \\n            bell[i][j] = bell[i-1][j-1] + bell[i][j-1]   \\n    return bell[n][0] \\n', _gt_ns)\n_gt = _gt_ns['bell_number']\n_inputs = [[2], [10], [56], [0], [100], [99], [True], [False], [98], [1], [2], [3], [97], [96], [11], [12], [92], [95], [94], [14], [13], [10], [55], [17], [15], [93], [16], [9], [91], [54], [25], [18], [4], [5], [6], [8], [90], [53], [7], [19], [64], [20], [21], [56], [63], [52], [24], [57], [22], [62], [89], [51], [50], [88], [58], [49], [45], [65], [23], [87], [46], [59], [26], [44], [61], [48], [47], [60], [30], [27], [86], [28], [31], [29], [66], [67], [85], [70], [71], [43], [69], [82], [83], [72], [68], [81], [73], [32], [33], [42], [74], [84], [41], [80], [79], [75], [40], [76], [34], [35], [78], [77], [39], [38], [36]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(bell_number(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_067.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

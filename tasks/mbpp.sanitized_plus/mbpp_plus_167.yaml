@@ -1,0 +1,65 @@
+id: mbpp_plus_167
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_167.md
+  prompt_sha256: 99dabbebe2b1938ce196e323d8fa636830c76e45440e1d44141130284b616203
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_167.py
+    digest: d0f9c848f1e339bcd436e65261b3382a2b4bc45c0c18f115fd28d2a9ba8c95c2
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 167
+  entry_point: next_power_of_2
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: next_power_of_2
+  tests:
+  - assert next_power_of_2(0) == 1
+  - assert next_power_of_2(5) == 8
+  - assert next_power_of_2(17) == 32
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef next_power_of_2(n): \\n  if n and not n & (n - 1):\\n    return n\\n  res = 1\\n  while n != 0: \\n    n >>= 1\\n    res <<= 1\\n  return res; \\n', _gt_ns)\n_gt = _gt_ns['next_power_of_2']\n_inputs = [[0], [5], [17], [1], [2], [8], [128], [1000000], [342788], [567990], [999999999999], [987654321098], [1000000000000], [1234567890123], [987654321], [40], [342789], [False], [41], [1000000000001], [1000001], [True], [987654320], [10], [129], [95], [39], [9], [38], [342790], [94], [987654322], [987654321097], [999999999998], [1000000000002], [1000002], [127], [1234567890122], [987654323], [1000003], [55], [52], [56], [0], [567989], [1000000000003], [1000000000004], [567987], [1000004], [567986], [999999999997], [1234567890124], [1000005], [342787], [7], [11], [54], [999999], [96], [567985], [1234567890125], [6], [57], [987654321095], [342791], [93], [999998], [1000006], [342786], [92], [33], [97], [1234567890126], [36], [987654321096], [37], [53], [35], [5], [1000007], [12], [1000000000005], [987654319], [999999999996], [3], [130], [22], [567988], [987654318], [100], [98], [1000000000006], [131], [67], [132], [987654317], [42], [101], [987654321094], [77], [4], [567991], [342792], [987654321099], [1234567890121], [99], [58], [1000000000007], [342785], [1000000000008], [51], [50], [1000000000009], [133], [21]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(next_power_of_2(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_167.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_118
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_118.md
+  prompt_sha256: 417d34324b649e1c583c5c17be6124c19cffab6609db40719e1ade5b64a0e18c
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_118.py
+    digest: a36046d809fef830953fcbf5f2130a09e798a666f92f874c6a5b28a691ab4b70
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 118
+  entry_point: string_to_list
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: string_to_list
+  tests:
+  - assert string_to_list("python programming")==['python','programming']
+  - assert string_to_list("lists tuples strings")==['lists','tuples','strings']
+  - assert string_to_list("write a program")==['write','a','program']
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef string_to_list(string): \\n    return string.split(\" \")\\n', _gt_ns)\n_gt = _gt_ns['string_to_list']\n_inputs = [['python programming'], ['lists tuples strings'], ['write a program'], [''], ['   python      programming    '], ['1234 5678 9101'], ['string1,string2,string3'], ['My favorite programming language is Python'], ['string1,     string2,       string3'], ['string1,string2,strin3'], ['language'], ['1234 5678 91string1,string2,string301'], ['string1,string2,3'], ['My'], ['1234'], ['l'], ['5678'], ['192314 5678 9101'], ['python'], ['12314'], ['   ng    '], ['56678'], ['favorite'], ['string2,'], ['AeFmnNDd'], ['56'], ['programming'], ['pronggrammin12314g'], ['prog'], ['5striing1,stringg2,strin3'], ['language  ng    '], ['favorit'], ['gvZn'], ['languPythonage  ng    '], ['Python'], ['SfDBdGHKU'], ['is'], ['5stprogriing1,stringg2,strin3'], ['fvorrite'], ['porog'], ['pAeFmnNDdor'], ['propg'], ['languag5678e  ng    '], ['My favorite programming lamnguage is Python'], ['12My favorite programming language is Python34 5678 9101'], ['programmming'], ['My favorite prolanguPythonagegramminlg language is Python'], ['te'], ['fvorrrite'], ['string1,     string2,       sstring3'], ['1234 5678  9101'], ['556is78'], ['My favorite prol anguPythonagegramminlg lanage is Python'], ['vksoeiMq'], ['12My favorite programming language is Python34 5678string2,'], ['5striing1,My favorite proMye ythonpstringg2,strin3'], ['1234 5678 91string1,sPython342,string301'], ['fvorofrite'], ['fvorrreite'], ['favoritprogrammming'], ['Python34'], ['556iss78'], ['peMsMC'], ['ffvorrreite'], ['5striing1,My favorite proMylanguagee ythonpstringg2,strin3'], ['556iss788'], ['spythonring2'], ['string3'], ['Pstring3ython'], ['My favorit5678e prol anguPythonagegramminlg lanage is Pgython'], ['12334 5678  9101'], ['prol'], ['langua g5678e  ng    '], ['rfvorrrite'], ['PlanguPythonage'], ['123My favorite prolanguPythonagegramminlg language is Python4 5678 9101'], ['12 334 5678  9101'], ['fvorofritre'], ['192314'], ['string1,     st ring2,,       string3'], ['lanage'], ['gprolanguPythonagegramminlgvZ12n'], ['fvoorrite'], ['st'], ['anguPythonagegramminlg'], ['12My favorite programming glanguage is Python34 5678string2,'], ['12python3My'], ['languPythonage  ngn    '], ['gg5678e'], ['rfvorrtristring1,     st ring2,,       string3te'], ['languag5678e'], ['string1,     st ring2,languag5678e  ng      string3'], ['5stprogriing1,stiringg2,strin3'], ['My favorite programming language is PytlanguPythonagehon'], ['programmmipng'], ['flvorofrite'], ['tt'], ['1212314M3y'], ['pronggrrammin12314g'], ['string1,     st ring2,,        string3'], ['123My favorite prolanguPythonagegramminlg language is Pythstring1,     string2,       string3on4 5678 9101'], ['fvsstring3e'], ['Pst3ring3ython'], ['string1,     st ring2,languag5678e  ng      string'], ['lan12334 5678  9101gua g5678e  ng    '], ['faorite'], ['91nstring1,string2,string301'], ['prrfvorrtristring1,     st ring2,,       string3teol'], ['556667string1,string2,string3']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(string_to_list(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_118.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

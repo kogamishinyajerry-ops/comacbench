@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_158",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef find_max(words):\\n    \\\"\\\"\\\"Write a function that accepts a list of strings.\\n    The list contains different words. Return the word with maximum number\\n    of unique characters. If multiple strings have maximum number of unique\\n    characters, return the one which comes first in lexicographical order.\\n\\n    find_max([\\\"name\\\", \\\"of\\\", \\\"string\\\"]) == \\\"string\\\"\\n    find_max([\\\"name\\\", \\\"enam\\\", \\\"game\\\"]) == \\\"enam\\\"\\n    find_max([\\\"aaaaaaa\\\", \\\"bb\\\" ,\\\"cc\\\"]) == \\\"\\\"aaaaaaa\\\"\\n    \\\"\\\"\\\"\\n\\n\\n    mx_ch_cnt, ans = 0, \\\"\\\"\\n    for word in words:\\n        ch_cnt = len(set(word)) \\n        if ch_cnt > mx_ch_cnt or (ch_cnt == mx_ch_cnt and word < ans):\\n            mx_ch_cnt, ans = ch_cnt, word\\n    return ans\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 11, \"cases_total\": 11, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 0.149,
+    "setup_s": 0.0,
+    "grade_s": 0.148
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

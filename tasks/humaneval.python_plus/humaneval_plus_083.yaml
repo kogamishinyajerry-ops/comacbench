@@ -1,0 +1,69 @@
+id: humaneval_plus_083
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_083.md
+  prompt_sha256: 3d2bdafedb466c4cf6215c6ef37628df73c21d5b076ef9cf29a2f8378ad150f0
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_083.py
+    digest: 383537f1d09bd730f675428d4a399e3c3eca1b3159b8f44aed93075ca7a31845
+output_contract:
+- function:starts_one_ends
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/83
+  entry_point: starts_one_ends
+  n_test_cases: 8
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: starts_one_ends
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert starts_one_ends(1) == 1
+  - assert starts_one_ends(2) == 18
+  - assert starts_one_ends(3) == 180
+  - assert starts_one_ends(4) == 1800
+  - assert starts_one_ends(5) == 18000
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef starts_one_ends(n):\\n    \"\"\"\\n    Given a positive integer n, return the count of the numbers of n-digit\\n    positive integers that start or end with 1.\\n    \"\"\"\\n\\n\\n    if n == 1: return 1\\n    return 18 * 10 ** (n - 2)\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['starts_one_ends']\n_inputs = [[1], [2], [3], [4], [5], [6], [10], [12], [15], [20], [30], [8], [25], [100], [500], [29], [14], [26], [19], [13], [9], [101], [28], [21], [24], [7], [102], [99], [16], [501], [17], [22], [98], [11], [499], [1000], [1234], [9876], [31415], [1000000], [99999], [9877], [9878], [1235], [1001], [9879], [9880], [999999], [9881], [31414], [78], [999998], [999], [1002], [100000], [9882], [1233], [80], [999997], [1236], [1237], [1232], [79], [90], [31416], [31413], [31412], [31411], [1003], [999996], [68], [69], [1004], [97], [23], [9883], [89], [31417], [1231], [67], [100001], [50], [94], [82], [53], [52], [51], [9874], [31418], [77], [54], [9875], [76], [9873], [1000001], [96], [49], [1000002], [75], [998], [35], [39], [48], [34], [70], [38], [95], [997], [47]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(starts_one_ends(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_083.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

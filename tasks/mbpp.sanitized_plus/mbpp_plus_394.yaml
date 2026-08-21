@@ -1,0 +1,65 @@
+id: mbpp_plus_394
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_394.md
+  prompt_sha256: 8ff156917973efd5e32ad652a305796eed287eb86e37e35c16d7bc018971c2d3
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_394.py
+    digest: 1e5c46b3f67938a1b39f175aa34813ccede9620695a6d7f5fc9979b72094c319
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 394
+  entry_point: check_distinct
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: check_distinct
+  tests:
+  - assert check_distinct((1, 4, 5, 6, 1, 4)) == False
+  - assert check_distinct((1, 4, 5, 6)) == True
+  - assert check_distinct((2, 3, 4, 5, 6)) == True
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef check_distinct(test_tup):\\n  return len(test_tup) == len(set(test_tup))\\n', _gt_ns)\n_gt = _gt_ns['check_distinct']\n_inputs = [[[1, 4, 5, 6, 1, 4]], [[1, 4, 5, 6]], [[2, 3, 4, 5, 6]], [[]], [[1]], [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]], [[1, 1, 1, 1, 1, 1, 1, 1, 1, 2]], [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]], [[1, 2, 3.14, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3.14, 4, 5, 6, 7, 8, 9, 10]], [[1, 'a', True, 3.14]], [[7, 8, 37, 3, -71, -36]], [[7, 9, 37, 3, -71, -36]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]], [[10, 9, 8, 7, 6, 5, 4, 3, 1, 1, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1]], [[0, 1]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6]], [[61, 1, 34, -53, -71, False]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10, 8, 7, 6, 5, 4, 3, 2, 1, 6]], [[10, 9, 8, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 2]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 2, 1, 6]], [[1, 2, 3.14, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3.14, 4, 5, 6, 8, 9, 10]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 6]], [[10, 9, 8, 7, 6, 5, 6, 3, 2, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10, 8, 7, 6, 5, 4, 3, 2, 1, 6, 3]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 10, 8, 7, 6, 5, 4, 3, 2, 0, 1, 6, 3]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1, 6]], [[0, 1, 1]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 10, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]], [[0, 1, 0]], [[1, 0]], [[10, 9, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6]], [[6, 8, 8, 37, 3, -71, -36]], [[1, 2, 3.14, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3.14, 4, 5, 6, 9, 10]], [[6, 0, 1, 1]], [[1, 0, 1, 1]], [[7, 8, 3, -71, -36]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 4, 3, 2, 1, 6]], [[6, 0, 1, 1, 1]], [[10, 9, 8, 6, 5, 4, 3, 2, 1, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 3]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1, 9]], [[6, 0, 1, 1, 1, 1]], [[1, 2, 0, 1, 1]], [[10, 1]], [[10, 9, 9, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6]], [[5, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 6, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1, 7]], [[10, 9, 8, 7, 6, 5, 4, 3, 2, 61, 10, 9, 8, 7, 6, 5, 4, 2, 1, 6, 6]], [[10, 7, 7, 1]], [[1, 0, 1, 1, 1]]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(check_distinct(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_394.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

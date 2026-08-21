@@ -1,0 +1,65 @@
+id: mbpp_plus_309
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_309.md
+  prompt_sha256: 3feba535ab8f256319f3aa46bb9d93a7479da8466cc25d9c029518fa74e8ea06
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_309.py
+    digest: 683baaa5b6abe1c562dbfc44939305bc71890a06fab69ea1b434255dab13b6ed
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 309
+  entry_point: maximum
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: maximum
+  tests:
+  - assert maximum(5,10) == 10
+  - assert maximum(-1,-2) == -1
+  - assert maximum(9,7) == 9
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef maximum(a,b):   \\n    return max(a, b)\\n', _gt_ns)\n_gt = _gt_ns['maximum']\n_inputs = [[5, 10], [-1, -2], [9, 7], [3.14, 10.65], [-2.1, 0.9], [4.7, -3.8], [0, 10], [-10, 0], [0, 0], [-10000000000000000000000000, 1e-26], [-9876543210987654321098765, -1234567890123456789012345], [3.141592653589793, 3.141592653589793], [1.1808193778623197, 0.9], [0, 9], [3.141592653589793, 10.65], [0, -10], [-10000000000000000000000000, -1234567890123456789012345], [10.65, 10.65], [2.9618248823452746, 3.141592653589793], [1.2157775014136278, 0.6793588880224353], [-9999999999999999999999998, 0.9], [9, -1], [-10000000000000000000000000, 11], [0.9, 0.9], [11, 0.9], [3.141592653589793, 0.9], [-9876543210987654321098765, -9876543210987654321098765], [10, -10], [2.0531824740205407, 3.141592653589793], [9, 10], [0.6793588880224353, 2.0531824740205407], [-1234567890123456789012344, -1234567890123456789012345], [-10000000000000000000000000, -10000000000000000000000000], [3.141592653589793, 1.2157775014136278], [-1234567890123456789012345, -1234567890123456789012345], [11, -1234567890123456789012344], [1.5845776850148763, 0.9], [-9876543210987654321098765, 10], [-1, -10000000000000000000000000], [2.3167165662630365, 1.5845776850148763], [11, 12], [-9999999999999999999999997, 0.9], [3.7369883507451815, 3.141592653589793], [1.7912598325814533, 2.0531824740205407], [10, -1], [-1234567890123456789012345, -10000000000000000000000000], [3.141592653589793, 10.723965513304417], [10, -1234567890123456789012345], [1.2157775014136278, 1e-26], [10, 10], [-10000000000000000000000001, 1e-26], [3.489417024918704, 0.9], [-9999999999999999999999999, 0.9], [11.354840748288053, 2.484392829474946], [9, 9], [-10, -1234567890123456789012344], [1.5845776850148763, 1.5845776850148763], [-1234567890123456789012345, -9876543210987654321098765], [1.437569968606471, 0.9], [10, 9], [-1234567890123456789012344, -1234567890123456789012344], [11.354840748288053, 1e-26], [11, 13], [3.7369883507451815, 3.7484448127691747], [-10, -10], [1.437569968606471, 1.8110406201833071], [2.3167165662630365, 2.484392829474946], [1.2157775014136278, -2.1], [-0.030376207066556082, 7.499539649487587], [-2.1, 1.2157775014136278], [2, 1], [-1234567890123456789012345, -1], [1, -10000000000000000000000000], [3.141592653589793, 10.640794492137154], [-9999999999999999999999999, -10000000000000000000000000], [1, -9999999999999999999999997], [-2.1, -1.7697103312809708], [1, 1], [-9999999999999999999999999, -1234567890123456789012345], [-9999999999999999999999997, -9999999999999999999999997], [1.1808193778623197, 1.8110406201833071], [-9999999999999999999999999, 12], [3.141592653589793, 1.1808193778623197], [-1234567890123456789012346, -1234567890123456789012345], [0.8312079285541487, 1.2157775014136278], [3.141592653589793, 2.2911536081938935], [2.9618248823452746, 7.499539649487587], [1.7661199773658156, 2.2911536081938935], [2.9618248823452746, 3.7484448127691747], [-10, -9], [7.3022277742249955, 7.499539649487587], [1.898572449510145, 2.36750373246299], [3.141592653589793, 1.898572449510145], [2.9618248823452746, 2.9632529449641662], [-10, -1234567890123456789012345], [10, 2.9632529449641662], [11.042105761712191, 11.52667925889018], [12, -1234567890123456789012345], [2.36750373246299, 0.6793588880224353], [1, 10], [0, 13], [11, 11], [3.7369883507451815, 2.9632529449641662], [0.8312079285541487, 0.8312079285541487], [-9876543210987654321098766, -10000000000000000000000001], [4.0762338243861995, 3.141592653589793], [1.898572449510145, 1.898572449510145], [9, -11], [13, 12], [3.653195415338968, 3.141592653589793], [-1234567890123456789012345, 11], [-11, 0]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(maximum(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_309.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_126
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_126.md
+  prompt_sha256: b2c111c46d181a68a05f65ced8835e65b64f88e0fc856d258c9d92be21f46132
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_126.py
+    digest: 27e06a6840f336824d66c4baf2e6f7ef3a372dc04cbf79fbb813a14ae6cf86de
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 126
+  entry_point: sum
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: sum
+  tests:
+  - assert sum(10,15) == 6
+  - assert sum(100,150) == 93
+  - assert sum(4,6) == 3
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\nimport math\\ndef sum(a,b): \\n    sum = 0\\n    n = math.gcd(a, b)\\n    N = int(math.sqrt(n)) + 1\\n    for i in range (1, N): \\n        if (n % i == 0): \\n            sum += i\\n            if (n / i != i): \\n                sum += (n / i)\\n    return sum\\n', _gt_ns)\n_gt = _gt_ns['sum']\n_inputs = [[10, 15], [100, 150], [4, 6], [27, 81], [12, 18], [123, 456], [555, 1111], [987, 654], [10, 3], [987654321, 123456789], [555, 456], [987654322, 81], [555, 987654322], [3, 987654321], [555, 555], [123, 1111], [987654321, 987654321], [456, 456], [81, 555], [123456790, 123456790], [123456789, 987654322], [123, 3], [12, 1111], [123456789, 81], [555, 554], [81, 456], [455, 456], [81, 457], [555, 987654323], [556, 553], [80, 456], [555, 553], [123456789, 456], [456, 987654323], [987, 986], [987654320, 987654321], [987654323, 987654322], [987654323, 987654323], [987654322, 987654321], [987654323, 10], [455, 987654320], [987654322, 987654322], [123456789, 123456790], [554, 457], [26, 82], [11, 3], [986, 987654323], [123, 123], [555, 81], [987654324, 987], [987654321, 18], [987654319, 987654318], [654, 654], [123456790, 455], [3, 987654322], [80, 987654321], [553, 553], [556, 457], [988, 654], [455, 123456789], [654, 987654321], [123456790, 654], [11, 123], [556, 1111], [27, 26], [80, 124], [556, 456], [987, 987], [457, 456], [553, 80], [81, 458], [123456789, 123456789], [457, 457], [457, 3], [123456789, 986], [985, 987], [986, 986], [987654320, 987654320], [456, 458], [2, 3], [124, 987654323], [987654320, 81], [12, 12], [987654321, 987654320], [125, 555], [81, 2], [654, 81], [654, 123456788], [987654319, 80], [81, 554], [457, 554], [987654323, 456], [456, 26], [81, 81], [556, 556], [654, 80], [987654319, 986], [123, 4], [556, 987654320], [456, 556], [987654320, 456], [987654321, 2], [126, 2], [556, 987654322], [18, 123456789], [2, 654], [457, 987654323], [985, 456], [2, 18], [3, 556]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(sum(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_126.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

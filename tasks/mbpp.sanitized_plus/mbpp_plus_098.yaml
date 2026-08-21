@@ -1,0 +1,65 @@
+id: mbpp_plus_098
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_098.md
+  prompt_sha256: 2ef5acbb2f4298d7013fe706aa06beb56ff4b2304e68da87bc50590aef79314e
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_098.py
+    digest: 0a3e20c57d34846554423417af31f78185e5b6b71c88398b758880cf47275ec6
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 98
+  entry_point: multiply_num
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: multiply_num
+  tests:
+  - assert math.isclose(multiply_num((8, 2, 3, -1, 7)), -67.2, rel_tol=0.001)
+  - assert math.isclose(multiply_num((-10,-20,-30)), -2000.0, rel_tol=0.001)
+  - assert math.isclose(multiply_num((19,15,18)), 1710.0, rel_tol=0.001)
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef multiply_num(numbers):  \\n    from functools import reduce\\n    return reduce(lambda x, y: x * y, numbers) / len(numbers)\\n', _gt_ns)\n_gt = _gt_ns['multiply_num']\n_inputs = [[[8, 2, 3, -1, 7]], [[-10, -20, -30]], [[19, 15, 18]], [[100000, 2, 3]], [[2.5, 1.5, 0, -3, 4.2]], [[0.5, 0.75, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]], [[1, 10, 100, 1000, 10000, 100000]], [[-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]], [[0, 0]], [[2, 3, 4, -2, 0]], [[1000000, 2000000, 3000000, -1000000]], [[5, 5, 5, 5]], [[1, -2, 3, -4, 5]], [[1, -2, 3, -4, 5, -2]], [[2, -2, 3, -6, -2, 0]], [[0, 0, 0]], [[2, 3, 4, -2, 0, 2]], [[2, 2, 3, 4, -2, 0]], [[2, 3, 4, -2, 0, -2]], [[3, 100000, 2, 3]], [[1, 10, 100, 1000, 10000, 100000, 100000]], [[1, 10, 100, 1000, 10000, 100000, 10]], [[2, 3, 0, -2, 0, 2]], [[2, 1, -2, 0, 2]], [[1000000, 2000000, 3000000, -1000000, -1000000]], [[-1, -2, -3, -5, -6, -7, -8, -9, -10]], [[1000000, 2000000, -1000000]], [[100000, 2]], [[0]], [[1000000, 2000000, -9, -1000000, 1000000]], [[-9, -1, -2, -3, -4, -5, -7, -8, -9, -10]], [[2, -2, 3, -7, -6, -2, 0]], [[0.5, 0.75, 0.1, 0.2, 0.2734396265136305, 0.3, 0.4, 0.5, 0.6, 0.7]], [[-1, -2, -1, -3, -4, -5, -6, -7, -8, -9, -10, -1]], [[2, 3, -2, 0]], [[2, 3, -1, -6, -2, 0]], [[1000000, -1000000]], [[5, 5, 5]], [[5, 5]], [[-1, -2, -3, 0, -5, -6, -7, -8, -9, -10, -1]], [[100000, 2, 100001, 3]], [[0.5, 0.75, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1027137544003226, 0.6, 0.7, 0.3]], [[2, 3, -4, 4, -2, 0]], [[100001, 2, -2, 0]], [[0.5, 0.75, 0.7, 0.1, 0.2, 0.3, 0.4, 0.5, 1.5, 0.6, 0.7]], [[-5, -2, 2, 5]], [[-1]], [[2, 3, -3, 4, -2, 0, -2]], [[1, 9, 10, 100, 1000, 10000, 100000, 10000, 1000]], [[2.5, 1.5, 0]], [[100000, 3]], [[0.5, 0.75, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1027137544003226, 0.6, 0.7, 0.3, 0.7]], [[2, 3, -3, 4, -2, 0, -3]], [[-2, 2, -1, 5]], [[0.5, 0.75, 1.5, 0.2, 0.2734396265136305, 0.3, 0.4, 0.5, 0.6, 0.7]], [[1, 10, 100, 1000, 10000, -9]], [[1.6805641411244991, 2.5, 1.5, 0]], [[3000000, 2, 3, 4, 0, 1]], [[0, 6, 5, 5]], [[1, 10, 100, 1000, 10000, 100000, 100000, 1]], [[2.5, 0, 2.5]], [[-6, 0]], [[1000000, 2000000, 3000000, -1000000, -1000000, 3000000]], [[2, 3, -2, 0, 3]], [[0.5, 0.75, 0.1, 0.2, 0.3, 0.4, 0.2734396265136305, 0.5, 0.1027137544003226, 1.0039341653341238, 0.3, 0.7]], [[2, 3, -6, -2, 0]], [[1]], [[-9, 1000000, 2000000, 3000000, -1000000]], [[-5, -1, 2, 5]], [[5, 5, 1, 5]], [[100000, 2, 4]], [[1, 10, 101, 100, 1000, 10000, -9]], [[2, 3, 0, 2]], [[2, 3, -2, 0, 3, 3]], [[-1, -2, -1, -3, -4, -5, -6, -8, -8, -9, -10, -1]], [[1000000, 2000000, -9, -1000000, 1000000, 2000000]], [[0.5, 0.75, 0.1, 0.2, 0.3, 0.3408682932336746, 0.4, 0.2734396265136305, 0.5, 0.1027137544003226, 1.0039341653341238, 0.3, 0.7]], [[2, 3, 0, 100000, 2]], [[1000000, -1000000, 1000000]], [[-1, -2, -1, -3, -4, -5, -6, -8, -8, -9, -10, 9, -1]], [[2.5, 1.5, 0, 1.5]], [[2, 3, 4, -2, -10, 0, 2]], [[0, 0, 1000000, 0, 0]], [[1, 1]], [[2, 3, 4, 1, -2, 0]], [[100000, -2, 3, 100000]], [[2, 3, 0, -10, -2, 0, 2]], [[1.6805641411244991, 1.5, 0]], [[3]], [[2.5, 1.5]], [[1, 11, 101, 100, 1000, 10000, -9, 1]], [[1.6805641411244991, 1.6805641411244991]], [[-1, -2, -1, -3, -4, -5, -7, -8, -9, -10, -1]], [[1000000, 5]], [[1, 10, 100, 1000, -9, 9999, -9]], [[-6, -6]], [[2, -2, 3, -6, -2]], [[0.5, 0.75, 0.1, 0.2, 0.75, 0.4, 0.5, 0.6, 0.7]], [[2, 3, 4, -1, 1]], [[2000000, -9, -1000000, 1000000]], [[1, 10, 100, 1000, 100000]], [[-1000000, 1, 10, 100, 1000, -9, -9]], [[1, 3, 4, -2, -10, 0, 2]], [[2, 3, 4, -2, -10, 0, 2, -3, 2]], [[1, 10, 100, 10000, 100000, 100000, 1]], [[2.5, 0.1027137544003226, 1.5, 0]], [[2, 3, 0, -10, -2, 0, 3, 2]], [[1000001, 2000000, -9, -1000000, 1000000]], [[2, 2, 3, 0, -2, 0, 2]], [[1, 10, 100, 10000, 100000, 1]], [[2, 1, -2, 0, -2]], [[2.5, 1.5, 0, 1]], [[-5, -1, 1, 5]]]\n_atol = 0.0001\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(multiply_num(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_098.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

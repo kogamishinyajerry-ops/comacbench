@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_010",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\n\\ndef is_palindrome(string: str) -> bool:\\n    \\\"\\\"\\\" Test if given string is a palindrome \\\"\\\"\\\"\\n    return string == string[::-1]\\n\\n\\ndef make_palindrome(string: str) -> str:\\n    \\\"\\\"\\\" Find the shortest palindrome that begins with a supplied string.\\n    Algorithm idea is simple:\\n    - Find the longest postfix of supplied string that is a palindrome.\\n    - Append to the end of the string reverse of a string prefix that comes before the palindromic suffix.\\n    >>> make_palindrome('')\\n    ''\\n    >>> make_palindrome('cat')\\n    'catac'\\n    >>> make_palindrome('cata')\\n    'catac'\\n    \\\"\\\"\\\"\\n\\n    if is_palindrome(string):\\n        return string\\n    for i in range(len(string)):\\n        if is_palindrome(string[i:]):\\n            return string + string[i-1::-1]\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 0.163,
+    "setup_s": 0.0,
+    "grade_s": 0.163
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

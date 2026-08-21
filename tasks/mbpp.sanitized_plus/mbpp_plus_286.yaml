@@ -1,0 +1,65 @@
+id: mbpp_plus_286
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_286.md
+  prompt_sha256: 12e6a75fd6435f4bcbacbb0b0c9493e329f3014675b059096fb058ec68473903
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_286.py
+    digest: 46ecfb145999541c76e9965caa70f74330c66ea9333937d38dbaea1ebe1b886c
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 286
+  entry_point: max_sub_array_sum_repeated
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: max_sub_array_sum_repeated
+  tests:
+  - assert max_sub_array_sum_repeated([10, 20, -30, -1], 4, 3) == 30
+  - assert max_sub_array_sum_repeated([-1, 10, 20], 3, 2) == 59
+  - assert max_sub_array_sum_repeated([-1, -2, -3], 3, 3) == -1
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef max_sub_array_sum_repeated(a, n, k): \\n\\tmodifed = a * k\\n\\tpre = 0\\t# dp[i-1]\\n\\tres = modifed[0]\\n\\tfor n in modifed:\\n\\t\\tpre = max(pre + n, n)\\n\\t\\tres = max(pre, res)\\n\\treturn res\\n', _gt_ns)\n_gt = _gt_ns['max_sub_array_sum_repeated']\n_inputs = [[[10, 20, -30, -1], 4, 3], [[-1, 10, 20], 3, 2], [[-1, -2, -3], 3, 3], [[5, -2, 10, 4, -7, 3], 6, 5], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 2], [[5, -2, 11, 4, -7, 3], 6, 5], [[5, -2, 10, 5, -7, 3], 6, 6], [[5, -2, 10, 5, -7, 3], 6, 1], [[5, -2, 10, 5, -7, 3, 10], 7, 6], [[5, -2, 10, 5, -7, 3, 10], 7, 10], [[5, -2, 10, 5, -7, 3, 10], 7, 5], [[5, -2, 10, 5, -7, 3, 10], 7, 9], [[5, -2, 11, 4, -7, 3], 6, 4], [[5, -2, 10, 4, -7, 3], 6, 4], [[5, -2, 10, -7, 3, 5], 6, 1], [[5, -2, 10, 5, -7, 4, 10], 7, 6], [[5, -2, 10, -7, 3, 5], 6, 3], [[5, -2, 10, 5, -7, 4, 10], 7, 7], [[1, 2, 3, -4, -5, 6, 7, -8, 10, 10], 10, 2], [[9, -2, 10, 5, -7, 3, 10], 7, 5], [[5, -2, 10, 4, -7, 3], 6, 6], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 1], [[5, -2, 10, 5, -7, 3, 10], 7, 7], [[5, -2, 10, 5, -7, 3, 10], 7, 4], [[-7, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 1], [[5, -2, 10, 4, -7, 3, 10], 7, 5], [[-7, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 11], [[-7, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 10], [[6, -2, 9, -7, 3, 5], 6, 3], [[5, -2, 10, 4, -7, 3, 10], 7, 6], [[6, -2, 9, -7, 3, 5], 6, 6], [[5, -2, 10, 5, -7, 3], 6, 9], [[5, -2, 10, 5, -7, 3, 10], 7, 1], [[5, -2, 10, 5, -4, 3, 10], 7, 7], [[6, -2, 9, -7, 3, 5], 6, 2], [[-2, -3, 9, -7, 3, 5], 6, 3], [[6, -2, 10, 4, -7, 3, 10], 7, 6], [[1, 2, 11, -4, -5, 6, 7, -8, 9, 10], 10, 1], [[5, -2, 5, -7, 4, 10], 6, 6], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 10], [[1, 2, 3, -4, -5, 6, 7, -8, 10, 10], 10, 3], [[-7, 2, 3, -4, 1, 6, 7, -8, 9, 10], 10, 11], [[4, -2, 10, -7, 3, 5], 6, 3], [[5, -2, 10, -7, 3, 5], 6, 6], [[5, -1, 10, 4, -7, 3], 6, 4], [[5, -2, 10, 5, -7, 3, 10], 7, 11], [[1, 2, 3, -4, -5, 6, 7, -8, 10, 10], 10, 4], [[9, -2, 10, 5, -7, 3, 10], 7, 6], [[5, -1, 10, 3, -7, 3], 6, 4], [[6, -2, 10, 4, -8, 3, 10], 7, 6], [[5, -2, 10, 4, -7, 3], 6, 11], [[5, -2, 10, 5, -7, 3], 6, 2], [[5, -2, 10, 5, -8, 3], 6, 9], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10, 7], 11, 1], [[6, -2, 10, 4, -8, 3, 10, 10], 8, 6], [[1, 11, 2, 3, -4, -5, 7, -8, 10, 10], 10, 10], [[5, -2, 10, 4, -7, 3, 10], 7, 4], [[5, -2, 10, 5, -7, 3], 6, 10], [[5, -2, 10, 4, -7, 3, -2], 7, 3], [[1, 11, 2, 3, -4, -5, 7, -8, 10, 10], 10, 5], [[-7, 2, 3, -4, -5, 6, 6, -8, 9, 10], 10, 1], [[5, -2, 10, 5, -7, 3, 9], 7, 5], [[5, -2, 10, -7, 3, 5], 6, 7], [[5, -2, 10, 4, -7, 3, 10], 7, 7], [[-7, 2, 3, -4, -5, 6, 6, -8, 9, 10, 6], 11, 1], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 4], [[9, -2, 10, 5, -7, 3, 10], 7, 7], [[-7, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 8], [[9, -2, 10, 4, -7, 3, 10], 7, 5], [[6, -2, 10, 4, -7, 3, 10], 7, 5], [[5, -1, 10, 3, -7, 3], 6, 3], [[1, 2, 11, -4, -5, 6, 7, -8, 9, 10], 10, 10], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 9], [[9, -2, 10, 4, -7, 3, 10], 7, 4], [[5, -2, 10, -7, 3, 5], 6, 5], [[5, -2, 10, 4, -7, 3], 6, 7], [[5, -2, 10, 4, 4, 3], 6, 11], [[-2, -3, 9, -7, -1, 5], 6, 3], [[5, -2, -2, 5, -7, 3, 10], 7, 11], [[5, -2, 10, 4, -7, 3, 8], 7, 7], [[6, -2, 10, 5, -4, 3, 10], 7, 7], [[6, -2, 10, 4, -7, 3, 10], 7, 4], [[1, 2, 3, -4, -5, 6, 7, -8, 10, 10], 10, 10], [[9, -2, 10, 4, -7, 3], 6, 7], [[5, -2, 10, 3, 3, 5], 6, 6], [[-2, 10, 5, -8, 3], 5, 9], [[5, -2, 10, 5, -7, 3], 6, 5], [[6, -1, 9, -7, 3, 5], 6, 3], [[5, -2, -2, 5, -7, 3, 10], 7, 12], [[1, 2, 3, -4, -5, 6, 7, -8, 9, 10], 10, 11], [[5, -2, 5, -7, 4, 10], 6, 7], [[5, -2, 10, 4, -6, 3], 6, 2], [[6, -2, 10, 4, -7, 3, 10], 7, 7], [[-2, -3, 9, -1, -1, 5], 6, 3], [[-2, -3, 9, -7, -1, 5], 6, 4], [[5, -2, 11, 4, -7, 3], 6, 3], [[1, 2, 3, -3, -5, 6, 7, -8, 10, 10], 10, 10], [[7, -2, 10, 4, -7, 3, 10], 7, 6], [[5, -2, 10, 5, -7, 3], 6, 11], [[9, -2, 10, 5, -7, 3, 10], 7, 2], [[5, -2, 10, 5, -7, 3], 6, 7], [[5, -2, 10, 5, -7, 3, 10], 7, 12], [[6, -3, 10, 5, -4, 3, 10], 7, 7], [[6, -1, 9, -4, 3, 5], 6, 3], [[-7, 2, 3, -4, -5, 6, -7, -8, 9, 10], 10, 8]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(max_sub_array_sum_repeated(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_286.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

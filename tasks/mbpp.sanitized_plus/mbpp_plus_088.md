@@ -1,0 +1,9 @@
+Write a function to get the frequency of all the elements in a list, returned as a dictionary.
+
+Use exactly these top-level function name(s) in your solution: freq_count.
+
+Your code should pass these tests:
+
+```
+assert freq_count([10,10,10,10,20,20,20,20,40,40,50,50,30])==({10: 4, 20: 4, 40: 2, 50: 2, 30: 1})
+```

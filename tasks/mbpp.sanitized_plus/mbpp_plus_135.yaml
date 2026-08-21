@@ -1,0 +1,65 @@
+id: mbpp_plus_135
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_135.md
+  prompt_sha256: b3c7025575bca0ffe2fb8afa92d48e8883bef745b4fc92019de24fff94ed5de0
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_135.py
+    digest: 5804f9c8b4d68fc54f01f035afd9ff0c77692bc6649847ef320f00777aead860
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 135
+  entry_point: hexagonal_num
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: hexagonal_num
+  tests:
+  - assert hexagonal_num(10) == 190
+  - assert hexagonal_num(5) == 45
+  - assert hexagonal_num(7) == 91
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef hexagonal_num(n): \\n\\treturn n * (2 * n - 1) \\n', _gt_ns)\n_gt = _gt_ns['hexagonal_num']\n_inputs = [[10], [5], [7], [100], [1000], [10000], [9999], [9998], [10001], [99], [9997], [1001], [10002], [9996], [101], [True], [90], [98], [97], [1002], [10003], [102], [1003], [62], [1004], [False], [96], [103], [9995], [104], [63], [64], [91], [61], [1005], [89], [1006], [60], [105], [66], [59], [65], [87], [88], [10004], [9994], [58], [106], [1007], [22], [92], [10005], [10006], [86], [93], [67], [57], [23], [9993], [68], [85], [39], [21], [84], [5], [94], [40], [83], [999], [1008], [20], [41], [42], [10007], [38], [56], [6], [1009], [107], [69], [82], [55], [9992], [24], [7], [12], [8], [11], [108], [95], [25], [1], [9], [19], [10], [36], [0], [81], [52], [51], [109], [10008], [110], [1010], [10009], [43]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(hexagonal_num(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_135.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

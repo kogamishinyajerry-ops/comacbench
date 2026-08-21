@@ -1,0 +1,65 @@
+id: mbpp_plus_312
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_312.md
+  prompt_sha256: 2ff3e5fc18234c68e5afe25a7771c94bacc5d14fc875ab9bf2641f3f0299d98e
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_312.py
+    digest: dd40c84b276502bc3c3c61e013d16bbd1d9187692490fd7f96915cb029fd42be
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 312
+  entry_point: volume_cone
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: volume_cone
+  tests:
+  - assert math.isclose(volume_cone(5,12), 314.15926535897927, rel_tol=0.001)
+  - assert math.isclose(volume_cone(10,15), 1570.7963267948965, rel_tol=0.001)
+  - assert math.isclose(volume_cone(19,17), 6426.651371693521, rel_tol=0.001)
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\nimport math\\ndef volume_cone(r,h):\\n  return (1.0 / 3) * math.pi * r * r * h\\n', _gt_ns)\n_gt = _gt_ns['volume_cone']\n_inputs = [[5, 12], [10, 15], [19, 17], [3.5, 8.2], [2.2, 4.7], [6.9, 2.3], [1000, 2000], [1.234, 5.678], [10.567, 7.89], [456.789, 123.456], [987.654, 321.098], [10.567, 10.567], [987.654, 3.5], [10.567, 1.234], [456.3381444428326, 123.456], [456.789, 3.5], [1.234, 1.234], [321.098, 168.94178585748298], [10.062162623290103, 10.062162623290103], [456.789, 5.678], [456.789, 388.7528921290703], [456.789, 4.222046540766119], [987.654, 3.3318554794950845], [11.081962312637511, 11.081962312637511], [1.234, 1.8683657303042116], [1.7994502519997089, 1.6146639261873168], [418.9192385760365, 5.678], [418.9192385760365, 2.3], [456.789, 4.928071889937876], [3.212703762340813, 2.3], [7.6622497831772085, 7.89], [2.378587054952834, 4.7], [10.062162623290103, 456.3381444428326], [987.654, 6.9], [1.7994502519997089, 4.928071889937876], [987.654, 2.705632224815191], [1.88487391345283, 3.5], [4.973822145742326, 5.678], [1.234, 2.2], [1.234, 8.2], [1.88487391345283, 7.89], [418.9192385760365, 2.1821425592540242], [7.6622497831772085, 123.456], [3.5, 5.307457074898993], [3.212703762340813, 3.212703762340813], [7.89, 10.999978928538894], [123.456, 122.94268835587204], [1.234, 1.0143813429712258], [4.462763515521088, 4.928071889937876], [4.886498233097042, 4.886498233097042], [5.678, 5.678], [8.164810097091653, 7.6622497831772085], [14.696773684181256, 4.7], [2.4747825820340905, 2.3], [10.567, 7.194070932537068], [7.89, 4.886498233097042], [7.6622497831772085, 183.12244565865572], [122.8191510847481, 117.12499057645937], [5.722833818810574, 2.1821425592540242], [7.89, 4.195516279600971], [4.462763515521088, 1.7994502519997089], [4.195516279600971, 168.94178585748298], [456.3381444428326, 388.7528921290703], [4.584255552437924, 2.3], [1.7803467811689282, 1.6146639261873168], [10.567, 321.098], [3.930531091978424, 4.7], [3.930531091978424, 1.0143813429712258], [3.5, 3.5], [1.0725091193999579, 1.0143813429712258], [1.88487391345283, 3.3318554794950845], [4.462763515521088, 1.3297034614252445], [0.5561103655828992, 1.0143813429712258], [10.999978928538894, 4.195516279600971], [4.615962386993007, 2.1821425592540242], [11.980439670399893, 7.787216662850671], [1.474604255550374, 5.184525170511173], [6.695658956768952, 6.695658956768952], [1.3834538242508858, 1.88487391345283], [17.146104995225684, 456.3381444428326], [4.886498233097042, 1.8683657303042116], [1.88487391345283, 4.615962386993007], [12.052676270488469, 14.696773684181256], [17.146104995225684, 7.89], [123.456, 122.84983443418058], [388.7528921290703, 1.234], [0.5561103655828992, 122.86850838444352], [456.789, 1.6616184514399182], [418.9192385760365, 8.2], [1.0725091193999579, 16.746701140899006], [True, True], [2.8997575884253255, 987.654], [6.695658956768952, 1.8683657303042116], [2.4484913418894525, 3.5], [456.789, 3.1688227707140735], [456.789, 2.4747825820340905], [7.6622497831772085, 4.973822145742326], [456.3381444428326, 456.3381444428326], [4.973822145742326, 388.7528921290703], [5.722833818810574, 12.052676270488469], [987.654, 2.099492328965713], [7.89, 4.928071889937876], [2.4747825820340905, 122.84983443418058], [10.567, 456.8519227964984], [1.88487391345283, 2.2], [4.886498233097042, 3.212703762340813], [3.776854528744753, 4.321001736599134], [1.544964412295513, 2.2], [456.3381444428326, 1.0143813429712258], [418.9192385760365, 418.9192385760365], [6.695658956768952, 4.886498233097042]]\n_atol = 0.0001\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(volume_cone(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_312.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

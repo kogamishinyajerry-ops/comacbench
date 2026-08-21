@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_089",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef encrypt(s):\\n    \\\"\\\"\\\"Create a function encrypt that takes a string as an argument and\\n    returns a string encrypted with the alphabet being rotated. \\n    The alphabet should be rotated in a manner such that the letters \\n    shift down by two multiplied to two places.\\n    For example:\\n    encrypt('hi') returns 'lm'\\n    encrypt('asdfghjkl') returns 'ewhjklnop'\\n    encrypt('gf') returns 'kj'\\n    encrypt('et') returns 'ix'\\n    \\\"\\\"\\\"\\n\\n    d = 'abcdefghijklmnopqrstuvwxyz'\\n    return \\\"\\\".join(map(lambda ch: chr((ord(ch) - ord(\\\"a\\\") + 4) % 26 + ord(\\\"a\\\")) if ch in d else ch, s))\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 0.168,
+    "setup_s": 0.0,
+    "grade_s": 0.168
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

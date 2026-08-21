@@ -1,0 +1,65 @@
+id: mbpp_plus_168
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_168.md
+  prompt_sha256: 20cdaeab560e98d2009ac685e37ed034f618577a254941092a1b1c133c2455b9
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_168.py
+    digest: 5529d845d180c2373d25d852729d48aabf7e1c65884a53884a741e1dd59c149e
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 168
+  entry_point: frequency
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: frequency
+  tests:
+  - assert frequency([1,2,3], 4) == 0
+  - assert frequency([1,2,2,3,3,3,4], 3) == 3
+  - assert frequency([0,1,2,3,1,2], 1) == 2
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef frequency(a,x): \\n    return a.count(x)\\n', _gt_ns)\n_gt = _gt_ns['frequency']\n_inputs = [[[1, 2, 3], 4], [[1, 2, 2, 3, 3, 3, 4], 3], [[0, 1, 2, 3, 1, 2], 1], [[], 1], [[], 4], [[False], 4], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], 1], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], 1], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], False], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPshwex', 'ICMkS', '', ''], 1], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], 0], [[True, False, False, True, False, True, True, True, False], 2], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPVjygOQshwex', 'VjPshwex', 'ICMkS', '', ''], 1], [[], 2], [[4.779178548584724, 20.12336259087077], 1], [[4.779178548584724, 72.59056638104303, 92.53457117882732], True], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 20.12336259087077], False], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPVjygOQshwex', 'VjPshwex', 'ICMkS', '', '', 'CL', 'IV'], 1], [[True, False, False, True, False, True, True, False, True, False], 2], [[6.671642720053646, 72.59056638104303, 92.53457117882732, 20.12336259087077], 4], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPVjygOQshwex', 'VjPshwex', 'ICMkS', 'VjPVjygOQshwVjPshwexex', '', '', 'CL', 'IV'], 5], [[False, False], 4], [[5.159327309211834, 4.779178548584724], 1], [[4.779178548584724, 73.08137236933901, 92.53457117882732, 20.12336259087077], True], [[True, False], 4], [[23.020319535944452, [5, False, -74, -50, -9, 5, 4, -97], '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwVjPshwexex', 'q'], 2], [[4.779178548584724, 20.12336259087077, 4.779178548584724], False], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], 0], [[True, True], 4], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPVjygOQshwex', 'ICMkS', '', '', 'CL', 'IV'], -50], [[5], 2], [[23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwVjPshwexex', 'q', [5, False, -74, -50, -9, 5, 4, -97]], 2], [[5], False], [[23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwex', [5, False, -74, -50, -9, 5, 4, -97]], -50], [[5, 5], False], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], True], [[72.59056638104303, 92.53457117882732, 23.408003718694573, 20.12336259087077, 92.53457117882732], False], [[60, 4, 4, -43, 4, 81, -50, 5, 99, -97], 4], [[5.599696065924146], 4], [[23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], 'VIV', '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwex', [5, False, -74, -50, -9, 5, 4, -97]], -51], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPVjygOQshwex', 'ICMkS', '', '', 'CL', 'IV'], -74], [[], 3], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], -51], [[4.779178548584724, 20.12336259087077], False], [[20.12336259087077], False], [[23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwVjPshwexex', 'q'], 2], [[4.779178548584724, 20.12336259087077, 4.779178548584724], True], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], 2], [[5, 5], True], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 92.53457117882732], True], [[6.671642720053646, 73.08137236933901, 4.779178548584724, 20.12336259087077], 4], [[True], 4], [[True], 1], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], -9], [[72.59056638104303, 92.53457117882732, 23.408003718694573, 20.12336259087077, 92.53457117882732], True], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], -51], [[5.159327309211834, 4.779178548584724], -97], [[], 5], [[4.779178548584724, 23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], 'VIV', '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwex', [5, False, -74, -50, -9, 5, 4, -97]], -51], [[72.59056638104303, 92.53457117882732, 25.495320338145287, 23.408003718694573, 104.92811756855819, 20.12336259087077, 92.53457117882732], False], [[23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwVjPshwexex', 'q', [5, False, -74, -50, -9, 5, 4, -97]], 3], [[True, False, False, True, False, True, True, True, False], 81], [[72.59056638104303, 92.53457117882732, 20.12336259087077], 1], [[4.779178548584724, 73.08137236933901, 92.53457117882732], True], [[21.457739778830753, 4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], 0], [[5], 1], [[60, 4, 4, -43, 4, 82, -50, 5, 3, 99], 4], [[4.779178548584724, 72.59056638104303, 91.9284337556918, 92.53457117882732, 20.12336259087077], -51], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.95740817891545], -1], [[72.59056638104303, 92.53457117882732, 12.618578392571889, 20.12336259087077, 92.53457117882732], False], [['CL', 'vGL', 'VjygOQ', 'IV', 'VjPVjygOQshwex', 'ICMkS', '', '', 'CL', 'IV'], -43], [[], -9], [[], 82], [[72.59056638104303, 92.53457117882732, 23.408003718694573, 91.9284337556918, 92.53457117882732], True], [[5], -1], [[72.59056638104303, 92.53457117882732, 91.9284337556918, 92.53457117882732], False], [[False, True, False], 4], [[4.779178548584724, 23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], 'VIV', '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwex', [5, False, -74, -50, -9, 5, 4, -97], 'VIV'], -51], [[99, -31, 82, -60], 3], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732, 92.53457117882732], 4], [[None, 73.08137236933901, -72.0136627571263, -2.6946579959743957, 'grmqd', {}, 'VjPVjygOQshwex', {'-32': 12.618578392571889, '5': [66.8966114578121, -3.026526737101335, 4.779178548584724], '2': True, '-51': 81, '-77': 60}, 81], 5], [[4.779178548584724, 23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], 'VIV', '', [], False, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwex', [5, False, -74, -50, -9, 5, 4, -97], 'VVIV'], -51], [[72.59056638104303, 92.53457117882732, 20.12336259087077], 0], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], False], [[20.95740817891545, 5.599696065924146, 5.599696065924146], 4], [[5, 6], False], [['vGL', 'GEMQus', 'VjPVjygOQshwex', 'o', '', '', 'ICMkS', 'GHTx', 'grmqd', 'LvGL', 'vGL'], 5], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 20.12336259087077, 72.59056638104303], False], [[20.95740817891545, 5.599696065924146, 5.599696065924146, 5.599696065924146], 4], [[4.638246081712282, 4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732], 2], [[-3.026526737101335, -51.21354843845134, -50.84067158641727], 5], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077], 2], [[4.779178548584724, 72.59056638104303, 93.00370740734236, 20.12336259087077], 1], [[4.779178548584724, 72.59056638104303, 92.53457117882732], False], [[23.408003718694573, 93.00370740734236, 72.59056638104303, 25.495320338145287, 104.92811756855819, -72.0136627571263, 104.92811756855819, 59.68770177971405, -62.798823266707295, 5.159327309211834], 4], [[5], 5], [[60, 3, 4, 4, -43, 4, 81, -50, 5, 99, -97], 4], [[4.779178548584724, 20.12336259087077], True], [[20.95740817891545, 5.599696065924146, 4.638246081712282, 5.599696065924146, 5.599696065924146], 4], [[False, False], -43], [[4.779178548584724, 72.59056638104303, 92.53457117882732, 20.12336259087077, 92.53457117882732, 92.53457117882732], 3], [[], -77], [[4.000120888560737, 20.12336259087077], False], [[60, 4, -50, -43, 4, 81, -50, 5, 99, -97, 99], -60], [[23.020319535944452, 'IV', [5, False, -74, -50, -9, 5, 4, -97], '', [], True, 2, 'VjPVjygOQshwex', 'VjPVjygOQshwVjPshwexex', 'q'], 2]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(frequency(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_168.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

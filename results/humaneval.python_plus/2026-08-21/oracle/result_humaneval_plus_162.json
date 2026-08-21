@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_162",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef string_to_md5(text):\\n    \\\"\\\"\\\"\\n    Given a string 'text', return its md5 hash equivalent string.\\n    If 'text' is an empty string, return None.\\n\\n    >>> string_to_md5('Hello world') == '3e25960a79dbc69b674cd4ec67a72c62'\\n    \\\"\\\"\\\"\\n\\n    if text == \\\"\\\": return None\\n    import hashlib\\n    m = hashlib.md5()\\n    m.update(text.encode(\\\"utf-8\\\"))\\n    return m.hexdigest()\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 0.188,
+    "setup_s": 0.0,
+    "grade_s": 0.187
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

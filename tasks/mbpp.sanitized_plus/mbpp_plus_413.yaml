@@ -1,0 +1,65 @@
+id: mbpp_plus_413
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_413.md
+  prompt_sha256: ae7e2a950a724515b54d2a1e9b818f830fd24e321b064974cd9155e7d9d0de34
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_413.py
+    digest: a996ddd044c06813eeb65267f849f3be97fa04f2ea7e860d3c2fd3fa9b95bbac
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 413
+  entry_point: extract_nth_element
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: extract_nth_element
+  tests:
+  - assert extract_nth_element([('Greyson Fulton', 98, 99), ('Brady Kent', 97, 96), ('Wyatt Knott', 91, 94), ('Beau Turnbull', 94, 98)] ,0)==['Greyson Fulton', 'Brady Kent', 'Wyatt Knott', 'Beau Turnbull']
+  - assert extract_nth_element([('Greyson Fulton', 98, 99), ('Brady Kent', 97, 96), ('Wyatt Knott', 91, 94), ('Beau Turnbull', 94, 98)] ,2)==[99, 96, 94, 98]
+  - assert extract_nth_element([('Greyson Fulton', 98, 99), ('Brady Kent', 97, 96), ('Wyatt Knott', 91, 94), ('Beau Turnbull', 94, 98)],1)==[98, 97, 91, 94]
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef extract_nth_element(list1, n):\\n    return [x[n] for x in list1]\\n', _gt_ns)\n_gt = _gt_ns['extract_nth_element']\n_inputs = [[[['Greyson Fulton', 98, 99], ['Brady Kent', 97, 96], ['Wyatt Knott', 91, 94], ['Beau Turnbull', 94, 98]], 0], [[['Greyson Fulton', 98, 99], ['Brady Kent', 97, 96], ['Wyatt Knott', 91, 94], ['Beau Turnbull', 94, 98]], 2], [[['Greyson Fulton', 98, 99], ['Brady Kent', 97, 96], ['Wyatt Knott', 91, 94], ['Beau Turnbull', 94, 98]], 1], [[], 0], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 91, 89]], 1], [[], 1], [[['John Doe', 78, 90, 82]], 0], [[['A', 1], ['B', 1], ['C', 1]], 1], [[], 84], [[], 85], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1], [1, 'C', 1]], 1], [[['A', 1], ['C', 1]], 1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1], [1, 'C', 1]], 0], [[['A', 1], ['B', 1], ['C', 1], ['C', 1]], 0], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1]], 0], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1]], 1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1]], 1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1]], -1], [[['A', 1], ['B', 1], [2, 'A', 1], ['C', 1], ['C', 1], ['A', 1]], 0], [[['A', 1], ['B', 1], ['C', 1], ['C', 1]], -1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1], [1, 'C', 1]], -1], [[['B', 1], ['C', 1], ['C', 1]], 0], [[['EEmily BrownownA', 1], [1, 'C', 1], ['B', 1], ['C', 1], [1, 'C', 1]], 1], [[['A', 1], ['C', 1], ['C', 1]], 1], [[['B', 1], ['C', 1], ['Mark Johnson', 1], ['C', 1]], 0], [[['A', 1], ['B', 1], ['C', 'C', 1], ['C', 1], ['C', 1]], 1], [[['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['B', 1], ['C'], ['Mark Johnson', 1], ['C', 1]], 0], [[['AA', 'A', 1], ['B', 1], ['C', 1]], 1], [[['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Jane Smith', 0, 87, 84], ['Emily Brown', 88, 91, 89]], 0], [[['A', 1], ['B', 1], ['C'], ['C', 1], ['C', 1]], 0], [[['C', 1]], 1], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['John Doe', 78, 90, 82]], -1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1]], -2], [[], 83], [[['A', 1], ['C', 1, 1], ['C', 1]], 1], [[['C', 92], ['A', 1], ['B', 1], ['C', 1], ['C', 1], ['A', 1]], -1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['A', 1]], -1], [[['A', 1], ['B', 1], ['C', 'CC', 1]], 1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1]], 0], [[['John Doe', 78, 90, 82], ['John Doe', 78, 90, 82], ['John Doe', 78, 90, 82]], 0], [[['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Jane Smith', 0, 87, 84], ['Emily Brown', 88, 91, 89], [79, 'Emily Brown', 88, 91, 89], ['Jane Smith', 92, 87, 84]], 0], [[['A', 1], ['C', 1, 1], ['C', 1]], 0], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], ['C', 1], [1, 'C', 1]], -1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], ['C', 1], [1, 'C', 1], ['C']], -1], [[['A', 1], ['C', 1], ['BrownA', 1]], 1], [[['A', 1], ['B', 1], ['C', 'CC', 1], ['A', 1]], 1], [[['A', 1], ['C', 1], ['BrownA', 1]], -1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['A', 1], [1]], -1], [[['Emily BrownA', 1], ['Emilyy BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1]], 0], [[], 89], [[['Emily BrownA', 1], ['Emilyy BrownA', 1], [1, 'C', 1], ['B', 1]], 1], [[['A', 1], ['C', 1, 1], ['C', 1]], -1], [[['A', 1], ['', 1], ['B', 1], ['C', 1], ['C', 1]], 0], [[['John Doe', 78, 90, 82, 'John Doe'], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['A', 1], ['C', 1], ['BrownA', 1]], 0], [[['A', 1], ['B', 1], ['C', 'CC', 1], ['B', 1]], 1], [[['A', 1], ['A', 92], ['B', 1], ['C', 1], ['A', 1]], 1], [[['Emily BrownA', 1], ['Emilyy BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1], ['Emilyy BrownA', 1]], 0], [[['A', '', 1], ['B', 1], ['C', 1], ['C', 1]], 1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], ['C', 1], [1, 'C', 0, 1], ['C']], -1], [[['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Jane Smith', 0, 87, 84], ['Jane Smith', 1, 87, 84], ['Emily Brown', 88, 91, 89]], 0], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 91, 89], ['John Doe', 78, 90, 82]], 0], [[['A', 1], ['C', 1], ['BrownA', 1], ['BrownA', 1]], -1], [[['Emily BrownA', 1], ['Emilyy BrownA', 1], [1, 'C', 1], ['B', 2], ['C', 1]], 0], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['Jane Smith'], ['C', 1], [1, 'C', 0, 1], ['C']], -1], [[['A', 1], ['C', 1], ['BrownA', 1]], -2], [[['BrownownAA', 1], ['C', 1], ['BrownA', 1], ['BrownA', 1]], -1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], ['C', 1], [1, 'C', 1]], 0], [[['AA', 'A', 1], ['C', 1]], 1], [[['A', 1], ['C', 1, 1], ['C', 1], ['C', 1]], 1], [[['B', 1], ['C', 1], ['Mark Johnson', 1], ['C', 1], ['C', 1]], -1], [[['Emily BrownA', 1], ['Emilyy BrownA', 1], [1, 'C', 1], ['B', 2]], -1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1], ['C', 1]], -1], [[['A', 1], ['', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1]], 0], [[['A', 1], ['', 1], ['B', 1], ['C', 1], ['C', 1], [1], ['C', 1]], -1], [[['B', 1, 'B'], ['B', 1], ['C', 1], ['Mark Johnson', 1], ['C', 1], ['C', 1]], -1], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1], ['C', 1]], 1], [[['BrownownAA', 1], ['EEmily BrownownA', 'BrownA', 1], ['C', 1], ['BrownA', 1], ['BrownA', 1]], -2], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], [90, 'Mark Johnson', 79, 85, 91], ['Mark Johnson', 79, 85, 91, 85], ['Emily Brown', 88, 91, 89], ['Mark Johnson', 'Mark Jokhnson', 79, 85, 91, 85], ['John Doe', 78, 90, 82]], 0], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1], [1, 'C', 1, 1]], -1], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 91, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['A', 1], ['B', 1], ['C', 'C', 1], ['C', 1], ['C', 1]], 0], [[['A', 1], ['AA', 'A', 1], ['C', 1]], 1], [[['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Jane Smith', 0, 87, 84], ['Emily Brown', 88, 91, 89], [79, 'Emily Brown', 88, 91, 89], ['Jane Smith', 92, 87, 84]], -2], [[['BA', 'A', 1], ['A', 1], ['B', 'A', 1], ['C', 1], ['BrownA', 1], ['B', 'A', 1]], 1], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 85, 91], ['Emily Brown', 88, 91, 89], ['Jane Smith', 92, 87, 84]], 0], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], ['C', 1], [1, 'C', 1], ['C'], ['C']], -1], [[[1], [1, 'C', 1], ['B', 1], ['C', 1]], 0], [[['A', 1], ['B', 2], ['C', 'CC', 1]], 1], [[['A', 1], ['CC', 1], ['C', 1]], 0], [[['AA', 'A', 1], ['B', 1], ['AA', 'A'], ['C', 1]], 0], [[['A', 1], ['A', 92], ['B', 1], ['C', 1, 1], ['A', 1]], 1], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], [1, '', 'C', 1], ['C', 1], [1, 'C', 1]], 0], [[['Emily BrownA', 1], ['B', 1], ['Jane Smith'], ['C', 1], [1, 'C', 0, 1], [1, 'C', 0, 0], ['C']], -1], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 91, 89]], -2], [[['Emily BrownA', 1], [1, 'C', 1], ['B', 1], ['C'], ['C', 1], [1, 'C', 1], [1, 'C', 1]], -1], [[['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Mark Johnson', 78, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['A', 1], ['B', 1], ['C', 1], ['C', 1], ['C', 1], ['B', 1]], 0], [[['John Doe', 78, 90, 82], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Emily Brown', 88, 78, 91, 89], ['John Doe', 78, 90, 82]], 0], [[['A', 1], ['', 1], ['C', 1], ['C', 1]], 0], [[['A', 1], ['B', 1], ['C', 1]], -2], [[['Mark Johnson', 79, 85, 91], ['Mark Johnson', 78, 85, 91], ['Emily Brown', 88, 91, 89]], 0], [[['A', 1], ['C', 1], ['BrownA', 1], ['A', 1]], -1], [[['Jane Smith', 91, 87, 84], ['Jane Smith', 92, 87, 84], ['Mark Johnson', 79, 85, 91], ['Jane Smith', 0, 87, 84], ['Emily Brown', 88, 91, 89], [79, 'Emily Brown', 88, 91, 89], ['Jane Smith', 92, 87, 84]], -2], [[['Emily BrownA', 1], ['B', 90, 1], ['Emilyy BrownA', 1], [1, 'C', 1], ['B', 1], ['C', 1]], 0]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(extract_nth_element(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_413.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

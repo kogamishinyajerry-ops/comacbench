@@ -1,0 +1,65 @@
+id: mbpp_plus_462
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_462.md
+  prompt_sha256: 7e800874c9d047d24f13a251a16b4149febe5fec7a8276ddc7af269dfaacf144
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_462.py
+    digest: 6ac7105ba6dd0136e0b91a01be3603835b2a67726862fb53315838465028f9e0
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 462
+  entry_point: combinations_list
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: combinations_list
+  tests:
+  - assert combinations_list(['orange', 'red', 'green', 'blue'])==[[], ['orange'], ['red'], ['red', 'orange'], ['green'], ['green', 'orange'], ['green', 'red'], ['green', 'red', 'orange'], ['blue'], ['blue', 'orange'], ['blue', 'red'], ['blue', 'red', 'orange'], ['blue', 'green'], ['blue', 'green', 'orange'], ['blue', 'green', 'red'], ['blue', 'green', 'red', 'orange']]
+  - assert combinations_list(['red', 'green', 'blue', 'white', 'black', 'orange'])==[[], ['red'], ['green'], ['green', 'red'], ['blue'], ['blue', 'red'], ['blue', 'green'], ['blue', 'green', 'red'], ['white'], ['white', 'red'], ['white', 'green'], ['white', 'green', 'red'], ['white', 'blue'], ['white', 'blue', 'red'], ['white', 'blue', 'green'], ['white', 'blue', 'green', 'red'], ['black'], ['black', 'red'], ['black', 'green'], ['black', 'green', 'red'], ['black', 'blue'], ['black', 'blue', 'red'], ['black', 'blue', 'green'], ['black', 'blue', 'green', 'red'], ['black', 'white'], ['black', 'white', 'red'], ['black', 'white', 'green'], ['black', 'white', 'green', 'red'], ['black', 'white', 'blue'], ['black', 'white', 'blue', 'red'], ['black', 'white', 'blue', 'green'], ['black', 'white', 'blue', 'green', 'red'], ['orange'], ['orange', 'red'], ['orange', 'green'], ['orange', 'green', 'red'], ['orange', 'blue'], ['orange', 'blue', 'red'], ['orange', 'blue', 'green'], ['orange', 'blue', 'green', 'red'], ['orange', 'white'], ['orange', 'white', 'red'], ['orange', 'white', 'green'], ['orange', 'white', 'green', 'red'], ['orange', 'white', 'blue'], ['orange', 'white', 'blue', 'red'], ['orange', 'white', 'blue', 'green'], ['orange', 'white', 'blue', 'green', 'red'], ['orange', 'black'], ['orange', 'black', 'red'], ['orange', 'black', 'green'], ['orange', 'black', 'green', 'red'], ['orange', 'black', 'blue'], ['orange', 'black', 'blue', 'red'], ['orange', 'black', 'blue', 'green'], ['orange', 'black', 'blue', 'green', 'red'], ['orange', 'black', 'white'], ['orange', 'black', 'white', 'red'], ['orange', 'black', 'white', 'green'], ['orange', 'black', 'white', 'green', 'red'], ['orange', 'black', 'white', 'blue'], ['orange', 'black', 'white', 'blue', 'red'], ['orange', 'black', 'white', 'blue', 'green'], ['orange', 'black', 'white', 'blue', 'green', 'red']]
+  - assert combinations_list(['red', 'green', 'black', 'orange'])==[[], ['red'], ['green'], ['green', 'red'], ['black'], ['black', 'red'], ['black', 'green'], ['black', 'green', 'red'], ['orange'], ['orange', 'red'], ['orange', 'green'], ['orange', 'green', 'red'], ['orange', 'black'], ['orange', 'black', 'red'], ['orange', 'black', 'green'], ['orange', 'black', 'green', 'red']]
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef combinations_list(list1):\\n    if len(list1) == 0:\\n        return [[]]\\n    result = []\\n    for el in combinations_list(list1[1:]):\\n        result += [el, el+[list1[0]]]\\n    return result\\n', _gt_ns)\n_gt = _gt_ns['combinations_list']\n_inputs = [[['orange', 'red', 'green', 'blue']], [['red', 'green', 'blue', 'white', 'black', 'orange']], [['red', 'green', 'black', 'orange']], [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']], [['red', 'green', 'blue', 'red', 'white', 'black', 'green']], [['apple', 'banana', 'orange', 'apple', 'banana', 'kiwi']], [['a', 'b', 'a', 'b', 'c']], [['apple', 'banana', 'red', 'apple', 'banana']], [['apple', 'banana', 'orange', 'apple', 'kiwi']], [['banana', 'red', 'apple', 'banana']], [['apple', 'red', 'apple', 'banana']], [['bananabanana', 'banana', 'red', 'apple', 'apredple', 'banana']], [['apple', 'banana', 'orange', 'appple', 'banana', 'kiwi']], [['banana', 'apple', 'banana']], [['apple', 'banana', 'orange', 'apple', 'kiwi', 'apple']], [['appple', 'bna', 'orange', 'apple', 'kiwi']], [['a', 'b', 'a', 'b', 'c', 'b']], [['apple', 'banana', 'red', 'apple', 'banana', 'banana']], [['a', 'bblack', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']], [['a', 'b', 'a', 'bananab', 'c']], [['red', 'green', 'blue', 'red', 'wthite', 'greenwthite', 'black', 'green', 'green']], [['nbanana', 'apple', 'banana', 'banana', 'banana']], [['red', 'green', 'blue', 'red', 'wthite', 'greenwthite', 'black', 'green', 'green', 'green']], [['apple', 'orange', 'appple', 'banana', 'kiwi']], [['red', 'green', 'blue', 'red', 'white', 'black', 'bna', 'green']], [['apple', 'banana', 'red', 'banana']], [['green', 'blue', 'red', 'wthite', 'greenwthite', 'black', 'green', 'green', 'green']], [['banana', 'apple', 'banana', 'banana']], [['apple', 'appple', 'banana', 'kiwi']], [['a', 'b', 'a', 'b', 'd', 'c']], [['happle', 'banana', 'abpple']], [['a', 'b', 'a', 'bananab', 'c', 'a', 'b']], [['apple', 'i', 'orange', 'apple', 'kiwi']], [['banana', 'red', 'banana']], [['orangge', 'apple', 'banana', 'orange', 'apple', 'kiwi', 'apple']], [['a', 'bblack', 'cc', 'd', 'e', 'f', 'gg', 'h', 'i', 'j']], [['apple', 'orange', 'banana', 'kiwi']], [['a', 'b', 'a', 'happlnbanana', 'b', 'c']], [['orangge', 'apple', 'banana', 'orange', 'aepple', 'kiwi', 'apple']], [['apple', 'orange', 'e', 'kiwi', 'ore']], [['apple', 'orange', 'iwi', 'kiwi']], [['apple', 'applle', 'red', 'apple', 'banana']], [['appple', 'bna', 'orange', 'apple', 'kiwi', 'orange']], [['a', 'aepplec', 'b', 'a', 'b', 'd', 'c']], [['a', 'bblack', 'cc', 'd', 'e', 'f', 'gg', 'h', 'i', 'happle', 'j']], [['nbanana', 'apple', 'banana', 'bna', 'banana', 'banana']], [['appple', 'bna', 'orange', 'apple', 'kiwi', 'kiwi']], [['nbanana', 'apple', 'banana', 'bna', 'banana', 'banana', 'apple']], [['red', 'green', 'blue', 'red', 'white', 'black', 'green', 'red']], [['apple', 'onge', 'e', 'kiwi', 'ore']], [['nbanana', 'apple', 'whitenbanana', 'banana', 'bna', 'banana', 'banana', 'apple']], [['apple', 'orange', 'iwi', 'kiwi', 'iwi']], [['orangge', 'apple', 'banana', 'orange', 'aepple', 'apple']], [['banand', 'apple', 'banana', 'red', 'bana']], [['apple', 'i', 'orange', 'orang', 'apple', 'kiwi']], [['orange', 'iwi', 'iiwi', 'kiwi']], [['apple', 'orange', 'e', 'kiwi', 'ore', 'kiwi']], [['nbanana', 'apredple', 'whitenbanana', 'banana', 'bna', 'banana', 'banana', 'apple']], [['apple', 'e', 'whitenbanana', 'ore']], [['apple', 'orangbanana', 'orange', 'appple', 'banana', 'kiwi']], [['apple', 'onge', 'e', 'kiwi', 'ore', 'ore']], [['banand', 'apple', 'banana', 'bana']], [['apple', 'applle', 'orang', 'red', 'apple', 'banana', 'orang']], [['apple', 'banana', 'red', 'apporele', 'banana']], [['red', 'green', 'blue', 'red', 'wthite', 'greenwthite', 'bananab', 'g', 'black', 'green', 'green']], [['orange', 'iwi', 'iiwi', 'bblack']], [['orangge', 'apple', 'banana', 'orange', 'orange', 'apple', 'kiwi', 'apple', 'kiwi']], [['apple', 'd', 'orange', 'iwi', 'kiwi', 'iwi', 'orange', 'd']], [['nbanana', 'apple', 'whitenbanana', 'banana', 'bna', 'banana', 'bananiiwia', 'apple']], [['nbanana', 'banana', 'bna', 'banana', 'banana']], [['apple', 'aepplle', 'orang', 'red', 'apple', 'banana', 'apple']], [['applle', 'apple', 'applle', 'orang', 'red', 'apple', 'banana', 'orang', 'applle']], [['appple', 'bna', 'orange', 'apple', 'kiwi', 'onge', 'kiwi', 'bna']], [['apple', 'banana', 'banana']], [['nbanana', 'apple', 'whitenbanana', 'banana', 'bna', 'banana', 'bananiiwia', 'apple', 'banana']], [['a', 'bblack', 'cc', 'd', 'e', 'gg', 'h', 'happle', 'j']], [['apple', 'orang', 'red', 'apple', 'a', 'apple']], [['red', 'green', 'blue', 'red', 'wthite', 'greenwthite', 'g', 'black', 'green', 'green']], [['nbanana', 'apple', 'banaongena', 'banana', 'bn', 'banana', 'banana', 'apple', 'banaongena']], [['orange', 'iwwi', 'bn', 'kiwi']], [['apple', 'orang', 'red', 'apple', 'a', 'apple', 'apple']], [['oree', 'e', 'whitenbanana', 'ore', 'oree']], [['a', 'bb', 'a', 'happlnbanana', 'b', 'c']], [['apple', 'orange', 'iwi', 'kiwi', 'applee', 'iwi']], [['apple', 'applle', 'orang', 'red', 'apple', 'banana']], [['apple', 'banana', 'orange', 'aepple', 'appple', 'banana', 'kiwi']], [['apple', 'orange', 'e', 'kiwi', 'ore', 'e']], [['apple', 'orang', 'red', 'apple', 'bna', 'a', 'apple']], [['bn', 'b', 'a', 'orehapplnbanana', 'c']], [['red', 'green', 'blue', 'red', 'wthite', 'greenwthite', 'green', 'green']], [['apple', 'f', 'banana', 'red', 'banana', 'banana']], [['aplple', 'banana', 'banana']], [['orangge', 'apple', 'banana', 'orange', 'aepple', 'kiwi', 'greenapple', 'orange']], [['nbanana', 'apple', 'bnanana', 'banana', 'banana']], [['nbanana', 'apple', 'baanana', 'banana']], [['banana', 'apple', 'bananabanana', 'banana']], [['apple', 'd', 'orange', 'iwbanaongenai', 'iwi', 'kiwi', 'iwi', 'orange', 'd']], [['nbanana', 'apredple', 'whitenbanana', 'whitenbananaa', 'banana', 'bna', 'banana', 'banana', 'apple']], [['apple', 'i', 'orange', 'e', 'kiwi', 'ore']], [['apple', 'banana', 'red', 'baananabanana', 'apple', 'banana']], [['nbanaana', 'apple', 'banana', 'bnna', 'banana', 'banana']], [['apple', 'applle', 'red', 'apple', 'aapplle', 'banana']], [['aplple']], [['red', 'green', 'blue', 'red', 'white', 'black']], [['appple', 'bna', 'orange', 'apple', 'kiwi', 'aporele', 'kiwi']], [['orange', 'bblack', 'bn', 'kiwi']], [['apple', 'onge', 'e', 'kiwi', 'one', 'ore', 'ore', 'onge']]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(combinations_list(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_462.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

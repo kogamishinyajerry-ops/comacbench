@@ -1,0 +1,65 @@
+id: mbpp_plus_085
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_085.md
+  prompt_sha256: 20d149520f54e0a9055205d28c6212c4be3fb0c2362d47ade8920e0303e7aad5
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_085.py
+    digest: 744feb6bc97e77be47cafbbe4400e7bb2a955bbc28e4e206b8fd6278943ece57
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 85
+  entry_point: surfacearea_sphere
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: surfacearea_sphere
+  tests:
+  - assert math.isclose(surfacearea_sphere(10), 1256.6370614359173, rel_tol=0.001)
+  - assert math.isclose(surfacearea_sphere(15), 2827.4333882308138, rel_tol=0.001)
+  - assert math.isclose(surfacearea_sphere(20), 5026.548245743669, rel_tol=0.001)
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\nimport math\\ndef surfacearea_sphere(r):\\n  return 4 * math.pi * (r**2)\\n', _gt_ns)\n_gt = _gt_ns['surfacearea_sphere']\n_inputs = [[10], [15], [20], [0.5], [1000], [1.25], [1e-10], [10000000000.0], [True], [0.8797935814628997], [0.5598154120615232], [1.099652034619149], [1.4666806892181193e-10], [0.30075595752911943], [0.14131211326255033], [1.5957056333538597], [2.8446633646372703], [1.0135226864402946], [999], [0.4652485633326504], [1.6160933440485161], [1.2395141071553297], [1001], [1.371623122065585], [6.016010239335242e-11], [0.3416547044021554], [1.4012158763654516], [0.2151302194789502], [0.9610743975015349], [1.2824168057024987], [1.2350343793427891], [1.741473062111801], [0.8328344786121058], [1.183605703278993], [0.3611170633175245], [0.7555326580733448], [97.62730112830147], [0.2732793706097826], [0.7951715096838966], [1.5501230356650713], [0.6842351453078037], [1.0317072568457641], [1.8059908182330324], [0.5075339315400214], [0.7681946087260797], [2.0852972065009174], [1.2988601893200238], [0.603044867219653], [1.4026942852103004], [0.523212033970379], [1.4597394961162697], [0.35775373645335146], [2.0479628632355526e-10], [35], [78], [0.6507313974062889], [4.365800974062854], [1.8456085367711623], [5.158707823383085], [79], [98.55913813353447], [1.4247236940537644], [1.9675371646406168], [0.9005697011096585], [1.8552473563367964], [2.012892104151268], [0.3631985979165624], [1.4033799197683636], [0.9268500963761888], [0.316208014117482], [1.2705215198025646e-10], [1002], [2.2262142172391357], [1.0831631055569682], [0.345186802549617], [0.4137398550418435], [0.5767615986315501], [2.07943497754721], [0.48838279998965645], [0.3271784231301367], [0.623788870153854], [0.5543692007776275], [9.149067620466951], [2.3096767309847452], [1.5560367329991556], [0.3202451092926611], [1.8404062689910736], [0.5726009377678422], [0.8357084454950721], [0.4686710492184495], [1.1902208721405216], [0.9609380264864483], [9857375230.431854], [1.6292570499973758], [0.776765114340302], [0.2810143961710297], [0.6386231930163654], [0.7825150182275014], [0.8887021798812079], [0.2705076454130074], [0.7063890179953193], [0.9919682715828331], [0.18724175315316485], [0.47251742847046363], [0.34091721710471784], [0.48848524318350334], [60.94952675176301], [0.34974511524935736]]\n_atol = 0.0001\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(surfacearea_sphere(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_085.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

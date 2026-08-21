@@ -1,0 +1,65 @@
+id: mbpp_plus_268
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_268.md
+  prompt_sha256: 6b14b8d6aa2523daca5d868adbc3f099a0691e80577757eee085299c13cc0a08
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_268.py
+    digest: cdde1309998d923f92f58c0b273d6f15598a1914db70804796f39c76a748af29
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 268
+  entry_point: find_star_num
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: find_star_num
+  tests:
+  - assert find_star_num(3) == 37
+  - assert find_star_num(4) == 73
+  - assert find_star_num(5) == 121
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef find_star_num(n): \\n\\treturn 6 * n * (n - 1) + 1 \\n', _gt_ns)\n_gt = _gt_ns['find_star_num']\n_inputs = [[3], [4], [5], [1000000], [543210], [98765432], [999999], [999998], [543211], [543212], [999997], [True], [543213], [543214], [1000001], [999996], [1000002], [1000004], [1000003], [98765433], [543215], [543209], [1000005], [98765434], [67], [98765435], [98765430], [98765431], [77], [76], [75], [78], [999995], [53], [1000006], [74], [73], [52], [98765429], [1000007], [98765428], [999994], [54], [543216], [72], [543208], [543207], [999993], [71], [543217], [68], [50], [66], [55], [543206], [51], [70], [98765427], [543205], [56], [17], [49], [1000008], [543204], [57], [1000009], [98765436], [999992], [24], [1000010], [1000011], [1000012], [16], [59], [58], [23], [1000013], [93], [15], [22], [94], [48], [543218], [14], [98765426], [95], [79], [92], [98765437], [18], [69], [1000014], [46], [543219], [98765425], [91], [45], [25], [98765423], [21], [13], [47], [27], [80], [1000015], [26]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(find_star_num(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_268.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

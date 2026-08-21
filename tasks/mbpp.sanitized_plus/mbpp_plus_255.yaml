@@ -1,0 +1,65 @@
+id: mbpp_plus_255
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_255.md
+  prompt_sha256: bf1f832fe4c9f80f146e9e55d73c646edd152b3614ebc9727caee40d9e5a53b8
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_255.py
+    digest: c0411dfb88946c7dfc3190ae974f4722f6527e77dad64834e92f6eae03275185
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 255
+  entry_point: combinations_colors
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: combinations_colors
+  tests:
+  - assert combinations_colors( ["Red","Green","Blue"],1)==[('Red',), ('Green',), ('Blue',)]
+  - assert combinations_colors( ["Red","Green","Blue"],2)==[('Red', 'Red'), ('Red', 'Green'), ('Red', 'Blue'), ('Green', 'Green'), ('Green', 'Blue'), ('Blue', 'Blue')]
+  - assert combinations_colors( ["Red","Green","Blue"],3)==[('Red', 'Red', 'Red'), ('Red', 'Red', 'Green'), ('Red', 'Red', 'Blue'), ('Red', 'Green', 'Green'), ('Red', 'Green', 'Blue'), ('Red', 'Blue', 'Blue'), ('Green', 'Green', 'Green'), ('Green', 'Green', 'Blue'), ('Green', 'Blue', 'Blue'), ('Blue', 'Blue', 'Blue')]
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\nfrom itertools import combinations_with_replacement \\ndef combinations_colors(l, n):\\n    return list(combinations_with_replacement(l, n))\\n', _gt_ns)\n_gt = _gt_ns['combinations_colors']\n_inputs = [[['Red', 'Green', 'Blue'], 1], [['Red', 'Green', 'Blue'], 2], [['Red', 'Green', 'Blue'], 3], [[], 0], [[], 2], [['A', 'B', 'C', 'D'], 4], [['1', '2', '3', '4', '5'], 3], [['X', 'Y', 'Z', 'W', 'V'], 5], [['Dog', 'Cat', 'Bird', 'Fish'], 2], [['Apple', 'Banana', 'Orange'], 3], [[], 3], [[], 5], [[96.2114299656439, 7.2887651994648195, 57.22322518606262, 57.22322518606262], 5], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262], 5], [[-15.974759744741093, -56.940078121175475, 7.2887651994648195, -46.32457755815658], 2], [[-15.974759744741093, -56.940078121175475, 7.2887651994648195, -46.32457755815658], 3], [[True, False, False, False, True, True, False, False], 2], [['1', '2', '3', '4', '5'], 2], [['Apple', 'Bird', 'Banana', 'Orange'], 3], [[], 4], [[True, False, False, False, True, True, False, False, True], 2], [[2, True, 7, -44], 2], [[True, False, False, True, True, False, False, True], 0], [[True, -44, 77, 13, -6], 3], [[7.2887651994648195, 57.22322518606262, 57.22322518606262], 5], [['Apple', 'Banana', 'Orange'], True], [['1', '2', 'B', '3', '4', '5'], 3], [[96.2114299656439, 7.2887651994648195, 57.22322518606262], 5], [[96.2114299656439, 7.2887651994648195, 56.50649563542532], 5], [[96.2114299656439, 7.2887651994648195, 56.50649563542532, 7.2887651994648195], 5], [[True, -44, 77, 13], 2], [['X', 'Y', 'Z', 'W', 'V'], 13], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.2114299656439], 5], [[True], 4], [[2, True, 7, -45], 2], [['Dog', 'Cat', 'Bird', 'Fish', 'Cat'], 2], [['D', 'gFZNMZdhcV', 'XWJuC', 'Bird', '1', 'SXWexM', 'Z', 'BAATOxwnYH', 'qkuW', 'V'], 2], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.2114299656439], 4], [[], 6], [[False, -44, 77, 13, -6, 77], 3], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.73431974512846], 5], [[True, False, False, False, True, True, False, False], 4], [[True, False, False, False, True, True, False, False, True, False], 2], [[-15.974759744741093, -56.940078121175475, 7.2887651994648195, -9.30673522512974, -46.32457755815658], 2], [['A', 'C', 'D', 'A'], 4], [[True, False, False, True, False, False, True], 0], [['Dog', 'Cat', 'Bird', 'Fish'], 5], [[96.2114299656439, 7.2887651994648195], 5], [[True, False, False, True, False, False, True, True], 5], [[True, True, False, False, False, True, True, False, False], 4], [['Dog', 'Cat', 'Bird', 'Fish', 'Cat'], 1], [[57.22322518606262], 5], [[False, -44, 77, 13, -6, 77, 77], 3], [['Dog', 'F1ish', 'Cat', 'Bird', 'Fish', 'Fish'], 5], [[-15.974759744741093, -56.940078121175475, 7.2887651994648195, -16.50492279989501, -46.32457755815658], 3], [[-15.974759744741093, -56.940078121175475, 7.2887651994648195], 5], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439], 3], [[-15.236427883245629, -56.940078121175475, 7.2887651994648195], 5], [[True], 5], [['Apple', 'Bird', 'Fish', 'Orange', 'Fish'], 3], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439], 2], [[-44, 77, 13, -6, 77, 77], 3], [['A', 'B', 'D'], 6], [[-16.50492279989501, 57.22322518606262, 57.22322518606262], 5], [[True, False, False, True, False, False, True, True, True], 5], [[False, True, 'XWJuC'], 6], [[True, False, False, True, False, False, True, False], 5], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.2114299656439], 5], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.2114299656439], 3], [[True, False, False, True, False, False, True, False], 6], [[-44, 77, 13, 77, 77], 0], [['1', '2', '3', '4', '5'], 4], [[True, False, False, True, False, False, True, True, True], 6], [[-15.974759744741093, -56.940078121175475, -46.32457755815658], 3], [['Dog', 'Cat', 'Bird', 'Fish', 'Cat'], 0], [[False, -44, 77, 13, -6, 76, 77], 3], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.2114299656439, 96.2114299656439], 5], [['Apple', 'ApSXWexMple', 'Banana', 'Orange'], 3], [[-15.974759744741093, -50.02392339800485, -56.940078121175475, 7.2887651994648195, -46.32457755815658], 3], [[False, True, 'B'], 6], [[True, False, False, True, False, True, True, True], 6], [['D', 'gFZNMZdhcV', 'XWJuC', 'Bird', '11', 'SXWexM', 'Z', 'BAATOxwnYH', 'qkuW', 'V'], 2], [[-15.974759744741093, -56.940078121175475, 7.2887651994648195, -9.30673522512974, -46.32457755815658], 5], [['Dog', 'Cat', 'Bird', 'Fish', 'Bird'], 2], [['A', 'B', 'C', 'D', 'B'], 13], [['WW', 'X', 'Y', 'Z', 'W', 'V'], 13], [[57.22322518606262, 96.2114299656439, 7.2887651994648195, 56.50649563542532], 5], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439, 96.2114299656439], 2], [['Dog', 'Cat', 'CatBird', 'Bird', 'Fish'], 77], [['Dog', 'Cat', 'Bird', 'Fish'], 77], [['Apple', 'Bird', 'Fish', 'Orange', 'Fish', 'Bird'], 2], [['Dog', 'Cat', 'Dog', 'Bird', 'Fish', 'Cat', 'Cat'], 1], [['Apple', 'Banana', 'Orange'], False], [['Dog', 'Cat', 'Bird', 'Fish'], 76], [['Dog', 'Cat', 'Dog', 'Bird', 'Fish', 'Cat', 'Cat', 'Cat'], 1], [['Apple', 'ApSXWexMple', 'Banana', 'Orange'], 0], [[-15.974759744741093, -56.940078121175475], 3], [[False, -44, 77, 13, -6, 76, 77, -6], 3], [[False, True], 6], [[2, True, 7, -44], 76], [[False, -44, 77, 13, -6, 77], 7], [[False, -44, 77, 13, -6, 77, -6], 6], [['Dog', 'CAat', 'Bird', 'Fish', 'Cat'], 1], [[57.22322518606262, 96.2114299656439, 7.2887651994648195, 56.50649563542532], 77], [[96.2114299656439, 7.2887651994648195, 96.2114299656439, 57.22322518606262, 96.2114299656439, 7.2887651994648195], 2], [[], True], [['Dog', 'C4at', 'Fish'], 3], [['Banana', 'Orange'], True], [[False, True, True, 'XWXJuC', 'XWJuC'], 6], [[84, 15], 2], [[96.2114299656439, 7.2887651994648195, 57.22322518606262, 96.2114299656439], 2], [[2, True, 7, -44], True]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(combinations_colors(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_255.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

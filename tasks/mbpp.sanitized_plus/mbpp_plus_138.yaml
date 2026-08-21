@@ -1,0 +1,65 @@
+id: mbpp_plus_138
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_138.md
+  prompt_sha256: b76cfcb9b3eb9dae358673e71814f697d450131381708cfd00b35b7b61233040
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_138.py
+    digest: 3e89499735fe643ea2aad49755c6ea8ed8793ce65c3ca62a3058f95184ea1578
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 138
+  entry_point: is_Sum_Of_Powers_Of_Two
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: is_Sum_Of_Powers_Of_Two
+  tests:
+  - assert is_Sum_Of_Powers_Of_Two(10) == True
+  - assert is_Sum_Of_Powers_Of_Two(7) == False
+  - assert is_Sum_Of_Powers_Of_Two(14) == True
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef is_Sum_Of_Powers_Of_Two(n): \\n    return n > 0 and n % 2 == 0\\n', _gt_ns)\n_gt = _gt_ns['is_Sum_Of_Powers_Of_Two']\n_inputs = [[10], [7], [14], [123456789], [-14], [-2147483648], [-15], [123456788], [-2147483647], [123456787], [-2147483649], [-2147483650], [True], [-2147483651], [-16], [False], [-2147483646], [123456786], [-17], [-88], [-18], [-19], [-20], [123456785], [-7], [-6], [-2147483652], [-2147483653], [-2147483645], [-2147483654], [123456784], [-86], [-2147483643], [-87], [123456783], [21], [-2147483655], [-85], [-9], [-21], [-10], [19], [-22], [-89], [10], [123456782], [-2147483642], [-23], [-2147483641], [-11], [-8], [-90], [18], [-5], [123456790], [-4], [20], [-2147483640], [9], [123456781], [123456791], [-2147483644], [123456780], [-2147483639], [8], [42], [123456792], [-2147483656], [-13], [-2147483657], [41], [43], [-91], [-2147483638], [-2147483637], [-12], [40], [123456779], [44], [123456793], [28], [29], [45], [123456778], [39], [-55], [82], [-92], [-43], [-3], [27], [11], [-2147483636], [-50], [12], [61], [17], [7], [-75], [81], [-44], [-36], [79], [-45], [-51], [46]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(is_Sum_Of_Powers_Of_Two(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_138.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,67 @@
+id: humaneval_plus_019
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_019.md
+  prompt_sha256: 4e83ff2642d2804e609705c406dc6d357d71a5e9aff8e896ac5f1ac558d942c2
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_019.py
+    digest: 7c02370953e8dc425e31829eb6dd07863ae6cbfb1a276d190c89ddfa67f54b7d
+output_contract:
+- function:sort_numbers
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/19
+  entry_point: sort_numbers
+  n_test_cases: 6
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: sort_numbers
+  tests:
+  - assert sort_numbers('') == ''
+  - assert sort_numbers('three') == 'three'
+  - assert sort_numbers('three five nine') == 'three five nine'
+  - assert sort_numbers('five zero four seven nine eight') == 'zero four five seven eight nine'
+  - assert sort_numbers('six five four three two one zero') == 'zero one two three four five six'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('from typing import List\\n\\n\\ndef sort_numbers(numbers: str) -> str:\\n    \"\"\" Input is a space-delimited string of numberals from \\'zero\\' to \\'nine\\'.\\n    Valid choices are \\'zero\\', \\'one\\', \\'two\\', \\'three\\', \\'four\\', \\'five\\', \\'six\\', \\'seven\\', \\'eight\\' and \\'nine\\'.\\n    Return the string with numbers sorted from smallest to largest\\n    >>> sort_numbers(\\'three one five\\')\\n    \\'one three five\\'\\n    \"\"\"\\n\\n    \\n    to_int = {\\'zero\\': 0, \\'one\\': 1, \\'two\\': 2, \\'three\\': 3, \\'four\\': 4, \\'five\\': 5, \\'six\\': 6, \\'seven\\': 7, \\'eight\\': 8, \\'nine\\': 9}\\n\\n    if numbers == \"\": return \"\"\\n    return \" \".join(sorted(numbers.split(\" \"), key=lambda n: to_int[n]))\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['sort_numbers']\n_inputs = [[''], ['three'], ['three five nine'], ['five zero four seven nine eight'], ['six five four three two one zero'], ['four eight two'], ['nine'], ['one six two four nine'], ['two seven eight zero five'], ['nine zero'], ['seven three one'], ['two two three three four five six'], ['zero five four one seven eight two six'], ['nine eight seven six five four three two one zero'], ['two zero nine four five six'], ['nine eight seven six five four one zero'], ['two zero nine'], ['four eight'], [''], ['zero five four one seven'], ['six'], ['two two four five six'], ['zero five four one'], ['zero five seven'], ['four two'], ['four'], ['two six'], ['two two five six'], ['seven'], ['zero five four zero five four one seven eight two six'], ['zero five one seven eight two six'], ['four four eight two'], ['seven three'], ['nine eight seven five four three two one zero'], ['two four five six'], ['zero four one'], ['zero seven eight two six'], ['zero five eight two six'], ['zero'], ['three'], ['one six'], ['nine six'], ['two seven eight five'], ['two'], ['two three three four five six'], ['zero five four seven'], ['nine eight seven one zero'], ['four five six'], ['two nine'], ['two two three'], ['nine eight seven six five two one zero'], ['zero five six'], ['zero five'], ['zero five two six'], ['zero five four zero four one seven eight two six'], ['four eight two two three'], ['five four one seven eight two six'], ['nine seven six five two one zero'], ['nine eight seven six zero'], ['two nine seven six five two one zero'], ['two four six'], ['nine one zero'], ['four six'], ['zero five four'], ['zero two six'], ['zero five one'], ['nine six five two one zero'], ['two nine eight seven six five four one zero'], ['zero four one seven'], ['two zero nine four zero four one'], ['one zero five six'], ['nine seven six five two zero'], ['two nine eight seven six five four one zero one zero'], ['two nine seven six five two one zero five two six'], ['one'], ['nine eight seven five four three two one'], ['two seven'], ['nine eight seven six'], ['zero five one seven six'], ['nine one zero five four one seven eight two six'], ['zero two'], ['two four zero four one'], ['zero five four zero five four one seven'], ['two two four five'], ['zero one seven eight two six'], ['nine two six'], ['nine one zero five four one six'], ['two two seven eight zero five four five six'], ['two four zero four'], ['two zero six'], ['two three'], ['two nine seven six five two one zero four five six'], ['nine six five two three three four five six one zero'], ['nine eight one zero'], ['two four'], ['four two nine eight seven six five four one zero'], ['two two'], ['nine seven six five two one'], ['one six two nine'], ['zero five four one seven eight six'], ['nine seven four six'], ['five six'], ['two zero nine four one'], ['zero five four one eight two six'], ['nine one zero five four one'], ['one two three four five six seven eight nine'], ['nine eight seven six five four three two one'], ['five seven eight six nine four zero two one three'], ['four six nine eight seven one five zero two three'], ['seven one zero five two four eight six nine three'], ['zero one two three four five six seven eight nine'], ['two four six eight zero one three five seven nine'], ['nine seven five three one eight six four two zero'], ['one zero three four two six five seven eight nine'], ['seven five zero four nine eight two six one three'], ['five'], ['eight'], ['four six nine eight five zero two three'], ['one two three three'], ['two nine eight seven six five four three two one seven nine'], ['zero one two five six seven eight nine'], ['five four six nine eight seven one five zero two three two one three'], ['nine eight seven six five four two one'], ['one two one four'], ['one one one one one'], ['one two'], ['four four two six nine two zero'], ['nine eight seven six five two three two one'], ['nine eight seven two one'], ['one zero three nine'], ['nine eight'], ['seven one zero five three'], ['zero two three']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(sort_numbers(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_019.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

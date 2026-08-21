@@ -1,0 +1,65 @@
+id: mbpp_plus_224
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_224.md
+  prompt_sha256: 95851e62dc2aacf0f0a57b7dcc55aa6b766861b5c5f5fb4aa076cfbd23b51c44
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_224.py
+    digest: 111f3ccd6171fdd73d633d91a12a1ac289340d10f162639398d2a9089966e375
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 224
+  entry_point: count_Set_Bits
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: count_Set_Bits
+  tests:
+  - assert count_Set_Bits(2) == 1
+  - assert count_Set_Bits(4) == 1
+  - assert count_Set_Bits(6) == 2
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec(\"\\ndef count_Set_Bits(n): \\n    return bin(n)[2:].count('1')\\n\", _gt_ns)\n_gt = _gt_ns['count_Set_Bits']\n_inputs = [[2], [4], [6], [999999999], [1000000000], [True], [False], [1000000001], [999999998], [67], [999999997], [999999996], [1000000002], [1000000003], [66], [999999995], [65], [999999994], [68], [69], [71], [72], [999999993], [1000000004], [1], [2], [73], [70], [64], [1000000005], [74], [98], [63], [0], [999999992], [1000000006], [3], [61], [62], [97], [999999991], [75], [4], [11], [95], [1000000007], [94], [93], [96], [92], [76], [12], [77], [9], [44], [13], [10], [1000000008], [14], [91], [78], [79], [59], [99], [80], [90], [999999990], [85], [60], [57], [1000000009], [58], [84], [100], [43], [101], [48], [6], [23], [1000000010], [56], [86], [55], [102], [5], [53], [46], [81], [47], [52], [49], [54], [83], [45], [16], [50], [30], [28], [82], [42], [33], [17], [31], [41], [51]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(count_Set_Bits(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_224.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

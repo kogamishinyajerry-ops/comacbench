@@ -1,0 +1,65 @@
+id: mbpp_plus_090
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_090.md
+  prompt_sha256: b55cc636185c64cb7b3b56e70eba403e8ef1926ef11ce53d1118f493620fa2eb
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_090.py
+    digest: 3ca8af129c3d88fb8ab51a2b27dbd06e46439a683f56b2f272555a738957050d
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 90
+  entry_point: len_log
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: len_log
+  tests:
+  - assert len_log(["python","PHP","bigdata"]) == 7
+  - assert len_log(["a","ab","abc"]) == 3
+  - assert len_log(["small","big","tall"]) == 5
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef len_log(list1):\\n    return max(len(x) for x in list1)\\n', _gt_ns)\n_gt = _gt_ns['len_log']\n_inputs = [[['python', 'PHP', 'bigdata']], [['a', 'ab', 'abc']], [['small', 'big', 'tall']], [['Longest', 'word', 'length']], [['This', 'is', 'a', 'complex', 'example', 'to', 'test', 'the', 'function']], [['elephant', 'fox', 'monkey', 'zebra', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['fox', 'monkey', 'zebra', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['elephant', 'fox', 'monkey', 'zebra', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['fox', 'Longest', 'zebra', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['fox', 'monkey', 'zebra', 'lion', 'This', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'monkey']], [['elephant', 'fox', 'monkey', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['elephant', 'fox', 'monkey', 'zebra', 'tiger', 'giraffe', 'p', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['i', 'This', 'is', 'a', 'complex', 'example', 'to', 'test', 'the', 'ttoo', 'function']], [['elephant', 'fox', 'monkey', 'zebra', 'lion', 'tiger', 'gireaffe', 'kangaroo', 'panda', 'hippopotamus']], [['elephant', 'fox', 'monkey', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger', 'tiger']], [['elephant', 'fox', 'monkey', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangamonkeyroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['fox', 'monkey', 'zebra', 'tiger', 'giraffe', 'p', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['This', 'is', 'a', 'complex', 'example', 'to', 'test', 'the', 'function', 'a']], [['Longest', 'length']], [['fox', 'Longest', 'zebra', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['fox', 'monkey', 'zebra', 'tiger', 'giraffe', '', 'p', 'kangaroo', 'foelephantx', 'bear', 'panda', 'hippopotamus']], [['fox', 'Longest', 'zebra', 'pandaa', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['Longest', 'zebra', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['Longest', 'length', 'Longest']], [['fox', 'monkey', 'zebra', 'tiger', 'giraffe', '', 'p', 'kangaroo', 'foelephantx', 'bear', 'panda', 'hippopotamus', 'giraffe']], [['elephant', 'fox', 'monkey', 'function', 'zebra', 'lion', 'tiger', 'gireaffe', 'kangaroo', 'panda', 'hippopotamus']], [['length', 'LongestThis', 'Longest']], [['elephant', 'fox', 'monkey', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['This', 'is', '', 'a', 'complex', 'example', 'to', 'test', 'the', 'function', 'the']], [['This', 'is', 'a', 'complex', 'example', 'to', 'the', 'aa', 'function', 'a']], [['This', 'is', 'a', 'complex', 'example', 'to', 'test', 'the', 'function', 'a', 'a']], [['elephant', 'fox', 'teiger', 'monkey', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['elephant', 'fox', 'monkey', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['elephant', 'fx', 'monkey', 'zebra', 'lion', 'tiger', 'giraffe', 'giraff', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['elephant', 'fox', 'zebra', 'monkey', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['This', 'is', 'a', 'complex', 'example', 'is', 'test', 'the', 'function', 'a', 'a']], [['This', 'is', '', 'a', 'complex', 'example', 'to', 'test', 'the']], [['fox', 'monkey', 'zebra', 'lion', 'tigttooer', 'giraffe', 'kangaroo', 'bear', 'hippopotamus']], [['Longest', 'word', 'length', 'Longest']], [['This', 'a', 'complex', 'example', 'to', 'test', 'thte', 'function', 'a', 'a']], [['monkey', 'zebra', 'tiger', 'giraffe', '', 'p', 'kangaroo', 'foelephantx', 'bear', 'panda', 'hippopotamus']], [['Longest', 'Lonngest', 'length', 'Longest']], [['leth', 'LongestThis', 'Longest']], [['fnunction', 'This', 'is', 'a', 'complex', 'example', 'to', 'the', 'aa', 'function', 'a']], [['elephant', 'fox', 'monkey', 'LongestThis', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger', 'tiger']], [['This', 'is', 'elephant', 'complex', 'example', 'is', 'test', 'the', 'function', 'a', 'a']], [['fox', 'monkey', 'zebra', 'lion', 'This', 'giraffe', 'kangaroo', 'bear', 'panda', 'giraffbeare', 'hippopotamus', 'monkey']], [['elephant', 'fox', 'monkey', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'hippopotamus', 'tiger']], [['This', 'a', 'complex', 'giraffbeare', 'to', 'test', 'thte', 'function', 'a', 'a']], [['Longest', 'word', 'Lonpgest', 'length', 'Longest', 'Longest']], [['Longest', 'word', 'length', 'word']], [['This', 'is', 'a', 'complex', 'example', 'to', 'test', 'function', 'a', 'a']], [['This', 'is', 'a', 'complex', 'example', 'to', 'test', 'oto', 'function', 'a', 'a', 'is']], [['Longest']], [['fox', 'monkey', 'zebra', 'lion', 'giraffe', 'kangaroo', 'bear', 'hippopotamus']], [['leth', 'LongestThis', 'leelephantth', 'Longest']], [['Lot', 'word', 'length', 'word']], [['Longest', 'fnunction', 'lion', 'tigerLongest', 'giraffe', 'kangaroo', 'bear', 'hippopotamus']], [['elephant', 'fx', 'monkey', 'zebra', 'foelephantx', 'lion', 'tiger', 'giraffe', 'giraff', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['This', 'a', 'example', 'to', 'test', 'thte', 'function', 'a', 'a']], [['This', 'a', 'complex', 'the', 'to', 'test', 'thte', 'function', 'a', 'a']], [['is', 'a', 'complex', 'example', 'to', 'test', 'the', 'function', 'a', 'a']], [['This', 'a', 'complex', 'the', 'to', 'apandaa', 'test', 'thte', 'function', 'a', 'a']], [['Longest', 'word', 'length', 'Longest', 'Longest']], [['Lonpgest', 'monkey', '', 'length', 'length']], [['lgth', 'Longest', 'length', 'Longest', 'length']], [['elephant', 'fox', 'monkey', 'zebra', 'zebralengthn', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger', 'tiger', 'elephant']], [['is', 'a', 'complex', 'word', 'to', 'test', 'the', 'function', 'a', 'a']], [['This', 'TThis', 'is', 'a', 't', 'complex', 'example', 'to', 'test', 'the', 'function', 'the']], [['LLot', 'word', 'length', 'word', 'word']], [['Longest', 'fnunction', 'lion', 'tigerLongest', 'giraffe', 'bear', 'hippopotamus']], [['is', 'a', 'complex', '', 'example', 'to', 'test', 'the', 'function', 'a', 'a']], [['This', 'a', 'complex', 'the', 'to', 'apandaa', 'test', 'thtte', 'function', '', 'a']], [['Longest', 'lion', 'tigerLongest', 'giraffe', 'bbr', 'kangaroo', 'bbear', 'bear', 'hippopotamus']], [['Longest', 'word', 'length', 'Longest', 'Longest', 'word', 'Longest']], [['Lot', 'fox', 'monkey', 'zebra', 'zera', 'giraffe', 'hiippopotamus', 'kangaroo', 'bear', 'hippopotamus']], [['This', 'is', 'elephant', 'example', 'is', 'test', 'the', 'function', 'a', 'a']], [['Longest', 'fnunction', 'lion', 'tigerLongest', 'giraffe', 'bearr', 'hippopotamus', 'fnunction']], [['LLot', 'word', 'length', 'word', 'panda']], [['fox', 'LongestThis', 'Longsest', 'example']], [['elephant', 'giraff', 'monkey', 'lion', 'tiger', 'mlengthonkey', 'giraffe', 'kangaroo', 'bear', 'panda', 'pada', 'hippopotamus']], [['elephant', 'fox', 'zebra', 'zebra', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger']], [['This', 'a', 'complex', 'the', 'to', 'apandaa', 'length', 'test', 'thtte', 'function', '', 'a']], [['Longest', 'fnunction', 'lion', 'tigerLongest', 'giraffe', 'kangaroo', 'bear', 'hippopotamus', 'fnunction']], [['Longetst', 'zebra', 'lion', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['a', 'complex', 'giraffbeare', 'to', 'test', 'thte', 'function', 'a', 'a']], [['zera', 'Lot', 'word', 'length', 'word', 'zera']], [['oto', 'This', 'is', 'a', 'complex', 'example', 'to', 'the', 'aa', 'function', 'a']], [['Longest', 'fnunction', 'lion', 'tigerLongest', 'giraffe', 'fnuncction', 'bear', 'hippopotamus']], [['oto', 'This', 'a', 'complex', 'example', 'aa', 'to', 'aa', 'function', 'a']], [['This', 'is', 'elephant', 'example', 'is', 'test', 'the', 'function', 'elephant', 'a']], [['lgth', 'Longest', 'length', 'Longest', 'length', 'Longest']], [['elephant', 'fox', 'monkey', 'LongestThis', 'zebran', 'tiger', 'giraffe', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger', 'kangamonkeyroo']], [['oto', 'This', 'is', 'a', 'complex', 'exampl', 'to', 'the', 'aa', 'function', 'hthe', 'a']], [['fox', 'p', 'zebra', 'tiger', 'giraffe', 'p', 'kangaroo', 'foelephantx', 'bear', 'panda', 'hippopotamus', 'giraffe']], [['elephant', 'fox', 'monkey', 'LongestThis', 'zebran', 'tiger', 'kangaroo', 'bear', 'panda', 'hippopotamus', 'tiger', 'kangamonkeyroo', 'monkey']], [['fox', 'Longest', 'zebra', 'lion', 'tiger', 'girafffoelephantx', 'kangaroo', 'bear', 'panda', 'hippopotamus']], [['elephant', 'fox', 'monkey', 'function', 'zebra', 'lion', 'tiger', 'gireaffe', 'to', 'kangaroo', 'panda', 'hippopotamus']], [['This', 'a', 'complex', 'the', 'to', 'apandaa', 'test', 'thte', 'function', 'a', 'a', 'apandaa']], [['fnunction', 'This', 'is', 'a', 'complex', 'example', 'to', 'the', 'aa', 'function', 'a', 'to', 'to']], [['is', 'a', 'complex', '', 'to', 'test', 'the', 'function', 'a', 'a']], [['This', 'a', 'complex', 'the', 'to', 'apandaa', 'test', 'thtte', 'function', '', 'a', 'complex']], [['This', 'is', '', 'a', 'complex', 'example', 'to', 'test', 'the', 'function', 'the', 'th', 'a']], [['elephant', 'fox', 'monkey', 'function', 'zebra', 'lion', 'tiger', 'gireaffe', 'kangaroo', 'panda', 'girafffoelephantx', 'hippopotamus']], [['Longest', 'fnunction', 'lion', 'tigerLongest', 'giraffe', 'bearr', 'fnunction']], [['Longest', 'lion', 'tigerLongest', 'giraffe', 'bearr', 'fnunction']]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(len_log(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_090.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

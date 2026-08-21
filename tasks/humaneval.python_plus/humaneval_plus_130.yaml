@@ -1,0 +1,72 @@
+id: humaneval_plus_130
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_130.md
+  prompt_sha256: 66953ca58b40b74e45a51d684fbd429836befa2156377fb10e35d3b9868325b4
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_130.py
+    digest: c079127a02e7e09e728d38e444215c4de76b42d17929015fb43138d11d8f7286
+output_contract:
+- function:tri
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/130
+  entry_point: tri
+  n_test_cases: 11
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: tri
+  tests:
+  - assert tri(3) == [1, 3, 2.0, 8.0]
+  - assert tri(4) == [1, 3, 2.0, 8.0, 3.0]
+  - assert tri(5) == [1, 3, 2.0, 8.0, 3.0, 15.0]
+  - assert tri(6) == [1, 3, 2.0, 8.0, 3.0, 15.0, 4.0]
+  - assert tri(7) == [1, 3, 2.0, 8.0, 3.0, 15.0, 4.0, 24.0]
+  - assert tri(8) == [1, 3, 2.0, 8.0, 3.0, 15.0, 4.0, 24.0, 5.0]
+  - assert tri(9) == [1, 3, 2.0, 8.0, 3.0, 15.0, 4.0, 24.0, 5.0, 35.0]
+  - assert tri(20) == [1, 3, 2.0, 8.0, 3.0, 15.0, 4.0, 24.0, 5.0, 35.0, 6.0, 48.0, 7.0, 63.0, 8.0, 80.0, 9.0, 99.0, 10.0, 120.0, 11.0]
+  - assert tri(0) == [1]
+  - assert tri(1) == [1, 3]
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef tri(n):\\n    \"\"\"Everyone knows Fibonacci sequence, it was studied deeply by mathematicians in \\n    the last couple centuries. However, what people don\\'t know is Tribonacci sequence.\\n    Tribonacci sequence is defined by the recurrence:\\n    tri(1) = 3\\n    tri(n) = 1 + n / 2, if n is even.\\n    tri(n) =  tri(n - 1) + tri(n - 2) + tri(n + 1), if n is odd.\\n    For example:\\n    tri(2) = 1 + (2 / 2) = 2\\n    tri(4) = 3\\n    tri(3) = tri(2) + tri(1) + tri(4)\\n           = 2 + 3 + 3 = 8 \\n    You are given a non-negative integer number n, you have to a return a list of the \\n    first n + 1 numbers of the Tribonacci sequence.\\n    Examples:\\n    tri(3) = [1, 3, 2, 8]\\n    \"\"\"\\n\\n\\n    if n == 0: return [1]\\n    if n == 1: return [1, 3]\\n    ans = [1, 3]\\n    for i in range(2, n + 1):\\n        if i % 2 == 0:\\n            ans.append(1 + i / 2)\\n        else:\\n            ans.append(ans[-1] + ans[-2] + 1 + (i + 1) / 2)\\n    return ans\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['tri']\n_inputs = [[3], [4], [5], [6], [7], [8], [9], [20], [0], [1], [2], [10], [15], [25], [13], [12], [30], [100], [35], [50], [99], [29], [24], [51], [3], [1], [16], [14], [26], [17], [18], [23], [49], [34], [98], [11], [0], [28], [20], [36], [22], [101], [4], [102], [5], [33], [31], [27], [21], [97], [6], [32], [52], [48], [53], [47], [19], [103], [9], [88], [87], [89], [7], [96], [95], [46], [45], [8], [44], [94], [104], [85], [37], [86], [43], [105], [42], [84], [38], [39], [106], [83], [82], [93], [108], [81], [41], [64], [40], [90], [54], [65], [66], [91], [63], [107], [67], [92], [109], [80], [62], [61], [55], [75], [79], [68], [111], [110], [1000000], [74], [73], [1000001], [999999], [999997], [999998], [999996], [999995], [76], [77], [78], [71], [72], [1000002], [1000003], [1000004]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(tri(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_130.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_234
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_234.md
+  prompt_sha256: 386712dbc07d5685486fff20a5ee1f68ef6e878895bd408daa155ab51a1a5f98
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_234.py
+    digest: 1912782615799d0c3ea74be414dca36c662bee0d469180788ffa1158d6098b4a
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 234
+  entry_point: volume_cube
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: volume_cube
+  tests:
+  - assert volume_cube(3)==27
+  - assert volume_cube(2)==8
+  - assert volume_cube(5)==125
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef volume_cube(l):\\n  return l ** 3\\n', _gt_ns)\n_gt = _gt_ns['volume_cube']\n_inputs = [[3], [2], [5], [2.5], [1.768116407397588], [1.5330053387267233], [1.9409769466405233], [1.0356135456814313], [1.037763337581918], [1.028168921286162], [2.7426133283647474], [1.765616780512917], [3.9316946516263895], [0.9973720595122996], [2.500545981587986], [1.5471918358270063], [1.8932750500326467], [1.3384468899118565], [0.7724375366243361], [3.1594535359035825], [1.3824667962587152], [2.7470452952934243], [0.9156953778182462], [34], [3.819138685765539], [1.4852904495738046], [0.23333006553317204], [1.4833943990344491], [1.5762124498957681], [2.1453705140814767], [2.0656643626262605], [1.998117239983417], [0.7317945310911964], [0.7070489633316177], [1.5058980780463802], [0.6138472691338149], [1.886424605194764], [0.08168965641450154], [0.18480474894634202], [1.366617929835222], [1.6299804234811697], [0.26349775076805804], [0.1547548264158745], [1.4522052790699127], [1.352441827883809], [0.38606015130413257], [1.7757473200891363], [0.614856877384917], [1.092355188478646], [0.3278779481525271], [1.2118163861770028], [1.749229601188382], [0.7956349837789919], [3.058711440212882], [1.4631345109269929], [1.1100051438831426], [2.0112906528412884], [1.768699928888167], [3.328031163589532], [1.2766431508113951], [1.4012381668068086], [2.0974957803273613], [1.7965130249661876], [0.0013239186479343523], [True], [4.251410459943179], [0.8009116513441019], [29], [0.7710089491068963], [2.5816025535251335], [3.0782604418271386], [0.03179620192173771], [0.8071981441876176], [0.7514475069968345], [0.8414426924543517], [1.569979981693539], [1.5211274206864358], [1.8099459378857916], [0.0017356944757310683], [0.3907431982365772], [0.7382628147228494], [0.9555707899605295], [2.725023494814321], [4.283520965958573], [1.51773208972581], [2.1318839221754122], [3.6634136940364126], [3.0123612083786675], [2.356275015399078], [2.1281846741167216], [0.797257273379254], [3.473310475795803], [1.7076616217920995], [0.25816778679886393], [3.8940301896154903], [3.6099763184907694], [0.781946355279999], [2.9534714352068647], [77.01634556267851], [77.21550881078151], [0.0013626847553614187], [3.522566373363042], [0.3181745290034501], [0.6136495769697746]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(volume_cube(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_234.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

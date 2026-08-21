@@ -1,0 +1,69 @@
+id: humaneval_plus_084
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_084.md
+  prompt_sha256: 0af47ea9913fac4521ad31c4914f8a112ed4c69aa3d81b32bd2bc8a38715e3f5
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_084.py
+    digest: 44a49f9ef1a911a3714cb02d87677e52ce1e698b0eeeda1f2bf4256fc34672e8
+output_contract:
+- function:solve
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/84
+  entry_point: solve
+  n_test_cases: 8
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: solve
+  tests:
+  - assert True, 'This prints if this assert fails 1 (good for debugging!)'
+  - assert solve(1000) == '1', 'Error'
+  - assert solve(150) == '110', 'Error'
+  - assert solve(147) == '1100', 'Error'
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - assert solve(333) == '1001', 'Error'
+  - assert solve(963) == '10010', 'Error'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef solve(N):\\n    \"\"\"Given a positive integer N, return the total sum of its digits in binary.\\n    \\n    Example\\n        For N = 1000, the sum of digits will be 1 the output should be \"1\".\\n        For N = 150, the sum of digits will be 6 the output should be \"110\".\\n        For N = 147, the sum of digits will be 12 the output should be \"1100\".\\n    \\n    Variables:\\n        @N integer\\n             Constraints: 0 ≤ N ≤ 10000.\\n    Output:\\n         a string of binary number\\n    \"\"\"\\n\\n\\n    s = sum(map(lambda x: int(x), str(N)))\\n    return bin(s)[2:]\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['solve']\n_inputs = [[1000], [150], [147], [333], [963], [1], [10], [101], [1111], [5000], [9999], [819], [15], [75], [820], [818], [16], [1112], [17], [9998], [9997], [821], [2], [1110], [1113], [74], [11], [14], [10000], [100], [73], [27], [35], [817], [1114], [9996], [1115], [12], [18], [816], [13], [36], [28], [1109], [96], [97], [5001], [76], [1116], [9], [815], [822], [26], [814], [72], [4999], [95], [8], [102], [25], [3], [9995], [1107], [33], [19], [4], [1117], [20], [1118], [5], [24], [94], [23], [34], [77], [812], [4998], [6], [84], [4997], [813], [29], [103], [98], [78], [37], [83], [93], [21], [1108], [1119], [31], [1120], [9994], [85], [79], [7], [30], [71], [9993], [32], [52], [90], [91], [8888], [7777], [6666], [5555], [4444], [3333], [2222], [1010], [7776], [8889], [3332], [6667], [6668], [2223], [2224], [22], [7779], [3331], [7778], [5554], [6665], [6669], [2221], [8887], [5553], [4443], [7780], [57], [5556], [6664], [56], [5557], [5552], [3334], [6670], [4445], [2219], [2225], [60], [5551], [8886], [1009], [2220], [1011], [3330], [55], [2218], [5550], [58], [1012], [3329], [59], [7775], [6671], [6672], [2227], [8885], [70], [1007], [54], [1008], [2228], [2226], [5547], [4442], [2230], [2231], [1013], [5548], [7782], [44], [7783], [3328], [2232], [2233], [6673], [53], [5549], [2234], [69], [6663], [7774], [7773], [7772], [3335], [7771], [8884], [1014], [3336], [3337], [4441], [8883], [5558], [3327], [65], [66], [63], [7770], [5559], [5560], [7769], [5561], [8890], [3338], [8882], [8891], [7768], [62], [5562], [8881], [64], [7767]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(solve(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_084.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

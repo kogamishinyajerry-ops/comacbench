@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_074",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef total_match(lst1, lst2):\\n    '''\\n    Write a function that accepts two lists of strings and returns the list that has \\n    total number of chars in the all strings of the list less than the other list.\\n\\n    if the two lists have the same number of chars, return the first list.\\n\\n    Examples\\n    total_match([], []) ➞ []\\n    total_match(['hi', 'admin'], ['hI', 'Hi']) ➞ ['hI', 'Hi']\\n    total_match(['hi', 'admin'], ['hi', 'hi', 'admin', 'project']) ➞ ['hi', 'admin']\\n    total_match(['hi', 'admin'], ['hI', 'hi', 'hi']) ➞ ['hI', 'hi', 'hi']\\n    total_match(['4'], ['1', '2', '3', '4', '5']) ➞ ['4']\\n    '''\\n\\n    c1, c2 = sum(map(lambda s: len(s), lst1)), sum(map(lambda s: len(s), lst2))\\n    return lst1 if c1 <= c2 else lst2\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 12, \"cases_total\": 12, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 0.205,
+    "setup_s": 0.0,
+    "grade_s": 0.205
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.11s"
+  ]
+}

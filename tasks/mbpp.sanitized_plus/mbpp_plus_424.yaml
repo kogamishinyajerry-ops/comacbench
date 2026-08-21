@@ -1,0 +1,65 @@
+id: mbpp_plus_424
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_424.md
+  prompt_sha256: c0fcde4e103eb10ec45d162bb9ff0bba8935cf387fba0cdc3880536149d692e7
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_424.py
+    digest: 2a32e27c7d8d7890bbab94c8193fe3fc6635ae49d465a3eac80d3bebe3322161
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 424
+  entry_point: extract_rear
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: extract_rear
+  tests:
+  - assert extract_rear(('Mers', 'for', 'Vers') ) == ['s', 'r', 's']
+  - assert extract_rear(('Avenge', 'for', 'People') ) == ['e', 'r', 'e']
+  - assert extract_rear(('Gotta', 'get', 'go') ) == ['a', 't', 'o']
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef extract_rear(test_tuple):\\n  return [ele[-1] for ele in test_tuple]\\n', _gt_ns)\n_gt = _gt_ns['extract_rear']\n_inputs = [[['Mers', 'for', 'Vers']], [['Avenge', 'for', 'People']], [['Gotta', 'get', 'go']], [['Lorem', 'ipsum', 'dolor', 'sit', 'amet']], [['Quick', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog']], [['Python', 'is', 'a', 'widely', 'used', 'programming', 'language']], [['This', 'is', 'a', 'test', 'for', 'the', 'function']], [['Complex', 'input', 'to', 'test', 'the', 'function', 'with']], [['I', 'love', 'writing', 'code', 'in', 'Python']], [['The', 'function', 'should', 'handle', 'both', 'strings', 'and', 'numbers']], [['We', 'expect', 'the', 'output', 'to', 'be', 'a', 'list', 'of', 'characters']], [[]], [['Hello', 'World!', '12345']], [['123', 'abc', '456']], [['Hello World', 'This is a test', 'for the function']], [['apple', 'banana', 'cherry', 'durian']], [['apple', 'orange', 'mango', 'kiwi', 'papaya']], [['dog', 'cat', 'hamster', 'guinea pig', 'rabbit', 'gerbil']], [['The', 'quick', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog!']], [['hello123', 'world456', 'python789']], [['1', '2', '3', '4', '5']], [['-1', '-2', '-3', '-4', '-5']], [['9', 'a', 'b', '1', '2']], [['input', 'kiwi', 'app4le', 'papaya']], [['Hello', 'World!', '12345', 'He', '12345']], [['apple', 'banana', 'mango', 'cherry', 'durian', 'bananna', 'durian', 'durian']], [['The', 'function', 'over', 'should', 'handle', 'both', 'strings', 'and', 'numbers']], [['strings', 'This is a test', 'for the function']], [['banana', 'durian', 'apple']], [['Hello World', 'This is a test']], [['The', 'quick', 'brown', 'fox', 'jumps', 'over', 'the', 'World', 'lazy', 'dog!']], [['banana', 'durian', 'fox']], [['The', 'quic', 'brown', 'fox', 'jumps', 'over', 'the', 'World', 'lazy', 'dgd!']], [['The', 'function', 'over', 'should', 'handle', 'both', 'strings', 'and', 'numbers', 'strings']], [['dog', 'cat', 'hamster', 'guinea pig', 'rabbit', 'gerbil', 'guinea pig']], [['brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog']], [['dog', 'cat', 'love', 'used', 'hamster', 'guinea pig', 'rabbit', 'gerbil']], [['strings', 'This is a test', 'for the function', 'strings']], [['apple', 'orange', 'maoutputngo', 'kiwi', 'papaya']], [['1', '2', '3', '4', 'dolor']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings']], [['brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog', 'fox']], [['The', 'function', 'over', 'should', 'handle', 'dgd!', 'strings', 'and', 'numbers']], [['uswidelyed', 'dog', 'cat', 'love', 'used', 'hamster', 'guinea pig', 'rabbit', 'gerbil']], [['The', 'quick', 'brown', 'fox', 'expect', 'jumps', 'over', 'the', 'lazy', 'dog!']], [['dog', 'cat', 'love', 'used', 'guinea pig', 'rabbit']], [['This', 'is', 'a', 'test', 'for', 'function']], [['This', 'is', 'a', 'sit', 'test', 'for', 'function']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'strings']], [['4', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'doog', 'fox']], [['1', '2rabbit', '3', '4', 'handle', 'dolor']], [['The', 'quic', 'brown', 'fox', 'jumps', 'the', 'World', 'd!gd!', 'abc', 'dgd!']], [['The', 'function', 'over', 'should', 'handle', 'ThTe', 'both', 'strings', 'and', 'numbers', 'strings']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['dog', 'cat', 'hamster', 'guinea pig', 'rabbit', 'gerbil', 'guinea pig', 'guinea pig']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'string', 'strings', 'strings']], [['Quick', 'brown', 'fox', 'jumps', 'over', 'laazy', 'the', 'lazy', 'dog']], [['dog', 'ctI', 'hamster', 'guinea pig', 'rabbit', 'gerbil', 'guinea pig', 'guinea pig']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', '-2', 'numbers', 'strings', 'handle']], [['This', 'is', 'a', 'test', 'for', 'the', 'function', 'for', 'for']], [['apple', 'laazy', 'banana', 'mango', 'cherry', 'durian', 'bananna', 'durian', 'durian']], [['This', 'is', 'a', 'test', 'for', 'function', 'for']], [['apple', 'laazy', 'banana', 'mango', 'cherry', 'durian', 'bananna', 'durian', 'durian', 'cherry']], [['The', 'function', 'over', 'should', 'handle', 'ThTe', 'both', 'and', 'numbers', 'strings', 'over']], [['input', 'kiwi', 'pappaya', 'gerbil', 'papaya']], [['dog', 'cat', 'hamsterof', 'guinea pig', 'rabbit', 'gerbil']], [['The', 'function', 'over', 'should', 'handle', 'both', 'strings', 'anjumpsd', 'numbers', 'strings']], [['The', 'quick', 'brown', 'fox', 'brown', 'jumps', 'over', 'the', 'lazy', 'dog!']], [['dtheog', 'love', 'used', 'guinea pig', 'rabbit']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle', 'and']], [['dog', 'cat', 'guinea pig', 'rabbit', 'gerbil', 'dog']], [['kiwi', 'app4le', 'papaya']], [['Complex', '-5', 'love', 'used', 'hamster', 'guinea pig', 'rabbit', 'gerbil', 'guinea pig']], [['Lorem', 'dolor', 'cat', 'sit', 'amet', 'amet']], [['The', 'function', 'over', 'should', 'handle', 'dgd!', 'strings', 'and', 'numbers', 'numbers', 'The']], [['The', 'functon', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['apple', 'orange', 'mango', 'kiwi', 'papaya', 'kiwi']], [['brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog', 'fox', 'fox']], [['Hello World', 'This is a test', 'for the function', 'Hello World']], [['This', 'test', 'for', 'function']], [['dtheog', 'love', 'used', 'guinea pig', 'rabbit', 'guinea pig']], [['This', 'a', 'test', 'for', 'the', 'function']], [['uswidelyed', 'dog', 'cat', 'used', 'hamster', 'guinea pig', 'rabbit', 'gerbil']], [['The', 'function', 'should', 'handle', 'both', 'strings', 'botd!gd!h', 'and', 'numbers']], [['The', 'funnction', 'over', 'should', 'handle', 'dgd!', 'strings', 'and', 'numbers']], [['-3The', 'function', 'over', 'should', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['rrabbit', 'dog', 'ctI', 'hamster', 'guinea pig', 'rabbit', 'gerbil', 'guinea pig', 'guinea pig']], [['banana', 'apple', 'apple']], [['dog', 'cat', 'used', 'hamter', 'guinea pig', 'rabbit', 'gerbil']], [['-3The', 'function', 'over', 'd!gd!', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['dog', 'cat', 'guinea pig', '123', 'gerbil', 'dog']], [['We', 'expect', 'pappaya', 'output', 'to', 'be', 'a', 'list', 'of', 'characters']], [['banana', 'durian', 'fox', 'durian']], [['The', 'function', 'over', 'should', 'ThTe', 'handale', 'both', 'strings', 'and', 'numbers', 'strings', 'strings', 'The']], [['dtheog', 'love', 'used', 'guinea pig', 'rabbit', 'guinea pig', 'guinea pig']], [['This', 'is', 'a', 'for', 'function']], [['1', '3', '4', 'handle', 'dolor']], [['Imango', 'love', 'writing', 'code', 'in', 'Python', 'Python']], [['The', 'function', 'over', 'should', 'ThTe', 'numipsumrs', 'handle', 'both', 'brown', 'and', 'numbers', 'strings']], [['I', 'love', 'writing', 'code', 'in', 'Python', 'I']], [['Thloveis', 'is', 'a', 'sit', 'test', 'for', 'function']], [['rOdbYFwfQl', 'TI', 'hamter', 'jumps']], [['input', 'kiwi', 'pappaya']], [['dtheog', 'love', 'used', 'guinea pig', 'rabbit', 'guinea pigwriting', 'guinea pig', 'guinea pig']], [['The', 'brown', 'fox', 'jumps', 'the', 'World', 'd!gd!', 'abc', 'dgd!']], [['The', 'function', 'over', 'should', 'ThTe', '3', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['ctI', 'banana', 'apple', 'apple']], [['input', 'kiwi', 'app4le', 'papaya', 'app4le']], [['The', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['The', 'brown', 'fox', 'Wrld', 'jumps', 'the', 'World', 'd!gd!', 'abc', 'dgd!']], [['apple', 'orange', 'maoutputngo', 'kiwi', 'papaya', 'apple']], [['We', 'expect', 'the', 'output', 'to', 'be', 'a', 'list', 'of', 'characters', 'expecct']], [['1', '2', '3', '4', 'dolor', '2']], [['apple', 'banana', 'durian', 'durian']], [['The', 'function', 'over', 'shoduld', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'strings']], [['The', 'function', 'over', 'should', 'ThTe', 'handle', 'both', 'strings', 'and', 'numbers', 'used']], [['brown', 'ddog', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog']], [['-33The', 'function', 'over', 'd!gd!', 'handle', 'both', 'strings', 'and', 'numbers', 'strings', 'handle']], [['We', 'expect', 'papWorldpaya', 'output', 'to', 'be', 'a', 'of', 'characters']], [['input', 'kiwi', 'app4le']], [['9', 'a', '1', '2']], [['love', '9', 'TI', 'hamter', 'jumps']], [['The', 'funnction', 'over', 'nmangoumbers', 'should', 'handle', 'dgd!', 'strings', 'and', 'numbers']]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(extract_rear(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_424.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

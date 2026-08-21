@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_041",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\n\\ndef car_race_collision(n: int):\\n    \\\"\\\"\\\"\\n    Imagine a road that's a perfectly straight infinitely long line.\\n    n cars are driving left to right;  simultaneously, a different set of n cars\\n    are driving right to left.   The two sets of cars start out being very far from\\n    each other.  All cars move in the same speed.  Two cars are said to collide\\n    when a car that's moving left to right hits a car that's moving right to left.\\n    However, the cars are infinitely sturdy and strong; as a result, they continue moving\\n    in their trajectory as if they did not collide.\\n\\n    This function outputs the number of such collisions.\\n    \\\"\\\"\\\"\\n\\n\\n    return n ** 2\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 0.145,
+    "setup_s": 0.0,
+    "grade_s": 0.144
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

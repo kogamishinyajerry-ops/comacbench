@@ -1,0 +1,67 @@
+id: humaneval_plus_060
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_060.md
+  prompt_sha256: e5fec2063624dc85a0683f1dcada1961322cc1a8f1235c27c027ac9059ba1ef4
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_060.py
+    digest: aa7c92e4bd4b0f8767c134cb6644fc65878cd864668c3763cfe428abe43f103a
+output_contract:
+- function:sum_to_n
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/60
+  entry_point: sum_to_n
+  n_test_cases: 6
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: sum_to_n
+  tests:
+  - assert sum_to_n(1) == 1
+  - assert sum_to_n(6) == 21
+  - assert sum_to_n(11) == 66
+  - assert sum_to_n(30) == 465
+  - assert sum_to_n(100) == 5050
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\n\\ndef sum_to_n(n: int):\\n    \"\"\"sum_to_n is a function that sums numbers from 1 to n.\\n    >>> sum_to_n(30)\\n    465\\n    >>> sum_to_n(100)\\n    5050\\n    >>> sum_to_n(5)\\n    15\\n    >>> sum_to_n(10)\\n    55\\n    >>> sum_to_n(1)\\n    1\\n    \"\"\"\\n\\n\\n    return (n + 1) * n // 2\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['sum_to_n']\n_inputs = [[1], [6], [11], [30], [100], [2], [3], [4], [7], [15], [20], [25], [50], [75], [1000], [14], [5], [16], [6], [26], [92], [19], [93], [94], [999], [51], [17], [21], [22], [8], [74], [52], [23], [91], [76], [24], [90], [18], [13], [27], [998], [55], [65], [1], [66], [73], [89], [56], [57], [997], [996], [77], [28], [87], [88], [72], [54], [53], [86], [85], [78], [67], [29], [58], [79], [995], [49], [71], [994], [59], [37], [80], [48], [47], [38], [64], [60], [992], [40], [993], [81], [12], [84], [39], [9], [63], [10], [83], [62], [991], [11], [61], [36], [45], [35], [68], [990], [1001], [69], [95], [34], [70], [30], [96], [1000000], [500000], [532178], [215], [217], [214], [216], [499998], [532179], [499995], [213], [499997], [499999], [43], [212], [532177], [499996], [999999], [500001], [499994], [1000001], [532180], [999998], [44], [532181], [500002], [42], [1000002], [999997], [218], [532182], [1000003], [46], [1000004], [41], [211], [999996], [532176], [219], [220], [500003], [532183], [499993], [532184], [532175], [500004], [1002], [532174], [210], [209], [499992], [532173], [1003], [532185], [221], [82], [1000005], [1000006], [1004], [1005]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(sum_to_n(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_060.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

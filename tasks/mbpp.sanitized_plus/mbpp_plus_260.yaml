@@ -1,0 +1,65 @@
+id: mbpp_plus_260
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_260.md
+  prompt_sha256: 4d2f477c57545b7d5229c3145f3f3eab1a67ec05dae16eafd087022dd1c318d7
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_260.py
+    digest: 2990433473b05f61e691ee4121e67b0a14b9190323d45cf1e9b561282a2d82ff
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 260
+  entry_point: newman_prime
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: newman_prime
+  tests:
+  - assert newman_prime(3) == 7
+  - assert newman_prime(4) == 17
+  - assert newman_prime(5) == 41
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef newman_prime(n): \\n\\tif n == 0 or n == 1: \\n\\t\\treturn 1\\n\\ta = 1\\n\\tb = 1\\n\\tc = 1\\n\\tfor _ in range(2, n + 1):\\n\\t\\tc = 2 * b + a\\n\\t\\ta = b\\n\\t\\tb = c\\n\\treturn c\\n', _gt_ns)\n_gt = _gt_ns['newman_prime']\n_inputs = [[3], [4], [5], [100], [0], [1], [1234], [99], [False], [1235], [True], [1233], [98], [97], [87], [2], [1232], [1236], [1231], [101], [88], [1237], [86], [20], [21], [89], [102], [103], [6], [96], [1230], [104], [91], [1239], [92], [3], [22], [90], [7], [1238], [23], [95], [1229], [10], [19], [85], [1240], [5], [11], [8], [1241], [18], [84], [24], [9], [93], [94], [1228], [17], [83], [12], [13], [82], [25], [1227], [4], [67], [81], [1226], [1225], [26], [1242], [68], [1243], [16], [73], [105], [1224], [66], [65], [14], [1223], [74], [75], [64], [15], [27], [106], [72], [80], [62], [43], [78], [76], [44], [69], [79], [70], [45], [46], [1244], [42], [107], [29], [61], [108], [71]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(newman_prime(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_260.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

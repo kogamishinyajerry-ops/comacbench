@@ -1,0 +1,65 @@
+id: mbpp_plus_160
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_160.md
+  prompt_sha256: 69857a44d6e79e1443b2da9f7a02733ea1f4a51f917694ec2cc5a9334fbf4a87
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_160.py
+    digest: b2594fd3db55559fa7bbd21094e80c84bdf02c4fb7692f6583a7d05e7bd41740
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 160
+  entry_point: find_solution
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: find_solution
+  tests:
+  - assert find_solution(2, 3, 7) == (2, 1)
+  - assert find_solution(4, 2, 7) == None
+  - assert find_solution(1, 13, 17) == (4, 1)
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef find_solution(a, b, n):\\n\\ti = 0\\n\\twhile i * a <= n:\\n\\t\\tif (n - (i * a)) % b == 0: \\n\\t\\t\\treturn (i, (n - (i * a)) // b)\\n\\t\\ti = i + 1\\n\\treturn None\\n', _gt_ns)\n_gt = _gt_ns['find_solution']\n_inputs = [[2, 3, 7], [4, 2, 7], [1, 13, 17], [100, 50, 4000], [25, 10, 500], [7, 11, 123], [25, 123, 500], [100, 4000, 4000], [4000, 4000, 4000], [4000, 50, 4000], [25, 123, 7], [500, 50, 4000], [50, 500, 50], [6, 122, 7], [7, 123, 7], [100, 4000, 50], [500, 50, 500], [4000, 50, 50], [6, 122, 122], [7, 123, 123], [50, 123, 7], [122, 7, 122], [122, 7, 11], [123, 25, 50], [4001, 50, 50], [4000, 50, 501], [122, 101, 100], [25, 10, 10], [25, 10, 501], [500, 6, 123], [7, 123, 500], [501, 123, 7], [50, 124, 7], [100, 122, 100], [123, 26, 25], [50, 50, 50], [4001, 26, 25], [499, 50, 4000], [4000, 50, 499], [103, 102, 102], [123, 7, 123], [50, 3999, 4000], [500, 50, 6], [4000, 499, 4000], [101, 103, 4001], [25, 500, 123], [25, 26, 123], [499, 4000, 499], [4000, 11, 4000], [25, 50, 4000], [49, 7, 7], [7, 7, 123], [499, 4000, 4000], [6, 500, 50], [500, 50, 501], [500, 51, 500], [4001, 4001, 499], [4001, 4001, 4001], [499, 4000, 6], [500, 51, 6], [100, 500, 500], [4000, 7, 124], [25, 500, 25], [4000, 49, 50], [499, 499, 4000], [50, 123, 123], [6, 4000, 50], [100, 103, 4001], [50, 121, 122], [501, 8, 7], [25, 499, 25], [10, 10, 500], [4000, 4001, 4000], [4000, 3999, 499], [101, 101, 4001], [500, 50, 7], [3999, 123, 7], [25, 25, 10], [11, 123, 11], [101, 101, 6], [50, 4000, 4000], [100, 51, 4000], [10, 500, 10], [101, 25, 50], [501, 7, 7], [50, 4000, 3999], [10, 500, 25], [25, 499, 123], [501, 49, 6], [102, 102, 102], [121, 4000, 51], [502, 123, 7], [50, 3998, 501], [25, 121, 121], [25, 9, 9], [501, 7, 502], [11, 25, 11], [3999, 101, 500], [7, 12, 500], [7, 122, 7], [499, 6, 499], [25, 11, 25], [499, 11, 4000], [121, 4000, 121], [50, 102, 50], [7, 8, 123]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(find_solution(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_160.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_017
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_017.md
+  prompt_sha256: 2c54caf0fd1851c0bfeac2d619ee91290a8f8e2f49f7171295c38a218aca13bf
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_017.py
+    digest: f23d4bdba83dfbd7626bef07b2037c29cd059a974308d222ae6ad238118b5243
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 17
+  entry_point: square_perimeter
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: square_perimeter
+  tests:
+  - assert square_perimeter(10)==40
+  - assert square_perimeter(5)==20
+  - assert square_perimeter(4)==16
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef square_perimeter(a):\\n  return 4*a\\n', _gt_ns)\n_gt = _gt_ns['square_perimeter']\n_inputs = [[10], [5], [4], [3.5], [3.867338210205425], [4.017438434643324], [4.487089891527536], [2.6642890317066636], [5.887984312046749], [6.072194086423373], [3.642116465724614], [3.695469856787123], [4.141400647038825], [6.035071486216641], [3.271150304405481], [True], [84], [22], [5.654807546008664], [4.820511953305605], [6.577316776519947], [5.002581120259965], [6.969535253031167], [3.718379579422467], [6.322289576625546], [5.632673587071418], [5.3345589524375985], [6.725440141493683], [6.516564500761447], [8.993452545033046], [5.319836337788916], [6.043399656495942], [6.185578656467972], [4.217038121909214], [87], [4.005528059933441], [6.208925187146142], [85], [2.5181655036830994], [82], [4.1150925428079805], [5.484648231650928], [6.701524882996955], [21], [5.568439992700058], [88], [6.843276090129513], [3.4382125488926367], [6.388475480286746], [7.660073820339544], [2.769573374810499], [6.898645835852767], [7.826927755593033], [2.4985782322950842], [5.8695983810477985], [4.773486580932547], [3.001034234443808], [5.395838439745376], [3.577918724597513], [5.170120644837316], [6.99185332198154], [3.449246178521576], [5.5411783354818605], [6.436883135688541], [3.49384577169542], [5.015277110821801], [3.4631036701381923], [3.38643188343381], [1.9894160159593337], [1.837789735808722], [5.245639801999035], [4.465805726769371], [5.309603748296835], [3.3070853809486187], [8.803439557651616], [5.447584681806455], [2.6402987239829994], [5.81268658921342], [2.203529850744147], [2.413369661283704], [2.8444882558095452], [2.9679176613024727], [5.635919297098677], [7.106142255754484], [3.673088666908028], [11.501115163046252], [3.3172795455753574], [3.2120053514572735], [6.650019959695511], [23], [2.413305987922484], [3.453597614102104], [6.8216792009730725], [1.2676205462665886], [6.866125113001431], [4.423165960786375], [1.9765423457339029], [4.395641502661771], [2.9248802236697493], [1.6520153932594805], [8.099418388939899], [5.066661526673157], [6.345597309471013], [2.66964983620433]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(square_perimeter(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_017.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

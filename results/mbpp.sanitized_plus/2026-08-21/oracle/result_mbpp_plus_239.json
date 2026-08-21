@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_239",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef get_total_number_of_sequences(m, n):\\n\\tT=[[0 for _ in range(n + 1)] for _ in range(m + 1)] \\n\\tfor i in range(m + 1): \\n\\t\\tfor j in range(n + 1): \\n\\t\\t\\tif i==0 or j==0: \\n\\t\\t\\t\\tT[i][j] = 0\\n\\t\\t\\telif i<j: \\n\\t\\t\\t\\tT[i][j] = 0\\n\\t\\t\\telif j==1: \\n\\t\\t\\t\\tT[i][j] = i \\n\\t\\t\\telse: \\n\\t\\t\\t\\tT[i][j] = T[i-1][j] + T[i//2][j-1] \\n\\treturn T[m][n]\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 0.139,
+    "setup_s": 0.0,
+    "grade_s": 0.138
+  },
+  "environment_digest": "sha256:a4a2038026bc51de101fd4314e3af8605c62f991fe2b4324ef750d7d8a57dd8b",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

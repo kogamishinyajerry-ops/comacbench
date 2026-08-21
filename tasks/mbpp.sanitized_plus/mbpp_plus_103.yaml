@@ -1,0 +1,65 @@
+id: mbpp_plus_103
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_103.md
+  prompt_sha256: f75d779c4d097e981e0182a005923791f6fbb9249af4757ad3f183e35ba243f4
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_103.py
+    digest: a8ebde28e51998eb469ee2f762e1b4f7df039b577fbeed75d558018e8285182e
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 103
+  entry_point: eulerian_num
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: eulerian_num
+  tests:
+  - assert eulerian_num(3, 1) == 4
+  - assert eulerian_num(4, 1) == 11
+  - assert eulerian_num(5, 3) == 26
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef eulerian_num(n, m): \\n\\tif (m >= n or n == 0): \\n\\t\\treturn 0 \\n\\tif (m == 0): \\n\\t\\treturn 1 \\n\\treturn (n - m) * eulerian_num(n - 1, m - 1) + (m + 1) * eulerian_num(n - 1, m)\\n', _gt_ns)\n_gt = _gt_ns['eulerian_num']\n_inputs = [[3, 1], [4, 1], [5, 3], [0, 0], [1, 1], [1, 2], [1, 0], [0, 2], [0, 1], [2, 1], [2, 0], [2, 2], [2, 3], [3, 2], [1, 3], [0, 3], [2, 4], [1, 4], [4, 2], [4, 4], [3, 1], [4, 0], [4, 1], [3, 0], [0, 4], [3, 4], [5, 4], [3, 3], [5, 2], [4, 5], [5, 0], [1, 5], [False, True], [5, 5], [5, 1], [True, True], [6, 6], [2, 6], [0, 5], [6, 2], [4, 3], [6, 1], [3, 5], [5, 3], [7, 3], [4, 6], [7, 4], [5, 6], [5, 7], [6, 3], [6, 7], [0, 6], [False, False], [3, 6], [6, 4], [7, 6], [0, 7], [7, 2], [8, 7], [8, 2], [6, 5], [True, False], [7, 0], [2, 7], [8, 5], [6, 0], [0, 8], [4, 8], [7, 1], [8, 1], [7, 7], [4, 7], [2, 5], [8, 4], [10, 9], [9, 9], [10, 3], [10, 10], [3, 9], [10, 2], [2, 8], [8, 3], [5, 8], [9, 10], [8, 8], [2, 9], [4, 9], [9, 6], [7, 8], [8, 9], [1, 8], [1, 10], [11, 10], [5, 9], [11, 9], [5, 11], [9, 2], [7, 5], [8, 0], [6, 8], [1, 9], [8, 6], [9, 8], [9, 4]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(eulerian_num(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_103.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

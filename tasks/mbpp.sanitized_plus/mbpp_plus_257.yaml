@@ -1,0 +1,65 @@
+id: mbpp_plus_257
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_257.md
+  prompt_sha256: 207c87bf4fd0cf81060c76283cc734a1eb94d8c28f2c6c3ab4dc6e7ca4072119
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_257.py
+    digest: 3a1e8ada17e1accc51fe8ecf7f97924d9f05bc016256506bddb6b8815f131e2c
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 257
+  entry_point: swap_numbers
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: swap_numbers
+  tests:
+  - assert swap_numbers(10,20)==(20,10)
+  - assert swap_numbers(15,17)==(17,15)
+  - assert swap_numbers(100,200)==(200,100)
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef swap_numbers(a,b):\\n    return (b, a)\\n', _gt_ns)\n_gt = _gt_ns['swap_numbers']\n_inputs = [[10, 20], [15, 17], [100, 200], [-5, -10], [-100, -200], [-7, -3], [3.14, 2.718], [1.0, -0.5], [-100.5, 200.75], [5, 5], [-10, -10], [1.23, 1.23], [2.718, -0.5], [3.5839953593217544, 2.718], [5, -10], [-5, -11], [-8, -9], [-8, -10], [-8, -8], [1.0, 200.75], [200.75, 200.75], [-5, -8], [-100, -100], [200.0168272694265, 200.75], [6, -9], [1.7816735844630143, -0.5], [-5, -9], [-100.5, 1.7816735844630143], [1.110891875212232, 200.0168272694265], [-4, -11], [-5, -4], [-5, -5], [-102, -10], [0.9096439911291, 200.75], [-0.5, 200.75], [-8, -5], [-101, -100], [6, -11], [-9, -9], [-11, -11], [-4, -4], [-7, -10], [-11, -100], [-100.5, -0.6246510737114712], [1.110891875212232, 199.9586278490392], [199.80254729935734, 200.75], [200.0168272694265, 200.0168272694265], [-10, -200], [1.110891875212232, -100.5], [-4, -10], [-4, -12], [-0.34485327561456525, -0.5], [-4, -100], [-10, -12], [5, -3], [-7, -4], [-8, -7], [2.490084004197559, 1.7816735844630143], [201.10785660080364, 200.75], [-10, -8], [-10, -11], [109.06389054379079, 200.75], [1.110891875212232, 167.10351385707486], [-102, -101], [2.1330119070118485, -100.5], [True, 1.23], [124.61838179160847, 200.75], [-100, -10], [-9, -10], [-12, -10], [3.5839953593217544, -100.5], [2.1330119070118485, 124.14572872953535], [2.718, 200.0168272694265], [-13, -10], [2.1330119070118485, 200.75], [-102, -8], [-5, -13], [3.5839953593217544, 199.80254729935734], [0.9096439911291, 198.1727902022114], [-10, -4], [201.10785660080364, 201.10785660080364], [-13, -12], [-13, -13], [124.61838179160847, -0.24953757954867695], [-12, -12], [-5, 6], [2.22631597518509, 1.7816735844630143], [-9, -8], [-10, -9], [199.80254729935734, 247.7275752312867], [1.430105248193135, 200.75], [2.154236201660944, 2.4273044050861996], [1.7816735844630143, 1.7816735844630143], [-0.6246510737114712, 1.7816735844630143], [False, 266.8266128826292], [4.42809307831693, 2.718], [-7, -12], [124.61838179160847, 2.4273044050861996], [-13, -9], [-12, -11], [-0.6246510737114712, -0.6246510737114712], [-200, -11], [200.68795799999515, 200.75], [266.8266128826292, 266.8266128826292], [-7, -13], [0.4054844111976208, -0.5], [1.7816735844630143, 2.490084004197559], [4, 5], [-5, -101], [-5, -100], [5, -9], [-11, -10]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(swap_numbers(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_257.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_256
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_256.md
+  prompt_sha256: 4de8f1b8cea44fd70bf4190ecc258b38414b0f5b2ee4fced5a22cbac928b6bba
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_256.py
+    digest: 356ec6a5377e66e6feb4b849ebc32435dded646dd70a1f1505604649990de023
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 256
+  entry_point: count_Primes_nums
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: count_Primes_nums
+  tests:
+  - assert count_Primes_nums(5) == 2
+  - assert count_Primes_nums(10) == 4
+  - assert count_Primes_nums(100) == 25
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef count_Primes_nums(n):\\n    return sum(all(i % j != 0 for j in range(2, i)) for i in range(2, n))\\n', _gt_ns)\n_gt = _gt_ns['count_Primes_nums']\n_inputs = [[5], [10], [100], [1000], [1001], [1002], [1003], [999], [True], [False], [998], [65], [66], [67], [997], [68], [64], [1004], [1005], [99], [996], [63], [995], [1006], [1007], [1008], [62], [994], [86], [1009], [85], [61], [87], [60], [44], [1010], [1011], [45], [59], [80], [100], [69], [70], [71], [98], [97], [79], [1012], [2], [1013], [84], [56], [1], [0], [81], [78], [43], [1014], [72], [1015], [90], [42], [41], [46], [88], [3], [1016], [57], [4], [38], [993], [1017], [77], [101], [1018], [83], [82], [76], [58], [73], [39], [74], [89], [40], [75], [1019], [96], [47], [94], [95], [55], [48], [5], [54], [1020], [102], [53], [91], [992], [1021], [991], [11], [92], [37]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(count_Primes_nums(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_256.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

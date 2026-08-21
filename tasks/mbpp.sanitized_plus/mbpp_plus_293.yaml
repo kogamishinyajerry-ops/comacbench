@@ -1,0 +1,65 @@
+id: mbpp_plus_293
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_293.md
+  prompt_sha256: 0e4eedbf6afb2dbe83423f8283654ef2f93a96f2b6dcbc13a1e9c086936cba89
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_293.py
+    digest: 377ee7104cf2565e00a15e1dda2b7a5f572fb7d3b2367885c7e568f338085509
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 293
+  entry_point: otherside_rightangle
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: otherside_rightangle
+  tests:
+  - assert math.isclose(otherside_rightangle(7,8), 10.63014581273465, rel_tol=0.001)
+  - assert math.isclose(otherside_rightangle(3,4), 5, rel_tol=0.001)
+  - assert math.isclose(otherside_rightangle(7,15), 16.55294535724685, rel_tol=0.001)
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\nimport math\\ndef otherside_rightangle(w,h):\\n  return math.sqrt(w * w + h * h)\\n', _gt_ns)\n_gt = _gt_ns['otherside_rightangle']\n_inputs = [[7, 8], [3, 4], [7, 15], [2.5, 3.5], [1.2, 5.8], [6.25, 8.75], [2.152482257674037, 2.152482257674037], [6.25, 3.5], [2.152482257674037, 8.75], [2.700297324225485, 2.152482257674037], [3.5, 3.5], [1.3854432804588013, 3.5], [6.25, 2.5], [3.459608286705722, 3.5], [2.700297324225485, 1.3854432804588013], [2.700297324225485, 2.5], [1.3854432804588013, 8.75], [5.8, 3.5], [1.2, 1.2], [2.308614082678652, 3.5], [2.700297324225485, 2.700297324225485], [4.332995054280495, 1.3854432804588013], [1.3854432804588013, 1.2], [3.128098969138767, 6.25], [2.152482257674037, 3.128098969138767], [1.3854432804588013, 1.3854432804588013], [6.25, 6.25], [3.095980066414836, 2.700297324225485], [2.700297324225485, 3.5], [1.3854432804588013, 3.128098969138767], [5.8, 3.3484482761805356], [2.7086159184536536, 3.5], [2.308614082678652, 6.25], [2.152482257674037, 3.095980066414836], [3.128098969138767, 1.3854432804588013], [3.095980066414836, 3.095980066414836], [2.152482257674037, 3.5], [2.3253354449208996, 2.3253354449208996], [2.5, 3.7294875574760864], [5.8, 8.75], [4.934318039286869, 7.10665346391923], [1.2, 7.10665346391923], [3.7830167078632826, 4.934318039286869], [1.3854432804588013, 2.152482257674037], [5.8, 6.62665120928707], [3.128098969138767, 5.657955029609455], [2.121917472041424, 3.095980066414836], [1.3896678124587478, 1.3854432804588013], [5.8, 5.8], [1.3854432804588013, 0.9247368967322904], [4.332995054280495, 4.332995054280495], [5.8, 3.095980066414836], [7.10665346391923, 6.25], [2.152482257674037, 3.7294875574760864], [0.9247368967322904, 6.25], [1.3854432804588013, 0.9324068563687935], [0.9247368967322904, 1.3854432804588013], [2.700297324225485, 8.75], [3.128098969138767, 3.128098969138767], [1.3854432804588013, 3.7294875574760864], [5.609674187963928, 6.120577768854655], [3.7294875574760864, 2.152482257674037], [2.152482257674037, 4.200733677232915], [1.3896678124587478, 3.5], [2.700297324225485, 6.485822554946278], [7.10665346391923, 1.3854432804588013], [3.037033380664223, 2.5], [2.3253354449208996, 6.25], [9.7314836661486, 8.75], [2.308614082678652, 1.771736989507307], [3.5, 3.320009576711617], [3.095980066414836, 1.3854432804588013], [1.142869766833729, 1.2], [5.8, 4.691960825352264], [2.839781839152035, 2.839781839152035], [8.75, 3.7294875574760864], [3.0905937192183774, 3.5], [2.776233325766796, 3.095980066414836], [0.9247368967322904, 2.152482257674037], [1.4225634330794525, 3.7883490886429945], [2.3253354449208996, 6.350592155455148], [5.8, 1.4225634330794525], [3.5231122565219826, 5.8], [1.6386030770450668, 3.128098969138767], [2.152482257674037, 3.2955503797743395], [3.5, 5.8], [2.096685320976868, 1.2], [5.657955029609455, 4.691960825352264], [8.75, 4.934318039286869], [2.776233325766796, 3.128098969138767], [4.79546607177157, 4.480199970153443], [6.350592155455148, 4.337165328379914], [4.79546607177157, 3.320009576711617], [5.8, 8.659511063997245], [4.480199970153443, 3.095980066414836], [2.558784255229485, 3.5], [3.700904830850258, 2.5], [3.7883490886429945, 6.485822554946278], [6.2784961324556425, 6.25], [4.332995054280495, 1.2726616367292138], [6.485822554946278, 6.485822554946278], [5.8, 4.934318039286869], [8.378901997060781, 8.404736942628722], [1.2726616367292138, 3.5], [6.350592155455148, 1.2726616367292138], [5.609674187963928, 1.3854432804588013]]\n_atol = 0.0001\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(otherside_rightangle(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_293.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

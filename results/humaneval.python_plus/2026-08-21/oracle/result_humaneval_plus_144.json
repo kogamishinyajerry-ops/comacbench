@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_144",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef simplify(x, n):\\n    \\\"\\\"\\\"Your task is to implement a function that will simplify the expression\\n    x * n. The function returns True if x * n evaluates to a whole number and False\\n    otherwise. Both x and n, are string representation of a fraction, and have the following format,\\n    <numerator>/<denominator> where both numerator and denominator are positive whole numbers.\\n\\n    You can assume that x, and n are valid fractions, and do not have zero as denominator.\\n\\n    simplify(\\\"1/5\\\", \\\"5/1\\\") = True\\n    simplify(\\\"1/6\\\", \\\"2/1\\\") = False\\n    simplify(\\\"7/10\\\", \\\"10/2\\\") = False\\n    \\\"\\\"\\\"\\n\\n\\n    x1, x2 = map(int, x.split(\\\"/\\\"))\\n    n1, n2 = map(int, n.split(\\\"/\\\"))\\n    return (x1 * n1) % (x2 * n2) == 0\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 14, \"cases_total\": 14, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.06}"
+  },
+  "timings": {
+    "agent_s": 0.133,
+    "setup_s": 0.0,
+    "grade_s": 0.132
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.06s"
+  ]
+}

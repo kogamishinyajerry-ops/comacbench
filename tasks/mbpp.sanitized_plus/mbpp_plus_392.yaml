@@ -1,0 +1,65 @@
+id: mbpp_plus_392
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_392.md
+  prompt_sha256: 3ebebfc48d55531c3f9931874bfc2abd00c37701a8d6096a88c60f59dc9967c0
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_392.py
+    digest: 3bc1217d70b468de5dbf171a2dfb9e801d5d377739b6c9ca3c73936bc6ab1661
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 392
+  entry_point: get_max_sum
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: get_max_sum
+  tests:
+  - assert get_max_sum(60) == 106
+  - assert get_max_sum(10) == 12
+  - assert get_max_sum(2) == 2
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef get_max_sum (n):\\n\\t# if n = 0, f(0) = max(5(f(0), 0)), so f(0) = 5f(0) or f(0) = 0, for both cases f(0) = 0\\n\\tres = [0]\\n\\tfor i in range(1, n + 1):\\n\\t\\tres.append(max(res[i // 2] + res[i // 3] + res[i // 4] + res[i // 5], i))\\n\\treturn res[n]\\n', _gt_ns)\n_gt = _gt_ns['get_max_sum']\n_inputs = [[60], [10], [2], [100], [1000], [10000], [100000], [500], [99], [498], [499], [101], [False], [9999], [1001], [501], [True], [1002], [10001], [502], [999], [100001], [100002], [497], [9998], [100003], [1003], [496], [100004], [1004], [99999], [99998], [102], [1005], [10002], [100005], [998], [503], [68], [10003], [103], [495], [69], [67], [1006], [100006], [98], [997], [104], [504], [996], [505], [494], [70], [1007], [1008], [493], [96], [97], [995], [99997], [38], [994], [506], [10004], [10005], [2], [99996], [37], [95], [492], [993], [3], [4], [10006], [490], [66], [5], [73], [18], [100007], [39], [6], [507], [1009], [1010], [488], [491], [489], [19], [65], [27], [17], [487]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(get_max_sum(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_392.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: humaneval_plus_006
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_006.md
+  prompt_sha256: f67859b0d40359315c65cd6c6211df16d145d0f458bfe816f70bcb7b394992f6
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_006.py
+    digest: b877910914b8549c4f6c4ad72b053546538ce6ff9d578fddce74bf008263a6b5
+output_contract:
+- function:parse_nested_parens
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/6
+  entry_point: parse_nested_parens
+  n_test_cases: 4
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: parse_nested_parens
+  tests:
+  - assert parse_nested_parens('(()()) ((())) () ((())()())') == [2, 3, 1, 3]
+  - assert parse_nested_parens('() (()) ((())) (((())))') == [1, 2, 3, 4]
+  - assert parse_nested_parens('(()(())((())))') == [4]
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('from typing import List\\n\\n\\ndef parse_nested_parens(paren_string: str) -> List[int]:\\n    \"\"\" Input to this function is a string represented multiple groups for nested parentheses separated by spaces.\\n    For each of the group, output the deepest level of nesting of parentheses.\\n    E.g. (()()) has maximum two levels of nesting while ((())) has three.\\n\\n    >>> parse_nested_parens(\\'(()()) ((())) () ((())()())\\')\\n    [2, 3, 1, 3]\\n    \"\"\"\\n\\n    \\n    def count_depth(s: str) -> int:\\n        max_depth, cnt = 0, 0\\n        for ch in s:\\n            if ch == \"(\": cnt += 1\\n            if ch == \")\": cnt -= 1\\n            max_depth = max(max_depth, cnt)\\n        return max_depth\\n    \\n    return [count_depth(s) for s in paren_string.split(\" \") if s != \"\"]\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['parse_nested_parens']\n_inputs = [['(()()) ((())) () ((())()())'], ['() (()) ((())) (((())))'], ['(()(())((())))'], [''], ['((()))'], ['(())(()())'], ['(())(()(()))((()()))'], ['(()()(((())))(()(())))()'], ['()((()))'], ['(())'], ['()()()'], ['()(())'], ['(((())(()(()))((()()))))(()(()))((()()))'], ['(()()(()(())((()()(((())))(()(())))())(((()))))(()(())))()'], ['((()(())(()(()))((()()))))'], ['(()()(((())))(()(())(((())(()(()))((()()))))(()(()))((()()))))()'], ['((()()(((())))(()(())))())((()()))'], ['(()()(((())((()()(((())))(()(())))())(((()))))(()(()))))()'], ['()(()()(((())))(()(())(((())(()(()))((()()))))(()(()))((()()))))()((()))'], ['((()(())((()(()))((()())))))'], ['((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))'], ['((((((())(())))())((()()()(()(((()(()))))))))()(((())(()(()))((()()()))()))((()))()(()))()'], ['()()()()()()'], ['((((((()))(()()((()))))(()))))'], ['(((())))'], ['((()())()())'], ['()()()()()'], ['((((())()))()(()))(())'], ['((())()()()((((())(())))))'], ['(((((((()()()((()))(())()((()))((()())(())))))))()())()())'], ['((((())())))(())(())'], ['()(((())))'], ['(((((((())))))))'], ['(((((()(((()))))(()))()()())(())))()(())(())'], ['((())())()()'], ['((())()()((((())(())))))'], ['(()(())()())'], ['((((())(())))()()())((()))(())'], ['((()))()()()'], ['((((())())))(())'], ['(((((((((((((((())))))))))))))))'], ['((((((((((((())()()()))()))))(()))(())))))'], ['(((((((())((((())(())))))))())))()'], ['((((())((())))()(())))'], ['((((((((((()))))))((()))()))))'], ['(()(())())'], ['()'], ['((((((((((())))))))((()))((((((((())((((())(())))(((()()((())((()))(()((((()))()())))))())((((())))((()((((((())))))))))())))))()((((())))))))))))'], ['((((((((()(()))))))(((()))()))))'], ['((((((((((((((()))))))((()))()))))))))'], ['((((((((((((((()))))))((()))())((((((((()(()))))))(((()))())))))))))))'], ['((((())())(((((((())((((())(()))))(((()()((())((()))(()((((()))()())))))())((((())))((()((((((())))))))))())))))()((((()))))))))(())(())'], ['((((())((()))())(())))'], ['((())()())'], ['()()()()()((((((((((()))))))((()))()))))()'], ['((((((((((())))))((()))))(()))))'], ['((((((((((())))))))((()))((((((((())((((())(())))(((()()((())((()))(()((((()))()())))))())((((()))))((()(((((((())))))))))())))))()((((())))))))))))'], ['((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()((((()))))))))))((((((()()()((()))(())()(((((())))))))))))'], ['(((((()()()((()))(())()((()))())))))(()((((((((((()))))))((())))))))'], ['((((((()))(()()((())))))))'], ['(((((((()))))(()))))'], ['()()()()'], ['(((((()()()((()))(())()((()))((()())((((((()))(()()((()))))(()))))(())))))))'], ['((((((()))(()()((())(((((()()()((()))(())()((()))((()())(())))))))))))))'], ['(((())((((((()(()))))))((((((((((((()))))))((())(()))())))((()))))))((()))))'], ['((((((((()(())))()))(((())))()))))'], ['((((((((((()))))))((()))())))((())()()))'], ['(((((((())((((())(())))(((()()((())((()))(()(((((()))()())))))))((((())))((()((((((())))))))))())))))())((((()))))))'], ['(((((((((())((((())(())))(((()()((())((()))(()((((()))()())))))())((((())))((()((((((())))))))))())))))()((((()))))))((((())())))(())(())((((((((()))))))((())))())))((())()()))']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(parse_nested_parens(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_006.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

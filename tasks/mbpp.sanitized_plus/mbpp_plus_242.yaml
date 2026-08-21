@@ -1,0 +1,65 @@
+id: mbpp_plus_242
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_242.md
+  prompt_sha256: f5095836454410efee29863e78dbe302df0bf9357f59eb8d25a15b4bb7886960
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_242.py
+    digest: 821e04944d1497b9b87f55533ef0cc6db5c3d3a1e80086a9bf7de9e994d957ec
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 242
+  entry_point: count_charac
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: count_charac
+  tests:
+  - assert count_charac("python programming")==18
+  - assert count_charac("language")==8
+  - assert count_charac("words")==5
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef count_charac(str1):\\n    return len(str1)\\n', _gt_ns)\n_gt = _gt_ns['count_charac']\n_inputs = [['python programming'], ['language'], ['words'], [''], ['a'], ['ɢᴜᴍɪᴇꜱ'], ['cMPNwvV'], ['ccMPNwvV'], ['ccMPcMPNwvVNwvV'], ['accMPNwvV'], ['aaccMPNwvV'], ['ccMPNwV'], ['ccMPNwvVcMPNwvV'], ['aaccMPNwv'], ['ccMPcMPNwvVNvV'], ['ɢᴜaaccMPNwvᴍɪᴇꜱ'], ['aacccMPNwvVMPNwv'], ['aaaccccMPcMPNwvVNwvVNwv'], ['cccMPcMPNwvVNvV'], ['aaccMPNw'], ['cNMPNwvV'], ['cNMPNwvcNMPNwvVV'], ['ccMPV'], ['accaaccMPNwvMPNwvV'], ['aaccccMPNwvVcMPNwvVMPNwvV'], ['aaaccccMPcMPNwvcMPNwvVVNwvVNwv'], ['ccMPccccMPcMPNwvVNvVMPNwvVNwvV'], ['aaccMPaccaaccMPNwvMPNwvVNw'], ['aaaaccMPNcMPNwvVwv'], ['ccMPccccMPcMPNwvVNvVMPNwvVNcwvV'], ['ccMPcMPNwvVNwvvV'], ['accV'], ['cNMPNwvcNMwPNwvVV'], ['accaaccMPNwccMPcMPNwvVNwvvVvMPccMPVNwvV'], ['aaacccccMPcMPNwvVNwvVcNwv'], ['ɢᴜᴍccMPcMPNwvVNvVɪᴇꜱaccMPNwvV'], ['ccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvV'], ['ɢᴜaaccMPNwvᴍaccaaccMPNwccMPcMPNwvVNwvvVvMPccMPVNwvVɪᴇꜱ'], ['ccMPNwaccMPNwvVVvV'], ['aaccMPaNwvMPNwvVNw'], ['accaaccMPNwccMPcMPNwvVNwvvVvMPMccvV'], ['ccMPcMPNwvVNvaaacccaaccMPNwccMPcMPNwvVNwvVcNwvV'], ['aaccMPNww'], ['aaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNwvVVvV'], ['aaaaaccMPNcMPNwvVwv'], ['acacVcccMPcMPNwvVNvV'], ['ccMPccccMPcMPNNwvVNvVMPNwvVNcwvV'], ['cNMPNwv'], ['ɢᴜaaɢccMPNwvᴍɪᴇꜱ'], ['aaacMPNwvVNwvVcNwv'], ['aaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNccMPNwVVV'], ['accaaccMPNPwvMPNwvV'], ['ɢᴜᴍV'], ['accaaccMPccMPNwVNPwaacccMwPNwvVMPNwv'], ['ccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVccMPcMPNwvVNwvV'], ['cMPNwccMPcMPNwvVNwvvVvMPMccvV'], ['aaccccMPNwvVcV'], ['aaccccMPNwvNwvV'], ['ɢᴜaaccMPNwvᴍaacccMPNwvVMPNwvɪᴇꜱ'], ['ccMPcMPNwvVNvaaacccaacɢᴜaaccMPNwvᴍaacccMPNwvVMPNwvɪᴇꜱcMPNwccMPcMPNwvVNwvVcNwvV'], ['ccMPcMPNwNwvVNwvVcNwvV'], ['aaccMPaccaaccMPwNwvMPNwvVNwV'], ['accaaccMPNwccMPcccMPVvMPNwvVNwvvVvMPccMPVNwvV'], ['ccMPcMPNwvVNvaaccMPNwwV'], ['ccMPcccccMPcMPNNwvVNvVMPNVwvVNcwvV'], ['aaccaaccVaccMPNwvVNMPNwcNMccMPcMPNwvVNvaaacccaacɢᴜaaccMPNwvᴍaacccMPNwvVMPNwvɪᴇꜱcMPNwccMPcMPNwvVNwvVcNwvVPNwvcNMaacccMPNwvVMPNwvwPNccMPNwVVV'], ['ccMPccccMPcMPNccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVNwvVNvVMPNwvVNcwvaaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNwvVVvVV'], ['ccMccMPNwVPcMPccMPccccMPcMPNccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVNwvVNvVMPNwvVNcwvaaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNwvVVvVV'], ['aacccMPNwaaacccccMPcMPNwvVNwvVcNwvvVMPNwv'], ['ccMPcMPNwvaaaacMPNwvVNwvVcNwvaaaccMPNcMPNwvVwvVNwvV'], ['ccMPcccPcMPNwvVNvVMPNwvVNwvV'], ['aaccccMPNwvVcMPNwvVccMPcccccMPcMPNNwvVNvVMPNVwvVNcwvVMPNwvV'], ['aaccMPaMNwvMPNwvVNw'], ['ɢᴜaaccMPNwvᴍaccaacccMccMPNwVPcMPccMPccccMPcMPNccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVNwvVNvVMPNwvVNcwvaaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNwvVVvVVcMPNwccMPcMPNwvVNwvvVvMPccMPVNwvVɪᴇꜱ'], ['accaaccMPccMPNwVNPwaacccMwPNaaccMPNwvVwv'], ['cccMaaccccMPNwvNwvVPcMPNwvVNvV'], ['aaccccMPNwvVwcV'], ['ɢᴜᴍ'], ['accaaccMPaNwccMPcccMPVvMPNwVNwvvVvMPccMPVNwvV'], ['ccMPccccMPcMccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVccMPcMPNwvVNwvVPNwvVNvVMPNwvVNcwvV'], ['aaacMPNwvVNwvVcNwvv'], ['aaccccMPcccPcMPNwvVNvVMPNwvVNwvVMv'], ['ɢᴜaaɢccMPNwvᴍᴍɪᴇꜱ'], ['accaaccMPNwccMPcccMPVvMPNwvVNwvcMPNwccMPcMPNwvVNwvvVvMPMccvVvVvMPccMPVNwvV'], ['ccMPcMPNPwvVNvaaacccaacɢᴜaaccMPNwvᴍaacccMPNwvVMPNwvɪᴇꜱcMPNwccMPcMPNwvVNwvVcNwvV'], ['aaccMPNwaaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNwvVVvVw'], ['ɢᴜᴍccMPcMPNwvVNɢvVɪᴇꜱaccMPNwvV'], ['ccMPVaaacMPNwvVNwvVcNwvv'], ['acacVcccVNvV'], ['accaaccMPcccMPNwVNPwaacccMwPNaaccMPNwvVwv'], ['cccMPcMPPNwvVNvV'], ['aaccaaccMPNwvVMPNwcNMPNwvcNMaaaacccMPNwvVMPNwvcccMPNwvVMPNwvwPNwvVVvV'], ['aaccMPNwvccMPcMPNwvVNvaaacccaaccMPvNwccMPcMPNwvVNwvVcNwvV'], ['cccMPcɢᴜᴍɪᴇꜱMPPNwvVNvVaaccMPNwvV'], ['accaaccMPNwɢᴜaaɢccMPNwvᴍɪᴇꜱccMPcMPNwvVNwvvVvMPMccvV'], ['aaaccMPNwvV'], ['ccMPNcccccMPcMPNNwvVNvVMPNVwvVNcwvV'], ['aaaccccMPcvcMPNwvVVNwvVNwv'], ['aaccaaccVaccMPNwvVNMPNwcNMvccMPcMPNwvVNvaaacccaacɢᴜaaccMPNwvᴍaacccMPNwvVMPNwvɪᴇꜱcMPNwccMPcMPNwvVNwvVcNwvVPNwvcNMaacccMPNwvVMPNwvwPNccMPNwVVV'], ['ccMPccccMPcMccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVccMPcMPNwvVNwvVPNwvVMPNwvVNcwvV'], ['aaccMPNaaccMPaMNwvMPNwvVNww'], ['ccMPcccMPccccMPcMPNccMPcMPNwvVNvaaacccccMPcMPNwvVNwvVcNwvVNwvVNvVMPNwvVNcwvaaccaaccMPNwvVMPNwcNMPNwvcNMaacccMPNwvVMPNwvwPNwvVVvVVPcMPNwvVNvVMPNwvVNcwvV'], ['cccMaccccMPNwvNwvVPcMPNwvVNvV'], ['waccMPNwvV'], ['cccMPcMPNaaaccccMPcMPNwvcMPNwvVVNwvVNwv'], ['ccMPNcccccMPcMPNNwvVNvVMPNVVwvVNcwvV']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(count_charac(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_242.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

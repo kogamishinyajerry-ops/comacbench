@@ -1,0 +1,70 @@
+id: humaneval_plus_138
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_138.md
+  prompt_sha256: 648c72918b31543c915c018739e6d2fb313a60cf1f4dc3de9364c68bfc810a63
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_138.py
+    digest: 928eef1d46c90b361340ee81ed61aefdc1fdd40a9d6e1e67134e0a5e1eee11e4
+output_contract:
+- function:is_equal_to_sum_even
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/138
+  entry_point: is_equal_to_sum_even
+  n_test_cases: 9
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: is_equal_to_sum_even
+  tests:
+  - assert is_equal_to_sum_even(4) == False
+  - assert is_equal_to_sum_even(6) == False
+  - assert is_equal_to_sum_even(8) == True
+  - assert is_equal_to_sum_even(10) == True
+  - assert is_equal_to_sum_even(11) == False
+  - assert is_equal_to_sum_even(12) == True
+  - assert is_equal_to_sum_even(13) == False
+  - assert is_equal_to_sum_even(16) == True
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef is_equal_to_sum_even(n):\\n    \"\"\"Evaluate whether the given number n can be written as the sum of exactly 4 positive even numbers\\n    Example\\n    is_equal_to_sum_even(4) == False\\n    is_equal_to_sum_even(6) == False\\n    is_equal_to_sum_even(8) == True\\n    \"\"\"\\n\\n    return n >= 8 and n % 2 == 0\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['is_equal_to_sum_even']\n_inputs = [[4], [6], [8], [10], [11], [12], [13], [16], [20], [22], [24], [30], [36], [40], [42], [48], [50], [28], [41], [21], [39], [23], [25], [35], [19], [49], [51], [52], [47], [37], [34], [-79], [29], [53], [57], [56], [-2], [0], [2], [5], [9], [15], [27], [100], [8], [-3], [76], [98], [3], [97], [7], [1], [6], [99], [-50], [-71], [-1], [-72], [-27], [96], [10], [-26], [-39], [-55], [-29], [-66], [11], [14], [-42], [4], [77], [-38], [-30], [-25], [-34], [78], [-65], [-49], [-18], [-7], [75], [-37], [-73], [-51], [64], [-52], [-8], [-6], [-10], [16], [12], [26], [18], [17], [31], [-98], [-87], [-5], [-40], [-88], [-4], [55], [-86], [13], [32], [54], [-68], [-90], [-91], [-78], [-80]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(is_equal_to_sum_even(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_138.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,65 @@
+id: mbpp_plus_123
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_123.md
+  prompt_sha256: d04e379fb7a0190b1ba471ee3c8542cdea30c4ed4a0aadd25292c5e51920ed8b
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_123.py
+    digest: bc92f474dc93f09c8d4256cca9697ad05fcccc394bf14f4498099d4532ff92c5
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 123
+  entry_point: amicable_numbers_sum
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: amicable_numbers_sum
+  tests:
+  - assert amicable_numbers_sum(999)==504
+  - assert amicable_numbers_sum(9999)==31626
+  - assert amicable_numbers_sum(99)==0
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef div_sum(num):\\n    res = 1\\n    i = 2\\n    while i * i <= num:\\n        if num % i == 0:\\n            res += i\\n            if i * i != num:\\n                res += num / i\\n        i += 1\\n    return res\\ndef amicable_numbers_sum(limit):\\n    amicables = set()\\n    for num in range(2, limit + 1):\\n        if num in amicables:\\n            continue\\n        sum_fact = div_sum(num)\\n        sum_fact2 = div_sum(sum_fact)\\n        if num == sum_fact2 and num != sum_fact:\\n            amicables.add(num)\\n            amicables.add(sum_fact2)\\n    return sum(amicables)\\n', _gt_ns)\n_gt = _gt_ns['amicable_numbers_sum']\n_inputs = [[999], [9999], [99], [10000], [5000], [4999], [4998], [5001], [90], [92], [89], [91], [10001], [93], [5002], [4997], [True], [94], [4996], [4995], [10002], [9999], [88], [10003], [5003], [5004], [21], [87], [22], [4994], [95], [86], [96], [20], [9998], [4993], [23], [47], [97], [5005], [10004], [9], [9997], [10005], [85], [8], [46], [9996], [84], [7], [19], [9995], [98], [10006], [18], [99], [100], [101], [24], [68], [61], [69], [44], [43], [17], [5006], [16], [6], [10], [45], [10007], [66], [15], [83], [48], [9994], [81], [60], [74], [5007], [67], [28], [80], [72], [79], [70], [29], [49], [9993], [65], [4992], [4991], [11], [10008], [73], [12], [62], [71], [4990], [5008], [78], [50], [59], [77], [10009]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(amicable_numbers_sum(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_123.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

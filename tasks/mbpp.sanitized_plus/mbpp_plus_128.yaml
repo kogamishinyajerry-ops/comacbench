@@ -1,0 +1,65 @@
+id: mbpp_plus_128
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_128.md
+  prompt_sha256: baf04d7be1d7415a8fef5091c4e2515df082755a9fc34bf51703d0e532f7361e
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_128.py
+    digest: 85e36bbdce33a006ae19ddf2ba6d328a9128929c6961fa7d05eeebe4f8e34cb3
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 128
+  entry_point: long_words
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: long_words
+  tests:
+  - assert long_words(3,"python is a programming language")==['python','programming','language']
+  - assert long_words(2,"writing a program")==['writing','program']
+  - assert long_words(5,"sorting list")==['sorting']
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec(\"\\ndef long_words(n, s):\\n    return list(filter(lambda x: len(x) > n, s.split(' ')))\\n\", _gt_ns)\n_gt = _gt_ns['long_words']\n_inputs = [[3, 'python is a programming language'], [2, 'writing a program'], [5, 'sorting list'], [0, 'abc  def  ghi  jklm  nopqrs   tuvwxyz'], [0, ''], [10, 'thisisaverylongword testing wordlengths'], [100, 'hello python is a programming language'], [0, 'is'], [100, 'thisisaverylongwordw testing wordlengths'], [0, 'jklm'], [100, 'thisisaverylongwordw teseting wordlengths'], [0, 'thisisaverylongword testing wordlengths'], [10, 'is'], [10, 'hello python is a programming language'], [1, 'thisisaverylongword testing wordlengths'], [0, 'jklam'], [100, 'tuvwxyz'], [0, 'hello'], [0, 'jkjlam'], [100, ''], [1, 'jklam'], [100, 'thisisaverylongwordnopqrsw teseting wordlengths'], [10, 'heogramming language'], [10, ''], [100, 'i'], [11, 'thisisaverylongword testing wordlengths'], [100, 'thisisaverylongword'], [2, ''], [2, 'heogramming language'], [2, 'hello python is a programming language'], [100, 'ii'], [1, 'thisisaverylongwordw teseting wordlengths'], [100, 'thisisaveriylongwordw testing wordlengths'], [9, 'jklm'], [100, 'is'], [10, 'helloh python is a programming language'], [100, 'abc  def  ghi  jklm  nopqrs   tuvwxyz'], [2, 'heogramming laneguage'], [0, 'ajklamteseting'], [100, 'thisisaveriylongwordw'], [100, 'thisisaverylongwordw testheogramming languageing wordlengths'], [0, 'thisisaverylongwordnopqrsw teseting wordlengths'], [99, 'thisisaveriylongwordw'], [0, 'a'], [0, 'hello python is a programming language'], [0, 'aa'], [0, 'thisisaveriylongwordw'], [10, 'python'], [10, 'jkl'], [1, 'hello python is a programming language'], [1, 'jkllm'], [100, 'thisisaverylongwordnopqrsw teseting wordlengthsi'], [101, 'thisisaverylongwordw testing wordlengths'], [99, 'thisisaverylongwordw teseting wordlengths'], [99, 'heogramming langualaneguagege'], [0, 'ii'], [101, 'thisisaverylongwordw testheogramming languageing wordlengths'], [11, 'jkl'], [1, ''], [101, 'abc  def  ghi  jklm  nopqrs   tuvwx yz'], [0, 'thisisaveriylongwoordw'], [0, 'hlello'], [0, 'heogramming language'], [1, 'heogramming language'], [101, 'is'], [9, 'thisisaverylongwordnopqrsw teseting wordlengths'], [99, 'hello python is a programming language'], [1, 'thisisalanguageverylongwordw teseting wordleths'], [10, 'jkjlam'], [0, 'hlelllo'], [100, 'yz'], [0, 'ajheogramming languageklamteseting'], [9, 'helloh python is a programminlaneguageg language'], [11, 'thisisaveriylongwordw'], [2, 'thisisaverylongwordw teseting wordlengths'], [2, 'hlelllo'], [1, 'hello python is a prthisisaverylongwordnopqrsw teseting wordlengthsiogramming language'], [0, 'abc  def  ghi  jklm  thisisaveriylongwordwnopqrs   tuvwxyz'], [101, 'aaa'], [11, 'heogramming language'], [2, 'wordlengthsiogramming'], [1, 'thisisalanguageverylthisisaverylongwordnopqrsw teseting wordlengthsiongwordw teseting wordleths'], [11, 'wordlengthsiongwordw'], [1, 'heogramminghelloh python is a programming languagelanguage'], [11, 'thisisaverylongword'], [11, 'ljkl'], [99, 'thisisalanguageverylongwordw'], [1, 'ajheogramming languageklamteseting'], [0, 'wordlengthsi'], [100, 'thisisaveriylongwordwnopqrs'], [102, 'aaa'], [102, 'aaaa'], [10, 'thisisaveriylongwordw testing wordlengths'], [0, 'jkl'], [10, 'thisisaverylongwordnopqrsw teseting wordlengths'], [10, 'jk'], [100, 'thisisaverylongwordnopqrsw tegseting wordlengthsi'], [101, 'thisisajklmverylongwordw testing wordlengths'], [1, 'heogramming laneguage'], [1, 'ajklamteseting'], [100, 'thisisaverylongwordw testheogramming languagein wordlengths'], [102, 'thisisaveriylongwordw testing wordlengths'], [100, 'thisisavongwordw'], [100, 'hlello'], [0, 'hello python is heogramming laneguagea programming language'], [10, 'wlengthsiongwordw'], [99, 'hello pylanguage']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(long_words(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_128.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

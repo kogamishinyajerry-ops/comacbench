@@ -1,0 +1,67 @@
+id: humaneval_plus_041
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_041.md
+  prompt_sha256: 7616ac47ddd5dc31e1c61bbd947f035febe6f7c5e4c31b2cc95b26b4887a41d5
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_041.py
+    digest: 2f9870121722c356e680ec869337267b843f4f4a262861da4c479cb66be8199f
+output_contract:
+- function:car_race_collision
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/41
+  entry_point: car_race_collision
+  n_test_cases: 6
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: car_race_collision
+  tests:
+  - assert car_race_collision(2) == 4
+  - assert car_race_collision(3) == 9
+  - assert car_race_collision(4) == 16
+  - assert car_race_collision(8) == 64
+  - assert car_race_collision(10) == 100
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\n\\ndef car_race_collision(n: int):\\n    \"\"\"\\n    Imagine a road that\\'s a perfectly straight infinitely long line.\\n    n cars are driving left to right;  simultaneously, a different set of n cars\\n    are driving right to left.   The two sets of cars start out being very far from\\n    each other.  All cars move in the same speed.  Two cars are said to collide\\n    when a car that\\'s moving left to right hits a car that\\'s moving right to left.\\n    However, the cars are infinitely sturdy and strong; as a result, they continue moving\\n    in their trajectory as if they did not collide.\\n\\n    This function outputs the number of such collisions.\\n    \"\"\"\\n\\n\\n    return n ** 2\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['car_race_collision']\n_inputs = [[2], [3], [4], [8], [10], [5], [6], [12], [15], [20], [1], [25], [7], [100], [500], [24], [101], [14], [99], [4], [8], [3], [23], [19], [47], [48], [46], [26], [499], [27], [98], [28], [18], [45], [498], [13], [102], [11], [17], [501], [68], [21], [30], [10000], [987654], [1000], [1002], [97], [9999], [987653], [22], [29], [10001], [16], [31], [9998], [89], [44], [9997], [1003], [83], [43], [84], [100000], [1000000000], [59], [58], [999], [987652], [998], [57], [997], [996], [56], [9], [55], [92], [50], [42], [54], [10], [53], [87]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(car_race_collision(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_041.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

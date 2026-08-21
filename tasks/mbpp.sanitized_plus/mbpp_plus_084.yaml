@@ -1,0 +1,65 @@
+id: mbpp_plus_084
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_084.md
+  prompt_sha256: 0e7074e75fbb09f743feb4a8e8961437c96db17d32a46f0addf3f2beb250976a
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_084.py
+    digest: 287bbacf6d86194b7cb438abc4ac813054fb24f41698314d9ff2e8a0583e5fc5
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 84
+  entry_point: sequence
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: sequence
+  tests:
+  - assert sequence(10) == 6
+  - assert sequence(2) == 1
+  - assert sequence(3) == 2
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef sequence(n): \\n\\tif n == 1 or n == 2: \\n\\t\\treturn 1\\n\\tseq = [0] * (n + 1)\\n\\tseq[1] = seq[2] = 1\\n\\tfor i in range(3, n + 1):\\n\\t\\tseq[i] = seq[seq[i - 1]] + seq[i - seq[i - 1]]\\n\\treturn seq[n]\\n', _gt_ns)\n_gt = _gt_ns['sequence']\n_inputs = [[10], [2], [3], [100], [1000], [10000], [1000000], [49284], [76589], [92346], [109872], [92345], [76590], [1001], [10001], [109871], [True], [101], [99], [109873], [76588], [109870], [999999], [999998], [28], [9999], [109874], [49283], [102], [76591], [98], [92344], [29], [999], [109869], [109868], [97], [109867], [49285], [9998], [109866], [88], [49282], [30], [109876], [87], [31], [49280], [92343], [32], [92342], [49281], [103], [76592], [999997], [85], [95], [76587], [25], [86], [89], [104], [96], [27], [109875], [84], [1000001], [9997], [997], [49286], [1002], [105], [11], [9996], [1000002], [92341], [9], [8], [1000003], [76586], [109865], [12], [76585], [26], [996], [33], [49287], [10], [92340], [76593], [92347], [76584], [7], [92348], [34], [92339], [106], [6], [76594], [109864], [92338], [998], [49288], [76595], [92337], [76583], [13], [83], [1004], [23], [82]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(sequence(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_084.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

@@ -1,0 +1,55 @@
+id: math500_q023
+registry_id: math500.math_reasoning
+domain: knowledge
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: math500@hf-h4_v1_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/math500.math_reasoning/math500_q023.md
+  prompt_sha256: 7bdaccb869903b8fe4d1ce174e562b2172b7821106d80384b373c2273cd8494e
+  assets:
+  - path: data/math500/math_reasoning/math500_test.jsonl
+    digest: 35dc41080a3680858b27fa7e0533d2d547825316fc5dafe5d316f4ccc5a06132
+output_contract:
+- answer
+reference:
+  source: MATH-500（MIT, 上游 hendrycks/math；HF HuggingFaceH4 重建）
+  revision: math500@hf-h4_v1_20260821
+  unique_id: test/algebra/2193.json
+  level: 5
+  subject: Algebra
+  reference_boxed: x=5
+  refusal_expected: false
+  uncertainty_note: 官方 boxed 最终答案；greedy exact match 口径（归一化+数值化优先），非符号等价，同值不同形保守判负（registry
+    risks 已标注）
+grader:
+  answer_format: math_answer
+  validity_gate: true
+  objective_layer: boxed_exact_match
+  parse_rule: last_boxed_brace_balanced_then_hash_num_fallback
+  numeric_rel_tol: 1.0e-06
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯 boxed 答案：physics/objective/robustness 不适用，权重经 YAML 覆写塌缩到 requirements
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: HuggingFaceH4/MATH-500（上游 hendrycks/math）
+  license: MIT
+  status: confirmed-repo
+  revision: math500@hf-h4_v1_20260821
+  mirror_allowed: true

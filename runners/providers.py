@@ -458,8 +458,12 @@ def get_answer(
             return {"answer": raw, "raw": raw, "attempts": 1,
                     "meta": {"provider": "oracle"}}
         if expect == "math_answer":
-            ref = task["reference"]["reference_number"]
-            raw = f"The answer is computed from the reference solution.\n#### {ref}"
+            ref_boxed = task["reference"].get("reference_boxed")
+            if ref_boxed is not None:      # MATH-500 型：回显官方 boxed 答案
+                raw = f"Reference solution verified.\n\\boxed{{{ref_boxed}}}"
+            else:                          # GSM8K 型：回显参考数
+                raw = (f"The answer is computed from the reference solution.\n"
+                       f"#### {task['reference']['reference_number']}")
             return {"answer": raw, "raw": raw, "attempts": 1,
                     "meta": {"provider": "oracle"}}
         ref = task["reference"]["correct_option_index"]

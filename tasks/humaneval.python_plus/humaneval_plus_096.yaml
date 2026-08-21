@@ -1,0 +1,72 @@
+id: humaneval_plus_096
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_096.md
+  prompt_sha256: 1bc12794363447477205d4c308c16c2d17a4655a7472c7abc8451d8dc701be40
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_096.py
+    digest: d5fd27f5c99dc52718b0364c486234b0090111f3a045ca77398cef21de9686f0
+output_contract:
+- function:count_up_to
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/96
+  entry_point: count_up_to
+  n_test_cases: 11
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: count_up_to
+  tests:
+  - assert count_up_to(5) == [2, 3]
+  - assert count_up_to(6) == [2, 3, 5]
+  - assert count_up_to(7) == [2, 3, 5]
+  - assert count_up_to(10) == [2, 3, 5, 7]
+  - assert count_up_to(0) == []
+  - assert count_up_to(22) == [2, 3, 5, 7, 11, 13, 17, 19]
+  - assert count_up_to(1) == []
+  - assert count_up_to(18) == [2, 3, 5, 7, 11, 13, 17]
+  - assert count_up_to(47) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43]
+  - assert count_up_to(101) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef count_up_to(n):\\n    \"\"\"Implement a function that takes an non-negative integer and returns an array of the first n\\n    integers that are prime numbers and less than n.\\n    for example:\\n    count_up_to(5) => [2,3]\\n    count_up_to(11) => [2,3,5,7]\\n    count_up_to(0) => []\\n    count_up_to(20) => [2,3,5,7,11,13,17,19]\\n    count_up_to(1) => []\\n    count_up_to(18) => [2,3,5,7,11,13,17]\\n    \"\"\"\\n\\n\\n    ans = []\\n    isprime = [True] * (n + 1)\\n    for i in range(2, n):\\n        if isprime[i]:\\n            ans.append(i)\\n            for j in range(i + i, n, i):\\n                isprime[j] = False\\n    return ans\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['count_up_to']\n_inputs = [[5], [6], [7], [10], [0], [22], [1], [18], [47], [101], [2], [3], [12], [17], [50], [500], [1000], [25], [30], [100], [18], [999], [49], [19], [13], [499], [998], [1001], [1], [99], [31], [101], [16], [48], [47], [997], [498], [15], [11], [83], [51], [996], [995], [24], [98], [102], [52], [82], [14], [97], [81], [29], [96], [28], [20], [23], [26], [4], [497], [46], [32], [27], [0], [103], [21], [22], [45], [501], [73], [95], [10], [104], [5], [1002], [74], [84], [8], [53], [77], [496], [91], [94], [76], [75], [78], [9], [105], [106], [85], [495], [107], [108], [7], [79], [93], [494], [109], [90], [89], [92], [54], [6], [33], [86], [502], [110], [44], [72], [200], [10000], [7919], [150], [152], [9999], [151], [9998], [153], [149], [148], [199], [198], [154], [9997], [155], [197], [156], [157], [158], [503], [55], [147], [56], [201], [39], [63], [40], [159], [7920], [7918], [196], [38], [504], [7917], [146], [195], [1003], [61], [7916], [87], [37], [145], [62], [60], [88], [202], [35], [9996], [1004], [994], [68], [67], [69], [80], [36], [66], [58], [203]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(count_up_to(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_096.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

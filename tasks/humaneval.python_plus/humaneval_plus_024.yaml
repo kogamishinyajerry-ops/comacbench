@@ -1,0 +1,67 @@
+id: humaneval_plus_024
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_024.md
+  prompt_sha256: ec1c4d283a71a6f748f6b61e1c2658e1d98195dd85de5c62b35788df60e03a36
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_024.py
+    digest: 30cc7b6293e4d087886c8f8464a634554dd2517ff8e0f53eb052a4a262b35f93
+output_contract:
+- function:largest_divisor
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/24
+  entry_point: largest_divisor
+  n_test_cases: 6
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: largest_divisor
+  tests:
+  - assert largest_divisor(3) == 1
+  - assert largest_divisor(7) == 1
+  - assert largest_divisor(10) == 5
+  - assert largest_divisor(100) == 50
+  - assert largest_divisor(49) == 7
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\n\\ndef largest_divisor(n: int) -> int:\\n    \"\"\" For a given number n, find the largest number that divides n evenly, smaller than n\\n    >>> largest_divisor(15)\\n    5\\n    \"\"\"\\n\\n\\n    for i in range(2, n):\\n        if n % i == 0: return n // i\\n    return 1\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['largest_divisor']\n_inputs = [[3], [7], [10], [100], [49], [2], [27], [101], [235], [500], [999], [1000], [36], [72], [81], [499], [234], [73], [998], [35], [22], [23], [1001], [74], [236], [82], [75], [99], [76], [77], [24], [28], [80], [238], [29], [237], [56], [57], [3], [997], [30], [4], [102], [37], [233], [103], [78], [55], [5], [58], [21], [83], [25], [1003], [996], [11], [501], [34], [232], [100], [995], [231], [33], [79], [502], [1004], [54], [1005], [1002], [20], [230], [98], [32], [31], [53], [65], [59], [38], [52], [19], [97], [64], [12], [51], [1006], [39], [40], [49], [60], [61], [10], [6], [96], [63], [26], [104], [239], [41], [88], [42], [84], [503], [43], [62], [18], [127], [1321], [500027], [732312], [1234567], [732313], [126], [500028], [1322], [732314], [1234568], [1320], [500029], [95], [500030], [732311], [1323], [1234569], [1234566], [500031], [50], [732315], [1234570], [732310], [128], [732309], [1324], [500026], [71], [732316], [131], [125], [500025], [70], [48], [47], [46], [994], [69], [124], [1234572], [1325], [500024], [132], [1234571], [1319], [94], [993], [130], [992], [129], [1318], [732317], [732318], [990], [44], [989], [732308], [732306], [732307], [732305], [732304], [1234565], [732303], [8], [732302], [92], [93]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(largest_divisor(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_024.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

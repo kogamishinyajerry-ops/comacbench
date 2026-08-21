@@ -1,0 +1,65 @@
+id: mbpp_plus_279
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_279.md
+  prompt_sha256: ac9fd57bc5c0c173eb68f4310a653d83fef973629f5d4a04fee2ee61e7997d46
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_279.py
+    digest: dfcad617a059d7b6e3ca5c122cb1dc3ea23041c123ef41b10b3beacd5c4cc161
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 279
+  entry_point: is_num_decagonal
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: is_num_decagonal
+  tests:
+  - assert is_num_decagonal(3) == 27
+  - assert is_num_decagonal(7) == 175
+  - assert is_num_decagonal(10) == 370
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef is_num_decagonal(n): \\n\\treturn 4 * n * n - 3 * n \\n', _gt_ns)\n_gt = _gt_ns['is_num_decagonal']\n_inputs = [[3], [7], [10], [1000000], [987654], [123456789], [987654321], [1], [3141592653589793238462643383279], [987654321012345678901234567890], [1000000000000000000000000000000], [123456789876543212345678987654], [9999999999999999999999999999999], [10000000000000000000000000000000], [3141592653589793238462643383280], [1000001], [2], [999999999999999999999999999999], [3141592653589793238462643383281], [1000000000000000000000000000001], [36], [999999999999999999999999999997], [987654321012345678901234567891], [123456789876543212345678987653], [3], [987654322], [True], [35], [9999999999999999999999999999998], [123456790], [987655], [123456791], [73], [999999999999999999999999999996], [987654321012345678901234567892], [10000000000000000000000000000001], [4], [999999999999999999999999999995], [999999999999999999999999999998], [987654323], [37], [123456792], [987654324], [1000000000000000000000000000002], [3141592653589793238462643383278], [3141592653589793238462643383277], [38], [9999999999999999999999999999997], [987654325], [123456789876543212345678987656], [89], [1000000000000000000000000000003], [72], [123456789876543212345678987657], [123456789876543212345678987655], [9999999999999999999999999999996], [9999999999999999999999999999995], [123456789876543212345678987658], [3141592653589793238462643383283], [999999999999999999999999999994], [3141592653589793238462643383284], [123456788], [88], [12], [987654321012345678901234567893], [90], [123456789876543212345678987652], [3141592653589793238462643383282], [999999999999999999999999999993], [1000000000000000000000000000004], [999999999999999999999999999992], [999999999999999999999999999991], [987653], [1000002], [987652], [987654321012345678901234567894], [45], [123456789876543212345678987651], [123456793], [91], [3141592653589793238462643383276], [56], [1000003], [123456789876543212345678987650], [987654321012345678901234567896], [987654321012345678901234567889], [13], [987654321012345678901234567897], [3141592653589793238462643383275], [14], [1000004], [5], [987654327], [57], [987654326], [987654320], [987654321012345678901234567895], [71], [33], [10000000000000000000000000000002], [987654321012345678901234567898], [1000000000000000000000000000005], [3141592653589793238462643383285], [58], [999999], [987654328], [3141592653589793238462643383274], [34], [15], [46], [987656], [987654329], [47], [32]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(is_num_decagonal(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_279.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

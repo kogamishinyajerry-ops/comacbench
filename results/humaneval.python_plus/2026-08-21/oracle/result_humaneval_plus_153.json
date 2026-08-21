@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_153",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef Strongest_Extension(class_name, extensions):\\n    \\\"\\\"\\\"You will be given the name of a class (a string) and a list of extensions.\\n    The extensions are to be used to load additional classes to the class. The\\n    strength of the extension is as follows: Let CAP be the number of the uppercase\\n    letters in the extension's name, and let SM be the number of lowercase letters \\n    in the extension's name, the strength is given by the fraction CAP - SM. \\n    You should find the strongest extension and return a string in this \\n    format: ClassName.StrongestExtensionName.\\n    If there are two or more extensions with the same strength, you should\\n    choose the one that comes first in the list.\\n    For example, if you are given \\\"Slices\\\" as the class and a list of the\\n    extensions: ['SErviNGSliCes', 'Cheese', 'StuFfed'] then you should\\n    return 'Slices.SErviNGSliCes' since 'SErviNGSliCes' is the strongest extension \\n    (its strength is -1).\\n    Example:\\n    for Strongest_Extension('my_class', ['AA', 'Be', 'CC']) == 'my_class.AA'\\n    \\\"\\\"\\\"\\n\\n\\n    def strength(s: str) -> int:\\n        CAP, SM = 0, 0\\n        for ch in s:\\n            if ch.isupper(): CAP += 1\\n            if ch.islower(): SM += 1\\n        return CAP - SM\\n    max_strength = max(map(strength, extensions))\\n    for e in extensions:\\n        if strength(e) == max_strength:\\n            return class_name + \\\".\\\" + e\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.06}"
+  },
+  "timings": {
+    "agent_s": 0.13,
+    "setup_s": 0.0,
+    "grade_s": 0.129
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.06s"
+  ]
+}

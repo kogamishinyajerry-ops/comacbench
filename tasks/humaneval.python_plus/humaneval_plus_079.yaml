@@ -1,0 +1,67 @@
+id: humaneval_plus_079
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_079.md
+  prompt_sha256: 541f39e60a9fd454b81d703bbecbf14db21c2ea834df77805c1c9a9544cb245d
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_079.py
+    digest: cd6ea9c18cac22ac05f4d2239c8ed569222f153c74d945c00362e7b5ecd16b27
+output_contract:
+- function:decimal_to_binary
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/79
+  entry_point: decimal_to_binary
+  n_test_cases: 6
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: decimal_to_binary
+  tests:
+  - assert decimal_to_binary(0) == 'db0db'
+  - assert decimal_to_binary(32) == 'db100000db'
+  - assert decimal_to_binary(103) == 'db1100111db'
+  - assert decimal_to_binary(15) == 'db1111db', 'This prints if this assert fails 1 (good for debugging!)'
+  - assert True, 'This prints if this assert fails 2 (also good for debugging!)'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef decimal_to_binary(decimal):\\n    \"\"\"You will be given a number in decimal form and your task is to convert it to\\n    binary format. The function should return a string, with each character representing a binary\\n    number. Each character in the string will be \\'0\\' or \\'1\\'.\\n\\n    There will be an extra couple of characters \\'db\\' at the beginning and at the end of the string.\\n    The extra characters are there to help with the format.\\n\\n    Examples:\\n    decimal_to_binary(15)   # returns \"db1111db\"\\n    decimal_to_binary(32)   # returns \"db100000db\"\\n    \"\"\"\\n\\n\\n    return \"db\" + bin(decimal)[2:] + \"db\"\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['decimal_to_binary']\n_inputs = [[0], [32], [103], [15], [100001], [255], [999999999], [1000000000000], [7], [1023], [1], [2], [3], [4], [1000000000], [6], [1000000001], [1000000000002], [5], [100002], [100000], [1022], [8], [1000000002], [0], [1024], [100003], [1000000000001], [999999998], [999999999999], [256], [257], [1021], [259], [1000000000003], [1000000004], [1000000000004], [1000000000005], [1000000005], [9], [1000000000006], [260], [1000000000007], [100004], [999999999998], [999999999997], [258], [1000000000008], [1000000006], [45], [100005], [99999], [1025], [999999997], [999999996], [1000000003], [44], [43], [1000000007], [42], [999999995], [46], [47], [254], [10], [999999994], [28], [1000000000009], [100007], [41], [1020], [27], [1026], [23], [999999999996], [253], [100006], [38], [100008], [39], [100009], [1027], [261], [26], [1019], [1000000008], [11], [251], [1018], [48], [22], [99998], [21], [40], [37], [20], [100011], [262], [25], [1028], [24], [999999993], [274877906943], [9223372036854775807], [10000000000000000000000000000001], [8892743], [1000], [274877906942], [10000000000000000000000000000002], [8892742], [8892740], [8892744], [10000000000000000000000000000003], [8892745], [8892741], [999], [8892739], [274877906941], [274877906940], [998], [9223372036854775806], [10000000000000000000000000000000], [274877906939], [1001], [1002], [9223372036854775808], [274877906938], [8892737], [8892746], [8892747], [274877906944], [1003], [9223372036854775805], [252], [8892748], [997], [274877906937], [8892736], [274877906945], [9223372036854775809], [274877906936], [274877906946], [8892735], [8892738], [1004], [10000000000000000000000000000004], [996], [10000000000000000000000000000005], [8892750], [8892749], [1006], [8892751], [99], [98], [9999999999999999999999999999999], [92], [1005], [9999999999999999999999999999998], [8892752], [1007], [9223372036854775804], [995], [16], [263], [53], [30], [274877906947], [29], [9223372036854775810], [67], [66], [9223372036854775811], [9999999999999999999999999999997], [63], [9999999999999999999999999999996], [81], [82], [80], [68], [9223372036854775812], [32], [31], [83], [79], [62], [61], [84], [65], [60], [9223372036854775813], [250], [249], [9999999999999999999999999999995], [85], [89], [9223372036854775814], [49], [78], [50], [88], [33], [90]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(decimal_to_binary(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_079.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

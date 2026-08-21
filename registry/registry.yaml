@@ -400,6 +400,61 @@ entries:
     status: integrated
     integrated_note: 2026-08-21 code_exec unit_tests_problem 跑通（dev 终端）；oracle 自检 257/257；stub pass@1 0 / GLM-4.6 0.9416 / M3 0.9455（各 1 题 code_not_executable），见 results/mbpp.sanitized/2026-08-21/
 
+  # ---------- 批次 3 第二波: 更硬数学 + 测试加强编程（2026-08-21 扩充） ----------
+  - id: math500.math_reasoning
+    name: MATH-500 竞赛数学（全量）
+    source: https://huggingface.co/datasets/HuggingFaceH4/MATH-500 (上游 hendrycks/math)
+    tier: A
+    order: 22
+    batch: batch-3
+    adapter: qa_grounded
+    env_class: qa
+    license: MIT
+    license_status: confirmed-repo
+    content: MATH test split 500 题标准子集（level 1-5）；比 GSM8K 难一档的竞赛数学可比层；182/500 答案为表达式/文本（boxed 归一化判分）
+    scoring: "\\boxed{} 抽取 + 归一化 + 数值化优先/字符串精确匹配（greedy exact match 口径）；无 LLM judge"
+    env: 无执行环境要求
+    assets_revision: math500@hf-h4_v1_20260821   # 2026-08-21 镜像（500 题全量 + LICENSE），sha256 见 data/math500/math_reasoning/PROVENANCE.md
+    risks: [MATH 已广泛入训练语料 -> 仅作可比基线；非符号等价判分对同值不同形答案保守（如实标注）]
+    status: staged
+    staged_note: 2026-08-21 镜像完成（MIT 权威链核验，500 题全量）；math_answer boxed 判分与基线进行中
+
+  - id: humaneval.python_plus
+    name: HumanEval+（EvalPlus 加强测试）
+    source: https://huggingface.co/datasets/evalplus/humanevalplus
+    tier: A-
+    order: 23
+    batch: batch-3
+    adapter: code_exec
+    env_class: python_sandbox
+    license: Apache-2.0（数据，官方 GitHub release）/ MIT（原版 prompt 复用）
+    license_status: confirmed-split
+    content: 164 题与 humaneval.python 一一对应；同原版提示、隐藏测试换 EvalPlus 官方 NoExtreme 加强版（原版断言 + base/plus 全量输入活体 GT 比对）——纯测试升级恢复饱和区区分度
+    scoring: unit_tests_problem（断言拆分 + 活体 GT 批量比对，官方 out==exp/allclose 语义）；pass@1 = HumanEval+ NoExtreme 口径
+    env: Python 沙箱 + numpy（已验证可用）
+    assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821   # 2026-08-21 官方 release 镜像（HF 卡片版有转换缺陷已弃用），sha256 见 data/humaneval/python_plus/PROVENANCE.md
+    risks: [公共题入语料同 humaneval；与原版分差为「测试敏感度」信号——方向性指标不受泄漏影响；NoExtreme 口径与社区全量版分差需并读]
+    status: staged
+    staged_note: 2026-08-21 镜像完成（Apache-2.0 双证）；判分与基线进行中
+
+  - id: mbpp.sanitized_plus
+    name: MBPP+（EvalPlus 加强测试，∩sanitized 224 题）
+    source: https://huggingface.co/datasets/evalplus/mbppplus
+    tier: A-
+    order: 24
+    batch: batch-3
+    adapter: code_exec
+    env_class: python_sandbox
+    license: Apache-2.0（数据，官方 GitHub release）/ CC BY 4.0（上游 MBPP 本体）
+    license_status: confirmed-dataset
+    content: 官方 NoExtreme release（378）∩ mbpp.sanitized（257）= 222 题（2 题官方输入-GT 不兼容缺陷排除）；同原 sanitized 提示、判分 = 官方 assertion + base/plus 活体 GT
+    scoring: unit_tests_problem（assertion 逐条 + 活体 GT 批量比对）；pass@1 = MBPP+ NoExtreme 口径（交集子集）
+    env: Python 沙箱 + numpy
+    assets_revision: mbppplus@release_v0.2.0-noextreme_20260821   # 2026-08-21 官方 release 镜像（缺陷处置见 PROVENANCE），sha256 见 data/mbpp/sanitized_plus/PROVENANCE.md
+    risks: [同提示测试升级口径——分差为测试敏感度信号；222 题交集非全量 MBPP+（保持与既有基准可比）；124/252 上游缺陷排除如实标注]
+    status: staged
+    staged_note: 2026-08-21 镜像完成（Apache-2.0 双证）；判分与基线进行中
+
   # ---------- 条件纳入（不进入排期，满足条件后重审） ----------
   - id: cadbench.cadquery
     name: CADBench

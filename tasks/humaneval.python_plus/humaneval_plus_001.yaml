@@ -1,0 +1,66 @@
+id: humaneval_plus_001
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_001.md
+  prompt_sha256: ea81fd724ebe3c95fe8ac754ae56ee3bd63dbf2ebd82f478700a71a1d2d8744b
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_001.py
+    digest: 8d188cc9a7a3b0e1e72404c421bc298563be457e1588f6d5b73c2b53715341da
+output_contract:
+- function:separate_paren_groups
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/1
+  entry_point: separate_paren_groups
+  n_test_cases: 5
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: separate_paren_groups
+  tests:
+  - assert separate_paren_groups('(()()) ((())) () ((())()())') == ['(()())', '((()))', '()', '((())()())']
+  - assert separate_paren_groups('() (()) ((())) (((())))') == ['()', '(())', '((()))', '(((())))']
+  - assert separate_paren_groups('(()(())((())))') == ['(()(())((())))']
+  - assert separate_paren_groups('( ) (( )) (( )( ))') == ['()', '(())', '(()())']
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('from typing import List\\n\\n\\ndef separate_paren_groups(paren_string: str) -> List[str]:\\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\\n    separate those group into separate strings and return the list of those.\\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\\n    Ignore any spaces in the input string.\\n    >>> separate_paren_groups(\\'( ) (( )) (( )( ))\\')\\n    [\\'()\\', \\'(())\\', \\'(()())\\']\\n    \"\"\"\\n\\n\\n    cnt, group, results = 0, \"\", []\\n    for ch in paren_string:\\n        if ch == \"(\": cnt += 1\\n        if ch == \")\": cnt -= 1\\n        if ch != \" \": group += ch\\n        if cnt == 0:\\n            if group != \"\": results.append(group)\\n            group = \"\"\\n    return results\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['separate_paren_groups']\n_inputs = [['(()()) ((())) () ((())()())'], ['() (()) ((())) (((())))'], ['(()(())((())))'], ['( ) (( )) (( )( ))'], ['()'], ['(())'], ['((()))()'], ['()()()'], ['()(()())()'], ['(((()()((())))))'], ['((()()))(())'], ['()(()()((())))'], ['()()()(((()())))()(())'], ['(((())))()((()()))'], ['(((())))()(((())))()((()()))((()()))'], ['((((((())))()(((())))()((()()))((()())))()))(())'], ['()(()())()(()()((())))()'], ['()(()()((()))(((()()((()))))))'], ['()()((((()()((()))))))'], ['()()((((()()((()))))()()()))'], ['()()()(((()())))()((()))'], ['((()()((((((())))()(((())))()((()()))((()())))()))(())))(())'], ['()()()(()()()(((()())))()((()))((()())))()(())'], ['()()(()())()(()())()'], ['(((()))())()((()()))'], ['()()(()())()(()()((()))())()'], ['()()((((()()((()))))))()(()())()(()()((())))()'], ['()()(((((()()((()))))))()(()())()(()))()'], ['((() ((()()((((((  )))))))()()))) (()(()))()(()())'], ['((( ) ((( )) () (( ))))) (((( )))) (( ))'], ['(()) (()) ((() ((())))()) ((())(()))()'], ['((()) ()) ()(()) (()(())())'], ['((()) (())() (())(()))()(((())))((()()))((()))'], ['(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())))'], ['(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())))()()()()()'], ['()()()()()()((()))()()()((()))()()()((()))()()()((()))()()()((()))()()()((()))()()()((()))()()()'], ['() ( ) (( )) ((( )))()(()()()) ((()())())() (()()()()()())'], ['((( ) (((()) (()) ((() ((())))()) ((())(()))()( )) () (( ))))) (((( )))) (( ))'], ['(()()()()()())'], ['(()) (()) '], ['((( ) (((())) (()) ((() ((())((((((() ((() ((() ())))))))))))()) ((())(()))()( )) () (( ))))) (((( )))) (( ))'], ['(()) ((((() ((()()((((((  )))))))()()))) (()(()))()(()()))) '], ['((( ) (((()(())())) (()) ((() ((())((((((() ((() ((() ())))))))))))()) ((())(()))()( )) () (( ))))) (((( )))) (( ))'], ['()(())'], ['(())()'], ['(()(()))'], ['((( ) (((()(())()) (()) ((() ((())((((((() ((() ((() ())))))))))))()) ((())(()))()( )) (())(()))()((((()))((())))((()()))((())))() (( ))))) (((( )))) (( ))'], ['(())(())'], [' (()) (()) ((() ((())))()) ((())(()))()'], ['((())(()))()'], ['()((()()()()()()((()))()()()((()))()()()((()))()()()((()))()()()((()))()()()((()))()()()((()))()()()))'], ['(()(())())'], [''], ['((( ) )(((())) (()(())(( ))))) (((( )))) (( ))'], ['((()) ()) ()(( )) (()(())())'], ['(()()()())'], ['()(()())()(())'], ['()()()()()()((()))()()()((()))()()(())'], ['(()(()))()(()())'], ['((()())())()'], ['((( ) (((()) (()) ((() ((()))))()) (()()()()()())((())(()))()( )) () (( ())))) (((( )))) (( ))'], ['((( )) ()) ()(()) (()(())())'], ['((((((()) ((() ((() ())))))))))'], ['(((()) ()) ())'], ['(())((()(((())))((()()))(((((()) (())() (())(())((())((( ) (((()) (()) ((() ((())))()) (()()()()()())((())(()))()( )) () (( ())))) (((( )))) (( )))))()))((())))))'], ['( ) (( )) (( )( ))       ()()()'], ['(())(()())()((((((()))))))'], ['( )'], ['((()))'], ['((( ) ((( )) () (( )))))  (((( )))) (( ))'], ['((( ) ((( )((( ) ((( )) () (( ))))) (((( )))) (( ))) () (( ))))) (((( )))) (( ))'], ['() ( ) (( )) ((( )))()(()()()) ((()())())()(()()()()()())'], ['(((())))(((())))(((())))(((())))(((())))(((())))(((())))(((())()(())))(((())))(((())))()()()()()'], ['((()())())()(()()()()()())'], ['((()))(()()())'], ['((( ))) (( ))'], ['(((())))'], ['((() ((()()))))()(()()())()(()())'], ['(((((((() (((()()))))))))))'], ['((()))()(())'], ['()()()()()()((()))()()()((()))()()()((()))()()()((()))()()()'], ['(()())()'], ['((())(()(()(()))()(()())()()((()))()()()((()))()))()'], ['((( ) ((( )) () (( ))))) (((( )) )) (( ))'], ['((()())())()(()(((()())()(()()))()(()())()()((())))()()()((())())()()()())'], ['(((()())))'], ['(())()()()((()))()()()']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(separate_paren_groups(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_001.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true

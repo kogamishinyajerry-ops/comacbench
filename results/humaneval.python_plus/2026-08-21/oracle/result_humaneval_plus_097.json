@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_097",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef multiply(a, b):\\n    \\\"\\\"\\\"Complete the function that takes two integers and returns \\n    the product of their unit digits.\\n    Assume the input is always valid.\\n    Examples:\\n    multiply(148, 412) should return 16.\\n    multiply(19, 28) should return 72.\\n    multiply(2020, 1851) should return 0.\\n    multiply(14,-15) should return 20.\\n    \\\"\\\"\\\"\\n\\n    return int(str(a)[-1]) * int(str(b)[-1])\\n\\n\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 0.158,
+    "setup_s": 0.0,
+    "grade_s": 0.158
+  },
+  "environment_digest": "sha256:2460f0283e0aee390851aaeddc8db661389948dab7ff39006c7908f2ebe3cd6d",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

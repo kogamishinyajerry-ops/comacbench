@@ -1,0 +1,65 @@
+id: mbpp_plus_474
+registry_id: mbpp.sanitized_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: mbppplus@release_v0.2.0-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/mbpp.sanitized_plus/mbpp_plus_474.md
+  prompt_sha256: db294c47ec3b10696e385b35999d420495df937299f5c88a1933a30c95e7094d
+  assets:
+  - path: data/mbpp/sanitized_plus/MbppPlus-NoExtreme.jsonl
+    digest: 2682a29850fb17185106b2f40e72d1ebe7091b7393c576cff71b60e83c42ed33
+  - path: data/mbpp/sanitized/mbpp_sanitized_test.jsonl
+    digest: ffdc47903bc8a2bcf733b2566090f1fb2324f4f1a139b1a38b4b3e3b767da8c0
+  - path: data/mbpp/sanitized_plus/oracle/mbpp_plus_474.py
+    digest: aaa5df11ac3c7e8a95a76d49ff45fc8b7cf1c7c48b11f75be63389daec94bc31
+output_contract:
+- script
+reference:
+  source: MBPP+ 官方 release v0.2.0 NoExtreme 变体（Apache-2.0；上游 CC BY 4.0）
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mbpp_task_id: 474
+  entry_point: replace_char
+  n_test_cases: 4
+  test_note: 官方 assertion 逐条 + base/plus 全量输入活体 GT 比对（双侧 _nb 归一）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: replace_char
+  tests:
+  - assert replace_char("polygon",'y','l')==("pollgon")
+  - assert replace_char("character",'c','a')==("aharaater")
+  - assert replace_char("python",'l','a')==("python")
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef replace_char(str1, ch, newch):\\n    return str1.replace(ch, newch)\\n', _gt_ns)\n_gt = _gt_ns['replace_char']\n_inputs = [['polygon', 'y', 'l'], ['character', 'c', 'a'], ['python', 'l', 'a'], ['', 'a', 'b'], ['python', 'z', 'a'], ['python', 'o', 'o'], ['AbCdEfGhIjKlMnOpQrStUvWxYz', 'm', 'n'], ['pythoon', 'a', 'b'], ['python', 'z', 'o'], ['z', 'a', 'a'], ['z', 'z', 'z'], ['', 'm', 'm'], ['AbCdEfGhIjKlMnOpQrStUvWxYz', 'a', 'b'], ['python', 'z', 'z'], ['zzz', 'z', 'z'], ['zzz', 'a', 'a'], ['a', 'a', 'a'], ['a', 'b', 'o'], ['b', 'z', 'o'], ['', 'o', 'm'], ['', 'a', 'a'], ['AbCdEfGhIjKlMnOpQrStUvWYzz', 'a', 'a'], ['n', 'z', 'a'], ['', 'b', 'o'], ['pythona', 'z', 'a'], ['pythoonpythona', 'z', 'a'], ['zz', 'a', 'a'], ['mz', 'z', 'z'], ['', 'o', 'o'], ['a', 'm', 'o'], ['b', 'a', 'b'], ['b', 'o', 'o'], ['AbCdEfGhIjKlMnOpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzz', 'm', 'n'], ['b', 'a', 'a'], ['mz', 'a', 'a'], ['zzz', 'z', 'a'], ['m', 'a', 'a'], ['zz', 'z', 'a'], ['mz', 'a', 'b'], ['aa', 'b', 'o'], ['m', 'n', 'm'], ['a', 'o', 'b'], ['z', 'a', 'z'], ['AbCdEfGhIjKlMnOpQrStUvWxYz', 'a', 'a'], ['bb', 'a', 'a'], ['python', 'o', 'b'], ['n', 'n', 'n'], ['zzzzz', 'a', 'a'], ['zz', 'z', 'o'], ['zz', 'o', 'o'], ['a', 'z', 'a'], ['a', 'b', 'a'], ['n', 'z', 'z'], ['opythoon', 'a', 'o'], ['AbCdEfGhIjKlMnOpQrStUvWxYz', 'm', 'b'], ['zzzzza', 'b', 'b'], ['AbCdEfGhIjKlMnOpQrSthUvWYzz', 'a', 'a'], ['AbCdEfGhIjKlMnOpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzz', 'b', 'b'], ['AbCdEfGhIjKlMnOpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzz', 'z', 'z'], ['zz', 'z', 'z'], ['aa', 'b', 'b'], ['pythona', 'a', 'a'], ['AbCdEfGhIjKlaMnOpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzz', 'o', 'o'], ['mz', 'b', 'o'], ['mAbCdEfGhIjKlMnOpQrSthUvWYzz', 'm', 'm'], ['zz', 'n', 'a'], ['pythoonpynthona', 'z', 'a'], ['aa', 'o', 'o'], ['b', 'b', 'b'], ['a', 'a', 'z'], ['zpythoonpynthona', 'z', 'o'], ['zzzzz', 'm', 'm'], ['a', 'm', 'm'], ['oopythoon', 'a', 'o'], ['m', 'm', 'm'], ['zpythoonpynthona', 'o', 'b'], ['o', 'o', 'o'], ['pytoopythoonhona', 'z', 'a'], ['AbCdEfGhIjKlaMnOpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzz', 'z', 'a'], ['bb', 'a', 'o'], ['oo', 'o', 'o'], ['pytbboopythoonhona', 'z', 'z'], ['opythoon', 'z', 'z'], ['aa', 'z', 'b'], ['pythnn', 'o', 'b'], ['zzzzza', 'o', 'b'], ['AbCdEfGhIjKlaMnOGpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzz', 'o', 'o'], ['aaa', 'b', 'b'], ['AbCdEfGhIjKlMnOpQrStUvWxAWbCdEfGhIjKlMnOpQrStUvWxYzz', 'b', 'b'], ['a', 'o', 'a'], ['pythoAbCdEpythnnfGhIjKlMnOpQaaaxYzn', 'z', 'z'], ['AbCdEfGhIjKlMnOpQrStUvWxAbCdEfKGhIjKlMnOpQrStUvWxYzz', 'm', 'n'], ['opythoon', 'o', 'o'], ['pythooon', 'a', 'b'], ['pythooon', 'm', 'm'], ['', 'b', 'b'], ['zpythoonpynthona', 'b', 'o'], ['o', 'b', 'o'], ['b', 'b', 'o'], ['n', 'z', 'n'], ['zzzzza', 'b', 'a'], ['o', 'b', 'a'], ['ma', 'm', 'm'], ['mz', 'z', 'a'], ['AbCdEfGhIjKlMnOpQrStUvWxAWbCdEfGhIjKlMnOpQrStUvWxYzz', 'a', 'a'], ['zzzAbCdEfGhIjKlaMnOGpQrStUvWxAbCdEfGhIjKlMnOpQrStUvWxYzzzz', 'a', 'a'], ['pytohona', 'z', 'a']]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(replace_char(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_imports:
+  - import math
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/mbpp/sanitized_plus/oracle/mbpp_plus_474.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；summary 另报 pass@1
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/mbppplus_release v0.2.0 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ CC BY 4.0（上游 MBPP 本体）
+  status: confirmed-dataset
+  revision: mbppplus@release_v0.2.0-noextreme_20260821
+  mirror_allowed: true

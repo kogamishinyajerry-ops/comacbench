@@ -1,0 +1,9 @@
+Write a function to perform index wise multiplication of tuple elements in the given two tuples.
+
+Use exactly these top-level function name(s) in your solution: index_multiplication.
+
+Your code should pass these tests:
+
+```
+assert index_multiplication(((1, 3), (4, 5), (2, 9), (1, 10)),((6, 7), (3, 9), (1, 1), (7, 3)) ) == ((6, 21), (12, 45), (2, 9), (7, 30))
+```

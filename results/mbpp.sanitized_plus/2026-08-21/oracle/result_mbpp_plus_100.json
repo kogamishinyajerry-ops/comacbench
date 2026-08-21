@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_100",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\ndef next_smallest_palindrome(num):\\n    if all(digit == '9' for digit in str(num)):\\n        return num + 2\\n    else:\\n        num = [int(digit) for digit in str(num)]\\n        n = len(num)\\n        mid = n // 2\\n        left_smaller = False\\n        # if n is odd, ignore the middle digit at first\\n        i = mid - 1\\n        j = mid + 1 if n % 2 else mid\\n        while i >= 0 and num[i] == num[j]:\\n            i -= 1\\n            j += 1\\n        # stop if traverse end or difference found\\n        if i < 0 or num[i] < num[j]:\\n            left_smaller = True\\n        # copy left to right\\n        while i >= 0:\\n            num[j] = num[i]\\n            j += 1\\n            i -= 1\\n        # the middle digit must be incremented\\n        if left_smaller:\\n            carry = 1\\n            i = mid - 1\\n            if n % 2:\\n                num[mid] += carry\\n                carry = num[mid] // 10\\n                num[mid] %= 10\\n                j = mid + 1\\n            else:\\n                j = mid\\n            while i >= 0:\\n                num[i] += carry\\n                carry = num[i] // 10\\n                num[i] %= 10\\n                num[j] = num[i]\\n                j += 1\\n                i -= 1\\n    return int(\\\"\\\".join(map(str, num)))\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 0.178,
+    "setup_s": 0.0,
+    "grade_s": 0.177
+  },
+  "environment_digest": "sha256:a4a2038026bc51de101fd4314e3af8605c62f991fe2b4324ef750d7d8a57dd8b",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

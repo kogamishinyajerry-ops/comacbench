@@ -1,0 +1,66 @@
+id: humaneval_plus_123
+registry_id: humaneval.python_plus
+domain: coding
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: humanevalplus@release_v0.1.10-noextreme_20260821
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/humaneval.python_plus/humaneval_plus_123.md
+  prompt_sha256: 151b9655d4331f5f2849df461adf686fb9f720bfccea33d9087ff9157c729b61
+  assets:
+  - path: data/humaneval/python_plus/HumanEvalPlus-NoExtreme.jsonl
+    digest: 3c5aa88735e442f327030f7097f9443ee173419e0db2a75b1c12730415398e88
+  - path: data/humaneval/python/HumanEval.jsonl
+    digest: b2adeeae8b383b6f0c615746a397f25c8abe44da4afb29cd10e6c4bbf0463fd3
+  - path: data/humaneval/python_plus/oracle/humaneval_plus_123.py
+    digest: 878d43b935939d1ff158f27476ba9fe544b1bf17ee13e0ad1fc983eab522a58e
+output_contract:
+- function:get_odd_collatz
+reference:
+  source: HumanEval+ 官方 release v0.1.10 NoExtreme 变体（Apache-2.0）
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  task_id: HumanEval/123
+  entry_point: get_odd_collatz
+  n_test_cases: 5
+  test_note: 原版断言逐条拆分 + base/plus 全量输入活体 GT 比对（官方语义，canonical 判分时现场执行，双侧 _nb 归一 tuple/set 保类型）
+  uncertainty_note: 断言二值判定无比对不确定度；atol 由官方 release 逐题给出
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  entry_point: get_odd_collatz
+  tests:
+  - assert get_odd_collatz(14) == [1, 5, 7, 11, 13, 17]
+  - assert get_odd_collatz(5) == [1, 5]
+  - assert get_odd_collatz(12) == [1, 3, 5], 'This prints if this assert fails 1 (good for debugging!)'
+  - assert get_odd_collatz(1) == [1], 'This prints if this assert fails 2 (also good for debugging!)'
+  - "def _nb(x):\n    import numpy as _np\n    if isinstance(x,(bool,int,float,str,type(None))): return x\n    if isinstance(x,_np.bool_): return bool(x)\n    if isinstance(x,_np.integer): return int(x)\n    if isinstance(x,_np.floating): return float(x)\n    if isinstance(x,_np.ndarray): return [_nb(v) for v in x.tolist()]\n    if isinstance(x,tuple): return {'__T__': [_nb(v) for v in x]}\n    if isinstance(x,list): return [_nb(v) for v in x]\n    if isinstance(x,(set,frozenset)): return {'__S__': sorted((_nb(v) for v in x),key=repr)}\n    if isinstance(x,dict): return {str(k):_nb(v) for k,v in x.items()}\n    return repr(x)\n\n_gt_ns = {}\nexec('\\ndef get_odd_collatz(n):\\n    \"\"\"\\n    Given a positive integer n, return a sorted list that has the odd numbers in collatz sequence.\\n\\n    The Collatz conjecture is a conjecture in mathematics that concerns a sequence defined\\n    as follows: start with any positive integer n. Then each term is obtained from the \\n    previous term as follows: if the previous term is even, the next term is one half of \\n    the previous term. If the previous term is odd, the next term is 3 times the previous\\n    term plus 1. The conjecture is that no matter what value of n, the sequence will always reach 1.\\n\\n    Note: \\n        1. Collatz(1) is [1].\\n        2. returned list sorted in increasing order.\\n\\n    For example:\\n    get_odd_collatz(5) returns [1, 5] # The collatz sequence for 5 is [5, 16, 8, 4, 2, 1], so the odd numbers are only 1, and 5.\\n    \"\"\"\\n\\n\\n    ans, x = [], n\\n    while x != 1:\\n        if x % 2 == 1: ans.append(x)\\n        x = x // 2 if x % 2 == 0 else x * 3 + 1\\n    ans.append(1)\\n    return sorted(ans)\\n\\n\\n', _gt_ns)\n_gt = _gt_ns['get_odd_collatz']\n_inputs = [[14], [5], [12], [1], [2], [3], [7], [10], [15], [20], [25], [30], [100], [13], [6], [101], [99], [29], [19], [27], [14], [26], [8], [28], [5], [11], [102], [18], [16], [98], [17], [4], [21], [12], [9], [1], [62], [22], [103], [97], [10000], [27345], [48271], [99999], [1000000], [10000000000000], [982927638], [1073741825], [9857654321], [9999999999999999999999999999999999], [9999999999999999999999999999999998], [27347], [1000001], [1000002], [10001], [27348], [27349], [10000000000000000000000000000000000], [27350], [982927639], [10002], [999999], [982927641], [982927642], [982927640], [48272], [1073741824], [100001], [1073741826], [100000], [1073741822], [9857654322], [9999], [100002], [48270], [27346], [99998], [982927637], [999998], [99997], [982927636], [37], [1073741823], [982927643], [1073741827], [10000000000000000000000000000000001], [82], [999997], [1073741821], [70], [36], [10003], [76], [9999999999999], [10004], [9999999999999999999999999999999997], [2147483647], [9223372036854775807], [9223372036854775808], [9857654320], [10000000000001], [10000000000002], [27344], [10000000000003], [9997], [67], [9857654323], [27343], [9996], [9998], [10000000000004], [9999999999998], [27342], [52], [27340], [68], [9999999999997], [83], [9857654319], [9999999999996], [9999999999995], [9999999999994], [9857654324], [48273], [48274], [27341], [35], [27339], [54], [48276], [53], [9999999999993], [982927644], [34], [982927645], [33], [999996], [9999999999992], [9999999999991], [1073741828], [96], [999995], [55]]\n_atol = 0\nfor _inp in _inputs:\n    _exp = _nb(_gt(*_inp))\n    _got = _nb(get_odd_collatz(*_inp))\n    if not (_got == _exp):\n        import numpy as _np\n        try:\n            assert _np.allclose(_got, _exp, rtol=1e-07, atol=_atol)\n        except Exception:\n            assert False, f'mismatch on {_inp!r}'\n"
+  test_split_mode: split_pure+live_gt_batch
+  test_imports: []
+  determinism_runs: 2
+  sandbox:
+    banned: network/process/ctypes/sys.path
+    isolated_interpreter: true
+  oracle_source: data/humaneval/python_plus/oracle/humaneval_plus_123.py
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.2
+    objective: 0.0
+    robustness: 0.3
+  note: objective=N/A 权重 0；robustness=两次执行确定性；pass@1（=physics==1.0）为 HumanEval+ NoExtreme 口径
+limits:
+  cpu: 4
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: evalplus/humanevalplus_release v0.1.10 NoExtreme（GitHub）
+  license: Apache-2.0（数据）/ MIT（复用原版 prompt）
+  status: confirmed-split
+  revision: humanevalplus@release_v0.1.10-noextreme_20260821
+  mirror_allowed: true
