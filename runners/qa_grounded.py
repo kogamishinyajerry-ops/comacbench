@@ -282,19 +282,23 @@ def extract_boxed(text: str) -> str | None:
 
 
 def _norm_boxed(s: str) -> str:
-    """minerva 风格轻量归一化（非符号等价）：去装饰宏/空白/货币符，统一分数宏。"""
+    """minerva 风格轻量归一化（非符号等价）：去装饰宏/空白/货币符/度数标记，
+    统一分数宏，解包 \\text{}。"""
+    import re as _re
     t = s.strip()
     for old, new in (("\\left", ""), ("\\right", ""), ("\\!", ""), ("\\,", ""),
                      ("\\;", ""), ("\\ ", ""), ("$", ""), (" ", ""), ("\\dfrac", "\\frac"),
-                     ("\\tfrac", "\\frac")):
+                     ("\\tfrac", "\\frac"), ("^{\\circ}", ""), ("^\\circ", ""), ("°", "")):
         t = t.replace(old, new)
-    return t.rstrip(".")
+    t = _re.sub(r"\\text\{([^{}]*)\}", r"\1", t)     # \text{Evelyn} -> Evelyn
+    return t.rstrip(".").strip()
 
 
 def _try_number(s: str) -> float | None:
-    """数字 / a/b / \\frac{a}{b} 形式数值化；失败 None。"""
+    """数字 / a/b / \\frac{a}{b} 形式数值化（先去度数标记）；失败 None。"""
     import re as _re
-    t = s.strip().lstrip("$")
+    t = (s.strip().lstrip("$").replace("^{\\circ}", "")
+         .replace("^\\circ", "").replace("°", ""))
     v = _parse_number(t)
     if v is not None:
         return v
@@ -304,6 +308,18 @@ def _try_number(s: str) -> float | None:
         if m and float(m.group(2)) != 0:
             return float(m.group(1)) / float(m.group(2))
     return None
+
+
+def extract_hash_text(text: str) -> str | None:
+    """#### 通道文本回退：最后一个 #### 之后的首行非空内容（模型未按 \\boxed
+    协议输出时，其 #### 声明仍是最终答案——MATH-500 型的合法等价通道）。"""
+    s = strip_think_inline(text)
+    if "####" not in s:
+        return None
+    tail = s.rsplit("####", 1)[1]
+    first = next((ln.strip() for ln in tail.splitlines() if ln.strip()), "")
+    first = first.strip().strip("$").strip()
+    return first or None
 
 
 def grade_math_boxed(ref: str, ans: str, rel_tol: float) -> float:
@@ -362,22 +378,30 @@ def run_task(
         rel_tol = float(task["grader"].get("numeric_rel_tol", 1e-6))
         ref_boxed = task["reference"].get("reference_boxed")
         if ref_boxed is not None:
-            # MATH-500 型：boxed 抽取为主，#### 数值为退化兜底
+            # MATH-500 型：boxed 优先 -> #### 文本通道 -> #### 数值兜底
             ans_box = extract_boxed(raw)
             if ans_box is not None:
                 gate, gate_failures, failure_mode = 1, [], None
                 req_score = grade_math_boxed(str(ref_boxed), ans_box, rel_tol)
                 parsed = ans_box
             else:
-                num = parse_math_answer(raw)
-                ref_num = _try_number(_norm_boxed(str(ref_boxed)))
-                if num is not None and ref_num is not None:
+                # 模型未按 \boxed 协议时，其 #### 声明仍是最终答案（等价通道，
+                # 走同一归一化比对；#### 后首行整段文本而非仅数字——含 p-q/Evelyn 类）
+                hash_txt = extract_hash_text(raw)
+                if hash_txt is not None:
                     gate, gate_failures, failure_mode = 1, [], None
-                    req_score = grade_math_answer(ref_num, num, rel_tol)
-                    parsed = num
+                    req_score = grade_math_boxed(str(ref_boxed), hash_txt, rel_tol)
+                    parsed = hash_txt
                 else:
-                    gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
-                    req_score, parsed = 0.0, None
+                    num = parse_math_answer(raw)
+                    ref_num = _try_number(_norm_boxed(str(ref_boxed)))
+                    if num is not None and ref_num is not None:
+                        gate, gate_failures, failure_mode = 1, [], None
+                        req_score = grade_math_answer(ref_num, num, rel_tol)
+                        parsed = num
+                    else:
+                        gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+                        req_score, parsed = 0.0, None
             subscores = {"physics": None, "requirements": req_score,
                          "objective": None, "robustness": 0.0}
             layer_details = {"parsed_answer": parsed, "reference_number": str(ref_boxed),

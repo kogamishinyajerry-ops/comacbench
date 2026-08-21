@@ -13,7 +13,7 @@
 - 正确: 250/250（accuracy = 1.0000，分母=计分任务数）
 - 子分适用性: physics=N/A（无证据/拒答层）；objective=N/A（并入 requirements）；robustness=N/A（样本=1）
 - 权重（任务 YAML 覆写）: score = gate × 1.0×requirements
-- 抽取口径: #### 优先 -> 显式 answer is/答案 -> 全文末数（parse_math_answer）
+- 抽取口径: GSM8K 型 #### 优先 -> answer is/答案 -> 末数（parse_math_answer）；MATH-500 型 \\boxed{} 优先（花括号配平）-> #### 数值兜底，归一化后精确匹配（数值化优先）
 
 ## 每题明细
 
