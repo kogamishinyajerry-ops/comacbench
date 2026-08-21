@@ -26,6 +26,8 @@ benchmarks/
 ├── data/<来源族>/<基准>/      # 镜像数据 + PROVENANCE.md（先许可证后镜像，sha256 锁定）
 ├── report/
 │   └── 2026-08-19-benchmark-survey.md   # 调研报告归档（决策证据基线，冻结）
+├── plugin/
+│   └── dsh-comac-benchmark/  # DSH 插件（comac_* 六工具，薄代理 runners/；安装法见其 README）
 └── results/                  # 基线报告落点 results/<registry_id>/<date>/<provider>/
     └── M1-summary.md         # 里程碑总结（M1 起每里程碑一份）
 ```
