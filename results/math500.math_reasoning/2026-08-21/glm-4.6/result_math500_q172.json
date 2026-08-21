@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q172",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given an arithmetic sequence where the fourth term is 200 and the eighth term is 500. In an arithmetic sequence, the term at the midpoint index equals the average of two symmetric terms. Since the midpoint of indices 4 and 8 is 6, the sixth term is the average:\\n\\n\\\\[\\na_6 = \\\\frac{a_4 + a_8}{2} = \\\\frac{200 + 500}{2} = \\\\frac{700}{2} = 350.\\n\\\\]\\n\\nAlternatively, using the formulas: let \\\\(a\\\\) be the first term and \\\\(d\\\\) the common difference. Then\\n\\n\\\\[\\n\\\\begin{cases}\\na + 3d = 200,\\\\\\\\\\na + 7d = 500.\\n\\\\end{cases}\\n\\\\]\\n\\nSubtracting gives \\\\(4d = 300\\\\), so \\\\(d = 75\\\\). Then \\\\(a = 200 - 3 \\\\cdot 75 = -25\\\\). Hence the sixth term is \\\\(a + 5d = -25 + 5 \\\\cdot 75 = 350\\\\).\\n\\nThus, the sixth term is \\\\(350\\\\).\\n\\n\\\\boxed{350}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"350\", \"reference_number\": \"350\", \"raw_tail\": \" so \\\\(d = 75\\\\). Then \\\\(a = 200 - 3 \\\\cdot 75 = -25\\\\). Hence the sixth term is \\\\(a + 5d = -25 + 5 \\\\cdot 75 = 350\\\\).\\n\\nThus, the sixth term is \\\\(350\\\\).\\n\\n\\\\boxed{350}\"}"
+  },
+  "timings": {
+    "agent_s": 19.758,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given an arithmetic sequence where the fourth term is 200 and the eighth term is 500. In an arithmetic sequence, ' attempts=1"
+  ]
+}

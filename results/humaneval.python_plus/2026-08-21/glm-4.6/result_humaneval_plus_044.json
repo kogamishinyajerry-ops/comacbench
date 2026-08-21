@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_044",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def change_base(x: int, base: int):\\n    \\\"\\\"\\\"Change numerical base of input number x to base.\\n    return string representation after the conversion.\\n    base numbers are less than 10.\\n    >>> change_base(8, 3)\\n    '22'\\n    >>> change_base(8, 2)\\n    '1000'\\n    >>> change_base(7, 2)\\n    '111'\\n    \\\"\\\"\\\"\\n    if x == 0:\\n        return \\\"0\\\"\\n    negative = x < 0\\n    if negative:\\n        x = -x\\n    digits = []\\n    while x > 0:\\n        digits.append(str(x % base))\\n        x //= base\\n    # digits are least significant first, so reverse them\\n    result = ''.join(reversed(digits))\\n    if negative:\\n        result = '-' + result\\n    return result\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 26.695,
+    "setup_s": 0.0,
+    "grade_s": 0.139
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

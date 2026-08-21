@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q460",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"Alright, let's tackle this geometry problem step by step. I'll start by understanding the given information and then work through the angles to find the measure of ∠STR.\\n\\n### Understanding the Diagram and Given Information\\n\\nFirst, let's interpret the diagram based on the Asymptote code provided. From the Asymptote code, we can deduce the positions of the points:\\n\\n- Points Q and R are on the x-axis, with Q at (0,0) and R at (1,0).\\n- Point P is above the x-axis at (1.1, 0.5).\\n- Point S is defined as 0.6*P, so S is at (0.66, 0.3).\\n- Point T is defined as R + 0.6*(P - R). Calculating that:\\n  - P - R = (1.1 - 1, 0.5 - 0) = (0.1, 0.5)\\n  - 0.6*(P - R) = (0.06, 0.3)\\n  - R + that = (1 + 0.06, 0 + 0.3) = (1.06, 0.3)\\n  \\nSo, T is at (1.06, 0.3).\\n\\nNow, the lines are drawn as follows:\\n- T--S\\n- S--P\\n- P--R\\n- R--Q\\n- Q--S\\n\\nThis forms a sort of quadrilateral with an extra line from Q to S, and ST is parallel to QR (since ST is from S to T, and QR is from Q to R, both horizontal lines, but wait, let's check their slopes).\\n\\n### Verifying Parallelism\\n\\nGiven that ST ∥ QR, let's confirm this by checking their slopes.\\n\\n- QR goes from Q(0,0) to R(1,0). Slope of QR = (0 - 0)/(1 - 0) = 0 (horizontal line).\\n- ST goes from S(0.66,0.3) to T(1.06,0.3). Slope of ST = (0.3 - 0.3)/(1.06 - 0.66) = 0/0.4 = 0.\\n\\nSo, both ST and QR are horizontal lines, confirming that ST ∥ QR.\\n\\n### Given Angles\\n\\nWe're given:\\n- �\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": 0.0, \"reference_number\": \"75^\\\\circ\", \"raw_tail\": \".3). Slope of ST = (0.3 - 0.3)/(1.06 - 0.66) = 0/0.4 = 0.\\n\\nSo, both ST and QR are horizontal lines, confirming that ST ∥ QR.\\n\\n### Given Angles\\n\\nWe're given:\\n- �\"}"
+  },
+  "timings": {
+    "agent_s": 598.715,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"Alright, let's tackle this geometry problem step by step. I'll start by understanding the given information and then wor\" attempts=2"
+  ]
+}

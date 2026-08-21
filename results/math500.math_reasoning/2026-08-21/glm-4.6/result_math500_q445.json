@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q445",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the circle \\\\(x^2+y^2=2\\\\) and the parabola \\\\(y^2=8x\\\\). They have two common tangents, which we will find, and the four points of tangency form a quadrilateral. We need its area.\\n\\n### Step 1: Find the common tangents.\\nLet a non‑vertical line be \\\\(y = mx + c\\\\).  \\nFor it to be tangent to the circle, its distance from the center \\\\((0,0)\\\\) must equal the radius \\\\(\\\\sqrt{2}\\\\):\\n\\\\[\\n\\\\frac{|c|}{\\\\sqrt{m^2+1}} = \\\\sqrt{2} \\\\quad\\\\Longrightarrow\\\\quad c^2 = 2(m^2+1). \\\\tag{1}\\n\\\\]\\n\\nFor it to be tangent to the parabola, substitute \\\\(y = mx + c\\\\) into \\\\(y^2 = 8x\\\\):\\n\\\\[\\n(mx + c)^2 = 8x \\\\;\\\\Longrightarrow\\\\; m^2 x^2 + (2mc - 8)x + c^2 = 0.\\n\\\\]\\nTangency requires the discriminant to be zero:\\n\\\\[\\n(2mc - 8)^2 - 4m^2c^2 = 0 \\\\;\\\\Longrightarrow\\\\; -32mc + 64 = 0 \\\\;\\\\Longrightarrow\\\\; mc = 2. \\\\tag{2}\\n\\\\]\\n\\nFrom (2), \\\\(c = \\\\frac{2}{m}\\\\) (since \\\\(m \\\\neq 0\\\\)). Substitute into (1):\\n\\\\[\\n\\\\left(\\\\frac{2}{m}\\\\right)^2 = 2(m^2+1) \\\\;\\\\Longrightarrow\\\\; \\\\frac{4}{m^2} = 2m^2 + 2 \\\\;\\\\Longrightarrow\\\\; 4 = 2m^4 + 2m^2.\\n\\\\]\\nDivide by 2: \\\\(2 = m^4 + m^2\\\\). Let \\\\(u = m^2 \\\\ge 0\\\\): \\\\(u^2 + u - 2 = 0\\\\). This factors as \\\\((u+2)(u-1)=0\\\\), so \\\\(u = 1\\\\) (since \\\\(u = -2\\\\) is invalid). Hence \\\\(m^2 = 1\\\\) and \\\\(m = \\\\pm 1\\\\).\\n\\nThen \\\\(c = \\\\frac{2}{m}\\\\) gives:\\n- \\\\(m = 1\\\\), \\\\(c = 2\\\\) → line \\\\(y = x + 2\\\\).\\n- \\\\(m = -1\\\\), \\\\(c = -2\\\\) → line \\\\(y = -x - 2\\\\).\\n\\nThese are the two common tangents.\\n\\n### Step 2: Find the points of tangency.\\n**For the circle:** The point of tangency is the foot of the perpendicular from the center to the line.\\n\\n- For \\\\(y = x+2\\\\) (or \\\\(x - y + 2 = 0\\\\)): foot = \\\\(\\\\left(-\\\\frac{1\\\\cdot 2}{1^2+(-1)^2},\\\\; -\\\\frac{(-1)\\\\cdot 2}{1^2+(-1)^2}\\\\right) = (-1, 1)\\\\). Call this \\\\(A\\\\).\\n- For \\\\(y = -x-2\\\\) (or \\\\(x + y + 2 = 0\\\\)): foot = \\\\(\\\\left(-\\\\frac{1\\\\cdot 2}{1^2+1^2},\\\\; -\\\\frac{1\\\\cdot 2}{1^2+1^2}\\\\right) = (-1, -1)\\\\). Call this \\\\(C\\\\).\\n\\n**For the parabola:** Substitute the line into the parabola and use the double root condition.\\n\\n- For \\\\(y = x+2\\\\): \\\\((x+2)^2 = 8x\\\\) → \\\\(x^2 - 4x + 4 = 0\\\\) → \\\\((x-2)^2 = 0\\\\) → \\\\(x = 2\\\\), \\\\(y = 4\\\\). Call this \\\\(B\\\\).\\n- For \\\\(y = -x-2\\\\): \\\\((-x-2)^2 = 8x\\\\) → same quadratic → \\\\(x = 2\\\\), \\\\(y = -4\\\\). Call this \\\\(D\\\\).\\n\\nThus the four points are:\\n\\\\[\\nA(-1,1),\\\\quad B(2,4),\\\\quad C(-1,-1),\\\\quad D(2,-4).\\n\\\\]\\n\\n### Step 3: Determine the quadrilateral.\\nThe convex hull of these four points is a quadrilateral. Ordering the vertices clockwise (or counterclockwise) we can take, for example, \\\\(A \\\\to B \\\\to D \\\\to C\\\\). This gives a convex quadrilateral with two vertical sides (\\\\(CA\\\\) and \\\\(BD\\\\)) and two slanted sides (\\\\(AB\\\\) and \\\\(DC\\\\)).\\n\\n### Step 4: Compute the area.\\nUse the shoelace formula with vertices \\\\(A(-1,1)\\\\), \\\\(B(2,4)\\\\), \\\\(D(2,-4)\\\\), \\\\(C(-1,-1)\\\\):\\n\\n\\\\[\\n\\\\begin{array}{c|c}\\nx & y \\\\\\\\ \\\\hline\\n-1 & 1 \\\\\\\\\\n2 & 4 \\\\\\\\\\n2 & -4 \\\\\\\\\\n-1 & -1\\n\\\\end{array}\\n\\\\]\\n\\nSum of products \\\\(x_i y_{i+1}\\\\):\\n\\\\[\\n(-1)\\\\cdot4 + 2\\\\cdot(-4) + 2\\\\cdot(-1) + (-1)\\\\cdot1 = -4 -8 -2 -1 = -15.\\n\\\\]\\n\\nSum of products \\\\(y_i x_{i+1}\\\\):\\n\\\\[\\n1\\\\cdot2 + 4\\\\cdot2 + (-4)\\\\cdot(-1) + (-1)\\\\cdot(-1) = 2 + 8 + 4 + 1 = 15.\\n\\\\]\\n\\nArea = \\\\(\\\\frac{1}{2}\\\\left|(-15) - 15\\\\right| = \\\\frac{1}{2}\\\\cdot 30 = 15\\\\).\\n\\nAlternatively, note that the quadrilateral is a trapezoid with parallel vertical sides of lengths \\\\(CA = 2\\\\) and \\\\(BD = 8\\\\), and the horizontal distance between them is \\\\(3\\\\), so area = \\\\(\\\\frac{1}{2}(2+8)\\\\cdot 3 = 15\\\\).\\n\\n### Final answer\\n\\\\[\\n\\\\boxed{15}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"15\", \"reference_number\": \"15\", \"raw_tail\": \"ths \\\\(CA = 2\\\\) and \\\\(BD = 8\\\\), and the horizontal distance between them is \\\\(3\\\\), so area = \\\\(\\\\frac{1}{2}(2+8)\\\\cdot 3 = 15\\\\).\\n\\n### Final answer\\n\\\\[\\n\\\\boxed{15}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 250.82,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the circle \\\\(x^2+y^2=2\\\\) and the parabola \\\\(y^2=8x\\\\). They have two common tangents, which we will find, an' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_296",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def get_Inv_Count(arr):\\n    # Convert to list and handle trivial cases\\n    arr = list(arr)\\n    n = len(arr)\\n    if n <= 1:\\n        return 0\\n\\n    temp = [0] * n\\n\\n    def _merge_sort(left, right):\\n        inv_count = 0\\n        if left < right:\\n            mid = (left + right) // 2\\n            inv_count += _merge_sort(left, mid)\\n            inv_count += _merge_sort(mid + 1, right)\\n            inv_count += merge(left, mid, right)\\n        return inv_count\\n\\n    def merge(left, mid, right):\\n        i, j, k = left, mid + 1, left\\n        inv = 0\\n        while i <= mid and j <= right:\\n            if arr[i] <= arr[j]:\\n                temp[k] = arr[i]\\n                i += 1\\n            else:\\n                temp[k] = arr[j]\\n                inv += (mid - i + 1)  # all remaining in left are greater\\n                j += 1\\n            k += 1\\n        while i <= mid:\\n            temp[k] = arr[i]\\n            i += 1\\n            k += 1\\n        while j <= right:\\n            temp[k] = arr[j]\\n            j += 1\\n            k += 1\\n        for idx in range(left, right + 1):\\n            arr[idx] = temp[idx]\\n        return inv\\n\\n    return _merge_sort(0, n - 1)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 32.501,
+    "setup_s": 0.0,
+    "grade_s": 0.136
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

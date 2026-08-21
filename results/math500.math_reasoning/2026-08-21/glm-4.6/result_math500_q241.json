@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q241",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to find the smallest distance from the origin (0,0) to a point on the parabola \\\\(y = \\\\frac{1}{2}x^2 - 9\\\\). Let the point be \\\\((x, y)\\\\) with \\\\(y = \\\\frac{1}{2}x^2 - 9\\\\). The distance squared from the origin is\\n\\n\\\\[\\nD = x^2 + y^2 = x^2 + \\\\left(\\\\frac{1}{2}x^2 - 9\\\\right)^2.\\n\\\\]\\n\\nExpand the square:\\n\\n\\\\[\\n\\\\left(\\\\frac{1}{2}x^2 - 9\\\\right)^2 = \\\\frac{1}{4}x^4 - 9x^2 + 81.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\nD = x^2 + \\\\frac{1}{4}x^4 - 9x^2 + 81 = \\\\frac{1}{4}x^4 - 8x^2 + 81.\\n\\\\]\\n\\nLet \\\\(t = x^2\\\\) (\\\\(t \\\\ge 0\\\\)). Then\\n\\n\\\\[\\nD(t) = \\\\frac{1}{4}t^2 - 8t + 81.\\n\\\\]\\n\\nThis is a quadratic in \\\\(t\\\\) with positive leading coefficient, so it has a unique minimum at its vertex. Compute the derivative:\\n\\n\\\\[\\n\\\\frac{dD}{dt} = \\\\frac{1}{2}t - 8 = 0 \\\\implies t = 16.\\n\\\\]\\n\\nSince \\\\(t = 16\\\\) is non‑negative, it is admissible and gives the minimum. The corresponding \\\\(x\\\\) values are \\\\(x = \\\\pm 4\\\\).\\n\\nNow substitute \\\\(t = 16\\\\) into \\\\(D\\\\):\\n\\n\\\\[\\nD_{\\\\min} = \\\\frac{1}{4}(16)^2 - 8 \\\\cdot 16 + 81 = \\\\frac{1}{4} \\\\cdot 256 - 128 + 81 = 64 - 128 + 81 = 17.\\n\\\\]\\n\\nThus the smallest distance is \\\\(a = \\\\sqrt{D_{\\\\min}} = \\\\sqrt{17}\\\\), and we need \\\\(a^2 = 17\\\\).\\n\\nWe can verify with the point \\\\((4,-1)\\\\): distance \\\\(= \\\\sqrt{4^2 + (-1)^2} = \\\\sqrt{17}\\\\).\\n\\nTherefore,\\n\\n\\\\[\\n\\\\boxed{17}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"17\", \"reference_number\": \"17\", \"raw_tail\": \"= \\\\sqrt{17}\\\\), and we need \\\\(a^2 = 17\\\\).\\n\\nWe can verify with the point \\\\((4,-1)\\\\): distance \\\\(= \\\\sqrt{4^2 + (-1)^2} = \\\\sqrt{17}\\\\).\\n\\nTherefore,\\n\\n\\\\[\\n\\\\boxed{17}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 21.507,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to find the smallest distance from the origin (0,0) to a point on the parabola \\\\(y = \\\\frac{1}{2}x^2 - 9\\\\). Let t' attempts=1"
+  ]
+}

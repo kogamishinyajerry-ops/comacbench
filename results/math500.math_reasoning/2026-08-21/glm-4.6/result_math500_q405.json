@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q405",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to assign 3 distinct people to 5 distinct offices, with the condition that no two people share an office (each office can hold at most one person). This is equivalent to counting the number of injective functions from the set of people (size 3) to the set of offices (size 5).\\n\\n- The first person can be assigned to any of the 5 offices.\\n- After assigning the first person, the second person can be assigned to any of the remaining 4 offices.\\n- Finally, the third person can be assigned to any of the remaining 3 offices.\\n\\nMultiplying these choices gives the total number of assignments:\\n\\n\\\\[\\n5 \\\\times 4 \\\\times 3 = 60.\\n\\\\]\\n\\nAlternatively, we can first choose which 3 offices (out of 5) will be occupied and then assign the 3 people to those offices in any order. The number of ways to choose 3 offices is \\\\(\\\\binom{5}{3}=10\\\\), and the number of ways to permute the 3 people among the chosen offices is \\\\(3! = 6\\\\). Their product is also \\\\(10 \\\\times 6 = 60\\\\).\\n\\nThus, there are 60 ways.\\n\\n\\\\boxed{60}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"60\", \"reference_number\": \"60\", \"raw_tail\": \"number of ways to permute the 3 people among the chosen offices is \\\\(3! = 6\\\\). Their product is also \\\\(10 \\\\times 6 = 60\\\\).\\n\\nThus, there are 60 ways.\\n\\n\\\\boxed{60}\"}"
+  },
+  "timings": {
+    "agent_s": 33.835,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to assign 3 distinct people to 5 distinct offices, with the condition that no two people share an office (each o' attempts=1"
+  ]
+}

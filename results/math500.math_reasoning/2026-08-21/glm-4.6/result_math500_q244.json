@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q244",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given a convex polygon. Let \\\\(n\\\\) be the number of sides (\\\\(n \\\\ge 3\\\\)). The sum of all interior angles of an \\\\(n\\\\)-gon is \\\\((n-2) \\\\cdot 180^\\\\circ\\\\). Suppose the sum of all interior angles except one is \\\\(1070^\\\\circ\\\\). Denote the missing angle by \\\\(x\\\\). Then\\n\\n\\\\[\\n(n-2) \\\\cdot 180 - x = 1070 \\\\quad \\\\Longrightarrow \\\\quad x = (n-2) \\\\cdot 180 - 1070.\\n\\\\]\\n\\nBecause the polygon is convex, each interior angle satisfies \\\\(0^\\\\circ < x < 180^\\\\circ\\\\). Thus\\n\\n\\\\[\\n0 < (n-2) \\\\cdot 180 - 1070 < 180.\\n\\\\]\\n\\nSolve the inequalities separately.\\n\\n1. \\\\((n-2) \\\\cdot 180 - 1070 > 0\\\\) gives \\\\((n-2) \\\\cdot 180 > 1070\\\\), so \\\\(n-2 > \\\\frac{1070}{180} = 5.944\\\\ldots\\\\). Since \\\\(n-2\\\\) is an integer, \\\\(n-2 \\\\ge 6\\\\), i.e. \\\\(n \\\\ge 8\\\\).\\n\\n2. \\\\((n-2) \\\\cdot 180 - 1070 < 180\\\\) gives \\\\((n-2) \\\\cdot 180 < 1250\\\\), so \\\\(n-2 < \\\\frac{1250}{180} = 6.944\\\\ldots\\\\). Hence \\\\(n-2 \\\\le 6\\\\), i.e. \\\\(n \\\\le 8\\\\).\\n\\nCombining \\\\(n \\\\ge 8\\\\) and \\\\(n \\\\le 8\\\\) yields \\\\(n = 8\\\\).\\n\\nCheck: For \\\\(n = 8\\\\), the total sum is \\\\((8-2) \\\\cdot 180 = 1080^\\\\circ\\\\), so the missing angle is \\\\(1080 - 1070 = 10^\\\\circ\\\\), which lies strictly between \\\\(0^\\\\circ\\\\) and \\\\(180^\\\\circ\\\\). The polygon is convex and the other seven angles sum to \\\\(1070^\\\\circ\\\\), each less than \\\\(180^\\\\circ\\\\). Therefore the polygon has 8 sides.\\n\\n\\\\boxed{8}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8\", \"reference_number\": \"8\", \"raw_tail\": \"180^\\\\circ\\\\). The polygon is convex and the other seven angles sum to \\\\(1070^\\\\circ\\\\), each less than \\\\(180^\\\\circ\\\\). Therefore the polygon has 8 sides.\\n\\n\\\\boxed{8}\"}"
+  },
+  "timings": {
+    "agent_s": 36.362,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given a convex polygon. Let \\\\(n\\\\) be the number of sides (\\\\(n \\\\ge 3\\\\)). The sum of all interior angles of an \\\\(n\\\\' attempts=1"
+  ]
+}

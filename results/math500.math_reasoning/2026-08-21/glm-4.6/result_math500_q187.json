@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q187",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let \\\\( n \\\\) be the number of nickels and \\\\( d \\\\) be the number of dimes. We have two equations:\\n\\n\\\\[\\nn + d = 11 \\\\quad \\\\text{(total number of coins)}\\n\\\\]\\n\\n\\\\[\\n5n + 10d = 75 \\\\quad \\\\text{(total value in cents)}\\n\\\\]\\n\\nSolve the first equation for \\\\( d \\\\): \\\\( d = 11 - n \\\\). Substitute into the value equation:\\n\\n\\\\[\\n5n + 10(11 - n) = 75\\n\\\\]\\n\\n\\\\[\\n5n + 110 - 10n = 75\\n\\\\]\\n\\n\\\\[\\n-5n + 110 = 75\\n\\\\]\\n\\n\\\\[\\n-5n = 75 - 110 = -35\\n\\\\]\\n\\n\\\\[\\nn = \\\\frac{-35}{-5} = 7\\n\\\\]\\n\\nThus, Hillary has 7 nickels. (Check: 7 nickels = 35¢, 4 dimes = 40¢, total 75¢, and 7+4=11 coins.)\\n\\n\\\\boxed{7}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"7\", \"reference_number\": \"7\", \"raw_tail\": \"= 75 - 110 = -35\\n\\\\]\\n\\n\\\\[\\nn = \\\\frac{-35}{-5} = 7\\n\\\\]\\n\\nThus, Hillary has 7 nickels. (Check: 7 nickels = 35¢, 4 dimes = 40¢, total 75¢, and 7+4=11 coins.)\\n\\n\\\\boxed{7}\"}"
+  },
+  "timings": {
+    "agent_s": 8.637,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let \\\\( n \\\\) be the number of nickels and \\\\( d \\\\) be the number of dimes. We have two equations:\\n\\n\\\\[\\nn + d = 11 \\\\quad \\\\te' attempts=1"
+  ]
+}

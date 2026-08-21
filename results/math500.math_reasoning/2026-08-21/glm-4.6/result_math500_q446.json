@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q446",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the geometric sequence with first term \\\\(a = \\\\frac{1}{4}\\\\) and common ratio \\\\(r = \\\\frac{1/8}{1/4} = \\\\frac{1}{2}\\\\). The sum of the first \\\\(n\\\\) terms of a geometric series is\\n\\n\\\\[\\nS_n = a \\\\frac{1 - r^n}{1 - r}.\\n\\\\]\\n\\nSubstituting the known values:\\n\\n\\\\[\\nS_n = \\\\frac{1}{4} \\\\cdot \\\\frac{1 - \\\\left(\\\\frac{1}{2}\\\\right)^n}{1 - \\\\frac{1}{2}} = \\\\frac{1}{4} \\\\cdot \\\\frac{1 - \\\\left(\\\\frac{1}{2}\\\\right)^n}{\\\\frac{1}{2}} = \\\\frac{1}{4} \\\\cdot 2 \\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right) = \\\\frac{1}{2}\\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right).\\n\\\\]\\n\\nWe are told \\\\(S_n = \\\\frac{255}{512}\\\\), so\\n\\n\\\\[\\n\\\\frac{1}{2}\\\\left(1 - \\\\left(\\\\frac{1}{2}\\\\right)^n\\\\right) = \\\\frac{255}{512}.\\n\\\\]\\n\\nMultiply both sides by 2:\\n\\n\\\\[\\n1 - \\\\left(\\\\frac{1}{2}\\\\right)^n = \\\\frac{255}{256}.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\n\\\\left(\\\\frac{1}{2}\\\\right)^n = 1 - \\\\frac{255}{256} = \\\\frac{1}{256}.\\n\\\\]\\n\\nSince \\\\(256 = 2^8\\\\), we have \\\\(\\\\left(\\\\frac{1}{2}\\\\right)^8 = \\\\frac{1}{256}\\\\). Therefore\\n\\n\\\\[\\n\\\\left(\\\\frac{1}{2}\\\\right)^n = \\\\left(\\\\frac{1}{2}\\\\right)^8 \\\\implies n = 8.\\n\\\\]\\n\\nVerification: \\\\(S_8 = \\\\frac{1}{2}\\\\left(1 - \\\\frac{1}{256}\\\\right) = \\\\frac{1}{2} \\\\cdot \\\\frac{255}{256} = \\\\frac{255}{512}\\\\), which matches the given sum.\\n\\nHence, \\\\(n = 8\\\\).\\n\\n\\\\boxed{8}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"8\", \"reference_number\": \"8\", \"raw_tail\": \" = \\\\frac{1}{2}\\\\left(1 - \\\\frac{1}{256}\\\\right) = \\\\frac{1}{2} \\\\cdot \\\\frac{255}{256} = \\\\frac{255}{512}\\\\), which matches the given sum.\\n\\nHence, \\\\(n = 8\\\\).\\n\\n\\\\boxed{8}\"}"
+  },
+  "timings": {
+    "agent_s": 19.734,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the geometric sequence with first term \\\\(a = \\\\frac{1}{4}\\\\) and common ratio \\\\(r = \\\\frac{1/8}{1/4} = \\\\frac{1' attempts=1"
+  ]
+}

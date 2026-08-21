@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q238",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The denominator is the sum of two absolute values, which is zero if and only if each absolute value is zero. This requires both quadratics to be zero simultaneously:\\n\\n\\\\[\\nx^2+3x-4 = 0 \\\\quad \\\\text{and} \\\\quad x^2+9x+20 = 0.\\n\\\\]\\n\\nSolving the first: \\\\(x^2+3x-4 = (x+4)(x-1)=0\\\\) gives \\\\(x = -4\\\\) or \\\\(x = 1\\\\).\\n\\nSolving the second: \\\\(x^2+9x+20 = (x+4)(x+5)=0\\\\) gives \\\\(x = -4\\\\) or \\\\(x = -5\\\\).\\n\\nThe only common solution is \\\\(x = -4\\\\). At this point the denominator is zero, so \\\\(x = -4\\\\) is not in the domain. No other real numbers cause the denominator to be zero.\\n\\nThus the answer is \\\\(\\\\boxed{-4}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-4\", \"reference_number\": \"-4\", \"raw_tail\": \"s point the denominator is zero, so \\\\(x = -4\\\\) is not in the domain. No other real numbers cause the denominator to be zero.\\n\\nThus the answer is \\\\(\\\\boxed{-4}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 19.351,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The denominator is the sum of two absolute values, which is zero if and only if each absolute value is zero. This requir' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q431",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The functions \\\\(\\\\arcsin x\\\\) and \\\\(\\\\arccos x\\\\) are defined for \\\\(x \\\\in [-1, 1]\\\\). For all such \\\\(x\\\\), the identity \\\\(\\\\arcsin x + \\\\arccos x = \\\\frac{\\\\pi}{2}\\\\) holds. Let \\\\(a = \\\\arcsin x\\\\), so \\\\(a \\\\in [-\\\\frac{\\\\pi}{2}, \\\\frac{\\\\pi}{2}]\\\\) and \\\\(\\\\arccos x = \\\\frac{\\\\pi}{2} - a\\\\). Then\\n\\n\\\\[\\nf(x) = (\\\\arccos x)^2 + (\\\\arcsin x)^2 = \\\\left(\\\\frac{\\\\pi}{2} - a\\\\right)^2 + a^2 = 2a^2 - \\\\pi a + \\\\frac{\\\\pi^2}{4}.\\n\\\\]\\n\\nThis is a quadratic in \\\\(a\\\\) with positive leading coefficient, so it is convex. The minimum occurs at the vertex\\n\\n\\\\[\\na = \\\\frac{\\\\pi}{4} \\\\in \\\\left[-\\\\frac{\\\\pi}{2}, \\\\frac{\\\\pi}{2}\\\\right],\\n\\\\]\\n\\ngiving\\n\\n\\\\[\\nf_{\\\\min} = 2\\\\left(\\\\frac{\\\\pi}{4}\\\\right)^2 - \\\\pi\\\\left(\\\\frac{\\\\pi}{4}\\\\right) + \\\\frac{\\\\pi^2}{4} = \\\\frac{\\\\pi^2}{8}.\\n\\\\]\\n\\nThe maximum on the closed interval occurs at the endpoint farthest from the vertex, i.e., at \\\\(a = -\\\\frac{\\\\pi}{2}\\\\):\\n\\n\\\\[\\nf\\\\left(-\\\\frac{\\\\pi}{2}\\\\right) = 2\\\\left(-\\\\frac{\\\\pi}{2}\\\\right)^2 - \\\\pi\\\\left(-\\\\frac{\\\\pi}{2}\\\\right) + \\\\frac{\\\\pi^2}{4} = \\\\frac{\\\\pi^2}{2} + \\\\frac{\\\\pi^2}{2} + \\\\frac{\\\\pi^2}{4} = \\\\frac{5\\\\pi^2}{4}.\\n\\\\]\\n\\nAt the other endpoint, \\\\(a = \\\\frac{\\\\pi}{2}\\\\), we obtain \\\\(f = \\\\frac{\\\\pi^2}{4}\\\\), which is smaller. The function is continuous on \\\\([-1, 1]\\\\), so the range is the interval from the minimum to the maximum.\\n\\nThus the range of \\\\(f(x)\\\\) is\\n\\n\\\\[\\n\\\\boxed{\\\\left[\\\\frac{\\\\pi^{2}}{8},\\\\frac{5\\\\pi^{2}}{4}\\\\right]}.\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\left[\\\\frac{\\\\pi^{2}}{8},\\\\frac{5\\\\pi^{2}}{4}\\\\right]\", \"reference_number\": \"\\\\left[ \\\\frac{\\\\pi^2}{8}, \\\\frac{5 \\\\pi^2}{4} \\\\right]\", \"raw_tail\": \", so the range is the interval from the minimum to the maximum.\\n\\nThus the range of \\\\(f(x)\\\\) is\\n\\n\\\\[\\n\\\\boxed{\\\\left[\\\\frac{\\\\pi^{2}}{8},\\\\frac{5\\\\pi^{2}}{4}\\\\right]}.\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 75.123,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The functions \\\\(\\\\arcsin x\\\\) and \\\\(\\\\arccos x\\\\) are defined for \\\\(x \\\\in [-1, 1]\\\\). For all such \\\\(x\\\\), the identity \\\\(\\\\arc' attempts=1"
+  ]
+}

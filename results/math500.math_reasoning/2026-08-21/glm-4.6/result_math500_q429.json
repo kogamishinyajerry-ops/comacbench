@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q429",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given positive real numbers \\\\(a\\\\) and \\\\(b\\\\) satisfying \\\\(ab^2 = 5\\\\). We need to minimize \\\\(f = a^4 + b^8\\\\).\\n\\nExpress \\\\(a\\\\) in terms of \\\\(b\\\\) using the constraint:\\n\\\\[\\na = \\\\frac{5}{b^2}.\\n\\\\]\\n\\nSubstitute into \\\\(f\\\\):\\n\\\\[\\nf = \\\\left(\\\\frac{5}{b^2}\\\\right)^4 + b^8 = \\\\frac{625}{b^8} + b^8.\\n\\\\]\\n\\nLet \\\\(x = b^8 > 0\\\\). Then\\n\\\\[\\nf = x + \\\\frac{625}{x}.\\n\\\\]\\n\\nBy the AM–GM inequality, for \\\\(x > 0\\\\),\\n\\\\[\\nx + \\\\frac{625}{x} \\\\ge 2\\\\sqrt{x \\\\cdot \\\\frac{625}{x}} = 2\\\\sqrt{625} = 2 \\\\cdot 25 = 50.\\n\\\\]\\n\\nEquality holds when \\\\(x = \\\\frac{625}{x}\\\\), i.e., \\\\(x^2 = 625\\\\), so \\\\(x = 25\\\\) (positive). Thus the minimum value of \\\\(f\\\\) is \\\\(50\\\\).\\n\\nCorrespondingly, \\\\(b^8 = 25 \\\\Rightarrow b = 5^{1/4}\\\\) and \\\\(a = \\\\frac{5}{b^2} = \\\\frac{5}{5^{1/2}} = 5^{1/2}\\\\).\\n\\nTherefore, the minimum value is \\\\(50\\\\).\\n\\n#### 50\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"50\", \"reference_number\": \"50\", \"raw_tail\": \"Correspondingly, \\\\(b^8 = 25 \\\\Rightarrow b = 5^{1/4}\\\\) and \\\\(a = \\\\frac{5}{b^2} = \\\\frac{5}{5^{1/2}} = 5^{1/2}\\\\).\\n\\nTherefore, the minimum value is \\\\(50\\\\).\\n\\n#### 50\"}"
+  },
+  "timings": {
+    "agent_s": 167.322,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given positive real numbers \\\\(a\\\\) and \\\\(b\\\\) satisfying \\\\(ab^2 = 5\\\\). We need to minimize \\\\(f = a^4 + b^8\\\\).\\n\\nExpr' attempts=1"
+  ]
+}

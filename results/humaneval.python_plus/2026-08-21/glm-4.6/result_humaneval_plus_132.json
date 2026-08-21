@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_132",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.7333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.86665,
+  "artifacts": {
+    "code": "\"def is_nested(string):\\n    '''\\n    Create a function that takes a string as input which contains only square brackets.\\n    The function should return True if and only if there is a valid subsequence of brackets \\n    where at least one bracket in the subsequence is nested.\\n\\n    is_nested('[[]]') ➞ True\\n    is_nested('[]]]]]]][[[[[]') ➞ False\\n    is_nested('[][]') ➞ False\\n    is_nested('[]') ➞ False\\n    is_nested('[[][]]') ➞ True\\n    is_nested('[[]][[') ➞ True\\n    '''\\n    # Use a stack to keep track of opening bracket positions\\n    stack = []\\n    \\n    for i, char in enumerate(string):\\n        if char == '[':\\n            # If the stack is not empty, the current '[' is inside another pair\\n            # This indicates nesting.\\n            if stack:\\n                return True\\n            stack.append(i)\\n        else:  # char == ']'\\n            if stack:\\n                stack.pop()\\n            else:\\n                # Ignore unmatched closing brackets for the purpose of checking nesting?\\n                # The definition of \\\"valid subsequence of brackets\\\" implies we can pick valid ones.\\n                # However, if we hit a closing bracket with empty stack, any valid nesting \\n                # must occur AFTER this point (using subsequent brackets), but previous\\n                # valid pairs are gone.\\n                # Example: '][]' -> '[]' is a valid subsequence, but not nested.\\n                # If we have '][[]', we ignore the first ']', then process '[[]]' which is nested.\\n                # So, we just continue.\\n                pass\\n                \\n    return False\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 11, \"cases_total\": 15, \"failed_cases\": [{\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 8, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 13, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 15, \"pass\": false, \"err\": \"AssertionError: mismatch on ['[]]]]]]][[[[[]']\"}], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 389.578,
+    "setup_s": 0.0,
+    "grade_s": 0.135
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

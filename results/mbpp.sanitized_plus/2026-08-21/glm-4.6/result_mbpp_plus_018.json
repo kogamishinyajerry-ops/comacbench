@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_018",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def str_to_list(s):\\n    \\\"\\\"\\\"Convert a string to a list of characters.\\\"\\\"\\\"\\n    return list(s)\\n\\ndef lst_to_string(lst):\\n    \\\"\\\"\\\"Convert a list of characters to a string.\\\"\\\"\\\"\\n    return ''.join(lst)\\n\\ndef get_char_count_array(s):\\n    \\\"\\\"\\\"Return a count array (list of 256 ints) for characters in s.\\\"\\\"\\\"\\n    count = [0] * 256  # assuming ASCII characters\\n    for ch in s:\\n        count[ord(ch)] += 1\\n    return count\\n\\ndef remove_dirty_chars(first, second):\\n    \\\"\\\"\\\"\\n    Remove all characters from `first` that appear in `second`.\\n    Uses the helper functions as required.\\n    \\\"\\\"\\\"\\n    # Get the count array for the second string\\n    count = get_char_count_array(second)\\n\\n    # Convert the first string to a list of characters\\n    chars = str_to_list(first)\\n\\n    # Filter out characters that have a non-zero count in the second string\\n    filtered = []\\n    for ch in chars:\\n        if count[ord(ch)] == 0:\\n            filtered.append(ch)\\n\\n    # Convert the filtered list back to a string\\n    return lst_to_string(filtered)\\n\\n# Test the function with the provided example\\nif __name__ == \\\"__main__\\\":\\n    assert remove_dirty_chars(\\\"probasscurve\\\", \\\"pros\\\") == 'bacuve'\\n    print(\\\"All tests passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 66.656,
+    "setup_s": 0.0,
+    "grade_s": 0.145
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

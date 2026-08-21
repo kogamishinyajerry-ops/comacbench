@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q205",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the matrix \\\\(\\\\mathbf{A}\\\\) acting on two vectors:\\n\\n\\\\[\\n\\\\mathbf{A} \\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} = \\\\begin{pmatrix} 2 \\\\\\\\ 4 \\\\\\\\ -3 \\\\end{pmatrix}, \\\\qquad \\n\\\\mathbf{A} \\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix} = \\\\begin{pmatrix} 0 \\\\\\\\ -5 \\\\\\\\ -5 \\\\end{pmatrix}.\\n\\\\]\\n\\nWe need to find \\\\(\\\\mathbf{A} \\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix}\\\\).\\n\\nFirst, express \\\\(\\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix}\\\\) as a linear combination of the two given vectors. Solve for scalars \\\\(c_1, c_2\\\\) such that\\n\\n\\\\[\\nc_1 \\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + c_2 \\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix} = \\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix}.\\n\\\\]\\n\\nThis yields the system:\\n\\n\\\\[\\n\\\\begin{cases}\\n3c_1 - 5c_2 = -13 & (1)\\\\\\\\\\nc_1 + 2c_2 = 3 & (2)\\\\\\\\\\n0c_1 + 2c_2 = 4 & (3)\\n\\\\end{cases}\\n\\\\]\\n\\nFrom (3): \\\\(2c_2 = 4 \\\\Rightarrow c_2 = 2\\\\). Substitute into (2): \\\\(c_1 + 2(2) = 3 \\\\Rightarrow c_1 + 4 = 3 \\\\Rightarrow c_1 = -1\\\\). Check (1): \\\\(3(-1) - 5(2) = -3 -10 = -13\\\\), which holds. Thus,\\n\\n\\\\[\\n\\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix} = -1 \\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + 2 \\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix}.\\n\\\\]\\n\\nSince \\\\(\\\\mathbf{A}\\\\) is a matrix (linear transformation),\\n\\n\\\\[\\n\\\\mathbf{A} \\\\begin{pmatrix} -13 \\\\\\\\ 3 \\\\\\\\ 4 \\\\end{pmatrix} = \\\\mathbf{A}\\\\left( -1 \\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + 2 \\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix} \\\\right) = -1 \\\\cdot \\\\mathbf{A} \\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} + 2 \\\\cdot \\\\mathbf{A} \\\\begin{pmatrix} -5 \\\\\\\\ 2 \\\\\\\\ 2 \\\\end{pmatrix}.\\n\\\\]\\n\\nSubstitute the given images:\\n\\n\\\\[\\n-1 \\\\begin{pmatrix} 2 \\\\\\\\ 4 \\\\\\\\ -3 \\\\end{pmatrix} + 2 \\\\begin{pmatrix} 0 \\\\\\\\ -5 \\\\\\\\ -5 \\\\end{pmatrix} = \\\\begin{pmatrix} -2 \\\\\\\\ -4 \\\\\\\\ 3 \\\\end{pmatrix} + \\\\begin{pmatrix} 0 \\\\\\\\ -10 \\\\\\\\ -10 \\\\end{pmatrix} = \\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}.\\n\\\\]\\n\\nTherefore,\\n\\n\\\\[\\n\\\\boxed{\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}\", \"raw_tail\": \"trix} 0 \\\\\\\\ -10 \\\\\\\\ -10 \\\\end{pmatrix} = \\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}.\\n\\\\]\\n\\nTherefore,\\n\\n\\\\[\\n\\\\boxed{\\\\begin{pmatrix} -2 \\\\\\\\ -14 \\\\\\\\ -7 \\\\end{pmatrix}}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 42.268,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the matrix \\\\(\\\\mathbf{A}\\\\) acting on two vectors:\\n\\n\\\\[\\n\\\\mathbf{A} \\\\begin{pmatrix} 3 \\\\\\\\ 1 \\\\\\\\ 0 \\\\end{pmatrix} =' attempts=1"
+  ]
+}

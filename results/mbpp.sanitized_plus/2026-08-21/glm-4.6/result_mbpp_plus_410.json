@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_410",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"def min_val(lst):\\n    \\\"\\\"\\\"\\n    Finds the minimum value in a heterogeneous list.\\n    \\n    This function filters the list to include only numeric types (integers and floats)\\n    to find the minimum value, as Python 3 does not allow direct comparison between \\n    incompatible types (e.g., str and int).\\n    \\n    Args:\\n        lst (list): A list potentially containing mixed data types.\\n        \\n    Returns:\\n        int or float or None: The minimum numeric value found in the list, \\n                              or None if no numeric values are present.\\n    \\\"\\\"\\\"\\n    # Filter for numeric types (int and float) using a generator expression\\n    numeric_values = (x for x in lst if isinstance(x, (int, float)))\\n    \\n    try:\\n        # Return the minimum value from the filtered numeric values\\n        return min(numeric_values)\\n    except ValueError:\\n        # Return None if the generator yields no items (e.g., list is empty or has no numbers)\\n        return None\\n\\n# Test case to verify the function\\nif __name__ == \\\"__main__\\\":\\n    assert min_val(['Python', 3, 2, 4, 5, 'version']) == 2\\n    print(\\\"Test passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [['Python', 10, 5, 2.5, 2.5, 'version']]\"}], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 46.381,
+    "setup_s": 0.0,
+    "grade_s": 0.131
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

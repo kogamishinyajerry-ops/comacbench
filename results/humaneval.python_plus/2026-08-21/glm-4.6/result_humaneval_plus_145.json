@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_145",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"def order_by_points(nums):\\n    \\\"\\\"\\\"\\n    Write a function which sorts the given list of integers\\n    in ascending order according to the sum of their digits.\\n    Note: if there are several items with similar sum of their digits,\\n    order them based on their index in original list.\\n\\n    For example:\\n    >>> order_by_points([1, 11, -1, -11, -12]) == [-1, -11, 1, -12, 11]\\n    >>> order_by_points([]) == []\\n    \\\"\\\"\\\"\\n    def digit_sum(n):\\n        # Convert integer to string, iterate over characters.\\n        # We handle negative numbers by ignoring the minus sign.\\n        return sum(int(d) for d in str(n) if d.isdigit())\\n\\n    # Use enumerate to keep track of the original index.\\n    # Sort by the digit sum first, then by the original index.\\n    return [num for index, num in sorted(enumerate(nums), key=lambda x: (digit_sum(x[1]), x[0]))]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 8, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 4, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 6, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 8, \"pass\": false, \"err\": \"AssertionError: mismatch on [[1, 11, -1, -11, -12]]\"}], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 452.207,
+    "setup_s": 0.0,
+    "grade_s": 0.184
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

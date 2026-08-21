@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q423",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to find the largest integer less than 2010 satisfying:\\n\\n- \\\\(x \\\\equiv 5 \\\\pmod{7}\\\\)\\n- \\\\(x \\\\equiv 10 \\\\pmod{11}\\\\)\\n- \\\\(x \\\\equiv 10 \\\\pmod{13}\\\\)\\n\\nThe moduli 7, 11, 13 are pairwise coprime, so by the Chinese Remainder Theorem there is a unique solution modulo \\\\(N = 7\\\\cdot11\\\\cdot13 = 1001\\\\).\\n\\nFirst combine the last two congruences. Since 11 and 13 are coprime, \\\\(x \\\\equiv 10 \\\\pmod{11}\\\\) and \\\\(x \\\\equiv 10 \\\\pmod{13}\\\\) together are equivalent to \\\\(x \\\\equiv 10 \\\\pmod{143}\\\\) (because \\\\(11\\\\cdot13=143\\\\)).\\n\\nNow solve the system:\\n\\\\[\\n\\\\begin{cases}\\nx \\\\equiv 5 \\\\pmod{7} \\\\\\\\\\nx \\\\equiv 10 \\\\pmod{143}\\n\\\\end{cases}\\n\\\\]\\n\\nLet \\\\(x = 10 + 143k\\\\). Substitute into the first congruence:\\n\\\\[\\n10 + 143k \\\\equiv 5 \\\\pmod{7}\\n\\\\]\\n\\nCompute \\\\(10 \\\\mod 7 = 3\\\\) and \\\\(143 \\\\mod 7 = 3\\\\) (since \\\\(7\\\\cdot20=140\\\\)). Thus:\\n\\\\[\\n3 + 3k \\\\equiv 5 \\\\pmod{7} \\\\implies 3k \\\\equiv 2 \\\\pmod{7}\\n\\\\]\\n\\nThe inverse of 3 modulo 7 is 5 because \\\\(3\\\\cdot5 = 15 \\\\equiv 1 \\\\pmod{7}\\\\). Multiply both sides by 5:\\n\\\\[\\nk \\\\equiv 2\\\\cdot5 = 10 \\\\equiv 3 \\\\pmod{7}\\n\\\\]\\n\\nSo \\\\(k = 3 + 7t\\\\) for integer \\\\(t\\\\). Then\\n\\\\[\\nx = 10 + 143(3 + 7t) = 10 + 429 + 1001t = 439 + 1001t\\n\\\\]\\n\\nThe least non‑negative solution is \\\\(a = 439\\\\) (when \\\\(t = 0\\\\)). All solutions are \\\\(x = 439 + 1001t\\\\).\\n\\nWe need the largest \\\\(x < 2010\\\\). Since \\\\(1001 \\\\cdot 2 = 2002 > 2010\\\\), the possible values are for \\\\(t = 0\\\\) and \\\\(t = 1\\\\):\\n- \\\\(t = 0\\\\): \\\\(x = 439\\\\)\\n- \\\\(t = 1\\\\): \\\\(x = 439 + 1001 = 1440\\\\)\\n\\n\\\\(1440 < 2010\\\\) and is larger than 439. For \\\\(t = 2\\\\), \\\\(x = 439 + 2002 = 2441 > 2010\\\\). Hence the largest integer less than 2010 satisfying the conditions is \\\\(1440\\\\).\\n\\nCheck:\\n- \\\\(1440 \\\\div 7 = 205 \\\\cdot 7 = 1435\\\\), remainder \\\\(5\\\\).\\n- \\\\(1440 \\\\div 11 = 130 \\\\cdot 11 = 1430\\\\), remainder \\\\(10\\\\).\\n- \\\\(1440 \\\\div 13 = 110 \\\\cdot 13 = 1430\\\\), remainder \\\\(10\\\\).\\n\\nAll conditions hold.\\n\\n\\\\[\\n\\\\boxed{1440}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"1440\", \"reference_number\": \"1440\", \"raw_tail\": \" \\\\(1440 \\\\div 11 = 130 \\\\cdot 11 = 1430\\\\), remainder \\\\(10\\\\).\\n- \\\\(1440 \\\\div 13 = 110 \\\\cdot 13 = 1430\\\\), remainder \\\\(10\\\\).\\n\\nAll conditions hold.\\n\\n\\\\[\\n\\\\boxed{1440}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 48.969,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to find the largest integer less than 2010 satisfying:\\n\\n- \\\\(x \\\\equiv 5 \\\\pmod{7}\\\\)\\n- \\\\(x \\\\equiv 10 \\\\pmod{11}\\\\)\\n- ' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q224",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We observe that $\\\\sin 100^\\\\circ = \\\\sin 80^\\\\circ$, $\\\\sin 120^\\\\circ = \\\\sin 60^\\\\circ$, $\\\\sin 140^\\\\circ = \\\\sin 40^\\\\circ$, and $\\\\sin 160^\\\\circ = \\\\sin 20^\\\\circ$. Hence the product becomes\\n\\\\[\\n(\\\\sin 20^\\\\circ \\\\sin 40^\\\\circ \\\\sin 60^\\\\circ \\\\sin 80^\\\\circ)^2.\\n\\\\]\\nNow compute $P = \\\\sin 20^\\\\circ \\\\sin 40^\\\\circ \\\\sin 60^\\\\circ \\\\sin 80^\\\\circ$.  \\nWe have $\\\\sin 60^\\\\circ = \\\\frac{\\\\sqrt3}{2}$. For the remaining three factors, use the identity\\n\\\\[\\n\\\\sin\\\\theta \\\\sin(60^\\\\circ-\\\\theta) \\\\sin(60^\\\\circ+\\\\theta) = \\\\frac14 \\\\sin 3\\\\theta.\\n\\\\]\\nWith $\\\\theta = 20^\\\\circ$ we get\\n\\\\[\\n\\\\sin 20^\\\\circ \\\\sin 40^\\\\circ \\\\sin 80^\\\\circ = \\\\frac14 \\\\sin 60^\\\\circ = \\\\frac14\\\\cdot\\\\frac{\\\\sqrt3}{2} = \\\\frac{\\\\sqrt3}{8}.\\n\\\\]\\nThus\\n\\\\[\\nP = \\\\frac{\\\\sqrt3}{2} \\\\cdot \\\\frac{\\\\sqrt3}{8} = \\\\frac{3}{16}.\\n\\\\]\\nThe original product is $P^2 = \\\\left(\\\\frac{3}{16}\\\\right)^2 = \\\\frac{9}{256}$.\\n\\nAlternatively, note that the angles are $k\\\\cdot20^\\\\circ$ for $k=1,\\\\dots,8$, i.e., $\\\\sin\\\\frac{k\\\\pi}{9}$. The known formula $\\\\prod_{k=1}^{n-1}\\\\sin\\\\frac{k\\\\pi}{n}=\\\\frac{n}{2^{n-1}}$ with $n=9$ directly gives $\\\\frac{9}{2^8}=\\\\frac{9}{256}$.\\n\\nTherefore, the answer is $\\\\boxed{\\\\frac{9}{256}}$.\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{9}{256}\", \"reference_number\": \"\\\\frac{9}{256}\", \"raw_tail\": \"rod_{k=1}^{n-1}\\\\sin\\\\frac{k\\\\pi}{n}=\\\\frac{n}{2^{n-1}}$ with $n=9$ directly gives $\\\\frac{9}{2^8}=\\\\frac{9}{256}$.\\n\\nTherefore, the answer is $\\\\boxed{\\\\frac{9}{256}}$.\"}"
+  },
+  "timings": {
+    "agent_s": 42.266,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We observe that $\\\\sin 100^\\\\circ = \\\\sin 80^\\\\circ$, $\\\\sin 120^\\\\circ = \\\\sin 60^\\\\circ$, $\\\\sin 140^\\\\circ = \\\\sin 40^\\\\circ$, an' attempts=1"
+  ]
+}

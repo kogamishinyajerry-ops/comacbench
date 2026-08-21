@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q425",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We place the triangle with circumcenter \\\\(O\\\\) at the origin. Let \\\\(\\\\overrightarrow{OA} = \\\\mathbf{A}\\\\), \\\\(\\\\overrightarrow{OB} = \\\\mathbf{B}\\\\), \\\\(\\\\overrightarrow{OC} = \\\\mathbf{C}\\\\). Then \\\\(|\\\\mathbf{A}| = |\\\\mathbf{B}| = |\\\\mathbf{C}| = R\\\\).\\n\\nThe centroid \\\\(G\\\\) satisfies \\\\(\\\\overrightarrow{OG} = \\\\frac{\\\\mathbf{A}+\\\\mathbf{B}+\\\\mathbf{C}}{3} = \\\\mathbf{G}\\\\).\\n\\nFor the orthocenter \\\\(H\\\\), a known vector identity gives \\\\(\\\\overrightarrow{OH} = \\\\mathbf{A}+\\\\mathbf{B}+\\\\mathbf{C} = 3\\\\mathbf{G}\\\\).\\n\\nThe midpoint \\\\(F\\\\) of \\\\(\\\\overline{GH}\\\\) is\\n\\\\[\\n\\\\overrightarrow{OF} = \\\\frac{\\\\overrightarrow{OG}+\\\\overrightarrow{OH}}{2} = \\\\frac{\\\\mathbf{G}+3\\\\mathbf{G}}{2} = 2\\\\mathbf{G}.\\n\\\\]\\n\\nNow compute the desired sum:\\n\\\\[\\n\\\\begin{aligned}\\nAF^2+BF^2+CF^2 &= |\\\\mathbf{A}-2\\\\mathbf{G}|^2 + |\\\\mathbf{B}-2\\\\mathbf{G}|^2 + |\\\\mathbf{C}-2\\\\mathbf{G}|^2 \\\\\\\\\\n&= \\\\sum \\\\bigl(|\\\\mathbf{A}|^2 - 4\\\\,\\\\mathbf{A}\\\\cdot\\\\mathbf{G} + 4|\\\\mathbf{G}|^2\\\\bigr) \\\\\\\\\\n&= \\\\sum |\\\\mathbf{A}|^2 - 4\\\\,\\\\mathbf{G}\\\\cdot\\\\sum\\\\mathbf{A} + 12|\\\\mathbf{G}|^2.\\n\\\\end{aligned}\\n\\\\]\\nWe have \\\\(\\\\sum |\\\\mathbf{A}|^2 = 3R^2\\\\) and \\\\(\\\\sum\\\\mathbf{A} = \\\\mathbf{A}+\\\\mathbf{B}+\\\\mathbf{C} = 3\\\\mathbf{G}\\\\), so \\\\(\\\\mathbf{G}\\\\cdot\\\\sum\\\\mathbf{A} = 3|\\\\mathbf{G}|^2\\\\). Substituting,\\n\\\\[\\nS = 3R^2 - 4\\\\cdot 3|\\\\mathbf{G}|^2 + 12|\\\\mathbf{G}|^2 = 3R^2.\\n\\\\]\\n\\nThus \\\\(AF^2+BF^2+CF^2 = 3R^2\\\\).\\n\\n\\\\boxed{3R^2}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"3R^2\", \"reference_number\": \"3R^2\", \"raw_tail\": \"m\\\\mathbf{A} = 3|\\\\mathbf{G}|^2\\\\). Substituting,\\n\\\\[\\nS = 3R^2 - 4\\\\cdot 3|\\\\mathbf{G}|^2 + 12|\\\\mathbf{G}|^2 = 3R^2.\\n\\\\]\\n\\nThus \\\\(AF^2+BF^2+CF^2 = 3R^2\\\\).\\n\\n\\\\boxed{3R^2}\"}"
+  },
+  "timings": {
+    "agent_s": 199.819,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We place the triangle with circumcenter \\\\(O\\\\) at the origin. Let \\\\(\\\\overrightarrow{OA} = \\\\mathbf{A}\\\\), \\\\(\\\\overrightarrow' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_046",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def fib4(n: int) -> int:\\n    \\\"\\\"\\\"The Fib4 number sequence is a sequence similar to the Fibbonacci sequnece that's defined as follows:\\n    fib4(0) -> 0\\n    fib4(1) -> 0\\n    fib4(2) -> 2\\n    fib4(3) -> 0\\n    fib4(n) -> fib4(n-1) + fib4(n-2) + fib4(n-3) + fib4(n-4).\\n    Please write a function to efficiently compute the n-th element of the fib4 number sequence.  Do not use recursion.\\n    >>> fib4(5)\\n    4\\n    >>> fib4(6)\\n    8\\n    >>> fib4(7)\\n    14\\n    \\\"\\\"\\\"\\n    if n < 0:\\n        raise ValueError(\\\"n must be non-negative\\\")\\n    if n == 0 or n == 1:\\n        return 0\\n    if n == 2:\\n        return 2\\n    if n == 3:\\n        return 0\\n    a, b, c, d = 0, 0, 2, 0  # fib4(0), fib4(1), fib4(2), fib4(3)\\n    for i in range(4, n+1):\\n        e = a + b + c + d\\n        a, b, c, d = b, c, d, e\\n    return d\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 5, \"cases_total\": 5, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 58.678,
+    "setup_s": 0.0,
+    "grade_s": 0.151
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

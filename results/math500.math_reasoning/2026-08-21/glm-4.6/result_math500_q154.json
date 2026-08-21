@@ -1,0 +1,38 @@
+{
+  "task_id": "math500_q154",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The problem asks for the shortest path a gecko can take on the surface of the room to reach a fly. The room dimensions are $12' \\\\times 10' \\\\times 8'$ (Length $\\\\times$ Width $\\\\times$ Height). Let the coordinate system $(x, y, z)$ correspond to (Length, Width, Height) respectively. The ranges are $x \\\\in [0, 12]$, $y \\\\in [0, 10]$, and $z \\\\in [0, 8]$.\\n\\nThe gecko is on a side wall. The side walls are the walls defined by constant width, $y=0$ and $y=10$.\\nThe problem states the gecko is on a side wall ($10' \\\\times 8'$), one foot from the ceiling ($z=7$) and one foot from the back wall ($x=1$, assuming the back wall is $x=0$).\\nLet's place the gecko at Point $G = (1, 0, 7)$ on the wall $y=0$.\\n\\nThe fly is on the opposite side wall. This is the wall $y=10$.\\nThe fly is one foot from the floor ($z=1$) and one foot from the front wall ($x=11$, assuming the front wall is $x=12$).\\nLet's place the fly at Point $F = (11, 10, 1)$ on the wall $y=10$.\\n\\nWe need to find the shortest path on the surface of the rectangular prism connecting $G$ and $F$. The gecko can walk across the walls and the ceiling. Implicitly in such problems, the \\\"walls\\\" accessible for walking include the floor, front wall, and back wall as well, unless restricted (e.g., \\\"must stay on walls and ceiling\\\"). The phrasing \\\"walk across the ceiling and the walls\\\" suggests all surfaces are permissible. However, the shortest path often lies on a plane that \\\"unfolds\\\" adjacent faces. Since the gecko is on one side wall and the fly on the opposite, the gecko must cross at least one other face (top, front, back, or bottom).\\n\\nConsider the \\\"unfolding\\\" method. We cut the room along vertical edges to flatten the walls onto the plane of the starting wall ($y=0$). The gecko is at $G$. The fly can be mapped onto this plane by unfolding the room. There are\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": null, \"reference_number\": \"2\\\\sqrt{113}\", \"raw_tail\": \"es to flatten the walls onto the plane of the starting wall ($y=0$). The gecko is at $G$. The fly can be mapped onto this plane by unfolding the room. There are\"}"
+  },
+  "timings": {
+    "agent_s": 409.983,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The problem asks for the shortest path a gecko can take on the surface of the room to reach a fly. The room dimensions a' attempts=2"
+  ]
+}

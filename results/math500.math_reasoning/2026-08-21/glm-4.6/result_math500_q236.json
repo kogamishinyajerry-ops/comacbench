@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q236",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to compute\\n\\\\[\\n\\\\frac{1}{\\\\cos^2 10^\\\\circ} + \\\\frac{1}{\\\\sin^2 20^\\\\circ} + \\\\frac{1}{\\\\sin^2 40^\\\\circ}.\\n\\\\]\\n\\n**Step 1: Convert to sines of complementary angles.**  \\nSince \\\\(\\\\cos 10^\\\\circ = \\\\sin 80^\\\\circ\\\\), the expression becomes\\n\\\\[\\n\\\\frac{1}{\\\\sin^2 80^\\\\circ} + \\\\frac{1}{\\\\sin^2 20^\\\\circ} + \\\\frac{1}{\\\\sin^2 40^\\\\circ}\\n= \\\\csc^2 20^\\\\circ + \\\\csc^2 40^\\\\circ + \\\\csc^2 80^\\\\circ.\\n\\\\]\\n\\n**Step 2: Use the identity \\\\(\\\\csc^2\\\\theta = \\\\dfrac{2}{1-\\\\cos 2\\\\theta}\\\\).**  \\nThus\\n\\\\[\\n\\\\csc^2 20^\\\\circ = \\\\frac{2}{1-\\\\cos 40^\\\\circ},\\\\quad\\n\\\\csc^2 40^\\\\circ = \\\\frac{2}{1-\\\\cos 80^\\\\circ},\\\\quad\\n\\\\csc^2 80^\\\\circ = \\\\frac{2}{1-\\\\cos 160^\\\\circ}.\\n\\\\]\\nBecause \\\\(\\\\cos 160^\\\\circ = -\\\\cos 20^\\\\circ\\\\), we have \\\\(1-\\\\cos 160^\\\\circ = 1+\\\\cos 20^\\\\circ\\\\).\\n\\n**Step 3: Introduce \\\\(x = \\\\cos 20^\\\\circ\\\\).**  \\nThen\\n\\\\[\\n\\\\cos 40^\\\\circ = 2x^2-1,\\\\qquad \\\\cos 80^\\\\circ = 2\\\\cos^2 40^\\\\circ-1 = 8x^4-8x^2+1.\\n\\\\]\\nConsequently,\\n\\\\[\\n1-\\\\cos 40^\\\\circ = 2(1-x^2),\\\\qquad\\n1-\\\\cos 80^\\\\circ = 8x^2(1-x^2),\\\\qquad\\n1+\\\\cos 20^\\\\circ = 1+x.\\n\\\\]\\n\\n**Step 4: Write the sum \\\\(S\\\\) in terms of \\\\(x\\\\).**\\n\\\\[\\nS = 2\\\\left( \\\\frac{1}{2(1-x^2)} + \\\\frac{1}{8x^2(1-x^2)} + \\\\frac{1}{1+x} \\\\right).\\n\\\\]\\n\\n**Step 5: Combine the terms.**  \\nWrite \\\\(\\\\dfrac{1}{1+x} = \\\\dfrac{1-x}{1-x^2}\\\\). Then\\n\\\\[\\nS = \\\\frac{2}{1-x^2}\\\\left( \\\\frac12 + \\\\frac{1}{8x^2} + 1 - x \\\\right)\\n   = \\\\frac{2}{1-x^2}\\\\left( \\\\frac32 - x + \\\\frac{1}{8x^2} \\\\right).\\n\\\\]\\n\\n**Step 6: Simplify the bracket.**  \\nPut over denominator \\\\(8x^2\\\\):\\n\\\\[\\n\\\\frac32 - x = \\\\frac{12x^2}{8x^2} - \\\\frac{8x^3}{8x^2} = \\\\frac{12x^2 - 8x^3}{8x^2},\\n\\\\]\\nso\\n\\\\[\\n\\\\frac32 - x + \\\\frac{1}{8x^2} = \\\\frac{12x^2 - 8x^3 + 1}{8x^2}.\\n\\\\]\\nThus\\n\\\\[\\nS = \\\\frac{2}{1-x^2} \\\\cdot \\\\frac{12x^2 - 8x^3 + 1}{8x^2}\\n   = \\\\frac{12x^2 - 8x^3 + 1}{4x^2(1-x^2)}.\\n\\\\]\\n\\n**Step 7: Use the triple‑angle identity for \\\\(\\\\cos 20^\\\\circ\\\\).**  \\nSince \\\\(\\\\cos 60^\\\\circ = \\\\frac12\\\\), we have\\n\\\\[\\n\\\\cos 60^\\\\circ = 4\\\\cos^3 20^\\\\circ - 3\\\\cos 20^\\\\circ \\\\;\\\\Longrightarrow\\\\;\\n4x^3 - 3x = \\\\frac12 \\\\;\\\\Longrightarrow\\\\; 8x^3 - 6x - 1 = 0.\\n\\\\]\\nHence \\\\(8x^3 = 6x + 1\\\\). Substitute into the numerator:\\n\\\\[\\n12x^2 - 8x^3 + 1 = 12x^2 - (6x+1) + 1 = 12x^2 - 6x.\\n\\\\]\\n\\n**Step 8: Simplify \\\\(S\\\\).**\\n\\\\[\\nS = \\\\frac{12x^2 - 6x}{4x^2(1-x^2)}\\n   = \\\\frac{6x(2x-1)}{4x^2(1-x^2)}\\n   = \\\\frac{3(2x-1)}{2x(1-x^2)}.\\n\\\\]\\n\\n**Step 9: Relate \\\\(2x-1\\\\) to \\\\(1-x^2\\\\) using the cubic.**  \\nFrom \\\\(8x^3 - 6x - 1 = 0\\\\) we get \\\\(8x - 8x^3 = 2x - 1\\\\), i.e.\\n\\\\[\\n2x - 1 = 8x(1-x^2).\\n\\\\]\\nPlug this into the expression for \\\\(S\\\\):\\n\\\\[\\nS = \\\\frac{3 \\\\cdot 8x(1-x^2)}{2x(1-x^2)} = \\\\frac{24}{2} = 12.\\n\\\\]\\n\\nThus the original sum equals \\\\(12\\\\).\\n\\n\\\\[\\n\\\\boxed{12}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"12\", \"reference_number\": \"12\", \"raw_tail\": \"g this into the expression for \\\\(S\\\\):\\n\\\\[\\nS = \\\\frac{3 \\\\cdot 8x(1-x^2)}{2x(1-x^2)} = \\\\frac{24}{2} = 12.\\n\\\\]\\n\\nThus the original sum equals \\\\(12\\\\).\\n\\n\\\\[\\n\\\\boxed{12}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 165.26,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to compute\\n\\\\[\\n\\\\frac{1}{\\\\cos^2 10^\\\\circ} + \\\\frac{1}{\\\\sin^2 20^\\\\circ} + \\\\frac{1}{\\\\sin^2 40^\\\\circ}.\\n\\\\]\\n\\n**Step 1: C' attempts=1"
+  ]
+}

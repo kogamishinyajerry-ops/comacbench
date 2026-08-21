@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q173",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The series is geometric with first term \\\\(4\\\\) and common ratio \\\\(r = \\\\frac{12/a}{4} = \\\\frac{3}{a}\\\\). For convergence, we need \\\\(|r| < 1\\\\), i.e., \\\\(\\\\frac{3}{a} < 1\\\\) ⇒ \\\\(a > 3\\\\). The sum is\\n\\n\\\\[\\nS = \\\\frac{4}{1 - \\\\frac{3}{a}} = \\\\frac{4}{\\\\frac{a-3}{a}} = \\\\frac{4a}{a-3}.\\n\\\\]\\n\\nWe require \\\\(S\\\\) to be a perfect square integer. Set \\\\(S = k^2\\\\) with \\\\(k \\\\in \\\\mathbb{N}\\\\). Then\\n\\n\\\\[\\n\\\\frac{4a}{a-3} = k^2 \\\\implies 4a = k^2(a-3) \\\\implies a = \\\\frac{3k^2}{k^2-4}.\\n\\\\]\\n\\nRewrite as\\n\\n\\\\[\\na = 3 + \\\\frac{12}{k^2-4}.\\n\\\\]\\n\\nSince \\\\(a\\\\) is an integer, \\\\(k^2-4\\\\) must divide \\\\(12\\\\). Also \\\\(a>3\\\\) requires \\\\(k^2-4 > 0\\\\) ⇒ \\\\(k \\\\ge 3\\\\).\\n\\nCheck divisors of \\\\(12\\\\): \\\\(1,2,3,4,6,12\\\\). Compute \\\\(k^2 = d+4\\\\):\\n\\n- \\\\(d=1\\\\) ⇒ \\\\(k^2=5\\\\) (not a square)\\n- \\\\(d=2\\\\) ⇒ \\\\(k^2=6\\\\) (no)\\n- \\\\(d=3\\\\) ⇒ \\\\(k^2=7\\\\) (no)\\n- \\\\(d=4\\\\) ⇒ \\\\(k^2=8\\\\) (no)\\n- \\\\(d=6\\\\) ⇒ \\\\(k^2=10\\\\) (no)\\n- \\\\(d=12\\\\) ⇒ \\\\(k^2=16\\\\) ⇒ \\\\(k=4\\\\)\\n\\nThus \\\\(k=4\\\\) gives \\\\(a = 3 + \\\\frac{12}{12} = 4\\\\). This satisfies convergence (\\\\(a=4>3\\\\)) and the sum is \\\\(S = 16 = 4^2\\\\), a perfect square. No smaller positive integer \\\\(a\\\\) works because \\\\(a\\\\le 3\\\\) makes the series diverge.\\n\\nTherefore, the smallest possible value of \\\\(a\\\\) is \\\\(4\\\\).\\n\\n\\\\boxed{4}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"4\", \"reference_number\": \"4\", \"raw_tail\": \"uare. No smaller positive integer \\\\(a\\\\) works because \\\\(a\\\\le 3\\\\) makes the series diverge.\\n\\nTherefore, the smallest possible value of \\\\(a\\\\) is \\\\(4\\\\).\\n\\n\\\\boxed{4}\"}"
+  },
+  "timings": {
+    "agent_s": 115.166,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The series is geometric with first term \\\\(4\\\\) and common ratio \\\\(r = \\\\frac{12/a}{4} = \\\\frac{3}{a}\\\\). For convergence, we' attempts=1"
+  ]
+}

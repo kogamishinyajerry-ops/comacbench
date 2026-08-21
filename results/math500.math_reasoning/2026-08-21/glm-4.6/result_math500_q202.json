@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q202",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We model the game with states: when it is Alice's turn and when it is Bob's turn. Let \\\\(P\\\\) be the probability that Alice eventually wins given that it is currently Alice's turn. Let \\\\(Q\\\\) be the probability that Alice eventually wins given that it is currently Bob's turn.\\n\\n- From Alice's turn: She flips a fair coin. With probability \\\\(\\\\frac12\\\\) she gets heads and wins immediately. With probability \\\\(\\\\frac12\\\\) she gets tails and the turn passes to Bob. Therefore,\\n\\\\[\\nP = \\\\frac12 \\\\cdot 1 + \\\\frac12 \\\\cdot Q.\\n\\\\]\\n\\n- From Bob's turn: Bob flips a fair coin. With probability \\\\(\\\\frac12\\\\) he gets tails and wins, so Alice loses (probability 0 for Alice). With probability \\\\(\\\\frac12\\\\) he gets heads and the turn passes back to Alice. Therefore,\\n\\\\[\\nQ = \\\\frac12 \\\\cdot 0 + \\\\frac12 \\\\cdot P = \\\\frac12 P.\\n\\\\]\\n\\nSubstitute \\\\(Q\\\\) into the equation for \\\\(P\\\\):\\n\\\\[\\nP = \\\\frac12 + \\\\frac12 \\\\left(\\\\frac12 P\\\\right) = \\\\frac12 + \\\\frac14 P.\\n\\\\]\\n\\nSolve for \\\\(P\\\\):\\n\\\\[\\nP - \\\\frac14 P = \\\\frac12 \\\\quad\\\\Longrightarrow\\\\quad \\\\frac34 P = \\\\frac12 \\\\quad\\\\Longrightarrow\\\\quad P = \\\\frac{2}{3}.\\n\\\\]\\n\\nThus, the probability that Alice wins the game is \\\\(\\\\frac{2}{3}\\\\).\\n\\n\\\\boxed{\\\\frac{2}{3}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{2}{3}\", \"reference_number\": \"\\\\frac{2}{3}\", \"raw_tail\": \"\\\\quad \\\\frac34 P = \\\\frac12 \\\\quad\\\\Longrightarrow\\\\quad P = \\\\frac{2}{3}.\\n\\\\]\\n\\nThus, the probability that Alice wins the game is \\\\(\\\\frac{2}{3}\\\\).\\n\\n\\\\boxed{\\\\frac{2}{3}}\"}"
+  },
+  "timings": {
+    "agent_s": 48.582,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer=\"We model the game with states: when it is Alice's turn and when it is Bob's turn. Let \\\\(P\\\\) be the probability that Alic\" attempts=1"
+  ]
+}

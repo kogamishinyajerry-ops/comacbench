@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_079",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def decimal_to_binary(decimal):\\n    \\\"\\\"\\\"You will be given a number in decimal form and your task is to convert it to\\n    binary format. The function should return a string, with each character representing a binary\\n    number. Each character in the string will be '0' or '1'.\\n\\n    There will be an extra couple of characters 'db' at the beginning and at the end of the string.\\n    The extra characters are there to help with the format.\\n\\n    Examples:\\n    decimal_to_binary(15)   # returns \\\"db1111db\\\"\\n    decimal_to_binary(32)   # returns \\\"db100000db\\\"\\n    \\\"\\\"\\\"\\n    # Convert the decimal number to a binary string using the built-in bin() function.\\n    # bin() returns a string starting with '0b', so we slice from index 2 to remove it.\\n    binary_string = bin(decimal)[2:]\\n    \\n    # Wrap the binary string with the 'db' prefix and suffix.\\n    return \\\"db\\\" + binary_string + \\\"db\\\"\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 17.381,
+    "setup_s": 0.0,
+    "grade_s": 0.136
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

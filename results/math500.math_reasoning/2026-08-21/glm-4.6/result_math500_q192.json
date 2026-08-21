@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q192",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The triangle \\\\( \\\\triangle PQR \\\\) is isosceles with \\\\( PQ = QR = 34 \\\\) and base \\\\( PR = 32 \\\\). The median \\\\( \\\\overline{QM} \\\\) from vertex \\\\( Q \\\\) to side \\\\( PR \\\\) meets \\\\( PR \\\\) at its midpoint \\\\( M \\\\), so \\\\( PM = MR = 16 \\\\). In an isosceles triangle, the median from the apex is also the altitude, so \\\\( \\\\triangle QMP \\\\) is a right triangle with right angle at \\\\( M \\\\). Applying the Pythagorean theorem:\\n\\n\\\\[\\nQM^2 + PM^2 = PQ^2 \\\\implies QM^2 + 16^2 = 34^2.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\nQM^2 = 34^2 - 16^2 = 1156 - 256 = 900 \\\\implies QM = \\\\sqrt{900} = 30.\\n\\\\]\\n\\nAlternatively, using Apollonius' theorem:\\n\\n\\\\[\\nPQ^2 + QR^2 = 2\\\\left(QM^2 + \\\\left(\\\\frac{PR}{2}\\\\right)^2\\\\right) \\\\implies 34^2 + 34^2 = 2\\\\left(QM^2 + 16^2\\\\right),\\n\\\\]\\n\\nwhich yields the same result.\\n\\nTherefore, the length of median \\\\( \\\\overline{QM} \\\\) is \\\\( 30 \\\\).\\n\\n\\\\[\\n\\\\boxed{30}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"30\", \"reference_number\": \"30\", \"raw_tail\": \"s 34^2 + 34^2 = 2\\\\left(QM^2 + 16^2\\\\right),\\n\\\\]\\n\\nwhich yields the same result.\\n\\nTherefore, the length of median \\\\( \\\\overline{QM} \\\\) is \\\\( 30 \\\\).\\n\\n\\\\[\\n\\\\boxed{30}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 25.161,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The triangle \\\\( \\\\triangle PQR \\\\) is isosceles with \\\\( PQ = QR = 34 \\\\) and base \\\\( PR = 32 \\\\). The median \\\\( \\\\overline{QM' attempts=1"
+  ]
+}

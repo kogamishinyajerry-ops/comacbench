@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_109",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def odd_Equivalent(s, k):\\n    \\\"\\\"\\\"\\n    Finds the number of numbers with an odd value when a binary string \\n    is rotated k times.\\n    \\n    A binary string represents an odd number if its last bit is '1'.\\n    When a binary string is rotated left once, the bit at index 0 moves to the end.\\n    Thus, after 1 rotation, the last bit is s[0].\\n    After 2 rotations, the last bit is s[1].\\n    After d rotations, the last bit is s[(d-1) % len(s)].\\n    \\n    To count the odd numbers generated in k rotations, we need to count \\n    how many '1's are in the sequence s[0], s[1], ..., s[k-1] (cyclically).\\n    \\n    Args:\\n    s (str): The binary string.\\n    k (int): The number of rotations.\\n    \\n    Returns:\\n    int: The count of odd numbers generated.\\n    \\\"\\\"\\\"\\n    n = len(s)\\n    if n == 0 or k == 0:\\n        return 0\\n        \\n    # Count the total number of '1's in the string\\n    total_ones = s.count('1')\\n    \\n    # Calculate how many full cycles of the string fit in k rotations\\n    full_cycles = k // n\\n    \\n    # Calculate the remaining rotations after full cycles\\n    remainder = k % n\\n    \\n    # Total count = (ones in full cycles) + (ones in the partial cycle)\\n    count = full_cycles * total_ones\\n    count += s[:remainder].count('1')\\n    \\n    return count\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 283.976,
+    "setup_s": 0.0,
+    "grade_s": 0.138
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

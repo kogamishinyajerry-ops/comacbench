@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_119",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def match_parens(lst):\\n    '''\\n    You are given a list of two strings, both strings consist of open\\n    parentheses '(' or close parentheses ')' only.\\n    Your job is to check if it is possible to concatenate the two strings in\\n    some order, that the resulting string will be good.\\n    A string S is considered to be good if and only if all parentheses in S\\n    are balanced. For example: the string '(())()' is good, while the string\\n    '())' is not.\\n    Return 'Yes' if there's a way to make a good string, and return 'No' otherwise.\\n\\n    Examples:\\n    match_parens(['()(', ')']) == 'Yes'\\n    match_parens([')', ')']) == 'No'\\n    '''\\n    def is_balanced(s):\\n        balance = 0\\n        for ch in s:\\n            if ch == '(':\\n                balance += 1\\n            else:  # ch == ')'\\n                balance -= 1\\n            if balance < 0:\\n                return False\\n        return balance == 0\\n\\n    s1, s2 = lst\\n    if is_balanced(s1 + s2) or is_balanced(s2 + s1):\\n        return 'Yes'\\n    else:\\n        return 'No'\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 13, \"cases_total\": 13, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 26.933,
+    "setup_s": 0.0,
+    "grade_s": 0.144
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

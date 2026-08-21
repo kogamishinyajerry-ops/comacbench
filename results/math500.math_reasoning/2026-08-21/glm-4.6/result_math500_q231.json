@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q231",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let \\\\(A\\\\), \\\\(B\\\\), and \\\\(C\\\\) be the current ages of Amy, Ben, and Chris, respectively.\\n\\nFrom the average:\\n\\\\[\\n\\\\frac{A + B + C}{3} = 6 \\\\quad\\\\Rightarrow\\\\quad A + B + C = 18. \\\\tag{1}\\n\\\\]\\n\\nFour years ago, Chris’s age equaled Amy’s current age:\\n\\\\[\\nC - 4 = A. \\\\tag{2}\\n\\\\]\\n\\nIn four years, Ben’s age will be \\\\(\\\\frac{3}{5}\\\\) of Amy’s age at that time:\\n\\\\[\\nB + 4 = \\\\frac{3}{5}(A + 4). \\\\tag{3}\\n\\\\]\\n\\nSubstitute \\\\(A = C - 4\\\\) from (2) into (1):\\n\\\\[\\n(C - 4) + B + C = 18 \\\\quad\\\\Rightarrow\\\\quad B + 2C = 22 \\\\quad\\\\Rightarrow\\\\quad B = 22 - 2C. \\\\tag{4}\\n\\\\]\\n\\nSubstitute \\\\(A = C - 4\\\\) into (3):\\n\\\\[\\nB + 4 = \\\\frac{3}{5}\\\\big((C - 4) + 4\\\\big) = \\\\frac{3}{5}C.\\n\\\\]\\nThus\\n\\\\[\\nB = \\\\frac{3}{5}C - 4. \\\\tag{5}\\n\\\\]\\n\\nSet (4) equal to (5):\\n\\\\[\\n22 - 2C = \\\\frac{3}{5}C - 4.\\n\\\\]\\nSolve for \\\\(C\\\\):\\n\\\\[\\n22 + 4 = \\\\frac{3}{5}C + 2C \\\\quad\\\\Rightarrow\\\\quad 26 = \\\\frac{13}{5}C \\\\quad\\\\Rightarrow\\\\quad C = 26 \\\\cdot \\\\frac{5}{13} = 10.\\n\\\\]\\n\\nChris is currently \\\\(10\\\\) years old.\\n\\n\\\\[\\n\\\\boxed{10}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \"C + 2C \\\\quad\\\\Rightarrow\\\\quad 26 = \\\\frac{13}{5}C \\\\quad\\\\Rightarrow\\\\quad C = 26 \\\\cdot \\\\frac{5}{13} = 10.\\n\\\\]\\n\\nChris is currently \\\\(10\\\\) years old.\\n\\n\\\\[\\n\\\\boxed{10}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 48.291,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let \\\\(A\\\\), \\\\(B\\\\), and \\\\(C\\\\) be the current ages of Amy, Ben, and Chris, respectively.\\n\\nFrom the average:\\n\\\\[\\n\\\\frac{A + B ' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_235",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.25,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.625,
+  "artifacts": {
+    "code": "\"def even_bit_set_number(n):\\n    # Calculate the number of bits needed to represent n\\n    num_bits = n.bit_length() if n > 0 else 1\\n    \\n    # Create a number with even bits set to 1 and odd bits set to 0\\n    result = 0\\n    for i in range(2, num_bits + 1, 2):  # Iterate over even positions\\n        result |= (1 << (i - 1))  # Adjust to 0-based indexing for bit shifting\\n    \\n    return result\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 1, \"cases_total\": 4, \"failed_cases\": [{\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [20]\"}], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 497.156,
+    "setup_s": 0.0,
+    "grade_s": 0.132
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q419",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given vectors \\\\(\\\\mathbf{a} = \\\\begin{pmatrix} 1 \\\\\\\\ 2 \\\\\\\\ -5 \\\\end{pmatrix}\\\\) and \\\\(\\\\mathbf{b} = \\\\begin{pmatrix} 90 \\\\\\\\ 30 \\\\\\\\ 30 \\\\end{pmatrix}\\\\) and must find the vector \\\\(\\\\mathbf{v}\\\\) of smallest magnitude satisfying \\\\(\\\\mathbf{a} \\\\times \\\\mathbf{v} = \\\\mathbf{b}\\\\).\\n\\nFirst, check consistency: \\\\(\\\\mathbf{a} \\\\cdot \\\\mathbf{b} = 1\\\\cdot90 + 2\\\\cdot30 + (-5)\\\\cdot30 = 90+60-150 = 0\\\\), so solutions exist.\\n\\nThe equation \\\\(\\\\mathbf{a} \\\\times \\\\mathbf{v} = \\\\mathbf{b}\\\\) has a family of solutions. If \\\\(\\\\mathbf{v}_0\\\\) is one particular solution, then \\\\(\\\\mathbf{v} = \\\\mathbf{v}_0 + \\\\lambda \\\\mathbf{a}\\\\) (for any scalar \\\\(\\\\lambda\\\\)) also works because \\\\(\\\\mathbf{a} \\\\times (\\\\mathbf{v}_0 + \\\\lambda \\\\mathbf{a}) = \\\\mathbf{a} \\\\times \\\\mathbf{v}_0 + \\\\lambda \\\\mathbf{a} \\\\times \\\\mathbf{a} = \\\\mathbf{b}\\\\). Among these, the smallest magnitude occurs when \\\\(\\\\mathbf{v}\\\\) is orthogonal to \\\\(\\\\mathbf{a}\\\\), i.e., when \\\\(\\\\mathbf{v} \\\\cdot \\\\mathbf{a} = 0\\\\). Then the magnitude is simply the distance from the origin to the line of solutions, and that unique vector is the one we seek.\\n\\nTo find a particular solution orthogonal to \\\\(\\\\mathbf{a}\\\\), set \\\\(\\\\mathbf{v}_\\\\perp \\\\cdot \\\\mathbf{a} = 0\\\\) and require \\\\(\\\\mathbf{a} \\\\times \\\\mathbf{v}_\\\\perp = \\\\mathbf{b}\\\\). Use the vector triple product identity:\\n\\\\[\\n\\\\mathbf{a} \\\\times (\\\\mathbf{a} \\\\times \\\\mathbf{v}_\\\\perp) = \\\\mathbf{a}(\\\\mathbf{a}\\\\cdot\\\\mathbf{v}_\\\\perp) - |\\\\mathbf{a}|^2 \\\\mathbf{v}_\\\\perp.\\n\\\\]\\nSince \\\\(\\\\mathbf{a}\\\\cdot\\\\mathbf{v}_\\\\perp = 0\\\\), this simplifies to\\n\\\\[\\n\\\\mathbf{a} \\\\times (\\\\mathbf{a} \\\\times \\\\mathbf{v}_\\\\perp) = -|\\\\mathbf{a}|^2 \\\\mathbf{v}_\\\\perp.\\n\\\\]\\nBut \\\\(\\\\mathbf{a} \\\\times (\\\\mathbf{a} \\\\times \\\\mathbf{v}_\\\\perp) = \\\\mathbf{a} \\\\times \\\\mathbf{b}\\\\). Hence\\n\\\\[\\n-|\\\\mathbf{a}|^2 \\\\mathbf{v}_\\\\perp = \\\\mathbf{a} \\\\times \\\\mathbf{b} \\\\quad \\\\Longrightarrow \\\\quad \\\\mathbf{v}_\\\\perp = -\\\\frac{\\\\mathbf{a} \\\\times \\\\mathbf{b}}{|\\\\mathbf{a}|^2}.\\n\\\\]\\n\\nNow compute \\\\(\\\\mathbf{a} \\\\times \\\\mathbf{b}\\\\):\\n\\\\[\\n\\\\mathbf{a} \\\\times \\\\mathbf{b} = \\\\begin{vmatrix}\\n\\\\mathbf{i} & \\\\mathbf{j} & \\\\mathbf{k} \\\\\\\\\\n1 & 2 & -5 \\\\\\\\\\n90 & 30 & 30\\n\\\\end{vmatrix} = \\\\left(2\\\\cdot30 - (-5)\\\\cdot30,\\\\; -(1\\\\cdot30 - (-5)\\\\cdot90),\\\\; 1\\\\cdot30 - 2\\\\cdot90\\\\right)\\n= (60+150,\\\\; -(30+450),\\\\; 30-180) = (210,\\\\; -480,\\\\; -150).\\n\\\\]\\n\\nAlso,\\n\\\\[\\n|\\\\mathbf{a}|^2 = 1^2 + 2^2 + (-5)^2 = 1+4+25 = 30.\\n\\\\]\\n\\nThus\\n\\\\[\\n\\\\mathbf{v}_\\\\perp = -\\\\frac{1}{30}(210,\\\\,-480,\\\\,-150) = \\\\left(-\\\\frac{210}{30},\\\\; \\\\frac{480}{30},\\\\; \\\\frac{150}{30}\\\\right) = (-7,\\\\; 16,\\\\; 5).\\n\\\\]\\n\\nCheck orthogonality: \\\\((-7)\\\\cdot1 + 16\\\\cdot2 + 5\\\\cdot(-5) = -7+32-25 = 0\\\\). Verify the cross product:\\n\\\\[\\n\\\\begin{pmatrix}1\\\\\\\\2\\\\\\\\-5\\\\end{pmatrix} \\\\times \\\\begin{pmatrix}-7\\\\\\\\16\\\\\\\\5\\\\end{pmatrix} = \\\\begin{pmatrix}2\\\\cdot5 - (-5)\\\\cdot16\\\\\\\\ -(1\\\\cdot5 - (-5)\\\\cdot(-7))\\\\\\\\ 1\\\\cdot16 - 2\\\\cdot(-7)\\\\end{pmatrix} = \\\\begin{pmatrix}10+80\\\\\\\\ -(5-35)\\\\\\\\ 16+14\\\\end{pmatrix} = \\\\begin{pmatrix}90\\\\\\\\30\\\\\\\\30\\\\end{pmatrix},\\n\\\\]\\nwhich matches \\\\(\\\\mathbf{b}\\\\).\\n\\nThe general solution is \\\\(\\\\mathbf{v} = (-7,16,5) + \\\\lambda (1,2,-5)\\\\). Its squared magnitude is\\n\\\\[\\n|\\\\mathbf{v}|^2 = |(-7,16,5)|^2 + \\\\lambda^2 |(1,2,-5)|^2 = (49+256+25) + \\\\lambda^2\\\\cdot30 = 330 + 30\\\\lambda^2.\\n\\\\]\\nThis is minimized when \\\\(\\\\lambda = 0\\\\). Hence the vector with the smallest magnitude is \\\\(\\\\mathbf{v}_\\\\perp\\\\).\\n\\nTherefore, the required vector is\\n\\\\[\\n\\\\boxed{\\\\begin{pmatrix} -7 \\\\\\\\ 16 \\\\\\\\ 5 \\\\end{pmatrix}}.\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} -7 \\\\\\\\ 16 \\\\\\\\ 5 \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} -7 \\\\\\\\ 16 \\\\\\\\ 5 \\\\end{pmatrix}\", \"raw_tail\": \"ce the vector with the smallest magnitude is \\\\(\\\\mathbf{v}_\\\\perp\\\\).\\n\\nTherefore, the required vector is\\n\\\\[\\n\\\\boxed{\\\\begin{pmatrix} -7 \\\\\\\\ 16 \\\\\\\\ 5 \\\\end{pmatrix}}.\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 145.441,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given vectors \\\\(\\\\mathbf{a} = \\\\begin{pmatrix} 1 \\\\\\\\ 2 \\\\\\\\ -5 \\\\end{pmatrix}\\\\) and \\\\(\\\\mathbf{b} = \\\\begin{pmatrix} 90 \\\\' attempts=1"
+  ]
+}

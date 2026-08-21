@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_472",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def check_Consecutive(arr):\\n    \\\"\\\"\\\"\\n    Checks if the given list contains consecutive integers.\\n    Returns True if the elements are consecutive, False otherwise.\\n    \\\"\\\"\\\"\\n    # Empty lists are not considered consecutive in this context\\n    if not arr:\\n        return False\\n    \\n    # If the number of unique elements is different from the list length,\\n    # there are duplicates, so they cannot be consecutive.\\n    if len(set(arr)) != len(arr):\\n        return False\\n    \\n    # For a list of consecutive integers, the range (max - min + 1)\\n    # must be equal to the number of elements in the list.\\n    return max(arr) - min(arr) + 1 == len(arr)\\n\\nif __name__ == \\\"__main__\\\":\\n    # Provided test case\\n    assert check_Consecutive([1, 2, 3, 4, 5]) == True\\n    \\n    # Additional test cases for robustness\\n    assert check_Consecutive([5, 4, 3, 2, 1]) == True  # Unsorted\\n    assert check_Consecutive([1, 2, 3, 5]) == False    # Missing number\\n    assert check_Consecutive([1, 2, 2, 3]) == False    # Duplicates\\n    assert check_Consecutive([10]) == True             # Single element\\n    assert check_Consecutive([]) == False              # Empty list\\n    \\n    print(\\\"All tests passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.06}"
+  },
+  "timings": {
+    "agent_s": 46.111,
+    "setup_s": 0.0,
+    "grade_s": 0.119
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.06s"
+  ]
+}

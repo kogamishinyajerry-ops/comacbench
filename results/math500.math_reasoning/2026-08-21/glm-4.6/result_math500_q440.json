@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q440",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We expand each product and then subtract.\\n\\nFirst, expand \\\\((u+4)(u-1)\\\\):\\n\\\\[\\n(u+4)(u-1) = u\\\\cdot u + u\\\\cdot(-1) + 4\\\\cdot u + 4\\\\cdot(-1) = u^2 - u + 4u - 4 = u^2 + 3u - 4.\\n\\\\]\\n\\nSecond, expand \\\\((u-3)(u+6)\\\\):\\n\\\\[\\n(u-3)(u+6) = u\\\\cdot u + u\\\\cdot6 + (-3)\\\\cdot u + (-3)\\\\cdot6 = u^2 + 6u - 3u - 18 = u^2 + 3u - 18.\\n\\\\]\\n\\nNow subtract the second expression from the first:\\n\\\\[\\n(u^2 + 3u - 4) - (u^2 + 3u - 18) = u^2 + 3u - 4 - u^2 - 3u + 18 = 14.\\n\\\\]\\n\\nThus the simplified expression is \\\\(14\\\\).\\n\\n\\\\boxed{14}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"14\", \"reference_number\": \"14\", \"raw_tail\": \"nd expression from the first:\\n\\\\[\\n(u^2 + 3u - 4) - (u^2 + 3u - 18) = u^2 + 3u - 4 - u^2 - 3u + 18 = 14.\\n\\\\]\\n\\nThus the simplified expression is \\\\(14\\\\).\\n\\n\\\\boxed{14}\"}"
+  },
+  "timings": {
+    "agent_s": 23.565,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We expand each product and then subtract.\\n\\nFirst, expand \\\\((u+4)(u-1)\\\\):\\n\\\\[\\n(u+4)(u-1) = u\\\\cdot u + u\\\\cdot(-1) + 4\\\\cdot ' attempts=1"
+  ]
+}

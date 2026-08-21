@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q228",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given three planes:\\n\\n\\\\[\\n\\\\begin{aligned}\\n\\\\pi_1:&\\\\ x - z = 0, \\\\\\\\\\n\\\\pi_2:&\\\\ x - 2y + z = 0, \\\\\\\\\\n\\\\pi_3:&\\\\ x + y + z = 0.\\n\\\\end{aligned}\\n\\\\]\\n\\nFor a point \\\\(P=(x,y,z)\\\\), the distances to these planes are\\n\\n\\\\[\\nd_1 = \\\\frac{|x-z|}{\\\\sqrt{2}},\\\\quad\\nd_2 = \\\\frac{|x-2y+z|}{\\\\sqrt{6}},\\\\quad\\nd_3 = \\\\frac{|x+y+z|}{\\\\sqrt{3}}.\\n\\\\]\\n\\nSquaring eliminates the absolute values, so\\n\\n\\\\[\\nd_1^2 = \\\\frac{(x-z)^2}{2},\\\\quad\\nd_2^2 = \\\\frac{(x-2y+z)^2}{6},\\\\quad\\nd_3^2 = \\\\frac{(x+y+z)^2}{3}.\\n\\\\]\\n\\nThe condition defining the set \\\\(S\\\\) is\\n\\n\\\\[\\nd_1^2+d_2^2+d_3^2 = 36.\\n\\\\]\\n\\nSubstituting the expressions:\\n\\n\\\\[\\n\\\\frac{(x-z)^2}{2} + \\\\frac{(x-2y+z)^2}{6} + \\\\frac{(x+y+z)^2}{3} = 36.\\n\\\\]\\n\\nMultiply both sides by 6 to clear denominators:\\n\\n\\\\[\\n3(x-z)^2 + (x-2y+z)^2 + 2(x+y+z)^2 = 216.\\n\\\\]\\n\\nExpand each term:\\n\\n\\\\[\\n\\\\begin{aligned}\\n3(x-z)^2 &= 3x^2 -6xz + 3z^2,\\\\\\\\\\n(x-2y+z)^2 &= x^2 + 4y^2 + z^2 -4xy +2xz -4yz,\\\\\\\\\\n2(x+y+z)^2 &= 2x^2 + 2y^2 + 2z^2 +4xy +4xz +4yz.\\n\\\\end{aligned}\\n\\\\]\\n\\nSumming them:\\n\\n\\\\[\\n\\\\begin{aligned}\\nx^2&:\\\\ 3+1+2 = 6,\\\\\\\\\\ny^2&:\\\\ 0+4+2 = 6,\\\\\\\\\\nz^2&:\\\\ 3+1+2 = 6,\\\\\\\\\\nxy&:\\\\ 0-4+4 = 0,\\\\\\\\\\nxz&:\\\\ -6+2+4 = 0,\\\\\\\\\\nyz&:\\\\ 0-4+4 = 0.\\n\\\\end{aligned}\\n\\\\]\\n\\nHence the left side simplifies to \\\\(6x^2+6y^2+6z^2 = 6(x^2+y^2+z^2)\\\\). Therefore,\\n\\n\\\\[\\n6(x^2+y^2+z^2) = 216 \\\\quad\\\\Longrightarrow\\\\quad x^2+y^2+z^2 = 36.\\n\\\\]\\n\\nThus \\\\(S\\\\) is the sphere of radius \\\\(6\\\\) centered at the origin. The region enclosed by \\\\(S\\\\) is the solid ball of radius \\\\(6\\\\). Its volume is\\n\\n\\\\[\\nV = \\\\frac{4}{3}\\\\pi r^3 = \\\\frac{4}{3}\\\\pi \\\\cdot 6^3 = \\\\frac{4}{3}\\\\pi \\\\cdot 216 = 288\\\\pi.\\n\\\\]\\n\\n\\\\[\\n\\\\boxed{288\\\\pi}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"288\\\\pi\", \"reference_number\": \"288 \\\\pi\", \"raw_tail\": \"he solid ball of radius \\\\(6\\\\). Its volume is\\n\\n\\\\[\\nV = \\\\frac{4}{3}\\\\pi r^3 = \\\\frac{4}{3}\\\\pi \\\\cdot 6^3 = \\\\frac{4}{3}\\\\pi \\\\cdot 216 = 288\\\\pi.\\n\\\\]\\n\\n\\\\[\\n\\\\boxed{288\\\\pi}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 82.354,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given three planes:\\n\\n\\\\[\\n\\\\begin{aligned}\\n\\\\pi_1:&\\\\ x - z = 0, \\\\\\\\\\n\\\\pi_2:&\\\\ x - 2y + z = 0, \\\\\\\\\\n\\\\pi_3:&\\\\ x + y + z = 0' attempts=1"
+  ]
+}

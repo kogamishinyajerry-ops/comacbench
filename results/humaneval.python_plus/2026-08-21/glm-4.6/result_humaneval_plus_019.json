@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_019",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from typing import List\\n\\ndef sort_numbers(numbers: str) -> str:\\n    \\\"\\\"\\\" Input is a space-delimited string of numberals from 'zero' to 'nine'.\\n    Valid choices are 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight' and 'nine'.\\n    Return the string with numbers sorted from smallest to largest\\n    >>> sort_numbers('three one five')\\n    'one three five'\\n    \\\"\\\"\\\"\\n    if not numbers.strip():\\n        return \\\"\\\"\\n    word_to_num = {\\n        'zero': 0,\\n        'one': 1,\\n        'two': 2,\\n        'three': 3,\\n        'four': 4,\\n        'five': 5,\\n        'six': 6,\\n        'seven': 7,\\n        'eight': 8,\\n        'nine': 9\\n    }\\n    # split and sort based on numeric value\\n    words = numbers.split()\\n    sorted_words = sorted(words, key=lambda w: word_to_num[w])\\n    return ' '.join(sorted_words)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 12.765,
+    "setup_s": 0.0,
+    "grade_s": 0.148
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

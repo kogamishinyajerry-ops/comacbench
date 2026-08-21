@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q485",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given four points \\\\(A, B, C, D\\\\) with the following distances:\\n\\n\\\\[\\nAB = 6,\\\\quad AC = 6,\\\\quad AD = 5,\\\\quad BC = 5,\\\\quad BD = 3,\\\\quad CD = 4.\\n\\\\]\\n\\nWe need the shortest possible length of a path that starts at any one of these points and visits the other three exactly once. This is the minimum Hamiltonian path on the complete graph with these edge weights.\\n\\nSince there are only four vertices, we can enumerate all possible orders of the points (starting anywhere) and compute the total distance of the three consecutive edges. The minimum value among these 24 permutations (or 12 undirected paths) will be the answer.\\n\\nWe can fix the starting point and list all permutations of the remaining three vertices.\\n\\n- **Starting at \\\\(A\\\\)**:\\n  - \\\\(A \\\\to B \\\\to C \\\\to D\\\\): \\\\(AB+BC+CD = 6+5+4 = 15\\\\)\\n  - \\\\(A \\\\to B \\\\to D \\\\to C\\\\): \\\\(AB+BD+DC = 6+3+4 = 13\\\\)\\n  - \\\\(A \\\\to C \\\\to B \\\\to D\\\\): \\\\(AC+CB+BD = 6+5+3 = 14\\\\)\\n  - \\\\(A \\\\to C \\\\to D \\\\to B\\\\): \\\\(AC+CD+DB = 6+4+3 = 13\\\\)\\n  - \\\\(A \\\\to D \\\\to B \\\\to C\\\\): \\\\(AD+DB+BC = 5+3+5 = 13\\\\)\\n  - \\\\(A \\\\to D \\\\to C \\\\to B\\\\): \\\\(AD+DC+CB = 5+4+5 = 14\\\\)\\n\\n  Minimum from \\\\(A\\\\): \\\\(13\\\\).\\n\\n- **Starting at \\\\(B\\\\)**:\\n  - \\\\(B \\\\to A \\\\to C \\\\to D\\\\): \\\\(BA+AC+CD = 6+6+4 = 16\\\\)\\n  - \\\\(B \\\\to A \\\\to D \\\\to C\\\\): \\\\(BA+AD+DC = 6+5+4 = 15\\\\)\\n  - \\\\(B \\\\to C \\\\to A \\\\to D\\\\): \\\\(BC+CA+AD = 5+6+5 = 16\\\\)\\n  - \\\\(B \\\\to C \\\\to D \\\\to A\\\\): \\\\(BC+CD+DA = 5+4+5 = 14\\\\)\\n  - \\\\(B \\\\to D \\\\to A \\\\to C\\\\): \\\\(BD+DA+AC = 3+5+6 = 14\\\\)\\n  - \\\\(B \\\\to D \\\\to C \\\\to A\\\\): \\\\(BD+DC+CA = 3+4+6 = 13\\\\)\\n\\n  Minimum from \\\\(B\\\\): \\\\(13\\\\).\\n\\n- **Starting at \\\\(C\\\\)**:\\n  - \\\\(C \\\\to A \\\\to B \\\\to D\\\\): \\\\(CA+AB+BD = 6+6+3 = 15\\\\)\\n  - \\\\(C \\\\to A \\\\to D \\\\to B\\\\): \\\\(CA+AD+DB = 6+5+3 = 14\\\\)\\n  - \\\\(C \\\\to B \\\\to A \\\\to D\\\\): \\\\(CB+BA+AD = 5+6+5 = 16\\\\)\\n  - \\\\(C \\\\to B \\\\to D \\\\to A\\\\): \\\\(CB+BD+DA = 5+3+5 = 13\\\\)\\n  - \\\\(C \\\\to D \\\\to A \\\\to B\\\\): \\\\(CD+DA+AB = 4+5+6 = 15\\\\)\\n  - \\\\(C \\\\to D \\\\to B \\\\to A\\\\): \\\\(CD+DB+BA = 4+3+6 = 13\\\\)\\n\\n  Minimum from \\\\(C\\\\): \\\\(13\\\\).\\n\\n- **Starting at \\\\(D\\\\)**:\\n  - \\\\(D \\\\to A \\\\to B \\\\to C\\\\): \\\\(DA+AB+BC = 5+6+5 = 16\\\\)\\n  - \\\\(D \\\\to A \\\\to C \\\\to B\\\\): \\\\(DA+AC+CB = 5+6+5 = 16\\\\)\\n  - \\\\(D \\\\to B \\\\to A \\\\to C\\\\): \\\\(DB+BA+AC = 3+6+6 = 15\\\\)\\n  - \\\\(D \\\\to B \\\\to C \\\\to A\\\\): \\\\(DB+BC+CA = 3+5+6 = 14\\\\)\\n  - \\\\(D \\\\to C \\\\to A \\\\to B\\\\): \\\\(DC+CA+AB = 4+6+6 = 16\\\\)\\n  - \\\\(D \\\\to C \\\\to B \\\\to A\\\\): \\\\(DC+CB+BA = 4+5+6 = 15\\\\)\\n\\n  Minimum from \\\\(D\\\\): \\\\(14\\\\).\\n\\nThe smallest total among all starting points is \\\\(13\\\\), achieved, for example, by the paths \\\\(A \\\\to B \\\\to D \\\\to C\\\\), \\\\(A \\\\to C \\\\to D \\\\to B\\\\), \\\\(A \\\\to D \\\\to B \\\\to C\\\\), \\\\(B \\\\to D \\\\to C \\\\to A\\\\), \\\\(C \\\\to B \\\\to D \\\\to A\\\\), and \\\\(C \\\\to D \\\\to B \\\\to A\\\\).\\n\\nThus the shortest distance that can be travelled is \\\\(\\\\boxed{13}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"13\", \"reference_number\": \"13\", \"raw_tail\": \"o B \\\\to C\\\\), \\\\(B \\\\to D \\\\to C \\\\to A\\\\), \\\\(C \\\\to B \\\\to D \\\\to A\\\\), and \\\\(C \\\\to D \\\\to B \\\\to A\\\\).\\n\\nThus the shortest distance that can be travelled is \\\\(\\\\boxed{13}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 119.441,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given four points \\\\(A, B, C, D\\\\) with the following distances:\\n\\n\\\\[\\nAB = 6,\\\\quad AC = 6,\\\\quad AD = 5,\\\\quad BC = 5,' attempts=1"
+  ]
+}

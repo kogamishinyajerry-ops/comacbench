@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_086",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8889,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.94445,
+  "artifacts": {
+    "code": "\"import re\\n\\ndef anti_shuffle(s):\\n    \\\"\\\"\\\"\\n    Write a function that takes a string and returns an ordered version of it.\\n    Ordered version of string, is a string where all words (separated by space)\\n    are replaced by a new word where all the characters arranged in\\n    ascending order based on ascii value.\\n    Note: You should keep the order of words and blank spaces in the sentence.\\n\\n    For example:\\n    anti_shuffle('Hi') returns 'Hi'\\n    anti_shuffle('hello') returns 'ehllo'\\n    anti_shuffle('Hello World!!!') returns 'Hello !!!Wdlor'\\n    \\\"\\\"\\\"\\n    # Replace each sequence of non-space characters with its sorted version\\n    return re.sub(r'\\\\S+', lambda m: ''.join(sorted(m.group())), s)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 9, \"failed_cases\": [{\"case\": 9, \"pass\": false, \"err\": \"AssertionError: mismatch on ['\\\\n\\\\n123 456\\\\n789\\\\n']\"}], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 42.638,
+    "setup_s": 0.0,
+    "grade_s": 0.143
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

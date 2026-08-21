@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q428",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are to find the minimum of \\\\(S = \\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d}\\\\) given positive real numbers \\\\(a,b,c,d\\\\) with \\\\(a+b+c+d=1\\\\).\\n\\nApply the Cauchy–Schwarz inequality in the form\\n\\\\[\\n\\\\left(\\\\sum \\\\frac{w_i}{x_i}\\\\right)\\\\left(\\\\sum x_i\\\\right) \\\\ge \\\\left(\\\\sum \\\\sqrt{w_i}\\\\right)^2,\\n\\\\]\\nwith \\\\(w_1=1,\\\\; w_2=1,\\\\; w_3=4,\\\\; w_4=16\\\\) and \\\\(x_1=a,\\\\; x_2=b,\\\\; x_3=c,\\\\; x_4=d\\\\). Then\\n\\\\[\\n\\\\left(\\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d}\\\\right)(a+b+c+d) \\\\ge \\\\left(\\\\sqrt{1}+\\\\sqrt{1}+\\\\sqrt{4}+\\\\sqrt{16}\\\\right)^2.\\n\\\\]\\nThe sum on the right is \\\\(1+1+2+4 = 8\\\\), so the right-hand side equals \\\\(8^2 = 64\\\\). Since \\\\(a+b+c+d = 1\\\\), we obtain\\n\\\\[\\n\\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d} \\\\ge 64.\\n\\\\]\\n\\nEquality holds when the vectors \\\\(\\\\left(\\\\frac{\\\\sqrt{w_i}}{\\\\sqrt{x_i}}\\\\right)\\\\) and \\\\(\\\\left(\\\\sqrt{x_i}\\\\right)\\\\) are proportional, i.e.\\n\\\\[\\n\\\\frac{\\\\sqrt{w_i}}{\\\\sqrt{x_i}} = t\\\\sqrt{x_i} \\\\quad \\\\Longrightarrow \\\\quad \\\\sqrt{w_i} = t x_i \\\\quad \\\\Longrightarrow \\\\quad x_i = \\\\frac{\\\\sqrt{w_i}}{t}.\\n\\\\]\\nWith \\\\(\\\\sum x_i = 1\\\\), we get \\\\(t = \\\\sum \\\\sqrt{w_i} = 8\\\\). Hence\\n\\\\[\\na = \\\\frac{1}{8},\\\\; b = \\\\frac{1}{8},\\\\; c = \\\\frac{2}{8} = \\\\frac{1}{4},\\\\; d = \\\\frac{4}{8} = \\\\frac{1}{2},\\n\\\\]\\nall positive and summing to \\\\(1\\\\). For these values the expression equals \\\\(64\\\\).\\n\\nThus the minimum value is \\\\(64\\\\).\\n\\n\\\\[\\n\\\\boxed{64}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"64\", \"reference_number\": \"64\", \"raw_tail\": \"c{4}{8} = \\\\frac{1}{2},\\n\\\\]\\nall positive and summing to \\\\(1\\\\). For these values the expression equals \\\\(64\\\\).\\n\\nThus the minimum value is \\\\(64\\\\).\\n\\n\\\\[\\n\\\\boxed{64}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 105.172,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are to find the minimum of \\\\(S = \\\\frac{1}{a} + \\\\frac{1}{b} + \\\\frac{4}{c} + \\\\frac{16}{d}\\\\) given positive real numbers' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q499",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given triangle \\\\(ABC\\\\) with altitudes \\\\(\\\\overline{AD}\\\\) and \\\\(\\\\overline{BE}\\\\) intersecting at the orthocenter \\\\(H\\\\).  The angles \\\\(\\\\angle BAC = 54^\\\\circ\\\\) and \\\\(\\\\angle ABC = 52^\\\\circ\\\\).\\n\\nFirst, find the third angle:\\n\\\\[\\n\\\\angle ACB = 180^\\\\circ - (54^\\\\circ + 52^\\\\circ) = 74^\\\\circ.\\n\\\\]\\n\\nNow, compute \\\\(\\\\angle HAB\\\\).  Since \\\\(AD\\\\) is an altitude, \\\\(AD \\\\perp BC\\\\).  In right triangle \\\\(ABD\\\\) (right at \\\\(D\\\\)),\\n\\\\[\\n\\\\angle ABD = \\\\angle ABC = 52^\\\\circ,\\n\\\\]\\nso\\n\\\\[\\n\\\\angle BAD = 90^\\\\circ - 52^\\\\circ = 38^\\\\circ.\\n\\\\]\\nBecause \\\\(H\\\\) lies on \\\\(AD\\\\) (the orthocenter is inside the acute triangle), \\\\(\\\\angle HAB = \\\\angle BAD = 38^\\\\circ\\\\).\\n\\nNext, compute \\\\(\\\\angle HBA\\\\).  Since \\\\(BE\\\\) is an altitude, \\\\(BE \\\\perp AC\\\\).  In right triangle \\\\(ABE\\\\) (right at \\\\(E\\\\)),\\n\\\\[\\n\\\\angle BAE = \\\\angle BAC = 54^\\\\circ,\\n\\\\]\\nso\\n\\\\[\\n\\\\angle ABE = 90^\\\\circ - 54^\\\\circ = 36^\\\\circ.\\n\\\\]\\nBecause \\\\(H\\\\) lies on \\\\(BE\\\\), \\\\(\\\\angle HBA = \\\\angle ABE = 36^\\\\circ\\\\).\\n\\nNow, in \\\\(\\\\triangle AHB\\\\),\\n\\\\[\\n\\\\angle AHB = 180^\\\\circ - (\\\\angle HAB + \\\\angle HBA) = 180^\\\\circ - (38^\\\\circ + 36^\\\\circ) = 180^\\\\circ - 74^\\\\circ = 106^\\\\circ.\\n\\\\]\\n\\n(Alternatively, the well‑known relation \\\\(\\\\angle AHB = 180^\\\\circ - \\\\angle C\\\\) gives the same result.)\\n\\nThus, the measure of \\\\(\\\\angle AHB\\\\) is \\\\(106^\\\\circ\\\\).\\n\\n\\\\[\\n\\\\boxed{106^\\\\circ}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"106^\\\\circ\", \"reference_number\": \"106^\\\\circ\", \"raw_tail\": \"ell‑known relation \\\\(\\\\angle AHB = 180^\\\\circ - \\\\angle C\\\\) gives the same result.)\\n\\nThus, the measure of \\\\(\\\\angle AHB\\\\) is \\\\(106^\\\\circ\\\\).\\n\\n\\\\[\\n\\\\boxed{106^\\\\circ}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 181.732,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given triangle \\\\(ABC\\\\) with altitudes \\\\(\\\\overline{AD}\\\\) and \\\\(\\\\overline{BE}\\\\) intersecting at the orthocenter \\\\(H' attempts=1"
+  ]
+}

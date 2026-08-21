@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q186",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to count positive integers \\\\(n > 1\\\\) such that \\\\(2^{24}\\\\) is a perfect \\\\(n^{\\\\text{th}}\\\\) power. That means there exists an integer \\\\(a\\\\) with \\\\(a^n = 2^{24}\\\\).\\n\\nSince \\\\(2^{24}\\\\) is a power of a prime, any integer \\\\(a\\\\) satisfying \\\\(a^n = 2^{24}\\\\) must be of the form \\\\(a = \\\\pm 2^k\\\\) for some nonnegative integer \\\\(k\\\\). Because \\\\(2^{24} > 0\\\\), if \\\\(n\\\\) is odd then \\\\(a\\\\) must be positive; if \\\\(n\\\\) is even, \\\\(a\\\\) could be negative, but that does not affect the exponent condition. In any case, we have \\\\((\\\\pm 2^k)^n = 2^{kn}\\\\) (since \\\\((-1)^n = 1\\\\) when \\\\(n\\\\) is even, and for odd \\\\(n\\\\) we take the positive root). Therefore we require \\\\(kn = 24\\\\).\\n\\nThus \\\\(n\\\\) must be a positive divisor of \\\\(24\\\\) and also \\\\(k = 24/n\\\\) must be a positive integer. The divisors of \\\\(24\\\\) are: \\\\(1, 2, 3, 4, 6, 8, 12, 24\\\\). Excluding \\\\(n = 1\\\\) (since \\\\(n > 1\\\\)), we obtain \\\\(7\\\\) possible values for \\\\(n\\\\).\\n\\nWe can verify each:\\n- \\\\(n = 2\\\\): \\\\(2^{24} = (2^{12})^2\\\\)\\n- \\\\(n = 3\\\\): \\\\(2^{24} = (2^{8})^3\\\\)\\n- \\\\(n = 4\\\\): \\\\(2^{24} = (2^{6})^4\\\\)\\n- \\\\(n = 6\\\\): \\\\(2^{24} = (2^{4})^6\\\\)\\n- \\\\(n = 8\\\\): \\\\(2^{24} = (2^{3})^8\\\\)\\n- \\\\(n = 12\\\\): \\\\(2^{24} = (2^{2})^{12}\\\\)\\n- \\\\(n = 24\\\\): \\\\(2^{24} = (2^{1})^{24}\\\\)\\n\\nAll work. No other \\\\(n > 1\\\\) can work because if \\\\(n\\\\) does not divide \\\\(24\\\\), then \\\\(24/n\\\\) is not an integer, so \\\\(2^{24/n}\\\\) would not be an integer, and no integer \\\\(a\\\\) exists.\\n\\nHence the answer is \\\\(7\\\\).\\n\\n\\\\boxed{7}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"7\", \"reference_number\": \"7\", \"raw_tail\": \"not divide \\\\(24\\\\), then \\\\(24/n\\\\) is not an integer, so \\\\(2^{24/n}\\\\) would not be an integer, and no integer \\\\(a\\\\) exists.\\n\\nHence the answer is \\\\(7\\\\).\\n\\n\\\\boxed{7}\"}"
+  },
+  "timings": {
+    "agent_s": 44.408,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to count positive integers \\\\(n > 1\\\\) such that \\\\(2^{24}\\\\) is a perfect \\\\(n^{\\\\text{th}}\\\\) power. That means there' attempts=1"
+  ]
+}

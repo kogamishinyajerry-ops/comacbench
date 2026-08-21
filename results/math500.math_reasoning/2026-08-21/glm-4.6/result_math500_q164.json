@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q164",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We start by expressing the given expression in terms of more convenient angles.\\n\\n\\\\[\\n\\\\tan 100^\\\\circ + 4 \\\\sin 100^\\\\circ.\\n\\\\]\\n\\nSince \\\\(100^\\\\circ = 180^\\\\circ - 80^\\\\circ\\\\), we have\\n\\n\\\\[\\n\\\\sin 100^\\\\circ = \\\\sin 80^\\\\circ,\\\\quad \\\\cos 100^\\\\circ = -\\\\cos 80^\\\\circ,\\\\quad \\\\tan 100^\\\\circ = \\\\frac{\\\\sin 100^\\\\circ}{\\\\cos 100^\\\\circ} = \\\\frac{\\\\sin 80^\\\\circ}{-\\\\cos 80^\\\\circ} = -\\\\tan 80^\\\\circ.\\n\\\\]\\n\\nThus the expression becomes\\n\\n\\\\[\\n-\\\\tan 80^\\\\circ + 4 \\\\sin 80^\\\\circ.\\n\\\\]\\n\\nNow use \\\\(80^\\\\circ = 90^\\\\circ - 10^\\\\circ\\\\). Then\\n\\n\\\\[\\n\\\\sin 80^\\\\circ = \\\\cos 10^\\\\circ,\\\\quad \\\\cos 80^\\\\circ = \\\\sin 10^\\\\circ,\\\\quad \\\\tan 80^\\\\circ = \\\\cot 10^\\\\circ.\\n\\\\]\\n\\nSubstituting gives\\n\\n\\\\[\\n-\\\\cot 10^\\\\circ + 4 \\\\cos 10^\\\\circ.\\n\\\\]\\n\\nWrite \\\\(-\\\\cot 10^\\\\circ = -\\\\frac{\\\\cos 10^\\\\circ}{\\\\sin 10^\\\\circ}\\\\) and combine terms over the common denominator \\\\(\\\\sin 10^\\\\circ\\\\):\\n\\n\\\\[\\n-\\\\frac{\\\\cos 10^\\\\circ}{\\\\sin 10^\\\\circ} + 4\\\\cos 10^\\\\circ = \\\\frac{-\\\\cos 10^\\\\circ + 4\\\\cos 10^\\\\circ \\\\sin 10^\\\\circ}{\\\\sin 10^\\\\circ} = \\\\frac{4\\\\cos 10^\\\\circ \\\\sin 10^\\\\circ - \\\\cos 10^\\\\circ}{\\\\sin 10^\\\\circ}.\\n\\\\]\\n\\nUsing the double‑angle identity \\\\(2\\\\sin 10^\\\\circ \\\\cos 10^\\\\circ = \\\\sin 20^\\\\circ\\\\), we have \\\\(4\\\\cos 10^\\\\circ \\\\sin 10^\\\\circ = 2\\\\sin 20^\\\\circ\\\\). Therefore\\n\\n\\\\[\\n\\\\frac{2\\\\sin 20^\\\\circ - \\\\cos 10^\\\\circ}{\\\\sin 10^\\\\circ}.\\n\\\\]\\n\\nNow we simplify the numerator. Observe that\\n\\n\\\\[\\n2\\\\sin 20^\\\\circ = 2\\\\sin(30^\\\\circ - 10^\\\\circ) = 2(\\\\sin 30^\\\\circ \\\\cos 10^\\\\circ - \\\\cos 30^\\\\circ \\\\sin 10^\\\\circ) = 2\\\\left(\\\\frac12 \\\\cos 10^\\\\circ - \\\\frac{\\\\sqrt3}{2} \\\\sin 10^\\\\circ\\\\right) = \\\\cos 10^\\\\circ - \\\\sqrt3 \\\\sin 10^\\\\circ.\\n\\\\]\\n\\nHence\\n\\n\\\\[\\n2\\\\sin 20^\\\\circ - \\\\cos 10^\\\\circ = (\\\\cos 10^\\\\circ - \\\\sqrt3 \\\\sin 10^\\\\circ) - \\\\cos 10^\\\\circ = -\\\\sqrt3 \\\\sin 10^\\\\circ.\\n\\\\]\\n\\nSubstituting back,\\n\\n\\\\[\\n\\\\frac{2\\\\sin 20^\\\\circ - \\\\cos 10^\\\\circ}{\\\\sin 10^\\\\circ} = \\\\frac{-\\\\sqrt3 \\\\sin 10^\\\\circ}{\\\\sin 10^\\\\circ} = -\\\\sqrt3.\\n\\\\]\\n\\nTherefore,\\n\\n\\\\[\\n\\\\tan 100^\\\\circ + 4 \\\\sin 100^\\\\circ = -\\\\sqrt3.\\n\\\\]\\n\\n\\\\boxed{-\\\\sqrt{3}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-\\\\sqrt{3}\", \"reference_number\": \"-\\\\sqrt{3}\", \"raw_tail\": \"c}{\\\\sin 10^\\\\circ} = \\\\frac{-\\\\sqrt3 \\\\sin 10^\\\\circ}{\\\\sin 10^\\\\circ} = -\\\\sqrt3.\\n\\\\]\\n\\nTherefore,\\n\\n\\\\[\\n\\\\tan 100^\\\\circ + 4 \\\\sin 100^\\\\circ = -\\\\sqrt3.\\n\\\\]\\n\\n\\\\boxed{-\\\\sqrt{3}}\"}"
+  },
+  "timings": {
+    "agent_s": 128.684,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We start by expressing the given expression in terms of more convenient angles.\\n\\n\\\\[\\n\\\\tan 100^\\\\circ + 4 \\\\sin 100^\\\\circ.\\n\\\\' attempts=1"
+  ]
+}

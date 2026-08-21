@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q198",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are asked: \\\"In how many ways can 6 girls and 2 boys sit in a row if the 2 boys insist on sitting next to each other?\\\" Assume the girls are distinct and the boys are distinct.\\n\\nStep 1: Because the two boys must be adjacent, treat them as a single \\\"block\\\". This reduces the problem to arranging 7 items: the block and the 6 girls.\\n\\nStep 2: Within the block, the two boys can be ordered in \\\\(2! = 2\\\\) ways (boy A then boy B, or boy B then boy A).\\n\\nStep 3: The 7 items (6 distinct girls and 1 block) are all distinguishable. They can be arranged in a row in \\\\(7! = 5040\\\\) ways.\\n\\nStep 4: Multiply the arrangements of the 7 items by the internal arrangements of the boys: total number of seatings = \\\\(7! \\\\times 2! = 5040 \\\\times 2 = 10080\\\\).\\n\\nThus, there are 10080 ways.\\n\\n\\\\boxed{10080}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10080\", \"reference_number\": \"10,\\\\!080\", \"raw_tail\": \"items by the internal arrangements of the boys: total number of seatings = \\\\(7! \\\\times 2! = 5040 \\\\times 2 = 10080\\\\).\\n\\nThus, there are 10080 ways.\\n\\n\\\\boxed{10080}\"}"
+  },
+  "timings": {
+    "agent_s": 36.239,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are asked: \"In how many ways can 6 girls and 2 boys sit in a row if the 2 boys insist on sitting next to each other?\"' attempts=1"
+  ]
+}

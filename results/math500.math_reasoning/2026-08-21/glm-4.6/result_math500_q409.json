@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q409",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The asymptotes are \\\\(y = 2x - 3\\\\) and \\\\(y = 17 - 2x\\\\). Their intersection gives the center of the hyperbola:\\n\\n\\\\[\\n2x - 3 = 17 - 2x \\\\quad\\\\Longrightarrow\\\\quad 4x = 20 \\\\quad\\\\Longrightarrow\\\\quad x = 5,\\\\; y = 2\\\\cdot5 - 3 = 7.\\n\\\\]\\n\\nThus the center is \\\\((h,k) = (5,7)\\\\).\\n\\nTranslate coordinates: \\\\(X = x - 5\\\\), \\\\(Y = y - 7\\\\). In these coordinates the asymptotes become \\\\(Y = 2X\\\\) and \\\\(Y = -2X\\\\).\\n\\nA hyperbola with these asymptotes and center at the origin has an equation of the form\\n\\n\\\\[\\n(Y - 2X)(Y + 2X) = k \\\\quad\\\\Longrightarrow\\\\quad Y^2 - 4X^2 = k,\\n\\\\]\\n\\nwhere \\\\(k \\\\neq 0\\\\) is a constant.\\n\\nThe point \\\\((4,7)\\\\) lies on the hyperbola. Its translated coordinates are \\\\(X = 4-5 = -1\\\\), \\\\(Y = 7-7 = 0\\\\). Substituting:\\n\\n\\\\[\\n0^2 - 4(-1)^2 = -4 = k.\\n\\\\]\\n\\nHence the equation is \\\\(Y^2 - 4X^2 = -4\\\\), or equivalently \\\\(4X^2 - Y^2 = 4\\\\). Dividing by 4 gives the standard form:\\n\\n\\\\[\\n\\\\frac{X^2}{1} - \\\\frac{Y^2}{4} = 1.\\n\\\\]\\n\\nThus the hyperbola is horizontal with \\\\(a^2 = 1\\\\) and \\\\(b^2 = 4\\\\). For a hyperbola, \\\\(c^2 = a^2 + b^2 = 1 + 4 = 5\\\\), so \\\\(c = \\\\sqrt{5}\\\\). The distance between the two foci is \\\\(2c = 2\\\\sqrt{5}\\\\).\\n\\n\\\\[\\n\\\\boxed{2\\\\sqrt{5}}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\\\\sqrt{5}\", \"reference_number\": \"2 \\\\sqrt{5}\", \"raw_tail\": \" = 4\\\\). For a hyperbola, \\\\(c^2 = a^2 + b^2 = 1 + 4 = 5\\\\), so \\\\(c = \\\\sqrt{5}\\\\). The distance between the two foci is \\\\(2c = 2\\\\sqrt{5}\\\\).\\n\\n\\\\[\\n\\\\boxed{2\\\\sqrt{5}}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 150.424,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The asymptotes are \\\\(y = 2x - 3\\\\) and \\\\(y = 17 - 2x\\\\). Their intersection gives the center of the hyperbola:\\n\\n\\\\[\\n2x - 3 ' attempts=1"
+  ]
+}

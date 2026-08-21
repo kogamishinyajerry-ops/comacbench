@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q435",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The domain of \\\\(f(x) = \\\\frac{2x-7}{\\\\sqrt{x^2-5x+6}}\\\\) consists of all real numbers for which the denominator is defined and non-zero. Since the denominator contains a square root, the radicand must be positive (zero would make the denominator zero, which is undefined). Therefore, we require:\\n\\n\\\\[\\nx^2 - 5x + 6 > 0.\\n\\\\]\\n\\nFactor the quadratic:\\n\\n\\\\[\\nx^2 - 5x + 6 = (x-2)(x-3).\\n\\\\]\\n\\nThe inequality \\\\((x-2)(x-3) > 0\\\\) holds when the product is positive. This occurs outside the interval between the roots, i.e., for \\\\(x < 2\\\\) or \\\\(x > 3\\\\). The endpoints \\\\(x = 2\\\\) and \\\\(x = 3\\\\) are excluded because the radicand becomes zero, making the denominator zero.\\n\\nThus, the domain is:\\n\\n\\\\[\\n(-\\\\infty, 2) \\\\cup (3, \\\\infty).\\n\\\\]\\n\\n\\\\boxed{(-\\\\infty,2)\\\\cup(3,\\\\infty)}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"(-\\\\infty,2)\\\\cup(3,\\\\infty)\", \"reference_number\": \"(-\\\\infty, 2) \\\\cup (3, \\\\infty)\", \"raw_tail\": \"d because the radicand becomes zero, making the denominator zero.\\n\\nThus, the domain is:\\n\\n\\\\[\\n(-\\\\infty, 2) \\\\cup (3, \\\\infty).\\n\\\\]\\n\\n\\\\boxed{(-\\\\infty,2)\\\\cup(3,\\\\infty)}\"}"
+  },
+  "timings": {
+    "agent_s": 18.951,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The domain of \\\\(f(x) = \\\\frac{2x-7}{\\\\sqrt{x^2-5x+6}}\\\\) consists of all real numbers for which the denominator is defined ' attempts=1"
+  ]
+}

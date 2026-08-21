@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q490",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The polynomial is given by\\n$$f(x) = a_nx^n + a_{n-1}x^{n-1} + \\\\cdots + a_2x^2 + a_1x + a_0$$\\nwith integer coefficients. The leading coefficient is $a_n = 2$ and the constant term is $a_0 = 66$.\\nThe roots of the polynomial are distinct integers. Let the roots be $r_1, r_2, \\\\dots, r_n$.\\nAccording to Vieta's formulas, the sum of the roots is given by\\n$$\\\\sum_{i=1}^n r_i = -\\\\frac{a_{n-1}}{a_n} = -\\\\frac{a_{n-1}}{2}$$\\nThus, $a_{n-1} = -2 \\\\sum_{i=1}^n r_i$.\\nWe want to minimize $|a_{n-1}| = 2 \\\\left| \\\\sum_{i=1}^n r_i \\\\right|$.\\nAlso from Vieta's formulas, the product of the roots is\\n$$\\\\prod_{i=1}^n r_i = (-1)^n \\\\frac{a_0}{a_n} = (-1)^n \\\\frac{66}{2} = (-1)^n 33$$\\nSince the roots $r_i$ are distinct integers, their product must be a factor of 33. The divisors of 33 are $\\\\pm 1, \\\\pm 3, \\\\pm 11, \\\\pm 33$.\\nThe roots must be chosen from the set of divisors of 33 such that their product is $(-1)^n 33$.\\n\\nThe set of divisors of 33 is $D = \\\\{ \\\\pm 1, \\\\pm 3, \\\\pm 11, \\\\pm 33 \\\\}$.\\nTo minimize the absolute value of the sum of the roots, we should choose roots that are close to zero or cancel each other out (like having both positive and negative values).\\nThe available divisors and their absolute values are:\\n$|1|=1$\\n$|3|=3$\\n$|11|=11$\\n$|33|=33$\\n\\nWe want to select a subset $S \\\\subset D$ such that $\\\\prod_{r \\\\in S} r = \\\\pm 33$ and $|\\\\sum_{r \\\\in S} r|$ is minimized\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "layer_details": "{\"parsed_answer\": 33.0, \"reference_number\": \"14\", \"raw_tail\": \" are:\\n$|1|=1$\\n$|3|=3$\\n$|11|=11$\\n$|33|=33$\\n\\nWe want to select a subset $S \\\\subset D$ such that $\\\\prod_{r \\\\in S} r = \\\\pm 33$ and $|\\\\sum_{r \\\\in S} r|$ is minimized\"}"
+  },
+  "timings": {
+    "agent_s": 378.171,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial is given by\\n$$f(x) = a_nx^n + a_{n-1}x^{n-1} + \\\\cdots + a_2x^2 + a_1x + a_0$$\\nwith integer coefficients. ' attempts=2"
+  ]
+}

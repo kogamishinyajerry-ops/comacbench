@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q470",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We need to maximize \\\\(f(a,b,c,d)=a b^2 c^3 d^4\\\\) subject to \\\\(a+b+c+d=10\\\\) and \\\\(a,b,c,d>0\\\\).\\n\\n**Method 1: Lagrange multipliers**\\n\\nConsider the logarithm: \\\\(\\\\ln f = \\\\ln a + 2\\\\ln b + 3\\\\ln c + 4\\\\ln d\\\\).  \\nDefine the Lagrangian \\\\(\\\\mathcal{L} = \\\\ln a + 2\\\\ln b + 3\\\\ln c + 4\\\\ln d - \\\\lambda(a+b+c+d-10)\\\\).\\n\\nSet partial derivatives to zero:\\n\\n\\\\[\\n\\\\frac{\\\\partial \\\\mathcal{L}}{\\\\partial a} = \\\\frac{1}{a} - \\\\lambda = 0 \\\\;\\\\Rightarrow\\\\; a = \\\\frac{1}{\\\\lambda},\\n\\\\]\\n\\\\[\\n\\\\frac{\\\\partial \\\\mathcal{L}}{\\\\partial b} = \\\\frac{2}{b} - \\\\lambda = 0 \\\\;\\\\Rightarrow\\\\; b = \\\\frac{2}{\\\\lambda},\\n\\\\]\\n\\\\[\\n\\\\frac{\\\\partial \\\\mathcal{L}}{\\\\partial c} = \\\\frac{3}{c} - \\\\lambda = 0 \\\\;\\\\Rightarrow\\\\; c = \\\\frac{3}{\\\\lambda},\\n\\\\]\\n\\\\[\\n\\\\frac{\\\\partial \\\\mathcal{L}}{\\\\partial d} = \\\\frac{4}{d} - \\\\lambda = 0 \\\\;\\\\Rightarrow\\\\; d = \\\\frac{4}{\\\\lambda}.\\n\\\\]\\n\\nSubstitute into the constraint:\\n\\n\\\\[\\na+b+c+d = \\\\frac{1}{\\\\lambda} + \\\\frac{2}{\\\\lambda} + \\\\frac{3}{\\\\lambda} + \\\\frac{4}{\\\\lambda} = \\\\frac{10}{\\\\lambda} = 10 \\\\;\\\\Rightarrow\\\\; \\\\lambda = 1.\\n\\\\]\\n\\nThus the critical point is \\\\(a=1,\\\\; b=2,\\\\; c=3,\\\\; d=4\\\\).\\n\\n**Method 2: Weighted AM–GM**\\n\\nThe exponents sum to \\\\(1+2+3+4=10\\\\), matching the total sum \\\\(10\\\\). By the inequality for weighted products, the maximum occurs when\\n\\n\\\\[\\n\\\\frac{a}{1} = \\\\frac{b}{2} = \\\\frac{c}{3} = \\\\frac{d}{4} = \\\\frac{a+b+c+d}{1+2+3+4} = \\\\frac{10}{10}=1,\\n\\\\]\\n\\nso again \\\\(a=1,\\\\; b=2,\\\\; c=3,\\\\; d=4\\\\).\\n\\n**Compute the product:**\\n\\n\\\\[\\na b^2 c^3 d^4 = 1 \\\\cdot 2^2 \\\\cdot 3^3 \\\\cdot 4^4 = 1 \\\\cdot 4 \\\\cdot 27 \\\\cdot 256 = 108 \\\\cdot 256 = 27648.\\n\\\\]\\n\\n**Justification of maximum:** The function is continuous on the closed simplex \\\\(\\\\{a,b,c,d\\\\ge0,\\\\; a+b+c+d=10\\\\}\\\\) (where it is zero on the boundary) and positive in the interior. The unique interior critical point therefore gives the global maximum.\\n\\nThus the maximum value is \\\\(\\\\boxed{27648}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"27648\", \"reference_number\": \"27648\", \"raw_tail\": \"the boundary) and positive in the interior. The unique interior critical point therefore gives the global maximum.\\n\\nThus the maximum value is \\\\(\\\\boxed{27648}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 129.869,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to maximize \\\\(f(a,b,c,d)=a b^2 c^3 d^4\\\\) subject to \\\\(a+b+c+d=10\\\\) and \\\\(a,b,c,d>0\\\\).\\n\\n**Method 1: Lagrange mult' attempts=1"
+  ]
+}

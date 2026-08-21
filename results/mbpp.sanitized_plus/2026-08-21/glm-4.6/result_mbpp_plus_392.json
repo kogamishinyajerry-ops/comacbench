@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_392",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"from functools import lru_cache\\n\\n@lru_cache(maxsize=None)\\ndef get_max_sum(n):\\n    \\\"\\\"\\\"\\n    Calculates the maximum sum possible by using the given equation \\n    f(n) = max( (f(n/2) + f(n/3) + f(n/4) + f(n/5)), n).\\n    Uses integer division for the recursive steps.\\n    \\\"\\\"\\\"\\n    if n == 0:\\n        return 0\\n    \\n    # Calculate the sum of the recursive calls\\n    # We use integer division (//) because the problem involves splitting an integer n\\n    split_sum = (get_max_sum(n // 2) + \\n                 get_max_sum(n // 3) + \\n                 get_max_sum(n // 4) + \\n                 get_max_sum(n // 5))\\n    \\n    # Return the maximum of the split sum and n itself\\n    return max(split_sum, n)\\n\\nif __name__ == \\\"__main__\\\":\\n    # Verification with the provided test case\\n    assert get_max_sum(60) == 106\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.27}"
+  },
+  "timings": {
+    "agent_s": 140.372,
+    "setup_s": 0.0,
+    "grade_s": 0.529
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.27s"
+  ]
+}

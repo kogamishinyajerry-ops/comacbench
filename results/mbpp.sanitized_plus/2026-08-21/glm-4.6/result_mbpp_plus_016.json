@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_016",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"import re\\n\\ndef text_lowercase_underscore(text):\\n    \\\"\\\"\\\"\\n    Returns True if the input string consists of sequences of lowercase letters \\n    joined with an underscore, False otherwise.\\n    \\\"\\\"\\\"\\n    # ^[a-z]+       : Matches the start of the string followed by one or more lowercase letters.\\n    # (_[a-z]+)+    : Matches one or more occurrences of an underscore followed by one or more lowercase letters.\\n    # $             : Matches the end of the string.\\n    pattern = r'^[a-z]+(_[a-z]+)+$'\\n    \\n    # re.fullmatch checks if the whole string matches the pattern\\n    if re.fullmatch(pattern, text):\\n        return True\\n    else:\\n        return False\\n\\n# Test case\\nassert text_lowercase_underscore(\\\"aab_cbbbc\\\") == True\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on ['a']\"}], \"determinism\": 1.0, \"run1_s\": 0.06}"
+  },
+  "timings": {
+    "agent_s": 231.328,
+    "setup_s": 0.0,
+    "grade_s": 0.121
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.06s"
+  ]
+}

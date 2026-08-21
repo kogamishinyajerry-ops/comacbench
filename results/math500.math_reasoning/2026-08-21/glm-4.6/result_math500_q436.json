@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q436",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We roll $n$ fair 6‑sided dice. For each die, the probability of showing a 1 is $\\\\frac16$, and the probability of showing a number other than 1 is $\\\\frac56$. Let $X$ be the number of dice that show a number other than 1. Then $X$ follows a binomial distribution with parameters $n$ and $p=\\\\frac56$. The probability that exactly two dice show a number other than 1 is\\n\\n\\\\[\\nP(X=2) = \\\\binom{n}{2} \\\\left(\\\\frac56\\\\right)^2 \\\\left(\\\\frac16\\\\right)^{n-2}.\\n\\\\]\\n\\nWe are given that this probability equals $\\\\frac{25}{216}$:\\n\\n\\\\[\\n\\\\binom{n}{2} \\\\left(\\\\frac56\\\\right)^2 \\\\left(\\\\frac16\\\\right)^{n-2} = \\\\frac{25}{216}.\\n\\\\]\\n\\nSimplify the left side:\\n\\n\\\\[\\n\\\\binom{n}{2} = \\\\frac{n(n-1)}{2}, \\\\qquad \\\\left(\\\\frac56\\\\right)^2 = \\\\frac{25}{36}, \\\\qquad \\\\left(\\\\frac16\\\\right)^{n-2} = \\\\frac{1}{6^{n-2}}.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\n\\\\frac{n(n-1)}{2} \\\\cdot \\\\frac{25}{36} \\\\cdot \\\\frac{1}{6^{n-2}} = \\\\frac{25\\\\,n(n-1)}{72\\\\,6^{n-2}}.\\n\\\\]\\n\\nSet equal to $\\\\frac{25}{216}$ and cancel the common factor $25$ (nonzero):\\n\\n\\\\[\\n\\\\frac{n(n-1)}{72\\\\,6^{n-2}} = \\\\frac{1}{216}.\\n\\\\]\\n\\nCross‑multiply:\\n\\n\\\\[\\nn(n-1) = \\\\frac{1}{216} \\\\cdot 72 \\\\cdot 6^{n-2} = \\\\frac{72}{216} \\\\cdot 6^{n-2} = \\\\frac13 \\\\cdot 6^{n-2}.\\n\\\\]\\n\\nMultiply both sides by 3:\\n\\n\\\\[\\n3\\\\,n(n-1) = 6^{n-2}.\\n\\\\]\\n\\nNow test small integer values of $n$ (since $n$ must be at least 2 to have exactly two dice not showing 1).\\n\\n- For $n=2$: LHS $=3\\\\cdot2\\\\cdot1=6$, RHS $=6^{0}=1$ → not equal.\\n- For $n=3$: LHS $=3\\\\cdot3\\\\cdot2=18$, RHS $=6^{1}=6$ → not equal.\\n- For $n=4$: LHS $=3\\\\cdot4\\\\cdot3=36$, RHS $=6^{2}=36$ → equality holds.\\n- For $n=5$: LHS $=3\\\\cdot5\\\\cdot4=60$, RHS $=6^{3}=216$ → not equal.\\n- For larger $n$, RHS grows much faster than LHS, so no further solutions.\\n\\nTherefore, the only possible value is $n=4$. Checking: $\\\\binom{4}{2}\\\\left(\\\\frac56\\\\right)^2\\\\left(\\\\frac16\\\\right)^2 = 6 \\\\cdot \\\\frac{25}{36} \\\\cdot \\\\frac{1}{36} = \\\\frac{150}{1296} = \\\\frac{25}{216}$, which matches the given probability.\\n\\n\\\\[\\n\\\\boxed{4}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"4\", \"reference_number\": \"4\", \"raw_tail\": \")^2\\\\left(\\\\frac16\\\\right)^2 = 6 \\\\cdot \\\\frac{25}{36} \\\\cdot \\\\frac{1}{36} = \\\\frac{150}{1296} = \\\\frac{25}{216}$, which matches the given probability.\\n\\n\\\\[\\n\\\\boxed{4}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 32.072,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We roll $n$ fair 6‑sided dice. For each die, the probability of showing a 1 is $\\\\frac16$, and the probability of showing' attempts=1"
+  ]
+}

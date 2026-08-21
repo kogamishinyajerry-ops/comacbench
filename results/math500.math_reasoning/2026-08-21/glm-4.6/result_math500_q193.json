@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q193",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The polynomial \\\\(2x^4 + a_3 x^3 + a_2 x^2 + a_1 x + 1\\\\) has integer coefficients. By the Rational Root Theorem, any rational root expressed in lowest terms as \\\\(\\\\frac{p}{q}\\\\) must satisfy \\\\(p \\\\mid 1\\\\) and \\\\(q \\\\mid 2\\\\). Hence \\\\(p = \\\\pm 1\\\\) and \\\\(q = 1\\\\) or \\\\(2\\\\) (taking the denominator positive). Therefore the only possible rational roots are \\\\(\\\\pm 1\\\\) and \\\\(\\\\pm \\\\frac{1}{2}\\\\).\\n\\nEach of these values can be realized as a root by choosing appropriate integer coefficients. For example:\\n- For \\\\(x = 1\\\\): take \\\\(a_3 = -3\\\\), \\\\(a_2 = 0\\\\), \\\\(a_1 = 0\\\\).\\n- For \\\\(x = -1\\\\): take \\\\(a_3 = 3\\\\), \\\\(a_2 = 0\\\\), \\\\(a_1 = 0\\\\).\\n- For \\\\(x = \\\\frac{1}{2}\\\\): take \\\\(a_3 = -9\\\\), \\\\(a_2 = 0\\\\), \\\\(a_1 = 0\\\\).\\n- For \\\\(x = -\\\\frac{1}{2}\\\\): take \\\\(a_3 = 9\\\\), \\\\(a_2 = 0\\\\), \\\\(a_1 = 0\\\\).\\n\\nThus the set of different possible rational roots consists of exactly four numbers.\\n\\n\\\\[\\n\\\\boxed{4}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"4\", \"reference_number\": \"4\", \"raw_tail\": \"\\\\frac{1}{2}\\\\): take \\\\(a_3 = 9\\\\), \\\\(a_2 = 0\\\\), \\\\(a_1 = 0\\\\).\\n\\nThus the set of different possible rational roots consists of exactly four numbers.\\n\\n\\\\[\\n\\\\boxed{4}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 163.245,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The polynomial \\\\(2x^4 + a_3 x^3 + a_2 x^2 + a_1 x + 1\\\\) has integer coefficients. By the Rational Root Theorem, any rati' attempts=1"
+  ]
+}

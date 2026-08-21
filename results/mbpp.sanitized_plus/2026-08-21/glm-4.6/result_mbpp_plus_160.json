@@ -1,0 +1,36 @@
+{
+  "task_id": "mbpp_plus_160",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef find_solution(a, b, n):\\n    \\\"\\\"\\\"\\n    Finds integers x and y such that ax + by = n.\\n    Returns (x, y) as a tuple if a solution exists, otherwise None.\\n    \\\"\\\"\\\"\\n    # We look for integer x such that (n - ax) is divisible by b.\\n    # This means ax ≡ n (mod b), or ax = n + kb for some integer k.\\n    \\n    # Handle special case where b is 0. Equation becomes ax = n.\\n    # Solution exists if n is divisible by a. y can be anything (e.g., 0).\\n    if b == 0:\\n        if a == 0:\\n            return (0, 0) if n == 0 else None\\n        if n % a == 0:\\n            return (n // a, 0)\\n        return None\\n\\n    # To find x, we can rewrite the congruence:\\n    # a*x ≡ n (mod b)\\n    # Let g = gcd(a, b). A solution exists if and only if g divides n.\\n    # If a solution exists, x = x0 + k*(b/g) where x0 is a particular solution.\\n    \\n    # We can find x0 by solving (a/g)*x ≡ (n/g) (mod b/g).\\n    # This requires finding the modular inverse of (a/g) modulo (b/g).\\n    # Since a/g and b/g are coprime, the inverse exists.\\n    \\n    # Simplify the problem: find x such that n - a*x is divisible by b.\\n    # We try values of x from 0 to b/g - 1. One must work if a solution exists.\\n    \\n    import math\\n    \\n    g = math.gcd(a, b)\\n    \\n    if n % g != 0:\\n        return None\\n        \\n    # We only need to check x in the range [0, abs(b/g) - 1]\\n    # because x repeats with period b/g.\\n    step = abs(b // g)\\n    \\n    for k in range(step):\\n        x = k\\n        remainder = n - a * x\\n        if remainder % b == 0:\\n            y = remainder // b\\n            return (x, y)\\n            \\n    return None\\n\\n# Tests\\nassert find_solution(2, 3, 7) == (2, 1)\\nassert find_solution(4, 6,\""
+  },
+  "timings": {
+    "agent_s": 587.21,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q245",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are asked to find the remainder when \\\\(f(x)=x^{10}+5x^9-8x^8+7x^7-x^6-12x^5+4x^4-8x^3+12x^2-5x-5\\\\) is divided by \\\\(x^2-1\\\\). Since the divisor is a quadratic, the remainder must be a linear polynomial of the form \\\\(ax+b\\\\).\\n\\nBy the Remainder Theorem for polynomials, when we divide by \\\\(x^2-1 = (x-1)(x+1)\\\\), the remainder at the roots \\\\(x=1\\\\) and \\\\(x=-1\\\\) satisfies:\\n\\\\[\\nf(1) = a\\\\cdot1 + b = a+b,\\\\qquad f(-1) = a\\\\cdot(-1)+b = -a+b.\\n\\\\]\\n\\nFirst compute \\\\(f(1)\\\\) by substituting \\\\(x=1\\\\):\\n\\\\[\\nf(1) = 1 + 5 - 8 + 7 - 1 - 12 + 4 - 8 + 12 - 5 - 5.\\n\\\\]\\nAdding step by step:\\n\\\\begin{align*}\\n1+5 &= 6,\\\\\\\\\\n6-8 &= -2,\\\\\\\\\\n-2+7 &= 5,\\\\\\\\\\n5-1 &= 4,\\\\\\\\\\n4-12 &= -8,\\\\\\\\\\n-8+4 &= -4,\\\\\\\\\\n-4-8 &= -12,\\\\\\\\\\n-12+12 &= 0,\\\\\\\\\\n0-5 &= -5,\\\\\\\\\\n-5-5 &= -10.\\n\\\\end{align*}\\nThus \\\\(f(1) = -10\\\\).\\n\\nNow compute \\\\(f(-1)\\\\) by substituting \\\\(x=-1\\\\) (even powers give \\\\(1\\\\), odd powers give \\\\(-1\\\\)):\\n\\\\[\\n\\\\begin{array}{rcl}\\nx^{10} &=& 1,\\\\\\\\\\n5x^9 &=& 5\\\\cdot(-1) = -5,\\\\\\\\\\n-8x^8 &=& -8\\\\cdot 1 = -8,\\\\\\\\\\n7x^7 &=& 7\\\\cdot(-1) = -7,\\\\\\\\\\n-x^6 &=& -1\\\\cdot 1 = -1,\\\\\\\\\\n-12x^5 &=& -12\\\\cdot(-1) = 12,\\\\\\\\\\n4x^4 &=& 4\\\\cdot 1 = 4,\\\\\\\\\\n-8x^3 &=& -8\\\\cdot(-1) = 8,\\\\\\\\\\n12x^2 &=& 12\\\\cdot 1 = 12,\\\\\\\\\\n-5x &=& -5\\\\cdot(-1) = 5,\\\\\\\\\\n-5 &=& -5.\\n\\\\end{array}\\n\\\\]\\nSumming these values:\\n\\\\begin{align*}\\n1 - 5 &= -4,\\\\\\\\\\n-4 - 8 &= -12,\\\\\\\\\\n-12 - 7 &= -19,\\\\\\\\\\n-19 - 1 &= -20,\\\\\\\\\\n-20 + 12 &= -8,\\\\\\\\\\n-8 + 4 &= -4,\\\\\\\\\\n-4 + 8 &= 4,\\\\\\\\\\n4 + 12 &= 16,\\\\\\\\\\n16 + 5 &= 21,\\\\\\\\\\n21 - 5 &= 16.\\n\\\\end{align*}\\nThus \\\\(f(-1) = 16\\\\).\\n\\nWe now have the system:\\n\\\\[\\n\\\\begin{cases}\\na + b = -10,\\\\\\\\\\n-a + b = 16.\\n\\\\end{cases}\\n\\\\]\\nAdd the equations: \\\\(2b = 6 \\\\Rightarrow b = 3\\\\). Substitute into the first equation: \\\\(a + 3 = -10 \\\\Rightarrow a = -13\\\\).\\n\\nTherefore, the remainder is \\\\(-13x + 3\\\\).\\n\\n\\\\boxed{-13x+3}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"-13x+3\", \"reference_number\": \"-13x+3\", \"raw_tail\": \"(2b = 6 \\\\Rightarrow b = 3\\\\). Substitute into the first equation: \\\\(a + 3 = -10 \\\\Rightarrow a = -13\\\\).\\n\\nTherefore, the remainder is \\\\(-13x + 3\\\\).\\n\\n\\\\boxed{-13x+3}\"}"
+  },
+  "timings": {
+    "agent_s": 70.685,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are asked to find the remainder when \\\\(f(x)=x^{10}+5x^9-8x^8+7x^7-x^6-12x^5+4x^4-8x^3+12x^2-5x-5\\\\) is divided by \\\\(x^' attempts=1"
+  ]
+}

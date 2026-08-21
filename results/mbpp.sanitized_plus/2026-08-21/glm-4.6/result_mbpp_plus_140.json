@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_140",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"def extract_singly(list_of_lists):\\n    \\\"\\\"\\\"Flatten a list of lists (or tuples) into a single list of numbers.\\\"\\\"\\\"\\n    return [item for sublist in list_of_lists for item in sublist]\\n\\nif __name__ == \\\"__main__\\\":\\n    # Test provided in the problem statement\\n    assert set(extract_singly([(3, 4, 5), (4, 5, 7), (1, 4)])) == set([3, 4, 5, 7, 1])\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 0, \"cases_total\": 4, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [[[3, 4, 5], [4, 5, 7], [1, 4]]]\"}], \"determinism\": 1.0, \"run1_s\": 0.09}"
+  },
+  "timings": {
+    "agent_s": 34.065,
+    "setup_s": 0.0,
+    "grade_s": 0.151
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.09s"
+  ]
+}

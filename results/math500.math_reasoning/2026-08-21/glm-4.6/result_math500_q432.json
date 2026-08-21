@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q432",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given the recurrence\\n\\n\\\\[\\nf(n+1)=(-1)^{n+1}n-2f(n),\\\\qquad n\\\\ge 1,\\n\\\\]\\n\\nand the condition \\\\(f(1)=f(1986)\\\\). We need the sum\\n\\n\\\\[\\nS = f(1)+f(2)+\\\\cdots+f(1985).\\n\\\\]\\n\\n---\\n\\n### Step 1. Solve the recurrence\\n\\nRewrite the recurrence as\\n\\n\\\\[\\nf(n+1)+2f(n)=(-1)^{n+1}n.\\n\\\\]\\n\\nThis is a first‑order linear recurrence. The homogeneous solution is\\n\\n\\\\[\\nf_h(n)=C\\\\cdot(-2)^{n-1},\\n\\\\]\\n\\nbecause \\\\(f_h(n+1)=-2f_h(n)\\\\).\\n\\nFor a particular solution, since the right‑hand side is \\\\(n(-1)^{n+1}\\\\), we try\\n\\n\\\\[\\nf_p(n)=(An+B)(-1)^n.\\n\\\\]\\n\\nPlugging into the recurrence:\\n\\n\\\\[\\n\\\\begin{aligned}\\nf_p(n+1)+2f_p(n)\\n&=\\\\bigl(A(n+1)+B\\\\bigr)(-1)^{n+1}+2(An+B)(-1)^n\\\\\\\\\\n&= -\\\\bigl(An+A+B\\\\bigr)(-1)^n+2(An+B)(-1)^n\\\\\\\\\\n&=\\\\bigl(-An-A+B+2An+2B\\\\bigr)(-1)^n\\\\\\\\\\n&=\\\\bigl(An + (B-A)\\\\bigr)(-1)^n.\\n\\\\end{aligned}\\n\\\\]\\n\\nWe want this to equal \\\\((-1)^{n+1}n = -n(-1)^n\\\\). Hence\\n\\n\\\\[\\nAn+(B-A)=-n,\\n\\\\]\\n\\nso \\\\(A=-1\\\\) and \\\\(B-A=0\\\\) \\\\(\\\\Rightarrow\\\\) \\\\(B=A=-1\\\\). Thus\\n\\n\\\\[\\nf_p(n)=(-n-1)(-1)^n = -(n+1)(-1)^n.\\n\\\\]\\n\\nThe general solution is\\n\\n\\\\[\\nf(n)=C\\\\cdot(-2)^{n-1}-(n+1)(-1)^n.\\n\\\\]\\n\\n---\\n\\n### Step 2. Use the condition \\\\(f(1)=f(1986)\\\\)\\n\\nCompute \\\\(f(1)\\\\) and \\\\(f(1986)\\\\):\\n\\n\\\\[\\n\\\\begin{aligned}\\nf(1)&=C\\\\cdot(-2)^{0}-(1+1)(-1)^1 = C+2,\\\\\\\\[4pt]\\nf(1986)&=C\\\\cdot(-2)^{1985}-(1986+1)(-1)^{1986}=C\\\\cdot(-2)^{1985}-1987.\\n\\\\end{aligned}\\n\\\\]\\n\\nSet them equal:\\n\\n\\\\[\\nC+2 = C\\\\cdot(-2)^{1985}-1987.\\n\\\\]\\n\\nSolve for \\\\(C\\\\):\\n\\n\\\\[\\nC-C\\\\cdot(-2)^{1985} = -1989 \\\\quad\\\\Longrightarrow\\\\quad C\\\\bigl(1-(-2)^{1985}\\\\bigr) = -1989.\\n\\\\]\\n\\nSince \\\\(1985\\\\) is odd, \\\\((-2)^{1985} = -2^{1985}\\\\). Thus\\n\\n\\\\[\\n1-(-2)^{1985} = 1+2^{1985},\\n\\\\]\\n\\nand\\n\\n\\\\[\\nC = -\\\\frac{1989}{1+2^{1985}}.\\n\\\\]\\n\\n---\\n\\n### Step 3. Express the required sum\\n\\n\\\\[\\nS = \\\\sum_{n=1}^{1985} f(n) = C\\\\sum_{n=1}^{1985}(-2)^{n-1} \\\\;-\\\\; \\\\sum_{n=1}^{1985}(n+1)(-1)^n.\\n\\\\]\\n\\n---\\n\\n### Step 4. Evaluate the geometric sum\\n\\n\\\\[\\n\\\\sum_{n=1}^{1985}(-2)^{n-1} = \\\\frac{1-(-2)^{1985}}{1-(-2)} = \\\\frac{1+2^{1985}}{3}.\\n\\\\]\\n\\nMultiplying by \\\\(C\\\\):\\n\\n\\\\[\\nC\\\\cdot\\\\frac{1+2^{1985}}{3} = -\\\\frac{1989}{1+2^{1985}}\\\\cdot\\\\frac{1+2^{1985}}{3} = -\\\\frac{1989}{3} = -663.\\n\\\\]\\n\\n---\\n\\n### Step 5. Evaluate \\\\(\\\\displaystyle\\\\sum_{n=1}^{1985}(n+1)(-1)^n\\\\)\\n\\nWrite \\\\((n+1)(-1)^n = n(-1)^n + (-1)^n\\\\).\\n\\n- **Sum of \\\\((-1)^n\\\\):**  \\n  \\\\(\\\\displaystyle\\\\sum_{n=1}^{1985}(-1)^n = -1\\\\) (because \\\\(1985\\\\) is odd).\\n\\n- **Sum of \\\\(n(-1)^n\\\\):**  \\n  For an odd number \\\\(N=2m+1\\\\),  \\n  \\\\(\\\\displaystyle\\\\sum_{n=1}^{2m+1} n(-1)^n = -m-1\\\\).  \\n  Here \\\\(1985 = 2\\\\cdot992+1\\\\), so \\\\(m=992\\\\) and the sum is \\\\(-992-1 = -993\\\\).\\n\\nThus\\n\\n\\\\[\\n\\\\sum_{n=1}^{1985}(n+1)(-1)^n = (-993) + (-1) = -994.\\n\\\\]\\n\\n---\\n\\n### Step 6. Combine the parts\\n\\n\\\\[\\nS = (-663) - (-994) = -663 + 994 = 331.\\n\\\\]\\n\\n---\\n\\n\\\\[\\n\\\\boxed{331}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"331\", \"reference_number\": \"331\", \"raw_tail\": \"um_{n=1}^{1985}(n+1)(-1)^n = (-993) + (-1) = -994.\\n\\\\]\\n\\n---\\n\\n### Step 6. Combine the parts\\n\\n\\\\[\\nS = (-663) - (-994) = -663 + 994 = 331.\\n\\\\]\\n\\n---\\n\\n\\\\[\\n\\\\boxed{331}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 213.895,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given the recurrence\\n\\n\\\\[\\nf(n+1)=(-1)^{n+1}n-2f(n),\\\\qquad n\\\\ge 1,\\n\\\\]\\n\\nand the condition \\\\(f(1)=f(1986)\\\\). We need ' attempts=1"
+  ]
+}

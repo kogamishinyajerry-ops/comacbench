@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q420",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"The projection of vector \\\\(\\\\mathbf{a}\\\\) onto vector \\\\(\\\\mathbf{b}\\\\) is given by\\n\\n\\\\[\\n\\\\operatorname{proj}_{\\\\mathbf{b}} \\\\mathbf{a} = \\\\frac{\\\\mathbf{a} \\\\cdot \\\\mathbf{b}}{\\\\mathbf{b} \\\\cdot \\\\mathbf{b}} \\\\,\\\\mathbf{b}.\\n\\\\]\\n\\nWe are given \\\\(\\\\mathbf{a} \\\\cdot \\\\mathbf{b} = 8\\\\) and \\\\(\\\\mathbf{b} = \\\\begin{pmatrix} 2 \\\\\\\\ 6 \\\\\\\\ 3 \\\\end{pmatrix}\\\\). First compute \\\\(\\\\mathbf{b} \\\\cdot \\\\mathbf{b}\\\\):\\n\\n\\\\[\\n\\\\mathbf{b} \\\\cdot \\\\mathbf{b} = 2^2 + 6^2 + 3^2 = 4 + 36 + 9 = 49.\\n\\\\]\\n\\nThus the scalar factor is\\n\\n\\\\[\\n\\\\frac{\\\\mathbf{a} \\\\cdot \\\\mathbf{b}}{\\\\mathbf{b} \\\\cdot \\\\mathbf{b}} = \\\\frac{8}{49}.\\n\\\\]\\n\\nMultiplying this factor by \\\\(\\\\mathbf{b}\\\\) yields the projection vector:\\n\\n\\\\[\\n\\\\operatorname{proj}_{\\\\mathbf{b}} \\\\mathbf{a} = \\\\frac{8}{49} \\\\begin{pmatrix} 2 \\\\\\\\ 6 \\\\\\\\ 3 \\\\end{pmatrix} = \\\\begin{pmatrix} \\\\frac{16}{49} \\\\\\\\[2pt] \\\\frac{48}{49} \\\\\\\\[2pt] \\\\frac{24}{49} \\\\end{pmatrix}.\\n\\\\]\\n\\n\\\\boxed{\\\\begin{pmatrix} \\\\frac{16}{49} \\\\\\\\[2pt] \\\\frac{48}{49} \\\\\\\\[2pt] \\\\frac{24}{49} \\\\end{pmatrix}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\begin{pmatrix} \\\\frac{16}{49} \\\\\\\\[2pt] \\\\frac{48}{49} \\\\\\\\[2pt] \\\\frac{24}{49} \\\\end{pmatrix}\", \"reference_number\": \"\\\\begin{pmatrix} 16/49 \\\\\\\\ 48/49 \\\\\\\\ 24/49 \\\\end{pmatrix}\", \"raw_tail\": \"} \\\\\\\\[2pt] \\\\frac{48}{49} \\\\\\\\[2pt] \\\\frac{24}{49} \\\\end{pmatrix}.\\n\\\\]\\n\\n\\\\boxed{\\\\begin{pmatrix} \\\\frac{16}{49} \\\\\\\\[2pt] \\\\frac{48}{49} \\\\\\\\[2pt] \\\\frac{24}{49} \\\\end{pmatrix}}\"}"
+  },
+  "timings": {
+    "agent_s": 82.15,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The projection of vector \\\\(\\\\mathbf{a}\\\\) onto vector \\\\(\\\\mathbf{b}\\\\) is given by\\n\\n\\\\[\\n\\\\operatorname{proj}_{\\\\mathbf{b}} \\\\mat' attempts=1"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_245",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def max_sum(arr):\\n    n = len(arr)\\n    if n == 0:\\n        return 0\\n\\n    # msis[i] stores the maximum sum of an increasing subsequence ending at arr[i]\\n    msis = [x for x in arr]\\n\\n    # Compute maximum sum increasing subsequence values in forward direction\\n    for i in range(n):\\n        for j in range(i):\\n            if arr[i] > arr[j]:\\n                msis[i] = max(msis[i], msis[j] + arr[i])\\n\\n    # msds[i] stores the maximum sum of a decreasing subsequence starting from arr[i]\\n    msds = [x for x in arr]\\n\\n    # Compute maximum sum decreasing subsequence values in backward direction\\n    for i in range(n - 1, -1, -1):\\n        for j in range(n - 1, i, -1):\\n            if arr[i] > arr[j]:\\n                msds[i] = max(msds[i], msds[j] + arr[i])\\n\\n    # Find the maximum value of msis[i] + msds[i] - arr[i]\\n    max_val = float('-inf')\\n    for i in range(n):\\n        max_val = max(max_val, msis[i] + msds[i] - arr[i])\\n\\n    return max_val\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 132.819,
+    "setup_s": 0.0,
+    "grade_s": 0.142
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

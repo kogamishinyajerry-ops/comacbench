@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q156",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We set up a coordinate system with the track as the $x$-axis and $O$ at the origin. Since $OP$ is perpendicular to the track, we let $P = (0,d)$ with $d>0$. Let the speed of runner $A$ be $v$, so runner $B$ runs at speed $3v$. At time $t\\\\ge 0$, their positions are\\n\\\\[\\nA = (vt,0),\\\\qquad B = (3vt,0).\\n\\\\]\\nThe vectors from $P$ to $A$ and $B$ are\\n\\\\[\\n\\\\overrightarrow{PA} = (vt,-d),\\\\qquad \\\\overrightarrow{PB} = (3vt,-d).\\n\\\\]\\nThe angle $\\\\theta = \\\\angle APB$ satisfies\\n\\\\[\\n\\\\cos\\\\theta = \\\\frac{\\\\overrightarrow{PA}\\\\cdot\\\\overrightarrow{PB}}{|\\\\overrightarrow{PA}||\\\\overrightarrow{PB}|}\\n= \\\\frac{3v^2t^2+d^2}{\\\\sqrt{v^2t^2+d^2}\\\\,\\\\sqrt{9v^2t^2+d^2}}.\\n\\\\]\\nIntroduce the dimensionless variable $x = vt/d$. Then\\n\\\\[\\n\\\\cos\\\\theta = \\\\frac{3x^2+1}{\\\\sqrt{x^2+1}\\\\,\\\\sqrt{9x^2+1}}.\\n\\\\]\\nWe wish to maximize $\\\\theta$, i.e., minimize $\\\\cos\\\\theta$ for $x\\\\ge0$. Set\\n\\\\[\\nf(x) = \\\\frac{3x^2+1}{\\\\sqrt{(x^2+1)(9x^2+1)}}.\\n\\\\]\\nSquare to simplify: $g(x) = f(x)^2 = \\\\dfrac{(3x^2+1)^2}{(x^2+1)(9x^2+1)}$.\\nDifferentiate $\\\\ln g$:\\n\\\\[\\n\\\\frac{d}{dx}\\\\ln g = \\\\frac{12x}{3x^2+1} - \\\\frac{2x}{x^2+1} - \\\\frac{18x}{9x^2+1}.\\n\\\\]\\nSet the derivative to zero (and $x>0$):\\n\\\\[\\n\\\\frac{12}{3x^2+1} = \\\\frac{2}{x^2+1} + \\\\frac{18}{9x^2+1}.\\n\\\\]\\nClearing denominators leads to $x^2 = \\\\frac13$. Thus $x = 1/\\\\sqrt3$ (the positive root).  \\nAt this value,\\n\\\\[\\n\\\\cos\\\\theta = \\\\frac{3\\\\cdot\\\\frac13+1}{\\\\sqrt{\\\\frac13+1}\\\\,\\\\sqrt{3+1}} = \\\\frac{1+1}{\\\\sqrt{\\\\frac43}\\\\cdot 2} = \\\\frac{2}{2\\\\sqrt{4/3}} = \\\\frac{1}{\\\\sqrt{4/3}} = \\\\frac{\\\\sqrt3}{2}.\\n\\\\]\\nHence $\\\\theta = 30^\\\\circ$.  \\nSince $\\\\cos\\\\theta \\\\to 1$ (i.e., $\\\\theta\\\\to0$) as $x\\\\to0$ or $x\\\\to\\\\infty$, this critical point gives the maximum angle.\\n\\n\\\\[\\n\\\\boxed{30}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"30\", \"reference_number\": \"30^\\\\circ\", \"raw_tail\": \" $\\\\theta = 30^\\\\circ$.  \\nSince $\\\\cos\\\\theta \\\\to 1$ (i.e., $\\\\theta\\\\to0$) as $x\\\\to0$ or $x\\\\to\\\\infty$, this critical point gives the maximum angle.\\n\\n\\\\[\\n\\\\boxed{30}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 201.083,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We set up a coordinate system with the track as the $x$-axis and $O$ at the origin. Since $OP$ is perpendicular to the t' attempts=1"
+  ]
+}

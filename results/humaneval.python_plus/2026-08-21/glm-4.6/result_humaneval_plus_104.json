@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_104",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def unique_digits(x):\\n    \\\"\\\"\\\"Given a list of positive integers x. return a sorted list of all \\n    elements that hasn't any even digit.\\n\\n    Note: Returned list should be sorted in increasing order.\\n    \\n    For example:\\n    >>> unique_digits([15, 33, 1422, 1])\\n    [1, 15, 33]\\n    >>> unique_digits([152, 323, 1422, 10])\\n    []\\n    \\\"\\\"\\\"\\n    def all_digits_odd(n):\\n        # Check that every decimal digit of n is odd.\\n        while n:\\n            digit = n % 10\\n            if digit % 2 == 0:   # even digit found\\n                return False\\n            n //= 10\\n        return True\\n\\n    # Filter numbers that satisfy the condition, then sort.\\n    result = [num for num in x if all_digits_odd(num)]\\n    result.sort()\\n    return result\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 6, \"cases_total\": 6, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 21.558,
+    "setup_s": 0.0,
+    "grade_s": 0.192
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s"
+  ]
+}

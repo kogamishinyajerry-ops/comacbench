@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_108",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def count_nums(arr):\\n    \\\"\\\"\\\"\\n    Write a function count_nums which takes an array of integers and returns\\n    the number of elements which has a sum of digits > 0.\\n    If a number is negative, then its first signed digit will be negative:\\n    e.g. -123 has signed digits -1, 2, and 3.\\n    >>> count_nums([]) == 0\\n    >>> count_nums([-1, 11, -11]) == 1\\n    >>> count_nums([1, 1, 2]) == 3\\n    \\\"\\\"\\\"\\n    count = 0\\n    for num in arr:\\n        if num >= 0:\\n            digit_sum = sum(int(d) for d in str(num))\\n        else:\\n            s = str(num)[1:]  # remove the negative sign\\n            digit_sum = -int(s[0]) + sum(int(d) for d in s[1:])\\n        if digit_sum > 0:\\n            count += 1\\n    return count\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 10, \"cases_total\": 10, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 87.49,
+    "setup_s": 0.0,
+    "grade_s": 0.215
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.11s"
+  ]
+}

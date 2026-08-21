@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q418",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The distance from a point \\\\((x_0, y_0)\\\\) to a line \\\\(Ax + By + C = 0\\\\) is given by\\n\\\\[\\nd = \\\\frac{|Ax_0 + By_0 + C|}{\\\\sqrt{A^2 + B^2}}.\\n\\\\]\\nRewrite the line \\\\(y = 2x - 2\\\\) as \\\\(2x - y - 2 = 0\\\\), so \\\\(A = 2\\\\), \\\\(B = -1\\\\), \\\\(C = -2\\\\).  \\nFor the point \\\\((6, 0)\\\\):\\n\\\\[\\n|Ax_0 + By_0 + C| = |2\\\\cdot6 + (-1)\\\\cdot0 - 2| = |12 - 2| = 10.\\n\\\\]\\nThe denominator is\\n\\\\[\\n\\\\sqrt{A^2 + B^2} = \\\\sqrt{2^2 + (-1)^2} = \\\\sqrt{4 + 1} = \\\\sqrt{5}.\\n\\\\]\\nThus,\\n\\\\[\\nd = \\\\frac{10}{\\\\sqrt{5}} = \\\\frac{10\\\\sqrt{5}}{5} = 2\\\\sqrt{5}.\\n\\\\]\\n\\nThe shortest distance from \\\\((6, 0)\\\\) to the line \\\\(y = 2x - 2\\\\) is \\\\(2\\\\sqrt{5}\\\\).\\n\\n\\\\boxed{2\\\\sqrt{5}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"2\\\\sqrt{5}\", \"reference_number\": \"2\\\\sqrt{5}\", \"raw_tail\": \"frac{10}{\\\\sqrt{5}} = \\\\frac{10\\\\sqrt{5}}{5} = 2\\\\sqrt{5}.\\n\\\\]\\n\\nThe shortest distance from \\\\((6, 0)\\\\) to the line \\\\(y = 2x - 2\\\\) is \\\\(2\\\\sqrt{5}\\\\).\\n\\n\\\\boxed{2\\\\sqrt{5}}\"}"
+  },
+  "timings": {
+    "agent_s": 10.308,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The distance from a point \\\\((x_0, y_0)\\\\) to a line \\\\(Ax + By + C = 0\\\\) is given by\\n\\\\[\\nd = \\\\frac{|Ax_0 + By_0 + C|}{\\\\sqrt' attempts=1"
+  ]
+}

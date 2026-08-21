@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_239",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"def get_total_number_of_sequences(m, n):\\n    \\\"\\\"\\\"\\n    Returns the number of sequences of length n where each element is a positive integer,\\n    the elements are in non-decreasing order (a_i >= a_{i-1}), and each element is less\\n    than or equal to m.\\n    \\\"\\\"\\\"\\n    # We want to count the number of integer sequences x_1, ..., x_n such that:\\n    # 1 <= x_1 <= x_2 <= ... <= x_n <= m\\n    # This is equivalent to choosing n elements from {1, ..., m} with repetition.\\n    # The number of such combinations is given by C(m + n - 1, n).\\n    \\n    if m <= 0 or n <= 0:\\n        return 0\\n\\n    k = n\\n    N = m + n - 1\\n    \\n    # Calculate C(N, k)\\n    # We use an efficient multiplicative method: Product_{i=1}^{k} (N - k + i) / i\\n    # Using Python's integers avoids floating point issues.\\n    \\n    numerator = 1\\n    for i in range(k):\\n        numerator *= (N - i)\\n    \\n    denominator = 1\\n    for i in range(2, k + 1):\\n        denominator *= i\\n        \\n    return numerator // denominator\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 0, \"cases_total\": 4, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 2, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 3, \"pass\": false, \"err\": \"AssertionError: \"}, {\"case\": 4, \"pass\": false, \"err\": \"AssertionError: mismatch on [10, 4]\"}], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 439.547,
+    "setup_s": 0.0,
+    "grade_s": 0.136
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

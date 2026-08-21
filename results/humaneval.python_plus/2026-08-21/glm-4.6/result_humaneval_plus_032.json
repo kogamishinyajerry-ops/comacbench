@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_032",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef poly(xs: list, x: float):\\n    \\\"\\\"\\\"\\n    Evaluates polynomial with coefficients xs at point x.\\n    return xs[0] + xs[1] * x + xs[1] * x^2 + .... xs[n] * x^n\\n    \\\"\\\"\\\"\\n    return sum([coeff * math.pow(x, i) for i, coeff in enumerate(xs)])\\n\\ndef find_zero(xs: list):\\n    \\\"\\\"\\\" xs are coefficients of a polynomial.\\n    find_zero find x such that poly(x) = 0.\\n    find_zero returns only only zero point, even if there are many.\\n    Moreover, find_zero only takes list xs having even number of coefficients\\n    and largest non zero coefficient as it guarantees\\n    a solution.\\n    >>> round(find_zero([1, 2]), 2) # f(x) = 1 + 2x\\n    -0.5\\n    >>> round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3) = -6 + 11x - 6x^2 + x^3\\n    1.0\\n    \\\"\\\"\\\"\\n    # If constant term is zero, x = 0 is a root\\n    if xs[0] == 0:\\n        return 0.0\\n\\n    n = len(xs) - 1\\n    a_n = xs[-1]  # leading coefficient (non‑zero by problem statement)\\n\\n    # Compute Cauchy bound for the absolute value of roots\\n    max_ratio = 0.0\\n    for i in range(n):\\n        ratio = abs(xs[i] / a_n)\\n        if ratio > max_ratio:\\n            max_ratio = ratio\\n    M = 1.0 + max_ratio\\n\\n    # Choose interval where the polynomial has opposite signs at the ends\\n    low = -M - 1.0\\n    high = M + 1.0\\n\\n    f_low = poly(xs, low)\\n    f_high = poly(xs, high)\\n\\n    # In the unlikely case that an endpoint is exactly zero, return it\\n    if f_low == 0:\\n        return low\\n    if f_high == 0:\\n        return high\\n\\n    # Bisection method\\n    tol = 1e-12\\n    max_iter = 1000\\n    for _ in range(max_iter):\\n        mid = (low + high) / 2.0\\n        f_mid = poly(xs, mid)\\n        if f_mid == 0 or (high - low) < tol:\\n            return mid\\n        if f_low * f_mid < 0:\\n            high = mid\\n            f_high = f_mid\\n        else:\\n            low = mid\\n            f_low = f_mid\\n\\n    # Return the best estimate after maximum iterations\\n    return (low + high) / 2.0\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 1, \"cases_total\": 2, \"failed_cases\": [{\"case\": 2, \"pass\": false, \"err\": \"AssertionError: mismatch on [[-3, 6, 9, -10]]\"}], \"determinism\": 1.0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 357.595,
+    "setup_s": 0.0,
+    "grade_s": 0.17
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s"
+  ]
+}

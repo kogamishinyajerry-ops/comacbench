@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q450",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The congruence is \\\\(14u \\\\equiv 46 \\\\pmod{100}\\\\).  \\nLet \\\\(d = \\\\gcd(14,100) = 2\\\\). Since \\\\(d \\\\mid 46\\\\), solutions exist.  \\nDivide the congruence and the modulus by \\\\(d\\\\):  \\n\\\\[\\n7u \\\\equiv 23 \\\\pmod{50}.\\n\\\\]  \\nBecause \\\\(\\\\gcd(7,50)=1\\\\), this reduced congruence has a unique solution modulo \\\\(50\\\\).  \\n\\nFind the inverse of \\\\(7\\\\) modulo \\\\(50\\\\). Using the Euclidean algorithm:  \\n\\\\(50 = 7 \\\\cdot 7 + 1\\\\), so \\\\(1 = 50 - 7 \\\\cdot 7\\\\).  \\nThus \\\\(7 \\\\cdot (-7) \\\\equiv 1 \\\\pmod{50}\\\\), and the inverse of \\\\(7\\\\) is \\\\(-7 \\\\equiv 43 \\\\pmod{50}\\\\).  \\n\\nMultiply both sides of \\\\(7u \\\\equiv 23\\\\) by \\\\(43\\\\):  \\n\\\\(u \\\\equiv 23 \\\\cdot 43 \\\\pmod{50}\\\\).  \\n\\\\(23 \\\\cdot 43 = 989\\\\). \\\\(989 \\\\div 50 = 19\\\\) remainder \\\\(39\\\\), so \\\\(u \\\\equiv 39 \\\\pmod{50}\\\\).  \\n\\nHence all integer solutions to the original congruence are  \\n\\\\(u = 39 + 50k,\\\\quad k \\\\in \\\\mathbb{Z}\\\\).  \\n\\nThe two smallest positive integer solutions are obtained with \\\\(k=0\\\\) and \\\\(k=1\\\\):  \\n\\\\(u_1 = 39,\\\\; u_2 = 39+50 = 89\\\\).  \\n\\nTheir average is  \\n\\\\[\\n\\\\frac{39 + 89}{2} = \\\\frac{128}{2} = 64.\\n\\\\]\\n\\n#### 64\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"64\", \"reference_number\": \"64\", \"raw_tail\": \"olutions are obtained with \\\\(k=0\\\\) and \\\\(k=1\\\\):  \\n\\\\(u_1 = 39,\\\\; u_2 = 39+50 = 89\\\\).  \\n\\nTheir average is  \\n\\\\[\\n\\\\frac{39 + 89}{2} = \\\\frac{128}{2} = 64.\\n\\\\]\\n\\n#### 64\"}"
+  },
+  "timings": {
+    "agent_s": 141.764,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The congruence is \\\\(14u \\\\equiv 46 \\\\pmod{100}\\\\).  \\nLet \\\\(d = \\\\gcd(14,100) = 2\\\\). Since \\\\(d \\\\mid 46\\\\), solutions exist.  \\n' attempts=1"
+  ]
+}

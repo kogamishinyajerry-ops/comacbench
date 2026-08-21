@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q459",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We are told that the cost of the paint is proportional to the surface area and the cost of the concrete is proportional to the volume. For a cube with side length \\\\(s\\\\) inches, the surface area is \\\\(6s^2\\\\) and the volume is \\\\(s^3\\\\). Therefore, the total cost \\\\(C(s)\\\\) can be expressed as\\n\\n\\\\[\\nC(s) = a \\\\cdot 6s^2 + b \\\\cdot s^3 = 6a s^2 + b s^3,\\n\\\\]\\n\\nwhere \\\\(a\\\\) is the cost per unit area for the paint and \\\\(b\\\\) is the cost per unit volume for the concrete.\\n\\nWe are given two data points:\\n- For \\\\(s = 1\\\\) inch, \\\\(C(1) = \\\\$1.30\\\\).\\n- For \\\\(s = 2\\\\) inches, \\\\(C(2) = \\\\$6.80\\\\).\\n\\nSubstituting these into the cost function gives the system of equations:\\n\\n\\\\[\\n\\\\begin{cases}\\n6a + b = 1.30 & \\\\quad (1)\\\\\\\\[4pt]\\n24a + 8b = 6.80 & \\\\quad (2)\\n\\\\end{cases}\\n\\\\]\\n\\nSolve the system. From equation (1), \\\\(b = 1.30 - 6a\\\\). Substitute into equation (2):\\n\\n\\\\[\\n24a + 8(1.30 - 6a) = 6.80 \\\\\\\\\\n24a + 10.4 - 48a = 6.80 \\\\\\\\\\n-24a + 10.4 = 6.80 \\\\\\\\\\n-24a = 6.80 - 10.4 = -3.60 \\\\\\\\\\na = \\\\frac{-3.60}{-24} = \\\\frac{3.60}{24} = 0.15.\\n\\\\]\\n\\nThen\\n\\n\\\\[\\nb = 1.30 - 6(0.15) = 1.30 - 0.90 = 0.40.\\n\\\\]\\n\\nNow compute the cost for a 3‑inch cube:\\n\\n\\\\[\\nC(3) = 6a \\\\cdot 3^2 + b \\\\cdot 3^3 = 6a \\\\cdot 9 + b \\\\cdot 27 = 54a + 27b.\\n\\\\]\\n\\nPlug in \\\\(a = 0.15\\\\) and \\\\(b = 0.40\\\\):\\n\\n\\\\[\\nC(3) = 54(0.15) + 27(0.40) = 8.10 + 10.80 = 18.90.\\n\\\\]\\n\\nThus, a 3‑inch cube would cost \\\\$18.90.\\n\\n\\\\boxed{18.90}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"18.90\", \"reference_number\": \"\\\\$18.90\", \"raw_tail\": \"7b.\\n\\\\]\\n\\nPlug in \\\\(a = 0.15\\\\) and \\\\(b = 0.40\\\\):\\n\\n\\\\[\\nC(3) = 54(0.15) + 27(0.40) = 8.10 + 10.80 = 18.90.\\n\\\\]\\n\\nThus, a 3‑inch cube would cost \\\\$18.90.\\n\\n\\\\boxed{18.90}\"}"
+  },
+  "timings": {
+    "agent_s": 53.24,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are told that the cost of the paint is proportional to the surface area and the cost of the concrete is proportional ' attempts=1"
+  ]
+}

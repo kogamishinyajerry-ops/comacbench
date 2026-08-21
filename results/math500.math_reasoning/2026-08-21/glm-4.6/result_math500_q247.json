@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q247",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The quadratic polynomial has integer coefficients, so the conjugate root \\\\(4+\\\\sqrt{11}\\\\) must also be a root. Therefore,\\n\\\\[\\np(x)=a\\\\bigl(x-(4-\\\\sqrt{11})\\\\bigr)\\\\bigl(x-(4+\\\\sqrt{11})\\\\bigr)=a\\\\left((x-4)^2-11\\\\right)=a(x^2-8x+5),\\n\\\\]\\nwhere \\\\(a\\\\) is a nonzero integer.\\n\\nNow compute\\n\\\\[\\np(3)=a(3^2-8\\\\cdot3+5)=a(9-24+5)=a(-10)=-10a,\\n\\\\]\\n\\\\[\\np(4)=a(4^2-8\\\\cdot4+5)=a(16-32+5)=a(-11)=-11a.\\n\\\\]\\n\\nThus\\n\\\\[\\n\\\\frac{p(3)}{p(4)}=\\\\frac{-10a}{-11a}=\\\\frac{10}{11}.\\n\\\\]\\n\\nThe ratio is independent of the integer scaling factor \\\\(a\\\\).\\n\\n\\\\[\\n\\\\boxed{\\\\frac{10}{11}}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{10}{11}\", \"reference_number\": \"\\\\frac{10}{11}\", \"raw_tail\": \"a.\\n\\\\]\\n\\nThus\\n\\\\[\\n\\\\frac{p(3)}{p(4)}=\\\\frac{-10a}{-11a}=\\\\frac{10}{11}.\\n\\\\]\\n\\nThe ratio is independent of the integer scaling factor \\\\(a\\\\).\\n\\n\\\\[\\n\\\\boxed{\\\\frac{10}{11}}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 29.358,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The quadratic polynomial has integer coefficients, so the conjugate root \\\\(4+\\\\sqrt{11}\\\\) must also be a root. Therefore,' attempts=1"
+  ]
+}

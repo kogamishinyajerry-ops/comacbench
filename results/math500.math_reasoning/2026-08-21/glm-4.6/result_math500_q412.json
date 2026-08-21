@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q412",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given a quadratic polynomial \\\\(P(x)=ax^2+bx+c\\\\) with real coefficients satisfying  \\n\\\\[\\nx^2-2x+2 \\\\le P(x) \\\\le 2x^2-4x+3 \\\\qquad\\\\text{for all real }x,\\n\\\\]  \\nand \\\\(P(11)=181\\\\). We need \\\\(P(16)\\\\).\\n\\nDefine the differences  \\n\\\\[\\nD_1(x)=P(x)-(x^2-2x+2)=(a-1)x^2+(b+2)x+(c-2)\\\\ge 0,\\n\\\\]  \\n\\\\[\\nD_2(x)=(2x^2-4x+3)-P(x)=(2-a)x^2+(-4-b)x+(3-c)\\\\ge 0.\\n\\\\]  \\nAdding them gives  \\n\\\\[\\nD_1(x)+D_2(x)=(x-1)^2.\\n\\\\]  \\nAt \\\\(x=1\\\\), the right side is \\\\(0\\\\), so \\\\(D_1(1)=D_2(1)=0\\\\). Hence \\\\(P(1)=1\\\\), i.e.  \\n\\\\[\\na+b+c=1. \\\\tag{1}\\n\\\\]\\n\\nFrom \\\\(P(11)=181\\\\) we have  \\n\\\\[\\n121a+11b+c=181. \\\\tag{2}\\n\\\\]  \\nSubtract (1) from (2) appropriately to eliminate \\\\(c\\\\):  \\n\\\\[\\n(121a+11b+c)-(a+b+c)=180 \\\\implies 120a+10b=180 \\\\implies 12a+b=18. \\\\tag{3}\\n\\\\]  \\nBut a better elimination gives a direct relation. Using (1) to write \\\\(b=1-a-c\\\\) and substitute into (2):  \\n\\\\[\\n121a+11(1-a-c)+c=181 \\\\implies 121a+11-11a-11c+c=181 \\\\implies 110a-10c=170 \\\\implies 11a-c=17. \\\\tag{4}\\n\\\\]  \\nThus  \\n\\\\[\\nc=11a-17,\\\\qquad b=1-a-c=1-a-(11a-17)=18-12a.\\n\\\\]\\n\\nBecause the inequalities hold for all \\\\(x\\\\), the leading coefficients must satisfy \\\\(a-1\\\\ge0\\\\) and \\\\(2-a\\\\ge0\\\\), so \\\\(a\\\\in[1,2]\\\\).\\n\\nNow examine \\\\(D_1(x)\\\\). For \\\\(a>1\\\\) (the case \\\\(a=1\\\\) will be ruled out by \\\\(P(11)=181\\\\)), \\\\(D_1\\\\) is a quadratic with positive leading coefficient and a root at \\\\(x=1\\\\). For \\\\(D_1(x)\\\\ge0\\\\) everywhere, this root must be a double root; otherwise the quadratic would become negative between two distinct roots. Hence the discriminant must be zero and the only root is \\\\(x=1\\\\). Equivalently, when we factor \\\\(D_1(x)=(x-1)L_1(x)\\\\) with \\\\(L_1(x)=(a-1)x+(19-11a)\\\\), we need \\\\(L_1(1)=0\\\\).  \\n\\\\[\\nL_1(1)=(a-1)+(19-11a)=18-10a=0 \\\\implies a=\\\\frac{9}{5}=1.8.\\n\\\\]  \\nThe same condition from \\\\(D_2\\\\) (with \\\\(L_2(x)=(2-a)x+(11a-20)\\\\)) gives \\\\(10a-18=0\\\\), again \\\\(a=1.8\\\\). The endpoints \\\\(a=1\\\\) or \\\\(a=2\\\\) do not satisfy \\\\(P(11)=181\\\\), so \\\\(a=1.8\\\\) is forced.\\n\\nSubstitute \\\\(a=\\\\frac{9}{5}\\\\) into the expressions for \\\\(b\\\\) and \\\\(c\\\\):  \\n\\\\[\\nb=18-12\\\\cdot\\\\frac{9}{5}=18-\\\\frac{108}{5}=\\\\frac{90-108}{5}=-\\\\frac{18}{5},\\n\\\\]  \\n\\\\[\\nc=11\\\\cdot\\\\frac{9}{5}-17=\\\\frac{99}{5}-\\\\frac{85}{5}=\\\\frac{14}{5}.\\n\\\\]  \\nCheck: \\\\(a+b+c=\\\\frac{9}{5}-\\\\frac{18}{5}+\\\\frac{14}{5}=1\\\\), and \\\\(P(11)=121\\\\cdot\\\\frac{9}{5}+11\\\\cdot(-\\\\frac{18}{5})+\\\\frac{14}{5}=\\\\frac{1089-198+14}{5}=\\\\frac{905}{5}=181\\\\).\\n\\nNow compute \\\\(P(16)\\\\):  \\n\\\\[\\nP(16)=256a+16b+c=256\\\\cdot\\\\frac{9}{5}+16\\\\cdot\\\\left(-\\\\frac{18}{5}\\\\right)+\\\\frac{14}{5}=\\\\frac{2304-288+14}{5}=\\\\frac{2030}{5}=406.\\n\\\\]\\n\\nThus the required value is \\\\(\\\\boxed{406}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"406\", \"reference_number\": \"406\", \"raw_tail\": \"b+c=256\\\\cdot\\\\frac{9}{5}+16\\\\cdot\\\\left(-\\\\frac{18}{5}\\\\right)+\\\\frac{14}{5}=\\\\frac{2304-288+14}{5}=\\\\frac{2030}{5}=406.\\n\\\\]\\n\\nThus the required value is \\\\(\\\\boxed{406}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 249.502,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given a quadratic polynomial \\\\(P(x)=ax^2+bx+c\\\\) with real coefficients satisfying  \\n\\\\[\\nx^2-2x+2 \\\\le P(x) \\\\le 2x^2' attempts=1"
+  ]
+}

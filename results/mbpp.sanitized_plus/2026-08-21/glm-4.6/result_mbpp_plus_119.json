@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_119",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"def search(arr):\\n    low, high = 0, len(arr) - 1\\n    while low < high:\\n        mid = (low + high) // 2\\n        if mid % 2 == 1:\\n            # If mid is odd, its pair should be at mid-1.\\n            if arr[mid] == arr[mid - 1]:\\n                # The single element is on the right side.\\n                low = mid + 1\\n            else:\\n                # The single element is on the left side (including mid).\\n                high = mid\\n        else:\\n            # If mid is even, its pair should be at mid+1.\\n            if mid + 1 < len(arr) and arr[mid] == arr[mid + 1]:\\n                # The pair is complete, so single element is after the pair.\\n                low = mid + 2\\n            else:\\n                # The single element is at or before mid.\\n                high = mid\\n    return arr[low]\\n\\nif __name__ == \\\"__main__\\\":\\n    assert search([1, 1, 2, 2, 3]) == 3\\n    # Additional tests (optional)\\n    # assert search([1, 2, 2]) == 1\\n    # assert search([1, 1, 2]) == 2\\n    # assert search([5]) == 5\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 3, \"cases_total\": 4, \"failed_cases\": [{\"case\": 4, \"pass\": false, \"err\": \"IndexError: list index out of range\"}], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 74.62,
+    "setup_s": 0.0,
+    "grade_s": 0.141
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

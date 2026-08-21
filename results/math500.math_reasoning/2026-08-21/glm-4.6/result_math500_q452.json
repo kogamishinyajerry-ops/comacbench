@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q452",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"Let the two-digit number be \\\\(10a + b\\\\), where \\\\(a\\\\) is the tens digit (\\\\(1 \\\\le a \\\\le 9\\\\)) and \\\\(b\\\\) is the units digit (\\\\(0 \\\\le b \\\\le 9\\\\)).\\n\\nGiven:\\n- \\\\(a + b = 13\\\\).\\n- The difference between the number and its reverse is \\\\(27\\\\). The reverse is \\\\(10b + a\\\\), so\\n\\\\[\\n|(10a + b) - (10b + a)| = |9a - 9b| = 9|a - b| = 27.\\n\\\\]\\nThus \\\\(|a - b| = 3\\\\).\\n\\nThe sum of the original number and its reverse is\\n\\\\[\\n(10a + b) + (10b + a) = 11a + 11b = 11(a + b).\\n\\\\]\\nSince \\\\(a + b = 13\\\\), this sum equals \\\\(11 \\\\times 13 = 143\\\\).\\n\\n(We can verify consistency: solving \\\\(a + b = 13\\\\) and \\\\(|a - b| = 3\\\\) gives digit pairs \\\\((5,8)\\\\) or \\\\((8,5)\\\\), both yielding numbers \\\\(58\\\\) and \\\\(85\\\\), and indeed \\\\(58 + 85 = 143\\\\).)\\n\\nThus the required sum is \\\\(\\\\boxed{143}\\\\).\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"143\", \"reference_number\": \"143\", \"raw_tail\": \"3\\\\) gives digit pairs \\\\((5,8)\\\\) or \\\\((8,5)\\\\), both yielding numbers \\\\(58\\\\) and \\\\(85\\\\), and indeed \\\\(58 + 85 = 143\\\\).)\\n\\nThus the required sum is \\\\(\\\\boxed{143}\\\\).\"}"
+  },
+  "timings": {
+    "agent_s": 24.23,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='Let the two-digit number be \\\\(10a + b\\\\), where \\\\(a\\\\) is the tens digit (\\\\(1 \\\\le a \\\\le 9\\\\)) and \\\\(b\\\\) is the units digit ' attempts=1"
+  ]
+}

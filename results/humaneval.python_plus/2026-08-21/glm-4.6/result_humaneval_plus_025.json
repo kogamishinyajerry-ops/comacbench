@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_025",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\nfrom typing import List\\n\\ndef factorize(n: int) -> List[int]:\\n    \\\"\\\"\\\" Return list of prime factors of given integer in the order from smallest to largest.\\n    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.\\n    Input number should be equal to the product of all factors\\n    >>> factorize(8)\\n    [2, 2, 2]\\n    >>> factorize(25)\\n    [5, 5]\\n    >>> factorize(70)\\n    [2, 5, 7]\\n    \\\"\\\"\\\"\\n    if n < 1:\\n        raise ValueError(\\\"Input must be a positive integer\\\")\\n\\n    factors = []\\n\\n    # Special case: 1 has no prime factors\\n    if n == 1:\\n        return factors\\n\\n    # Extract all factors of 2\\n    while n % 2 == 0:\\n        factors.append(2)\\n        n //= 2\\n\\n    # Check odd factors from 3 upwards\\n    divisor = 3\\n    while divisor * divisor <= n:\\n        while n % divisor == 0:\\n            factors.append(divisor)\\n            n //= divisor\\n        divisor += 2\\n\\n    # If n is still greater than 1, it is a prime factor\\n    if n > 1:\\n        factors.append(n)\\n\\n    return factors\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.07}"
+  },
+  "timings": {
+    "agent_s": 79.974,
+    "setup_s": 0.0,
+    "grade_s": 0.135
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.07s"
+  ]
+}

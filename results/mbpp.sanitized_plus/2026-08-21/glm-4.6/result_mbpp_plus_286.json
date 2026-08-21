@@ -1,0 +1,36 @@
+{
+  "task_id": "mbpp_plus_286",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "requirements": "executability",
+    "physics": "hidden_tests"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\ndef max_sub_array_sum_repeated(arr, n, k):\\n    \\\"\\\"\\\"\\n    Finds the largest sum of a contiguous array in the modified array \\n    which is formed by repeating the given array k times.\\n    \\n    Args:\\n    arr: List[int] - The input array.\\n    n: int - Length of the input array (number of elements to consider from arr).\\n    k: int - The number of times the array is repeated.\\n    \\\"\\\"\\\"\\n    \\n    # We only consider the first n elements of arr as per the problem signature\\n    arr = arr[:n]\\n    \\n    # If array is empty, sum is 0\\n    if n == 0:\\n        return 0\\n\\n    # If k == 1, it's just the standard Maximum Subarray Sum (Kadane's Algorithm)\\n    if k == 1:\\n        current_max = arr[0]\\n        global_max = arr[0]\\n        for i in range(1, n):\\n            current_max = max(arr[i], current_max + arr[i])\\n            global_max = max(global_max, current_max)\\n        return global_max\\n\\n    # For k > 1, we need to consider the extended array properties.\\n    # We use Kadane's algorithm on an array formed by arr concatenated with arr.\\n    # This covers all cases of contiguous subarrays that:\\n    # 1. Lie completely within one copy.\\n    # 2. Span the end of one copy and the beginning of the next.\\n    # It also implicitly handles cases where the optimal subarray spans more than 2 copies\\n    # via the wrap-around sum logic derived from the doubled array.\\n    \\n    current_max = arr[0]\\n    global_max = arr[0]\\n    \\n    # Iterate through the first n elements\\n    for i in range(1, n):\\n        current_max = max(arr[i], current_max + arr[i])\\n        global_max = max(global_max, current_max)\\n        \\n    # Reset current_max for the wrap-around check (transition from copy 1 to copy 2)\\n    # We continue the Kadane's sequence as if we started iterating again from 0\\n    current_max = max(arr[0], current_max + arr[0])\\n    global_max = max(global_max, current_max)\\n    \\n    # Iterate through the second n elements (indices 1 to n-1 in the second copy)\\n    for i in range(1, n):\\n        current_max = max(arr[i], current_max\""
+  },
+  "timings": {
+    "agent_s": 429.095,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "syntax error"
+  ]
+}

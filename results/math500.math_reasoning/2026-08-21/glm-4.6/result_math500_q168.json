@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q168",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We consider a grid of points with 3 rows and \\\\(n\\\\) columns, coordinates \\\\((x,y)\\\\) with \\\\(x=1,\\\\dots,n\\\\) and \\\\(y=1,2,3\\\\). We count all squares whose vertices are among these points.\\n\\n**Axis‑aligned squares.**  \\nA square of side length \\\\(s\\\\) (integer) uses points with \\\\(y\\\\) and \\\\(y+s\\\\) as rows, and \\\\(x\\\\) and \\\\(x+s\\\\) as columns. Since only three rows exist, \\\\(s\\\\) can be \\\\(1\\\\) or \\\\(2\\\\).  \\n\\n- \\\\(1\\\\times1\\\\) squares: \\\\(x\\\\) from \\\\(1\\\\) to \\\\(n-1\\\\), \\\\(y\\\\) from \\\\(1\\\\) to \\\\(2\\\\). Number: \\\\((3-1)(n-1)=2(n-1)\\\\).  \\n- \\\\(2\\\\times2\\\\) squares: \\\\(x\\\\) from \\\\(1\\\\) to \\\\(n-2\\\\), \\\\(y=1\\\\) only. Number: \\\\((3-2)(n-2)=n-2\\\\).\\n\\nTotal axis‑aligned squares: \\\\(2(n-1)+(n-2)=3n-4\\\\).\\n\\n**Tilted squares (non‑axis‑aligned).**  \\nA square not parallel to the axes can be described by a side vector \\\\((a,b)\\\\) and the perpendicular vector \\\\((-b,a)\\\\). The four \\\\(y\\\\)-coordinates are \\\\(y_0\\\\), \\\\(y_0+b\\\\), \\\\(y_0+b+a\\\\), \\\\(y_0+a\\\\). Because only rows \\\\(1,2,3\\\\) are available, the vertical spread must be at most \\\\(2\\\\). The only integer pair with both components non‑zero that satisfies this and allows all \\\\(y\\\\) values to be within \\\\(1,2,3\\\\) is essentially \\\\((1,1)\\\\) (or its sign variants). Taking the canonical representation with both components positive, we have \\\\((a,b)=(1,1)\\\\). The vertices become  \\n\\\\[(x_0,1),\\\\;(x_0+1\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": 1.0, \"reference_number\": \"19\", \"raw_tail\": \")\\\\) (or its sign variants). Taking the canonical representation with both components positive, we have \\\\((a,b)=(1,1)\\\\). The vertices become  \\n\\\\[(x_0,1),\\\\;(x_0+1\"}"
+  },
+  "timings": {
+    "agent_s": 420.361,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We consider a grid of points with 3 rows and \\\\(n\\\\) columns, coordinates \\\\((x,y)\\\\) with \\\\(x=1,\\\\dots,n\\\\) and \\\\(y=1,2,3\\\\). ' attempts=1"
+  ]
+}

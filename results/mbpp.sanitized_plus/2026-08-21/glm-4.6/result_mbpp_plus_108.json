@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_108",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def merge_sorted_list(list1, list2, list3):\\n    \\\"\\\"\\\"\\n    Merges three lists into a single sorted list.\\n    \\n    Parameters:\\n    list1 (list): The first list of numbers.\\n    list2 (list): The second list of numbers.\\n    list3 (list): The third list of numbers.\\n    \\n    Returns:\\n    list: A single list containing all elements from the input lists, sorted in ascending order.\\n    \\\"\\\"\\\"\\n    # Combine the lists\\n    merged_list = list1 + list2 + list3\\n    \\n    # Sort the combined list\\n    merged_list.sort()\\n    \\n    return merged_list\\n\\n# Verification using the provided test case\\nif __name__ == \\\"__main__\\\":\\n    assert merge_sorted_list([25, 24, 15, 4, 5, 29, 110],[19, 20, 11, 56, 25, 233, 154],[24, 26, 54, 48])==[4, 5, 11, 15, 19, 20, 24, 24, 25, 25, 26, 29, 48, 54, 56, 110, 154, 233]\\n    print(\\\"Test passed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.08}"
+  },
+  "timings": {
+    "agent_s": 42.367,
+    "setup_s": 0.0,
+    "grade_s": 0.146
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.08s"
+  ]
+}

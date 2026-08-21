@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q179",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given three points: \\\\(P_1 = (0,-1,-1)\\\\), \\\\(P_2 = (-4,4,4)\\\\), \\\\(P_3 = (4,5,1)\\\\). Find the equation of the plane containing them.\\n\\nFirst, find two vectors in the plane:\\n\\n\\\\[\\n\\\\vec{v}_1 = P_2 - P_1 = (-4-0,\\\\;4-(-1),\\\\;4-(-1)) = (-4,5,5)\\n\\\\]\\n\\n\\\\[\\n\\\\vec{v}_2 = P_3 - P_1 = (4-0,\\\\;5-(-1),\\\\;1-(-1)) = (4,6,2)\\n\\\\]\\n\\nThe normal vector \\\\(\\\\vec{n}\\\\) is the cross product \\\\(\\\\vec{v}_1 \\\\times \\\\vec{v}_2\\\\):\\n\\n\\\\[\\n\\\\vec{n} = \\\\begin{vmatrix}\\n\\\\mathbf{i} & \\\\mathbf{j} & \\\\mathbf{k} \\\\\\\\\\n-4 & 5 & 5 \\\\\\\\\\n4 & 6 & 2\\n\\\\end{vmatrix}\\n= \\\\mathbf{i}(5\\\\cdot2 - 5\\\\cdot6) - \\\\mathbf{j}(-4\\\\cdot2 - 5\\\\cdot4) + \\\\mathbf{k}(-4\\\\cdot6 - 5\\\\cdot4)\\n\\\\]\\n\\n\\\\[\\n= \\\\mathbf{i}(10-30) - \\\\mathbf{j}(-8-20) + \\\\mathbf{k}(-24-20)\\n= -20\\\\mathbf{i} + 28\\\\mathbf{j} -44\\\\mathbf{k}\\n\\\\]\\n\\nSo \\\\(\\\\vec{n} = (-20, 28, -44)\\\\). We can factor out a common factor of 4:\\n\\n\\\\[\\n\\\\vec{n} = 4(-5, 7, -11)\\n\\\\]\\n\\nThus a simpler normal vector is \\\\(\\\\vec{n} = (-5, 7, -11)\\\\).\\n\\nUsing point \\\\(P_1(0,-1,-1)\\\\), the plane equation is\\n\\n\\\\[\\n\\\\vec{n} \\\\cdot (x - 0,\\\\; y - (-1),\\\\; z - (-1)) = 0\\n\\\\]\\n\\n\\\\[\\n-5(x) + 7(y+1) - 11(z+1) = 0\\n\\\\]\\n\\nExpand:\\n\\n\\\\[\\n-5x + 7y + 7 - 11z - 11 = 0\\n\\\\]\\n\\\\[\\n-5x + 7y - 11z - 4 = 0\\n\\\\]\\n\\nMultiply by \\\\(-1\\\\) to make the coefficient of \\\\(x\\\\) positive:\\n\\n\\\\[\\n5x - 7y + 11z + 4 = 0\\n\\\\]\\n\\nCheck that all three points satisfy this equation:\\n\\n- \\\\(P_1\\\\): \\\\(5(0) -7(-1) + 11(-1) + 4 = 0 + 7 - 11 + 4 = 0\\\\)\\n- \\\\(P_2\\\\): \\\\(5(-4) -7(4) + 11(4) + 4 = -20 - 28 + 44 + 4 = 0\\\\)\\n- \\\\(P_3\\\\): \\\\(5(4) -7(5) + 11(1) + 4 = 20 - 35 + 11 + 4 = 0\\\\)\\n\\nAll are satisfied.\\n\\nThe coefficients are integers, \\\\(A = 5 > 0\\\\), and \\\\(\\\\gcd(|5|,|{-7}|,|11|,|4|) = \\\\gcd(5,7,11,4) = 1\\\\).\\n\\nThus the required plane equation is\\n\\n\\\\[\\n\\\\boxed{5x - 7y + 11z + 4 = 0}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"5x - 7y + 11z + 4 = 0\", \"reference_number\": \"5x - 7y + 11z + 4 = 0\", \"raw_tail\": \"s are integers, \\\\(A = 5 > 0\\\\), and \\\\(\\\\gcd(|5|,|{-7}|,|11|,|4|) = \\\\gcd(5,7,11,4) = 1\\\\).\\n\\nThus the required plane equation is\\n\\n\\\\[\\n\\\\boxed{5x - 7y + 11z + 4 = 0}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 69.41,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given three points: \\\\(P_1 = (0,-1,-1)\\\\), \\\\(P_2 = (-4,4,4)\\\\), \\\\(P_3 = (4,5,1)\\\\). Find the equation of the plane co' attempts=1"
+  ]
+}

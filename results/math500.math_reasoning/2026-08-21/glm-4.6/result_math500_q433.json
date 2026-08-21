@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q433",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "answer": "\"We need to convert \\\\(\\\\frac{57}{160}\\\\) to a terminating decimal. Since the denominator \\\\(160 = 2^5 \\\\cdot 5\\\\) contains only prime factors 2 and 5, the decimal will terminate. We can rewrite the fraction so that the denominator becomes a power of 10.\\n\\nThe denominator has factors \\\\(2^5\\\\) and \\\\(5^1\\\\). To obtain a denominator of the form \\\\(10^n = 2^n \\\\cdot 5^n\\\\), we choose \\\\(n = 5\\\\) (the larger exponent). Then we need to multiply numerator and denominator by \\\\(5^{4}\\\\) to supply the missing factors of 5:\\n\\n\\\\[\\n\\\\frac{57}{160} = \\\\frac{57 \\\\cdot 5^{4}}{160 \\\\cdot 5^{4}} = \\\\frac{57 \\\\cdot 625}{160 \\\\cdot 625}.\\n\\\\]\\n\\nNow \\\\(160 \\\\cdot 625 = 2^5 \\\\cdot 5 \\\\cdot 5^4 = 2^5 \\\\cdot 5^5 = 10^5 = 100\\\\,000\\\\). Compute the numerator: \\\\(57 \\\\cdot 625\\\\).\\n\\n\\\\[\\n57 \\\\cdot 625 = 57 \\\\cdot (600 + 25) = 57 \\\\cdot 600 + 57 \\\\cdot 25 = 34\\\\,200 + 1\\\\,425 = 35\\\\,625.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\n\\\\frac{57}{160} = \\\\frac{35\\\\,625}{100\\\\,000} = 0.35625.\\n\\\\]\\n\\nThe decimal terminates after five decimal places.\\n\\n\\\\boxed{0.35625}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"0.35625\", \"reference_number\": \".35625\", \"raw_tail\": \"200 + 1\\\\,425 = 35\\\\,625.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\n\\\\frac{57}{160} = \\\\frac{35\\\\,625}{100\\\\,000} = 0.35625.\\n\\\\]\\n\\nThe decimal terminates after five decimal places.\\n\\n\\\\boxed{0.35625}\"}"
+  },
+  "timings": {
+    "agent_s": 43.716,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We need to convert \\\\(\\\\frac{57}{160}\\\\) to a terminating decimal. Since the denominator \\\\(160 = 2^5 \\\\cdot 5\\\\) contains onl' attempts=1"
+  ]
+}

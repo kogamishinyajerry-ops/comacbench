@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q200",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given that 4 daps = 7 yaps and 5 yaps = 3 baps. To find how many daps equal 42 baps, we convert daps to baps via yaps.\\n\\nFrom 4 daps = 7 yaps, we get 1 dap = \\\\( \\\\frac{7}{4} \\\\) yaps.\\nFrom 5 yaps = 3 baps, we get 1 yap = \\\\( \\\\frac{3}{5} \\\\) baps.\\n\\nThus, 1 dap = \\\\( \\\\frac{7}{4} \\\\) yaps = \\\\( \\\\frac{7}{4} \\\\times \\\\frac{3}{5} = \\\\frac{21}{20} \\\\) baps.\\n\\nLet \\\\( x \\\\) be the number of daps equal to 42 baps. Then:\\n\\\\[ x \\\\times \\\\frac{21}{20} = 42 \\\\]\\n\\\\[ x = 42 \\\\times \\\\frac{20}{21} = \\\\frac{42}{21} \\\\times 20 = 2 \\\\times 20 = 40. \\\\]\\n\\nTherefore, 40 daps equal 42 baps.\\n\\n\\\\boxed{40}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"40\", \"reference_number\": \"40\", \"raw_tail\": \"\\\\[ x \\\\times \\\\frac{21}{20} = 42 \\\\]\\n\\\\[ x = 42 \\\\times \\\\frac{20}{21} = \\\\frac{42}{21} \\\\times 20 = 2 \\\\times 20 = 40. \\\\]\\n\\nTherefore, 40 daps equal 42 baps.\\n\\n\\\\boxed{40}\"}"
+  },
+  "timings": {
+    "agent_s": 20.572,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given that 4 daps = 7 yaps and 5 yaps = 3 baps. To find how many daps equal 42 baps, we convert daps to baps via ' attempts=1"
+  ]
+}

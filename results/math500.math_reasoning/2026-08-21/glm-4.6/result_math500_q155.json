@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q155",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The total area of the rectangle defined by \\\\(0 \\\\le x \\\\le 8\\\\) and \\\\(0 \\\\le y \\\\le 4\\\\) is \\\\(8 \\\\times 4 = 32\\\\).\\n\\nThe condition \\\\(x + y \\\\le 4\\\\) describes a half-plane. Intersecting this with the rectangle gives the region where \\\\(x \\\\ge 0\\\\), \\\\(y \\\\ge 0\\\\), and \\\\(x + y \\\\le 4\\\\). This region is a right triangle with vertices at \\\\((0,0)\\\\), \\\\((4,0)\\\\), and \\\\((0,4)\\\\). Its area is \\\\(\\\\frac{1}{2} \\\\times 4 \\\\times 4 = 8\\\\).\\n\\nSince the point is chosen uniformly, the probability is the ratio of the area of the favorable region to the total area:\\n\\\\[\\n\\\\frac{8}{32} = \\\\frac{1}{4}.\\n\\\\]\\n\\nThus, the probability is \\\\(\\\\frac{1}{4}\\\\).\\n\\n\\\\boxed{\\\\frac{1}{4}}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"\\\\frac{1}{4}\", \"reference_number\": \"\\\\frac{1}{4}\", \"raw_tail\": \"e ratio of the area of the favorable region to the total area:\\n\\\\[\\n\\\\frac{8}{32} = \\\\frac{1}{4}.\\n\\\\]\\n\\nThus, the probability is \\\\(\\\\frac{1}{4}\\\\).\\n\\n\\\\boxed{\\\\frac{1}{4}}\"}"
+  },
+  "timings": {
+    "agent_s": 11.004,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The total area of the rectangle defined by \\\\(0 \\\\le x \\\\le 8\\\\) and \\\\(0 \\\\le y \\\\le 4\\\\) is \\\\(8 \\\\times 4 = 32\\\\).\\n\\nThe conditio' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q201",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"The conditions give the system of congruences:\\n\\n\\\\[\\nN \\\\equiv 5 \\\\pmod{8}, \\\\qquad N \\\\equiv 3 \\\\pmod{6}.\\n\\\\]\\n\\nSince \\\\(\\\\gcd(8,6)=2\\\\) and \\\\(5-3=2\\\\) is divisible by \\\\(2\\\\), the system is consistent. The solutions are modulo \\\\(\\\\operatorname{lcm}(8,6)=24\\\\):\\n\\n\\\\[\\nN \\\\equiv 21 \\\\pmod{24}.\\n\\\\]\\n\\nThus \\\\(N = 21 + 24k\\\\) for integer \\\\(k\\\\). With \\\\(N < 50\\\\) and \\\\(N > 0\\\\), the possible values are:\\n\\n\\\\[\\nk=0 \\\\Rightarrow N=21,\\\\qquad k=1 \\\\Rightarrow N=45.\\n\\\\]\\n\\nNo other values satisfy the bounds. The sum of all possible values is:\\n\\n\\\\[\\n21 + 45 = 66.\\n\\\\]\\n\\n\\\\[\\n\\\\boxed{66}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"66\", \"reference_number\": \"66\", \"raw_tail\": \" \\\\Rightarrow N=21,\\\\qquad k=1 \\\\Rightarrow N=45.\\n\\\\]\\n\\nNo other values satisfy the bounds. The sum of all possible values is:\\n\\n\\\\[\\n21 + 45 = 66.\\n\\\\]\\n\\n\\\\[\\n\\\\boxed{66}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 62.101,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:68a2788258063401bd21c335639b7a2d88b0bafac931c7716fe6043bbe5c3b35",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='The conditions give the system of congruences:\\n\\n\\\\[\\nN \\\\equiv 5 \\\\pmod{8}, \\\\qquad N \\\\equiv 3 \\\\pmod{6}.\\n\\\\]\\n\\nSince \\\\(\\\\gcd(8,6' attempts=1"
+  ]
+}

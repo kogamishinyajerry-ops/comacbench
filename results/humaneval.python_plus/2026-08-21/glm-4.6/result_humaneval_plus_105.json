@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_105",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def by_length(arr):\\n    \\\"\\\"\\\"\\n    Given an array of integers, sort the integers that are between 1 and 9 inclusive,\\n    reverse the resulting array, and then replace each digit by its corresponding name from\\n    \\\"One\\\", \\\"Two\\\", \\\"Three\\\", \\\"Four\\\", \\\"Five\\\", \\\"Six\\\", \\\"Seven\\\", \\\"Eight\\\", \\\"Nine\\\".\\n\\n    For example:\\n      arr = [2, 1, 1, 4, 5, 8, 2, 3]   \\n            -> sort arr -> [1, 1, 2, 2, 3, 4, 5, 8] \\n            -> reverse arr -> [8, 5, 4, 3, 2, 2, 1, 1]\\n      return [\\\"Eight\\\", \\\"Five\\\", \\\"Four\\\", \\\"Three\\\", \\\"Two\\\", \\\"Two\\\", \\\"One\\\", \\\"One\\\"]\\n    \\n      If the array is empty, return an empty array:\\n      arr = []\\n      return []\\n    \\n      If the array has any strange number ignore it:\\n      arr = [1, -1 , 55] \\n            -> sort arr -> [-1, 1, 55]\\n            -> reverse arr -> [55, 1, -1]\\n      return = ['One']\\n    \\\"\\\"\\\"\\n    # Step 1: keep only numbers between 1 and 9 inclusive\\n    filtered = [num for num in arr if 1 <= num <= 9]\\n    \\n    # Step 2: sort ascending and then reverse (equivalent to sort descending)\\n    filtered.sort(reverse=True)\\n    \\n    # Step 3: map each digit to its English name\\n    name_map = {\\n        1: \\\"One\\\",\\n        2: \\\"Two\\\",\\n        3: \\\"Three\\\",\\n        4: \\\"Four\\\",\\n        5: \\\"Five\\\",\\n        6: \\\"Six\\\",\\n        7: \\\"Seven\\\",\\n        8: \\\"Eight\\\",\\n        9: \\\"Nine\\\"\\n    }\\n    \\n    return [name_map[num] for num in filtered]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 8, \"cases_total\": 8, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 92.064,
+    "setup_s": 0.0,
+    "grade_s": 0.199
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.11s"
+  ]
+}

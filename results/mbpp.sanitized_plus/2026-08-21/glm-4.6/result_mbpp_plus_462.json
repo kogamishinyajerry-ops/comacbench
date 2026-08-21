@@ -1,0 +1,38 @@
+{
+  "task_id": "mbpp_plus_462",
+  "registry_id": "mbpp.sanitized_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def combinations_list(lst):\\n    \\\"\\\"\\\"\\n    Generates all possible combinations of the elements of a given list.\\n    The implementation produces a specific order where each new element\\n    is added to the front of all existing combinations.\\n    \\\"\\\"\\\"\\n    # Start with the empty combination\\n    result = [[]]\\n    \\n    # Iterate through each element in the input list\\n    for element in lst:\\n        # For each existing combination, create a new combination\\n        # by adding the current element to the front\\n        new_combinations = [[element] + combo for combo in result]\\n        \\n        # Add the new combinations to the result list\\n        result.extend(new_combinations)\\n        \\n    return result\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 4, \"cases_total\": 4, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.12}"
+  },
+  "timings": {
+    "agent_s": 66.198,
+    "setup_s": 0.0,
+    "grade_s": 0.235
+  },
+  "environment_digest": "sha256:4d09edc6561d46ccbea7a0a8b3b845e46521d5ab492a976b235684eacb210af0",
+  "assets_revision": "mbppplus@release_v0.2.0-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.12s"
+  ]
+}

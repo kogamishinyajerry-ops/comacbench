@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q484",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We solve the equation\\n\\n\\\\[\\n\\\\sqrt{x + \\\\sqrt{3x + 6}} + \\\\sqrt{x - \\\\sqrt{3x + 6}} = 6.\\n\\\\]\\n\\nLet\\n\\n\\\\[\\nA = \\\\sqrt{x + \\\\sqrt{3x + 6}}, \\\\qquad B = \\\\sqrt{x - \\\\sqrt{3x + 6}}.\\n\\\\]\\n\\nBoth \\\\(A\\\\) and \\\\(B\\\\) are non‑negative real numbers, and we have\\n\\n\\\\[\\nA + B = 6. \\\\tag{1}\\n\\\\]\\n\\nSquaring (1) gives\\n\\n\\\\[\\n(A + B)^2 = A^2 + B^2 + 2AB = 36. \\\\tag{2}\\n\\\\]\\n\\nFrom the definitions,\\n\\n\\\\[\\nA^2 = x + \\\\sqrt{3x + 6}, \\\\qquad B^2 = x - \\\\sqrt{3x + 6}.\\n\\\\]\\n\\nAdding these yields\\n\\n\\\\[\\nA^2 + B^2 = 2x. \\\\tag{3}\\n\\\\]\\n\\nSubstituting (3) into (2) we obtain\\n\\n\\\\[\\n2x + 2AB = 36 \\\\quad\\\\Longrightarrow\\\\quad x + AB = 18 \\\\quad\\\\Longrightarrow\\\\quad AB = 18 - x. \\\\tag{4}\\n\\\\]\\n\\nBecause \\\\(A, B \\\\ge 0\\\\), we must have \\\\(AB \\\\ge 0\\\\), so \\\\(18 - x \\\\ge 0\\\\), i.e. \\\\(x \\\\le 18\\\\).\\n\\nNow compute the product \\\\(A^2 B^2\\\\):\\n\\n\\\\[\\nA^2 B^2 = (x + \\\\sqrt{3x + 6})(x - \\\\sqrt{3x + 6}) = x^2 - (3x + 6) = x^2 - 3x - 6. \\\\tag{5}\\n\\\\]\\n\\nBut also from (4), \\\\((AB)^2 = (18 - x)^2\\\\).  Equating this with (5) gives\\n\\n\\\\[\\n(18 - x)^2 = x^2 - 3x - 6.\\n\\\\]\\n\\nExpanding the left side:\\n\\n\\\\[\\n324 - 36x + x^2 = x^2 - 3x - 6.\\n\\\\]\\n\\nCancel \\\\(x^2\\\\) from both sides:\\n\\n\\\\[\\n324 - 36x = -3x - 6.\\n\\\\]\\n\\nBring all terms to one side:\\n\\n\\\\[\\n324 + 6 = 36x - 3x \\\\quad\\\\Longrightarrow\\\\quad 330 = 33x \\\\quad\\\\Longrightarrow\\\\quad x = 10.\\n\\\\]\\n\\nNow check the domain. For the square roots to be real we need\\n\\n\\\\[\\n3x + 6 \\\\ge 0 \\\\quad\\\\Longrightarrow\\\\quad x \\\\ge -2,\\n\\\\]\\nand\\n\\n\\\\[\\nx - \\\\sqrt{3x + 6} \\\\ge 0 \\\\quad\\\\Longrightarrow\\\\quad x \\\\ge \\\\sqrt{3x + 6}.\\n\\\\]\\n\\nSquaring the last inequality (both sides are non‑negative when it holds) gives\\n\\n\\\\[\\nx^2 \\\\ge 3x + 6 \\\\quad\\\\Longrightarrow\\\\quad x^2 - 3x - 6 \\\\ge 0.\\n\\\\]\\n\\nThe quadratic \\\\(x^2 - 3x - 6 = 0\\\\) has roots \\\\(\\\\frac{3 \\\\pm \\\\sqrt{33}}{2}\\\\).  The inequality holds for\\n\\n\\\\[\\nx \\\\le \\\\frac{3 - \\\\sqrt{33}}{2} \\\\quad\\\\text{or}\\\\quad x \\\\ge \\\\frac{3 + \\\\sqrt{33}}{2}.\\n\\\\]\\n\\nSince \\\\(x \\\\ge \\\\sqrt{3x + 6} \\\\ge 0\\\\), the only admissible part is \\\\(x \\\\ge \\\\frac{3 + \\\\sqrt{33}}{2} \\\\approx 4.37\\\\).  Together with \\\\(x \\\\le 18\\\\) from \\\\(AB \\\\ge 0\\\\), the domain is\\n\\n\\\\[\\n\\\\frac{3 + \\\\sqrt{33}}{2} \\\\le x \\\\le 18.\\n\\\\]\\n\\nThe value \\\\(x = 10\\\\) lies in this interval, so it is admissible.  Substituting back into the original equation:\\n\\n\\\\[\\n\\\\sqrt{10 + \\\\sqrt{3\\\\cdot10 + 6}} + \\\\sqrt{10 - \\\\sqrt{3\\\\cdot10 + 6}} = \\\\sqrt{10 + \\\\sqrt{36}} + \\\\sqrt{10 - \\\\sqrt{36}} = \\\\sqrt{10 + 6} + \\\\sqrt{10 - 6} = \\\\sqrt{16} + \\\\sqrt{4} = 4 + 2 = 6,\\n\\\\]\\n\\nwhich confirms the solution.\\n\\nThus the only solution is \\\\(x = 10\\\\).\\n\\n\\\\[\\n\\\\boxed{10}\\n\\\\]\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"10\", \"reference_number\": \"10\", \"raw_tail\": \"}} = \\\\sqrt{10 + 6} + \\\\sqrt{10 - 6} = \\\\sqrt{16} + \\\\sqrt{4} = 4 + 2 = 6,\\n\\\\]\\n\\nwhich confirms the solution.\\n\\nThus the only solution is \\\\(x = 10\\\\).\\n\\n\\\\[\\n\\\\boxed{10}\\n\\\\]\"}"
+  },
+  "timings": {
+    "agent_s": 111.652,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:392ecafdc1e4023bb9e8ab2d56567f975d9bc57935ecaac3d4afac6031bf2745",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We solve the equation\\n\\n\\\\[\\n\\\\sqrt{x + \\\\sqrt{3x + 6}} + \\\\sqrt{x - \\\\sqrt{3x + 6}} = 6.\\n\\\\]\\n\\nLet\\n\\n\\\\[\\nA = \\\\sqrt{x + \\\\sqrt{3x + ' attempts=1"
+  ]
+}

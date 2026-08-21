@@ -1,0 +1,38 @@
+{
+  "task_id": "humaneval_plus_057",
+  "registry_id": "humaneval.python_plus",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def monotonic(l: list):\\n    \\\"\\\"\\\"Return True is list elements are monotonically increasing or decreasing.\\n    >>> monotonic([1, 2, 4, 20])\\n    True\\n    >>> monotonic([1, 20, 4, 10])\\n    False\\n    >>> monotonic([4, 1, 0, -10])\\n    True\\n    \\\"\\\"\\\"\\n    return (all(x <= y for x, y in zip(l, l[1:])) or\\n            all(x >= y for x, y in zip(l, l[1:])))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 9, \"cases_total\": 9, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 17.197,
+    "setup_s": 0.0,
+    "grade_s": 0.171
+  },
+  "environment_digest": "sha256:47a9ad02a46995f029da7682d4b2680cbc57d3fa89591720354f9b35998dbabf",
+  "assets_revision": "humanevalplus@release_v0.1.10-noextreme_20260821",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.1s"
+  ]
+}

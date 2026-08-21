@@ -1,0 +1,36 @@
+{
+  "task_id": "math500_q475",
+  "registry_id": "math500.math_reasoning",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "math_numeric",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"We are given an unfair six-sided die with faces numbered 1 through 6, and opposite faces sum to 7. Let \\\\(F\\\\) be a face with probability greater than \\\\(\\\\frac16\\\\); its opposite face has probability less than \\\\(\\\\frac16\\\\); all other four faces each have probability exactly \\\\(\\\\frac16\\\\). Let \\\\(p = P(F)\\\\) and \\\\(q = P(\\\\text{opposite of }F)\\\\). Then\\n\\n\\\\[\\np + q + 4\\\\cdot\\\\frac16 = 1 \\\\quad\\\\Longrightarrow\\\\quad p + q = \\\\frac13.\\n\\\\]\\n\\nWhen two such dice are rolled independently, the probability that the sum is 7 is\\n\\n\\\\[\\nP(\\\\text{sum}=7) = \\\\sum_{i=1}^6 P(\\\\text{die}=i)\\\\,P(\\\\text{die}=7-i) = 2(p_1p_6 + p_2p_5 + p_3p_4),\\n\\\\]\\n\\nwhere \\\\(p_i\\\\) denotes the probability of face \\\\(i\\\\).\\n\\nAmong the three opposite pairs \\\\((1,6)\\\\), \\\\((2,5)\\\\), \\\\((3,4)\\\\), exactly one is the special pair \\\\((F,\\\\text{opposite})\\\\) with product \\\\(p q\\\\); the other two pairs are normal, each product \\\\(\\\\frac16\\\\cdot\\\\frac16 = \\\\frac1{36}\\\\). Hence\\n\\n\\\\[\\np_1p_6 + p_2p_5 + p_3p_4 = p q + 2\\\\cdot\\\\frac1{36} = p q + \\\\frac1{18}.\\n\\\\]\\n\\nThus\\n\\n\\\\[\\nP(\\\\text{sum}=7) = 2\\\\left(p q + \\\\frac1{18}\\\\right) = 2pq + \\\\frac19.\\n\\\\]\\n\\nWe are told that this equals \\\\(\\\\frac{47}{288}\\\\), so\\n\\n\\\\[\\n2pq + \\\\frac19 = \\\\frac{47}{288}.\\n\\\\]\\n\\nConverting \\\\(\\\\frac19\\\\) to denominator 288 gives \\\\(\\\\frac{32}{288}\\\\). Therefore\\n\\n\\\\[\\n2pq = \\\\frac{47}{288} - \\\\frac{32}{288} = \\\\frac{15}{288} \\\\quad\\\\Longrightarrow\\\\quad pq = \\\\frac{15}{576} = \\\\frac{5}{192}.\\n\\\\]\\n\\nNow we have the system\\n\\n\\\\[\\np+q = \\\\frac13,\\\\qquad pq = \\\\frac{5}{192}.\\n\\\\]\\n\\nThen \\\\(p\\\\) and \\\\(q\\\\) are the roots of\\n\\n\\\\[\\nt^2 - \\\\frac13 t + \\\\frac{5}{192} = 0.\\n\\\\]\\n\\nThe discriminant is\\n\\n\\\\[\\n\\\\Delta = \\\\left(\\\\frac13\\\\right)^2 - 4\\\\cdot\\\\frac{5}{192} = \\\\frac19 - \\\\frac{20}{192} = \\\\frac19 - \\\\frac{5}{48} = \\\\frac{16}{144} - \\\\frac{15}{144} = \\\\frac{1}{144},\\n\\\\]\\n\\nso \\\\(\\\\sqrt\\\\Delta = \\\\frac{1}{12}\\\\). The roots are\\n\\n\\\\[\\nt = \\\\frac{\\\\frac13 \\\\pm \\\\frac{1}{12}}{2} = \\\\frac{\\\\frac{5}{12}}{2} = \\\\frac{5}{24},\\\\qquad \\\\frac{\\\\frac{1}{4}}{2} = \\\\frac18.\\n\\\\]\\n\\nSince \\\\(p > \\\\frac16\\\\) and \\\\(\\\\frac{5}{24} \\\\approx 0.2083 > \\\\frac16\\\\) while \\\\(\\\\frac18 = 0.125 < \\\\frac16\\\\), we must have \\\\(p = \\\\frac{5}{24}\\\\) and \\\\(q = \\\\frac18\\\\).\\n\\nThus the probability of obtaining face \\\\(F\\\\) is \\\\(\\\\frac{5}{24}\\\\), already in lowest terms. Hence \\\\(m = 5\\\\), \\\\(n = 24\\\\), and\\n\\n\\\\[\\nm+n = 5 + 24 = 29.\\n\\\\]\\n\\n\\\\boxed{29}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"parsed_answer\": \"29\", \"reference_number\": \"29\", \"raw_tail\": \"hus the probability of obtaining face \\\\(F\\\\) is \\\\(\\\\frac{5}{24}\\\\), already in lowest terms. Hence \\\\(m = 5\\\\), \\\\(n = 24\\\\), and\\n\\n\\\\[\\nm+n = 5 + 24 = 29.\\n\\\\]\\n\\n\\\\boxed{29}\"}"
+  },
+  "timings": {
+    "agent_s": 130.937,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9c02c9f0066506eb2c090f85265b56428634469df705190b445b40d5222f0fbd",
+  "assets_revision": "math500@hf-h4_v1_20260821",
+  "logs": [
+    "answer='We are given an unfair six-sided die with faces numbered 1 through 6, and opposite faces sum to 7. Let \\\\(F\\\\) be a face w' attempts=1"
+  ]
+}
