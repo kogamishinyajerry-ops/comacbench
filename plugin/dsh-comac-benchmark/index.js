@@ -58,6 +58,7 @@ const ENV_NEEDS = {
   "aviary.transport_mission": { venv: true, note: "需仓库 .venv-aviary（aviary 1.0.1 + openmdao 3.45 栈）" },
   "cadgen.local_validity": { venv: true, note: "需仓库 .venv-cad（cadquery 2.8 + OCP，判分侧几何检查）" },
   "gtm.transport_control": { matlab: true, note: "需 MATLAB batch（runners/solvers/matlab.py：MATLAB_BIN 或 /Applications/MATLAB_R2026a.app/bin/matlab）" },
+  "gtm.transport_control_hard": { matlab: true, note: "同 gtm.transport_control（MATLAB batch）" },
 };
 // provider → keychain service（起跑时注入 env；离线 provider 不需要）
 // glmvl = GLM 视觉通道（multimodal_only 任务准入；免费档 glm-4v-flash 实测可用）
