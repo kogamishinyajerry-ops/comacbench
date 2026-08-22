@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% model.m — mc_01: Monte Carlo robustness screening (closed-loop short-period spec)\\n% Nominal longitudinal 4-state model x = [u, w, q, theta], elevator state\\n% feedback u = -K*x with the nominal short-period placed at wn = 2.0 rad/s,\\n% zeta = 0.6 and the phugoid held at its open-loop locations.\\n% Monte Carlo over +/-25% uniform uncertainty in Mw, Zw, Mq (N = 200\\n% deterministic samples drawn with the prescribed independent seeds).\\n\\nclear; clc;\\n\\n%% Nominal longitudinal model\\nVn = 710.0;\\nXu = -0.0066;   Xw =  0.039;\\nZu = -0.032;    Zw = -0.72;\\nMw = -0.0053;   Mq = -0.9;\\ng0 = 32.174;\\n\\nA = [ Xu   Xw   0    -g0  ;\\n      Zu   Zw   Vn    0   ;\\n      0    Mw   Mq    0   ;\\n      0    0    1     0   ];\\n\\nB = [0; -6.0; -4.0; 0];\\n\\n%% Gain design: short-period at wn = 2.0, zeta = 0.6; phugoid kept open-loop\\nwn_d   = 2.0;\\nzeta_d = 0.6;\\nsp_des = [ -zeta_d*wn_d + 1i*wn_d*sqrt(1 - zeta_d^2) ;\\n           -zeta_d*wn_d - 1i*wn_d*sqrt(1 - zeta_d^2) ];\\n\\nol_poles = eig(A);\\n[~, ord] = sort(abs(ol_poles), 'ascend');   % phugoid = lowest-|lambda| pair\\nphug_des = ol_poles(ord(1:2));\\n\\nK = place(A, B, [sp_des; phug_des]);\\nAcl_nom  = A - B*K;\\n\\n% nominal verification (diagnostic only)\\nev_nom = eig(Acl_nom);\\n[~, ixn] = sort(abs(ev_nom), 'descend');\\nwn_nom = abs(ev_nom(ixn(1)));\\nzt_nom = -real(ev_nom(ixn(1)))/wn_nom;\\nfprintf('K = [%.6g %.6g %.6g %.6g]\\\\n', K);\\nfprintf('Nominal closed-loop short-period: wn = %.4f rad/s, zeta = %.4f\\\\n', wn_nom, zt_nom);\\n\\n%% Monte Carlo setup: N = 200 deterministic samples, +/-25% uniform box\\nN   = 200;\\npct = 0.25;\\n\\nrng(20260827); f_Mw = 1 + pct*(2*rand(N,1) - 1);\\nrng(20261827); f_Zw = 1 + pct*(2*rand(N,1) - 1);\\nrng(20262827); f_Mq = 1 + pct*(2*rand(N,1) - 1);\\n\\n%% Spec screening: wn in [1.88, 2.12] rad/s AND zeta >= 0.51\\nwn_lo   = 1.88;\\nwn_hi   = 2.12;\\nzeta_lo = 0.51;\\n\\ncount      = 0;\\nwn_hist    = zeros(N,1);\\nzeta_hist  = zeros(N,1);\\n\\nfor i = 1:N\\n    Ai = A;\\n    Ai(2,2) = Zw * f_Zw(i);\\n    Ai(3,2) = Mw * f_Mw(i);\\n    Ai(3,3) = Mq * f_Mq(i);\\n\\n    ev = eig(Ai - B*K);\\n    [~, idx] = sort(abs(ev), 'descend');   % short-period = largest-|lambda| pair\\n    lam = ev(idx(1));\\n\\n    wn_i   = abs(lam);\\n    zeta_i = -real(lam)/max(wn_i, eps);\\n\\n    wn_hist(i)   = wn_i;\\n    zeta_hist(i) = zeta_i;\\n\\n    if (wn_i >= wn_lo) && (wn_i <= wn_hi) && (zeta_i >= zeta_lo)\\n        count = count + 1;\\n    end\\nend\\n\\npass_fraction      = count/N;\\nfailing_case_count = N - count;\\n\\nfprintf('MC short-period: wn in [%.4f, %.4f], zeta in [%.4f, %.4f]\\\\n', ...\\n        min(wn_hist), max(wn_hist), min(zeta_hist), max(zeta_hist));\\nfprintf('pass_fraction = %.4f  (%d / %d)\\\\n', pass_fraction, count, N);\\nfprintf('failing_case_count = %d\\\\n', failing_case_count);\\n\\n%% Write result.json (jsonencode of top-level struct with required keys)\\nresult = struct('pass_fraction', pass_fraction, 'failing_case_count', failing_case_count);\\n\\nfid = fopen('result.json', 'w');\\nif fid == -1\\n    error('model:FileOpen', 'Cannot open result.json for writing.');\\nend\\nfwrite(fid, jsonencode(result), 'char');\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.475, \"ref\": 0.475}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 105, \"ref\": 105}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 20.51}"
+  },
+  "timings": {
+    "agent_s": 158.561,
+    "setup_s": 0.0,
+    "grade_s": 20.514
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 20.51s"
+  ]
+}

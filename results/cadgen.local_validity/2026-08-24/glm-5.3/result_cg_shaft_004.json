@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_shaft_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ------------------------------------------------------------------\\n# Stepped shaft with central through bore - all dimensions in mm\\n# ------------------------------------------------------------------\\n\\n# Segment 1: diameter 36, z = 0 .. 25\\nseg1_dia = 36.0\\nseg1_z0 = 0.0\\nseg1_z1 = 25.0\\n\\n# Segment 2: diameter 24, z = 25 .. 55\\nseg2_dia = 24.0\\nseg2_z0 = 25.0\\nseg2_z1 = 55.0\\n\\n# Segment 3: diameter 14, z = 55 .. 73\\nseg3_dia = 14.0\\nseg3_z0 = 55.0\\nseg3_z1 = 73.0\\n\\n# Central through bore: diameter 6, along Z, full length\\nbore_dia = 6.0\\ntotal_height = 73.0\\n\\n# ---- Build the three coaxial cylindrical segments and fuse them ----\\nseg1 = (\\n    cq.Workplane(\\\"XY\\\")\\n    .circle(seg1_dia / 2.0)\\n    .extrude(seg1_z1 - seg1_z0)\\n)\\n\\nseg2 = (\\n    cq.Workplane(\\\"XY\\\")\\n    .workplane(offset=seg2_z0)\\n    .circle(seg2_dia / 2.0)\\n    .extrude(seg2_z1 - seg2_z0)\\n)\\n\\nseg3 = (\\n    cq.Workplane(\\\"XY\\\")\\n    .workplane(offset=seg3_z0)\\n    .circle(seg3_dia / 2.0)\\n    .extrude(seg3_z1 - seg3_z0)\\n)\\n\\nshaft = seg1.union(seg2).union(seg3)\\n\\n# ---- Cut the central through bore ----\\n# The cutting tool is extended beyond both ends for a robust through cut.\\nbore = (\\n    cq.Workplane(\\\"XY\\\")\\n    .workplane(offset=-10.0)\\n    .circle(bore_dia / 2.0)\\n    .extrude(total_height + 20.0)\\n)\\n\\nresult = shaft.cut(bore).clean()\\n\\n# ---- Export the single solid ----\\nsolid = result.val()\\nassert solid.isValid(), \\\"Resulting shape is not a valid B-Rep solid\\\"\\n\\ncq.exporters.export(result, \\\"part.step\\\")\\n\\nprint(\\\"Exported part.step\\\")\\nprint(\\\"Volume: {:.6f} mm^3\\\".format(solid.Volume()))\\nbb = solid.BoundingBox()\\nprint(\\\"Bounding box: {:.3f} x {:.3f} x {:.3f}\\\".format(bb.xlen, bb.ylen, bb.zlen))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.46}, {\"exit\": 0, \"duration_s\": 2.45}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 39725.439105, \"bbox_len\": [36.0, 36.0, 73.0], \"n_faces\": 8, \"n_solids\": 1, \"cyl_radii\": [3.0, 7.0, 12.0, 18.0]}, \"reference\": {\"volume_mm3\": 39725.439101, \"bbox_len\": [36.0, 36.0, 73.000001]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 39725.439105, \"ref\": 39725.439101}, \"bbox_len_x\": {\"rel_err\": 6e-09, \"ok\": true, \"got\": 36.0, \"ref\": 36.0}, \"bbox_len_y\": {\"rel_err\": 6e-09, \"ok\": true, \"got\": 36.0, \"ref\": 36.0}, \"bbox_len_z\": {\"rel_err\": 5e-09, \"ok\": true, \"got\": 73.0, \"ref\": 73.000001}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 3.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 18.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 12.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 7.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 47.539,
+    "setup_s": 0.0,
+    "grade_s": 4.928
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1662",
+    "run1 exit=0 2.46s",
+    "run2 exit=0 2.45s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_sleeve_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---------------------------------------------------------------\\n# Plain sleeve (annular ring) - all dimensions hard-coded in mm\\n# ---------------------------------------------------------------\\nOUTER_DIAMETER = 60.0   # outer diameter\\nBORE_DIAMETER = 40.0    # coaxial through-bore diameter\\nHEIGHT = 20.0           # height along Z\\n\\nouter_radius = OUTER_DIAMETER / 2.0   # 30.0\\nbore_radius = BORE_DIAMETER / 2.0     # 20.0\\n\\n# Build on the XY plane centered at the origin, base face at z=0,\\n# extruded upward along +Z. The nested circle becomes the through-bore,\\n# producing a single hollow cylindrical solid (no chamfers/fillets).\\nsleeve = (\\n    cq.Workplane(\\\"XY\\\", origin=(0.0, 0.0, 0.0))\\n    .circle(outer_radius)\\n    .circle(bore_radius)\\n    .extrude(HEIGHT)\\n)\\n\\nsolid = sleeve.val()\\n\\n# Sanity checks: single valid solid with positive volume\\nassert isinstance(solid, cq.Solid), \\\"Result is not a single solid\\\"\\nassert solid.isValid(), \\\"Solid is not B-Rep valid\\\"\\nassert solid.Volume() > 0.0, \\\"Solid volume must be positive\\\"\\n\\n# Expected volume: pi * (30^2 - 20^2) * 20 = 10000*pi\\nexpected_volume = 3.141592653589793 * (outer_radius**2 - bore_radius**2) * HEIGHT\\nassert abs(solid.Volume() - expected_volume) < 1e-6 * expected_volume\\n\\n# Export to the current working directory as a STEP file\\ncq.exporters.export(sleeve, \\\"part.step\\\")\\n\\nprint(\\\"Exported part.step\\\")\\nprint(\\\"Volume: {:.6f} mm^3\\\".format(solid.Volume()))\\nprint(\\\"Bounding box: {}\\\".format(solid.BoundingBox()))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.45}, {\"exit\": 0, \"duration_s\": 2.37}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 31415.926536, \"bbox_len\": [60.0, 60.0, 20.0], \"n_faces\": 4, \"n_solids\": 1, \"cyl_radii\": [20.0, 30.0]}, \"reference\": {\"volume_mm3\": 31415.926536, \"bbox_len\": [60.0, 60.0, 20.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 31415.926536, \"ref\": 31415.926536}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 20.0, \"ref\": 20.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 30.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 20.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 4, \"got\": 4, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 18.406,
+    "setup_s": 0.0,
+    "grade_s": 4.828
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1487",
+    "run1 exit=0 2.45s",
+    "run2 exit=0 2.37s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

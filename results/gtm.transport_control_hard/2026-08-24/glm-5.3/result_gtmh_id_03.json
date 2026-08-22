@@ -1,0 +1,40 @@
+{
+  "task_id": "gtmh_id_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"function model\\ndt = 0.02;\\nYdata = X(2:end,:);\\nPhi = [X(1:end-1,:), u(1:end-1)];\\nTheta = Phi\\\\Ydata; %#ok<NOBRACK>\\nAd = Theta(1:4,:);\\nlam = eig(Ad);\\ns = log(lam)/dt;\\n% select conjugate pair with largest |s|\\n[~,idx] = sort(abs(s),'descend');\\nsp = s(idx(1));\\nomega_sp_id = abs(sp);\\nzeta_sp_id = -real(sp)/omega_sp_id;\\nres = struct('omega_sp_id',omega_sp_id,'zeta_sp_id',zeta_sp_id);\\nfid = fopen('result.json','w');\\nfwrite(fid,jsonencode(res),'char');\\nfclose(fid);\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b无法对 'X' 进行索引。必须使用冒号运算符对现有变量进行索引。\\n\\n出错 model (第 3 行)\\nYdata = X(2:end,:);\\n        ^^^^^^^^^^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 269.949,
+    "setup_s": 0.0,
+    "grade_s": 11.413
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 11.41s"
+  ]
+}

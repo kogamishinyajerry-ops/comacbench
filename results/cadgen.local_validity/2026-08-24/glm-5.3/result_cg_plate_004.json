@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ------------------------------------------------------------------\\n# Hard-coded parameters (all dimensions in mm)\\n# ------------------------------------------------------------------\\nPLATE_LENGTH = 90.0     # X extent\\nPLATE_WIDTH = 70.0      # Y extent\\nPLATE_THICKNESS = 6.0   # Z extent (base face at z = 0)\\n\\nEDGE_FILLET_RADIUS = 9.0  # fillet on all four Z-parallel (vertical) edges\\n\\nHOLE_DIAMETER = 7.0       # through-hole diameter\\nHOLE_CENTERS = [\\n    (29.0, 19.0),\\n    (-29.0, 19.0),\\n    (-29.0, -19.0),\\n    (29.0, -19.0),\\n]\\n\\n# ------------------------------------------------------------------\\n# Build the solid\\n# ------------------------------------------------------------------\\n# Rectangular plate: centered on the origin in XY, base face at z = 0,\\n# thickness along +Z.\\npart = cq.Workplane(\\\"XY\\\").box(\\n    PLATE_LENGTH,\\n    PLATE_WIDTH,\\n    PLATE_THICKNESS,\\n    centered=(True, True, False),\\n)\\n\\n# Fillet all four vertical (Z-parallel) edges with radius 9.\\npart = part.edges(\\\"|Z\\\").fillet(EDGE_FILLET_RADIUS)\\n\\n# Four through holes (dia 7), axes parallel to Z, through the full\\n# thickness, centered at (+/-29, +/-19).\\npart = (\\n    part.faces(\\\">Z\\\")\\n    .workplane()\\n    .pushPoints(HOLE_CENTERS)\\n    .circle(HOLE_DIAMETER / 2.0)\\n    .cutThruAll()\\n)\\n\\n# ------------------------------------------------------------------\\n# Validate and export as a STEP file in the current working directory\\n# ------------------------------------------------------------------\\nsolid = part.val()\\n\\nassert solid.isValid(), \\\"Result is not a valid B-Rep solid\\\"\\nassert solid.Volume() > 0.0, \\\"Resulting solid has non-positive volume\\\"\\n\\ncq.exporters.export(part, \\\"part.step\\\")\\n\\n# Optional sanity output (does not affect the exported geometry)\\nprint(\\\"Volume [mm^3]: {:.6f}\\\".format(solid.Volume()))\\nbb = solid.BoundingBox()\\nprint(\\n    \\\"Bounding box: X={:.3f} Y={:.3f} Z={:.3f}\\\".format(bb.xlen, bb.ylen, bb.zlen)\\n)\\nprint(\\\"Face count: {}\\\".format(len(solid.Faces())))\\nprint(\\\"Exported part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.48}, {\"exit\": 0, \"duration_s\": 2.49}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 36459.185789, \"bbox_len\": [90.0, 70.0, 6.0], \"n_faces\": 14, \"n_solids\": 1, \"cyl_radii\": [3.5, 3.5, 3.5, 3.5, 9.0, 9.0, 9.0, 9.0]}, \"reference\": {\"volume_mm3\": 36459.185789, \"bbox_len\": [90.0, 70.0, 6.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 36459.185789, \"ref\": 36459.185789}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 90.0, \"ref\": 90.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 70.0, \"ref\": 70.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 6.0, \"ref\": 6.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 3.5, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 9.0, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 14, \"got\": 14, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 94.842,
+    "setup_s": 0.0,
+    "grade_s": 4.994
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1994",
+    "run1 exit=0 2.48s",
+    "run2 exit=0 2.49s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

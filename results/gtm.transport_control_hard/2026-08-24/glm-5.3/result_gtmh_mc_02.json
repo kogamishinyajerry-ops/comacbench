@@ -1,0 +1,40 @@
+{
+  "task_id": "gtmh_mc_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```matlab\\n%% =====================================================================\\n%  mc_02 : Monte Carlo robustness screening -- closed-loop short-period\\n%  ---------------------------------------------------------------------\\n%  Elevator state-feedback loop u = -K*x on the nominal longitudinal model\\n%  x = [u, w, q, theta]^T,  xdot = A*x + B*delta_e.\\n%  K places the NOMINAL closed-loop short-period at\\n%       omega_n = 2.1 rad/s, zeta = 0.55  (phugoid held at open-loop).\\n%  Mw, Zw, Mq uncertain by +/-20% (independent uniform box).\\n%  N = 200 deterministic samples (seeded rng), pass spec per sample:\\n%       short-period omega_n in [2.0, 2.2] rad/s  AND  zeta >= 0.52.\\n%  Writes result.json (jsonencode) with keys:\\n%       pass_fraction, failing_case_count\\n%  =====================================================================\\n\\n%% ------------------- nominal longitudinal model ----------------------\\nVn  = 740.0;\\nXu  = -0.006;    Xw  = 0.033;\\nZu  = -0.027;    Zw0 = -0.66;\\nMw0 = -0.0046;   Mq0 = -0.78;\\ng0  = 32.174;\\n\\nA = [ Xu,   Xw,   0,    -g0 ;\\n      Zu,   Zw0,  Vn,    0  ;\\n      0,    Mw0,  Mq0,   0  ;\\n      0,    0,    1,     0  ];\\n\\nB = [0; -5.5; -4.5; 0];\\n\\n%% ---------- state-feedback gain (SP placed, phugoid open-loop) --------\\nlam_ol = eig(A);\\n[~, idx] = sort(abs(lam_ol));            % two slowest = phugoid pair\\nph = lam_ol(idx(1:2));\\nif any(abs(imag(ph)) > 0)                % enforce an exact conjugate pair\\n    p_ph = [real(ph(1)) + 1i*abs(imag(ph(1)));\\n            real(ph(1)) - 1i*abs(imag(ph(1)))];\\nelse\\n    p_ph = real(ph(:));\\nend\\n\\nwn_d  = 2.1;                             % desired short-period\\nzt_d  = 0.55;\\nre_d  = -zt_d*wn_d;\\nim_d  =  wn_d*sqrt(1 - zt_d^2);\\np_des = [p_ph(1); p_ph(2); re_d + 1i*im_d; re_d - 1i*im_d];\\n\\nassert(rank(ctrb(A,B)) == 4, '(A,B) is not controllable');\\nK = place(A, B, p_des);                  % 1x4 gain, u = -K*x\\n\\n% quick verification of the nominal design (informational)\\nlam_nom  = eig(A - B*K);\\n[~, ordN] = sort(abs(lam_nom));\\nspN      = lam_nom(ordN(3:4));\\nwnN      = sqrt(real(spN(1)*spN(2)));\\nztN      = -real(spN(1) + spN(2))/(2*wnN);\\nfprintf('Nominal closed-loop short-period: wn = %.4f rad/s, zeta = %.4f\\\\n', wnN, ztN);\\n\\n%% ------------------------- Monte Carlo loop --------------------------\\nN   = 200;\\npct = 0.20;\\n\\nrng(20260828); f_Mw = 1 + pct*(2*rand(N,1) - 1);   % Mw multipliers\\nrng(20261828); f_Zw = 1 + pct*(2*rand(N,1) - 1);   % Zw multipliers\\nrng(20262828); f_Mq = 1 + pct*(2*rand(N,1) - 1);   % Mq multipliers\\n\\nwn_lo   = 2.0;\\nwn_hi   = 2.2;\\nzeta_lo = 0.52;\\n\\ncount = 0;\\nfor i = 1:N\\n    Ai = A;\\n    Ai(3,2) = Mw0 * f_Mw(i);            % perturbed Mw\\n    Ai(2,2) = Zw0 * f_Zw(i);            % perturbed Zw\\n    Ai(3,3) = Mq0 * f_Mq(i);            % perturbed Mq\\n\\n    lam = eig(Ai - B*K);                % closed-loop poles, sample i\\n\\n    % short-period = the two fastest (largest |lambda|) closed-loop poles\\n    [~, ord] = sort(abs(lam));\\n    sp = lam(ord(3:4));\\n\\n    % equivalent second-order parameters of that pole pair\\n    %   (s - l1)(s - l2) = s^2 + 2*zeta*wn*s + wn^2\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"length\", \"escalated\": false}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b错误: 文件:\\n/private/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_1j1wfipc/model.m\\n行: 1 列: 1\\n文本字符无效。请检查不受支持的符号、不可见的字符或非 ASCII 字符的粘贴。\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 376.193,
+    "setup_s": 0.0,
+    "grade_s": 16.301
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 16.3s"
+  ]
+}

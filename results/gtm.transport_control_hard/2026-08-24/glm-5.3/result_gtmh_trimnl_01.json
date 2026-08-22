@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"function model\\n% TRIMNL_01 : Nonlinear climb + coordinated-turn trim\\n% Three coupled nonlinear equations in unknowns x = [alpha; T; delta_e]\\n%   1) q*S*CL*cos(phi) + T*sin(alpha+iT) - W*cos(gamma)          = 0\\n%   2) T*cos(alpha+iT) - q*S*CD - W*sin(gamma)                   = 0\\n%   3) q*S*cbar*(Cm0+Cma*alpha+Cmde*delta_e) + T*sin(iT)*zT      = 0\\n% Solved with a damped Newton iteration (analytic Jacobian), multi-start.\\n\\nd2r = pi/180;\\n\\n% ---------------- Parameters ----------------\\nW    = 230000.0;          % weight, lbf\\nS    = 2400.0;            % wing area, ft^2\\nh    = 31000.0;           % altitude, ft\\nV    = 730.0;             % true airspeed, ft/s\\ngamD = 3.0;               % climb angle, deg\\nphiD = 30.0;              % bank angle, deg\\n\\nCL0  = 0.15;  CLa = 5.2;  CLde = 0.35;      % 1/rad\\nCD0  = 0.021; kk  = 0.043;                  % parabolic drag\\nrho0 = 0.0023769; H = 23800.0;              % slug/ft^3, ft (exponential atm)\\niT   = 2.5*d2r;    zT = 2.0;                % thrust incidence (rad), arm (ft)\\nCm0  = 0.02;  Cma = -0.3;  Cmde = -0.85;    % 1/rad\\ncbar = 17.0;                                % mean chord, ft\\n\\ngam  = gamD*d2r;\\nphi  = phiD*d2r;\\n\\nrho  = rho0*exp(-h/H);\\nq    = 0.5*rho*V^2;\\nqS   = q*S;\\n\\np = struct('W',W,'qS',qS,'gam',gam,'phi',phi, ...\\n           'CL0',CL0,'CLa',CLa,'CLde',CLde,'CD0',CD0,'kk',kk, ...\\n           'iT',iT,'zT',zT,'Cm0',Cm0,'Cma',Cma,'Cmde',Cmde,'cbar',cbar);\\n\\n% ---------------- Damped Newton (multi-start) ----------------\\ntol   = 1e-6;                                  % residual tol (lbf scale)\\nguess = [ 5.0*d2r  28000  -0.5*d2r ;\\n          3.0*d2r  15000   1.0*d2r ;\\n          8.0*d2r  45000  -2.0*d2r ];\\n\\nx  = guess(1,:)';\\nok = false;\\nfor g = 1:size(guess,1)\\n    x = guess(g,:)';\\n    for it = 1:100\\n        F  = resfun(x,p);\\n        nF = norm(F);\\n        if nF < tol, break; end\\n        try\\n            dx = -jacfun(x,p)\\\\F;\\n        catch\\n            x = x + 1e-4*randn(3,1).*max(abs(x),1);   % kick out of singular point\\n            continue;\\n        end\\n        lam = 1.0;                                    % backtracking line search\\n        for ls = 1:60\\n            if norm(resfun(x+lam*dx,p)) < nF, break; end\\n            lam = 0.5*lam;\\n        end\\n        step = lam*dx;\\n        x    = x + step;\\n        if norm(step) < 1e-14, break; end\\n    end\\n    if norm(resfun(x,p)) < tol, ok = true; break; end\\nend\\nif ~ok\\n    warning('Newton did not fully converge; residual = %.3e', norm(resfun(x,p)));\\nend\\n\\n% ---------------- Results ----------------\\nalpha = x(1);   T = x(2);   de = x(3);\\nn     = cos(gam)/cos(phi);                  % load factor, coordinated turn\\n\\nresult = struct( ...\\n    'alpha_trim_deg',   alpha/d2r, ...\\n    'thrust_lbf',       T, ...\\n    'delta_e_trim_deg', de/d2r, ...\\n    'load_factor',      n);\\n\\nfid = fopen('result.json','w');\\nif fid < 0, error('Cannot open result.json for writing.'); end\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\\n\\n% ---------------- Report ----------------\\nfprintf('rho = %.6e slug/ft^3, q = %.4f psf, qS = %.1f lbf\\\\n', rho, q, qS);\\nfprintf('alpha_trim   = %12.6f deg  (expect 0.5..10)\\\\n', alpha/d2r);\\nfprintf('thrust       = %12.2f lbf  (expect 5000..60000)\\\\n', T);\\nfprintf('delta_e_trim = %12.6f deg\\\\n', de/d2r);\\nfprintf('load factor  = %12.6f\\\\n', n);\\nfprintf('final residual norm = %.3e\\\\n', norm(resfun(x,p)));\\nend\\n\\n% ================= Residuals =================\\nfunction F = resfun(x,p)\\nalpha = x(1); T = x(2); de = x(3);\\nCL = p.CL0 + p.CLa*alpha + p.CLde*de;\\nCD = p.CD0 + p.kk*CL^2;\\nth = alpha + p.iT;                       % thrust angle vs horizon (body pitch = alpha)\\nF = [ p.qS*CL*cos(p.phi) + T*sin(th) - p.W*cos(p.gam) ;   % vertical\\n      T*cos(th) - p.qS*CD - p.W*sin(p.gam) ;              % along flight path\\n      p.qS*p.cbar*(p.Cm0 + p.Cma*alpha + p.Cmde*de) ...\\n          + T*sin(p.iT)*p.zT ];                          % pitch about CG\\nend\\n\\n% ================= Analytic Jacobian =================\\nfunction J = jacfun(x,p)\\nalpha = x(1); T = x(2); de = x(3);\\nCL = p.CL0 + p.CLa\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 5.336204581495039, \"ref\": 5.336204581495041}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 28054.677051191553, \"ref\": 28054.677051191557}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.5117443143632318, \"ref\": -0.5117443143632321}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.1531180614225278, \"ref\": 1.1531180614225278}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 9.76}"
+  },
+  "timings": {
+    "agent_s": 117.848,
+    "setup_s": 0.0,
+    "grade_s": 9.761
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.76s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_bossplate_003",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# --- Hard-coded parameters (mm) ---\\nPLATE_SIZE = 80.0    # base plate size in X and Y\\nPLATE_THK = 8.0      # base plate thickness (z = 0 .. 8)\\nBOSS_DIA = 25.0      # boss diameter\\nBOSS_HEIGHT = 15.0   # boss height above plate top (z = 8 .. 23)\\nHOLE_DIA = 7.0       # through-hole diameter\\nHOLE_OFFSET = 28.0   # hole centers at (+/-28, +/-28)\\n\\n# Base plate: 80 x 80 x 8, centered on origin in XY, base face at z = 0\\npart = cq.Workplane(\\\"XY\\\").box(\\n    PLATE_SIZE, PLATE_SIZE, PLATE_THK, centered=(True, True, False)\\n)\\n\\n# Cylindrical boss on the top face of the plate, axis along Z, centered at origin\\nboss = (\\n    cq.Workplane(\\\"XY\\\", origin=(0.0, 0.0, PLATE_THK))\\n    .circle(BOSS_DIA / 2.0)\\n    .extrude(BOSS_HEIGHT)\\n)\\npart = part.union(boss)\\n\\n# Four through holes of diameter 7, axes parallel to Z, through plate thickness only\\nhole_centers = [\\n    (x, y) for x in (-HOLE_OFFSET, HOLE_OFFSET) for y in (-HOLE_OFFSET, HOLE_OFFSET)\\n]\\ndrill = (\\n    cq.Workplane(\\\"XY\\\", origin=(0.0, 0.0, -1.0))\\n    .pushPoints(hole_centers)\\n    .circle(HOLE_DIA / 2.0)\\n    .extrude(PLATE_THK + 2.0)  # spans z = -1 .. 9: fully through plate, clear of boss\\n)\\npart = part.cut(drill)\\n\\n# Sanity checks: single solid with positive volume\\nassert part.solids().size() == 1, \\\"result must be a single solid\\\"\\nsolid = part.val()\\nassert solid.Volume() > 0.0, \\\"solid must have positive volume\\\"\\n\\n# Export the final single solid to STEP in the current working directory\\ncq.exporters.export(part, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.5}, {\"exit\": 0, \"duration_s\": 2.44}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 57331.603462, \"bbox_len\": [80.0, 80.0, 23.0], \"n_faces\": 12, \"n_solids\": 1, \"cyl_radii\": [3.5, 3.5, 3.5, 3.5, 12.5]}, \"reference\": {\"volume_mm3\": 57331.603462, \"bbox_len\": [80.0, 80.0, 23.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 57331.603462, \"ref\": 57331.603462}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 23.0, \"ref\": 23.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 3.5, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 12.5, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 12, \"got\": 12, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 39.214,
+    "setup_s": 0.0,
+    "grade_s": 4.953
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1497",
+    "run1 exit=0 2.5s",
+    "run2 exit=0 2.44s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

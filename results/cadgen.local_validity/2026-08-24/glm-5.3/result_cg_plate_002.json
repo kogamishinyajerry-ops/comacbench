@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_002",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---- Hard-coded parameters (mm) ----\\nLENGTH = 100.0        # X extent of plate\\nWIDTH = 60.0          # Y extent of plate\\nTHICKNESS = 8.0       # Z extent (base face at z = 0, thickness along +Z)\\nFILLET_RADIUS = 8.0   # fillet on all four vertical (Z-parallel) edges\\nHOLE_DIAMETER = 6.0   # through-hole diameter\\nHOLE_RADIUS = HOLE_DIAMETER / 2.0\\nHOLE_X = 35.0         # hole centers at (+/-35, +/-15)\\nHOLE_Y = 15.0\\n\\n# ---- Plate: 100 (X) x 60 (Y) x 8 (Z), centered on origin in XY, base at z=0 ----\\nplate = cq.Workplane(\\\"XY\\\").box(LENGTH, WIDTH, THICKNESS, centered=(True, True, False))\\n\\n# ---- Fillet all four vertical (Z-parallel) edges with radius 8 ----\\nplate = plate.edges(\\\"|Z\\\").fillet(FILLET_RADIUS)\\n\\n# ---- Four through holes, diameter 6, axes parallel to Z, at (+/-35, +/-15) ----\\nhole_points = [\\n    ( HOLE_X,  HOLE_Y),\\n    (-HOLE_X,  HOLE_Y),\\n    ( HOLE_X, -HOLE_Y),\\n    (-HOLE_X, -HOLE_Y),\\n]\\n\\n# Cutting cylinders overhang the plate in Z so the holes pass fully through the thickness\\ncutters = (\\n    cq.Workplane(\\\"XY\\\", origin=(0, 0, -1.0))\\n    .pushPoints(hole_points)\\n    .circle(HOLE_RADIUS)\\n    .extrude(THICKNESS + 2.0)\\n)\\n\\nresult = plate.cut(cutters)\\n\\nsolid = result.val()\\nassert solid.isValid(), \\\"Resulting shape is not a valid B-Rep solid\\\"\\nassert solid.Volume() > 0, \\\"Resulting solid has non-positive volume\\\"\\n\\n# ---- Export the single solid to STEP in the current working directory ----\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.44}, {\"exit\": 0, \"duration_s\": 2.5}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 46655.716754, \"bbox_len\": [100.0, 60.0, 8.0], \"n_faces\": 14, \"n_solids\": 1, \"cyl_radii\": [3.0, 3.0, 3.0, 3.0, 8.0, 8.0, 8.0, 8.0]}, \"reference\": {\"volume_mm3\": 46655.716754, \"bbox_len\": [100.0, 60.0, 8.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 46655.716754, \"ref\": 46655.716754}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 100.0, \"ref\": 100.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 8.0, \"ref\": 8.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 3.0, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 8.0, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 14, \"got\": 14, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 43.205,
+    "setup_s": 0.0,
+    "grade_s": 4.966
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1467",
+    "run1 exit=0 2.44s",
+    "run2 exit=0 2.5s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

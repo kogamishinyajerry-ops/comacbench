@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_gs_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"function model\\n% Gain scheduling (gs_03): independent full-state pole placement at three\\n% flight conditions of the SAME transport airframe.\\n%\\n% At each condition i, design u = -K_i*x so that the closed-loop\\n% A_i - B_i*K_i has:\\n%   * short-period pair at that condition's OWN target (wn_i, zeta_i)\\n%   * phugoid pair unchanged from its open-loop values\\n%\\n% Writes result.json with achieved closed-loop short-period wn/zeta per FC.\\n\\n    % ---------------- Flight conditions and targets ----------------\\n    A1 = [ -0.0058,  0.036,   0.0,  -32.174 ;\\n           -0.029 , -0.68 , 700.0,    0.0   ;\\n            0.0   , -0.0048, -0.86,   0.0   ;\\n            0.0   ,  0.0   ,  1.0 ,   0.0   ];\\n    B1 = [ 0.0 ; -7.5 ; -3.5 ; 0.0 ];\\n    wn1 = 2.4;  z1 = 0.62;\\n\\n    A2 = [ -0.0056,  0.028,   0.0,  -32.174 ;\\n           -0.021 , -0.58 , 720.0,    0.0   ;\\n            0.0   , -0.0038, -0.7 ,   0.0   ;\\n            0.0   ,  0.0   ,  1.0 ,   0.0   ];\\n    B2 = [ 0.0 ; -7.5 ; -3.5 ; 0.0 ];\\n    wn2 = 2.1;  z2 = 0.55;\\n\\n    A3 = [ -0.0055,  0.024,   0.0,  -32.174 ;\\n           -0.018 , -0.54 , 680.0,    0.0   ;\\n            0.0   , -0.0035, -0.65,   0.0   ;\\n            0.0   ,  0.0   ,  1.0 ,   0.0   ];\\n    B3 = [ 0.0 ; -7.5 ; -3.5 ; 0.0 ];\\n    wn3 = 1.9;  z3 = 0.5;\\n\\n    A = {A1, A2, A3};\\n    B = {B1, B2, B3};\\n    wnt = [wn1, wn2, wn3];\\n    zt  = [z1 , z2 , z3 ];\\n\\n    result = struct();\\n    Kall   = cell(1,3);\\n\\n    for i = 1:3\\n        Ai = A{i};\\n        Bi = B{i};\\n\\n        % ---- open-loop poles: separate phugoid (low freq) from short period ----\\n        ev  = eig(Ai);\\n        [~, ord] = sort(abs(ev), 'ascend');\\n        phugPoles = ev(ord(1:2));          % keep these at open-loop values\\n\\n        % ---- desired short-period pair at this condition's own target ----\\n        wd = wnt(i);\\n        zd = zt(i);\\n        spPoles = [ -zd*wd + 1i*wd*sqrt(1 - zd^2) ;\\n                    -zd*wd - 1i*wd*sqrt(1 - zd^2) ];\\n\\n        pdes = [ phugPoles(:) ; spPoles ];   % all four closed-loop poles\\n\\n        % ---- full-state feedback gain u = -K x ----\\n        Ki = place(Ai, Bi, pdes);\\n        Kall{i} = Ki;\\n\\n        % ---- verify achieved closed-loop short-period characteristics ----\\n        ecl = eig(Ai - Bi*Ki);\\n        [~, ord2] = sort(abs(ecl), 'ascend');\\n        spCL  = ecl(ord2(3:4));                    % highest-frequency pair\\n        wnAch = mean(abs(spCL));\\n        zAch  = -mean(real(spCL)) / wnAch;\\n\\n        result.(sprintf('cl_omega_sp_%d', i)) = wnAch;\\n        result.(sprintf('cl_zeta_sp_%d',  i)) = zAch;\\n\\n        fprintf('FC%d: K = [%10.5f %10.5f %10.5f %10.5f]\\\\n', ...\\n                i, Ki(1), Ki(2), Ki(3), Ki(4));\\n        fprintf('     phugoid kept at open-loop: %s\\\\n', mat2str(phugPoles.', 5));\\n        fprintf('     achieved short period: wn = %.6f rad/s (target %.4f), zeta = %.6f (target %.4f)\\\\n', ...\\n                wnAch, wd, zAch, zd);\\n    end\\n\\n    % ---------------- write result.json ----------------\\n    fid = fopen('result.json', 'w');\\n    if fid == -1\\n        error('Unable to open result.json for writing.');\\n    end\\n    fwrite(fid, jsonencode(result));\\n    fclose(fid);\\n    fprintf('result.json written.\\\\n');\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"cl_omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.3999999999972745, \"ref\": 2.3999999999972745}, \"cl_omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.10000000000294, \"ref\": 2.10000000000294}, \"cl_omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9000000000032344, \"ref\": 1.9000000000032344}, \"cl_zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.6200000000007259, \"ref\": 0.6200000000007259}, \"cl_zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.549999999999235, \"ref\": 0.549999999999235}, \"cl_zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.49999999999915323, \"ref\": 0.49999999999915323}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 9.29}"
+  },
+  "timings": {
+    "agent_s": 100.964,
+    "setup_s": 0.0,
+    "grade_s": 9.293
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.29s"
+  ]
+}

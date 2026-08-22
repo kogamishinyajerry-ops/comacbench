@@ -1,0 +1,40 @@
+{
+  "task_id": "gtmh_id_04",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"function model\\n    % Short-period identification from sampled flight response data\\n    X = evalin('base','X');\\n    u = evalin('base','u');\\n    dt = 0.02;\\n\\n    Phi = [X(1:end-1,:), u(1:end-1)];\\n    Y   = X(2:end,:);\\n    Th  = Phi\\\\Y;\\n    Ad  = Th(1:4,:);\\n    Bd  = Th(5,:);\\n\\n    lam = eig(Ad);\\n    s   = log(lam)/dt;\\n    [~,idx] = sort(abs(s),'descend');\\n    % largest-|s| conjugate pair (first two entries after sorting)\\n    sp = s(idx(1:2));\\n    wn = abs(sp(1));\\n    zt = -real(sp(1))/wn;\\n\\n    res = struct('omega_sp_id',wn,'zeta_sp_id',zt);\\n    fid = fopen('result.json','w');\\n    fwrite(fid, jsonencode(res));\\n    fclose(fid);\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b错误使用 evalin\\n函数或变量 'X' 无法识别。\\n\\n出错 model (第 3 行)\\n    X = evalin('base','X');\\n        ^^^^^^^^^^^^^^^^^^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 364.377,
+    "setup_s": 0.0,
+    "grade_s": 16.951
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 16.95s"
+  ]
+}

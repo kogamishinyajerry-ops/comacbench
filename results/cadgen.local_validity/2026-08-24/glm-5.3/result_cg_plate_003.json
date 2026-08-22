@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_003",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---------------------------------------------------------------------------\\n# Hard-coded parameters (mm)\\n# ---------------------------------------------------------------------------\\nPLATE_LENGTH = 160.0   # X extent\\nPLATE_WIDTH = 100.0    # Y extent\\nPLATE_THICKNESS = 12.0 # Z extent (base face at z = 0)\\nFILLET_RADIUS = 12.0   # radius on all four Z-parallel (vertical) edges\\nHOLE_DIAMETER = 10.0   # through-hole diameter\\nHOLE_RADIUS = HOLE_DIAMETER / 2.0\\nHOLE_CENTERS = [\\n    ( 58.0,  28.0),\\n    ( 58.0, -28.0),\\n    (-58.0,  28.0),\\n    (-58.0, -28.0),\\n]\\n\\n# ---------------------------------------------------------------------------\\n# Build the plate: box centered in XY, base at z=0, thickness along Z\\n# ---------------------------------------------------------------------------\\nplate = (\\n    cq.Workplane(\\\"XY\\\")\\n    .box(PLATE_LENGTH, PLATE_WIDTH, PLATE_THICKNESS, centered=(True, True, False))\\n)\\n\\n# Fillet all four vertical (Z-parallel) edges with radius 12\\nplate = plate.edges(\\\"|Z\\\").fillet(FILLET_RADIUS)\\n\\n# ---------------------------------------------------------------------------\\n# Cut the four through holes (axes parallel to Z, full thickness)\\n# Deterministic order of cutting for reproducibility.\\n# ---------------------------------------------------------------------------\\nfor (hx, hy) in HOLE_CENTERS:\\n    cutter = (\\n        cq.Workplane(\\\"XY\\\")\\n        .moveTo(hx, hy)\\n        .circle(HOLE_RADIUS)\\n        .extrude(PLATE_THICKNESS)\\n    )\\n    plate = plate.cut(cutter)\\n\\n# ---------------------------------------------------------------------------\\n# Validate and export the single solid\\n# ---------------------------------------------------------------------------\\nsolid = plate.val()\\nassert solid.isValid(), \\\"Resulting shape is not a valid B-Rep solid\\\"\\nassert isinstance(solid, cq.occ_impl.shapes.Solid), \\\"Result is not a single solid\\\"\\n\\ncq.exporters.export(plate, \\\"part.step\\\")\\n\\n# Quick local sanity report (informational only)\\nbb = solid.BoundingBox()\\nprint(\\\"Volume  : %.6f mm^3\\\" % solid.Volume())\\nprint(\\\"BBox    : %.6f x %.6f x %.6f mm\\\" % (bb.xlen, bb.ylen, bb.zlen))\\nprint(\\\"Faces   : %d\\\" % len(solid.Faces()))\\nprint(\\\"Exported: part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_qhbtbijm/model.py\\\", line 48, in <module>\\n    assert isinstance(solid, cq.occ_impl.shapes.Solid), \\\"Result is not a single solid\\\"\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: Result is not a single solid\\n\"}"
+  },
+  "timings": {
+    "agent_s": 35.022,
+    "setup_s": 0.0,
+    "grade_s": 2.61
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2182",
+    "run1 exit=1 2.61s"
+  ]
+}

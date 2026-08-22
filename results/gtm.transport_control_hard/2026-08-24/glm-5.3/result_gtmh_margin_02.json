@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"%% model.m — Robust stability margins of a designed loop (margin_02)\\n% L(s) = 9 / (s^3 + 5 s^2 + 6 s) = 9 / (s (s+2)(s+3))  (type-1 loop)\\n% Compute classical gain and phase margins via Control System Toolbox\\n% margin(), then write result.json.\\n\\nclear; clc;\\n\\n% --- Loop transfer function (descending powers) ---\\nnum = [9.0];\\nden = [1.0, 5.0, 6.0, 0.0];\\nL   = tf(num, den);\\n\\n% --- Classical stability margins ---\\n% [Gm, Pm, Wcg, Wcp] = margin(L):\\n%   Gm  = linear gain margin\\n%   Pm  = phase margin (deg)\\n%   Wcg = frequency where phase crosses -180 deg (phase crossover, rad/s)\\n%   Wcp = frequency where gain crosses 0 dB   (gain crossover, rad/s)\\n[Gm, Pm, Wcg, Wcp] = margin(L);\\n\\n% --- Assemble output struct ---\\nresult = struct();\\nresult.gm_db  = 20 * log10(Gm);  % gain margin in dB\\nresult.pm_deg = Pm;              % phase margin in degrees\\nresult.w_gc   = Wcp;             % gain crossover frequency (rad/s)\\nresult.w_pc   = Wcg;             % phase crossover frequency (rad/s)\\n\\n% --- Write result.json (jsonencode of top-level struct) ---\\njsonStr = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nif fid == -1\\n    error('model:FileOpen', 'Unable to open result.json for writing.');\\nend\\nfwrite(fid, jsonStr, 'char');\\nfclose(fid);\\n\\n% --- Report to console ---\\nfprintf('Loop: L(s) = 9 / (s^3 + 5 s^2 + 6 s)\\\\n');\\nfprintf('Gain margin        gm_db  = %.6f dB   (linear Gm = %.6f)\\\\n', result.gm_db, Gm);\\nfprintf('Phase margin       pm_deg = %.6f deg\\\\n', result.pm_deg);\\nfprintf('Gain crossover     w_gc   = %.6f rad/s\\\\n', result.w_gc);\\nfprintf('Phase crossover    w_pc   = %.6f rad/s\\\\n', result.w_pc);\\nfprintf('result.json written.\\\\n');\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.457574905606752, \"ref\": 10.457574905606752}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 37.39295782979206, \"ref\": 37.39295782979206}, \"w_gc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.511821, \"got\": 1.1957897028219016, \"ref\": 2.4494897427831783}, \"w_pc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.048429, \"got\": 2.4494897427831783, \"ref\": 1.1957897028219016}}, \"physics_hits\": \"2/4\", \"rel_tol\": 0.01, \"matlab_s\": 14.03}"
+  },
+  "timings": {
+    "agent_s": 29.649,
+    "setup_s": 0.0,
+    "grade_s": 14.03
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 14.03s"
+  ]
+}

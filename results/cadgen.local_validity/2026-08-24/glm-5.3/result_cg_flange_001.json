@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_flange_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\nimport cadquery as cq\\n\\n# ---------------------------------------------------------------------------\\n# Hard-coded parameters (all in mm)\\n# ---------------------------------------------------------------------------\\nFLANGE_OD = 100.0   # flange disc outer diameter\\nTHICKNESS = 10.0    # flange disc thickness (axis along Z, base face at z=0)\\nHOLE_DIA = 8.0      # bolt hole diameter\\nPCD = 76.0          # bolt circle diameter\\nN_HOLES = 6         # number of bolt holes\\n\\n# ---------------------------------------------------------------------------\\n# Build the flange disc: OD 100 x 10 thick, centered on origin in XY,\\n# extruded from z=0 to z=+10 along +Z.\\n# ---------------------------------------------------------------------------\\npart = cq.Workplane(\\\"XY\\\").circle(FLANGE_OD / 2.0).extrude(THICKNESS)\\n\\n# ---------------------------------------------------------------------------\\n# Cut the 6 through holes. First hole on the +X axis, then evenly spaced\\n# every 360/6 = 60 degrees, axes parallel to Z, through the full thickness.\\n# Holes are simple cylinders spanning the full thickness so the cut is\\n# guaranteed to pass completely through the solid.\\n# ---------------------------------------------------------------------------\\nfor i in range(N_HOLES):\\n    angle = math.radians(i * 360.0 / N_HOLES)\\n    x = (PCD / 2.0) * math.cos(angle)  # i = 0 -> (38, 0): on +X axis\\n    y = (PCD / 2.0) * math.sin(angle)\\n    cutter = (\\n        cq.Workplane(\\\"XY\\\", origin=(x, y, 0.0))\\n        .circle(HOLE_DIA / 2.0)\\n        .extrude(THICKNESS)\\n    )\\n    part = part.cut(cutter)\\n\\n# ---------------------------------------------------------------------------\\n# Sanity checks: single valid solid with positive volume\\n# ---------------------------------------------------------------------------\\nsolid = part.val()\\nassert solid.isValid(), \\\"Resulting shape is not a valid B-Rep solid\\\"\\nassert solid.Volume() > 0.0, \\\"Resulting solid has non-positive volume\\\"\\n\\nexpected_volume = math.pi * (FLANGE_OD / 2.0) ** 2 * THICKNESS \\\\\\n    - N_HOLES * math.pi * (HOLE_DIA / 2.0) ** 2 * THICKNESS\\nassert abs(solid.Volume() - expected_volume) / expected_volume < 1e-9, (\\n    \\\"Volume mismatch: got %.6f, expected %.6f\\\" % (solid.Volume(), expected_volume)\\n)\\n\\nbb = solid.BoundingBox()\\nassert abs(bb.xlen - FLANGE_OD) < 1e-9\\nassert abs(bb.ylen - FLANGE_OD) < 1e-9\\nassert abs(bb.zlen - THICKNESS) < 1e-9\\n\\n# ---------------------------------------------------------------------------\\n# Export the final single solid as a STEP file in the current directory\\n# ---------------------------------------------------------------------------\\ncq.exporters.export(part, \\\"part.step\\\")\\n\\nprint(\\\"Exported part.step: volume = %.6f mm^3, bbox = %.3f x %.3f x %.3f mm\\\"\\n      % (solid.Volume(), bb.xlen, bb.ylen, bb.zlen))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.49}, {\"exit\": 0, \"duration_s\": 2.48}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 75523.887392, \"bbox_len\": [100.0, 100.0, 10.0], \"n_faces\": 9, \"n_solids\": 1, \"cyl_radii\": [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 50.0]}, \"reference\": {\"volume_mm3\": 75523.887392, \"bbox_len\": [100.0, 100.0, 10.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 75523.887392, \"ref\": 75523.887392}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 100.0, \"ref\": 100.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 100.0, \"ref\": 100.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 10.0, \"ref\": 10.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.0, \"expect\": 6, \"got\": 6, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 50.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 9, \"got\": 9, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 30.738,
+    "setup_s": 0.0,
+    "grade_s": 4.984
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2777",
+    "run1 exit=0 2.49s",
+    "run2 exit=0 2.48s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

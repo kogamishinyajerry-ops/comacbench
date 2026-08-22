@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_04",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"%% margin_04 : Robust stability margins of a cascaded (inner + outer) loop\\n%  INNER loop : G_in(s) = 1/(s*(s+4)), feedback gain ki = 9 (unity negative FB)\\n%               G_in_cl(s) = ki*G_in / (1 + ki*G_in)\\n%  OUTER loop : G_out(s) = 3/(s*(s+4))\\n%  Total open loop: L(s) = G_out(s) * G_in_cl(s)   (inner loop closed FIRST,\\n%  then cascaded). Compute gain/phase margins of L(s) and write result.json.\\n\\nclear; clc;\\n\\ns = tf('s');\\n\\n% ---- Inner loop (closed first) ----\\nG_in = 1 / (s * (s + 4.0));\\nki   = 9.0;\\nG_in_cl = feedback(ki * G_in, 1);        % unity negative feedback\\n% -> G_in_cl(s) = 9 / (s^2 + 4s + 9)\\n\\n% ---- Outer loop ----\\nG_out = 3.0 / (s * (s + 4.0));\\n\\n% ---- Cascaded total open loop ----\\nL = G_out * G_in_cl;\\n% -> L(s) = 27 / ( s*(s+4)*(s^2+4s+9) )\\n\\n% ---- Stability margins of the total open loop ----\\n[Gm, Pm, Wcg, Wcp] = margin(L);\\n% Wcg = frequency where the GAIN margin is measured (phase crossover, phase = -180 deg)\\n% Wcp = frequency where the PHASE margin is measured (gain crossover, |L| = 0 dB)\\n\\ngm_db  = 20 * log10(Gm);   % gain margin in dB\\npm_deg = Pm;               % phase margin in degrees\\nw_gc   = Wcp;              % gain crossover frequency (rad/s)\\nw_pc   = Wcg;              % phase crossover frequency (rad/s)\\n\\n% ---- Write result.json ----\\nresult = struct('gm_db', gm_db, 'pm_deg', pm_deg, 'w_gc', w_gc, 'w_pc', w_pc);\\n\\nfid = fopen('result.json', 'w');\\nif fid == -1\\n    error('margin_04: cannot open result.json for writing');\\nend\\nfwrite(fid, jsonencode(result), 'char');\\nfclose(fid);\\n\\nfprintf('gm_db  = %.6f dB\\\\n',   gm_db);\\nfprintf('pm_deg = %.6f deg\\\\n',  pm_deg);\\nfprintf('w_gc   = %.6f rad/s\\\\n', w_gc);\\nfprintf('w_pc   = %.6f rad/s\\\\n', w_pc);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.669518050667117, \"ref\": 10.669518050667117}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 60.17331225409221, \"ref\": 60.17331225409221}, \"w_gc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.650575, \"got\": 0.7411036994679286, \"ref\": 2.120923852697917}, \"w_pc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.861845, \"got\": 2.120923852697917, \"ref\": 0.7411036994679286}}, \"physics_hits\": \"2/4\", \"rel_tol\": 0.01, \"matlab_s\": 21.54}"
+  },
+  "timings": {
+    "agent_s": 114.144,
+    "setup_s": 0.0,
+    "grade_s": 21.539
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 21.54s"
+  ]
+}

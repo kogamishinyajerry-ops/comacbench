@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_lbracket_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\nimport cadquery as cq\\n\\n# ----------------------------------------------------------------------\\n# Hard-coded parameters (all dimensions in mm)\\n# ----------------------------------------------------------------------\\nLEG_X = 120.0        # horizontal leg length along +X   (x: 0 .. 120)\\nLEG_Z = 80.0         # vertical leg height along +Z     (z: 0 .. 80)\\nWIDTH = 60.0         # common width along +Y            (y: 0 .. 60)\\nTHK = 10.0           # leg thickness\\nFILLET = 15.0        # inner concave fillet radius\\nHOLE_DIA = 10.0      # through-hole diameter\\nHOLE_R = HOLE_DIA / 2.0\\n\\nH_HOLE_X, H_HOLE_Y = 65.0, 30.0     # horizontal-leg hole center (axis || Z)\\nV_HOLE_Y, V_HOLE_Z = 30.0, 45.0     # vertical-leg hole center   (axis || X)\\n\\n# ----------------------------------------------------------------------\\n# L-profile sketched in the XZ plane (local u -> global X, local v -> global Z),\\n# extruded along the plane normal (0, -1, 0), then shifted to y in [0, 60]\\n# ----------------------------------------------------------------------\\ntx = THK + FILLET                              # tangent point on top of horizontal leg (u = 25)\\ntz = THK + FILLET                              # tangent point on inner face of vertical leg (v = 25)\\nam = THK + FILLET - FILLET / math.sqrt(2.0)    # fillet arc midpoint (nearest the inner corner)\\n\\nsolid = (\\n    cq.Workplane(\\\"XZ\\\")\\n    .moveTo(0.0, 0.0)                          # outer bottom corner at origin\\n    .lineTo(LEG_X, 0.0)                        # bottom face of horizontal leg\\n    .lineTo(LEG_X, THK)                        # outer end face of horizontal leg\\n    .lineTo(tx, THK)                           # top face of horizontal leg -> fillet tangent\\n    .threePointArc((am, am), (THK, tz))        # concave R15 fillet (tangent to z=10 and x=10)\\n    .lineTo(THK, LEG_Z)                        # inner face of vertical leg\\n    .lineTo(0.0, LEG_Z)                        # top face of vertical leg\\n    .close()                                   # outer face of vertical leg back to origin\\n    .extrude(WIDTH)                            # solid spans y in [-60, 0]\\n    .translate((0.0, WIDTH, 0.0))              # solid spans y in [0, 60]\\n    .val()\\n)\\n\\n# ----------------------------------------------------------------------\\n# Through holes: over-extended cylinders removed by boolean cut\\n# ----------------------------------------------------------------------\\ncyl_h = cq.Solid.makeCylinder(\\n    HOLE_R, 40.0, cq.Vector(H_HOLE_X, H_HOLE_Y, -15.0), cq.Vector(0, 0, 1)\\n)  # horizontal-leg hole, axis parallel to Z, centered at (x=65, y=30)\\n\\ncyl_v = cq.Solid.makeCylinder(\\n    HOLE_R, 40.0, cq.Vector(-15.0, V_HOLE_Y, V_HOLE_Z), cq.Vector(1, 0, 0)\\n)  # vertical-leg hole, axis parallel to X, centered at (y=30, z=45)\\n\\npart = solid.cut(cyl_h, cyl_v)\\n\\n# ----------------------------------------------------------------------\\n# Sanity checks: exactly one valid solid with positive volume, correct bbox\\n# ----------------------------------------------------------------------\\nsolids = part.Solids()\\nassert len(solids) == 1, f\\\"expected 1 solid, got {len(solids)}\\\"\\nresult = solids[0]\\nassert result.isValid(), \\\"resulting B-Rep is not valid\\\"\\nvol = result.Volume()\\nassert vol > 0.0\\n\\nbb = result.BoundingBox()\\nassert abs(bb.xlen - LEG_X) < 1e-6, f\\\"unexpected X extent {bb.xlen}\\\"\\nassert abs(bb.ylen - WIDTH) < 1e-6, f\\\"unexpected Y extent {bb.ylen}\\\"\\nassert abs(bb.zlen - LEG_Z) < 1e-6, f\\\"unexpected Z extent {bb.zlen}\\\"\\n\\n# ----------------------------------------------------------------------\\n# Export the single solid as STEP to the current working directory\\n# ----------------------------------------------------------------------\\ncq.exporters.export(result, \\\"part.step\\\")\\n\\nprint(f\\\"volume = {vol:.6f} mm^3\\\")\\nprint(f\\\"bbox   = ({bb.xlen:.6f}, {bb.ylen:.6f}, {bb.zlen:.6f}) mm\\\")\\nprint(\\\"exported part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.44}, {\"exit\": 0, \"duration_s\": 2.46}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 115326.328467, \"bbox_len\": [120.0, 60.0, 80.0], \"n_faces\": 11, \"n_solids\": 1, \"cyl_radii\": [5.0, 5.0, 15.0]}, \"reference\": {\"volume_mm3\": 115326.328467, \"bbox_len\": [120.0, 60.0, 80.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 115326.328467, \"ref\": 115326.328467}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 120.0, \"ref\": 120.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 5.0, \"expect\": 2, \"got\": 2, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 15.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 11, \"got\": 11, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 156.149,
+    "setup_s": 0.0,
+    "grade_s": 4.917
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3852",
+    "run1 exit=0 2.44s",
+    "run2 exit=0 2.46s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

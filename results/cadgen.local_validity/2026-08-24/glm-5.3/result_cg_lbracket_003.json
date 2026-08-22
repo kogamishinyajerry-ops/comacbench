@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_lbracket_003",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\nimport cadquery as cq\\n\\n# ------------------------------------------------------------------ parameters (mm)\\nLEG_X = 60.0        # horizontal leg: x from 0 to 60\\nLEG_Z = 50.0        # vertical leg: z from 0 to 50\\nT = 8.0             # leg thickness (z-extent of horizontal leg, x-extent of vertical leg)\\nW = 30.0            # width along +Y (y from 0 to 30)\\nFILLET_R = 8.0      # inner concave fillet radius (tangent at (16,8) and (8,16))\\nHOLE_D = 8.0        # through-hole diameter\\nH_HOLE_X = 34.0     # horizontal-leg hole center: (x=34, y=15), axis parallel to Z\\nHOLE_Y = 15.0       # hole centers y (both legs)\\nV_HOLE_Z = 29.0     # vertical-leg hole center: (y=15, z=29), axis parallel to X\\nOVR = 1.0           # tool over-extension for clean booleans\\n\\n# ------------------------------------------------------------------ L-profile in XZ\\n# On the \\\"XZ\\\" workplane, local (u, v) maps to global (X, Z); its normal is -Y.\\n# Fillet arc: circle centered at (T+R, T+R) = (16, 16), radius 8,\\n# from (16, 8) to (8, 16); midpoint lies along the 225-degree direction.\\na = T + FILLET_R - FILLET_R / math.sqrt(2.0)   # = 10.343145750507620\\n\\nprofile = (\\n    cq.Workplane(\\\"XZ\\\")\\n    .moveTo(0.0, 0.0)                            # (0, 0)  outer bottom corner\\n    .lineTo(LEG_X, 0.0)                          # (60, 0) outer bottom edge\\n    .lineTo(LEG_X, T)                            # (60, 8) outer right edge\\n    .lineTo(T + FILLET_R, T)                     # (16, 8) tangent point on top of horizontal leg\\n    .threePointArc((a, a), (T, T + FILLET_R))    # concave R8 fillet -> (8, 16) on inner face\\n    .lineTo(T, LEG_Z)                            # (8, 50) inner face of vertical leg\\n    .lineTo(0.0, LEG_Z)                          # (0, 50) top edge\\n    .close()                                     # back to (0, 0) outer left edge\\n)\\n\\n# The \\\"XZ\\\" plane normal points along -Y, so extruding by -W spans y = 0..30\\npart = profile.extrude(-W)\\n\\n# ------------------------------------------------------------------ through holes\\n# Horizontal-leg hole: axis parallel to Z, centered at (x=34, y=15), through z=0..8\\nhole_h = cq.Solid.makeCylinder(\\n    HOLE_D / 2.0,\\n    T + 2.0 * OVR,\\n    cq.Vector(H_HOLE_X, HOLE_Y, -OVR),\\n    cq.Vector(0.0, 0.0, 1.0),\\n)\\n# Vertical-leg hole: axis parallel to X, centered at (y=15, z=29), through x=0..8\\nhole_v = cq.Solid.makeCylinder(\\n    HOLE_D / 2.0,\\n    T + 2.0 * OVR,\\n    cq.Vector(-OVR, HOLE_Y, V_HOLE_Z),\\n    cq.Vector(1.0, 0.0, 0.0),\\n)\\n\\npart = part.cut(hole_h).cut(hole_v)\\n\\n# ------------------------------------------------------------------ sanity checks\\nshape = part.val()\\nassert shape.isValid(), \\\"resulting B-Rep is not valid\\\"\\nassert len(part.solids().vals()) == 1, \\\"expected exactly one solid\\\"\\n\\nbb = shape.BoundingBox()\\nprint(\\\"volume = {:.6f} mm^3\\\".format(shape.Volume()))\\nprint(\\\"bbox   = {:.3f} x {:.3f} x {:.3f}\\\".format(bb.xlen, bb.ylen, bb.zlen))\\nprint(\\\"faces  = {}\\\".format(len(shape.Faces())))\\n\\n# ------------------------------------------------------------------ export\\ncq.exporters.export(part, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.46}, {\"exit\": 0, \"duration_s\": 2.42}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 24087.787807, \"bbox_len\": [60.0, 30.0, 50.0], \"n_faces\": 11, \"n_solids\": 1, \"cyl_radii\": [4.0, 4.0, 8.0]}, \"reference\": {\"volume_mm3\": 24087.787807, \"bbox_len\": [60.0, 30.0, 50.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 24087.787807, \"ref\": 24087.787807}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 30.0, \"ref\": 30.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 50.0, \"ref\": 50.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.0, \"expect\": 2, \"got\": 2, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 8.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 11, \"got\": 11, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 120.553,
+    "setup_s": 0.0,
+    "grade_s": 4.902
+  },
+  "environment_digest": "sha256:27136d09cdc2f7340a9db1f5054e5977eb0d634e7fa0180cf7a2c18304b114ce",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3057",
+    "run1 exit=0 2.46s",
+    "run2 exit=0 2.42s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

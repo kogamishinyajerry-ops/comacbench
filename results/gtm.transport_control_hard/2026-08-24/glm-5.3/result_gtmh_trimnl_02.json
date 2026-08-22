@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% trimnl_02 : Nonlinear climb + coordinated-turn trim (3 coupled equations)\\n% Unknowns: x = [alpha (rad); T (lbf); delta_e (rad)]\\n% Equations:\\n%   1) q*S*CL*cos(phi) + T*sin(alpha+i_T) - W*cos(gamma)      = 0\\n%   2) T*cos(alpha+i_T) - q*S*CD - W*sin(gamma)               = 0\\n%   3) q*S*cbar*(Cm0+Cma*alpha+Cmde*delta_e) + T*sin(i_T)*z_T = 0\\n\\nclear; clc;\\n\\n% ---------------- given data ----------------\\nW    = 280000.0;          % weight, lbf\\nS    = 2730.0;            % wing area, ft^2\\nh    = 35000.0;           % altitude, ft\\nV    = 780.0;             % true airspeed, ft/s\\ngam  = 5.0*pi/180;        % climb angle, rad\\nphi  = 40.0*pi/180;       % bank angle, rad\\n\\nCL0  = 0.18;  CLa  = 5.6;   CLde = 0.3;     % 1/rad\\nCD0  = 0.019; kD   = 0.045;                 % parabolic drag\\nrho0 = 0.0023769;                           % slug/ft^3\\n\\niT   = 3.0*pi/180;        % thrust line incidence, rad\\nzT   = 2.2;               % thrust perpendicular arm, ft\\n\\nCm0  = 0.025; Cma = -0.34; Cmde = -0.9;     % 1/rad\\ncbar = 19.5;              % mean chord, ft\\n\\n% ---------------- atmosphere & dynamics ----------------\\nrho = rho0*exp(-h/23800);\\nq   = 0.5*rho*V^2;\\n\\nCLf = @(a,de) CL0 + CLa*a + CLde*de;\\nCDf = @(a,de) CD0 + kD*CLf(a,de)^2;\\n\\nF = @(x) [ q*S*CLf(x(1),x(3))*cos(phi) + x(2)*sin(x(1)+iT) - W*cos(gam);\\n           x(2)*cos(x(1)+iT) - q*S*CDf(x(1),x(3)) - W*sin(gam);\\n           q*S*cbar*(Cm0 + Cma*x(1) + Cmde*x(3)) + x(2)*sin(iT)*zT ];\\n\\n% ---------------- damped Newton with numerical Jacobian ----------------\\nguesses = [ 6.0*pi/180  45000.0  -0.7*pi/180;\\n            4.0*pi/180  40000.0  -1.0*pi/180;\\n            8.0*pi/180  50000.0   0.0        ];\\ntol   = 1e-12;\\nmaxit = 200;\\nx     = guesses(1,:)';\\nconverged = false;\\n\\nfor gsel = 1:size(guesses,1)\\n    x = guesses(gsel,:)';\\n    for it = 1:maxit\\n        Fx  = F(x);\\n        nFx = norm(Fx,inf);\\n\\n        % numerical Jacobian (central-free forward differences)\\n        J = zeros(3,3);\\n        for j = 1:3\\n            d = 1e-7*max(abs(x(j)),1.0);\\n            e = zeros(3,1); e(j) = d;\\n            J(:,j) = (F(x+e) - Fx)/d;\\n        end\\n\\n        step = -J\\\\Fx;\\n\\n        % damping: halve step until residual norm decreases\\n        lam = 1.0;\\n        for ls = 1:50\\n            xt = x + lam*step;\\n            if norm(F(xt),inf) < nFx, break; end\\n            lam = 0.5*lam;\\n        end\\n        x = x + lam*step;\\n\\n        if norm(lam*step,inf) < tol && norm(F(x),inf) < 1e-6\\n            converged = true; break;\\n        end\\n    end\\n    if converged, break; end\\nend\\n\\nif ~converged\\n    warning('Newton iteration did not fully converge; using last iterate.');\\nend\\n\\n% ---------------- results ----------------\\nalpha_trim_deg   = x(1)*180/pi;\\nthrust_lbf       = x(2);\\ndelta_e_trim_deg = x(3)*180/pi;\\nload_factor      = cos(gam)/cos(phi);\\n\\nresult = struct( ...\\n    'alpha_trim_deg',   alpha_trim_deg, ...\\n    'thrust_lbf',       thrust_lbf, ...\\n    'delta_e_trim_deg', delta_e_trim_deg, ...\\n    'load_factor',      load_factor);\\n\\nfid = fopen('result.json','w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\\n\\nfprintf('Residual check (should be ~0): [%g %g %g]\\\\n', F(x));\\nfprintf('alpha_trim = %.6f deg\\\\n', alpha_trim_deg);\\nfprintf('thrust     = %.2f lbf\\\\n',  thrust_lbf);\\nfprintf('delta_e    = %.6f deg\\\\n', delta_e_trim_deg);\\nfprintf('n          = %.6f\\\\n',     load_factor);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 6.1929127776963835, \"ref\": 6.192912777696382}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 46082.14114435781, \"ref\": 46082.14114435781}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.7098065449983074, \"ref\": -0.709806544998307}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.3004398204831333, \"ref\": 1.3004398204831333}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 9.77}"
+  },
+  "timings": {
+    "agent_s": 110.887,
+    "setup_s": 0.0,
+    "grade_s": 9.771
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.77s"
+  ]
+}

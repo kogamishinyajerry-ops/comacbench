@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% mc_03 : Monte Carlo robustness screening -- closed-loop short-period spec\\n% Elevator state feedback u = -K x on the nominal 4-state longitudinal model\\n% x = [u, w, q, theta].  Short-period poles placed at wn = 2.3 rad/s,\\n% zeta = 0.58; phugoid poles held at their open-loop values.\\n% Monte Carlo over N = 200 deterministic samples: +/-30% uniform multipliers\\n% on Mw, Zw, Mq drawn with independent seeds.\\n\\nclear; clc; close all;\\n\\n%% ---- Nominal longitudinal model (ft/s, ft/s, rad/s, rad) ----\\nV   = 690.0;\\nXu  = -0.007;   Xw = 0.045;\\nZu  = -0.04;    Zw = -0.8;\\nMw  = -0.0062;  Mq = -1.05;\\ng   = 32.174;\\n\\nA = [ Xu    Xw    0    -g ;\\n      Zu    Zw    V     0 ;\\n      0     Mw    Mq    0 ;\\n      0     0     1     0 ];\\n\\nB = [0; -6.5; -5.0; 0];                       % elevator input effectiveness\\n\\n% sanity: model must be controllable for pole placement\\nassert(rank(ctrb(A,B)) == 4, 'Nominal (A,B) not controllable');\\n\\n%% ---- State-feedback design: SP at wn=2.3, zeta=0.58, phugoid at open-loop ----\\nwn_sp   = 2.3;\\nzeta_sp = 0.58;\\n\\nwd_sp  = wn_sp*sqrt(1 - zeta_sp^2);\\nsp_des = -zeta_sp*wn_sp + 1i*wd_sp;           % desired short-period pair\\n\\nol     = eig(A);                              % open-loop poles\\n[~, o] = sort(abs(ol), 'descend');\\nph_ol  = ol(o(3:4));                          % slow pair = phugoid (kept)\\n\\npdes = [ph_ol(1); ph_ol(2); sp_des; conj(sp_des)];\\nK    = place(A, B, pdes);                     % u = -K x  =>  eig(A - B*K)\\n\\n% verify nominal closed-loop short-period meets the design targets\\nlam0 = eig(A - B*K);\\n[~, s0] = sort(abs(lam0), 'descend');\\nsp0  = lam0(s0(1:2));\\nwn0  = abs(sp0);\\nzt0  = -real(sp0)./wn0;\\nfprintf('Nominal closed-loop SP: wn = %.4f rad/s, zeta = %.4f\\\\n', wn0(1), zt0(1));\\n\\n%% ---- Monte Carlo: N = 200 deterministic samples, +/-30% uniform box ----\\nN   = 200;\\npct = 0.30;\\n\\nrng(20260829); f_Mw = 1 + pct*(2*rand(N,1) - 1);   % Mw multipliers\\nrng(20261829); f_Zw = 1 + pct*(2*rand(N,1) - 1);   % Zw multipliers\\nrng(20262829); f_Mq = 1 + pct*(2*rand(N,1) - 1);   % Mq multipliers\\n\\ncount = 0;\\nwn_hist = zeros(N,1);\\nzt_hist = zeros(N,1);\\n\\nfor i = 1:N\\n    Ai = [ Xu    Xw          0           -g ;\\n           Zu    f_Zw(i)*Zw  V            0 ;\\n           0     f_Mw(i)*Mw  f_Mq(i)*Mq   0 ;\\n           0     0           1            0 ];\\n\\n    lam = eig(Ai - B*K);                     % closed-loop poles, sample i\\n    [~, o] = sort(abs(lam), 'descend');\\n    sp  = lam(o(1:2));                       % short-period = fastest (largest |s|) pair\\n\\n    wn_i = abs(sp);\\n    zt_i = -real(sp)./wn_i;\\n\\n    wn_hist(i) = wn_i(1);\\n    zt_hist(i) = zt_i(1);\\n\\n    % pass: SP omega_n in [2.2, 2.4] rad/s AND zeta >= 0.55 (both poles of pair)\\n    if all(wn_i >= 2.2 & wn_i <= 2.4) && all(zt_i >= 0.55)\\n        count = count + 1;\\n    end\\nend\\n\\npass_fraction      = count/N;\\nfailing_case_count = N - count;\\n\\nfprintf('MC screening (N = %d): pass = %d, fail = %d, pass_fraction = %.4f\\\\n', ...\\n        N, count, failing_case_count, pass_fraction);\\n\\n%% ---- Write result.json ----\\nresult = struct('pass_fraction',      pass_fraction, ...\\n                'failing_case_count', failing_case_count);\\n\\nfid = fopen('result.json', 'w');\\nif fid == -1\\n    error('Unable to open result.json for writing.');\\nend\\nfwrite(fid, jsonencode(result), 'char');\\nfclose(fid);\\ndisp('result.json written.');\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.265, \"ref\": 0.265}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 147, \"ref\": 147}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 10.18}"
+  },
+  "timings": {
+    "agent_s": 115.888,
+    "setup_s": 0.0,
+    "grade_s": 10.178
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 10.18s"
+  ]
+}
