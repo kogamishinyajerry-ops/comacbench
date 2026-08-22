@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn10k_t2300_opr12",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        thermo = dict(thermo_method='TABULAR', thermo_data=pyc.AIR_JETA_TAB_SPEC)\\n\\n        self.add_subsystem('fc', pyc.FlightConditions(**thermo))\\n        self.add_subsystem('inlet', pyc.Inlet(**thermo))\\n        self.add_subsystem('comp', pyc.Compressor(**thermo))\\n        self.add_subsystem('burner', pyc.Combustor(**thermo))\\n        self.add_subsystem('turb', pyc.Turbine(**thermo))\\n        self.add_subsystem('nozz', pyc.Nozzle(**thermo))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n        self.connect('fc.Fl_O:tot', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n        self.connect('fc.Fl_O:stat:P', 'nozz.Ps')\\n\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n        self.connect('comp.perf.trq', 'shaft.trq_1')\\n        self.connect('turb.perf.trq', 'shaft.trq_2')\\n\\n        self.add_subsystem('fn_calc', om.ExecComp(\\n            'Fn = Fg - mdot * V0 - drag',\\n            Fn={'units': 'lbf'}, Fg={'units': 'lbf'},\\n            mdot={'units': 'lbm/s'}, V0={'units': 'ft/s'},\\n            drag={'units': 'lbf'}))\\n        self.connect('nozz.perf.Fg', 'fn_calc.Fg')\\n        self.connect('fc.Fl_O:stat:V', 'fn_calc.V0')\\n        self.connect('fc.W', 'fn_calc.mdot')\\n        self.connect('inlet.perf.drag', 'fn_calc.drag')\\n\\n        # balance T4 -> fuel flow\\n        bal_wf = om.BalanceComp('Wfuel', units='lbm/s', eq_units='degR',\\n                                lhs_name='T4', rhs_name='T4_t',\\n                                lower=1e-4, upper=50.)\\n        self.add_subsystem('bal_wf', bal_wf)\\n        self.connect('burner.Fl_O:tot:T', 'bal_wf.T4')\\n        self.connect('bal_wf.Wfuel', 'burner.Fuel:Fl_I:W')\\n\\n        # balance shaft torque -> turbine PR\\n        bal_pr = om.BalanceComp('PR', eq_units='ft*lbf',\\n                                lhs_name='trq', rhs_name='trq_t',\\n                                lower=0.05, upper=1.5)\\n        self.add_subsystem('bal_pr', bal_pr)\\n        self.connect('shaft.trq_net', 'bal_pr.trq')\\n        self.connect('bal_pr.PR', 'turb.PR')\\n\\n        # balance Fn -> engine airflow\\n        bal_w = om.BalanceComp('W', units='lbm/s', eq_units='lbf',\\n                               lhs_name='Fn', rhs_name='Fn_t',\\n                               lower=5., upper=2000.)\\n        self.add_subsystem('bal_w', bal_w)\\n        self.connect('fn_calc.Fn', 'bal_w.Fn')\\n        self.connect('bal_w.W', 'fc.W')\\n\\n        self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True,\\n                                                maxiter=60, atol=1e-7,\\n                                                rtol=1e-9, iprint=0)\\n        self.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef main():\\n    prob = om.Problem(model=Turbojet(), reports=False)\\n    prob.setup()\\n    prob.set_solver_print(level=0)\\n\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n    prob.set_val('fc.MN', 0.01)\\n    prob.set_val('fc.T', 518.67, units='degR')\\n\\n    prob.set_val('inlet.dPqP', 0.0)\\n    prob.set_val('comp.PR', 12.0)\\n    prob.set_val('comp.eff', 0.90)\\n    prob.set_val('burner.dPq', 0.03)\\n    prob.set_val('turb.eff', 0.90)\\n    prob.set_val('nozz.dPq', 0.0)\\n\\n    prob.set_val('shaft.Nmech', 12000.0, units='rpm')\\n\\n    prob.set_val('bal_wf.T4_t', 2300.0, units='degR')\\n    prob.set_val('bal_pr.trq_t', 0.0, units='ft*lbf')\\n    prob.set_val('bal_w.Fn_t', 10000.0, units='lbf')\\n\\n    prob.set_val('bal_wf.Wfuel', 3.0, units='lbm/s')\\n    prob.set_val('bal_pr.PR', 0.45)\\n    prob.set_val('bal_w.W', 160.0, units='lbm/s')\\n\\n    prob.run_model()\\n\\n    Fn = float(prob.get_val('fn_calc.Fn', units='lbf')[0])\\n    Wf = float(prob.get_val('burner.Wfuel', units='lbm/s')[0])\\n    Pt2 = float(prob.get_\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"del._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 584, in _setup_procs\\n    self._setup_check()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/mp_cycle.py\\\", line 38, in _setup_check\\n    raise NotImplementedError(f\\\"`super.setup()` has not been called within the setup method of f{self.__class__}\\\")\\nNotImplementedError: `super.setup()` has not been called within the setup method of f<class '__main__.Turbojet'>\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 513.654,
+    "setup_s": 0.0,
+    "grade_s": 1.001
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.0s"
+  ]
+}

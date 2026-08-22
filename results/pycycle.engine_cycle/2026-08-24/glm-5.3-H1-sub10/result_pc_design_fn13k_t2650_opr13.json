@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn13k_t2650_opr13",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nFn_target = 13000.0   # lbf\\nT4_target = 2650.0    # degR\\nOPR_target = 13.0\\nPamb_psf = 14.696 * 144.0\\n\\n\\nclass Turbojet(pyc.MPCycle):\\n\\n    def initialize(self):\\n        try:\\n            super().initialize()\\n        except Exception:\\n            pass\\n        if 'thermo_method' not in self.options:\\n            self.options.declare('thermo_method', default='TABULAR')\\n        if 'thermo_data' not in self.options:\\n            self.options.declare('thermo_data')\\n\\n    def setup(self):\\n        self.options['thermo_method'] = 'TABULAR'\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n\\n        self.pyc_add_element('Fl_I', pyc.FlightCondition())\\n\\n        design = self.pyc_add_pnt('DES', pyc.Element(name='Design Point'))\\n        design.pyc_add_element('inlet', pyc.Inlet())\\n        design.pyc_add_element('comp', pyc.Compressor())\\n        design.pyc_add_element('comb', pyc.Combustor())\\n        design.pyc_add_element('turb', pyc.Turbine())\\n        design.pyc_add_element('noz', pyc.Nozzle())\\n        design.pyc_add_element('shp', pyc.Shaft(num_ports=2))\\n\\n        # flight condition (SL static)\\n        self.set_input_defaults('Fl_I.Pt', 14.696, units='psi')\\n        self.set_input_defaults('Fl_I.Tt', 518.665, units='degR')\\n        self.set_input_defaults('Fl_I.MN', 0.001)\\n\\n        # element parameters\\n        self.set_input_defaults('DES.inlet.MN', 0.6)\\n        self.set_input_defaults('DES.comp.MN', 0.3)\\n        self.set_input_defaults('DES.comb.MN', 0.2)\\n        self.set_input_defaults('DES.turb.MN', 0.4)\\n        self.set_input_defaults('DES.noz.MN', 1.0)\\n        self.set_input_defaults('DES.comp.PR', OPR_target)\\n        self.set_input_defaults('DES.comp.eff', 0.90)\\n        self.set_input_defaults('DES.turb.eff', 0.90)\\n        self.set_input_defaults('DES.shp.Nmech', 10000.0, units='rpm')\\n\\n        super().setup()\\n\\n    def connect_design(self):\\n        # flow path\\n        self.pyc_connect_flow('Fl_I', 'DES.inlet.Fl_I')\\n        self.pyc_connect_flow('DES.inlet.Fl_O', 'DES.comp.Fl_I')\\n        self.pyc_connect_flow('DES.comp.Fl_O', 'DES.comb.Fl_I')\\n        self.pyc_connect_flow('DES.comb.Fl_O', 'DES.turb.Fl_I')\\n        self.pyc_connect_flow('DES.turb.Fl_O', 'DES.noz.Fl_I')\\n\\n        # shaft wiring (turbine drives compressor)\\n        self.connect('DES.turb.pwr', 'DES.shp.pwr_in_0')\\n\\n\\nclass Design(om.Group):\\n\\n    def setup(self):\\n        bal = om.BalanceComp()\\n        self.add_subsystem('bal', bal)\\n        self.add_subsystem('tj', Turbojet())\\n\\n        # power balance residual (turbine power must supply compressor power)\\n        self.add_subsystem('pwr_res', om.ExecComp(\\n            'res = pt + pc',\\n            res={'units': 'hp'}, pt={'units': 'hp'}, pc={'units': 'hp'}))\\n\\n        # performance\\n        self.add_subsystem('perf', om.ExecComp(\\n            ['Ve = We / (rhoe * Ae)',\\n             'dP = Pe - Pamb',\\n             'Fg = We * Ve / gc + dP * Ae',\\n             'Fn = Fg - Fram',\\n             'TSFC = 3600.0 * Wfuel / Fn'],\\n            Ve={'units': 'ft/s'},\\n            We={'units': 'lbm/s'},\\n            rhoe={'units': 'lbm/ft**3'},\\n            Ae={'units': 'ft**2'},\\n            dP={'units': 'lbf/ft**2'},\\n            Pe={'units': 'lbf/ft**2'},\\n            Pamb={'units': 'lbf/ft**2', 'val': Pamb_psf},\\n            Fg={'units': 'lbf'},\\n            gc={'units': 'lbm*ft/lbf/s**2', 'val': 32.174},\\n            Fn={'units': 'lbf'},\\n            Fram={'units': 'lbf', 'val': 0.0},\\n            TSFC={'units': '1/hr'},\\n            Wfuel={'units': 'lbm/s'}))\\n\\n        # balance variables\\n        bal.add_balance('W', units='lbm/s', eq_units='lbf', rhs_val=Fn_target, val=160.0)\\n        bal.add_balance('fuel', units='lbm/s', eq_units='degR', rhs_val=T4_target, val=2.5)\\n        bal.add_balance('turb_PR', eq_units='hp', rhs_val=0.0, val=4.0, sign=-1.0)\\n\\n        # hook balance outputs into the cycle\\n        self.connect('bal.W', 'tj.Fl_I.W')\\n        self.connect('bal.fuel', 'tj.DES.\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \" \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_nqvtvpbt/solve.py\\\", line 104, in setup\\n    bal.add_balance('turb_PR', eq_units='hp', rhs_val=0.0, val=4.0, sign=-1.0)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/components/balance_comp.py\\\", line 322, in add_balance\\n    meta = self.add_output(name, **options['kwargs'])\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/implicitcomponent.py\\\", line 375, in add_output\\n    metadata = super().add_output(name, val, **kwargs)\\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nTypeError: Component.add_output() got an unexpected keyword argument 'sign'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 469.046,
+    "setup_s": 0.0,
+    "grade_s": 1.085
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.08s"
+  ]
+}

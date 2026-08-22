@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn13k_t2650_opr13",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# ---------------- turbomachinery maps (from pycycle examples) ----------------\\nmap_explorer = pyc.MapExtractor(pyc.axisymmetric_compressor_maps)\\naxi5 = map_extractor.get_map('AXI5')\\n\\nmap_explorer = pyc.MapExtractor(pycycle_lpt = None) if False else None\\nfrom pycycle import turbine_maps\\nmap_explorer = pyc.MapExtractor(turbine_maps)\\nlpt2269 = map_explorer.get_map('LPT2269')\\n\\n# ---------------- cycle -----------------\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        # design conditions\\n        self.options['thermo_method'] = 'TABULAR'\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n        self.options['output_flow_stations'] = ['exit_bp']\\n\\n        self.pyc_add_element('flight', pyc.FlightConditions(MN=0.0, alt=0.0))\\n        self.pyc_add_element('inlet', pyc.Inlet())\\n        self.pyc_add_element('compressor', pyc.Compressor(map_data=axi5, design=True))\\n        self.pyc_add_element('burner', pyc.Combustor())\\n        self.pyc_add_element('turbine', pyc.Turbine(map_data=lpt2269, design=True))\\n        self.pyc_add_element('nozzle', pyc.Nozzle(lossCoef=0.99))\\n        self.pyc_add_element('shaft', pyc.Shaft(num_ports=2))\\n\\n        # connect flow station\\n        self.connect('flight.Ps', 'inlet.Ps')\\n        self.connect('flight.Ts', 'inlet.Ts')\\n        self.connect('inlet.Fl_O', 'compressor.Fl_I')\\n        self.connect('compressor.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turbine.Fl_I')\\n        self.connect('turbine.Fl_O', 'nozzle.Fl_I')\\n\\n        self.connect('shaft.trq_1', 'compressor.trq')\\n        self.connect('shaft.trq_2', 'turbine.trq')\\n        self.connect('shaft.Nmech', 'compressor.Nmech')\\n        self.connect('shaft.Nmech', 'turbine.Nmech')\\n\\n        self.connect('flight.MN', 'nozzle.MN')\\n\\n        # balance connections\\n        self.connect('compressor.Fl_O:tot:P', 'burner.Pt')\\n        self.connect('turbine.Fl_O:tot:P', 'nozzle.Pt')\\n        self.connect('burner.dPt', 'nozzle.dPtot')\\n\\n        # design balances\\n        self.pyc_add_cycle_param('burner.dPqP', 0.03)\\n        self.pyc_add_cycle_param('inlet.ram_recovery', 1.0)\\n        self.pyc_add_cycle_param('inlet.lossCoef', 1.0)\\n\\n        balance = self.add_subsystem('balance', om.BalanceComp(), promotes_inputs=['*'], promotes_outputs=['*'])\\n\\n        # balance on fuel flow to hit T4\\n        self.connect('burner.Fl_O:tot:T', 'balance.T4')\\n        balance.add_balance('W', val=1.5, units='lbm/s', eq_units='degR', lhs_name='T4', rhs_name='T4_target', use_mult=False)\\n        self.connect('balance.W', 'burner.Wfuel')\\n        self.set_input_defaults('T4_target', 2650.0, units='degR')\\n\\n        # balance on shaft speed so turbine work matches compressor\\n        self.connect('balance.turb_Nmech', 'turbine.Nmech')\\n        self.connect('balance.rho_rout', 'nozzle.rho_rout')\\n        # nozzle area balance handled below\\n\\n        # turbine PR balance to match power\\n        self.connect('balance.pr_pc', 'nozzle.PR')\\n\\nclass MPgroup(om.ParallelGroup):\\n    pass\\n\\n# simpler approach: use pycycle's standard design problem structure\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        des = self.add_subsystem('DESIGN', Turbojet(), promotes=['*'])\\n        des.nonlinear_solver = om.NewtonSolver(solve_subsystems=True, maxiter=100, atol=1e-8, rtol=1e-8, iprint=0)\\n        des.nonlinear_solver.linesearch = None\\n        des.linear_solver = om.DirectSolver(assemble_jac=True)\\n\\n        # nozzle area balance\\n        bal = om.BalanceComp()\\n        self.add_subsystem('nozz_bal', om.BalanceComp(), promotes=['*'])\\n        # engine size (W) balance on target thrust\\n        self.add_subsystem('Fn_burner', om.BalanceComp())\\n\\n        # connect thrust for sizing\\n        self.connect('perf.Fn', 'size_bal.lhs_Fn')\\n        self.connect('size_bal.W', 'inlet.Fl_I:stat:W')\\n\\n    def configure(self):\\n        pass\\n\\n# ---------------- problem ----------------\\np = om.Problem()\\n\\n# use pycycle's canonical example st\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_074hs810/solve.py\\\", line 7, in <module>\\n    map_explorer = pyc.MapExtractor(pyc.axisymmetric_compressor_maps)\\n                   ^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'MapExtractor'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 700.457,
+    "setup_s": 0.0,
+    "grade_s": 1.048
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.05s"
+  ]
+}

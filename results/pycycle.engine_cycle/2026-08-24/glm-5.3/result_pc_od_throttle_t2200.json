@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2200",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n\\n    def setup(self):\\n        DESIGN = self.pyc_add_cycle('DESIGN')\\n\\n        DESIGN.set_input_defaults('altitude', 0.0, units='ft')\\n        DESIGN.set_input_defaults('MN', 0.000001)\\n\\n        fgt = DESIGN.add_subsystem('fgt', pyc.FlightConditions(),\\n                                   promotes_inputs=['altitude', 'MN', 'W'])\\n        inlet = DESIGN.add_subsystem('inlet', pyc.Inlet(design_mode=True, num_pts=1,\\n                                                        thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        comp = DESIGN.add_subsystem('comp', pyc.Compressor(design_mode=True,\\n                                                           map_datas=pyc.AXI5,\\n                                                           thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        comb = DESIGN.add_subsystem('comb', pyc.Combustor(design_mode=True,\\n                                                          thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                                    promotes_inputs=['Wfuel', 'dPqP'])\\n        turb = DESIGN.add_subsystem('turb', pyc.Turbine(design_mode=True,\\n                                                        map_datas=pyc.LPT2269,\\n                                                        thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        noz = DESIGN.add_subsystem('noz', pyc.Nozzle(design_mode=True, num_pts=1,\\n                                                     loss_model='CD',\\n                                                     thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        shaft = DESIGN.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n        bal = DESIGN.add_subsystem('balance', om.BalanceComp(),\\n                                   promotes_inputs=['T4_target', 'Fn_target'])\\n\\n        # balances: mass flow to hit Fn, shaft speed to hit T4\\n        bal.add_balance('W', val=170.0, units='lbm/s', eq_units='lbf',\\n                        lhs_name='Fn_target', rhs_name='Fn')\\n        bal.add_balance('Nmech', val=1.0, eq_units='degR',\\n                        lhs_name='T4_target', rhs_name='T4')\\n\\n        # flow connections\\n        DESIGN.pyc_connect_flow('fgt.Fl_O', 'inlet.Fl_I', connect_static=False)\\n        DESIGN.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        DESIGN.pyc_connect_flow('comp.Fl_O', 'comb.Fl_I')\\n        DESIGN.pyc_connect_flow('comb.Fl_O', 'turb.Fl_I')\\n        DESIGN.pyc_connect_flow('turb.Fl_O', 'noz.Fl_I')\\n\\n        # shaft connections\\n        DESIGN.connect('balance.W', 'fgt.W')\\n        DESIGN.connect('balance.Nmech', 'shaft.Nmech')\\n        DESIGN.connect('shaft.Nmech', 'comp.Nmech')\\n        DESIGN.connect('shaft.Nmech', 'turb.Nmech')\\n        DESIGN.connect('comp.trq', 'shaft.trq_0')\\n        DESIGN.connect('turb.trq', 'shaft.trq_1')\\n\\n        # balance residuals\\n        DESIGN.connect('noz.Fn', 'balance.Fn')\\n        DESIGN.connect('comb.Fl_O:T', 'balance.T4')\\n\\n        # design point inputs\\n        DESIGN.set_input_defaults('inlet.MN', 0.6)\\n        DESIGN.set_input_defaults('comp.PR', 13.5)\\n        DESIGN.set_input_defaults('comp.map.Rline_des', 2.0)\\n        DESIGN.set_input_defaults('Wfuel', 3.0, units='lbm/s')\\n        DESIGN.set_input_defaults('dPqP', 0.03)\\n\\n        # solvers\\n        newton = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['maxiter'] = 100\\n        newton.options['atol'] = 1e-7\\n        newton.options['rtol'] = 1e-10\\n        newton.options['iprint'] = 2\\n        newton.linesearch = om.BoundsEnforceLS()\\n        self.nonlinear_solver = newton\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef main():\\n    p = om.Problem(model=Turbojet())\\n    p.setup()\\n    p.set_val('DESIGN.altitude', 0.0, units='ft')\\n    p.set_val('DESIGN.MN', 1.0e-6)\\n    p.set_val('DESIGN.Fn_target', [11800.0], units='lbf')\\n    p.set_val('DESIGN.T4_target', [2200.0], units='degR')\\n    p.set_val('DESIGN.Wfuel', 3.0, units='lbm/s')\\n    p.set_val('DESIGN.comp.PR', 13.5)\\n    p.set_val('DESIGN.inlet.MN', 0.6)\\n    p.set_solver_\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"anz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_tzaspvt1/solve.py\\\", line 10, in setup\\n    DESIGN = self.pyc_add_cycle('DESIGN')\\n             ^^^^^^^^^^^^^^^^^^\\nAttributeError: 'Turbojet' object has no attribute 'pyc_add_cycle'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 804.136,
+    "setup_s": 0.0,
+    "grade_s": 1.009
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

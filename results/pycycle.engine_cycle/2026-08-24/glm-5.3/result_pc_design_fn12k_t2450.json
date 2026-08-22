@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        # --- elements (map-based AXI5 compressor / LPT2269 turbine, TABULAR thermo) ---\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor())\\n        self.add_subsystem('burner', pyc.Combustor())\\n        self.add_subsystem('turb', pyc.Turbine())\\n        self.add_subsystem('nozz', pyc.Nozzle(nozzType='CD', lossCoef='CV'))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n        # --- flow connections ---\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # --- shaft ---\\n        self.connect('shaft.trq_0', 'comp.trq')\\n        self.connect('shaft.trq_1', 'turb.trq')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # --- area pass-through (design sizing) ---\\n        self.connect('inlet.Fl_O:stat:area', 'comp.Fl_I:stat:area')\\n        self.connect('comp.Fl_O:stat:area', 'burner.Fl_I:stat:area')\\n        self.connect('burner.Fl_O:stat:area', 'turb.Fl_I:stat:area')\\n        self.connect('turb.Fl_O:stat:area', 'nozz.Throat:stat:area')\\n\\n        # combustor inlet total pressure comes from compressor exit (bypass burner guess flow)\\n        self.pyc_connect_flow('comp.Fl_O:tot:P', 'burner.Fl_I:tot:P', connect_stat=False)\\n\\n        # --- design balance: find inlet mass flow W that yields target net thrust ---\\n        self.add_subsystem('fn_bal', om.BalanceComp(\\n            'W', val=150.0, units='lbm/s', eq_units='lbf', rhs_val=12000.0, lower=1.0))\\n        self.connect('fn_bal.W', 'inlet.Fl_I:stat:W')\\n        self.connect('nozz.Fn', 'fn_bal.lhs:lbf')\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['maxiter'] = 100\\n        newton.options['atol'] = 1e-8\\n        newton.options['rtol'] = 1e-8\\n        newton.options['iprint'] = 2\\n        newton.linesearch = om.BoundsEnforceLS()\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef safe_setval(prob, name, val, units=None):\\n    try:\\n        if units is None:\\n            prob.set_val(name, val)\\n        else:\\n            prob.set_val(name, val, units=units)\\n        return True\\n    except Exception as e:\\n        print(f\\\"  (skipped setting {name}: {e})\\\")\\n        return False\\n\\n\\ndef main():\\n    prob = om.Problem(model=Turbojet(design=True,\\n                                     thermo_method='TABULAR',\\n                                     thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n    prob.setup()\\n\\n    # --- design point conditions: SL static ---\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n    prob.set_val('fc.MN', 0.001)          # ~static\\n\\n    # --- design cycle inputs ---\\n    safe_setval(prob, 'inlet.ram_recovery', 0.99)\\n    safe_setval(prob, 'comp.PR', 14.0)                 # OPR (design)\\n    safe_setval(prob, 'comp.eff', 0.90)\\n    safe_setval(prob, 'burner.dPqP', 0.04)\\n    safe_setval(prob, 'burner.Tt4', 2450.0, units='degR')  # T4 target\\n    safe_setval(prob, 'burner.Wfuel', 2.0, units='lbm/s')  # initial guess if it's an input\\n    safe_setval(prob, 'turb.eff', 0.90)\\n    safe_setval(prob, 'nozz.Cv', 0.99)\\n    safe_setval(prob, 'shaft.Nmech', 9000.0, units='rpm')\\n\\n    # --- run design point ---\\n    prob.run_model()\\n\\n    Fn = float(prob.get_val('nozz.Fn', units='lbf')[0])\\n    Wfuel = float(prob.get_val('burner.Wfuel', units='lbm/s')[0])\\n    Pt2 = float(prob.get_val('comp.Fl_I:tot:P', units='psia')[0])\\n    Pt3 = float(prob.get_val('comp.Fl_O:tot:P', units='psia')[0])\\n    OPR = Pt3 / Pt2\\n    TSFC = Wfuel / Fn * 3600.0  # 1/hr\\n\\n    Wair = float(prob.get_val('inlet.Fl_I:stat:W', units='lbm/s')[0])\\n    print(\\\"---- Turbojet design point results ----\\\")\\n    print(f\\\"Fn\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"del._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 584, in _setup_procs\\n    self._setup_check()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/mp_cycle.py\\\", line 38, in _setup_check\\n    raise NotImplementedError(f\\\"`super.setup()` has not been called within the setup method of f{self.__class__}\\\")\\nNotImplementedError: `super.setup()` has not been called within the setup method of f<class '__main__.Turbojet'>\\n\"}"
+  },
+  "timings": {
+    "agent_s": 683.262,
+    "setup_s": 0.0,
+    "grade_s": 1.174
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.17s"
+  ]
+}

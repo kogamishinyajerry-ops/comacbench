@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn11k_t2550_opr11",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Group):\\n    def setup(self):\\n        thermo_method = 'TABULAR'\\n        thermo_data = pyc.AIR_JETA_TAB_SPEC\\n        fuel_data = pyc.JETA_TAB_SPEC\\n\\n        self.add_subsystem('fc', pyc.FlightCondition(thermo_method=thermo_method,\\n                                                     thermo_data=thermo_data))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_method=thermo_method,\\n                                              thermo_data=thermo_data))\\n        self.add_subsystem('comp', pyc.Compressor(thermo_method=thermo_method,\\n                                                  thermo_data=thermo_data, map=False))\\n        self.add_subsystem('burn', pyc.Combustor(thermo_method=thermo_method,\\n                                                 thermo_data=thermo_data,\\n                                                 fuel_thermo_data=fuel_data))\\n        self.add_subsystem('turb', pyc.Turbine(thermo_method=thermo_method,\\n                                               thermo_data=thermo_data, map=False))\\n        self.add_subsystem('noz', pyc.Nozzle(thermo_method=thermo_method,\\n                                             thermo_data=thermo_data,\\n                                             nozzleType='CD', design=True))\\n        self.add_subsystem('shaft', pyc.Shaft(num_elements=2), promotes=['*'])\\n\\n        bal = self.add_subsystem('bal', om.BalanceComp())\\n        bal.add_balance('W', val=150.0, units='lbm/s', eq_units='lbf',\\n                        rhs_val=0.0, lower=1.0, upper=3000.0)\\n        bal.add_balance('PR_turb', val=0.40, eq_units='hp', rhs_val=0.0,\\n                        lower=0.15, upper=0.98)\\n\\n        # flow connections\\n        self.connect('fc.Fl_I', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burn.Fl_I')\\n        self.connect('burn.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n        # shaft power balance\\n        self.connect('comp.power', 'pwr_in_0')\\n        self.connect('turb.power', 'pwr_in_1')\\n\\n        # ambient static pressure\\n        self.connect('fc.Ps', 'noz.Ps')\\n\\n        # CD nozzle design PR: fully expanded (Pt/Pamb)\\n        self.add_subsystem('noz_pr', om.ExecComp('PR = Pt/Ps',\\n                                                 PR=None, Pt={'units': 'psi'},\\n                                                 Ps={'units': 'psi'}))\\n        self.connect('turb.Fl_O:tot:P', 'noz_pr.Pt')\\n        self.connect('fc.Ps', 'noz_pr.Ps')\\n        self.connect('noz_pr.PR', 'noz.PR')\\n\\n        # net thrust residual: Fg - ram drag - target\\n        self.add_subsystem('net', om.ExecComp(\\n            'resid = Fg - W*V/g - Fn_target',\\n            Fg={'units': 'lbf'}, W={'units': 'lbm/s'}, V={'units': 'ft/s'},\\n            Fn_target={'units': 'lbf'}, resid={'units': 'lbf'}, g=32.174))\\n        self.connect('noz.Fg', 'net.Fg')\\n        self.connect('fc.Fl_I:W', 'net.W')\\n        self.connect('fc.V', 'net.V')\\n\\n        # balance connections\\n        self.connect('bal.W', 'fc.Fl_I:W')\\n        self.connect('bal.PR_turb', 'turb.PR')\\n        self.connect('net.resid', 'bal.W_resid')\\n        self.connect('pwr_out', 'bal.PR_turb_resid')\\n\\n        # design inputs\\n        self.set_input_defaults('fc.alt', 0.0, units='ft')\\n        self.set_input_defaults('fc.MN', 0.01)\\n        self.set_input_defaults('inlet.MN', 0.5)\\n        self.set_input_defaults('comp.PR', 11.0)\\n        self.set_input_defaults('comp.eff', 0.90)\\n        self.set_input_defaults('comp.MN', 0.5)\\n        self.set_input_defaults('burn.Fl_O:tot:T', 2550.0, units='degR')\\n        self.set_input_defaults('burn.dPq', 0.95)\\n        self.set_input_defaults('burn.MN', 0.2)\\n        self.set_input_defaults('turb.eff', 0.90)\\n        self.set_input_defaults('turb.MN', 0.7)\\n        self.set_input_defaults('noz.MN', 1.0)\\n        self.set_input_defaults('net.Fn_target', 11000.0, units='lbf')\\n        self.set_input_defaults('Nmech', 120\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_w24zgxtj/solve.py\\\", line 7, in <module>\\n    class Turbojet(pyc.Group):\\n                   ^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Group'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 562.799,
+    "setup_s": 0.0,
+    "grade_s": 1.086
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.09s"
+  ]
+}

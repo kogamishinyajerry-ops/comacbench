@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_design_fn14p5k_t2850_opr125",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "sandbox_escape_attempt"
+  ],
+  "failure_mode": "sandbox_escape_attempt",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport importlib\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# map data lives in different places depending on install layout\\ndef _try_import(modnames, attr):\\n    for m in modnames:\\n        try:\\n            mod = importlib.import_module(m)\\n            return getattr(mod, attr)\\n        except Exception:\\n            continue\\n    raise ImportError(f\\\"cannot find {attr}\\\")\\n\\nAXI5 = _try_import(\\n    ['pycycle.compressor_data', 'pycycle.elements.compressor_data', 'pycycle.data.compressor_data'],\\n    'AXI5')\\nLPT2269 = _try_import(\\n    ['pycycle.turbine_data', 'pycycle.elements.turbine_data', 'pycycle.data.turbine_data'],\\n    'LPT2269')\\n\\n\\nclass Turbojet(pyc.Cycle):\\n\\n    def setup(self):\\n        thermo_method = 'TABULAR'\\n        thermo_data = pyc.AIR_JETA_TAB_SPEC\\n        self.options['thermo_method'] = thermo_method\\n        self.options['thermo_data'] = thermo_data\\n\\n        self.add_subsystem('fc', pyc.FlightConditions(thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('comp', pyc.Compressor(thermo_method=thermo_method,\\n                                                  thermo_data=thermo_data,\\n                                                  map_extrap=True,\\n                                                  map_data=AXI5))\\n        self.add_subsystem('comb', pyc.Combustor(thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('turb', pyc.Turbine(thermo_method=thermo_method,\\n                                               thermo_data=thermo_data,\\n                                               map_extrap=True,\\n                                               map_data=LPT2269))\\n        self.add_subsystem('nozz', pyc.Nozzle(thermo_method=thermo_method, thermo_data=thermo_data,\\n                                              loss_coefs={'TN': 0.99}))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I')\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'comb.Fl_I')\\n        self.pyc_connect_flow('comb.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'nozz.Fl_I')\\n\\n        self.connect('shaft.Nmech', ['comp.Nmech', 'turb.Nmech'])\\n        self.connect('comp.trq', 'shaft.trq_1')\\n        self.connect('turb.trq', 'shaft.trq_2')\\n\\n        self.connect('fc.Fl_O:stat:P', 'nozz.Ps_exhaust')\\n\\n        self.add_subsystem('perf', pyc.Performance())\\n        self.connect('inlet.Fl_O:stat:W', 'perf.W')\\n        self.connect('comb.Wfuel', 'perf.Wfuel')\\n        self.connect('nozz.Fg', 'perf.Fg')\\n        self.connect('fc.Fl_O:stat:V', 'perf.V')\\n\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        self.add_subsystem('eng', Turbojet())\\n\\n        bal = self.add_subsystem('bal', om.BalanceComp())\\n        bal.add_balance('W', units='lbm/s', eq_val=14500.0, lhs_name='Fg', val=100.0)\\n        bal.add_balance('FAR', eq_val=2850.0, units='degR', lhs_name='T4', val=0.02)\\n        bal.add_balance('Nmech', units='rpm', eq_val=0.0, lhs_name='trq_net', val=12000.0)\\n\\n        self.connect('bal.W', 'eng.fc.W')\\n        self.connect('eng.nozz.Fg', 'bal.Fg')\\n        self.connect('bal.FAR', 'eng.comb.FAR')\\n        self.connect('eng.comb.Fl_O:tot:T', 'bal.T4')\\n        self.connect('bal.Nmech', 'eng.shaft.Nmech')\\n        self.connect('eng.shaft.trq_net', 'bal.trq_net')\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['atol'] = 1e-7\\n        newton.options['rtol'] = 1e-9\\n        newton.options['maxiter'] = 60\\n        newton.options['iprint'] = 0\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef main():\\n    p = om.Problem(model=TurbojetDesign())\\n    p.setup()\\n\\n    p.set_val('eng.fc.alt', 0.0, units='ft')\\n    p.set_val('eng.fc.MN', 0.000001)\\n    p.set_val('eng.inlet.ram_recovery', 0.98)\\n    p.set_val('eng.comp.PR'\"",
+    "iteration": "{\"rounds_used\": 2, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 483.277,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=['banned_import:importlib']",
+    "syntax_ok=True"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn16k_t2350_opr155",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nFn_target = 16000.0   # lbf\\nT4_target = 2350.0    # degR\\nOPR_target = 15.5\\n\\n\\nclass Turbojet(om.Group):\\n    def setup(self):\\n        # Design point conditions: sea level static\\n        self.set_input_defaults('fc.W', val=250.0, units='lbm/s')\\n        self.add_subsystem('fc', pyc.FlightCondition(MN=1e-4, alt=0.0))\\n\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor())     # default compressor map\\n        self.add_subsystem('comb', pyc.Combustor())      # AIR_JETA_TAB_SPEC fuel (default)\\n        self.add_subsystem('turb', pyc.Turbine())        # default map = LPT2269\\n        self.add_subsystem('noz', pyc.Nozzle(nozzle_type='CD'))\\n\\n        # Net thrust: Fg - ram drag (ram drag ~ 0 at MN ~ 0)\\n        self.add_subsystem('fn_calc', om.ExecComp(\\n            'Fn = Fg - W*V/gc',\\n            Fn={'units': 'lbf'}, Fg={'units': 'lbf'},\\n            W={'units': 'lbm/s'}, V={'units': 'ft/s'},\\n            gc={'units': 'lbf*s**2/(lbm*ft)'}))\\n        self.set_input_defaults('fn_calc.gc', val=32.174)\\n\\n        # Net torque on shaft (turbine provides, compressor consumes)\\n        self.add_subsystem('trq_calc', om.ExecComp(\\n            'trq_net = trq_comp + trq_turb', trq_net={'units': 'ft*lbf'},\\n            trq_comp={'units': 'ft*lbf'}, trq_turb={'units': 'ft*lbf'}))\\n\\n        # Design balances: Wfuel -> T4, nozzle area -> Fn, Nmech -> shaft torque balance\\n        bal = om.BalanceComp()\\n        bal.add_balance('Wfuel', units='lbm/s', eq_name='T4_resid',\\n                        lhs_name='T4', rhs_val=T4_target, lower=1e-3, ref=1.0)\\n        bal.add_balance('area_nozzle', units='inch**2', eq_name='Fn_resid',\\n                        lhs_name='Fn', rhs_val=Fn_target, lower=1.0, ref=100.0)\\n        bal.add_balance('Nmech', units='rpm', eq_name='trq_resid',\\n                        lhs_name='trq_net', rhs_val=0.0, lower=500., upper=60000., ref=1000.0)\\n        self.add_subsystem('bal', bal)\\n\\n        # Design intent\\n        self.set_input_defaults('comp.PR', val=OPR_target)\\n        self.set_input_defaults('turb.PR', val=0.42)\\n\\n        # Connections\\n        self.connect('fc.Ps', 'inlet.Ps')\\n        self.connect('fc.MN', 'inlet.MN')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'comb.Fl_I')\\n        self.connect('bal.Wfuel', 'comb.Wfuel')\\n        self.connect('comb.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n        self.connect('bal.area_nozzle', 'noz.area_nozzle')\\n        self.connect('bal.Nmech', 'comp.Nmech')\\n        self.connect('bal.Nmech', 'turb.Nmech')\\n\\n        self.connect('comb.Fl_O:tot:T', 'bal.T4')\\n        self.connect('comp.trq', 'trq_calc.trq_comp')\\n        self.connect('turb.trq', 'trq_calc.trq_turb')\\n        self.connect('trq_calc.trq_net', 'bal.trq_net')\\n\\n        self.connect('noz.Fg', 'fn_calc.Fg')\\n        self.connect('inlet.Fl_O:stat:W', 'fn_calc.W')\\n        self.connect('fc.V', 'fn_calc.V')\\n        self.connect('fn_calc.Fn', 'bal.Fn')\\n\\n        # Solver\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=False)\\n        newton.maxiter = 300\\n        newton.atol = 1e-7\\n        newton.rtol = 1e-9\\n        newton.line_search = om.BoundsEnforceLS()\\n        self.linear_solver = om.DirectSolver()\\n\\n\\nprob = om.Problem(model=Turbojet())\\nprob.setup(force_alloc_complex=False)\\n\\n# Initial guesses\\nprob.set_val('bal.Wfuel', 4.0, units='lbm/s')\\nprob.set_val('bal.area_nozzle', 500.0, units='inch**2')\\nprob.set_val('bal.Nmech', 8000.0, units='rpm')\\n\\nprob.set_solver_print(level=0)\\nprob.run_model()\\nprob.model.nonlinear_solver._iter_count = 0\\nprob.run_model()\\n\\nFn = float(np.squeeze(prob.get_val('fn_calc.Fn', units='lbf')))\\nWfuel = float(np.squeeze(prob.get_val('bal.Wfuel', units='lbm/s')))\\nOPR = float(np.squeeze(prob.get_val('comp.Fl_O:tot:P', units='psia')) /\\n            np.squeeze(prob.get_val('comp.Fl_I:tot:P', units='psia')))\\nTSFC = Wfuel * 3600.0 / Fn  # \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_g2jxroks/solve.py\\\", line 16, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(MN=1e-4, alt=0.0))\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 576.117,
+    "setup_s": 0.0,
+    "grade_s": 1.02
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Group):\\n\\n    def setup(self):\\n        design = self.add_subsystem('design', om.Group(), promotes=['*'])\\n\\n        design.add_subsystem('fc', pyc.FlightConditions(thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                             promotes_inputs=['MN', 'alt'])\\n        design.add_subsystem('inlet', pyc.Inlet(thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                             promotes_inputs=['Ps_out', 'Ts_out', 'Ram_P', 'Ram_T'])\\n        design.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                             promotes_inputs=['eff', 'PR'])\\n        design.add_subsystem('burner', pyc.Combustor(thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                             promotes_inputs=['Tt4', 'burner:dPqQ', 'mach', 'far_burn'])\\n        design.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                             promotes_inputs=['eff'])\\n        design.add_subsystem('nozz', pyc.Nozzle(nozzle_type='CD', thermo_data=pyc.AIR_JETA_TAB_SPEC),\\n                             promotes_inputs=['Noz:Throat:PqP', 'nozzle_exit:PqPs', 'loss_coefs'])\\n\\n        design.add_subsystem('shaft', pyc.Shaft(num_elements=1))\\n\\n        # connect the flow stations\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I')\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'burner.Fl_I')\\n        self.pyc_connect_flow('burner.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # make the shaft connections\\n        self.connect('comp.trq', 'shaft.trq_0')\\n        self.connect('turb.trq', 'shaft.trq_1')\\n        self.connect('shaft.Nmech', ['comp.Nmech', 'turb.Nmech'])\\n\\n        # setup the design balances:\\n        #  W      : balance nozzle throat area to the target size\\n        #  Nmech  : balance the net torque on the shaft to 0\\n        #  Fg     : balance gross thrust to the target value\\n        balance = self.add_subsystem('balance', om.BalanceComp())\\n\\n        balance.add_balance('W', val=100., units='lbm/s', eq_units='inch**2', rhs_val=150.)\\n        balance.add_balance('Nmech', val=10000., units='rpm', eq_units='ft*lbf', rhs_val=0.)\\n        balance.add_balance('Fg', val=10000., units='lbf', eq_units='inch**2', rhs_val=15000.)\\n\\n        self.connect('balance.W', 'inlet.Fl_I:tot:W')\\n        self.connect('nozz.Throat:stat:area', 'balance.lhs:W')\\n\\n        self.connect('shaft.trq_net', 'balance.lhs:Nmech')\\n\\n        self.connect('nozz.Fg', 'balance.lhs:Fg')\\n        self.connect('balance.Fg', 'nozz.exit:stat:area')\\n\\n        # default design point conditions\\n        self.set_input_defaults('alt', 0.0, units='ft')\\n        self.set_input_defaults('MN', 0.0)\\n        self.set_input_defaults('Ps_out', 14.696, units='psi')\\n        self.set_input_defaults('Ts_out', 518.67, units='degR')\\n        self.set_input_defaults('Ram_P', 1.0)\\n        self.set_input_defaults('Ram_T', 1.0)\\n        self.set_input_defaults('comp.PR', 15.0)\\n        self.set_input_defaults('comp.eff', 0.9)  # not default\\n        self.set_input_defaults('Tt4', 2800.0, units='degR')\\n        self.set_input_defaults('burner:dPqQ', 0.03)\\n        self.set_input_defaults('turb.eff', 0.9)\\n        self.set_input_defaults('Noz:Throat:PqP', 0.99)\\n        self.set_input_defaults('nozzle_exit:PqPs', 1.0)\\n        self.set_input_defaults('loss_coefs', np.array([0.0, 0.0, 0.0]))\\n        self.set_input_defaults('burner.mach', 0.1)\\n        self.set_input_defaults('far_burn', 0.0)\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['atol'] = 1e-8\\n        newton.options['rtol'] = 1e-8\\n        newton.options['iprint'] = 0\\n        newton.options['maxiter'] = 25\\n        newton.options['err_on_non_converge'] = True\\n        newton.linesearch = om.BoundsEnforceLS()\\n        newton.linesearch.options['print_bound_enforce'] \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_x7iqpfsy/solve.py\\\", line 7, in <module>\\n    class Turbojet(pyc.Group):\\n                   ^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Group'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 545.888,
+    "setup_s": 0.0,
+    "grade_s": 1.07
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.07s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14p5k_t2850_opr125",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(om.Group):\\n    def initialize(self):\\n        self.options.declare('thermo_data', default=pyc.AIR_JETA_TAB_SPEC)\\n        self.options.declare('design', default=True)\\n\\n    def setup(self):\\n        self.add_subsystem('PERF', pyc.Performance(group_throttle=True), promotes_inputs=['throttle'])\\n        self.add_subsystem('Fc', pyc.FlightConditions())\\n        self.add_subsystem('Inlet', pyc.Inlet())\\n        self.add_subsystem('Comp', pyc.Compressor(map_extrap=True, map_data=pyc.AXI5))\\n        self.add_subsystem('Comb', pyc.Combustor())\\n        self.add_subsystem('Turb', pyc.Turbine(map_extrap=True, map_data=pyc.LPT2269))\\n        self.add_subsystem('Nozz', pyc.Nozzle(nozzType='CD', lossCoef='CV'))\\n        self.add_subsystem('Shaft', pyc.Shaft(num_ports=2))\\n\\n        self.connect('Fc.stds.STAT', ['Inlet.Fl_O', 'Nozz.Fl_I'])\\n        self.connect('Fc.stds.TOTAL', 'Inlet.Fl_I')\\n\\n        self.connect('Inlet.Fl_O', 'Comp.Fl_I')\\n        self.connect('Comp.Fl_O', 'Comb.Fl_I')\\n        self.connect('Comp.shaft_LD', 'Shaft.pwr_in')\\n        self.connect('Comb.Fl_O', 'Turb.Fl_I')\\n        self.connect('Turb.Fl_O', 'Nozz.Fl_I')\\n        self.connect('Turb.shaft_LRx', 'Shaft.pwr_out')\\n        self.connect('Shaft.pwr_out_net', 'PERF.thrust_net')\\n\\n        self.connect('Inlet.Fl_O:stat:W', 'PERF.W_fuel')\\n        self.connect('Comb.Fl_O', 'PERF.FL_O')\\n        self.connect('Comb.Fl_I', 'PERF.FL_I')\\n        self.connect('Nozz.Fl_O:stat:area', 'PERF.exit_area')\\n\\n        balance = om.BalanceComp()\\n        self.add_subsystem('balance', balance, promotes=['*'])\\n\\n    def solve_design(self, p):\\n        newton = p.model.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['maxiter'] = 50\\n        newton.options['iprint'] = 0\\n        newton.options['atol'] = 1e-10\\n        newton.options['rtol'] = 1e-10\\n        p.model.linear_solver = om.DirectSolver()\\n\\n        p.set_val('balance.Fn', 14500.0, units='lbf')\\n        p.model.add_design_var('Comp.eff')\\n        p.set_val('balance.Fn_target', 14500.0, units='lbf')\\n\\n\\ndef main():\\n    p = om.Problem()\\n\\n    design = Turbojet()\\n    p.model.add_subsystem('design', design, promotes=['*'])\\n\\n    # balance vars\\n    # Set up Newton on a wrapper with balances\\n    # Instead of custom BalanceComp setup, use pycycle-style design solving with balance\\n    p.model.add_subsystem('bal_W', om.BalanceComp(name='W', units='lbm/s',\\n                                                  eq_name='Fn_residual', rhs_name='Fn_target',\\n                                                  lhs_name='Fn_calc', use_mult=False),\\n                          promotes=['*'])\\n\\n    # Set OPR and T4 with balances\\n    p.model.add_subsystem('bal_T4', om.BalanceComp(name='T4', units='degR',\\n                                                   eq_name='T4_residual', rhs_name='T4_target',\\n                                                   lhs_name='T4_calc', use_mult=False),\\n                          promotes=['*'])\\n\\n    p.model.add_subsystem('bal_OPR', om.BalanceComp(name='OPR', units=None,\\n                                                    eq_name='OPR_residual', rhs_name='OPR_target',\\n                                                    lhs_name='OPR_calc', use_mult=False),\\n                          promotes=['*'])\\n\\n    # connect balances\\n    p.model.connect('W', ['Inlet.Fl_I:stat:W', 'Fc.Fl_I:stat:W'])\\n    p.model.connect('T4', 'Comb.Tt_4')\\n    p.model.connect('OPR', 'Comp.PR')\\n    p.model.connect('PERF.thrust_net', 'Fn_calc')\\n    p.model.connect('Comb.Fl_O:tot:T', 'T4_calc')\\n    p.model.connect('Comp.Fl_O:tot:P', 'OPR_calc:P_out')\\n    p.model.connect('Comp.Fl_I:tot:P', 'OPR_calc:P_in')\\n\\n    # OPR division component\\n    p.model.add_subsystem('opr_div', om.ExecComp(['OPR_calc=P_out/P_in']), promotes=['*'])\\n\\n    # solve the linear connections\\n    p.model.connect('Nozz.Fl_O:stat:W', 'PERF.W_fuel', src_indices=[0])\\n    # Fix W_fuel hookup: PERF.W_fuel sho\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"yDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/components/balance_comp.py\\\", line 145, in __init__\\n    self.add_balance(name, eq_units, lhs_name, rhs_name, rhs_val,\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/components/balance_comp.py\\\", line 322, in add_balance\\n    meta = self.add_output(name, **options['kwargs'])\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/implicitcomponent.py\\\", line 375, in add_output\\n    metadata = super().add_output(name, val, **kwargs)\\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nTypeError: Component.add_output() got an unexpected keyword argument 'eq_name'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 470.493,
+    "setup_s": 0.0,
+    "grade_s": 1.106
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.1s"
+  ]
+}

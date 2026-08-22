@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nthermo_data = pyc.AIR_JETA_TAB_SPEC\\n\\nP = om.Problem()\\nmodel = P.model\\n\\nmodel.add_subsystem('fc', pyc.FlightConditions(thermo_data=thermo_data), promotes=['*'])\\nmodel.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo_data), promotes=['*'])\\nmodel.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=thermo_data,\\n                                           map_extrap=True), promotes=['*'])\\nmodel.add_subsystem('burner', pyc.Combustor(thermo_data=thermo_data), promotes=['*'])\\nmodel.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=thermo_data), promotes=['*'])\\nmodel.add_subsystem('nozz', pyc.Nozzle(thermo_data=thermo_data, lossCoef=0.02), promotes=['*'])\\nmodel.add_subsystem('shaft', pyc.Shaft(num_ports=2), promotes=['*'])\\nmodel.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_burners=1), promotes=['*'])\\n\\n# Flow path\\nmodel.connect('fc.Fl_O', 'inlet.Fl_I')\\nmodel.connect('inlet.Fl_O', 'comp.Fl_I')\\nmodel.connect('comp.Fl_O', 'burner.Fl_I')\\nmodel.connect('burner.Fl_O', 'turb.Fl_I')\\nmodel.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n# Shaft\\nmodel.connect('turb.trq', 'shaft.trq_0')\\nmodel.connect('comp.trq', 'shaft.trq_1')\\nmodel.connect('shaft.Nmech', 'comp.Nmech')\\nmodel.connect('shaft.Nmech', 'turb.Nmech')\\n\\n# Performance\\nmodel.connect('nozz.Fl_O', 'perf.Fl_I_1')\\nmodel.connect('inlet.Fl_O', 'perf.Fl_I_0')\\nmodel.connect('burner.Fl_I', 'perf.Fl_I_1burn')\\n\\n# Design: nozzle throat area set by turbine exit area\\nmodel.connect('turb.Fl_O:stat:area', 'nozz.Throat:stat:area')\\n\\n# Balances: W for Fn target, Wfuel for T4 target\\nbal = om.BalanceComp()\\nmodel.add_subsystem('bal', bal)\\nbal.add_balance('W', val=150.0, units='lbm/s')\\nbal.add_balance('Wfuel', val=3.0, units='lbm/s')\\nmodel.connect('bal.W', 'inlet.W')\\nmodel.connect('perf.Fn', 'bal.lhs:W')\\nmodel.connect('bal.Wfuel', 'burner.Wfuel')\\nmodel.connect('burner.Fl_O:tot:T', 'bal.lhs:Wfuel')\\n\\n# Solvers\\nnewton = model.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\nnewton.options['maxiter'] = 50\\nnewton.options['atol'] = 1e-8\\nnewton.options['rtol'] = 1e-8\\nnewton.options['iprint'] = 0\\nnewton.linesearch = om.BoundsEnforceLS()\\nmodel.linear_solver = om.DirectSolver()\\n\\nP.setup()\\n\\n# Design point conditions: SL static\\nP.set_val('fc.alt', 0.0, units='ft')\\nP.set_val('fc.MN', 0.001)\\nP.set_val('fc.dTs', 0.0, units='degR')\\n\\n# Targets\\nP.set_val('bal.rhs:W', 12000.0, units='lbf')\\nP.set_val('bal.rhs:Wfuel', 2450.0, units='degR')\\n\\n# Cycle settings\\nP.set_val('comp.PR', 14.0)          # compressor OPR\\nP.set_val('turb.PR', 3.7)           # turbine pressure ratio (design set point)\\nP.set_val('inlet.MN', 0.6)\\nP.set_val('comp.MN', 0.6)\\nP.set_val('burner.MN', 0.25)\\nP.set_val('turb.MN', 0.6)\\nP.set_val('burner.dPfrac', 0.03)\\n\\n# initial guesses (optional, ignore if inputs don't exist)\\nfor name, val, units in [('nozz.MN', 1.5, None), ('shaft.Nmech', 10000., 'rpm')]:\\n    try:\\n        if units is None:\\n            P.set_val(name, val)\\n        else:\\n            P.set_val(name, val, units=units)\\n    except Exception:\\n        pass\\n\\nP.run_model()\\n\\nFn = float(P.get_val('perf.Fn', units='lbf')[0])\\nTSFC = float(P.get_val('perf.TSFC', units='1/hr')[0])\\np3 = float(P.get_val('comp.Fl_O:tot:P', units='psia')[0])\\np2 = float(P.get_val('comp.Fl_I:tot:P', units='psia')[0])\\nOPR = p3 / p2\\nWf = float(P.get_val('burner.Wfuel', units='lbm/s')[0])\\nT4 = float(P.get_val('burner.Fl_O:tot:T', units='degR')[0])\\n\\nprint('Fn =', Fn, 'lbf')\\nprint('TSFC =', TSFC, '1/hr')\\nprint('OPR =', OPR)\\nprint('Wfuel =', Wf, 'lbm/s')\\nprint('T4 =', T4, 'degR')\\n\\nresult = {\\n    'Fn_lbf': Fn,\\n    'TSFC': TSFC,\\n    'OPR': OPR,\\n    'Wfuel_lbm_s': Wf,\\n}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"ne repeated 2 more times]\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/chem_eq.py\\\", line 344, in setup\\n    self.thermo = species_data.Properties(self.options['spec'],\\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/thermo/cea/species_data.py\\\", line 30, in __init__\\n    self.prod_data = self.thermo_data_module.products\\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'dict' object has no attribute 'products'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 442.46,
+    "setup_s": 0.0,
+    "grade_s": 1.01
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

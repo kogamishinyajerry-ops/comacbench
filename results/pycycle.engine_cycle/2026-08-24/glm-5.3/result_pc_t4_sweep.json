@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_t4_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n\\nclass Turbojet(pyc.Aircraft):  # not required; use plain Group\\n    pass\\n\\n\\ndef build_problem():\\n    prob = om.Problem()\\n\\n    prob.model.add_subsystem('fc', pyc.FlightConditions())\\n    prob.model.add_subsystem('inlet', pyc.Inlet())\\n    prob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.axi565_map))\\n    prob.model.add_subsystem('burner', pyc.Combustor())\\n    prob.model.add_subsystem('turb', pyc.Turbine(map_data=pyc.axi539_map))\\n    prob.model.add_subsystem('nozz', pyc.Nozzle())\\n    prob.model.add_subsystem('shaft', pyc.Shaft())\\n    prob.model.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_burners=1))\\n\\n    prob.model.connect('fc.Fl_O:stat:W', 'inlet.Fl_I:stat:W')\\n    prob.model.connect('fc.Fl_O:stat:rho', 'inlet.Fl_I:stat:rho')\\n    prob.model.connect('fc.Fl_O:stat:P', 'inlet.Fl_I:stat:P')\\n    prob.model.connect('fc.Fl_O:stat:T', 'inlet.Fl_I:stat:T')\\n    prob.model.connect('fc.Fl_O:tot:P', 'inlet.Fl_I:tot:P')\\n    prob.model.connect('fc.Fl_O:tot:T', 'inlet.Fl_I:tot:T')\\n    prob.model.connect('fc.Fl_O:tot:h', 'inlet.Fl_I:tot:h')\\n    prob.model.connect('fc.Fl_O:tot:S', 'inlet.Fl_I:tot:S')\\n\\n    prob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\n    prob.model.connect('comp.Fl_O', 'burner.Fl_I')\\n    prob.model.connect('burner.Fl_O', 'turb.Fl_I')\\n    prob.model.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n    prob.model.connect('burner.FAR', 'perf.FAR_burner')\\n    prob.model.connect('inlet.Fl_O:stat:area', 'perf.capture_area')\\n    prob.model.connect('nozz.Fl_O:stat:area', 'perf.exit_area')\\n    prob.model.connect('nozz.Fg', 'perf.Fg_0')\\n\\n    prob.model.connect('shaft.trq_net', 'perf.ram_drag_scale')  # placeholder, removed below\\n\\n    return prob\\n\\n\\ndef run_case(T4):\\n    prob = om.Problem()\\n\\n    prob.model.add_subsystem('fc', pyc.FlightConditions())\\n    prob.model.add_subsystem('inlet', pyc.Inlet())\\n    prob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.axi565_map))\\n    prob.model.add_subsystem('burner', pyc.Combustor())\\n    prob.model.add_subsystem('turb', pyc.Turbine(map_data=pyc.axi539_map))\\n    prob.model.add_subsystem('nozz', pyc.Nozzle())\\n    prob.model.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_burners=1))\\n\\n    # flow connections\\n    prob.model.connect('fc.Fl_O:stat:W', 'inlet.Fl_I:stat:W')\\n    prob.model.connect('fc.Fl_O:stat:rho', 'inlet.Fl_I:stat:rho')\\n    prob.model.connect('fc.Fl_O:stat:P', 'inlet.Fl_I:stat:P')\\n    prob.model.connect('fc.Fl_O:stat:T', 'inlet.Fl_I:stat:T')\\n    prob.model.connect('fc.Fl_O:tot:P', 'inlet.Fl_I:tot:P')\\n    prob.model.connect('fc.Fl_O:tot:T', 'inlet.Fl_I:tot:T')\\n    prob.model.connect('fc.Fl_O:tot:h', 'inlet.Fl_I:tot:h')\\n    prob.model.connect('fc.Fl_O:tot:S', 'inlet.Fl_I:tot:S')\\n    prob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\n    prob.model.connect('comp.Fl_O', 'burner.Fl_I')\\n    prob.model.connect('burner.Fl_O', 'turb.Fl_I')\\n    prob.model.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n    # performance connections\\n    prob.model.connect('burner.FAR', 'perf.FAR_burner')\\n    prob.model.connect('inlet.Fl_O:stat:area', 'perf.capture_area')\\n    prob.model.connect('nozz.Fl_O:stat:area', 'perf.exit_area')\\n    prob.model.connect('nozz.Fg', 'perf.Fg_0')\\n\\n    # shaft power balance\\n    prob.model.connect('comp.trq', 'turb.trq')\\n    # note sign handled via turb command\\n\\n    balance = om.BalanceComp()\\n    prob.model.add_subsystem('balance', balance)\\n\\n    prob.model.connect('fc.Fl_O:stat:W', 'perf.Freestream:stat:W')\\n\\n    prob.model.connect('perf.Fn', 'balance.lhs:x')\\n    prob.model.connect('balance.x', 'comp.PR_des')  # not ideal; use design off-design approach below\\n\\n    # Simple approach: run design point with given OPR and iterate on W to match Fn\\n    # Instead do explicit outer iteration on corrected flow / Mn.\\n    return prob\\n\\n\\ndef solve_t4(T4, Fn_target=12500.0, OPR=14.0):\\n    \\\"\\\"\\\"Iterate on inlet Mach number (via flight condition W) to hit Fn target.\\\"\\\"\\\"\\n    import scipy.optimize as sopt\\n\\n    def resid(x\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_sfxi5te6/solve.py\\\", line 7, in <module>\\n    class Turbojet(pyc.Aircraft):  # not required; use plain Group\\n                   ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Aircraft'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 502.523,
+    "setup_s": 0.0,
+    "grade_s": 1.095
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.09s"
+  ]
+}

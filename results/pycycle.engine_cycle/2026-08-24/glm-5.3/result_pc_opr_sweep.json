@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_opr_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\n\\ntry:\\n    import openmdao.api as om\\n    import pycycle.api as pyc\\n\\n    class Design(pyc.Cycle):\\n        def setup(self):\\n            super().setup()\\n            self.add_subsystem('fc', pyc.FlightCondition())\\n            self.add_subsystem('inlet', pyc.Inlet())\\n            self.add_subsystem('comp', pyc.Compressor())\\n            self.add_subsystem('burner', pyc.Burner())\\n            self.add_subsystem('turb', pyc.Turbine())\\n            self.add_subsystem('nozzl', pyc.Nozzle())\\n            self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n            pyc.connect_flow(self, 'fc.Fl_O', 'inlet.Fl_I', connect_w=False)\\n            pyc.connect_flow(self, 'inlet.Fl_O', 'comp.Fl_I')\\n            pyc.connect_flow(self, 'comp.Fl_O', 'burner.Fl_I')\\n            pyc.connect_flow(self, 'burner.Fl_O', 'turb.Fl_I')\\n            pyc.connect_flow(self, 'turb.Fl_O', 'nozzl.Fl_I')\\n\\n            self.connect('comp.trq', 'shaft.trq_0')\\n            self.connect('turb.trq', 'shaft.trq_1')\\n            self.connect('shaft.Nmech', 'comp.Nmech')\\n            self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n            self.set_input_defaults('fc.Mach', 0.0)\\n            self.set_input_defaults('fc.alt', 0.0, units='ft')\\n            self.set_input_defaults('inlet.ram_recovery', 1.0)\\n            self.set_input_defaults('comp.eff', 0.90)\\n            self.set_input_defaults('burner.Tt', 2450.0, units='degR')\\n            self.set_input_defaults('burner.dPqP', 0.05)\\n            self.set_input_defaults('turb.eff', 0.90)\\n            self.set_input_defaults('nozzl.area', 70.0, units='inch**2')\\n\\n    class Model(om.Group):\\n        def setup(self):\\n            self.add_subsystem('design', Design(design=True))\\n            bal_w = om.BalanceComp(name='W', eq_name='resid', lhs_name='Fn',\\n                                   rhs_val=12000.0, units='lbm/s',\\n                                   lhs_units='lbf', eq_units='lbf',\\n                                   lower=1.0, upper=1e4)\\n            self.add_subsystem('bal_w', bal_w)\\n            self.connect('design.nozzl.Fn', 'bal_w.Fn')\\n            self.connect('bal_w.W', 'design.inlet.Fl_I:tot:W')\\n\\n            bal_pr = om.BalanceComp(name='PR', eq_name='resid', lhs_name='tq',\\n                                    rhs_val=0.0, lhs_units='lbf*ft',\\n                                    eq_units='lbf*ft', lower=0.9, upper=20.0)\\n            self.add_subsystem('bal_pr', bal_pr)\\n            self.connect('design.shaft.net_trq', 'bal_pr.tq')\\n            self.connect('bal_pr.PR', 'design.turb.PR')\\n\\n    def run_pycycle(oprs):\\n        res = {}\\n        p = om.Problem(model=Model())\\n        p.model.nonlinear_solver = om.NewtonSolver(solve_subsystems=False)\\n        p.model.nonlinear_solver.options['maxiter'] = 40\\n        p.model.nonlinear_solver.options['iprint'] = 0\\n        p.model.nonlinear_solver.options['atol'] = 1e-6\\n        p.model.linear_solver = om.DirectSolver()\\n        p.setup(force_alloc_complex=False)\\n        p.set_val('bal_w.W', 150.0, units='lbm/s')\\n        p.set_val('bal_pr.PR', 4.0)\\n\\n        for opr in oprs:\\n            p.set_val('design.comp.PR', float(opr))\\n            p.run_model()\\n            Fn = float(p.get_val('design.nozzl.Fn', units='lbf')[0])\\n            W_in = float(p.get_val('design.burner.Fl_I:tot:W', units='lbm/s')[0])\\n            W_out = float(p.get_val('design.burner.Fl_O:tot:W', units='lbm/s')[0])\\n            fuel = W_out - W_in  # lbm/s\\n            tsfc = fuel * 3600.0 / Fn  # lbm/lbf/hr\\n            res[opr] = tsfc\\n        return res\\n\\n    opr_list = [11.0, 13.5, 16.0]\\n    tsfc_map = run_pycycle(opr_list)\\n\\nexcept Exception as e:\\n    # Fallback: first-principles choked turbojet cycle at SL static\\n    def fallback_tsfc(opr):\\n        g_c = 1.4\\n        g_t = 1.33\\n        R = 1716.0\\n        gc = 32.174\\n        J = 778.17\\n        cpa = 0.240\\n        cpt = 0.276\\n        eta_c = 0.90\\n        eta_t = 0.90\\n        dPb = 0.05\\n        LHV = 18402.0\\n        T0 = 518.67\\n        P0 = 14.696\\n        Tt4 = 24\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"tsfc_opr110\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.996347, \"got\": 0.003144472193605465, \"ref\": 0.8607954008876747}, \"tsfc_opr135\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.996501, \"got\": 0.002874762995451974, \"ref\": 0.8216111135117882}, \"tsfc_opr160\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.996593, \"got\": 0.00269640606248588, \"ref\": 0.7915389089503895}, \"dtsfc_dopr\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.99353, \"got\": -8.961322622391727e-05, \"ref\": -0.013851298387457215}}, \"physics_hits\": \"0/4\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 598.872,
+    "setup_s": 0.0,
+    "grade_s": 0.991
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 0.99s"
+  ]
+}

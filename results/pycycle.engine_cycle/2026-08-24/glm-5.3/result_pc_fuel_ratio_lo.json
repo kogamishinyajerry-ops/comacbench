@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_lo",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json, math\\n\\n# Simple SL turbojet on-design cycle model (sea level static, standard day)\\n# Fn target 11000 lbf, OPR 12.0, T4 = 2250 and 2550 degR\\n# Fuel ratio = Wfuel(2550)/Wfuel(2250)\\n\\ng = 32.174          # ft/s^2\\ngam = 1.4\\nR = 1716.0          # ft*lbf/(slug*R) -> use ft2/s2/R per unit mass\\ncp = gam * R / (gam - 1.0) / g / 778.16   # Btu/(lbm*R) ~ 0.240\\n\\nPa = 2116.22        # psf\\nTa = 518.67         # R\\nM0 = 0.0            # sea level static\\n\\neta_c = 0.90\\neta_t = 0.90\\neta_b = 0.99\\nLHV = 18400.0       # Btu/lbm\\n\\npi_inlet = 0.98     # ram/inlet total pressure recovery effect (at SLS ~ recovery)\\npi_b = 0.95         # burner total pressure ratio\\npi_n = 0.98         # nozzle total pressure ratio\\nOPR = 12.0\\nFn_target = 11000.0\\n\\ndef cycle(T4):\\n    # ram\\n    Pt2 = Pa * (1.0 + 0.5*(gam-1.0)*M0*M0)**(gam/(gam-1.0)) * pi_inlet\\n    Tt2 = Ta * (1.0 + 0.5*(gam-1.0)*M0*M0)\\n    # compressor\\n    Tt3 = Tt2 * (1.0 + ((OPR)**((gam-1.0)/gam) - 1.0)/eta_c)\\n    Pt3 = Pt2 * OPR\\n    # burner\\n    f = cp * (T4 - Tt3) / (eta_b * LHV)   # fuel/air\\n    Pt4 = Pt3 * pi_b\\n    # turbine: power balance (cp_air ~ cp_gas approx)\\n    dT_turb = (Tt3 - Tt2) / (1.0 + f)\\n    Tt5 = T4 - dT_turb\\n    # invert: Tt5/Tt4 = 1 - eta_t*(1 - PR_t^-(gam-1)/gam)\\n    x = 1.0 - (1.0 - Tt5 / Tt4) / eta_t\\n    PR_t = x ** (-gam / (gam - 1.0))\\n    Pt5 = Pt4 / PR_t\\n    # nozzle, fully expanded to ambient\\n    Pt7 = Pt5 * pi_n\\n    Tt7 = Tt5\\n    Me = math.sqrt(2.0/(gam-1.0) * ((Pt7/Pa)**((gam-1.0)/gam) - 1.0))\\n    Ts7 = Tt7 / (1.0 + 0.5*(gam-1.0)*Me*Me)\\n    a = math.sqrt(gam * R * Ts7)\\n    Ve = Me * a\\n    # thrust per unit air mass flow (SLS, no ram drag)\\n    Fn_per_W = (1.0 + f) * Ve / g          # lbf per (lbm/s)\\n    W_air = Fn_target / Fn_per_W           # lbm/s\\n    Wf = f * W_air\\n    return Wf, dict(Tt3=Tt3, f=f, Me=Me, Ve=Ve, W=W_air, TSFC=Wf/Fn_target*3600.0)\\n\\nWf_2250, info1 = cycle(2250.0)\\nWf_2550, info2 = cycle(2550.0)\\n\\nratio = Wf_2550 / Wf_2250\\n\\nresult = {\\n    \\\"Fn_lbf\\\": 11000.0,\\n    \\\"OPR\\\": 12.0,\\n    \\\"Wfuel_t4_2250_lbm_s\\\": Wf_2250,\\n    \\\"Wfuel_t4_2550_lbm_s\\\": Wf_2550,\\n    \\\"fuel_ratio_t2550_over_t2250\\\": ratio,\\n}\\n\\nwith open(\\\"result.json\\\", \\\"w\\\") as fp:\\n    json.dump(result, fp, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_fd8k3sen/solve.py\\\", line 57, in <module>\\n    Wf_2250, info1 = cycle(2250.0)\\n                     ^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_fd8k3sen/solve.py\\\", line 41, in cycle\\n    x = 1.0 - (1.0 - Tt5 / Tt4) / eta_t\\n                           ^^^\\nNameError: name 'Tt4' is not defined. Did you mean: 'T4'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 580.089,
+    "setup_s": 0.0,
+    "grade_s": 0.024
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.02s"
+  ]
+}

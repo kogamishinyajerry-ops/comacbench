@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_fn",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json, numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef run(fn=None, t4=None):\\n    p = pyc.MPCycle()\\n    p.pct_fan_bypass = 0.0\\n    # Design point\\n    design = p.p.design\\n    # OPR 13.5 via compressor pressure ratio\\n    p.p.design.splitter.BPR = 0.0\\n    p.p.design.compressor.PR = 13.5\\n\\n    # Set balances\\n    if fn is not None:\\n        p.p.design.balance.Fn_target = fn\\n    if t4 is not None:\\n        p.p.design.balance.T4_target = t4\\n\\n    p.setup()\\n    p.set_solver_debug(False)\\n    p.run_model()\\n    return {\\n        'Fn': p.get_val('design.perf.TSFC')[0],\\n        'T4': p.get_val('design.comp.Tt')[0],\\n    }\\n\\n\\n# Instead of relying on uncertain internal names, we build the standard\\n# pycycle example turbojet explicitly (from pycycle example: example_turbojet.py)\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor())\\n        self.add_subsystem('burner', pyc.Combustor())\\n        self.add_subsystem('turb', pxc := pyc.Turbine())\\n        self.add_subsystem('nozz', pyc.SupersonicNozzle())\\n        self.add_subsystem('shaft', pyc.Shaft())\\n        self.add_subsystem('perf', ppc := ppc)\\n\\n    def configure(self):\\n        pass\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"missing\": \"result.json\"}"
+  },
+  "timings": {
+    "agent_s": 503.498,
+    "setup_s": 0.0,
+    "grade_s": 1.075
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 1.07s"
+  ]
+}

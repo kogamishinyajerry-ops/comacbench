@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2700",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nfrom pycycle import map_data\\n\\nFN_TARGET = 11800.0   # lbf\\nT4_TARGET = 2700.0    # degR\\nOPR_TARGET = 13.5\\n\\nthermo = pyc.AIR_JETA_TAB_SPEC\\n\\n\\nclass DesignBalances(om.ImplicitComponent):\\n    \\\"\\\"\\\"Design-point balances: W (Fn), FAR (T4), Nmech (OPR), turb PR (torque).\\\"\\\"\\\"\\n\\n    def setup(self):\\n        self.add_input('Fn', units='lbf', val=FN_TARGET)\\n        self.add_input('T4', units='degR', val=T4_TARGET)\\n        self.add_input('OPR', val=OPR_TARGET)\\n        self.add_input('trq_net', units='lbf*ft', val=0.0)\\n\\n        self.add_output('W', val=170.0, units='lbm/s', lower=20., upper=2000.)\\n        self.add_output('FAR', val=0.025, lower=1e-4, upper=0.08)\\n        self.add_output('Nmech', val=15000.0, lower=1000., upper=60000.)\\n        self.add_output('turb_PR', val=4.0, lower=1.02, upper=20.)\\n\\n        self.declare_partials('*', '*', dependent=False)\\n        self.declare_partials('W', 'Fn', val=1.0)\\n        self.declare_partials('W', 'W')\\n        self.declare_partials('FAR', 'T4', val=1.0)\\n        self.declare_partials('FAR', 'FAR')\\n        self.declare_partials('Nmech', 'OPR', val=1.0)\\n        self.declare_partials('Nmech', 'Nmech')\\n        self.declare_partials('turb_PR', 'trq_net', val=1.0)\\n        self.declare_partials('turb_PR', 'turb_PR')\\n\\n    def apply_nonlinear(self, i, o, r):\\n        r['W'] = i['Fn'] - FN_TARGET\\n        r['FAR'] = i['T4'] - T4_TARGET\\n        r['Nmech'] = i['OPR'] - OPR_TARGET\\n        r['turb_PR'] = i['trq_net']\\n\\n    def linearize(self, i, o, J):\\n        J['W', 'W'] = -max(i['Fn'] / max(o['W'][0], 1e-3), 1.0)\\n        J['FAR', 'FAR'] = -3.0e4\\n        J['Nmech', 'Nmech'] = -2.0 * max(i['OPR'] / max(o['Nmech'][0], 1e-3), 1e-3)\\n        J['turb_PR', 'turb_PR'] = -5000.0\\n\\n\\nclass Turbojet(om.Group):\\n\\n    def setup(self):\\n        self.add_subsystem('flow_start', pyc.FlowStart(thermo_data=thermo))\\n        self.add_subsystem('fc', pyc.FlightConditions(thermo_data=thermo))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo))\\n\\n        comp = self.add_subsystem('comp', pyc.Compressor(\\n            map_data=map_data.AXI5, thermo_data=thermo, design=True))\\n\\n        burner = self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo, design=True))\\n        turb = self.add_subsystem('turb', pyc.Turbine(\\n            map_data=map_data.LPT2269, thermo_data=thermo, design=True))\\n        nozz = self.add_subsystem('nozz', pyc.Nozzle(thermo_data=thermo, design=True))\\n\\n        shaft = self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n        perf = self.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_shafts=1))\\n\\n        self.add_subsystem('balance', DesignBalances())\\n\\n        # flow path connections\\n        self.connect('flow_start.Fl_O', 'fc.Fl_I')\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # shaft connections\\n        self.connect('turb.trq', 'shaft.trq_1')\\n        self.connect('shaft.trq_0', 'comp.trq')\\n        self.connect('balance.Nmech', 'shaft.Nmech')\\n\\n        # performance connections\\n        self.connect('inlet.Fl_O', 'perf.Fl_I_0')\\n        self.connect('nozz.Fl_O', 'perf.Fl_I_1')\\n        self.connect('perf.Fn', 'balance.Fn')\\n        self.connect('burner.Fl_O:tot:T', 'balance.T4')\\n        self.connect('shaft.trq_net', 'balance.trq_net')\\n\\n        # design balances\\n        self.connect('balance.W', 'flow_start.W')\\n        self.connect('balance.FAR', 'burner.FAR')\\n        self.connect('balance.Nmech', 'comp.Nmech')\\n        self.connect('balance.Nmech', 'turb.Nmech')\\n        self.connect('balance.turb_PR', 'turb.PR')\\n\\n        # compressor OPR output (name varies across versions)\\n        connected = False\\n        for out in ('comp.OPR', 'comp.PR'):\\n            try:\\n                self.connect(out, 'balance.OPR')\\n              \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_szpx9d8i/solve.py\\\", line 5, in <module>\\n    from pycycle import map_data\\nImportError: cannot import name 'map_data' from 'pycycle' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/__init__.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 568.992,
+    "setup_s": 0.0,
+    "grade_s": 1.062
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nFn_target = 14000.0  # lbf\\nT4_target = 2900.0   # degR\\nOPR_target = 16.0\\n\\ninterp_method = 'TABULAR'\\nthermo_data = pyc.AIR_JETA_TAB_SPEC\\n\\n\\nclass Turbojet(pyc.Element):\\n\\n    def setup(self):\\n        self.add_subsystem('inlet', pyc.Inlet(design=True), promotes=['*'])\\n        self.add_subsystem('comp', pyc.Compressor(design=True,\\n                                                  map_extrap=True,\\n                                                  map_data=pyc.AXI5), promotes=['*'])\\n        self.add_subsystem('burn', pyc.Combustor(design=True), promotes=['*'])\\n        self.add_subsystem('turb', pyc.Turbine(design=True,\\n                                               map_extrap=True,\\n                                               map_data=pyc.LPT2269), promotes=['*'])\\n        self.add_subsystem('noz', pyc.Nozzle(design=True, lossCoef=0.99), promotes=['*'])\\n        self.add_subsystem('shaft', pyc.Shaft(num_elements=2), promotes=['*'])\\n\\n        # flow connections\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'burn.Fl_I')\\n        self.pyc_connect_flow('burn.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'noz.Fl_I')\\n\\n        # shaft connections\\n        self.connect('turb.trq', 'shaft.trq_0')\\n        self.connect('comp.trq', 'shaft.trq_1')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # net thrust = gross thrust - ram drag\\n        self.add_subsystem('fn_calc',\\n                           om.ExecComp('Fn = FG - FRAM',\\n                                       FG={'units': 'lbf'},\\n                                       FRAM={'units': 'lbf'},\\n                                       Fn={'units': 'lbf'}))\\n        self.connect('noz.FG', 'fn_calc.FG')\\n        self.connect('inlet.FRAM', 'fn_calc.FRAM')\\n\\n        # balances:\\n        #   W        -> net thrust = Fn_target\\n        #   FAR      -> burner exit T = T4_target\\n        #   turb_PR  -> shaft net torque = 0\\n        bal = self.add_subsystem('bal', om.BalanceComp(), promotes=['*'])\\n        bal.add_balance('W', val=170.0, units='lbm/s', lower=1.0)\\n        bal.add_balance('FAR', val=0.02, lower=1e-4)\\n        bal.add_balance('turb_PR', val=4.0, lower=1.01)\\n\\n        self.connect('bal.W', 'inlet.W')\\n        self.connect('bal.FAR', 'burn.Fl_I:FAR')\\n        self.connect('bal.turb_PR', 'turb.PR')\\n\\n        self.connect('fn_calc.Fn', 'bal.lhs:W')\\n        self.connect('burn.Fl_O:tot:T', 'bal.lhs:FAR')\\n        self.connect('shaft.trq_net', 'bal.lhs:turb_PR')\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['maxiter'] = 200\\n        newton.options['atol'] = 1e-8\\n        newton.options['rtol'] = 1e-10\\n        newton.options['iprint'] = 2\\n        newton.options['err_on_non_converge'] = False\\n        newton.linesearch = om.BoundsEnforceLS()\\n        self.linear_solver = om.DirectSolver(assemble_jac=True)\\n\\n\\ndef build_and_run(W0, FAR0, PR0, Nmech):\\n    p = om.Problem(model=Turbojet(thermo_data=thermo_data, interp_method=interp_method))\\n    p.setup(force_alloc_complex=False, mode='fwd')\\n\\n    # sea-level static conditions (MN ~ 0)\\n    p.set_val('Fl_I:tot:P', 14.696, units='psi')\\n    p.set_val('Fl_I:tot:T', 518.67, units='degR')\\n    p.set_val('MN', 0.01)\\n    p.set_val('ram_recovery', 1.0)\\n\\n    p.set_val('comp.PR', OPR_target)\\n    p.set_val('comp.MN', 0.4)\\n    p.set_val('comp.eff_des', 0.9)\\n\\n    p.set_val('burn.dPqP', 0.05)\\n    p.set_val('burn.MN', 0.3)\\n\\n    p.set_val('turb.MN', 0.7)\\n    p.set_val('turb.eff_des', 0.9)\\n\\n    p.set_val('Throat:MN', 1.0)\\n\\n    p.set_val('shaft.Nmech', Nmech, units='rpm')\\n\\n    # balance targets\\n    p.set_val('rhs:W', Fn_target, units='lbf')\\n    p.set_val('rhs:FAR', T4_target, units='degR')\\n    p.set_val('rhs:turb_PR', 0.0)\\n\\n    # initial guesses\\n    p.set_val('bal.W', W0, units='lbm/s')\\n    p.set_val('bal.FAR', FAR0)\\n    p.set_va\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_f44_2znu/solve.py\\\", line 14, in <module>\\n    class Turbojet(pyc.Element):\\n                   ^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Element'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 471.793,
+    "setup_s": 0.0,
+    "grade_s": 1.133
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.13s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2500",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nFn_target = 11800.0  # lbf\\nT4_target = 2500.0   # degR\\nOPR_target = 13.5\\n\\n\\nclass Turbojet(om.Group):\\n    def setup(self):\\n        # --- balance variables ---\\n        bal = self.add_subsystem('balance', om.BalanceComp())\\n        bal.add_balance('W', units='lbm/s', val=130.0, lower=1.0, upper=1000.0)\\n        bal.add_balance('Wfuel', units='lbm/s', val=2.0, lower=1e-4, upper=20.0)\\n        bal.add_balance('PR_turb', val=0.35, lower=0.05, upper=1.5)\\n        bal.add_balance('area', units='inch**2', val=200.0, lower=5.0, upper=2000.0)\\n\\n        # --- cycle elements ---\\n        self.add_subsystem('fc', pyc.FlightCondition(),\\n                           promotes_inputs=['MN', 'alt'])\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\n        self.add_subsystem('comb', pyc.Combustor(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\n        self.add_subsystem('noz', pyc.Nozzle())\\n\\n        # --- residuals ---\\n        self.add_subsystem('fn_res', om.ExecComp(\\n            'res = Fn_net - Fn_target',\\n            Fn_net={'units': 'lbf'}, Fn_target={'units': 'lbf'},\\n            res={'units': 'lbf'}),\\n            promotes_inputs=['Fn_target'])\\n        self.add_subsystem('T4_res', om.ExecComp(\\n            'res = T4 - T4_target',\\n            T4={'units': 'degR'}, T4_target={'units': 'degR'},\\n            res={'units': 'degR'}),\\n            promotes_inputs=['T4_target'])\\n        self.add_subsystem('pwr_res', om.ExecComp(\\n            'res = Wi*(h3-h2) - Wo*(h4-h5)',\\n            Wi={'units': 'lbm/s'}, Wo={'units': 'lbm/s'},\\n            h2={'units': 'Btu/lbm'}, h3={'units': 'Btu/lbm'},\\n            h4={'units': 'Btu/lbm'}, h5={'units': 'Btu/lbm'},\\n            res={'units': 'Btu/s'}))\\n        self.add_subsystem('noz_res', om.ExecComp(\\n            'res = Ps - Pamb', Ps={'units': 'psi'}, Pamb={'units': 'psi'},\\n            res={'units': 'psi'}))\\n\\n        # --- flow connections ---\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'comb.Fl_I')\\n        self.connect('comb.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n        # --- balance actuations ---\\n        self.connect('balance.W', 'fc.W')\\n        self.connect('balance.Wfuel', 'comb.Wfuel')\\n        self.connect('balance.PR_turb', 'turb.PR')\\n        self.connect('balance.area', 'noz.area')\\n\\n        # --- residual wiring ---\\n        self.connect('inlet.ram_drag', 'fn_res.Fn_net')  # ram_drag is negative\\n        self.connect('noz.Fn', 'fn_res.Fn_net', src_indices=[0],\\n                     alias_aliases=None) if False else None\\n\\n        # net thrust computed explicitly\\n        self.add_subsystem('net_thrust', om.ExecComp(\\n            'Fn_net = Fn_gross + ram_drag',\\n            Fn_gross={'units': 'lbf'}, ram_drag={'units': 'lbf'},\\n            Fn_net={'units': 'lbf'}))\\n        self.connect('noz.Fn', 'net_thrust.Fn_gross')\\n        self.connect('inlet.ram_drag', 'net_thrust.ram_drag')\\n        self.connect('net_thrust.Fn_net', 'fn_res.Fn_net')\\n\\n        self.connect('comb.Fl_O:tot:T', 'T4_res.T4')\\n        self.connect('balance.W', 'pwr_res.Wi')\\n        self.connect('comp.Fl_I:W', 'pwr_res.Wi')\\n        self.connect('turb.Fl_I:W', 'pwr_res.Wo')\\n        self.connect('comp.Fl_I:tot:h', 'pwr_res.h2')\\n        self.connect('comp.Fl_O:tot:h', 'pwr_res.h3')\\n        self.connect('turb.Fl_I:tot:h', 'pwr_res.h4')\\n        self.connect('turb.Fl_O:tot:h', 'pwr_res.h5')\\n        self.connect('noz.Fl_O:stat:P', 'noz_res.Ps')\\n        self.connect('fc.Fl_O:stat:P', 'noz_res.Pamb')\\n\\n        self.connect('fn_res.res', 'balance.resid_W')\\n        self.connect('T4_res.res', 'balance.resid_Wfuel')\\n        self.connect('pwr_res.res', 'balance.resid_PR_turb')\\n        self.connect('noz_res.res', 'balance.resid_area')\\n\\n        # --- solvers ---\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"2/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4cs_oc6m/solve.py\\\", line 21, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(),\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 496.508,
+    "setup_s": 0.0,
+    "grade_s": 1.136
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.13s"
+  ]
+}

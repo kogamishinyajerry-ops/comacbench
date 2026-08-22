@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_repair_opr",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport pycycle.api as pyc\\nfrom pycycle import constants_figs as c_figs\\n\\nFUEL_NAME = 'Jet-A (RP-1 LHV)'\\n\\n# Function that builds the cycle and solves for a given opr\\ndef run_case(opr, fn_target=1000.0, t4_target=1500.0):\\n    p = pyc.Problem()\\n    p.model = pcp = pyc.MPCycle(fuel=FUEL_NAME)\\n    des = pcp.des_points\\n    des.pc_nozs.Fn_balance.balance.Fn_target = fn_target\\n\\n    pcp.design_flow_analysis(\\n        design_pts=[('takeoff', 0.8, 0.0, 1.0)],\\n        Ram={'drag': 0.0, 'loss': 0.0},\\n        Comp={'map_extrap': False, 'PR_des': opr},\\n        Comb={'burner_pressure_ratio': 0.97},\\n        Turb={'map_extrap': False},\\n        Nozz={'Cv': 1.0},\\n        Bld={},\\n    )\\n    pcp.takeoff.set_input_defaults('t4_target', t4_target, units='degK')\\n\\n    pcp.off_design('odMFP',\\n        ducts=[{'name': 'duct4', 'element': 'Duct'}],\\n        maps=pcp.map_comps,\\n        design=pcp.des_pts,\\n        ram=['ram0'],\\n        bal=[\\n            pyc.ElementBalance('Fn', pcp.fn_trbpts,\\n                pcp.mpc_nozzes, 'res_FN'),\\n            pyc.VarBalance('W', 'W', pcp.duct_Ws,\\n                'balance.W', 'set_W'),\\n            pyc.VarBalance('t4', 't4', pcp.turb_Tt4s,\\n                'balance.t4', 'set_t4'),\\n        ])\\n    pcp.odMFP.set_input_defaults('shaft.speeds.Nmech', 12000., units='rpm')\\n\\n    p.setup(check=False)\\n    p.set_val('DESIGN.takeoff.Fn_balance.balance.Fn_target', fn_target, units='lbf')\\n    p.set_val('DESIGN.takeoff.opr', opr)\\n    p.set_val('DESIGN.takeoff.t4_target', t4_target, units='degK')\\n    p.run_model()\\n    TSFC = p.get_val('DESIGN.takeoff.perf.TSFC', units='lb/(lbf*h)')[0]\\n    return TSFC\\n\\n# Standard opr values for this cycle family\\ncandidates = [15, 20, 25, 30, 35]\\nresults = {}\\nfor opr in candidates:\\n    try:\\n        TSFC = run_case(opr)\\n        results[opr] = TSFC\\n        print(opr, TSFC)\\n    except Exception as e:\\n        print(opr, 'failed', e)\\n\\ntarget = 0.77939\\nbest = min(results, key=lambda k: abs(results[k]-target))\\nprint('Best opr:', best, results[best])\\n\\nwith open('result.json', 'w') as f:\\n    json.dump({'corrupted_param': 'opr', 'restored_value': best}, f)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_cl59ef5z/solve.py\\\", line 4, in <module>\\n    from pycycle import constants_figs as c_figs\\nImportError: cannot import name 'constants_figs' from 'pycycle' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/__init__.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 389.257,
+    "setup_s": 0.0,
+    "grade_s": 1.083
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.08s"
+  ]
+}

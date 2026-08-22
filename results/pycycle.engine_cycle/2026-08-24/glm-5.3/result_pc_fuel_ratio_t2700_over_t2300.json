@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_fuel_ratio_t2700_over_t2300",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nT4 油耗比 (SL, Fn = 11800 lbf, OPR = 13.5)\\n\\nSea-level static design-point turbojet cycle calculation for T4 = 2300 R\\nand T4 = 2700 R.  For each T4 the air mass flow is scaled so that the net\\nthrust equals 11800 lbf (choked convergent nozzle, momentum + pressure\\nthrust).  The required fuel flow is then FAR * W_air, and the requested\\nratio Wfuel(2700)/Wfuel(2300) is written to result.json.\\n\\nMethod: classic station-by-station cycle analysis with component\\nefficiencies (1% solution is insensitive to the exact loss assumptions\\nbecause most of them cancel in the ratio).\\n\\\"\\\"\\\"\\n\\nimport json\\nimport math\\n\\n# ---------------------- constants / assumptions ----------------------\\nG      = 32.174          # ft/s^2\\nGC     = 32.174          # lbf/lbm conversion\\nJ      = 778.17          # ft*lbf per BTU\\nPA     = 14.696          # psia, sea level static\\nTA     = 518.67          # degR\\nGAMMA_A = 1.4            # air\\nCP_A    = 0.240          # BTU/lbm-R\\nGAMMA_G = 1.33           # combustion gas\\nCP_G    = 0.276          # BTU/lbm-R\\nR_G     = 53.35          # ft*lbf/lbm-R\\nLHV     = 18400.0        # BTU/lbm (jet-A)\\nETA_C   = 0.90           # compressor isentropic efficiency\\nETA_T   = 0.90           # turbine isentropic efficiency\\nETA_N   = 0.98           # nozzle efficiency\\nETA_B   = 0.99           # burner efficiency\\nPI_B    = 0.97           # burner total pressure ratio\\nOPR     = 13.5\\nFN_TGT  = 11800.0        # lbf\\n\\n\\ndef solve(T4):\\n    # --- compressor (SL static, ideal inlet) ---\\n    pt3 = PA * OPR\\n    T3  = TA * (1.0 + ((pt3 / PA) ** ((GAMMA_A - 1.0) / GAMMA_A) - 1.0) / ETA_C)\\n    wc  = CP_A * (T3 - TA)                        # BTU per lbm air\\n\\n    # --- combustor: FAR from heat balance ---\\n    far = (CP_G * T4 - CP_A * T3) / (ETA_B * LHV)\\n    pt4 = pt3 * PI_B\\n\\n    # --- turbine: match compressor work (flow = (1+FAR) lbm gas per lbm air) ---\\n    dt_turb = (wc / (1.0 + far)) / CP_G\\n    T5 = T4 - dt_turb\\n    # turbine efficiency -> pressure ratio\\n    x  = 1.0 - dt_turb / (ETA_T * T4)\\n    pt5 = pt4 * x ** (GAMMA_G / (GAMMA_G - 1.0))\\n\\n    # --- choked convergent nozzle ---\\n    tau_choked = 2.0 / (GAMMA_G + 1.0)\\n    T9  = pt5 * 0.0 + T5 * tau_choked\\n    dh  = CP_G * (T5 - T9) * ETA_N                # BTU/lbm\\n    V9  = math.sqrt(2.0 * G * J * dh)             # ft/s\\n    p9  = pt5 * tau_choked ** (GAMMA_G / (GAMMA_G - 1.0))\\n    rho9 = (p9 * 144.0) / (R_G * T9)              # lbm/ft^3\\n\\n    # thrust per lbm/s of airflow (momentum + pressure area term)\\n    fn_per_air = (1.0 + far) * (V9 / GC + (p9 - PA) * 144.0 / (rho9 * V9 * GC))\\n\\n    Wair  = FN_TGT / fn_per_air                    # lbm/s\\n    Wfuel = far * Wair\\n    return dict(T4=T4, T3=T3, pt3=pt3, FAR=far, T5=T5, pt5=pt5,\\n                V9=V9, p9=p9, Wair=Wair, Wfuel=Wfuel,\\n                TSFC=Wfuel * 3600.0 / FN_TGT)\\n\\n\\nr23 = solve(2300.0)\\nr27 = solve(2700.0)\\nratio = r27['Wfuel'] / r23['Wfuel']\\n\\nfor tag, r in (('T4=2300R', r23), ('T4=2700R', r27)):\\n    print(f\\\"{tag}: FAR={r['FAR']:.5f}  Wair={r['Wair']:.3f} lbm/s  \\\"\\n          f\\\"Wfuel={r['Wfuel']:.4f} lbm/s  TSFC={r['TSFC']:.4f} 1/hr\\\")\\n\\nprint(f\\\"fuel_ratio_t2700_over_t2300 = {ratio:.4f}\\\")\\n\\nwith open('result.json', 'w') as f:\\n    json.dump({'fuel_ratio_t2700_over_t2300': ratio,\\n               'Wfuel_T2300_lbm_s': r23['Wfuel'],\\n               'Wfuel_T2700_lbm_s': r27['Wfuel'],\\n               'Fn_target_lbf': FN_TGT, 'OPR': OPR}, f, indent=2)\\nprint(\\\"wrote result.json\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"fuel_ratio_t2700_over_t2300\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.019844, \"got\": 1.170732415537869, \"ref\": 1.1479525087950972}}, \"physics_hits\": \"0/1\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 586.404,
+    "setup_s": 0.0,
+    "grade_s": 0.06
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 0.06s"
+  ]
+}

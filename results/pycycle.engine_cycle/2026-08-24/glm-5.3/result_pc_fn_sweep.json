@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fn_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.MPCycle):\\n    def setup(self):\\n        super().setup()\\n        self.add_subsystem('fc', pyc.FlightCondition())\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor())\\n        self.add_subsystem('burner', pyc.Burner())\\n        self.add_subsystem('turb', pyc.Turbine())\\n        self.add_subsystem('noz', pyc.Nozzle())\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n        self.connect('fc.Ps', 'inlet.Ps')\\n        self.connect('fc.Ts', 'inlet.Ts')\\n        self.connect('fc.MN', 'inlet.MN')\\n        self.connect('fc.flow:this', 'inlet.flow:that')\\n\\n        self.connect('inlet.flow:out', 'comp.flow:in')\\n        self.connect('comp.flow:out', 'burner.flow:in')\\n        self.connect('burner.flow:out', 'turb.flow:in')\\n        self.connect('turb.flow:out', 'noz.flow:in')\\n\\n        self.connect('shaft.trq_out', 'comp.trq_in')\\n        self.connect('comp.trq_out', 'shaft.trq_0')\\n        self.connect('turb.trq_out', 'shaft.trq_1')\\n\\n        # balances\\n        self.connect('burner.flow:out:T', 'balance.rhs_T4')\\n        bal = om.BalanceComp()\\n        bal.add_balance('Wfuel', units='lbm/s', eq_units='degR',\\n                        val=10., rhs_val=2450.)\\n        self.add_subsystem('balance', bal, promotes=['*'])\\n\\n        # balance for thrust\\n        bal2 = om.BalanceComp()\\n        bal2.add_balance('FanSize', val=1., eq_units='lbf', rhs_name='Fn_target')\\n        self.add_subsystem('balance_Fn', bal2, promotes=['*'])\\n\\n        self.connect('Wfuel', 'burner.Wfuel')\\n        self.connect('FanSize', 'inlet.Fs')\\n        self.connect('inlet.Fn', 'balance_Fn.lhs:FanSize')\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['atol'] = 1e-6\\n        newton.options['rtol'] = 1e-9\\n        newton.options['maxiter'] = 30\\n        newton.options['iprint'] = 2\\n        self.linear_solver = om.DirectSolver()\\n\\n    def setup_partials(self):\\n        super().setup_partials()\\n        self.declare_partials('*', '*', method='fd')\\n\\n\\nclass DesignPoint(pyc.MPCycle):\\n    def setup(self):\\n        design = self.add_subsystem('design', Turbojet(), promotes=['*'])\\n\\n        self.pyc_add_pnt('DES', design)\\n\\n        self.set_input_defaults('fc.alt', 0., units='ft')\\n        self.set_input_defaults('fc.MN', 0.8)\\n\\n\\ndef run_case(fn_target):\\n    prob = om.Problem(model=DesignPoint())\\n    prob.setup()\\n    prob.set_val('fc.alt', 0., units='ft')\\n    prob.set_val('fc.MN', 0.8)\\n    prob.set_val('balance_T4.rhs_T4', 2450., units='degR')  # not used directly\\n    prob.set_val('balance.rhs_T4', 2450., units='degR')\\n    prob.set_val('Fn_target', fn_target, units='lbf')\\n    prob.set_val('balance_Fn.Fn_target', fn_target, units='lbf')\\n    prob.set_val('comp.PR', 13.5)\\n    prob.set_val('comp.eff', 0.89)\\n    prob.set_val('turb.eff', 0.9)\\n    prob.set_val('burner.dPqP', 0.03)\\n    prob.set_val('inlet.ram_recovery', 0.99)\\n    prob.set_val('noz.Cv', 0.99)\\n    prob.set_val('noz.ThroatMn', 1.0)\\n    prob['DES.comp.PR'] = 13.5\\n    prob['DES.balance.rhs_T4'] = 2450.\\n    prob['DES.balance_Fn.Fn_target'] = fn_target\\n    prob.set_solver_print(level=-1)\\n    prob.run_model()\\n    return float(prob['DES.balance.Wfuel'][0]), float(prob['DES.inlet.Fn'][0])\\n\\n\\nfns = [10500., 12000., 13500.]\\nwfuels = []\\nfor fn in fns:\\n    wf, fn_actual = run_case(fn)\\n    print(f\\\"Fn target {fn}: Wfuel = {wf:.6f} lbm/s (Fn actual {fn_actual:.1f})\\\")\\n    wfuels.append(wf)\\n\\nslope, intercept = np.polyfit(fns, wfuels, 1)\\n\\nresult = {\\n    'wfuel_fn10500': wfuels[0],\\n    'wfuel_fn12000': wfuels[1],\\n    'wfuel_fn13500': wfuels[2],\\n    'dwfuel_dfn': slope,\\n}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\nprint(result)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"00gp/T/bm_sandbox_snu0mftb/solve.py\\\", line 64, in setup\\n    self.pyc_add_pnt('DES', design)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/mp_cycle.py\\\", line 237, in pyc_add_pnt\\n    if pnt.options['design'] is True:\\n       ~~~~~~~~~~~^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 553, in __getitem__\\n    self._raise(f\\\"Option '{name}' has not been declared.\\\", exc_type=KeyError)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Turbojet: Option 'design' has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 697.244,
+    "setup_s": 0.0,
+    "grade_s": 1.056
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.06s"
+  ]
+}

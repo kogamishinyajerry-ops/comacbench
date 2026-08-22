@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2300",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        thermo = pyc.AIR_JETA_TAB_SPEC\\n\\n        # --- engine elements ---\\n        self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo))\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=thermo))\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=thermo))\\n        self.add_subsystem('nozz', pyc.Nozzle(nozzType='CD', thermo_data=thermo))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n\\n        # --- flow connections ---\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n        self.connect('fc.Ps', 'nozz.Ps')\\n\\n        # --- shaft connections ---\\n        self.connect('shaft.trq_1', 'comp.trq')\\n        self.connect('shaft.trq_2', 'turb.trq')\\n        self.connect('comp.Nmech', 'shaft.Nmech_1')\\n        self.connect('turb.Nmech', 'shaft.Nmech_2')\\n\\n        # --- design balances ---\\n        # 1) W <-> Fn target\\n        self.add_subsystem('W_bal', om.BalanceComp(\\n            name='W', val=165.0, units='lbm/s',\\n            lhs_name='Fn', rhs_name='Fn_target',\\n            eq_units='lbf', lower=1.0, upper=2000.0))\\n        self.connect('nozz.Fn', 'W_bal.Fn')\\n        self.connect('W_bal.W', 'fc.W')\\n\\n        # 2) FAR <-> T4 target\\n        self.add_subsystem('T4_bal', om.BalanceComp(\\n            name='FAR', val=0.02,\\n            lhs_name='T4', rhs_name='T4_target',\\n            eq_units='degR', lower=0.0, upper=0.09))\\n        self.connect('burner.Fl_O:tot:T', 'T4_bal.T4')\\n        self.connect('T4_bal.FAR', 'burner.FAR')\\n\\n        # --- solvers ---\\n        newton = self.nonlinear_solver = om.NewtonSolver(\\n            solve_subsystems=True, maxiter=100, atol=1e-7, rtol=1e-7, iprint=0)\\n        newton.linesearch = om.ArmijoGoldsteinLS()\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef main():\\n    p = om.Problem(model=Turbojet())\\n    p.setup(force_alloc_complex=False, derivatives=False)\\n\\n    # --- design point conditions: sea level static ---\\n    p.set_val('fc.altitude', 0.0, units='ft')\\n    p.set_val('fc.MN', 1e-8)\\n    p.set_val('W_bal.Fn_target', 11800.0, units='lbf')\\n    p.set_val('T4_bal.T4_target', 2300.0, units='degR')\\n\\n    # --- design inputs / initial guesses ---\\n    p.set_val('fc.W', 165.0, units='lbm/s')\\n    p.set_val('inlet.MN', 0.6)\\n    p.set_val('inlet.Ram', 1.0)\\n    p.set_val('comp.PR', 13.5)\\n    p.set_val('comp.Rline', 2.2)\\n    p.set_val('burner.dPqP', 0.03)\\n    p.set_val('turb.PR', 4.5)\\n    p.set_val('turb.eff', 0.90)\\n    p.set_val('burner.FAR', 0.02)\\n\\n    p.run_model()\\n\\n    Fn = float(p.get_val('nozz.Fn', units='lbf')[0])\\n    Wfuel = float(p.get_val('burner.Wfuel', units='lbm/s')[0])\\n    OPR = float(p.get_val('comp.PR')[0])\\n\\n    # TSFC [lbm/(lbf*hr)] = fuel flow / thrust\\n    TSFC = Wfuel * 3600.0 / Fn\\n    try:\\n        TSFC_py = float(p.get_val('nozz.TSFC', units='lbm/(lbf*h)')[0])\\n        if TSFC_py > 0:\\n            TSFC = TSFC_py\\n    except Exception:\\n        pass\\n\\n    T4 = float(p.get_val('burner.Fl_O:tot:T', units='degR')[0])\\n\\n    result = {\\n        'Fn_lbf': Fn,\\n        'TSFC': TSFC,\\n        'OPR': OPR,\\n        'Wfuel_lbm_s': Wfuel,\\n    }\\n\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=2)\\n\\n    print('T4 =', T4, 'degR (target 2300)')\\n    print('Fn =', Fn, 'lbf (target 11800)')\\n    print('OPR =', OPR)\\n    print('TSFC =', TSFC, 'lbm/(lbf*hr)')\\n    print('Wfuel =', Wfuel, 'lbm/s')\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"enmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_6wbfex29/solve.py\\\", line 12, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo))\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 687.31,
+    "setup_s": 0.0,
+    "grade_s": 1.014
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_fuel_ratio",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport json\\nimport math\\n\\n# ------------------------------------------------------------------\\n# Simple, self-contained single-spool turbojet design-point analysis\\n# (sea level, M0 = 0.8, OPR = 13.5, Fn = 11800 lbf) for two T4 values.\\n# English engineering units: T [degR], P [psf], h [BTU/lbm], cp [BTU/lbm-R]\\n# ------------------------------------------------------------------\\n\\nGC = 32.174          # ft-lbf/slug... lbm-ft/(lbf-s^2)\\nJ = 778.17           # ft-lbf per BTU\\nR = 0.06855          # BTU/(lbm-R) gas constant of air\\nLHV = 18402.0        # BTU/lbm Jet-A\\nETA_C = 0.83         # compressor isentropic efficiency\\nETA_T = 0.86         # turbine isentropic efficiency\\nETA_B = 1.0          # burner efficiency\\nDPQP_B = 0.03        # burner total pressure loss\\nRAM = 0.99           # inlet ram recovery\\nOPR = 13.5\\nM0 = 0.8\\nT0, P0 = 518.67, 2116.22\\nFN_TARGET = 11800.0  # lbf\\n\\n# air cp fit (BTU/lbm/R vs degR) through CEA/JANAF-ish values\\nA, B, C = 0.2273, 2.52e-5, -8.0e-10\\nDH_PER_FAR = 0.20    # products sensible-enthalpy enrichment per unit FAR\\n\\n\\ndef cp_air(T):\\n    return A + B * T + C * T * T\\n\\n\\ndef h_air(T):\\n    return A * T + 0.5 * B * T * T + C / 3.0 * T ** 3\\n\\n\\ndef s_air(T):\\n    return A * math.log(T) + B * T + 0.5 * C * T * T\\n\\n\\ndef h_gas(T, f):\\n    return h_air(T) + DH_PER_FAR * f * T\\n\\n\\ndef s_gas(T, f):\\n    return s_air(T) + DH_PER_FAR * f * math.log(T)\\n\\n\\ndef T_from_h(h, f, lo=200.0, hi=6000.0):\\n    for _ in range(200):\\n        mid = 0.5 * (lo + hi)\\n        if h_gas(mid, f) < h:\\n            lo = mid\\n        else:\\n            hi = mid\\n    return 0.5 * (lo + hi)\\n\\n\\ndef T_from_s(s_target, f, P, lo=200.0, hi=6000.0):\\n    # solves s_gas(T,f) - R*ln(P) = s_target  (R ln P constant in T)\\n    off = DH_PER_FAR * f  # folded into target via ln T term\\n    for _ in range(200):\\n        mid = 0.5 * (lo + hi)\\n        if s_air(mid) + off * math.log(mid) - R * math.log(P) < s_target:\\n            lo = mid\\n        else:\\n            hi = mid\\n    return 0.5 * (lo + hi)\\n\\n\\ndef solve_design(T4):\\n    # --- freestream / inlet ---\\n    Tt2 = T0 * (1.0 + 0.2 * M0 * M0)\\n    Pt2 = RAM * P0 * (1.0 + 0.2 * M0 * M0) ** 3.5\\n\\n    # --- compressor (isentropic exit via entropy match) ---\\n    s_t3s = s_air(Tt2) + R * math.log(OPR)\\n    T3s = T_from_s(s_t3s, 0.0, Pt2 * OPR)\\n    h3 = h_air(Tt2) + (h_air(T3s) - h_air(Tt2)) / ETA_C\\n    T3 = T_from_h(h3, 0.0)\\n    Pt3 = OPR * Pt2\\n\\n    # --- burner: iterate on FAR ---\\n    f = 0.02\\n    for _ in range(100):\\n        f_new = (h_gas(T4, f) - h_air(T3)) / (ETA_B * LHV)\\n        if abs(f_new - f) < 1e-10:\\n            f = f_new\\n            break\\n        f = f_new\\n    Pt4 = (1.0 - DPQP_B) * Pt3\\n\\n    # --- turbine: work balance with compressor, then PR from efficiency ---\\n    dh_c = h_air(T3) - h_air(Tt2)\\n    h4 = h_gas(T4, f)\\n    h5 = h4 - dh_c / (1.0 + f)\\n    T5 = T_from_h(h5, f)\\n    h5s = h4 - (h4 - h5) / ETA_T\\n    T5s = T_from_h(h5s, f)\\n    PR_t = math.exp((s_gas(T4, f) - s_gas(T5s, f)) / R)\\n    Pt5 = Pt4 / PR_t\\n\\n    # --- nozzle: ideal (fully expanded) con-di to ambient ---\\n    s5 = s_gas(T5, f) - R * math.log(Pt5)  # entropy level\\n    T9 = T_from_s(s5, f, P0, lo=300.0, hi=T5)\\n    h9 = h_gas(T9, f)\\n    dh_n = h5 - h9  # BTU/lbm of gas\\n    V9 = math.sqrt(2.0 * GC * J * dh_n)  # ft/s\\n    V0 = M0 * math.sqrt(1.4 * GC * 53.35 * T0)\\n\\n    ST\""
+  },
+  "timings": {
+    "agent_s": 674.587,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_opr_sweep_hi",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\n\\n# ---------------- ambient / constants (English units) ----------------\\nT1 = 518.67      # degR\\nP1 = 2116.22     # psf\\nG = 32.174       # ft/s^2\\nJC = 778.17      # ft*lbf per Btu\\nR_AIR = 0.06855  # Btu/lbm-R (air)\\nLHV = 18402.0    # Btu/lbm Jet-A\\n\\n# cp curve for air (Btu/lbm-R vs degR) fitted to table data\\n_T = np.array([300., 500., 1000., 1500., 2000., 2500., 3000.])\\n_CP = np.array([0.2392, 0.2402, 0.2504, 0.2643, 0.2776, 0.2884, 0.2966])\\n_CPFIT = np.polyfit(_T, _CP, 3)\\n\\ndef cp_air(T):\\n    return np.polyval(_CPFIT, T)\\n\\ndef cp_gas(T):\\n    # products of combustion: slightly higher cp\\n    return 1.03 * np.polyval(_CPFIT, T)\\n\\ndef h_air(T0, T1_):\\n    return np.polyval(np.polyint(_CPFIT), T1_) - np.polyval(np.polyint(_CPFIT), T0)\\n\\ndef h_gas(T0, T1_):\\n    return 1.03 * h_air(T0, T1_)\\n\\n# ---------------- component assumptions ----------------\\nETA_C = 0.90      # compressor isentropic efficiency\\nDP_B = 0.03       # burner total pressure loss fraction\\nETA_B = 0.99      # combustion efficiency\\nETA_T = 0.90      # turbine isentropic efficiency\\nETA_M = 0.99      # shaft mechanical efficiency\\nDP_N = 0.01       # nozzle total pressure loss\\nCV = 0.98         # nozzle velocity coefficient\\n\\n\\ndef solve_opr(opr):\\n    T2, P2 = T1, P1\\n    P3 = opr * P2\\n\\n    # compressor exit temperature\\n    T3 = T2 * opr ** 0.2857\\n    for _ in range(50):\\n        cpm = 0.5 * (cp_air(T2) + cp_air(T3))\\n        gam = cpm / (cpm - R_AIR)\\n        T3s = T2 * opr ** ((gam - 1.) / gam)\\n        T3n = T2 + (T3s - T2) / ETA_C\\n        if abs(T3n - T3) < 1e-8:\\n            T3 = T3n\\n            break\\n        T3 = T3n\\n    dh_c = h_air(T2, T3)   # Btu/lbm\\n\\n    # burner\\n    T4 = 2800.0\\n    P4 = (1. - DP_B) * P3\\n    far = h_air(T2, T4) / (ETA_B * LHV - h_gas(T2, T4))  # fuel-air ratio (approx, h_fuel small)\\n\\n    # turbine: match power (turbine flow ~ W*(1+f))\\n    dh_t = dh_c / ((1. + far) * ETA_M)\\n    cpg = cp_gas(T4)\\n    T5 = T4 - dh_t / cpg\\n    # isentropic exit for pressure\\n    h5s = h_gas(T2, T4) - dh_t / ETA_T\\n    T5s = T4 - (h5s - h_gas(T2, T4 - (h5s - h_gas(T2, T4))))  # placeholder refine below\\n    # solve T5s from enthalpy\\n    lo, hi = T2, T4\\n    for _ in range(80):\\n        T5s = 0.5 * (lo + hi)\\n        if h_gas(T2, T5s) > h5s:\\n            hi = T5s\\n        else:\\n            lo = T5s\\n    T5s = 0.5 * (lo + hi)\\n    gam_g = cpg / (cpg - R_AIR * 1.03)\\n    P5 = P4 * (T5s / T4) ** (gam_g / (gam_g - 1.))\\n\\n    # nozzle\\n    Ptn = (1. - DP_N) * P5\\n    # critical conditions\\n    Pcrit = Ptn * (2. / (gam_g + 1.)) ** (gam_g / (gam_g - 1.))\\n    if Pcrit > P1:  # choked convergent nozzle\\n        Pth = Pcrit\\n        h_th = h_gas(T2, T4) - (1. - CV ** 2) * h_gas(T2, T5) * 0  # unused\\n        # ideal isentropic drop to critical static\\n        Tth = T5 * (Pth / Ptn) ** ((gam_g - 1.) / gam_g)\\n        h_avail = h_gas(T2, T5) - h_gas(T2, Tth)\\n        V = CV * np.sqrt(2. * G * JC * h_avail)\\n        R_g = R_AIR * 1.03 * JC * G  # ft*lbf/lbm-R\\n        rho_th = Pth / (R_g * Tth)\\n    else:  # fully expanded\\n        Pth = P1\\n        Tth = T5 * (Pth / Ptn) ** ((gam_g - 1.) / gam_g)\\n        h_avail = h_gas(T2, T5) - h_gas(T2, Tth)\\n        V = CV * np.sqrt(2. * G * JC * h_avail)\\n        R_g = R_g = R_AIR * 1.03 * JC * G\\n        rho_th = Pth / (R_g * Tth)\\n\\n    def thrust_per_flow(wdot):  # wdot in lbm/s air\\n        wg = wdot * (1. + far)\\n        area = wg / (rho_th * V)\\n        Fg = wg * V / G + (Pth - P1) * area\\n        return Fg\\n\\n    # size airflow for Fn = 15000 lbf (SLS, Mn=0 -> no ram drag)\\n    w = 100.0\\n    for _ in range(100):\\n        F = thrust_per_flow(w)\\n        w *= 15000.0 / F\\n        if abs(thrust_per_flow(w) - 15000.) < 1e-6:\\n            break\\n    F = thrust_per_flow(w)\\n    tsfc = 3600.0 * far * w / F  # lbm/lbf-hr\\n    return tsfc\\n\\n\\noprs = [11.5, 14.0, 16.0]\\ntsfcs = [solve_opr(o) for o in oprs]\\n\\nslope = float(np.polyfit(np.array(oprs), np.array(tsfcs), 1)[0])\\n\\nresult = {\\n    \\\"tsfc_opr115\\\": float(tsfcs[0]),\\n    \\\"tsfc_opr140\\\": float(tsfcs[1]),\\n    \\\"tsfc_opr160\\\": fl\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"tsfc_opr115\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.88781, \"got\": 0.10717733743885427, \"ref\": 0.9553206157968405}, \"tsfc_opr140\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.887528, \"got\": 0.10295427137922404, \"ref\": 0.9153767926402447}, \"tsfc_opr160\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.886707, \"got\": 0.10082188595343163, \"ref\": 0.8899182847828568}, \"dtsfc_dopr\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.902442, \"got\": -0.0014236710716413832, \"ref\": -0.014593018464563836}}, \"physics_hits\": \"0/4\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 532.986,
+    "setup_s": 0.0,
+    "grade_s": 0.148
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 0.15s"
+  ]
+}

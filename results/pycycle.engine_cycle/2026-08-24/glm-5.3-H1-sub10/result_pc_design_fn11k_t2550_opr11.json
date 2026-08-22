@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn11k_t2550_opr11",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(om.Group):\\n    def setup(self):\\n        thermo = pyc.AIR_JETA_TAB_SPEC\\n\\n        self.add_subsystem('fc', pyc.FlightConditions(),\\n                           promotes_inputs=['MN', 'alt'])\\n\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo),\\n                           promotes_inputs=['W', 'dPqP'])\\n\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, map_extrap=True,\\n                                                  thermo_data=thermo),\\n                           promotes_inputs=['Nmech'])\\n\\n        self.add_subsystem('comb', pyc.Combustor(thermo_data=thermo, use_thermo=True),\\n                           promotes_inputs=['FAR', 'dPqP'])\\n\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, map_extrap=True,\\n                                              thermo_data=thermo),\\n                           promotes_inputs=['Nmech'])\\n\\n        self.add_subsystem('noz', pyc.Nozzle(nozzType='CD', lossCoef='Cv',\\n                                             thermo_data=thermo),\\n                           promotes_inputs=['Cv'])\\n\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2),\\n                           promotes_inputs=['Nmech'])\\n\\n        # flow path connections\\n        self.connect('fc.Fl_O:tot', 'inlet.Fl_I')\\n        self.connect('fc.Pt', 'inlet.Pt')\\n        self.connect('fc.MN', 'inlet.MN')\\n        self.connect('inlet.Fl_O:tot', 'comp.Fl_I')\\n        self.connect('comp.Fl_O:tot', 'comb.Fl_I')\\n        self.connect('comb.Fl_O:tot', 'turb.Fl_I')\\n        self.connect('turb.Fl_O:tot', 'noz.Fl_I')\\n        self.connect('fc.Ps', 'noz.Ps')\\n\\n        # shaft connections\\n        self.connect('comp.trq', 'shaft.trq_1')\\n        self.connect('turb.trq', 'shaft.trq_2')\\n\\n        # net thrust = gross thrust + ram drag (ram drag is negative)\\n        self.add_subsystem('perf', om.ExecComp('Fn_net = Fn_gross + RamDrag',\\n                                               Fn_net={'units': 'lbf'},\\n                                               Fn_gross={'units': 'lbf'},\\n                                               RamDrag={'units': 'lbf'}))\\n        self.connect('noz.Fn', 'perf.Fn_gross')\\n        self.connect('inlet.RamDrag', 'perf.RamDrag')\\n\\n        # design balancers: W (for net thrust), FAR (for Tt4), turb_PR (for shaft power)\\n        balance = om.BalanceComp()\\n        balance.add_balance('W', units='lbm/s', eq_units='lbf', val=150.)\\n        balance.add_balance('FAR', units=None, eq_units='degR', val=0.017)\\n        balance.add_balance('turb_PR', units=None, eq_units='hp', val=3.)\\n        self.add_subsystem('balance', balance)\\n\\n        self.connect('balance.W', 'inlet.W')\\n        self.connect('balance.FAR', 'comb.FAR')\\n        self.connect('balance.turb_PR', 'turb.PR')\\n\\n        self.connect('perf.Fn_net', 'balance.lhs:W')\\n        self.connect('comb.Fl_O:tot:Tt', 'balance.lhs:FAR')\\n        self.connect('shaft.pwr_net', 'balance.lhs:turb_PR')\\n\\n        # solvers\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['atol'] = 1e-8\\n        newton.options['rtol'] = 1e-8\\n        newton.options['maxiter'] = 100\\n        newton.options['iprint'] = 0\\n        self.linear_solver = om.DirectSolver()\\n        self.nonlinear_solver.linesearch = om.BoundsEnforceLS()\\n\\n\\nprob = om.Problem(model=Turbojet())\\nprob.setup(force_alloc_complex=False, derivatives=True)\\n\\n# SL static design conditions\\nprob.set_val('alt', 0., units='ft')\\nprob.set_val('MN', 0.0001)\\n\\n# design inputs\\nprob.set_val('comp.PR', 11.0)\\nprob.set_val('comp.eff', 0.88)\\nprob.set_val('turb.eff', 0.90)\\nprob.set_val('Nmech', 9000., units='rpm')\\nprob.set_val('inlet.dPqP', 0.0)\\nprob.set_val('comb.dPqP', 0.03)\\nprob.set_val('noz.PRs', 0.99)\\nprob.set_val('noz.Cv', 0.99)\\nprob.set_val('noz.Throat:MN', 1.0)\\n\\n# targets\\nprob.set_val('balance.rhs:W', 11000., units='lbf')      # net thrust target\\nprob.set_val('balance.rhs:FAR', 2550., uni\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"ystem.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Combustor: Option 'use_thermo' cannot be set because it has not been declared.\\\"\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 458.65,
+    "setup_s": 0.0,
+    "grade_s": 1.005
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.0s"
+  ]
+}

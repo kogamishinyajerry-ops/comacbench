@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n\\n    def setup(self):\\n        thermo_data = pyc.AIR_JETA_TAB_SPEC\\n        thermo_method = 'TABULAR'\\n\\n        self.add_subsystem('fc', pyc.FlightConditions(thermo_data=thermo_data,\\n                                                      thermo_method=thermo_method),\\n                           promotes_inputs=['alt', 'MN', 'W'])\\n\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo_data,\\n                                              thermo_method=thermo_method),\\n                           promotes_inputs=['MN'])\\n\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5,\\n                                                  thermo_data=thermo_data,\\n                                                  thermo_method=thermo_method),\\n                           promotes_inputs=['Nmech'])\\n\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo_data,\\n                                                   thermo_method=thermo_method),\\n                           promotes_inputs=['FAR'])\\n\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269,\\n                                               thermo_data=thermo_data,\\n                                               thermo_method=thermo_method),\\n                           promotes_inputs=['Nmech'])\\n\\n        self.add_subsystem('nozz', pyc.Nozzle(thermo_data=thermo_data,\\n                                              thermo_method=thermo_method))\\n\\n        self.add_subsystem('shaft', pyc.Shaft(num_elem=2))\\n\\n        # flow path connections\\n        self.pyc_connect_output('fc.Fl_O', 'inlet.Fl_I')\\n        self.pyc_connect_output('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_output('comp.Fl_O', 'burner.Fl_I')\\n        self.pyc_connect_output('burner.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_output('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # shaft connections\\n        self.pyc_connect_output('comp.perf', 'shaft.e1')\\n        self.pyc_connect_output('turb.perf', 'shaft.e2')\\n\\n        # performance: net thrust and TSFC\\n        perf = self.add_subsystem('perf', om.ExecComp(\\n            ['Fn = FG - ram_drag',\\n             'ram_drag = Wr * V / g',\\n             'TSFC = Wf * 3600.0 / Fn'],\\n            Fn={'units': 'lbf'}, FG={'units': 'lbf'},\\n            ram_drag={'units': 'lbf'}, Wr={'units': 'lbm/s'},\\n            V={'units': 'ft/s'}, g={'units': 'lbm*ft/(lbf*s**2)', 'val': 32.174},\\n            Wf={'units': 'lbm/s'}, TSFC={'units': '1/hr'}))\\n\\n        self.connect('nozz.FG', 'perf.FG')\\n        self.connect('fc.Fl_O:stat:V', 'perf.V')\\n        self.connect('fc.Fl_O:stat:W', 'perf.Wr')\\n        self.connect('burner.Wfuel', 'perf.Wf')\\n\\n        # design balances: W for Fn target, FAR for T4 target\\n        bal = self.add_subsystem('balance', om.BalanceComp())\\n        bal.add_balance('W', units='lbm/s', eq_units='lbf',\\n                        lhs_name='Fn_res', rhs_name='Fn_tgt', lower=1.0, upper=2000.0)\\n        bal.add_balance('FAR', units=None, eq_units='degR',\\n                        lhs_name='T4_res', rhs_name='T4_tgt',\\n                        lower=1e-5, upper=0.1)\\n\\n        self.connect('perf.Fn', 'balance.Fn_res')\\n        self.connect('burner.Fl_O:tot:T', 'balance.T4_res')\\n        self.connect('balance.W', 'W')\\n        self.connect('balance.FAR', 'FAR')\\n\\n        # solvers\\n        self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        self.nonlinear_solver.maxiter = 60\\n        self.nonlinear_solver.atol = 1e-6\\n        self.nonlinear_solver.rtol = 1e-9\\n        self.nonlinear_solver.iprint = 1\\n        self.nonlinear_solver.linesearch = om.BoundsEnforceLS()\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef main():\\n    p = om.Problem(model=Turbojet(thermo_method='TABULAR',\\n                                  thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n    p.setup(mode='auto', force_alloc_complex=False)\\n    p.final_setup()\\n\\n    # sea-level static design conditions\\n\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"core/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Shaft: Option 'num_elem' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 638.602,
+    "setup_s": 0.0,
+    "grade_s": 0.998
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.0s"
+  ]
+}

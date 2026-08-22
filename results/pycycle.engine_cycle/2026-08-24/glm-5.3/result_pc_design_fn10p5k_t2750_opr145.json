@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_design_fn10p5k_t2750_opr145",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport json\\nimport numpy as np\\n\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef resolve_maps():\\n    \\\"\\\"\\\"Find the axi5 compressor map and lpt2269 turbine map across pycycle versions.\\\"\\\"\\\"\\n    import pycycle\\n    axi = None\\n    lpt = None\\n    mods = [pyc]\\n    for modname in ('pycycle.map_data', 'pycycle.elements.map_data', 'pycycle.maps', 'pycycle.constants'):\\n        try:\\n            mods.append(__import__(modname, fromlist=['*']))\\n        except Exception:\\n            pass\\n    for m in mods:\\n        for n in ('axi5', 'axi5_data', 'AXI5'):\\n            if axi is None and hasattr(m, n):\\n                axi = getattr(m, n)\\n        for n in ('lpt2269', 'lpt2269_data', 'LPT2269'):\\n            if lpt is None and hasattr(m, n):\\n                lpt = getattr(m, n)\\n    if axi is None or lpt is None:\\n        raise RuntimeError('Could not locate axi5 / lpt2269 map data')\\n    return axi, lpt\\n\\n\\ndef build(use_fuel_station=True):\\n    axi, lpt = resolve_maps()\\n\\n    p = om.Problem()\\n    model = p.model\\n\\n    model.add_subsystem('fc', pyc.FlightCondition(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n    model.add_subsystem('inlet', pyc.Inlet())\\n    model.add_subsystem('comp', pyc.Compressor(map_data=axi, design=True))\\n    model.add_subsystem('comb', pyc.Combustor())\\n    model.add_subsystem('turb', pyc.Turbine(map_data=lpt, design=True))\\n    model.add_subsystem('nozz', pyc.Nozzle())\\n    model.add_subsystem('shaft', pyc.Shaft(num_elements=2))\\n\\n    # balances: FAR -> T4, W -> Fn, Nmech -> shaft power balance\\n    bal = om.BalanceComp()\\n    bal.add_balance('FAR', units=None, eq_units='degR', lower=1e-5, upper=0.1)\\n    bal.add_balance('W', units='lbm/s', eq_units='lbf', lower=1.0, upper=2000.0)\\n    bal.add_balance('Nmech', units='rpm', eq_units='hp')\\n    model.add_subsystem('bal', bal)\\n\\n    model.add_subsystem('fn_sum', om.ExecComp('Fn = Fn_inl + Fn_noz', Fn={'units': 'lbf'},\\n                                              Fn_inl={'units': 'lbf'}, Fn_noz={'units': 'lbf'}))\\n    model.add_subsystem('pwr_resid', om.ExecComp('resid = p_comp + p_turb',\\n                                                 resid={'units': 'hp'}, p_comp={'units': 'hp'},\\n                                                 p_turb={'units': 'hp'}))\\n\\n    model.connect('fc.Fl_O', 'inlet.Fl_I')\\n    model.connect('inlet.Fl_O', 'comp.Fl_I')\\n    model.connect('comp.Fl_O', 'comb.Fl_I')\\n    model.connect('comb.Fl_O', 'turb.Fl_I')\\n    model.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n    model.connect('comp.pwr', 'shaft.pwr_1')\\n    model.connect('turb.pwr', 'shaft.pwr_2')\\n\\n    model.connect('bal.FAR', 'comb.FAR')\\n    model.connect('bal.W', 'fc.W')\\n    model.connect('bal.Nmech', 'comp.Nmech')\\n    model.connect('bal.Nmech', 'turb.Nmech')\\n\\n    model.connect('comb.Fl_O:tot:T', 'bal.lhs:FAR')\\n    model.connect('fn_sum.Fn', 'bal.lhs:W')\\n    model.connect('pwr_resid.resid', 'bal.lhs:Nmech')\\n\\n    model.connect('inlet.Fn', 'fn_sum.Fn_inl')\\n    model.connect('nozz.Fn', 'fn_sum.Fn_noz')\\n    model.connect('comp.pwr', 'pwr_resid.p_comp')\\n    model.connect('turb.pwr', 'pwr_resid.p_turb')\\n\\n    if use_fuel_station:\\n        model.add_subsystem('fuel', pyc.FlowStation(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        model.connect('fuel.Fl_O', 'comb.Fl_F')\\n\\n    newton = model.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n    newton.options['maxiter'] = 80\\n    newton.options['atol'] = 1e-8\\n    newton.options['rtol'] = 1e-12\\n    newton.options['iprint'] = 0\\n    model.linear_solver = om.DirectSolver()\\n\\n    p.setup(force_alloc_complex=False)\\n    return p\\n\\n\\ndef set_and_run(p, use_fuel_station=True, nmech_guess=12000.0):\\n    # ambient / flight condition (SL static)\\n    p.set_val('fc.alt', 0.0, units='ft')\\n    p.set_val('fc.MN', 0.01)\\n    p.set_val('inlet.MN', 0.01)\\n\\n    # design specifications\\n    p.set_val('comp.PR', 14.5)\\n    p.set_val('bal.rhs:FAR', 2750.0, units='degR')\\n    p.set_val('bal.rhs:W', 10500.0, units='lbf')\\n    p.set_val('bal.FAR', 0.022)\\n    p.set_val('bal.W', 120.0, units='lbm/s')\\n    p.set_val('bal.N\""
+  },
+  "timings": {
+    "agent_s": 716.832,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}
