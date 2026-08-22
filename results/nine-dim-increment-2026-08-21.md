@@ -13,7 +13,7 @@
 | 动力补厚 | pycycle.engine_cycle | 7→**28** | 0.0×28 | **1.0×28** | minimax-m3 **0.0393**（gate 2/28） | integrated（扩容） |
 | 总体补厚 | aviary.transport_mission | 8→**27** | 0.0×27 | **1.0×27** | minimax-m3 **0.2222**（gate 6/27） | integrated（扩容） |
 
-integrated 基准 15→**17**，任务总量 2119→**2376**。
+integrated 基准 15→**17**，任务总量 2119→**2361**（实测 `ls tasks/*/*.yaml`；2119+180+22+21+19）。
 
 ## 1. mechvqa.public_eval（多模态，knowledge 维 +1）
 

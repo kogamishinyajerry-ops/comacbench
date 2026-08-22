@@ -1,9 +1,11 @@
 # Benchmark 覆盖范围深度评估（2026-08-21）
 
 > **同日晚间更新**：本文 §5 建议的 1/2/3 三项（mechvqa VLM 通道、cadgen design_artifact
-> 接线、pycycle/aviary 扩题）当日已完成——integrated 15→17、任务 2119→2376、
-> cad_geometry 0→0.50、多模态 0.05→0.55、adapter 5/5 类接线。终值与证据见
-> `results/nine-dim-increment-2026-08-21.md`；下文保留评估时点快照。
+> 接线、pycycle/aviary 扩题）当日已完成；次日（08-22）GLM 额度恢复后补齐双基线。
+> 终值：integrated 15→**17**、任务 2119→**2361**、cad_geometry 0→0.50、多模态 0.05→0.55、
+> adapter 5/5 类接线、oracle 自检 13/17。**两幅雷达图已用 08-22 数据重绘**（make_radars.py
+> 内含变更注释）；证据与分数见 `results/nine-dim-increment-2026-08-21.md`（§7 为 GLM 补跑），
+> 下文保留评估时点快照。
 
 > 数据来源：`registry/registry.yaml`（38 条目）、`tasks/*/`（任务 YAML 实数）、`results/*/`（provider 落盘实数）、
 > `results/nine-dim-baseline-2026-08-19.md` / `M4-summary.md` / `batch2-round1-summary.md` / `batch3-*-summary.md`。
