@@ -1,6 +1,6 @@
 # T4 · 快照格式与归档纪律
 
-- Label: `wayfinder:grilling`（HITL） · Status: open · Blocked by: —
+- Label: `wayfinder:grilling`（HITL） · Status: claimed（wayfinding session） · Blocked by: —
 
 ## Question
 

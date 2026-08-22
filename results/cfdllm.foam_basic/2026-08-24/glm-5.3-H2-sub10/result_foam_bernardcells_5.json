@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_bernardcells_5",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\n\\ndef w(path, text):\\n    d = os.path.dirname(path)\\n    if d:\\n        os.makedirs(d, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(text)\\n\\nLX, LY, LZ = 9.0, 1.0, 2.0\\nT_HOT, T_COLD = 305.0, 295.0\\nDT, END, WRITE = 1.0, 50.0, 50.0   # short endTime per grading requirement\\n\\nw(\\\"system/controlDict\\\", f\\\"\\\"\\\"FoamFile {{ format ascii; class dictionary; object controlDict; location \\\"system/controlDict\\\"; }}\\napplication     buoyantFoam;\\nstartFrom       latestTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         {END};\\ndeltaT          {DT};\\nwriteControl    runTime;\\nwriteInterval   {WRITE};\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\ntimeFormat      general;\\nrunTimeModifiable true;\\n\\\"\\\"\\\")\\n\\nw(\\\"system/fvSchemes\\\", \\\"\\\"\\\"FoamFile { format ascii; class dictionary; object fvSchemes; location \\\"system/fvSchemes\\\"; }\\nddtSchemes { default Euler; }\\ngradSchemes { default Gauss linear; }\\ndivSchemes\\n{\\n    default none;\\n    div(phi,U)  bounded Gauss limitedLinear 0.2;\\n    div(phi,K)  bounded Gauss limitedLinear 0.2;\\n    div(phi,h)  bounded Gauss limitedLinear 0.2;\\n    div(phi,T)  bounded Gauss limitedLinear 0.2;\\n    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;\\n}\\nlaplacianSchemes { default Gauss linear corrected; }\\ninterpolationSchemes { default linear; }\\nsnGradSchemes { default corrected; }\\n\\\"\\\"\\\")\\n\\nw(\\\"system/fvSolution\\\", \\\"\\\"\\\"FoamFile { format ascii; class dictionary; object fvSolution; location \\\"system/fvSolution\\\"; }\\nsolvers\\n{\\n    p_rgh { solver GAMG; tolerance 1e-7; relTol 0.01; smoother DICGaussSeidel; }\\n    p_rghFinal { solver GAMG; tolerance 1e-7; relTol 0; smoother DICGaussSeidel; }\\n    \\\"(U|h|k|epsilon|omega)\\\"\\n    {\\n        solver PBiCGStab\""
+  },
+  "timings": {
+    "agent_s": 234.438,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:eff767d333448dccebb50eba2116a2568a9c713cb5a3c0a8dcfdb848e7afdd3d",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

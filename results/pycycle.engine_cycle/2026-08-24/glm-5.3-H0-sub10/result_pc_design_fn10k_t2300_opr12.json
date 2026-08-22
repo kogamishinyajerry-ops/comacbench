@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn10k_t2300_opr12",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        super().setup()\\n        design = self.pyc_add_pyc_point('design')\\n\\n        self.add_subsystem('perf', pyc.Performance(num_nodes=1), promotes=['*'])\\n\\n        design.add_subsystem('fc', pyc.FlightConditions(),\\n                             promotes_inputs=('MN', 'alt'))\\n        design.add_subsystem('inlet', pyc.Inlet(), promotes_inputs=('MN',))\\n        design.add_subsystem('compressor', pyc.CompressorMap(name='AXI5'),\\n                             promotes_inputs=('Nmech',))\\n        design.add_subsystem('burner', pyc.Combustor(engine='TABULAR', fuel_type='JETA'),\\n                             promotes_inputs=('fuel:Ts',))\\n        design.add_subsystem('turbine', pyc.LPT_MultistageMap(name='LPT2269'),\\n                             promotes_inputs=('Nmech',))\\n        design.add_subsystem('nozz', pyc.Nzzle(nozzType='CD'),\\n                             promotes_inputs=('MN',))\\n\\n        design.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I')\\n        design.pyc_connect_flow('inlet.Fl_O', 'compressor.Fl_I')\\n        design.pyc_connect_flow('compressor.Fl_O', 'burner.Fl_I')\\n        design.pyc_connect_flow('burner.Fl_O', 'turbine.Fl_I')\\n        design.pyc_connect_flow('turbine.Fl_O', 'nozz.Fl_I')\\n\\n        design.connect('fc.Fl_O:stat:P', 'inlet.Fl_I:tot:P')\\n        design.connect('inlet.Fl_O:tot:P', 'burner.Fl_I:tot:P')\\n        design.connect('inlet.Fl_O:tot:T', 'burner.Fl_I:tot:T')\\n        design.connect('fc.Fl_O:stat:P', 'perf.Ps_exhaust')\\n        design.connect('fc.Fl_O:tot:P', 'nozz.Ps_exhaust')\\n\\n        self.connect('burner.Fl_O:stat:W', 'burner.Wfuel')\\n        self.connect('burner.Wfuel', 'fuel:Fl_I:stat:W')\\n\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2), promotes=['*'])\\n\\n        design.connect('compresser_trq', 'trq_0')\\n        design.connect('turb_trq', 'trq_1')\\n\\n        balance = om.BalanceComp()\\n        self.add_subsystem('balance', balance, promotes=['*'])\\n\\n        self.connect('trq_net', 'Nmech')\\n        balance.add_balance('W', val=100., units='lbm/s')\\n        self.connect('balance.W', 'inlet.Fl_I:stat:W')\\n        self.connect('perf.thrust_net_max', 'balance.W')\\n        balance.add_balance('FAR', val=0.017, units=None)\\n        self.connect('balance.FAR', 'burner.Fl_I:FAR')\\n        self.connect('burner.Fl_O:tot:T', 'balance.FAR')\\n        balance.add_balance('Nmech', val=1., units=None)\\n        self.connect('shaft.Nmech', 'balance.Nmech')\\n        balance.add_balance('Ps', val=50., units='psi')\\n        self.connect('balance.Ps', 'nozz.Throat:PR')\\n        self.connect('nozzle.Throat:area', 'balance.Ps')\\n\\n        self.set_input_defaults('fc.alt', 0., units='ft')\\n        self.set_input_defaults('fc.MN', 0.000001)\\n        self.set_input_defaults('inlet.ram_recovery', 1.0)\\n        self.set_input_defaults('inlet.area', 1.5, units='ft**2')\\n        self.set_input_defaults('compressor.PR_des', 12.)\\n        self.set_input_defaults('compressor.eff_des', 0.9)\\n        self.set_input_defaults('turbine.eff_des', 0.9)\\n        self.set_input_defaults('burner.dPqP', 0.03)\\n        self.set_input_defaults('burner.Tmax', 3200., units='degR')\\n        self.set_input_defaults('burner.FAR', 0.017)\\n        self.set_input_defaults('burner.fuel:Ts', -11137., units='Btu/lbm')\\n        self.set_input_defaults('nozz.Cv', 0.99)\\n        self.set_input_defaults('shaft.Nmech', 8070.29, units='rpm')\\n        self.set_input_defaults('balance.W', 145., units='lbm/s')\\n        self.set_input_defaults('balance.FAR', 0.017)\\n        self.set_input_defaults('balance.Nmech', 1.)\\n        self.set_input_defaults('balance.Ps', 14.7, units='psia')\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver()\\n        newton.options['atol'] = 1e-6\\n        newton.options['rtol'] = 1e-6\\n        newton.options['maxiter'] = 20\\n        newton.options['solve_subsystems'] = True\\n        newton.options['iprint'] = 2\\n        newton.options['err_on_non_co\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"yDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 638, in _setup_procs\\n    subsys._setup_procs(subsys.pathname, sub_comm, prob_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_i8iermsh/solve.py\\\", line 9, in setup\\n    design = self.pyc_add_pyc_point('design')\\n             ^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'Turbojet' object has no attribute 'pyc_add_pyc_point'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 491.707,
+    "setup_s": 0.0,
+    "grade_s": 1.12
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.12s"
+  ]
+}

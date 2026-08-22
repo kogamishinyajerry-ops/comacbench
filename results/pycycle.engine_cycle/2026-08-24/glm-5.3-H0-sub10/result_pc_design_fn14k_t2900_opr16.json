@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        TAB_DATA = pyc.AIR_JETA_TAB_SPEC\\n        LPT = pyc.LPT2269\\n\\n        self.add_subsystem('fc', pyc.FlightConditions(thermo_data=TAB_DATA))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=TAB_DATA))\\n        self.add_subsystem('compressor', pyc.Compressor(thermo_data=TAB_DATA))\\n        self.add_subsystem('combustor', pyc.Combustor(thermo_data=TAB_DATA,\\n                                                     thermo_method='TABULAR'))\\n        self.add_subsystem('turbine', LPT(thermo_data=TAB_DATA,\\n                                          thermo_method='TABULAR'))\\n        self.add_subsystem('nozzle', pyc.Nozzle(thermo_data=TAB_DATA,\\n                                                thermo_method='TABULAR'))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n        self.add_subsystem('perf', pyc.Performance())\\n\\n        # flow connections\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I')\\n        self.pyc_connect_flow('inlet.Fl_O', 'compressor.Fl_I')\\n        self.pyc_connect_flow('compressor.Fl_O', 'combustor.Fl_I')\\n        self.pyc_connect_flow('combustor.Fl_O', 'turbine.Fl_I')\\n        self.pyc_connect_flow('turbine.Fl_O', 'nozzle.Fl_I')\\n\\n        # shaft torque\\n        self.connect('compressor.shaft_CT_out', 'shaft.CT_1')\\n        self.connect('turbine.shaft_CT_in', 'shaft.CT_2')\\n\\n        # performance connections\\n        self.connect('fc.Fl_O:stat:W', 'perf.Fn_1')\\n        self.connect('nozzle.Fg', 'perf.Fg_1')\\n        self.connect('combustor.Wfuel', 'perf.Wfuel_1')\\n        self.connect('shaft.pwr_net', 'perf.pwr_net')\\n\\n        # design defaults\\n        self.set_input_defaults('fc.alt', 0.0, units='ft')\\n        self.set_input_defaults('fc.MN', 0.01)\\n        self.set_input_defaults('inlet.ram_recovery', 1.0)\\n        self.set_input_defaults('compressor.PR', 15.0)\\n        self.set_input_defaults('compressor.eff', 0.90)\\n        self.set_input_defaults('turbine.eff', 0.90)\\n        self.set_input_defaults('combustor.FAR', 0.017, units=None)\\n        self.set_input_defaults('combustor.dPqP', 0.03)\\n        self.set_input_defaults('nozzle.dPqP', 0.01)\\n        self.set_input_defaults('nozzle.Cv', 0.99)\\n        self.set_input_defaults('nozzle.Throat:stat:area', 2.0, units='inch**2')\\n\\n\\nclass TurbojetDesign(om.Group):\\n\\n    def setup(self):\\n        des = self.add_subsystem('design', Turbojet(design=True))\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['atol'] = 1e-8\\n        newton.options['rtol'] = 1e-99\\n        newton.options['maxiter'] = 50\\n        newton.linesearch = om.BoundsEnforceLS()\\n\\n        self.linear_solver = om.DirectSolver(assemble_jac=True)\\n\\n        balance = om.IndepVarComp()\\n        balance.add_output('W', val=150.0, units='lbm/s')\\n        balance.add_output('FAR', val=0.017)\\n        balance.add_output('PR', val=15.0)\\n        self.add_subsystem('balsrc', balance)\\n\\n        self.add_subsystem('balance', om.BalanceComp())\\n\\n        self.balance.add_balance('W', units='lbm/s', eq_units='lbf',\\n                                 lhs_name='Fn', rhs_val=14000.0)\\n        self.balance.add_balance('FAR', val=0.017, lower=1e-4, upper=1.0,\\n                                 eq_units='degR', lhs_name='Tt4', rhs_val=2900.0)\\n        self.balance.add_balance('PR', val=15.0, lower=1.0, upper=60.0,\\n                                 rhs_val=16.0)\\n\\n        self.connect('design.perf.Fn', 'balance.Fn')\\n        self.connect('balance.W', 'design.fc.Fl_I:stat:W')\\n        self.connect('design.combustor.Fl_I:tot:T', 'balance.Tt4')\\n        self.connect('balance.FAR', 'design.combustor.FAR')\\n        self.connect('design.compressor.PR', 'balance.PR')\\n        self.connect('balance.PR', 'design.compressor.PR')\\n\\n        # initial guesses for flow\\n        self.set_guesses()\\n\\n    def set_guesses(self):\\n        self.set_solver_print(level=-1)\\n\\n\\nif __name__ == '__\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ros2h4db/solve.py\\\", line 104, in <module>\\n    des = prob.model.design\\n          ^^^^^^^^^^^^^^^^^\\nAttributeError: 'TurbojetDesign' object has no attribute 'design'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 503.586,
+    "setup_s": 0.0,
+    "grade_s": 1.033
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

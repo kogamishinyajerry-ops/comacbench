@@ -1,0 +1,37 @@
+{
+  "task_id": "foam_bernardcells_1",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"# cfdllm.foam_basic — H2/H3 脚手架（蒸馏工作流资产 v1）\\n\\n> 用途：harness 臂 H2/H3 prompt 注入件（`--scaffold data/cfdllm.foam_basic/scaffold.md`）。\\n> 蒸馏来源：本 harness 审计的失败模式（脚本级崩溃 87/110 + 求解未完成 23/110）+\\n> 判分器事实：docker OpenFOAM 10 (Foundation) 内 `bash -c \\\"./Allrun\\\"`，成功判据 =\\n> `log.<solver>` 倒数第二行 == `End` 且至少写出一个时间目录。\\n> 防泄漏：给的是最小可收敛模式（以 Bernard cell / buoyantFoam 为形），不含任何\\n> 考题的边界数值答案；考题仍要求按题面正确组装物理与参数。\\n\\n## 契约回顾（先做对这三件事）\\n\\n1. 输出**一个 python 脚本**（仅 os/math/builtins），在 cwd **写文件**，不执行任何\\n   OpenFOAM 命令；\\n2. 必须齐备：`system/{controlDict,fvSchemes,fvSolution,blockMeshDict}`、\\n   `constant/...`、`0/...`、`Allrun`；\\n3. `controlDict` 的 `application` 必须与 Allrun 里 `runApplication <solver>` 一致。\\n\\n## 最小可运行模式（buoyantFoam 热对流；数值按题面替换）\""
+  },
+  "timings": {
+    "agent_s": 237.87,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:eff767d333448dccebb50eba2116a2568a9c713cb5a3c0a8dcfdb848e7afdd3d",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

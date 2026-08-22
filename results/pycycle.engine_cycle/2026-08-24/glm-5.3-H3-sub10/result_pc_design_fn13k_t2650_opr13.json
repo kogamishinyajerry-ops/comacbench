@@ -1,0 +1,39 @@
+{
+  "task_id": "pc_design_fn13k_t2650_opr13",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import json\\nimport math\\n\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        self.options['thermo_method'] = 'TABULAR'\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n        design = self.options['design']\\n\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, map_extrap=True),\\n                           promotes_inputs=['Nmech'])\\n        self.add_subsystem('burner', pyc.Combustor(fuel_type=\\\"FAR\\\"))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269),\\n                           promotes_inputs=['Nmech'])\\n        self.add_subsystem('nozz', pyc.Nozzle(nozzType='CD', lossCoef='Cv'))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2), promotes_inputs=['Nmech'])\\n        self.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_burners=1))\\n\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I', connect_w=False)\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'burner.Fl_I')\\n        self.pyc_connect_flow('burner.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'nozz.Fl_I')\\n\\n        self.connect('comp.trq', 'shaft.trq_0')\\n        self.connect('turb.trq', 'shaft.trq_1')\\n        self.connect('fc.Fl_O:stat:P', 'nozz.Ps_exhaust')\\n        self.connect('inlet.Fl_O:tot:P', 'perf.Pt2')\\n        self.connect('comp.Fl_O:tot:P', 'perf.Pt3')\\n        self.connect('burner.Wfuel', 'perf.Wfuel_0')\\n        self.connect('inlet.F_ram', 'perf.ram_drag')\\n        self.connect('nozz.Fg', 'perf.Fg_0')\\n\\n        balance = self.add_subsystem('balance', om.BalanceComp())\\n        if design:\\n            balance.add_balance('W', units='lbm/s', eq_units='lbf', rhs_name='Fn_target')\\n            self.connect('balance.W', 'inlet.Fl_I:stat:W')\\n            self.connect('perf.Fn', 'balance.lhs:W')\\n            balance.add_balance('FAR', eq_units='degR', lower=1e-4, val=.017,\\n                                rhs_name='T4_target')\\n            self.connect('balance.FAR', 'burner.Fl_I:FAR')\\n            self.connect('burner.Fl_O:tot:T', 'balance.lhs:FAR')\\n            balance.add_balance('turb_PR', val=1.5, lower=1.001, upper=8,\\n                                eq_units='hp', rhs_val=0.)\\n            self.connect('balance.turb_PR', 'turb.PR')\\n            self.connect('shaft.pwr_net', 'balance.lhs:turb_PR')\\n        else:\\n            balance.add_balance('FAR', eq_units='lbf', lower=1e-4, val=.3,\\n                                rhs_name='Fn_target')\\n            self.connect('balance.FAR', 'burner.Fl_I:FAR')\\n            self.connect('perf.Fn', 'balance.lhs:FAR')\\n            balance.add_balance('Nmech', val=1.5, units='rpm', lower=500.,\\n                                eq_units='hp', rhs_val=0.)\\n            self.connect('balance.Nmech', 'Nmech')\\n            self.connect('shaft.pwr_net', 'balance.lhs:Nmech')\\n            balance.add_balance('W', val=168.0, units='lbm/s', eq_units='inch**2')\\n            self.connect('balance.W', 'inlet.Fl_I:stat:W')\\n            self.connect('nozz.Throat:stat:area', 'balance.lhs:W')\\n\\n        newton = self.nonlinear_solver = om.NewtonSolver()\\n        newton.options['atol'] = 1e-6\\n        newton.options['rtol'] = 1e-6\\n        newton.options['maxiter'] = 25\\n        newton.options['solve_subsystems'] = True\\n        newton.options['max_sub_solves'] = 100\\n        newton.options['reraise_child_analysiserror'] = False\\n        self.linear_solver = om.DirectSolver()\\n        super().setup()\\n\\n\\nclass MPTurbojet(pyc.MPCycle):\\n    def setup(self):\\n        self.pyc_add_pnt('DESIGN', Turbojet())\\n        self.set_input_defaults('DESIGN.Nmech', 8070.0, units='rpm')\\n        self.set_input_defaults('DESIGN.inlet.MN', 0.60)\\n        self.set_input_defaults('DESIGN.comp.MN', 0.020)\\n        self.set_input_defaults('DESIGN.burner.MN', 0.020)\\n        self.set_input_defaults('DESIGN.turb.MN', 0.4)\\n        s\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"Fn_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 2e-06, \"got\": 12999.977842934637, \"ref\": 12999.956564634995}, \"TSFC\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 1e-06, \"got\": 0.8861833899513955, \"ref\": 0.8861847037212499}, \"OPR\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 13.0, \"ref\": 13.0}, \"Wfuel_lbm_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 3.200101231706926, \"ref\": 3.2001007379500748}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01}",
+    "iteration": "{\"rounds_used\": 1, \"iterate_max\": 3, \"converged\": true}"
+  },
+  "timings": {
+    "agent_s": 166.749,
+    "setup_s": 0.0,
+    "grade_s": 4.365
+  },
+  "environment_digest": "sha256:11accaf9094c6bcf5f77985d0db21aef45b7bf6342da5a48c7f22c3482c6c014",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 4.36s"
+  ]
+}

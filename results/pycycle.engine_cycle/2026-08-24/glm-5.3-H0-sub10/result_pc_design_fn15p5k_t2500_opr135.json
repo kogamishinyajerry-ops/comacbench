@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.MPCycle):\\n\\n    def setup(self):\\n\\n        design = self.pyc_add_pnt('DESIGN')\\n        design.set_input_defaults('altitude', val=0., units='ft')\\n        design.set_input_defaults('Mach', val=1e-6, units=None)\\n        design.set_input_defaults('Tx', val=2500., units='degR')  # placeholder; use T4_target directly\\n\\n        # flow path\\n        design.pyc_add_element('fc', pyc.FlightConditions())\\n        design.pyc_add_element('inlet', pyc.Inlet(design=True))\\n        design.pyc_add_element('comp', pyc.Compressor(map_extrap=True,\\n                                                      map_data=pyc.AXI5()))\\n        design.pyc_add_element('comb', pyc.Combustor())\\n        design.pyc_add_element('turb', pyc.Turbine(map_extrap=True,\\n                                                   map_data=pyc.LPT2269()))\\n        design.pyc_add_element('nozz', pyc.Nzzle(design=True, loss_model='CD'))\\n        design.pyc_add_element('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # connections\\n        pyc.connect_flow(design, 'fc.Fl_O', 'inlet.Fl_I', connect_stat=False)\\n        pyc.connect_flow(design, 'inlet.Fl_O', 'comp.Fl_I')\\n        pyc.connect_flow(design, 'comp.Fl_O', 'comb.Fl_I')\\n        pyc.connect_flow(design, 'comb.Fl_O', 'turb.Fl_I')\\n        pyc.connect_flow(design, 'turb.Fl_O', 'nozz.Fl_I')\\n\\n        design.connect('shaft.trq_net', 'pct_rpm')\\n        design.connect('fc.Fl_O:stat:W', 'balance.W')\\n        design.connect('comp.Fl_O:tot:P', 'balance.P')\\n        design.connect('comp.Fl_O:tot:T', 'balance.T')\\n        design.connect('shaft.Nmech', 'balance.Nmech')\\n\\n        # thermodynamic data\\n        self.pyc_add_default_flow('fc.Fl_O', pyc.AIR_JETA_TAB_SPEC)\\n        self.pyc_add_default_flow('inlet.Fl_O', pyc.AIR_JETA_TAB_SPEC)\\n        self.pyc_add_default_flow('comp.Fl_O', pyc.AIR_JETA_TAB_SPEC)\\n        self.pyc_add_default_flow('comb.Fl_O', pyc.AIR_JETA_TAB_SPEC)\\n        self.pyc_add_default_flow('turb.Fl_O', pyc.AIR_JETA_TAB_SPEC)\\n        self.pyc_add_default_flow('nozz.Fl_I', pyc.AIR_JETA_TAB_SPEC)\\n\\n        # connect shaft to turbomachinery\\n        design.connect('comp.trq', 'shaft.trq_1')\\n        design.connect('turb.trq', 'shaft.trq_2')\\n        design.connect('shaft.Nmech', 'comp.Nmech')\\n        design.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # engine controls\\n        design.connect('Mn', 'fc.MN')\\n        design.connect('Ps_exhaust', 'nozz.Ps_exhaust')\\n        design.connect('BPR', 'balance.BPR')\\n\\n        # set the design defaults\\n        design.set_input_defaults('Ps_exhaust', units='psia')\\n        design.set_input_defaults('mn_inlet', 0.99, units=None)\\n        design.set_input_defaults('mn_nozz', 1.0, units=None)\\n\\n        # compressor design point\\n        design.set_input_defaults('comp.s_PR', 13.5)\\n        design.set_input_defaults('comp.s_Wc', 1.0)\\n        design.set_input_defaults('comp.s_eff', 1.0)\\n        design.set_input_defaults('comp.s_Nc', 1.0)\\n\\n        design.set_input_defaults('turb.s_PR', 1.0)\\n        design.set_input_defaults('turb.s_Wc', 1.0)\\n        design.set_input_defaults('turb.s_eff', 1.0)\\n        design.set_input_defaults('turb.s_Nc', 1.0)\\n\\n        # component efficiencies\\n        design.set_input_defaults('comp.eff_d', 0.9)\\n        design.set_input_defaults('turb.eff_d', 0.9)\\n\\n        # mixer\\n        design.set_input_defaults('balance.FAR', 0.0)\\n\\n        # balance the engine\\n        balance = design.pyc_add_element('balance', pyc.ElementBalance())\\n\\n        newton = design.nonlinear_solver\\n        newton.options['atol'] = 1e-6\\n        newton.options['rtol'] = 1e-6\\n        newton.options['maxiter'] = 100\\n        newton.options['iprint'] = 2\\n\\n        ls = newton.linesearch = om.BoundsEnforceLS()\\n        ls.options['print_bound_enforce'] = True\\n\\n        newton.solve_subsystems = True\\n\\n        design.linear_solver = om.DirectSolver(assemble_jac=True)\\n\\n        self.pyc_add_output('Fn', units='lbf')\\n        self.pyc_add_output('TSFC', units=\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_7jnrokp6/solve.py\\\", line 106, in <module>\\n    prob.model.pyc_connect_des_conns()\\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'Turbojet' object has no attribute 'pyc_connect_des_conns'. Did you mean: 'pyc_connect_des_od'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 516.161,
+    "setup_s": 0.0,
+    "grade_s": 1.004
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.0s"
+  ]
+}

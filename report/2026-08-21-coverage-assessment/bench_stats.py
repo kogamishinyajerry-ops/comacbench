@@ -58,10 +58,12 @@ def model_runs(rid: str) -> dict[str, tuple[str, list[float]]]:
     if not root.exists():
         return latest
     # glob 已按 日期/provider 排序 → 同家族后见覆盖前见 = 保留最新日期目录。
-    # 注意：-iter* 目录是迭代协议实验（v0.2 §9 单独报告），非基线——排除，
-    # 否则 sub10 试点会覆盖全量单轮基线。
+    # 注意：-iter* 是迭代协议实验、-H0/-H1/-H2/-H3 后缀是 v0.3 harness 臂实验
+    # （单独报告于 harness 增益矩阵），均非基线——排除，否则 sub10 试点会覆盖
+    # 全量单轮基线。
     for prov_dir in sorted(root.glob("*/*/")):
-        if prov_dir.name in SKIP_PROVIDERS or "-iter" in prov_dir.name:
+        if (prov_dir.name in SKIP_PROVIDERS or "-iter" in prov_dir.name
+                or any(f"-H{a}" in prov_dir.name for a in (0, 1, 2, 3))):
             continue
         fs = list(prov_dir.glob("result_*.json"))
         if not fs:

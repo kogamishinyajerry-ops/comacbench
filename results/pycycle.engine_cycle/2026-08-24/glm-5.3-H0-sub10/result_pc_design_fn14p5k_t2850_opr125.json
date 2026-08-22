@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14p5k_t2850_opr125",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\n\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nfrom pycycle import map_data\\n\\n\\nclass Turbojet(pyc.Elements):\\n    def setup(self):\\n        thermo_data = pyc.AIR_JETA_TAB_SPEC\\n\\n        self.add_subsystem('fc', pyc.FlightCondition())\\n        self.add_subsystem('flow_start', pyc.FlowStart(thermo_data=thermo_data))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo_data))\\n        self.add_subsystem('comp', pyc.Compressor(thermo_data=thermo_data,\\n                                                  map_data=map_data.AXI5()))\\n        self.add_subsystem('burn', pyc.Combustor(thermo_data=thermo_data))\\n        self.add_subsystem('trb', pyc.Turbine(thermo_data=thermo_data,\\n                                              map_data=map_data.LPT2269()))\\n        self.add_subsystem('noz', pyc.Nozzle(thermo_data=thermo_data,\\n                                             nozzle_type='CD', loss_coeff=0.99))\\n        self.add_subsystem('shaft', pyc.Shaft())\\n\\n        # flow connections\\n        self.connect('flow_start.Fl_O', 'fc.Fl_I')\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I')\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'burn.Fl_I')\\n        self.pyc_connect_flow('burn.Fl_O', 'trb.Fl_I')\\n        self.pyc_connect_flow('trb.Fl_O', 'noz.Fl_I')\\n\\n        # ambient pressure for nozzle gross thrust computation\\n        self.connect('fc.Ps', 'noz.Ps')\\n\\n        # shaft connections\\n        self.connect('comp.trq', 'shaft.trq_1')\\n        self.connect('trb.trq', 'shaft.trq_2')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'trb.Nmech')\\n\\n        # balances: W (Fn target), fuel_frac (T4 target), trb PR (power balance)\\n        bal = self.add_subsystem('bal', om.BalanceComp(\\n            name='W', units='lbm/s', eq_name='eq_W', rhs_name='Fn_target', lhs_name='Fn', val=100.0))\\n        bal.add_balance('fuel_frac', eq_name='eq_T4', rhs_name='T4_target',\\n                        lhs_name='T4', val=0.02, lower=1e-6, upper=0.2)\\n        bal.add_balance('trb_PR', eq_name='eq_PWR', rhs_val=0.0,\\n                        lhs_name='power_err', val=3.0, lower=1.01, upper=10.0)\\n\\n        self.connect('flow_start.W', 'bal.lhs:W') if hasattr(bal, 'lhs') else None\\n        self.connect('bal.W', 'flow_start.W')\\n        self.connect('noz.FG', 'bal.lhs:W')\\n\\n        self.connect('burn.Fl_I:FuelFrac:Wfuel', 'bal.lhs:fuel_frac') if False else None\\n        self.connect('bal.fuel_frac', 'burn.FuelFrac')\\n        self.connect('burn.Fl_O:tot:T', 'bal.lhs:T4')\\n\\n        self.connect('bal.trb_PR', 'trb.PR')\\n\\n        self.add_subsystem('pwr', om.ExecComp('err=cp-trb', cp=0.0, trb=0.0, units=None))\\n        self.connect('comp.power', 'pwr.cp')\\n        self.connect('trb.power', 'pwr.trb')\\n        self.connect('pwr.err', 'bal.lhs:power_err')\\n\\n        # net thrust / TSFC bookkeeping\\n        self.add_subsystem('thrust', om.ExecComp('Fn=FG-Wair*V0', Fn=0., FG=0., Wair=0., V0=0., units='lbf'))\\n        self.connect('noz.FG', 'thrust.FG')\\n        self.connect('flow_start.W', 'thrust.Wair')\\n        self.connect('fc.V0', 'thrust.V0')\\n\\n        self.add_subsystem('sfc', om.ExecComp('TSFC=Wfuel/Fn', TSFC=0., Wfuel=0., Fn=14500.))\\n        self.connect('burn.Wfuel', 'sfc.Wfuel')\\n        self.connect('thrust.Fn', 'sfc.Fn')\\n\\n\\ndef main():\\n    p = om.Problem(model=Turbojet())\\n    p.model.nonlinear_solver = om.NewtonSolver(solve_subsystems=True, maxiter=50,\\n                                               atol=1e-8, rtol=1e-8)\\n    p.model.nonlinear_solver.linesearch = om.BoundsEnforceLS()\\n    p.model.linear_solver = om.DirectSolver(assemble_jac=False)\\n\\n    p.setup(force_alloc_complex=False, derivatives=False)\\n\\n    # design point: sea level static\\n    p.set_val('fc.alt', 0.0, units='ft')\\n    p.set_val('fc.MN', 0.001)\\n\\n    p.set_val('inlet.MN', 0.6)\\n    p.set_val('inlet.loss_coeff', 0.0)\\n\\n    p.set_val('comp.PR', 12.5)\\n    p.set_val('comp.eff', 0.85)\\n    p.set_val('comp.MN', 0.5)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_413pdd81/solve.py\\\", line 6, in <module>\\n    from pycycle import map_data\\nImportError: cannot import name 'map_data' from 'pycycle' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/__init__.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 606.486,
+    "setup_s": 0.0,
+    "grade_s": 1.0
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.0s"
+  ]
+}

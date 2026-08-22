@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_design_fn13p5k_t2400_opr115",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "sandbox_escape_attempt"
+  ],
+  "failure_mode": "sandbox_escape_attempt",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport importlib\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef find_attr(names):\\n    import pycycle\\n    mods = [pyc]\\n    try:\\n        mods.append(importlib.import_module('pycycle.map_data'))\\n    except Exception:\\n        pass\\n    for m in mods:\\n        for n in names:\\n            if hasattr(m, n):\\n                return getattr(m, n)\\n    return None\\n\\n\\nAXI5 = find_attr(['AXI5', 'axi5', 'MAP_AXI5'])\\nLPT2269 = find_attr(['LPT2269', 'lpt2269', 'MAP_LPT2269'])\\n\\n\\ndef make_elem(cls, base_kw, map_data=None):\\n    if map_data is not None:\\n        try:\\n            return cls(**dict(base_kw, map_data=map_data))\\n        except TypeError:\\n            pass\\n    return cls(**base_kw)\\n\\n\\nclass NozzlePR(om.ExplicitComponent):\\n    \\\"\\\"\\\"Fully expanded CD nozzle: PR = Pt / Pambient.\\\"\\\"\\\"\\n\\n    def setup(self):\\n        self.add_input('Pt', units='psi')\\n        self.add_input('Pamb', units='psi')\\n        self.add_output('PR', units=None)\\n        self.declare_partials('PR', ['Pt', 'Pamb'])\\n\\n    def compute(self, inputs, outputs):\\n        outputs['PR'] = inputs['Pt'] / inputs['Pamb']\\n\\n    def compute_partials(self, inputs, partials):\\n        Pt, Pamb = inputs['Pt'], inputs['Pamb']\\n        partials['PR', 'Pt'] = 1.0 / Pamb\\n        partials['PR', 'Pamb'] = -Pt / Pamb ** 2\\n\\n\\nclass Engine(om.Group):\\n    \\\"\\\"\\\"Simple turbojet design point: Inlet + Compressor + Combustor +\\n    Turbine + CD Nozzle. Balances: W (Fn), Wfuel (Tt4), turb PR (shaft power).\\\"\\\"\\\"\\n\\n    def initialize(self):\\n        self.options.declare('design', default=True, values=[True, False])\\n\\n    def setup(self):\\n        design = self.options['design']\\n        thermo = pyc.AIR_JETA_TAB_SPEC\\n\\n        base = dict(design=design, thermo_data=thermo)\\n        try:\\n            fc = pyc.FlightCondition(design=design, thermo_data=thermo)\\n        except TypeError:\\n            fc = pyc.FlightCondition(design=design)\\n        inlet = make_elem(pyc.Inlet, base)\\n        comp = make_elem(pyc.Compressor, base, AXI5)\\n        burner = make_elem(pyc.Combustor, base)\\n        turb = make_elem(pyc.Turbine, base, LPT2269)\\n        noz = make_elem(pyc.Nozzle, base)\\n\\n        self.add_subsystem('fc', fc)\\n        self.add_subsystem('inlet', inlet)\\n        self.add_subsystem('comp', comp)\\n        self.add_subsystem('burner', burner)\\n        self.add_subsystem('turb', turb)\\n        self.add_subsystem('noz', noz)\\n\\n        # flow path connections\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n        # nozzle fully expanded to ambient\\n        self.add_subsystem('nozpr', NozzlePR())\\n        self.connect('turb.Fl_O:tot:P', 'nozpr.Pt')\\n        self.connect('fc.Fl_O:stat:P', 'nozpr.Pamb')\\n        self.connect('nozpr.PR', 'noz.PR')\\n\\n        # shaft power residual: comp.power (+) turb.power (-) = 0\\n        eq = self.add_subsystem('eq_power', om.AddSubtractComp())\\n        eq.add_equation('net_power', input_names=['comp_power', 'turb_power'],\\n                        units='hp', scaling_factors=[1.0, 1.0])\\n        self.connect('comp.power', 'eq_power.comp_power')\\n        self.connect('turb.power', 'eq_power.turb_power')\\n\\n        # balances\\n        bal = self.add_subsystem('bal', om.BalanceComp(),\\n                                 promotes_inputs=['Fn_target', 'T4_target'])\\n        bal.add_balance('W', units='lbm/s', eq_name='eq_W', lhs_name='Fg',\\n                        rhs_name='Fn_target', val=200.0, lower=1.0)\\n        bal.add_balance('Wfuel', units='lbm/s', eq_name='eq_Wfuel', lhs_name='Tt4',\\n                        rhs_name='T4_target', val=10.0, lower=1e-4)\\n        bal.add_balance('PRt', units=None, eq_name='eq_PRt', lhs_name='net_power',\\n                        rhs_val=0.0, val=3.5, lower=1.05, upper=8.0)\\n\\n        self.connect('bal.W', 'fc.W')\\n        self.connect('noz.Fg', 'bal.Fg')\\n        self.connect('bal.W\""
+  },
+  "timings": {
+    "agent_s": 686.991,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=['banned_import:importlib']",
+    "syntax_ok=True"
+  ]
+}

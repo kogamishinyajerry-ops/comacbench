@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn11k_t2550_opr11",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ntry:\\n    from pycycle.constants import field_data as FD\\nexcept Exception:\\n    FD = {'h': 0, 'S': 1, 'P': 2, 'T': 3, 'rho': 5, 'gamma': 6, 'Cp': 7,\\n          'n': 8, 'b': 9, 'W': 10, 'V': 11, 'Ps': 14, 'hs': 15}\\n\\nNFLOW = max(FD.values()) + 1\\nG0 = 32.174  # ft/s^2\\n\\n\\ndef make_flow(W, P, T, h, S=0.0):\\n    a = np.zeros(NFLOW)\\n    a[FD['W']] = W\\n    a[FD['P']] = P\\n    a[FD['T']] = T\\n    a[FD['h']] = h\\n    a[FD['S']] = S\\n    return a\\n\\n\\nclass ThrustCalc(om.ExplicitComponent):\\n    \\\"\\\"\\\"Net thrust from nozzle exit (static) flow and freestream conditions.\\\"\\\"\\\"\\n\\n    def setup(self):\\n        self.add_input('flow_stat', shape=NFLOW)\\n        self.add_input('W0', val=100.)       # lbm/s\\n        self.add_input('V0', val=0.)         # ft/s\\n        self.add_input('Pamb', val=14.696)   # psia\\n        self.add_output('Fn', val=10000.)    # lbf\\n        self.add_output('Wexit', val=100.)\\n        self.add_output('Vexit', val=1.)\\n\\n    def compute(self, inputs, outputs):\\n        f = inputs['flow_stat']\\n        W = f[FD['W']]\\n        V = f[FD['V']]\\n        Ps = f[FD['Ps']]\\n        rho = f[FD['rho']]\\n        A = W / (rho * V) if (rho > 0 and V > 0) else 0.0\\n        gross = W * V / G0 + (Ps - inputs['Pamb']) * A\\n        ram = inputs['W0'] * inputs['V0'] / G0\\n        outputs['Fn'] = gross - ram\\n        outputs['Wexit'] = W\\n        outputs['Vexit'] = V\\n\\n    def compute_partials(self, inputs, partials):\\n        pass\\n\\n\\nclass Turbojet(om.Group):\\n    def setup(self):\\n        thermo = pyc.AIR_JETA_TAB_SPEC\\n\\n        self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo))\\n\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo))\\n\\n        try:\\n            comp = pyc.Compressor(thermo_data=thermo, design=True, map=pyc.AXI5)\\n        except Exception:\\n            try:\\n                comp = pyc.Compressor(thermo_data=thermo, design=True)\\n            except Exception:\\n                comp = pyc.Compressor()\\n        self.add_subsystem('comp', comp)\\n\\n        try:\\n            burner = pyc.Combustor(thermo_data=thermo, thermo_method='TABULAR')\\n        except Exception:\\n            burner = pyc.Combustor(thermo_data=thermo)\\n        self.add_subsystem('burner', burner)\\n\\n        try:\\n            turb = pyc.Turbine(thermo_data=thermo, design=True, map=pyc.LPT2269)\\n        except Exception:\\n            try:\\n                turb = pyc.Turbine(thermo_data=thermo, design=True)\\n            except Exception:\\n                turb = pyc.Turbine()\\n        self.add_subsystem('turb', turb)\\n\\n        try:\\n            nozz = pyc.Nozzle(thermo_data=thermo, lossCoef='CV', areaDefinition='Exit')\\n        except Exception:\\n            nozz = pyc.Nozzle(thermo_data=thermo)\\n        self.add_subsystem('nozz', nozz)\\n\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2))\\n        self.add_subsystem('thrust', ThrustCalc())\\n\\n        bal = om.BalanceComp()\\n        bal.add_balance('W', units='lbm/s', eq_units='lbf', lhs_name='Fn',\\n                        rhs_val=11000., lower=5., upper=5000.)\\n        self.add_subsystem('bal', bal)\\n\\n        # flow connections\\n        self.connect('fc.Fl_O:tot', 'inlet.Fl_I:tot')\\n        self.connect('inlet.Fl_O:tot', 'comp.Fl_I:tot')\\n        self.connect('comp.Fl_O:tot', 'burner.Fl_I:tot')\\n        self.connect('burner.Fl_O:tot', 'turb.Fl_I:tot')\\n        self.connect('turb.Fl_O:tot', 'nozz.Fl_I:tot')\\n\\n        # shaft\\n        self.connect('comp.trq', 'shaft.trq_1')\\n        self.connect('turb.trq', 'shaft.trq_0')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # thrust / balance closure\\n        self.connect('nozz.Fl_O:stat', 'thrust.flow_stat')\\n        self.connect('bal.W', 'fc.W')\\n        self.connect('thrust.Fn', 'bal.Fn')\\n\\n        self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True, maxiter=100,\\n                                                atol=1e-8, rtol=1e-8, iprint=1)\\n        self.nonlinear_so\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 638, in _setup_procs\\n    subsys._setup_procs(subsys.pathname, sub_comm, prob_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_jp4qj69m/solve.py\\\", line 59, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo))\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 677.095,
+    "setup_s": 0.0,
+    "grade_s": 1.133
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.13s"
+  ]
+}

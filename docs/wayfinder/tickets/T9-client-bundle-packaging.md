@@ -1,6 +1,6 @@
 # T9 · client bundle 打包格式验证
 
-- Label: `wayfinder:task`（AFK——agent 可独立完成） · Status: claimed（2026-08-22 wayfinding session，执行子代理已发） · Blocked by: —（阻塞 T3）
+- Label: `wayfinder:task`（AFK——agent 可独立完成） · Status: **closed**（2026-08-23，六项验证全 PASS） · Blocked by: —（阻塞 T3）
 
 ## Question
 
@@ -19,4 +19,12 @@ T1 研究证明载体可行，但全压在同一个打包风险上：client plug
 
 ## Resolution
 
-（待解）
+**结论：全过，方案 1 的唯一技术雷已拆。** 六项验证点（静态契约解析 / `__DSH_BOOT__` 图行 / bundle URL factory 格式 / `/comac/ping` JSON / ViewMap 页面端到端 / HMR 无刷新热替换）全部自动化 PASS，无遗留人工确认项（Playwright headless 实证，截图留证）。
+
+**三个直接进 T6 规格书的定论**：
+
+1. **打包配方**：tsdown 0.22 公开版即可复刻官方 lazy-CJS factory 格式——`format:"cjs"` + banner/footer 拼 `window.__ModuleLoader__.load({id,factory})` 包装 + `deps.neverBundle:[/^react/]` + **`clean:false`**（默认 true 会删掉手写 host 半，首坑）。产物与官方 bundle 逐字节同构，无需源 monorepo。
+2. **挂载形态定论**：双面孔件（host+client）**只能** node_modules/包名形态挂载；绝对路径形态 host 半可用但 client 半不被发现（根因：`ClientModuleRegistry.resolveMeta` 用 `require.resolve("<name>/package.json")`，路径形态解析失败被缓存为"非 client 包"）。
+3. **隔离验证法**：`DSH_HOME=/tmp/...` 完整重定向 + 顶层 flag `--patch`（非 web 子命令）+ 独立端口——scratch 实例零接触主实例，本票全程 3080 未碰。
+
+e2e 旁路播种（workspace.create/session.create API）、GUI 首跑弹窗、tab 栏 hideChrome 条件等 6 条坑全部记录在案。完整证据：[研究报告](../research/T9-client-bundle-packaging.md)；可复现插件源码：`.attic/t9-hello-client/`。

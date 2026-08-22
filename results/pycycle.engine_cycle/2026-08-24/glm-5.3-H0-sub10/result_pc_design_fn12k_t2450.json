@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# ---- define a simple turbojet cycle ----\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        # design point station definitions (fractions of total flow)\\n        self.pyc_add_airflow_source('.Fl', 1.0)\\n\\n        # Tabular thermo data\\n        self.options['thermo_method'] = 'TABULAR'\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n\\n        f_a = self.pyc_add_flow_station('Fc', ['Fl'])\\n        f_c = self.pyc_add_compressor('comp', ['Fc'])\\n        f_b = self.pyc_add_combustor('comb', [f_c])\\n        f_t = self.pyc_add_turbine('turb', [f_b])\\n        f_n = self.pyc_add_nozzle('nozz', [f_t], 0.99)\\n\\n        self.pyc_add Shaft = None  # placeholder\""
+  },
+  "timings": {
+    "agent_s": 518.45,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

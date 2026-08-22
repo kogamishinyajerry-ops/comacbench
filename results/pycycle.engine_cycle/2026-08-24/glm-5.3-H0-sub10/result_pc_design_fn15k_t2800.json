@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    \\\"\\\"\\\"Simple turbojet: Inlet + Compressor + Combustor + Turbine + Nozzle,\\n    SL static design with balances for Fn, shaft power, and nozzle exit pressure.\\\"\\\"\\\"\\n\\n    def initialize(self):\\n        self.options.declare('thermo_data', default=pyc.AIR_JETA_TAB_SPEC)\\n\\n    def pyc_setup(self):\\n        thermo = self.options['thermo_data']\\n\\n        # compressor / turbine map data (AXI5 / LPT2269 with safe fallbacks)\\n        try:\\n            cmap = pyc.AXI5\\n        except AttributeError:\\n            cmap = pyc.MAP_PX5\\n        try:\\n            tmap = pyc.LPT2269\\n        except AttributeError:\\n            tmap = pyc.LPT_MAP\\n\\n        # engine elements\\n        self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo))\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo))\\n        self.add_subsystem('comp', pyc.Compressor(thermo_data=thermo, map_data=cmap))\\n        self.add_subsystem('burn', pyc.Combustor(thermo_data=thermo, fuel_type='JETA'))\\n        self.add_subsystem('turb', pyc.Turbine(thermo_data=thermo, map_data=tmap))\\n        self.add_subsystem('nozz', pyc.Nozzle(thermo_data=thermo))\\n\\n        # balances:\\n        # 1) inlet airflow W such that Fn = 15000 lbf\\n        # 2) turbine PR such that turbine power = compressor power (shaft balance)\\n        # 3) nozzle PR such that exit static pressure = ambient (fully expanded)\\n        self.add_subsystem('bal_W', om.BalanceComp(name='W', lhs_name='Fn',\\n                                                   rhs_name='Fn_target',\\n                                                   units='lbm/s', eq_units='lbf',\\n                                                   lower=1.0, upper=1.0e5))\\n        self.add_subsystem('bal_turb', om.BalanceComp(name='PR', lhs_name='lhs',\\n                                                      rhs_name='rhs', eq_units='hp',\\n                                                      lower=1.0001, upper=50.0))\\n        self.add_subsystem('bal_nozz', om.BalanceComp(name='PR', lhs_name='Ps',\\n                                                      rhs_name='Ps_amb', eq_units='psi',\\n                                                      lower=1.0001, upper=40.0))\\n\\n        # flow connections\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I')\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'burn.Fl_I')\\n        self.pyc_connect_flow('burn.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # balance connections\\n        self.connect('bal_W.W', 'fc.W')\\n        self.connect('nozz.Fn', 'bal_W.Fn')\\n        self.connect('bal_turb.PR', 'turb.PR')\\n        self.connect('comp.power', 'bal_turb.lhs')\\n        self.connect('turb.power', 'bal_turb.rhs')\\n        self.connect('bal_nozz.PR', 'nozz.PR')\\n        self.connect('nozz.Ps', 'bal_nozz.Ps')\\n        self.connect('fc.Ps', 'bal_nozz.Ps_amb')\\n\\n        # coupled solver for the design point\\n        nl = self.nonlinear_solver = om.NewtonSolver(solve_subsystems=True, maxiter=100, iprint=0)\\n        nl.linesearch = om.BoundsEnforceLS(bound_enforcement='vector')\\n        self.linear_solver = om.DirectSolver()\\n\\n\\ndef run_design(W_guess, turbPR_guess, nozzPR_guess):\\n    p = om.Problem(model=Turbojet())\\n    p.setup(check=False, force_alloc_complex=False)\\n    p.set_solver_print(level=0)\\n\\n    # SL static design conditions\\n    p.set_val('fc.alt', 0.0, units='ft')\\n    p.set_val('fc.MN', 0.0)\\n    p.set_val('inlet.MN', 0.0)\\n\\n    # design variables\\n    p.set_val('burn.Tt4', 2800.0, units='degR')   # T4 target\\n    p.set_val('burn.dPqP', 0.05)\\n    p.set_val('comp.PR', 15.0)                     # OPR target\\n\\n    # map/speed guesses\\n    p.set_val('comp.Nc', 1.0)\\n    p.set_val('turb.Nc', 1.0)\\n    p.set_val('comp.Nmech', 10000.0)\\n    p.set_val('turb.Nmech', 10000.0)\\n\\n    # balance guesses / targets\\n    p.set_val('bal_W.W', W_guess, units='lbm/s')\\n    p.set_val('bal_\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_6szwpze7/solve.py\\\", line 116, in <module>\\n    raise RuntimeError('Design point failed to converge')\\nRuntimeError: Design point failed to converge\\n\"}"
+  },
+  "timings": {
+    "agent_s": 850.309,
+    "setup_s": 0.0,
+    "grade_s": 1.099
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.1s"
+  ]
+}

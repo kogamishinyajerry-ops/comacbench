@@ -560,6 +560,10 @@ def main() -> int:
                          "rounds_to_success 落 artifacts.iteration 不进 score")
     ap.add_argument("--limit", type=int, default=0,
                     help="只跑前 K 个任务（试点子集用；0=全量）")
+    ap.add_argument("--scaffold", default=None,
+                    help="H2/H3 harness 臂：蒸馏工作流文档路径，注入每题 prompt 前"
+                         "部（反馈轮自动携带）。与 --iterate 组合构成 harness 臂矩阵："
+                         "H0=无；H1=--iterate 3；H2=--scaffold；H3=--iterate 3 --scaffold")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -592,6 +596,18 @@ def main() -> int:
             pf = (assets_root / pf).resolve()
         with open(pf, encoding="utf-8", newline="") as f:
             prompt_cache[t.id] = f.read()
+
+    # H2/H3 harness 臂：蒸馏工作流文档注入 prompt 前部（反馈轮以 prompt_cache
+    # 为基底自动携带）。文档是受测 harness 的核心资产，其 sha256 落 manifest。
+    scaffold_text = ""
+    if args.scaffold:
+        sp = Path(args.scaffold)
+        if not sp.is_absolute():
+            sp = (common.BENCH_ROOT / sp).resolve()
+        scaffold_text = sp.read_text(encoding="utf-8").strip() + \
+            "\n\n---\n\n# TASK\n\n"
+        for tid in prompt_cache:
+            prompt_cache[tid] = scaffold_text + prompt_cache[tid]
 
     oracle_cache: dict[str, str] = {}
     companions: list[tuple[str, str]] = []
@@ -626,6 +642,7 @@ def main() -> int:
              + f" --seed {args.seed}"
              + (f" --iterate {args.iterate}" if args.iterate > 1 else "")
              + (f" --limit {args.limit}" if args.limit else "")
+             + (f" --scaffold {args.scaffold}" if args.scaffold else "")
              + (" --resume" if args.resume else ""))
 
     results, crash, resumed = [], 0, 0
@@ -675,7 +692,11 @@ def main() -> int:
                                    "resumed_tasks": resumed,
                                    "protocol": "iterate" if args.iterate > 1 else "single",
                                    "iterate_rounds": args.iterate,
-                                   "limit": args.limit})
+                                   "limit": args.limit,
+                                   "harness_arm": ("H3" if (args.scaffold and args.iterate > 1)
+                                                   else "H2" if args.scaffold
+                                                   else "H1" if args.iterate > 1 else "H0"),
+                                   "scaffold": (args.scaffold or None)})
     sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
     dist = gate_distribution(results)
     print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "

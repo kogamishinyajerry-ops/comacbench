@@ -57,7 +57,8 @@ PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
         "key_envs": ["GLM_API_KEY"],
         "model_default": "glm-4.6",
         "keychain_hint": "security find-generic-password -s glm-api-key -w",
-        "extra_body": {"thinking": {"type": "enabled"}},
+        # 2026-08-24：glm-5.3 思考更长（pycycle 类复杂题 16384 耗尽、content 空）-> 32768
+        "extra_body": {"thinking": {"type": "enabled"}, "max_tokens": 32768},
         "escalate": {"thinking": {"type": "disabled"}, "max_tokens": 512},
     },
     "minimax": {
@@ -229,6 +230,12 @@ def _chat_completions_answer(
               "math_answer": _SYSTEM_PROMPT_MATH}[expect]
 
     def make_body(patch: dict[str, Any] | None) -> bytes:
+        if patch and patch.get("max_tokens", 1 << 30) <= 1024 and \
+                expect not in ("mcq", "math_answer"):
+            # escalate 的 512 是为 MCQ/短答案设计的；glm-5.3 实测难题上无视
+            # thinking disabled 仍推理（reasoning 耗尽 512 -> content 空），代码类
+            # expect 需要足以容纳「残余推理 + 完整代码」的预算（2026-08-24）
+            patch = {**patch, "max_tokens": 16384}
         if images:
             # OpenAI 兼容多模态 content：图在前文在后（bigmodel 实测可用；
             # images 为 data:image/...;base64 URI，由 adapter 侧加载生成）

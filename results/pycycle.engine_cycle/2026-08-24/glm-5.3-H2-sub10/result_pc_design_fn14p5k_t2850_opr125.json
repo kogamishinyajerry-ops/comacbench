@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_design_fn14p5k_t2850_opr125",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def setup(self):\\n        self.options['thermo_method'] = 'TABULAR'\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n        design = self.options['design']\\n\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, map_extrap=True),\\n                           promotes_inputs=['Nmech'])\\n        self.add_subsystem('burner', pyc.Combustor(fuel_type=\\\"FAR\\\"))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269),\\n                           promotes_inputs=['Nmech'])\\n        self.add_subsystem('nozz', pyc.Nozzle(nozzType='CD', lossCoef='Cv'))\\n        self.add_subsystem('shaft', pyc.Shaft(num_ports=2), promotes_inputs=['Nmech'])\\n        self.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_burners=1))\\n\\n        self.pyc_connect_flow('fc.Fl_O', 'inlet.Fl_I', connect_w=False)\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'burner.Fl_I')\\n        self.pyc_connect_flow('burner.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'nozz.Fl_I')\\n\\n        self.connect('comp.trq', 'shaft.trq_0')\\n        self.connect('turb.trq', 'shaft.trq_1')\\n        self.connect('fc.Fl_O:stat:P', 'nozz.Ps_exhaust')\\n        self.connect('inlet.Fl_O:tot:P', 'perf.Pt2')\\n        self.connect('comp.Fl_O:tot:P', 'perf.Pt3')\\n        self.connect('burner.Wfuel', 'perf.Wfuel_0')\\n        self.connect('inlet.F_ram', 'perf.ram_drag')\\n        self.connect('nozz.Fg', 'perf.Fg_0')\\n\\n        balance = self.add_subsystem('balance', om.BalanceComp())\\n        if\""
+  },
+  "timings": {
+    "agent_s": 230.227,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:11accaf9094c6bcf5f77985d0db21aef45b7bf6342da5a48c7f22c3482c6c014",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

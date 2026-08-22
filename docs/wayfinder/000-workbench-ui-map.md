@@ -16,6 +16,7 @@
   - **本地化硬规矩**：任何依赖必须可完全本地化打包，禁止运行时外部请求（字体/CDN/遥测）。
   - **薄代理延伸**：UI 数据层只读 result.json / registry.yaml / run_manifest，绝不复制判分逻辑。
   - **深色高密度工程台**：雷达图/热力图第一公民；中文标注清晰度是硬指标。
+  - **数据桥（T3 定案）**：host 插件 `/comac/*` prefix 路由活读 + client fetch；handler 内置 loopback 检查、全 GET 零写；快照导出仅走脚本/CLI；host 半与 comac_* agent 工具共享同一数据读取层（重算逻辑不复写）。
 - 关键事实（charting 已查）：19 基准、~80 个 date×provider 组合——全量结果一个 JSON 快照装得下；已有静态雷达图先例 `report/2026-08-21-coverage-assessment/radar_*.png`；仓库零前端积累。
 - 约定（local-markdown tracker）：票据状态 `open / claimed(<谁>) / closed`；阻塞用 `Blocked by:` 体例；前沿 = open 且 Blocked-by 全 closed 且未 claimed 的票据。**除 research 票外，每 session 最多解一票。**
 
@@ -33,6 +34,8 @@
 - 规格书交付物 = 决策论证 + IA/线框 + 数据契约 + 技术选型与打包 + 分期路线；可点击原型后置。
 - [T2 · 内网前端运行时事实](tickets/T2-intranet-runtime.md)：内网 JS 运行时全仓库近零证据（唯一线索 env-matrix L43"内网 DSH 代理运行时"）；pip 纪律已映射 npm，**推荐形态 = dev 打自包含静态 dist、内网拷目录**；4 层 20 条本地化校验清单草案 → [研究报告](research/T2-intranet-runtime.md)。暴露风险：内网 DSH 是否含 web GUI 未确认 → 见 T8。
 - [T1 · DSH 内嵌页的数据桥](tickets/T1-dsh-data-bridge.md)：**能内嵌**。页面 = client plugin 注册进 `conversation.view` ViewMap；前端不能调 agent 工具；**推荐桥 = host 插件挂 `/comac/*` prefix JSON 路由活读仓库**（本机 dsh-comfyui 有实证先例），Typert Remote 备选；风险集中于 client bundle 打包格式（→ T9）、裸路由无鉴权、新增插件须重启 → [研究报告](research/T1-dsh-data-bridge.md)。
+- [T9 · client bundle 打包格式验证](tickets/T9-client-bundle-packaging.md)：**全过**。tsdown 0.22 公开版复刻官方 factory 格式（cjs + banner/footer + neverBundle react + clean:false）；双面孔件必须 node_modules/包名挂载（绝对路径 client 半不被发现）；`DSH_HOME` 隔离法验证零接触主实例 → [研究报告](research/T9-client-bundle-packaging.md)，可复现配方 `.attic/t9-hello-client/`。
+- [T3 · 数据桥选型决策](tickets/T3-data-bridge-decision.md)：**方案 1 定案** = host 插件 `/comac/*` prefix JSON 路由活读 + client fetch；Typert 记为非 loopback 升级路径；暴露面 = handler 内置 loopback 检查 + 全 GET + 前缀独占；快照导出走脚本、UI 纯读、host 半零写；host 半与 comac_* 工具共享数据读取层。
 
 ## Tickets（前沿快照，权威状态以票据文件为准）
 
@@ -43,9 +46,9 @@
 | [T4 · 快照格式与归档纪律](tickets/T4-snapshot-format.md) | grilling (HITL) | open | — |
 | [T5 · 图表库与视觉系统选型](tickets/T5-chart-visual-stack.md) | grilling (HITL) | open | — |
 | [T8 · 内网 DSH 形态人工确认](tickets/T8-intranet-dsh-shape.md) | task (HITL，7 问清单) | open | — |
-| [T9 · client bundle 打包格式验证](tickets/T9-client-bundle-packaging.md) | task (AFK，hello-world 实证) | open | — |
-| [T3 · 数据桥选型决策](tickets/T3-data-bridge-decision.md) | grilling (HITL) | open | T9 |
-| [T6 · 规格书 v1 撰写](tickets/T6-spec-writing.md) | task | open | T3, T4, T5, T8 |
+| ~~[T9 · client bundle 打包格式验证](tickets/T9-client-bundle-packaging.md)~~ | task (AFK) | **closed**（六项验证全 PASS） | — |
+| ~~[T3 · 数据桥选型决策](tickets/T3-data-bridge-decision.md)~~ | grilling (HITL) | **closed**（方案 1 定案） | — |
+| [T6 · 规格书 v1 撰写](tickets/T6-spec-writing.md) | task | open | T4, T5, T8 |
 | [T7 · 可点击高保真原型](tickets/T7-clickable-prototype.md) | prototype (HITL) | open | T6 |
 
 ## Not yet specified
