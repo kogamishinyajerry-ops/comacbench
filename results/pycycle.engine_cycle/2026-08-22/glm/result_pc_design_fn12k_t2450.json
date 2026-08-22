@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\nimport os\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        # Thermodynamic data: TABULAR method with AIR_JETA_TAB_SPEC\\n        thermo_data = pyc.AIR_JETA_TAB_SPEC\\n        thermo_method = pyc.ThermoMethod.TABULAR\\n\\n        # 1. Flight Conditions (Sea Level, Mach ~ 0)\\n        self.add_subsystem('fc', pyc.FlightCondition())\\n\\n        # 2. Inlet\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo_data, thermo_method=thermo_method))\\n\\n        # 3. Compressor (AXI5 map)\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=thermo_data, thermo_method=thermo_method))\\n\\n        # 4. Combustor\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo_data, thermo_method=thermo_method))\\n\\n        # 5. Turbine (LPT2269 map)\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=thermo_data, thermo_method=thermo_method))\\n\\n        # 6. Nozzle (Convergent-Divergent)\\n        self.add_subsystem('nozzle', pyc.CDNozzle(thermo_data=thermo_data, thermo_method=thermo_method))\\n\\n        # 7. Shaft connecting Compressor and Turbine\\n        self.add_subsystem('shaft', pyc.Shaft(num_inlets=1, num_outlets=1))\\n\\n        # Connect Flow Path\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozzle.Fl_I')\\n\\n        # Connect Shaft Power/Torque\\n        self.connect('comp.trq', 'shaft.trq_1')\\n        self.connect('turb.trq', 'shaft.trq_2')\\n\\n        # --- Balances ---\\n        \\n        # Balance 1: Shaft Torque (Power Balance)\\n        # Variable: Nmech (Shaft Speed)\\n        # Residual: shaft.trq_net\\n        bal_trq = self.add_subsystem('bal_trq', om.BalanceComp())\\n        bal_trq.add_balance('Nmech', val=10000.0, units='rpm', eq_units='ft*lbf', lower=5000.0, upper=25000.0)\\n        self.connect('bal_trq.Nmech', ['comp.Nmech', 'turb.Nmech'])\\n        self.connect('shaft.trq_net', 'bal_trq.lhs:Nmech')\\n\\n        # Balance 2: T4 (Combustor Exit Temperature)\\n        # Variable: Wfuel (Fuel Flow)\\n        # Residual: burner.Fl_O:tot:T - T4_target\\n        bal_T4 = self.add_subsystem('bal_T4', om.BalanceComp())\\n        bal_T4.add_balance('Wfuel', val=2.0, units='lbm/s', eq_units='degR', lower=0.1, upper=10.0)\\n        self.connect('bal_T4.Wfuel', 'burner.Wfuel')\\n        self.connect('burner.Fl_O:tot:T', 'bal_T4.lhs:Wfuel')\\n\\n        # Set Solver for Inner Loop (Newton)\\n        self.nonlinear_solver = om.NewtonSolver(solve_subsystems=False, maxiter=20, iprint=2)\\n        self.linear_solver = om.DirectSolver()\\n        self.nonlinear_solver.options['rtol'] = 1e-5\\n        self.nonlinear_solver.options['atol'] = 1e-5\\n\\n\\n# Setup Problem\\nprob = om.Problem()\\nprob.model = TurbojetDesign()\\n\\n# Driver for Outer Loop (Optimization to hit Fn and OPR)\\nprob.driver = om.ScipyOptimizeDriver()\\nprob.driver.options['tol'] = 1e-4  # 0.01% tolerance for optimizer\\nprob.driver.options['maxiter'] = 100\\n\\n# --- Outer Loop Variables and Constraints ---\\n\\n# Design Variables:\\n# 1. Inlet Mass Flow (W) - Affects both Thrust and OPR\\nprob.model.add_design_var('inlet.Fl_O:stat:W', lower=50.0, upper=300.0)\\n# 2. Nozzle Throat Area (A_throat) - Affects Thrust and backpressure\\nprob.model.add_design_var('nozzle.Throat:area', lower=1.0, upper=5.0)\\n\\n# Constraints:\\n# 1. Net Thrust (Fn) = 12000 lbf\\nprob.model.add_constraint('nozzle.F_net', equals=12000.0)\\n# 2. Compressor Pressure Ratio (OPR) = 14.0\\nprob.model.add_constraint('comp.PR', equals=14.0)\\n\\n# --- Initial Conditions ---\\nprob.set_val('fc.MN', 0.0)\\nprob.set_val('fc.alt', 0.0, units='ft')\\n\\nprob.set_val('inlet.Fl_O:stat:W', 120.0, units='lbm/s')\\nprob.set_val('nozzle.Throat:area', 2.5, units='ft**2')\\n\\nprob.set_val('bal_trq.Nmech', 12000.0, units='rpm')\\nprob.set_val('bal_T4.Wfuel', 2.0, units='lbm/s')\\n\\n# Initial T4 guess to help solver\\nprob.set_val('bur\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ztovwi5j/solve.py\\\", line 93, in <module>\\n    prob.set_val('fc.MN', 0.0)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 595, in set_val\\n    self.model.set_val(name, val, units=units, indices=indices)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/system.py\\\", line 5351, in set_val\\n    raise RuntimeError(f\\\"{self.msginfo}: Called set_val({name}, ...) before setup \\\"\\nRuntimeError: <class TurbojetDesign>: Called set_val(fc.MN, ...) before setup completes.\\n\"}"
+  },
+  "timings": {
+    "agent_s": 307.368,
+    "setup_s": 0.0,
+    "grade_s": 1.073
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.07s"
+  ]
+}

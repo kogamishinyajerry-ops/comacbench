@@ -72,21 +72,21 @@ PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
         "escalate": {"thinking": {"type": "disabled"}, "max_tokens": 512},
     },
     # VLM 通道（2026-08-21 接入，mechvqa 多模态用）：
-    #   glm-4v-flash 免费档实测直连可用（1x1 图探针返回正常）；
-    #   GLM-4.6V / GLM-4.5V 为有效模型名但当前账户余额不足（1113）——
-    #   充值后 --model glm-4.6v 覆写即可升级，不改代码。
-    #   MiniMax 端点无 VL 模型（MiniMax-VL-01 报 2013 unknown model）；
-    #   Gemini key 区域封锁（FAILED_PRECONDITION）——故 VLM 单通道。
+    #   base 默认走 coding 端点（GLM 编程套餐额度，2026-08-22 实测 glm-4.6v 与
+    #   glm-4v-flash 在该端点均可用；标准 PAAS 端点欠费时 1113，GLMVL_BASE_URL 可覆写）。
+    #   glm-4v-flash 免费档 max_tokens 上限 1024（>1024 报 1210），4.6v 同限安全。
+    #   MiniMax 端点无 VL 模型（2013）；Gemini key 区域封锁——故 VLM 单通道。
     "glmvl": {
         "base_env": "GLMVL_BASE_URL",
-        "base_default": "https://open.bigmodel.cn/api/paas/v4",
+        "base_default": "https://open.bigmodel.cn/api/coding/paas/v4",
         "key_envs": ["GLMVL_API_KEY", "GLM_API_KEY"],
         "model_default": "glm-4v-flash",
         "keychain_hint": "security find-generic-password -s glm-api-key -w",
         "vlm": True,                       # 支持图像输入（multimodal_only 任务准入）
-        # glm-4v-flash 实测 max_tokens 上限 1024（>1024 报 1210 参数非法）；
-        # VQA 一两句中文短答 1024 token 足够（≈500+ 汉字）
         "extra_body": {"max_tokens": 1024},
+        # 2026-08-22 实测：glm-4.6v 个别难题思考耗尽 1024 token -> content 空；
+        # escalate 关思考保答案输出（coding 端点已验证 4.6v 接受 thinking 开关）
+        "escalate": {"thinking": {"type": "disabled"}, "max_tokens": 512},
     },
 }
 

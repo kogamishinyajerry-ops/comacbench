@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_opr_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ndef run_turbojet_design(opr, thrust_target, t4_target):\\n    \\\"\\\"\\\"\\n    Runs the pycycle Turbojet design point analysis for a specific OPR.\\n    Returns the calculated TSFC.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    \\n    # Add the Turbojet element\\n    prob.model.add_subsystem('turbojet', pyc.Turbojet())\\n    \\n    # Setup the problem\\n    prob.setup()\\n    \\n    # Set initial conditions and fixed parameters\\n    # Sea Level Static (SLS) conditions\\n    prob.set_val('turbojet.design.inlet.MN', 0.0)\\n    prob.set_val('turbojet.design.flight.alt', 0.0, units='ft')\\n    \\n    # Cycle Design Parameters\\n    # OPR (Compressor Pressure Ratio)\\n    prob.set_val('turbojet.design.compressor.PR', opr)\\n    # T4 (Turbine Inlet Temperature)\\n    prob.set_val('turbojet.design.combustor.Tt_out', t4_target, units='degR')\\n    \\n    # Setup Driver to match Thrust Target\\n    # We use an optimizer to vary Nozzle Throat Area to achieve the desired Thrust\\n    prob.driver = om.ScipyOptimizeDriver()\\n    \\n    # Design Variable: Nozzle Throat Area\\n    prob.model.add_design_var('turbojet.design.nozzle.A_throat', lower=0.1, upper=5.0)\\n    \\n    # Constraint: Thrust must equal target\\n    prob.model.add_constraint('turbojet.Fn', equals=thrust_target)\\n    \\n    # Run the optimization/solver\\n    prob.run_driver()\\n    \\n    # Get TSFC result\\n    tsfc = prob.get_val('turbojet.TSFC')\\n    \\n    return float(tsfc[0])\\n\\ndef main():\\n    # Target parameters\\n    THRUST_TARGET = 12000.0  # lbf\\n    T4_TARGET = 2450.0       # degR\\n    \\n    # OPR values to scan\\n    opr_values = [11.0, 13.5, 16.0]\\n    tsfc_results = []\\n    \\n    print(f\\\"Starting TSFC sensitivity scan for OPR: {opr_values}\\\")\\n    \\n    # Run analysis for each OPR\\n    for opr in opr_values:\\n        print(f\\\"Calculating for OPR = {opr}...\\\")\\n        tsfc = run_turbojet_design(opr, THRUST_TARGET, T4_TARGET)\\n        tsfc_results.append(tsfc)\\n        print(f\\\"  Result TSFC: {tsfc:.6f}\\\")\\n    \\n    # Calculate least-squares slope of TSFC vs OPR\\n    # polyfit returns [slope, intercept] for degree 1\\n    slope, _ = np.polyfit(opr_values, tsfc_results, 1)\\n    \\n    # Prepare output dictionary\\n    # Keys specified in prompt: tsfc_opr110, tsfc_opr135, tsfc_opr160\\n    result = {\\n        \\\"tsfc_opr110\\\": tsfc_results[0],  # OPR 11.0\\n        \\\"tsfc_opr135\\\": tsfc_results[1],  # OPR 13.5\\n        \\\"tsfc_opr160\\\": tsfc_results[2],  # OPR 16.0\\n        \\\"dtsfc_dopr\\\": slope\\n    }\\n    \\n    # Write to JSON\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=4)\\n        \\n    print(\\\"Analysis complete. Results written to result.json.\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vza9y2gp/solve.py\\\", line 86, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vza9y2gp/solve.py\\\", line 62, in main\\n    tsfc = run_turbojet_design(opr, THRUST_TARGET, T4_TARGET)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vza9y2gp/solve.py\\\", line 14, in run_turbojet_design\\n    prob.model.add_subsystem('turbojet', pyc.Turbojet())\\n                                         ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 152.331,
+    "setup_s": 0.0,
+    "grade_s": 1.624
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.62s"
+  ]
+}

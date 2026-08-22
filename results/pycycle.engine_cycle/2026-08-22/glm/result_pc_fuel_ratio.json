@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurbojetDesignPoint(om.Group):\\n    def setup(self):\\n        # Define thermodynamic properties for air and fuel (standard Jet-A approx)\\n        thermo = pyc.AirFuelMix(thmode='THERMO', elements=['C', 'H', 'O', 'N', 'AR'])\\n        \\n        # Add the Turbojet cycle element\\n        self.add_subsystem('cycle', pyc.Turbojet(thermo_data=thermo))\\n        \\n        # Add a Balance component to solve for Inlet Mass Flow (W) to hit Target Thrust\\n        self.add_subsystem('balance', om.BalanceComp())\\n        self.balance.add_balance('W', val=100.0, units='lbm/s', eq_units='lbf')\\n        \\n        # Connections\\n        # The output of the balance (W) connects to the cycle inlet mass flow\\n        self.connect('balance.W', 'cycle.inlet:W')\\n        # The actual thrust from the cycle connects to the balance RHS (target)\\n        self.connect('cycle.thrust.Fn', 'balance.rhs:W')\\n\\ndef solve_case(t4_value, target_thrust, opr):\\n    \\\"\\\"\\\"\\n    Solves the turbojet cycle for a specific T4 and returns fuel flow.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    prob.model = TurbojetDesignPoint()\\n    \\n    # Setup solvers\\n    # The outer solver resolves the thrust balance (varying W)\\n    prob.model.nonlinear_solver = om.NewtonSolver(solve_subsystems=False)\\n    prob.model.linear_solver = om.DirectSolver()\\n    \\n    prob.setup()\\n    \\n    # Set Initial Conditions (Sea Level Static)\\n    # Alt = 0 ft -> P = 14.696 psi, T = 518.67 degR\\n    prob.set_val('cycle.inlet:Fl_O:stat:P', 14.696, units='psi')\\n    prob.set_val('cycle.inlet:Fl_O:stat:T', 518.67, units='degR')\\n    prob.set_val('cycle.inlet:Mn', 0.0)\\n    \\n    # Set Design Parameters\\n    prob.set_val('cycle.compressor.PR', opr)\\n    prob.set_val('cycle.burner.T4', t4_value, units='degR')\\n    \\n    # Set Target Thrust\\n    prob.set_val('balance.rhs:W', target_thrust, units='lbf')\\n    \\n    # Set initial guess for Mass Flow (lbm/s)\\n    # Higher T4 means higher specific thrust, so lower mass flow is needed for the same thrust.\\n    # 2200 R is low, needs more flow. 2600 R is high, needs less flow.\\n    if t4_value == 2200:\\n        prob.set_val('balance.W', 125.0, units='lbm/s')\\n    else:\\n        prob.set_val('balance.W', 90.0, units='lbm/s')\\n        \\n    # Run the analysis\\n    prob.run_model()\\n    \\n    # Retrieve Fuel Flow (Wfuel)\\n    w_fuel = prob.get_val('cycle.burner.W_fuel', units='lbm/s')\\n    \\n    return w_fuel\\n\\n# --- Main Execution ---\\n\\n# Constants\\nFN_TARGET = 11800  # lbf\\nOPR_TARGET = 13.5\\nT4_CASE_1 = 2200   # degR\\nT4_CASE_2 = 2600   # degR\\n\\n# Solve for T4 = 2200 degR\\nfuel_flow_2200 = solve_case(T4_CASE_1, FN_TARGET, OPR_TARGET)\\nprint(f\\\"T4 {T4_CASE_1} degR: Wfuel = {fuel_flow_2200:.4f} lbm/s\\\")\\n\\n# Solve for T4 = 2600 degR\\nfuel_flow_2600 = solve_case(T4_CASE_2, FN_TARGET, OPR_TARGET)\\nprint(f\\\"T4 {T4_CASE_2} degR: Wfuel = {fuel_flow_2600:.4f} lbm/s\\\")\\n\\n# Calculate Ratio\\nratio = fuel_flow_2600 / fuel_flow_2200\\nprint(f\\\"Ratio (2600/2200): {ratio:.4f}\\\")\\n\\n# Write result to JSON\\nresult_data = {\\n    \\\"fuel_ratio_t2600_over_t2200\\\": ratio\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result_data, f)\\n\\nprint(\\\"Result written to result.json\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"H-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_sfu6udc9/solve.py\\\", line 8, in setup\\n    thermo = pyc.AirFuelMix(thmode='THERMO', elements=['C', 'H', 'O', 'N', 'AR'])\\n             ^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'AirFuelMix'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 110.984,
+    "setup_s": 0.0,
+    "grade_s": 1.028
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

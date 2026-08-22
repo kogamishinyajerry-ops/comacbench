@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_t4_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ndef main():\\n    # Define Operating Conditions\\n    fn_target = 12500.0  # lbf\\n    opr = 14.0\\n    t4_values = [2350.0, 2550.0, 2750.0]  # degR\\n\\n    tsfc_results = []\\n\\n    for t4 in t4_values:\\n        # Instantiate the Turbojet model\\n        prob = om.Problem()\\n        prob.model = pyc.Turbojet()\\n\\n        # Setup the solver\\n        # The design point requires solving the thrust balance. \\n        # We attach a NewtonSolver to the design group to converge the balances.\\n        prob.model.design.nonlinear_solver = om.NewtonSolver(solve_subsystems=False)\\n        prob.model.design.linear_solver = om.DirectSolver()\\n        prob.model.design.nonlinear_solver.options['maxiter'] = 20\\n        prob.model.design.nonlinear_solver.options['rtol'] = 1e-5\\n        prob.model.design.nonlinear_solver.options['atol'] = 1e-6\\n\\n        prob.setup()\\n\\n        # Set Design Parameters with explicit units\\n        prob.set_val('design.opr', opr)\\n        prob.set_val('design.Tt4', t4, units='degR')\\n        prob.set_val('design.Fn_target', fn_target, units='lbf')\\n\\n        # Set initial guess for mass flow (W) to aid convergence\\n        # ~120 lbm/s is a reasonable starting point for a 12,500 lbf class engine\\n        prob.set_val('inlet.W', 120.0, units='lbm/s')\\n\\n        # Run the analysis\\n        prob.run_model()\\n\\n        # Extract TSFC\\n        # PyCycle computes TSFC in 1/s (base SI units)\\n        tsfc = prob.get_val('perf.TSFC')[0]\\n        tsfc_results.append(float(tsfc))\\n\\n    # Calculate the least-squares slope of TSFC vs T4\\n    # x = T4 (degR), y = TSFC (1/s)\\n    slope, _ = np.polyfit(t4_values, tsfc_results, 1)\\n\\n    # Package results\\n    results = {\\n        \\\"tsfc_t42350\\\": tsfc_results[0],\\n        \\\"tsfc_t42550\\\": tsfc_results[1],\\n        \\\"tsfc_t42750\\\": tsfc_results[2],\\n        \\\"dtsfc_dt4\\\": float(slope)\\n    }\\n\\n    # Write to JSON\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=4)\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4i5yu6fn/solve.py\\\", line 64, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4i5yu6fn/solve.py\\\", line 17, in main\\n    prob.model = pyc.Turbojet()\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 259.01,
+    "setup_s": 0.0,
+    "grade_s": 1.077
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.08s"
+  ]
+}

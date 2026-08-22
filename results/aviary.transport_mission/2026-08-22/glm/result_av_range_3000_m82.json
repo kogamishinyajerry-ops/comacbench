@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_3000_m82",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info\\n\\n# Define the absolute path to the aircraft model CSV\\ncsv_path = '/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_range_3000_m82.csv'\\n\\n# Deepcopy the default phase_info to avoid modifying the global configuration\\ncustom_phase_info = copy.deepcopy(phase_info)\\n\\n# Set the cruise Mach number to 0.82 as requested\\ncustom_phase_info['cruise']['user_options']['mach_cruise'] = 0.82\\n\\n# Run Aviary with the specified environment constraints\\n# run_driver=False sets up the problem but does not run the optimizer driver\\nprob, _ = run_aviary(\\n    csv_path,\\n    phase_info=custom_phase_info,\\n    optimizer=\\\"SLSQP\\\",\\n    run_driver=False,\\n    verbosity=0,\\n    make_plots=False\\n)\\n\\n# Execute the model to perform the forward mission analysis\\nprob.run_model()\\n\\n# Extract the required output variables\\n# Using the promoted names, converting to lbm, and taking the first element\\ntotal_fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\nfinal_mass = prob.get_val('mission:final_mass', units='lbm')[0]\\n\\n# Prepare the result dictionary\\nresult_data = {\\n    \\\"fuel_burn_lbm\\\": total_fuel,\\n    \\\"final_mass_lbm\\\": final_mass\\n}\\n\\n# Write the result to result.json in the current working directory\\nwith open('result.json', 'w') as f:\\n    json.dump(result_data, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ython3.12/site-packages/openmdao/core/conn_graph.py\\\", line 874, in find_node\\n    guesses = sorted(set(get_close_matches(name, [n[1] for n, d in self.nodes(data=True)\\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/difflib.py\\\", line 701, in get_close_matches\\n    s.set_seq2(word)\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/difflib.py\\\", line 248, in set_seq2\\n    self.__chain_b()\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/difflib.py\\\", line 280, in __chain_b\\n    for i, elt in enumerate(b):\\n                  ^^^^^^^^^^^^\\nTypeError: 'int' object is not iterable\\n\"}"
+  },
+  "timings": {
+    "agent_s": 294.877,
+    "setup_s": 0.0,
+    "grade_s": 4.239
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 4.23s"
+  ]
+}

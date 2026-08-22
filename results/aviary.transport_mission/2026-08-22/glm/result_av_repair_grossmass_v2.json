@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_grossmass_v2",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport os\\nimport tempfile\\nimport copy\\n\\nimport numpy as np\\nimport pandas as pd\\nimport aviary.api as av\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Configuration\\nCSV_PATH = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_repair_grossmass_v2_corrupt.csv\\\"\\nREFERENCE_FUEL_BURN = 43389.55\\nCRUISE_MACH = 0.80\\n\\n# Define candidates: (key to restore, true value to set)\\n# Based on the problem description, we test which restoration yields the reference fuel burn.\\ncandidates = [\\n    {'param': 'aircraft:design:range', 'value': 3400.0},\\n    {'param': 'aircraft:design:gross_mass', 'value': 175400.0}\\n]\\n\\n# Setup Phase Info\\nphase_info = copy.deepcopy(default_phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = CRUISE_MACH\\n\\n# Read the original CSV\\ndf = pd.read_csv(CSV_PATH)\\n\\nresult = None\\n\\nfor cand in candidates:\\n    # Create a modified copy of the dataframe\\n    df_modified = df.copy()\\n    \\n    # Locate the row and update the value\\n    # Aviary CSVs typically have a 'Name' column for keys and 'Value' for values\\n    mask = df_modified['Name'] == cand['param']\\n    if not mask.any():\\n        print(f\\\"Warning: Parameter {cand['param']} not found in CSV.\\\")\\n        continue\\n        \\n    df_modified.loc[mask, 'Value'] = cand['value']\\n    \\n    # Create a temporary file for this run\\n    fd, temp_path = tempfile.mkstemp(suffix='.csv')\\n    try:\\n        # Write the modified data to temp file\\n        with os.fdopen(fd, 'w') as f:\\n            df_modified.to_csv(f, index=False)\\n        \\n        # Run Aviary\\n        prob = av.run_aviary(\\n            temp_path,\\n            phase_info=phase_info,\\n            run_driver=False,\\n            optimizer=\\\"SLSQP\\\",\\n            verbosity=0,\\n            make_plots=False\\n        )\\n        \\n        # Extract fuel burn\\n        fuel_burn = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n        \\n        # Compare with reference (using a small tolerance for floating point arithmetic)\\n        if np.isclose(fuel_burn, REFERENCE_FUEL_BURN, rtol=1e-4):\\n            result = {\\n                \\\"corrupted_param\\\": cand['param'],\\n                \\\"restored_value\\\": float(cand['value'])\\n            }\\n            break\\n            \\n    finally:\\n        # Clean up temp file\\n        if os.path.exists(temp_path):\\n            os.remove(temp_path)\\n\\nif result:\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=4)\\nelse:\\n    # Fallback if no match found (should not happen based on problem statement)\\n    print(\\\"No matching parameter found that reproduces the reference fuel burn.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"y-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/pandas/io/parsers/c_parser_wrapper.py\\\", line 215, in read\\n    chunks = self._reader.read_low_memory(nrows)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 832, in pandas._libs.parsers.TextReader.read_low_memory\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 897, in pandas._libs.parsers.TextReader._read_rows\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 868, in pandas._libs.parsers.TextReader._tokenize_rows\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 885, in pandas._libs.parsers.TextReader._check_tokenize_status\\n  File \\\"pandas/_libs/parsers.pyx\\\", line 2084, in pandas._libs.parsers.raise_parser_error\\npandas.errors.ParserError: Error tokenizing data. C error: Expected 3 fields in line 215, saw 5\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 63.744,
+    "setup_s": 0.0,
+    "grade_s": 1.23
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.23s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        # Thermodynamic Cycle Setup\\n        # Environment: Sea Level (SL), Alt 0 ft, MN ~ 0\\n        self.add_subsystem('fc', pyc.FlightCondition(num_nodes=1))\\n        \\n        # Components\\n        self.add_subsystem('inlet', pyc.DesignInlet(num_nodes=1))\\n        self.add_subsystem('comp', pyc.AXI5(num_nodes=1))\\n        self.add_subsystem('burner', pyc.Combustor(num_nodes=1))\\n        self.add_subsystem('turb', pyc.LPT2269(num_nodes=1))\\n        self.add_subsystem('nozz', pyc.CDNozzle(num_nodes=1))\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # Flow Connections\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # Mechanical Connections (Shaft)\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n        self.connect('comp.power', 'shaft.power_in')\\n        self.connect('turb.power', 'shaft.power_out')\\n\\n        # Balance for Nozzle Expansion (optional but good for design)\\n        # We will drive exit static pressure to ambient pressure via optimizer\\n        \\nif __name__ == \\\"__main__\\\":\\n    # Initialize Problem\\n    prob = om.Problem()\\n    prob.model = TurbojetDesign()\\n\\n    # Driver setup - using ScipyOptimizeDriver to solve for targets\\n    prob.driver = om.ScipyOptimizeDriver()\\n    prob.driver.options['tol'] = 1e-4  # Tolerance suitable for 1%\\n    prob.driver.options['maxiter'] = 100\\n\\n    # Setup\\n    prob.setup()\\n\\n    # --- Set Initial Guesses & Fixed Parameters ---\\n\\n    # Flight Condition: Sea Level, Static (Mach ~ 0)\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n    prob.set_val('fc.MN', 0.001) # Near zero, non-zero to avoid singularities if any\\n    prob.set_val('fc.dT', 0.0, units='degR')\\n    \\n    # Initial Guesses for Design Variables\\n    prob.set_val('shaft.Nmech', 10000.0, units='rpm')\\n    prob.set_val('burner.Wfuel', 2.5, units='lbm/s')\\n    prob.set_val('comp.s_W', 1.0) # Compressor map flow scale\\n    prob.set_val('turb.s_W', 1.0) # Turbine map flow scale\\n    prob.set_val('nozz.Throat:stat:area', 1.0, units='ft**2')\\n\\n    # --- Define Optimization Problem ---\\n    \\n    # Design Variables\\n    prob.model.add_design_var('shaft.Nmech', lower=5000.0, upper=20000.0)\\n    prob.model.add_design_var('burner.Wfuel', lower=0.1, upper=10.0)\\n    prob.model.add_design_var('comp.s_W', lower=0.1, upper=10.0)\\n    prob.model.add_design_var('turb.s_W', lower=0.1, upper=10.0)\\n    prob.model.add_design_var('nozz.Throat:stat:area', lower=0.1, upper=10.0, units='ft**2')\\n\\n    # Constraints (Design Targets)\\n    # 1. OPR = 16.0\\n    prob.model.add_constraint('comp.Fl_O:tot:P / comp.Fl_I:tot:P', equals=16.0)\\n    \\n    # 2. T4 = 2900 degR\\n    prob.model.add_constraint('burner.Fl_O:tot:T', equals=2900.0, units='degR')\\n    \\n    # 3. Net Thrust = 14000 lbf\\n    prob.model.add_constraint('nozz.Fn', equals=14000.0, units='lbf')\\n\\n    # 4. Component Sizing Match (Compressor and Turbine flow scales should match)\\n    prob.model.add_constraint('turb.s_W - comp.s_W', equals=0.0)\\n\\n    # 5. Nozzle Perfect Expansion (Exit Pressure = Ambient Pressure)\\n    prob.model.add_constraint('nozz.Fl_O:stat:P - fc.Fl_O:stat:P', equals=0.0)\\n\\n    # Run Optimization\\n    prob.run_driver()\\n\\n    # --- Extract Results ---\\n    fn_lbf = prob.get_val('nozz.Fn', units='lbf')[0]\\n    tsfc = prob.get_val('nozz.TSFC', units='lbm/(lbf*h)')[0]\\n    opr = prob.get_val('comp.Fl_O:tot:P / comp.Fl_I:tot:P')[0]\\n    wfuel_lbm_s = prob.get_val('burner.Wfuel', units='lbm/s')[0]\\n\\n    # Output to JSON\\n    results = {\\n        \\\"Fn_lbf\\\": float(fn_lbf),\\n        \\\"TSFC\\\": float(tsfc),\\n        \\\"OPR\\\": float(opr),\\n        \\\"Wfuel_lbm_s\\\": float(wfuel_lbm_s)\\n    }\\n\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"kages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_br25fyqg/solve.py\\\", line 9, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(num_nodes=1))\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 276.157,
+    "setup_s": 0.0,
+    "grade_s": 1.035
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

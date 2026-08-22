@@ -1,0 +1,38 @@
+{
+  "task_id": "av_range_3600_m78",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\ndef main():\\n    # Define the path to the aircraft model CSV\\n    aircraft_csv_path = '/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_range_3600_m78.csv'\\n\\n    # Deepcopy the default phase info to modify it safely\\n    phase_info = copy.deepcopy(default_phase_info)\\n\\n    # Update cruise Mach to 0.78 as requested\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.78\\n\\n    # Run Aviary with specified constraints\\n    # run_driver=False ensures setup and run are handled correctly for the API request\\n    # optimizer=\\\"SLSQP\\\" is required because pyoptsparse/IPOPT is not installed\\n    prob = run_aviary(\\n        aircraft_csv_path,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n\\n    # Extract results using the promoted names and units specified\\n    # prob.get_val returns an array, so we take index [0] for the scalar value\\n    fuel_burn_lbm = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    final_mass_lbm = prob.get_val('mission:final_mass', units='lbm')[0]\\n\\n    # Create the result dictionary\\n    result = {\\n        \\\"fuel_burn_lbm\\\": fuel_burn_lbm,\\n        \\\"final_mass_lbm\\\": final_mass_lbm\\n    }\\n\\n    # Write the result to result.json\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=4)\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"fuel_burn_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357572943, \"ref\": 43389.55357572943}, \"final_mass_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 136000.0, \"ref\": 136000.0}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 20.851,
+    "setup_s": 0.0,
+    "grade_s": 4.077
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 4.08s"
+  ]
+}

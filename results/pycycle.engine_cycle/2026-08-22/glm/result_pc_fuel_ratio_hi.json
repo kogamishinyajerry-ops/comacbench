@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_hi",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\nimport sys\\n\\ndef calculate_fuel_flow(t4_target):\\n    \\\"\\\"\\\"\\n    Solves the turbojet cycle for a specific T4 to find the fuel flow\\n    required to achieve 13000 lbf thrust at Sea Level Static conditions.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    model = prob.model\\n\\n    # Add the Turbojet element\\n    tz = model.add_subsystem('tz', pyc.Turbojet())\\n\\n    # Add a BalanceComp to vary Inlet Area to match Target Thrust\\n    # We want tz.Fn = 13000 lbf\\n    # Variable to vary: inlet area\\n    # Constraint: Thrust\\n    bal = model.add_subsystem('bal', om.BalanceComp())\\n    bal.add_balance('area', val=10.0, units='ft**2', eq_units='lbf', lower=0.1, upper=1000.0)\\n\\n    # Connect Balance Variable (area) to Turbojet Inlet Area\\n    model.connect('bal.area', 'tz.inlet.Fl_O:stat:area')\\n    \\n    # Connect Turbojet Thrust (Fn) to Balance RHS\\n    model.connect('tz.Fn', 'bal.rhs:area')\\n\\n    # Setup Solvers\\n    # Use NewtonSolver for the outer loop (Area -> Thrust match)\\n    model.nonlinear_solver = om.NewtonSolver()\\n    model.linear_solver = om.DirectSolver()\\n    model.nonlinear_solver.options['maxiter'] = 30\\n    model.nonlinear_solver.options['rtol'] = 1e-6\\n    model.nonlinear_solver.options['atol'] = 1e-6\\n    model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\n\\n    prob.setup()\\n\\n    # --- Set Operating Conditions ---\\n    # Flight Conditions: Sea Level, Static\\n    prob.set_val('tz.flt_cond.h', 0.0, units='ft')\\n    prob.set_val('tz.flt_cond.MN', 0.0)\\n\\n    # Design Parameters\\n    # OPR = 14.0 (Compressor Pressure Ratio)\\n    prob.set_val('tz.comp.PR', 14.0)\\n    \\n    # T4 (Burner Outlet Temperature)\\n    prob.set_val('tz.burner.Tt_out', t4_target, units='degR')\\n\\n    # Target Thrust (Set on the Balance LHS)\\n    # The balance solves: LHS - RHS = 0 => 13000 - Fn = 0\\n    prob.set_val('bal.lhs:area', 13000.0, units='lbf')\\n\\n    # Run the analysis\\n    # The Newton solver on prob.model will vary 'area' until 'Fn' matches target\\n    try:\\n        prob.run_model()\\n    except Exception as e:\\n        print(f\\\"Analysis failed for T4={t4_target}: {e}\\\")\\n        raise\\n\\n    # Retrieve Fuel Flow\\n    # The Turbojet group promotes fuel_W from the burner\\n    try:\\n        w_fuel = prob.get_val('tz.fuel_W', units='lbm/s')\\n    except KeyError:\\n        # Fallback for older versions or different configurations\\n        w_fuel = prob.get_val('tz.burner.W_fuel', units='lbm/s')\\n\\n    return float(w_fuel)\\n\\ndef main():\\n    print(\\\"Calculating fuel flow for T4 = 2400 degR...\\\")\\n    wf_2400 = calculate_fuel_flow(2400.0)\\n    print(f\\\"Fuel flow (2400 degR): {wf_2400:.4f} lbm/s\\\")\\n    \\n    print(\\\"Calculating fuel flow for T4 = 2800 degR...\\\")\\n    wf_2800 = calculate_fuel_flow(2800.0)\\n    print(f\\\"Fuel flow (2800 degR): {wf_2800:.4f} lbm/s\\\")\\n    \\n    # Calculate Ratio\\n    ratio = wf_2800 / wf_2400\\n    \\n    # Write to JSON\\n    result = {\\n        \\\"fuel_ratio_t2800_over_t2400\\\": ratio\\n    }\\n    \\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=4)\\n        \\n    print(f\\\"Result written to result.json\\\")\\n    print(f\\\"Ratio Wf(2800)/Wf(2400): {ratio:.6f}\\\")\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4u04sn24/solve.py\\\", line 99, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4u04sn24/solve.py\\\", line 77, in main\\n    wf_2400 = calculate_fuel_flow(2400.0)\\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4u04sn24/solve.py\\\", line 15, in calculate_fuel_flow\\n    tz = model.add_subsystem('tz', pyc.Turbojet())\\n                                   ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 246.103,
+    "setup_s": 0.0,
+    "grade_s": 1.046
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.05s"
+  ]
+}

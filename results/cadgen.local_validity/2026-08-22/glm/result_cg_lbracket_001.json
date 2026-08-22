@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_lbracket_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Dimensions (mm)\\n# Horizontal Leg: x[0, 80], y[0, 40], z[0, 10]\\nL_H = 80.0\\nW = 40.0\\nTHICKNESS = 10.0\\n\\n# Vertical Leg: x[0, 10], y[0, 40], z[0, 60]\\nL_V = 10.0\\nH_V = 60.0\\n\\n# Fillet\\nR_FILLET = 12.0\\n\\n# Holes\\nD_HOLE = 9.0\\nR_HOLE = D_HOLE / 2.0\\n\\n# 1. Create Horizontal Leg\\n# Center of box should be at (40, 20, 5) to span x[0,80], y[0,40], z[0,10]\\nleg_h = cq.Workplane(\\\"XY\\\").box(L_H, W, THICKNESS).translate((L_H/2, W/2, THICKNESS/2))\\n\\n# 2. Create Vertical Leg\\n# Center of box should be at (5, 20, 30) to span x[0,10], y[0,40], z[0,60]\\nleg_v = cq.Workplane(\\\"XY\\\").box(L_V, W, H_V).translate((L_V/2, W/2, H_V/2))\\n\\n# 3. Union to form L-bracket\\npart = leg_h.union(leg_v)\\n\\n# 4. Add Inner Concave Fillet\\n# The inner edge is at the intersection of x=10 and z=10 (along y).\\n# Midpoint of this edge is (10, 20, 10).\\n# The fillet radius is 12.\\ninner_edge = part.edges(cq.NearToPointSelector((10, 20, 10)))\\npart = part.fillet(R_FILLET, inner_edge)\\n\\n# 5. Add Horizontal Leg Hole\\n# Axis parallel to Z, centered at (x=45, y=20).\\n# Located on the top face of the horizontal leg (z=10).\\n# Point (45, 20, 10) lies on this face.\\nh1_face = part.faces(cq.NearToPointSelector((45, 20, 10)))\\npart = h1_face.workplane().hole(D_HOLE)\\n\\n# 6. Add Vertical Leg Hole\\n# Axis parallel to X, centered at (y=20, z=35).\\n# Located on the inner face of the vertical leg (x=10).\\n# Point (10, 20, 35) lies on this face.\\n# Note: z=35 is above the fillet extent (z=34), so it is on the planar face.\\nh2_face = part.faces(cq.NearToPointSelector((10, 20, 35)))\\npart = h2_face.workplane().hole(D_HOLE)\\n\\n# 7. Export to STEP\\ncq.exporters.export(part, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_6eojxcu6/model.py\\\", line 35, in <module>\\n    inner_edge = part.edges(cq.NearToPointSelector((10, 20, 10)))\\n                            ^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'cadquery' has no attribute 'NearToPointSelector'. Did you mean: 'NearestToPointSelector'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 426.062,
+    "setup_s": 0.0,
+    "grade_s": 2.473
+  },
+  "environment_digest": "sha256:1c19d3f89e645b4f97a73eef6143625248bbd32373e505b82d46a00ba59a7e73",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1635",
+    "run1 exit=1 2.47s"
+  ]
+}

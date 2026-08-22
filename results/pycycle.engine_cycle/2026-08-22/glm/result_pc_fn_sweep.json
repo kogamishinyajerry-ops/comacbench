@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fn_sweep",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ndef solve_design_point(fn_target):\\n    \\\"\\\"\\\"\\n    Sets up and runs a pycycle Turbojet design point optimization\\n    to achieve a specific net thrust (Fn) at Sea Level.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    model = prob.model\\n\\n    # Add Turbojet cycle\\n    model.add_subsystem('cycle', pyc.Turbojet())\\n\\n    # Design mode\\n    model.cycle.options['design'] = True\\n\\n    # Flight Conditions: Sea Level (SL), Static (Mach 0)\\n    # Altitude 0 ft, Mach 0\\n    model.cycle.FltCond.set_default_vals(altitude=0., mach=0.0)\\n\\n    # Thermodynamic design inputs specified in the prompt\\n    # T4 (Turbine Inlet Temperature) = 2450 degR\\n    # OPR (Overall Pressure Ratio) = 13.5\\n    \\n    # Set initial values and fixed design parameters\\n    # Note: In design mode, these are often fixed inputs or set via initial guesses\\n    # that the optimizer respects or uses as starting points.\\n    # For the Turbojet component in pycycle:\\n    # T4 is usually set on the Turbine inlet.\\n    prob.set_val('cycle.Turb.inlet:T', 2450.0, units='degR')\\n    \\n    # OPR is a property of the cycle. In design mode, we can set the compressor PR \\n    # or the overall cycle PR depending on the specific component implementation.\\n    # pycycle Turbojet usually allows setting 'OPR' on the cycle group or 'PR' on the compressor.\\n    # We'll set it on the cycle level if available, otherwise compressor.\\n    # Checking standard pycycle Turbojet: it has an 'OPR' input for design.\\n    prob.set_val('cycle.OPR', 13.5)\\n\\n    # Driver setup\\n    prob.driver = om.ScipyOptimizeDriver()\\n    prob.driver.options['tol'] = 1.0e-4\\n\\n    # To meet a specific Thrust target in design mode, we vary the physical size of the engine.\\n    # The standard sizing variable in pycycle is the Nozzle Throat Area (or Inlet Area).\\n    # We will use the Nozzle Throat Design Area as the design variable.\\n    model.add_design_var('cycle.nozz.Throat:des_stat:area', lower=0.1, upper=5.0)\\n\\n    # Constraint: Thrust must equal target\\n    model.add_constraint('cycle.Fn', equals=fn_target)\\n\\n    # Objective: Minimize the engine size (Area) to meet the thrust efficiently.\\n    # Alternatively, minimize SFC, but minimizing area ensures a valid physical solution \\n    # for the required thrust.\\n    model.add_objective('cycle.nozz.Throat:des_stat:area')\\n\\n    prob.setup()\\n\\n    # Initial guess for Nozzle Throat Area (ft^2)\\n    # A typical turbojet of this class (10k lbf) might have a throat area around 0.5 - 0.8 ft^2\\n    prob.set_val('cycle.nozz.Throat:des_stat:area', 0.6)\\n\\n    # Run the optimization\\n    prob.run_driver()\\n\\n    # Extract results\\n    # Fuel flow (burner fuel flow) in lbm/s\\n    wfuel = prob.get_val('cycle.burner.W_fuel', units='lbm/s')[0]\\n    \\n    # Check actual Thrust for verification (optional, but good for debugging)\\n    actual_fn = prob.get_val('cycle.Fn', units='lbf')[0]\\n    \\n    print(f\\\"Target Fn: {fn_target} lbf | Actual Fn: {actual_fn:.2f} lbf | Wfuel: {wfuel:.4f} lbm/s\\\")\\n    \\n    return wfuel\\n\\n# Main execution\\nif __name__ == \\\"__main__\\\":\\n    targets = [10500.0, 12000.0, 13500.0]\\n    wfuel_results = []\\n    \\n    print(\\\"Starting pycycle Turbojet Design Point Analysis...\\\")\\n    \\n    for target in targets:\\n        wf = solve_design_point(target)\\n        wfuel_results.append(wf)\\n\\n    # Calculate slope (Least Squares) of Wfuel vs Fn\\n    # y = mx + c\\n    # m = (N*sum(xy) - sum(x)sum(y)) / (N*sum(x^2) - (sum(x))^2)\\n    x = np.array(targets)\\n    y = np.array(wfuel_results)\\n    \\n    # Using numpy polyfit for least squares linear regression\\n    slope, intercept = np.polyfit(x, y, 1)\\n    \\n    dwfuel_dfn = slope\\n\\n    # Prepare output dictionary\\n    result_data = {\\n        \\\"wfuel_fn10500\\\": wfuel_results[0],\\n        \\\"wfuel_fn12000\\\": wfuel_results[1],\\n        \\\"wfuel_fn13500\\\": wfuel_results[2],\\n        \\\"dwfuel_dfn\\\": dwfuel_dfn\\n    }\\n\\n    # Write to result.json\\n    with open('result.json', 'w') as f:\\n        json.dump(result_data, f, indent=4)\\n        \\n    print(\\\"Anal\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_qcowa7hk/solve.py\\\", line 87, in <module>\\n    wf = solve_design_point(target)\\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_qcowa7hk/solve.py\\\", line 15, in solve_design_point\\n    model.add_subsystem('cycle', pyc.Turbojet())\\n                                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 59.021,
+    "setup_s": 0.0,
+    "grade_s": 1.01
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

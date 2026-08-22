@@ -1,0 +1,38 @@
+{
+  "task_id": "av_range_3400_m80",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nimport aviary.api as av\\nfrom aviary.models.missions.two_dof_default import phase_info\\n\\n# 1. Setup input parameters\\ninput_csv = '/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_range_3400_m80.csv'\\n\\n# 2. Configure Mission\\n# Deepcopy the default phase_info to avoid modifying the global object\\nmission_phase_info = copy.deepcopy(phase_info)\\n\\n# Set cruise Mach to 0.8 as requested\\nmission_phase_info['cruise']['user_options']['mach_cruise'] = 0.8\\n\\n# 3. Run Aviary\\n# run_driver=False is specified to set up the problem without running the optimizer driver immediately.\\n# We will manually run the model to perform the forward analysis.\\n# optimizer=\\\"SLSQP\\\" is passed as requested, though it is only used if run_driver=True.\\nprob = av.run_aviary(\\n    input_csv,\\n    mission_phase_info,\\n    run_driver=False,\\n    optimizer=\\\"SLSQP\\\",\\n    verbosity=0,\\n    make_plots=False\\n)\\n\\n# 4. Execute the forward mission analysis\\nprob.run_model()\\n\\n# 5. Extract results\\n# The prompt specifies using colon-style promoted names\\nfuel_burn_lbm = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\nfinal_mass_lbm = prob.get_val('mission:final_mass', units='lbm')[0]\\n\\n# 6. Write output\\nresult_data = {\\n    \\\"fuel_burn_lbm\\\": float(fuel_burn_lbm),\\n    \\\"final_mass_lbm\\\": float(final_mass_lbm)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result_data, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"fuel_burn_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 43389.55357567477, \"ref\": 43389.55357572943}, \"final_mass_lbm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 136000.0, \"ref\": 136000.0}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 47.924,
+    "setup_s": 0.0,
+    "grade_s": 4.201
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 4.2s"
+  ]
+}

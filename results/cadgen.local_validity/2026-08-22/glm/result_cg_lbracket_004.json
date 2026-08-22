@@ -1,0 +1,40 @@
+{
+  "task_id": "cg_lbracket_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport cadquery as cq\\n\\ndef main():\\n    # Parameters\\n    leg_len = 120.0   # Horizontal leg length (X)\\n    leg_hgt = 80.0    # Vertical leg height (Z)\\n    leg_width = 60.0  # Width (Y)\\n    thickness = 10.0  # Thickness of legs (X depth of vertical, Z depth of horizontal)\\n    fillet_r = 15.0   # Inner concave fillet radius\\n    hole_dia = 10.0   # Hole diameter\\n\\n    # 1. Create the base L-bracket\\n    # We construct the profile in the XZ plane (Y is up in this sketch) and extrude.\\n    # This is easier to define the internal corner for filleting than a boolean union of two boxes.\\n    # \\n    # Coordinates in the XZ plane:\\n    # Outer corner (0, 0)\\n    # Horizontal leg end (120, 0)\\n    # Horizontal leg inner bottom (10, 0)\\n    # Vertical leg top (0, 80)\\n    # Vertical leg inner left (0, 10)\\n    # Inner corner (10, 10)\\n    # We define a polygon that traces the perimeter counter-clockwise (outer boundary)\\n    # but we must leave the inner corner at (10, 10) sharp so we can fillet it.\\n    \\n    points = [\\n        (0, 0),           # Origin (Outer corner)\\n        (leg_len, 0),     # Horizontal leg outer end\\n        (leg_len, thickness), # Horizontal leg outer side\\n        (thickness, thickness), # Inner corner (vertex to be filleted)\\n        (thickness, leg_hgt),   # Vertical leg outer side\\n        (0, leg_hgt),     # Vertical leg outer top\\n        (0, 0)            # Close loop\\n    ]\\n    \\n    # Create the sketch and extrude along Y\\n    bracket = (\\n        cq.Workplane(\\\"XZ\\\")\\n        .polyline(points)\\n        .close()\\n        .extrude(leg_width)\\n    )\\n\\n    # 2. Create the inner concave fillet\\n    # The edge at the inner corner (10, 10, y) runs along the Y axis.\\n    # We fillet this edge.\\n    # Since the metal is on the \\\"outside\\\" of the L-shape (low X, low Z),\\n    #\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"length\", \"escalated\": true}",
+    "grade_details": "{\"syntax_error\": true}"
+  },
+  "timings": {
+    "agent_s": 317.677,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:1c19d3f89e645b4f97a73eef6143625248bbd32373e505b82d46a00ba59a7e73",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "provider=glm code_len=1792"
+  ]
+}

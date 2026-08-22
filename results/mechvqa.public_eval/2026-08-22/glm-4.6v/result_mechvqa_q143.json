@@ -1,0 +1,36 @@
+{
+  "task_id": "mechvqa_q143",
+  "registry_id": "mechvqa.public_eval",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.2177,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "vqa_free_obj",
+    "robustness": "N/A"
+  },
+  "score": 0.2177,
+  "artifacts": {
+    "answer": "\"h₂与d₃在数值上不存在直接对应关系。\"",
+    "model_meta": "{\"provider\": \"glmvl\", \"model\": \"glm-4.6v\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"vqa\", \"parsed_answer\": \"h₂与d₃在数值上不存在直接对应关系。\", \"reference_answer\": \"根据机械图纸及参数表格的对比，h₂ 是剖视图中的垂直高度尺寸，d₃ 是底视图中的水平直径尺寸。它们描述的是不同方向、不同功能的几何特征，数值上既不相等，也没有固定的差值或比例关系（表格中差值分别为 1.5、4、5，比例约为 1.11、1.31、1.33），且图纸未标注任何关联公式。因此，h₂ 与 d₃ 在数值上**不存在直接对应关系**。\", \"capability\": \"Judging\", \"difficulty\": \"Hard\", \"subcategory\": \"Consistency Judgment\"}"
+  },
+  "timings": {
+    "agent_s": 3.767,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cbae749aa71cd55631eb65446f6636e7d6e41afd96f9ab4e71c68c822419f4c5",
+  "assets_revision": "mechvqa@github-HEAD-2026-08-19",
+  "logs": [
+    "answer='h₂与d₃在数值上不存在直接对应关系。' attempts=1"
+  ]
+}

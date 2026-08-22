@@ -1,0 +1,36 @@
+{
+  "task_id": "mechvqa_q169",
+  "registry_id": "mechvqa.public_eval",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.1728,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "vqa_free_obj",
+    "robustness": "N/A"
+  },
+  "score": 0.1728,
+  "artifacts": {
+    "answer": "\"10；计算依据是参数表格中l₂=27mm时对应的“Rollers per track”值为10。\"",
+    "model_meta": "{\"provider\": \"glmvl\", \"model\": \"glm-4.6v\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"vqa\", \"parsed_answer\": \"10；计算依据是参数表格中l₂=27mm时对应的“Rollers per track”值为10。\", \"reference_answer\": \"根据机械图纸的中间侧视图以及图纸下方的参数表格，当 l₁=270 mm、l₂=27 mm 时，链条总长度中包含 **10 个滚轮单元**。\\n\\n**计算依据**：\\n1. 参数表格中对应 l₁=270 mm、l₂=27 mm 的行明确标注 “Rollers per track = 10”。\\n2. 中间侧视图显示链条为单轨道结构，滚轮单元沿链条长度方向连续排列，因而该数值直接代表链条总长度内的滚轮单元数\", \"capability\": \"Reasoning\", \"difficulty\": \"Hard\", \"subcategory\": \"Geometric Calculation\"}"
+  },
+  "timings": {
+    "agent_s": 13.348,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cbae749aa71cd55631eb65446f6636e7d6e41afd96f9ab4e71c68c822419f4c5",
+  "assets_revision": "mechvqa@github-HEAD-2026-08-19",
+  "logs": [
+    "answer='10；计算依据是参数表格中l₂=27mm时对应的“Rollers per track”值为10。' attempts=1"
+  ]
+}

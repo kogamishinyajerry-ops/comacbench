@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn16k_t2350_opr155",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\nimport numpy as np\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        # Use the requested thermodynamic data\\n        thermo = pyc.AIR_JETA_TAB_SPEC\\n        \\n        # Instantiate elements\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo))\\n        # AXI5 Compressor map\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=thermo))\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo))\\n        # LPT2269 Turbine map\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=thermo))\\n        # CD Nozzle\\n        self.add_subsystem('noz', pyc.Nozzle(nozzle_type='CD', thermo_data=thermo))\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n        \\n        # Balances\\n        # Balance 1: Adjust Shaft Speed (Nmech) to achieve OPR = 15.5\\n        self.add_subsystem('bal_opr', pyc.BalanceComp(name='Nmech', val=10000.0, units='rpm', \\n                                                     lhs_name='OPR_calc', rhs_val=15.5))\\n        \\n        # Balance 2: Adjust Inlet Area to achieve Thrust (Fn) = 16000 lbf\\n        self.add_subsystem('bal_fn', pyc.BalanceComp(name='area', val=1.0, units='ft**2', \\n                                                    lhs_name='Fn_calc', rhs_val=16000.0))\\n        \\n        # Connections\\n        \\n        # Flow path: FlightCond -> Inlet -> Compressor -> Burner -> Turbine -> Nozzle\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n        \\n        # Shaft connections: Nmech from balance to shaft to comp/turb. Power from comp/turb to shaft.\\n        self.connect('bal_opr.Nmech', 'shaft.Nmech')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n        self.connect('comp.power', 'shaft.power_in1')\\n        self.connect('turb.power', 'shaft.power_in2')\\n        \\n        # Balance connections\\n        self.connect('comp.OPR', 'bal_opr.OPR_calc')\\n        self.connect('bal_fn.area', 'inlet.Fl_O:stat:area')\\n        self.connect('noz.Fn', 'bal_fn.Fn_calc')\\n        \\n        # Miscellaneous\\n        self.connect('fc.MN', 'inlet.MN')\\n        self.connect('burner.W_fuel', 'noz.W_fuel') # Needed for TSFC calc\\n\\nif __name__ == \\\"__main__\\\":\\n    prob = om.Problem(model=TurbojetDesign())\\n    \\n    # Setup the problem\\n    prob.setup()\\n    \\n    # Set Design Point Inputs\\n    prob.set_val('fc.h', 0.0, units='ft')       # Altitude 0 ft\\n    prob.set_val('fc.MN', 0.0)                  # Mach 0\\n    prob.set_val('burner.T4', 2350.0, units='degR') # T4 target\\n    \\n    # Initial Guesses to aid convergence\\n    # Physical areas roughly estimated for a 16k lbf class engine\\n    prob.set_val('inlet.Fl_O:stat:area', 1.5, units='ft**2')\\n    prob.set_val('comp.Fl_O:stat:area', 1.5, units='ft**2')\\n    prob.set_val('burner.Fl_O:stat:area', 1.5, units='ft**2')\\n    prob.set_val('turb.Fl_O:stat:area', 1.5, units='ft**2')\\n    prob.set_val('noz.Fl_O:stat:area', 1.5, units='ft**2')\\n    prob.set_val('noz.Throat:stat:area', 1.0, units='ft**2')\\n    \\n    # Solver Configuration\\n    # Newton solver for the system\\n    prob.model.nonlinear_solver = om.NewtonSolver(solve_subsystems=False, iprint=2, maxiter=25)\\n    prob.model.linear_solver = om.DirectSolver()\\n    \\n    # Run the analysis\\n    try:\\n        prob.run_model()\\n    except Exception as e:\\n        # In case of convergence failure, we try to proceed or print error\\n        print(f\\\"Solver Warning: {e}\\\")\\n\\n    # Extract Results\\n    fn_lbf = prob.get_val('noz.Fn', units='lbf')\\n    tsfc = prob.get_val('noz.TSFC', units='1/hr') \\n    opr = prob.get_val('comp.OPR')\\n    w_fuel = prob.get_val('burner.W_fuel', units='lbm/s')\\n    \\n    results = {\\n        \\\"Fn_lbf\\\": float(fn_lbf),\\n     \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Nozzle: Option 'nozzle_type' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 182.765,
+    "setup_s": 0.0,
+    "grade_s": 1.026
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

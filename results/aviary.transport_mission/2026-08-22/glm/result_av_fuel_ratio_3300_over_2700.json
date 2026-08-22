@@ -1,0 +1,40 @@
+{
+  "task_id": "av_fuel_ratio_3300_over_2700",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Define the CSV files corresponding to the ranges\\n# Assuming the CSV files are named '2700.csv' and '3300.csv' based on the prompt description\\ncsv_files = {\\n    2700: '2700.csv',\\n    3300: '3300.csv'\\n}\\n\\nresults = {}\\n\\n# Target Cruise Mach\\ncruise_mach = 0.80\\n\\nfor range_nm, filename in csv_files.items():\\n    # Create a copy of the default phase info to modify cruise parameters\\n    phase_info = deepcopy(default_phase_info)\\n    \\n    # Set the cruise Mach number\\n    phase_info['cruise']['user_options']['mach_cruise'] = cruise_mach\\n    \\n    # Run the Aviary analysis\\n    # Using optimizer=\\\"SLSQP\\\" as pyoptsparse/IPOPT is not available\\n    prob = run_aviary(\\n        filename,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Retrieve the total fuel mass\\n    # The get_val method returns an array, we take the first element\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    results[range_nm] = fuel_mass\\n\\n# Calculate the required ratio\\nfuel_ratio = results[3300] / results[2700]\\n\\n# Write the result to result.json\\noutput = {\\\"fuel_ratio_3300_over_2700\\\": fuel_ratio}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(output, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"               ^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/process_input_decks.py\\\", line 110, in create_vehicle\\n    vehicle_deck = get_path(vehicle_deck, verbosity)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/functions.py\\\", line 244, in get_path\\n    raise FileNotFoundError(\\nFileNotFoundError: File not found in absolute path: 2700.csv, relative path: /private/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_r88rs5sy/2700.csv, or Aviary-based path: /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/2700.csv\\n\"}"
+  },
+  "timings": {
+    "agent_s": 23.87,
+    "setup_s": 0.0,
+    "grade_s": 1.255
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.25s"
+  ]
+}

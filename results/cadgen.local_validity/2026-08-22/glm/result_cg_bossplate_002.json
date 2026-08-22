@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_bossplate_002",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Define dimensions (mm)\\nplate_x = 110.0\\nplate_y = 70.0\\nplate_z = 12.0\\nboss_dia = 40.0\\nboss_h = 25.0\\nhole_dia = 9.0\\nhole_x_offset = 41.0\\nhole_y_offset = 21.0\\n\\n# Create the base plate\\n# Centered on X and Y, base face at z=0, extending to z=12\\n# centered=(True, True, False) centers in X and Y, but not Z (starts at 0)\\nplate = (\\n    cq.Workplane(\\\"XY\\\")\\n    .box(plate_x, plate_y, plate_z, centered=(True, True, False))\\n)\\n\\n# Add the central boss\\n# On the top face (z=12), centered, diameter 40, height 25 (extends to z=37)\\npart = (\\n    plate.faces(\\\">Z\\\")\\n    .workplane()\\n    .circle(boss_dia / 2)\\n    .extrude(boss_h)\\n)\\n\\n# Cut the four bolt holes\\n# Holes are through the plate thickness (0 to 12) only.\\n# We perform the cut from the bottom face (z=0) upwards by plate_z to ensure they do not penetrate the boss.\\nholes_locations = [\\n    (hole_x_offset, hole_y_offset),\\n    (-hole_x_offset, hole_y_offset),\\n    (hole_x_offset, -hole_y_offset),\\n    (-hole_x_offset, -hole_y_offset)\\n]\\n\\npart = (\\n    part.faces(\\\"<Z\\\")\\n    .workplane()\\n    .pushPoints(holes_locations)\\n    .circle(hole_dia / 2)\\n    .extrude(plate_z, combine=True, cut=True)\\n)\\n\\n# Export the final solid to part.step\\ncq.exporters.export(part, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_a5kt8g3e/model.py\\\", line 45, in <module>\\n    .extrude(plate_z, combine=True, cut=True)\\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nTypeError: Workplane.extrude() got an unexpected keyword argument 'cut'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 29.943,
+    "setup_s": 0.0,
+    "grade_s": 2.43
+  },
+  "environment_digest": "sha256:1c19d3f89e645b4f97a73eef6143625248bbd32373e505b82d46a00ba59a7e73",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1232",
+    "run1 exit=1 2.43s"
+  ]
+}

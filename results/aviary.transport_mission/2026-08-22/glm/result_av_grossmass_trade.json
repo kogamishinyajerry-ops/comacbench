@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_trade",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\n# Define the design gross masses and their corresponding input CSV files.\\n# Assumption: The CSV files are named after their gross mass (e.g., '165400.csv').\\n# Please ensure these files exist in the current working directory.\\ndesign_masses = [165400, 175400, 185400]\\ncsv_files = {mass: f\\\"{mass}.csv\\\" for mass in design_masses}\\n\\nresults = {}\\ncruise_mach = 0.80\\n\\nfor mass, filename in csv_files.items():\\n    # Deep copy the default phase info to modify it for this specific run\\n    phase_info = copy.deepcopy(default_phase_info)\\n    \\n    # Set the cruise Mach number as requested\\n    phase_info['cruise']['user_options']['mach_cruise'] = cruise_mach\\n    \\n    # Run the forward mission analysis\\n    # run_driver=False ensures we run the analysis, not an optimization.\\n    # optimizer='SLSQP' is specified by the environment constraints.\\n    prob = run_aviary(\\n        filename,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer='SLSQP',\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Extract the total fuel mass using the specified promoted name and units\\n    # The [0] index is used as the variable is often an array of size 1\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    \\n    # Store the result with the required key format\\n    results[f'fuel_{mass}_lbm'] = float(fuel_mass)\\n\\n# Determine the gross mass corresponding to the minimum fuel burn\\n# We find the key with the minimum value among the fuel results\\nmin_fuel_key = min(results, key=lambda k: results[k])\\n# Extract the mass number from the key (e.g., 'fuel_165400_lbm' -> 165400)\\nmin_gross_mass = int(min_fuel_key.split('_')[1])\\n\\n# Add the minimum fuel gross mass to the results\\nresults['min_fuel_grossmass_lbm'] = min_gross_mass\\n\\n# Write the results to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"         ^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/process_input_decks.py\\\", line 110, in create_vehicle\\n    vehicle_deck = get_path(vehicle_deck, verbosity)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/functions.py\\\", line 244, in get_path\\n    raise FileNotFoundError(\\nFileNotFoundError: File not found in absolute path: 165400.csv, relative path: /private/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_zuyq3lps/165400.csv, or Aviary-based path: /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/165400.csv\\n\"}"
+  },
+  "timings": {
+    "agent_s": 106.814,
+    "setup_s": 0.0,
+    "grade_s": 1.283
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.28s"
+  ]
+}

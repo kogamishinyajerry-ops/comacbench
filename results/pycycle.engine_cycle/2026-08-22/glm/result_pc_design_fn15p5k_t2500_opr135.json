@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nclass TurboJetCycle(om.Group):\\n    def initialize(self):\\n        self.options.declare('thermo_method', default='TABULAR')\\n        self.options.declare('thermo_data', default=pyc.AIR_JETA_TAB_SPEC)\\n\\n    def setup(self):\\n        thermo_method = self.options['thermo_method']\\n        thermo_data = self.options['thermo_data']\\n\\n        # Add components\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('burner', pyc.Combustor(thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('nozz', pyc.Nozzle(thermo_method=thermo_method, thermo_data=thermo_data))\\n        self.add_subsystem('shaft', pyc.Shaft(num_in=1, num_out=1))\\n        self.add_subsystem('perf', pyc.Performance(num_nozzles=1))\\n\\n        # Flow path connections\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # Shaft connections\\n        self.connect('shaft.N', 'comp.Nmech')\\n        self.connect('shaft.N', 'turb.Nmech')\\n        self.connect('comp.power', 'shaft.power_in_0')\\n        self.connect('turb.power', 'shaft.power_out_0')\\n\\n        # Performance connections\\n        self.connect('nozz.Fg', 'perf.Fg_0')\\n        self.connect('inlet.Fl_O:W', 'perf.W_0')\\n        self.connect('nozz.Fl_O:V', 'perf.V_0')\\n        self.connect('inlet.Fl_O:V', 'perf.V_1')\\n\\n# Setup Problem\\nprob = om.Problem()\\nprob.model = TurboJetCycle()\\n\\n# Driver configuration\\ndriver = prob.driver = om.ScipyOptimizeDriver()\\ndriver.options['optimizer'] = 'SLSQP'\\ndriver.options['tol'] = 1e-6\\n\\n# Design Variables\\nprob.model.add_design_var('inlet.W', lower=50.0, upper=400.0)\\nprob.model.add_design_var('shaft.N', lower=5000.0, upper=30000.0)\\nprob.model.add_design_var('nozz.A_throat', lower=0.1, upper=10.0)\\n\\n# Constraints\\nprob.model.add_constraint('comp.PR', equals=13.5)\\nprob.model.add_constraint('perf.F_net', equals=15500.0)\\n\\n# Power Balance Constraint\\nprob.model.add_subsystem('power_balance', om.ExecComp('power_err = power_out - power_in'))\\nprob.model.connect('shaft.power_out_0', 'power_balance.power_out')\\nprob.model.connect('shaft.power_in_0', 'power_balance.power_in')\\nprob.model.add_constraint('power_balance.power_err', equals=0.0)\\n\\n# Objective\\nprob.model.add_objective('burner.W_fuel')\\n\\n# Setup\\nprob.setup()\\n\\n# Set Inputs\\nprob.set_val('inlet.MN', 0.0)\\nprob.set_val('inlet.alt', 0.0)\\nprob.set_val('burner.Tt_out', 2500.0)\\n\\n# Initial Guesses\\nprob.set_val('inlet.W', 120.0)\\nprob.set_val('shaft.N', 15000.0)\\nprob.set_val('nozz.A_throat', 1.5)\\n\\n# Run\\nprob.run_model()\\nprob.run_driver()\\n\\n# Extract Results\\nFn = prob.get_val('perf.F_net')[0]\\nTSFC = prob.get_val('perf.TSFC')[0]\\nOPR = prob.get_val('comp.PR')[0]\\nWfuel = prob.get_val('burner.W_fuel')[0]\\n\\nresults = {\\n    \\\"Fn_lbf\\\": float(Fn),\\n    \\\"TSFC\\\": float(TSFC),\\n    \\\"OPR\\\": float(OPR),\\n    \\\"Wfuel_lbm_s\\\": float(Wfuel)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"o/core/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Shaft: Option 'num_in' cannot be set because it has not been declared.\\\"\\n\"}"
+  },
+  "timings": {
+    "agent_s": 243.088,
+    "setup_s": 0.0,
+    "grade_s": 1.023
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

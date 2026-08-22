@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_sweep_fine",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport json\\nfrom copy import deepcopy\\nimport aviary.api as av\\nfrom aviary.models.missions import two_dof_default\\n\\n# Define the ranges and their corresponding CSV filenames\\n# Based on the prompt \\\"range-variant CSVs provided (3000/3200/3400/3600 NM)\\\",\\n# we assume the files are named corresponding to their range.\\nranges = [3000, 3200, 3400, 3600]\\ncsv_files = {r: f\\\"{r}NM.csv\\\" for r in ranges}\\n\\n# Configure phase_info for M0.8 cruise\\n# Use deepcopy as explicitly requested\\nphase_info = deepcopy(two_dof_default.phase_info)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.8\\n\\nresults = {}\\nfuel_values = []\\n\\nfor r in ranges:\\n    input_file = csv_files[r]\\n    \\n    # Run the Aviary analysis\\n    # run_driver=False performs a single analysis pass\\n    # optimizer=\\\"SLSQP\\\" is required as per environment constraints\\n    prob = av.run_aviary(\\n        input_file,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Extract the required variables\\n    # We use the exact OpenMDAO promoted names and units specified\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    \\n    # Store the result\\n    results[f'fuel_{r}_lbm'] = float(fuel_mass)\\n    fuel_values.append(fuel_mass)\\n\\n# Calculate the least-squares slope of fuel vs range\\n# ranges: [3000, 3200, 3400, 3600]\\n# fuel_values: corresponding fuel masses\\nslope, _ = np.polyfit(ranges, fuel_values, 1)\\n\\nresults['dfuel_drange_lbm_per_nm'] = float(slope)\\n\\n# Write the output to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"         ^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/process_input_decks.py\\\", line 110, in create_vehicle\\n    vehicle_deck = get_path(vehicle_deck, verbosity)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/utils/functions.py\\\", line 244, in get_path\\n    raise FileNotFoundError(\\nFileNotFoundError: File not found in absolute path: 3000NM.csv, relative path: /private/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_yzx9rot3/3000NM.csv, or Aviary-based path: /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/3000NM.csv\\n\"}"
+  },
+  "timings": {
+    "agent_s": 138.216,
+    "setup_s": 0.0,
+    "grade_s": 1.238
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.24s"
+  ]
+}

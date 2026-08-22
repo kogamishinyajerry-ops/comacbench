@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2200",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\nimport numpy as np\\n\\nclass TurboJetCycle(om.Group):\\n    def setup(self):\\n        # Thermodynamics: TABULAR with AIR_JETA_TAB_SPEC\\n        self.add_subsystem('thermo', pyc.ThermoSpec(mode='tabular', composition='AIR_JETA_TAB_SPEC'))\\n\\n        # Flight Conditions\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n\\n        # Inlet\\n        self.add_subsystem('inlet', pyc.Inlet())\\n\\n        # AXI5 Compressor (Using standard Compressor class for design point)\\n        self.add_subsystem('comp', pyc.Compressor())\\n\\n        # Combustor\\n        self.add_subsystem('burner', pyc.Combustor())\\n\\n        # LPT2269 Turbine (Using standard Turbine class for design point)\\n        self.add_subsystem('turb', pyc.Turbine())\\n\\n        # CD Nozzle\\n        self.add_subsystem('nozzle', pyc.Nozzle())\\n\\n        # Shaft\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # Performance\\n        self.add_subsystem('perf', pyc.Performance())\\n\\n        # --- Connections ---\\n\\n        # Flow Path\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozzle.Fl_I')\\n        self.connect('nozzle.Fl_O', 'perf.Fl_I')\\n\\n        # Shaft Balance (Turbine drives Compressor)\\n        self.connect('comp.fl_work', 'shaft.fl_in')\\n        self.connect('turb.fl_work', 'shaft.fl_out')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # Thermodynamic Data\\n        self.connect('thermo.ALL', 'inlet.thermo_all')\\n        self.connect('thermo.ALL', 'comp.thermo_all')\\n        self.connect('thermo.ALL', 'burner.thermo_all')\\n        self.connect('thermo.ALL', 'turb.thermo_all')\\n        self.connect('thermo.ALL', 'nozzle.thermo_all')\\n\\n# Instantiate Problem\\nprob = om.Problem()\\nprob.model = TurboJetCycle()\\n\\n# Driver Setup (SLSQP for constraint satisfaction)\\ndriver = prob.driver = om.ScipyOptimizeDriver()\\ndriver.options['optimizer'] = 'SLSQP'\\ndriver.options['tol'] = 1e-3 # 0.1% error for 1% requirement\\ndriver.options['maxiter'] = 200\\n\\n# Setup\\nprob.setup()\\n\\n# --- Initial Guesses & Fixed Parameters ---\\n\\n# Flight Conditions: Sea Level, Static (MN ~ 0)\\nprob['fc.alt'] = 0.0\\nprob['fc.MN'] = 0.001 \\n\\n# Inlet\\nprob['inlet.Mach'] = 0.0\\nprob['inlet.dPqP'] = 0.0\\n\\n# Compressor: OPR = 13.5\\nprob['comp.PRdes'] = 13.5\\nprob['comp.eff'] = 0.86 # Assumed reasonable design efficiency\\n\\n# Burner: T4 = 2200 R\\nprob['burner.Tt_out'] = 2200.0\\nprob['burner.dPqP'] = 0.03\\n\\n# Turbine\\nprob['turb.eff'] = 0.90 # Assumed reasonable design efficiency\\nprob['turb.PR'] = 4.0 # Initial guess for Turbine PR\\n\\n# Nozzle (CD)\\nprob['nozzle.A_throat'] = 1.0 # Initial guess\\nprob['nozzle.A_exit'] = 1.5   # Initial guess\\nprob['nozzle.dPqP'] = 0.0\\n\\n# Shaft\\nprob['shaft.mech_eff'] = 0.99\\n\\n# --- Design Variables ---\\n# Vary Nozzle Throat Area (scales engine size/flow) and Turbine PR (balances power)\\nprob.model.add_design_var('nozzle.A_throat', lower=0.5, upper=5.0)\\nprob.model.add_design_var('turb.PR', lower=1.5, upper=15.0)\\n\\n# --- Constraints ---\\n# Target Thrust = 11800 lbf\\nprob.model.add_constraint('perf.Fn', equals=11800.0, scaler=1.0)\\n\\n# Shaft Power Balance = 0\\nprob.model.add_constraint('shaft.power_balance', equals=0.0, scaler=1.0)\\n\\n# --- Run ---\\nprob.run_driver()\\n\\n# --- Extract Results ---\\nFn_val = prob['perf.Fn'][0]\\nTSFC_val = prob['perf.TSFC'][0]\\nOPR_val = prob['comp.PR'][0]\\n\\n# Calculate Fuel Flow: Wf (lbm/s) = TSFC (lbm/hr/lbf) * Fn (lbf) / 3600 (s/hr)\\nWfuel_val = (TSFC_val * Fn_val) / 3600.0\\n\\nresults = {\\n    \\\"Fn_lbf\\\": float(Fn_val),\\n    \\\"TSFC\\\": float(TSFC_val),\\n    \\\"OPR\\\": float(OPR_val),\\n    \\\"Wfuel_lbm_s\\\": float(Wfuel_val)\\n}\\n\\n# Write Output\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\\n\\nprint(\\\"Simulation Complete.\\\")\\nprint(json.dumps(results, indent=2))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"te-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_risa7626/solve.py\\\", line 9, in setup\\n    self.add_subsystem('thermo', pyc.ThermoSpec(mode='tabular', composition='AIR_JETA_TAB_SPEC'))\\n                                 ^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'ThermoSpec'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 342.325,
+    "setup_s": 0.0,
+    "grade_s": 1.222
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.22s"
+  ]
+}

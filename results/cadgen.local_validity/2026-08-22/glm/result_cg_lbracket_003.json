@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_lbracket_003",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Dimensions in mm\\nL_H = 60.0\\nL_V = 50.0\\nW = 30.0\\nTHK = 8.0\\nFILLET_R = 8.0\\nHOLE_DIA = 8.0\\nHOLE_R = HOLE_DIA / 2.0\\n\\n# Hole locations\\nH_HOLE_X = 34.0\\nH_HOLE_Y = 15.0\\n\\nV_HOLE_Y = 15.0\\nV_HOLE_Z = 29.0\\n\\n# 1. Create the L-shape base solid\\n# Union of horizontal leg (0,0,0 to 60,30,8) and vertical leg (0,0,0 to 8,30,50)\\nres = cq.Workplane(\\\"XY\\\")\\nres = res.box(L_H, W, THK)  # Horizontal leg\\nres = res.union(cq.Workplane(\\\"XY\\\").workplane(offset=THK).box(THK, W, L_V - THK))\\n\\n# 2. Create the inner concave fillet (radius 8)\\n# Identify the intersection edge (the concave corner) located at (0, y, 8) and (8, y, 8).\\n# It is the edge parallel to Y axis where the two legs meet internally.\\n# Using a radius of 8 as requested.\\nres = res.edges(\\\"|Y\\\").fillet(FILLET_R)\\n\\n# 3. Create holes\\n# Horizontal leg hole (axis parallel to Z)\\nres = res.workplane().transformed(offset=(0, 0, -0.1))  # Shift slightly below to ensure clean cut\\nres = res.hole(HOLE_DIA, center=(H_HOLE_X, H_HOLE_Y))\\n\\n# Vertical leg hole (axis parallel to X)\\nres = res.workplane(offset=0).transformed(offset=(0, 0, 0), rotate=(0, -90, 0))\\n# The workplane origin is global (0,0,0), facing +X (global Z).\\n# We need a hole at global y=15, z=29.\\nres = res.hole(HOLE_DIA, center=(V_HOLE_Y, V_HOLE_Z))\\n\\n# 4. Export\\ncq.exporters.export(res, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_6id3cvmu/model.py\\\", line 29, in <module>\\n    res = res.edges(\\\"|Y\\\").fillet(FILLET_R)\\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-cad/lib/python3.12/site-packages/cadquery/cq.py\\\", line 1244, in fillet\\n    s = solid.fillet(radius, edgeList)\\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-cad/lib/python3.12/site-packages/cadquery/occ_impl/shapes.py\\\", line 3987, in fillet\\n    return self.__class__(fillet_builder.Shape())\\n                          ^^^^^^^^^^^^^^^^^^^^^^\\nOCP.OCP.Standard.Standard_Failure: BRep_API: command not done\\n\"}"
+  },
+  "timings": {
+    "agent_s": 450.002,
+    "setup_s": 0.0,
+    "grade_s": 2.53
+  },
+  "environment_digest": "sha256:1c19d3f89e645b4f97a73eef6143625248bbd32373e505b82d46a00ba59a7e73",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1318",
+    "run1 exit=1 2.53s"
+  ]
+}

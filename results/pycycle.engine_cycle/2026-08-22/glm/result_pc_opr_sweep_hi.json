@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_opr_sweep_hi",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ndef solve_for_tsfc(opr):\\n    \\\"\\\"\\\"\\n    Solves the turbojet design point for a given OPR, targeting 15000 lbf thrust\\n    and T4 = 2800 degR at Sea Level static conditions.\\n    Returns the TSFC.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n\\n    class ScaledEngine(om.Group):\\n        def setup(self):\\n            # Add the pycycle Turbojet element\\n            self.add_subsystem('cycle', pyc.Turbojet(), promotes_inputs=['*'])\\n\\n            # Add an ExecComp to compute the thrust error (Constraint: Fn - Target = 0)\\n            self.add_subsystem('thrust_err', om.ExecComp('err = Fn - 15000',\\n                                                         Fn={'units': 'lbf'},\\n                                                         err={'units': 'lbf'}))\\n\\n            # Connect the cycle thrust to the error calculator\\n            self.connect('cycle.Fn', 'thrust_err.Fn')\\n\\n            # Set a reasonable initial guess for inlet flow rate (lbm/s)\\n            self.set_input_defaults('design.inlet.Fl_W', 120.0, units='lbm/s')\\n\\n            # Configure the nonlinear solver to iterate on Flow Rate (Fl_W)\\n            # to satisfy the Thrust target (err = 0).\\n            self.nonlinear_solver = om.NewtonSolver(solve_subsystems=False)\\n            self.linear_solver = om.DirectSolver()\\n            \\n            # Define the state variable (the one we change) and the residual variable (the one we zero)\\n            # Note: 'design.inlet.Fl_W' is promoted from the cycle's inlet element\\n            self.nonlinear_solver.options['state_vars'] = ['design.inlet.Fl_W']\\n            self.nonlinear_solver.options['residual_vars'] = ['thrust_err.err']\\n            \\n            # Solver options for robustness\\n            self.nonlinear_solver.options['maxiter'] = 20\\n            self.nonlinear_solver.options['rtol'] = 1e-5\\n            self.nonlinear_solver.options['atol'] = 1e-6\\n\\n    prob.model = ScaledEngine()\\n\\n    # Setup the problem\\n    prob.setup()\\n\\n    # Set Environmental Cycle Inputs\\n    prob['design.inlet.MN'] = 0.0       # Mach number (Static)\\n    prob['design.inlet.alt'] = 0.0      # Altitude (Sea Level)\\n\\n    # Set Design Parameters\\n    prob['design.OD.PR_des'] = opr       # Overall Pressure Ratio\\n    prob['design.burner.Tt_out'] = 2800  # T4 in degR\\n\\n    # Run an initial pass to establish the thermodynamic cycle\\n    # This helps the internal pycycle solvers converge before the outer sizing loop starts\\n    prob.run_model()\\n\\n    # Run the outer Newton solver to adjust Flow rate to hit Thrust target\\n    prob.model.run_solve()\\n\\n    # Return the TSFC (usually in 1/hr)\\n    return prob['cycle.TSFC']\\n\\n# Main execution block\\nif __name__ == \\\"__main__\\\":\\n    opr_list = [11.5, 14.0, 16.0]\\n    results = {}\\n\\n    print(\\\"Starting OPR Sweep...\\\")\\n    \\n    # Solve for each OPR\\n    for opr in opr_list:\\n        print(f\\\"Processing OPR: {opr}\\\")\\n        tsfc = solve_for_tsfc(opr)\\n        \\n        # Generate key name (e.g., 11.5 -> tsfc_opr115)\\n        key = f\\\"tsfc_opr{int(opr * 10):03d}\\\"\\n        results[key] = float(tsfc)\\n        print(f\\\"  Result TSFC: {tsfc:.5f} 1/hr\\\")\\n\\n    # Calculate Least-Squares Slope (dTSFC/dOPR)\\n    # y = mx + c\\n    x_data = np.array(opr_list)\\n    # Extract TSFCs in corresponding order\\n    y_data = np.array([results['tsfc_opr115'], results['tsfc_opr140'], results['tsfc_opr160']])\\n    \\n    slope, _ = np.polyfit(x_data, y_data, 1)\\n    results['dtsfc_dopr'] = float(slope)\\n    \\n    print(f\\\"Calculated dTSFC/dOPR: {slope:.5f}\\\")\\n\\n    # Write results to JSON\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=4)\\n        \\n    print(\\\"Results saved to result.json\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vngwpm14/solve.py\\\", line 17, in setup\\n    self.add_subsystem('cycle', pyc.Turbojet(), promotes_inputs=['*'])\\n                                ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 215.821,
+    "setup_s": 0.0,
+    "grade_s": 1.223
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.22s"
+  ]
+}

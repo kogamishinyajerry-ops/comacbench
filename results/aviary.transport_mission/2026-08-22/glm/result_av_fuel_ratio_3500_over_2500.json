@@ -1,0 +1,40 @@
+{
+  "task_id": "av_fuel_ratio_3500_over_2500",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import two_dof_default_mission\\n\\n# Standard filenames for the range-variant benchmark aircraft\\nCSV_FILE_2500 = 'aircraft_for_bench_FwFm_GwGm_2500NM.csv'\\nCSV_FILE_3500 = 'aircraft_for_bench_FwFm_GwGm_3500NM.csv'\\n\\ndef run_mission_analysis(csv_file):\\n    \\\"\\\"\\\"\\n    Runs Aviary forward mission analysis for a given aircraft configuration.\\n    \\n    Args:\\n        csv_file (str): Path to the aircraft CSV file.\\n        \\n    Returns:\\n        float: Total fuel mass in lbm.\\n    \\\"\\\"\\\"\\n    # Deepcopy the default phase info to ensure we don't modify the global constant\\n    phase_info = copy.deepcopy(two_dof_default_mission)\\n    \\n    # Set cruise Mach to 0.80 as requested\\n    # Access: phase_info -> 'cruise' -> 'user_options' -> 'mach_cruise'\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Run the Aviary problem\\n    # run_driver=False: Run analysis without the optimization driver\\n    # optimizer=\\\"SLSQP\\\": Explicitly use SLSQP (required since IPOPT is not installed)\\n    # verbosity=0: Suppress console output\\n    # make_plots=False: Do not generate plot files\\n    prob = run_aviary(\\n        csv_file,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Retrieve the total fuel mass burned\\n    # Variable: 'mission:total_fuel_mass'\\n    # Units: 'lbm'\\n    # prob.get_val returns an array, so we access index [0]\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    \\n    return fuel_mass\\n\\ndef main():\\n    # Run analysis for the 2500 NM range variant\\n    fuel_2500_nm = run_mission_analysis(CSV_FILE_2500)\\n    \\n    # Run analysis for the 3500 NM range variant\\n    fuel_3500_nm = run_mission_analysis(CSV_FILE_3500)\\n    \\n    # Calculate the ratio\\n    fuel_ratio = fuel_3500_nm / fuel_2500_nm\\n    \\n    # Write results to JSON\\n    result_data = {\\n        \\\"fuel_ratio_3500_over_2500\\\": fuel_ratio\\n    }\\n    \\n    with open(\\\"result.json\\\", \\\"w\\\") as f:\\n        json.dump(result_data, f, indent=4)\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_g74ix52u/solve.py\\\", line 4, in <module>\\n    from aviary.models.missions.two_dof_default import two_dof_default_mission\\nImportError: cannot import name 'two_dof_default_mission' from 'aviary.models.missions.two_dof_default' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/aviary/models/missions/two_dof_default.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 126.751,
+    "setup_s": 0.0,
+    "grade_s": 1.101
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.1s"
+  ]
+}

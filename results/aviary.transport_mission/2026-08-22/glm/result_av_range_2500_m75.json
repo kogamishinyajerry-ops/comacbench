@@ -1,0 +1,40 @@
+{
+  "task_id": "av_range_2500_m75",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nfrom aviary.api import run_aviary\\n# In Aviary 1.0.1, the default 2-DOF phase info is located here.\\n# The prompt references 'two_dof_default' which corresponds to the standard 2-DOF mission configuration.\\nfrom aviary.models.missions.two_dof_based.phases import phase_info as default_phase_info\\n\\n# Configuration\\nCSV_PATH = '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_range_2500_m75.csv'\\nCRUISE_MACH = 0.75\\n\\n# Deep copy the default phase info to avoid modifying the global default\\nphase_info = copy.deepcopy(default_phase_info)\\n\\n# Update the cruise Mach number as requested\\nphase_info['cruise']['user_options']['mach_cruise'] = CRUISE_MACH\\n\\n# Run the forward mission analysis\\n# run_driver=False executes the forward mission (no optimization driver)\\n# optimizer='SLSQP' is specified as required (since pyoptsparse is not installed)\\nprob, _ = run_aviary(\\n    CSV_PATH,\\n    phase_info=phase_info,\\n    optimizer='SLSQP',\\n    run_driver=False,\\n    verbosity=0,\\n    make_plots=False\\n)\\n\\n# Extract results using the requested OpenMDAO promoted names and units\\n# [0] is used to get the scalar value from the array\\nfuel_burn_lbm = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\nfinal_mass_lbm = prob.get_val('mission:final_mass', units='lbm')[0]\\n# mission_range_nm = prob.get_val('mission:range', units='NM')[0] # Optional verification\\n\\n# Prepare the result dictionary\\nresults = {\\n    \\\"fuel_burn_lbm\\\": fuel_burn_lbm,\\n    \\\"final_mass_lbm\\\": final_mass_lbm\\n}\\n\\n# Write to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_c3i5onj0/solve.py\\\", line 6, in <module>\\n    from aviary.models.missions.two_dof_based.phases import phase_info as default_phase_info\\nModuleNotFoundError: No module named 'aviary.models.missions.two_dof_based'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 76.437,
+    "setup_s": 0.0,
+    "grade_s": 1.038
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.04s"
+  ]
+}

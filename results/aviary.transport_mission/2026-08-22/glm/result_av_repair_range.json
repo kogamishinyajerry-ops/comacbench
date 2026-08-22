@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_range",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport json\\nimport copy\\nimport pandas as pd\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as base_phase_info\\n\\n# Configuration\\nCORRUPTED_CSV_PATH = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_range_corrupt.csv\\\"\\nREFERENCE_FUEL_BURN = 43389.55\\nOUTPUT_FILE = \\\"result.json\\\"\\nTOLERANCE = 0.1  # Tolerance for matching fuel burn\\n\\ndef run_analysis(csv_path):\\n    \\\"\\\"\\\"\\n    Runs Aviary analysis with the provided CSV and fixed settings.\\n    Returns the calculated total fuel mass.\\n    \\\"\\\"\\\"\\n    # Setup Phase Info\\n    # Deepcopy to avoid modifying the global default\\n    phase_info = copy.deepcopy(base_phase_info)\\n    \\n    # Set Cruise Mach to 0.80\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n    # Run Aviary\\n    # run_driver=False performs a single analysis pass (no optimization)\\n    prob = run_aviary(\\n        csv_path,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n\\n    # Retrieve result\\n    fuel_burn = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    return fuel_burn\\n\\ndef test_restoration(param_name, true_value):\\n    \\\"\\\"\\\"\\n    Creates a modified CSV with the parameter restored, runs analysis,\\n    and returns the fuel burn.\\n    \\\"\\\"\\\"\\n    # Read original corrupted data\\n    df = pd.read_csv(CORRUPTED_CSV_PATH)\\n    \\n    # Update the specific parameter\\n    # Assuming standard Aviary CSV format with columns 'Name' and 'Value'\\n    if 'Name' in df.columns and 'Value' in df.columns:\\n        # Find the row and update the value\\n        df.loc[df['Name'] == param_name, 'Value'] = true_value\\n    elif param_name in df.columns:\\n        # Handle flat structure if necessary, though less common for Aviary inputs\\n        df[param_name] = true_value\\n    \\n    # Create a temporary file for the corrected model\\n    temp_csv = \\\"temp_corrected.csv\\\"\\n    df.to_csv(temp_csv, index=False)\\n    \\n    try:\\n        fuel = run_analysis(temp_csv)\\n        return fuel\\n    finally:\\n        # Clean up\\n        if os.path.exists(temp_csv):\\n            os.remove(temp_csv)\\n\\ndef main():\\n    results = {}\\n    \\n    # Candidate 1: aircraft:design:range\\n    # True value: 3200 NM\\n    print(\\\"Testing restoration of aircraft:design:range to 3200 NM...\\\")\\n    fuel_1 = test_restoration('aircraft:design:range', 3200.0)\\n    print(f\\\"Resulting Fuel Burn: {fuel_1:.2f} lbm\\\")\\n    \\n    # Candidate 2: aircraft:design:gross_mass\\n    # True value: 175400 lbm\\n    print(\\\"Testing restoration of aircraft:design:gross_mass to 175400 lbm...\\\")\\n    fuel_2 = test_restoration('aircraft:design:gross_mass', 175400.0)\\n    print(f\\\"Resulting Fuel Burn: {fuel_2:.2f} lbm\\\")\\n\\n    # Compare against reference\\n    diff_1 = abs(fuel_1 - REFERENCE_FUEL_BURN)\\n    diff_2 = abs(fuel_2 - REFERENCE_FUEL_BURN)\\n\\n    if diff_1 < TOLERANCE:\\n        print(\\\"Match found: aircraft:design:range is the corrupted parameter.\\\")\\n        results = {\\n            \\\"corrupted_param\\\": \\\"aircraft:design:range\\\",\\n            \\\"restored_value\\\": 3200.0\\n        }\\n    elif diff_2 < TOLERANCE:\\n        print(\\\"Match found: aircraft:design:gross_mass is the corrupted parameter.\\\")\\n        results = {\\n            \\\"corrupted_param\\\": \\\"aircraft:design:gross_mass\\\",\\n            \\\"restored_value\\\": 175400.0\\n        }\\n    else:\\n        # Fallback: pick the closest one if tolerance isn't met (numerical noise)\\n        print(f\\\"Tolerance not met. Differences: Range={diff_1:.4f}, Mass={diff_2:.4f}\\\")\\n        if diff_1 < diff_2:\\n            results = {\\n                \\\"corrupted_param\\\": \\\"aircraft:design:range\\\",\\n                \\\"restored_value\\\": 3200.0\\n            }\\n        else:\\n            results = {\\n                \\\"corrupted_param\\\": \\\"aircraft:design:gross_mass\\\",\\n                \\\"restored_value\\\": 175400.0\\n            }\\n\\n    # Write result.json\\n    with open(OUTPUT_FILE, 'w') as f:\\n        json.dump(results, f, indent=4)\\n    \\n    print(f\\\"Result written t\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"v-aviary/lib/python3.12/site-packages/pandas/io/parsers/readers.py\\\", line 1645, in __init__\\n    self._engine = self._make_engine(f, self.engine)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/pandas/io/parsers/readers.py\\\", line 1904, in _make_engine\\n    self.handles = get_handle(\\n                   ^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-aviary/lib/python3.12/site-packages/pandas/io/common.py\\\", line 930, in get_handle\\n    handle = open(\\n             ^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: '/Users/Zhuanz/projects/jerry-personal/JerryDSH/benchmarks/data/aviary/transport_mission/derived/av_repair_range_corrupt.csv'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 85.91,
+    "setup_s": 0.0,
+    "grade_s": 1.222
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.22s"
+  ]
+}

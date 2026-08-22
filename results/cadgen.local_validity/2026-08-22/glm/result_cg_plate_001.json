@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 0.3333,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.54165,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Dimensions in mm\\nL = 120.0\\nW = 80.0\\nH = 10.0\\nfillet_radius = 10.0\\nhole_diameter = 8.0\\n\\n# Create the plate\\n# 1. Create a box centered at the origin\\n# 2. Translate up by H/2 so the base is at z=0 and thickness is along Z\\nplate = (\\n    cq.Workplane(\\\"XY\\\")\\n    .box(L, W, H, centered=True)\\n    .translate((0, 0, H / 2))\\n)\\n\\n# Fillet the four vertical edges\\n# Selector \\\"|Z\\\" finds edges parallel to the Z-axis\\nplate = plate.edges(\\\"|Z\\\").fillet(fillet_radius)\\n\\n# Create the four through holes\\n# Holes are centered at (+/-42, +/-22)\\n# Use a construction rectangle (84 x 44) to locate the four centers\\nplate = (\\n    plate.faces(\\\">Z\\\")\\n    .workplane()\\n    .rect(84, 44, forConstruction=True)\\n    .hole(hole_diameter)\\n)\\n\\n# Export the solid\\ncq.exporters.export(plate, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.37}, {\"exit\": 0, \"duration_s\": 2.33}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 94638.937829, \"bbox_len\": [120.0, 80.0, 10.0], \"n_faces\": 11, \"n_solids\": 1, \"cyl_radii\": [4.0, 10.0, 10.0, 10.0, 10.0]}, \"reference\": {\"volume_mm3\": 93130.973355, \"bbox_len\": [120.0, 80.0, 10.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.016191868, \"ok\": false, \"got\": 94638.937829, \"ref\": 93130.973355}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 120.0, \"ref\": 120.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 10.0, \"ref\": 10.0}}, \"physics_score\": 0.75, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.0, \"expect\": 4, \"got\": 1, \"ok\": false, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 10.0, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 14, \"got\": 11, \"ok\": false}], \"requirements_score\": 0.3333, \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 59.96,
+    "setup_s": 0.0,
+    "grade_s": 4.711
+  },
+  "environment_digest": "sha256:1c19d3f89e645b4f97a73eef6143625248bbd32373e505b82d46a00ba59a7e73",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=790",
+    "run1 exit=0 2.37s",
+    "run2 exit=0 2.33s",
+    "physics=0.75 requirements=0.3333 vol_rel=1.62e-02"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "av_grossmass_trade3",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nfrom copy import deepcopy\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info as default_phase_info\\n\\ndef analyze_mass(gross_mass):\\n    # Construct filename based on the provided gross mass\\n    # Assumes files are named like 'aircraft_179400.csv' in the working directory\\n    filename = f'aircraft_{gross_mass}.csv'\\n    \\n    # Create a copy of phase info to set parameters for this specific run\\n    phase_info = deepcopy(default_phase_info)\\n    \\n    # Set cruise Mach to 0.80 as requested\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Run the Aviary mission analysis\\n    # run_driver=False performs a single analysis run (forward mission)\\n    # optimizer=\\\"SLSQP\\\" is explicitly requested to avoid import errors with pyoptsparse\\n    prob = run_aviary(\\n        filename,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Retrieve total fuel mass in lbm\\n    # get_val returns a numpy array, so we take the first element [0]\\n    fuel_mass = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    \\n    return fuel_mass\\n\\ndef main():\\n    masses = [179400, 180400, 182400]\\n    results = {}\\n    fuel_values = {}\\n\\n    # Run analysis for each design gross mass\\n    for mass in masses:\\n        try:\\n            fuel = analyze_mass(mass)\\n            key = f'fuel_{mass}_lbm'\\n            results[key] = fuel\\n            fuel_values[mass] = fuel\\n        except Exception as e:\\n            print(f\\\"Error processing mass {mass}: {e}\\\")\\n            results[f'fuel_{mass}_lbm'] = None\\n            fuel_values[mass] = float('inf')\\n\\n    # Determine the gross mass corresponding to the minimum fuel consumption\\n    # Exclude any failed runs (represented as infinity)\\n    if fuel_values:\\n        min_mass = min(fuel_values, key=fuel_values.get)\\n        results['min_fuel_grossmass_lbm'] = min_mass\\n    else:\\n        results['min_fuel_grossmass_lbm'] = None\\n\\n    # Write results to result.json\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=4)\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"aviary_mission\", \"hits\": {\"fuel_179400_lbm\": {\"status\": \"exact\", \"ok\": false, \"got\": null, \"ref\": 46353.85084346967}, \"fuel_180400_lbm\": {\"status\": \"exact\", \"ok\": false, \"got\": null, \"ref\": 47094.621860896616}, \"fuel_182400_lbm\": {\"status\": \"exact\", \"ok\": false, \"got\": null, \"ref\": 48575.80247816886}, \"min_fuel_grossmass_lbm\": {\"status\": \"exact\", \"ok\": false, \"got\": 179400, \"ref\": 179400.0}}, \"physics_hits\": \"0/4\", \"rel_tol\": 0.01}"
+  },
+  "timings": {
+    "agent_s": 67.871,
+    "setup_s": 0.0,
+    "grade_s": 1.285
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 1.28s"
+  ]
+}

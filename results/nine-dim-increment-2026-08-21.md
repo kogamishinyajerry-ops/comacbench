@@ -88,3 +88,31 @@ integrated 基准 15→**17**，任务总量 2119→**2376**。
 - GLM 账户欠费（文本 glm-4.6 与 GLM-4.6V 均 1113）→ 本轮 GLM 系基线仅免费档
   glm-4v-flash；GLM 文本基线待充值后补跑（--resume 幂等）。
 - 全部 run_manifest 含 seed/rerun_command/digest；gold 等效验证记录入 PROVENANCE。
+
+## 7. GLM 补跑基线（2026-08-22 追记）
+
+> 触发：编程套餐额度刷新。**coding 端点**（`/api/coding/paas/v4`）glm-4.6 与
+> glm-4.6v 均恢复可用（标准 PAAS 端点仍欠费——两通道额度独立）；glmvl 预设
+> base_default 已切 coding 端点。工程修复：glm-4.6v 个别难题思考耗尽 1024
+> token 致 content 空 → glmvl 加 escalate（thinking disabled 保答案，粘性升级
+> 与 glm/minimax 同款机制）。
+
+| 基准 | GLM 终值 | gate | 对照 |
+| --- | --- | --- | --- |
+| mechvqa（glm-4.6v，180 题） | **0.4044**（满分率 23.9%，43/180） | 180/180 | glm-4v-flash 0.3504 / 20.6% |
+| pycycle（glm-4.6，28 题） | **0.0000**（28/28 code_not_executable） | 0/28 | M3 0.0393（gate 2/28） |
+| aviary（glm-4.6，27 题） | **0.3111**（8 满分） | 9/27 | M3 0.2222（gate 6/27） |
+| cadgen（glm-4.6，22 题） | **0.6515**（12 满分） | 17/22 | M3 0.7083（gate 16/22） |
+
+读数：
+- **pycycle 双模型全灭互证**：GLM 0/28（全部脚本不可执行）+ M3 0.0393——
+  「写不出可执行 pycycle 脚本」是两家共同能力边界，非单家偶发；28 题厚样本下结论稳固。
+- **aviary GLM 略优**（0.311 vs 0.222，gate 9 vs 6）：与 2026-08-19 旧 8 题
+  GLM 0.375>M3 0.250 同向；过 gate 即高分的模式保持（9 过 gate 8 满分）。
+- **cadgen M3 略优**（0.708 vs 0.652，但 GLM gate 多 1）：GLM 过 gate 后部分分
+  低于 M3（几何精度欠）；L 支架族两家同弱（GLM 0.25 / M3 见 8-21 报告）。
+- **mechvqa 4.6v 小胜 flash**（0.404 vs 0.350，满分率 +3.3pp）：付费档增益有限，
+  自由短答 F1 判分下 VLM 差距被压缩；Recognition-Easy 仍最强（0.549）。
+
+口径注记：本节数据日期目录 `results/*/2026-08-22/{glm,glm-4.6v}/`，
+seed=0，--resume 幂等可续。

@@ -1,0 +1,41 @@
+{
+  "task_id": "cg_plate_002",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Define dimensions (mm)\\nlength = 100.0  # X dimension\\nwidth = 60.0    # Y dimension\\nthickness = 8.0 # Z dimension\\nfillet_radius = 8.0\\nhole_diameter = 6.0\\n\\n# Hole coordinates (x, y)\\nhole_positions = [\\n    (35.0, 15.0),\\n    (35.0, -15.0),\\n    (-35.0, 15.0),\\n    (-35.0, -15.0)\\n]\\n\\n# Create the plate\\n# Centered on XY, base face at Z=0\\nresult = (\\n    cq.Workplane(\\\"XY\\\")\\n    .box(length, width, thickness, centered=(True, True, False))\\n)\\n\\n# Fillet the four vertical edges (edges parallel to Z)\\nresult = result.edges(\\\"|Z\\\").fillet(fillet_radius)\\n\\n# Create the holes\\n# Use the XY plane at Z=0 to locate points, cut through along Z\\nresult = result.workplane(\\\"XY\\\").pushPoints(hole_positions).hole(hole_diameter)\\n\\n# Export to STEP\\ncq.exporters.export(result, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"(hole_diameter)\\n             ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-cad/lib/python3.12/site-packages/cadquery/cq.py\\\", line 608, in workplane\\n    offsetVector = normal.normalized().multiply(offset)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv-cad/lib/python3.12/site-packages/cadquery/occ_impl/geom.py\\\", line 160, in multiply\\n    return Vector(self.wrapped.Multiplied(scale))\\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nTypeError: Multiplied(): incompatible function arguments. The following argument types are supported:\\n    1. (self: OCP.OCP.gp.gp_Vec, theScalar: float) -> OCP.OCP.gp.gp_Vec\\n\\nInvoked with: <OCP.OCP.gp.gp_Vec object at 0x122dc8ab0>, 'XY'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 90.871,
+    "setup_s": 0.0,
+    "grade_s": 2.337
+  },
+  "environment_digest": "sha256:1c19d3f89e645b4f97a73eef6143625248bbd32373e505b82d46a00ba59a7e73",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=784",
+    "run1 exit=1 2.34s"
+  ]
+}

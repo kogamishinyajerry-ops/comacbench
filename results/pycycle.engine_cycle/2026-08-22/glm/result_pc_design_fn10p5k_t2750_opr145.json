@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn10p5k_t2750_opr145",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# Initialize the problem\\nprob = om.Problem()\\n\\n# Build the turbojet cycle model using the specified thermodynamic data\\n# The Turbojet group includes: Inlet, Compressor, Burner, Turbine, Nozzle, Shaft\\nprob.model = pyc.Turbojet(thermo_data='AIR_JETA_TAB_SPEC')\\n\\n# Set design point operating conditions\\n# Sea Level (alt=0), Static (MN=0)\\nprob.model.set_input_defaults('design.inlet.MN', 0.0)\\nprob.model.set_input_defaults('design.inlet.alt', 0.0, units='ft')\\n\\n# Compressor settings\\n# Target OPR = 14.5. We provide an initial guess for efficiency.\\nprob.model.set_input_defaults('design.compressor.PR', 14.5)\\nprob.model.set_input_defaults('design.compressor.eff', 0.86)\\n\\n# Burner settings\\n# Target T4 = 2750 degR. Standard pressure loss assumed.\\nprob.model.set_input_defaults('design.burner.Tt', 2750.0, units='degR')\\nprob.model.set_input_defaults('design.burner.dPqP', 0.03)\\n\\n# Turbine settings\\n# Initial guess for efficiency\\nprob.model.set_input_defaults('design.turbine.eff', 0.89)\\n\\n# Nozzle settings\\n# Initial guess for throat area (will be adjusted by driver)\\nprob.model.set_input_defaults('design.nozzle.A_throat', 1.5, units='ft**2')\\n\\n# Configure the driver\\n# We use an optimizer to vary the nozzle area to meet the thrust requirement.\\nprob.driver = om.ScipyOptimizeDriver()\\nprob.driver.options['optimizer'] = 'SLSQP'\\nprob.driver.options['tol'] = 1e-4  # Tolerance\\nprob.driver.options['maxiter'] = 100\\n\\n# Define Design Variables and Constraints\\n# Vary nozzle throat area to scale the engine size\\nprob.model.add_design_var('design.nozzle.A_throat', lower=0.1, upper=10.0)\\n\\n# Constraint: Net Thrust must equal 10500 lbf\\nprob.model.add_constraint('Fn', equals=10500.0)\\n\\n# Setup the problem\\nprob.setup()\\n\\n# Set initial guesses for the state variables to aid convergence\\nprob['design.nozzle.A_throat'] = 1.5\\nprob['design.compressor.Nmech'] = 10000.0\\n\\n# Run the driver to solve the design point\\nprob.run_driver()\\n\\n# Extract results\\nFn = prob.get_val('Fn', units='lbf')[0]\\nTSFC = prob.get_val('TSFC', units='lbm/lbf-hr')[0]\\nOPR = prob.get_val('compressor.PR')[0]\\nWfuel = prob.get_val('burner.W_fuel', units='lbm/s')[0]\\n\\n# Create dictionary for JSON output\\nresults = {\\n    \\\"Fn_lbf\\\": float(Fn),\\n    \\\"TSFC\\\": float(TSFC),\\n    \\\"OPR\\\": float(OPR),\\n    \\\"Wfuel_lbm_s\\\": float(Wfuel)\\n}\\n\\n# Write to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\\n\\nprint(\\\"Design point solved successfully.\\\")\\nprint(results)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_t__mcest/solve.py\\\", line 10, in <module>\\n    prob.model = pyc.Turbojet(thermo_data='AIR_JETA_TAB_SPEC')\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 249.141,
+    "setup_s": 0.0,
+    "grade_s": 1.052
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.05s"
+  ]
+}

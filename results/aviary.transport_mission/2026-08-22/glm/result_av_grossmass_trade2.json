@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_trade2",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport copy\\nfrom aviary.api import run_aviary\\nfrom aviary.mission.twodof.phase_info import two_dof_default\\n\\n# Define the three gross masses and their corresponding input files\\n# Assuming the CSV files are named following the pattern aircraft_{mass}.csv\\nmasses = [167400, 172400, 177400]\\n\\n# Setup phase info for Mach 0.80 cruise\\n# We deepcopy to avoid modifying the global default\\nphase_info = copy.deepcopy(two_dof_default)\\nphase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n# Dictionary to store fuel results for each mass\\nfuel_results = {}\\n\\nfor mass in masses:\\n    # Construct the filename based on the mass\\n    filename = f\\\"aircraft_{mass}.csv\\\"\\n    \\n    # Run Aviary setup\\n    # run_driver=False sets up the problem but does not run the optimization driver\\n    # optimizer=\\\"SLSQP\\\" is specified as required by the environment constraints\\n    prob = run_aviary(\\n        filename,\\n        phase_info=phase_info,\\n        run_driver=False,\\n        optimizer=\\\"SLSQP\\\",\\n        verbosity=0,\\n        make_plots=False\\n    )\\n    \\n    # Execute the model manually since run_driver=False\\n    prob.run_model()\\n    \\n    # Retrieve the total fuel mass in lbm\\n    # Using the colon style promoted name as requested\\n    fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n    fuel_results[mass] = fuel\\n\\n# Determine which gross mass resulted in the minimum fuel consumption\\nmin_fuel_grossmass = min(fuel_results, key=fuel_results.get)\\n\\n# Prepare the output dictionary with the exact keys specified\\noutput_data = {\\n    \\\"fuel_167400_lbm\\\": fuel_results[167400],\\n    \\\"fuel_172400_lbm\\\": fuel_results[172400],\\n    \\\"fuel_177400_lbm\\\": fuel_results[177400],\\n    \\\"min_fuel_grossmass_lbm\\\": min_fuel_grossmass\\n}\\n\\n# Write the results to result.json\\nwith open('result.json', 'w') as f:\\n    json.dump(output_data, f)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox__al4jo8k/solve.py\\\", line 4, in <module>\\n    from aviary.mission.twodof.phase_info import two_dof_default\\nModuleNotFoundError: No module named 'aviary.mission.twodof'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 99.003,
+    "setup_s": 0.0,
+    "grade_s": 1.026
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

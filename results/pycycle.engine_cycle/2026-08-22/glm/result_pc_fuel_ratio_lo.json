@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_lo",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\ndef run_turbojet_analysis(t4_target, fn_target, opr_target):\\n    \\\"\\\"\\\"\\n    Solves the turbojet design point for given T4, Thrust, and OPR.\\n    Returns the fuel flow rate required to achieve the target thrust.\\n    \\\"\\\"\\\"\\n    prob = om.Problem()\\n    prob.model = pyc.Turbojet(design=True)\\n    \\n    prob.setup()\\n    \\n    # Set Flight Conditions: Sea Level, Static\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n    prob.set_val('fc.MN', 0.0)\\n    \\n    # Set Design Parameters\\n    # The Turbojet component expects inputs in the 'design' group\\n    prob.set_val('design.inlet.MN', 0.0)\\n    prob.set_val('design.comp.PR', opr_target)\\n    prob.set_val('design.burner.Tt_out', t4_target, units='degR')\\n    \\n    # Set reasonable initial guesses for solver convergence\\n    # These are typical values for a turbojet\\n    prob.set_val('design.comp.eff', 0.86)\\n    prob.set_val('design.turb.eff', 0.89)\\n    prob.set_val('design.nozzle.Throat:MN', 1.0) # Nozzle is choked at design\\n    \\n    # Define Solvers\\n    # The cycle contains non-linear balances (shaft power, flow areas)\\n    # Newton solver is robust for design point cycles.\\n    prob.model.design.nonlinear_solver = om.NewtonSolver(solve_subsystems=False, maxiter=50, atol=1e-6, rtol=1e-6)\\n    prob.model.design.linear_solver = om.DirectSolver()\\n    \\n    # Run the analysis\\n    # The solver determines the mass flow, area splits, and turbine expansion ratios\\n    # that satisfy the energy balance and flow continuity.\\n    try:\\n        prob.run_model()\\n    except Exception as e:\\n        print(f\\\"Solver failed for T4={t4_target}: {e}\\\")\\n        return None\\n\\n    # Extract Results\\n    # The cycle solves for a 'reference' size.\\n    # We calculate the specific fuel consumption (SFC).\\n    # SFC = W_fuel / Thrust (usually lbm/lbf-hr)\\n    \\n    # Try to get SFC directly if the component provides it, otherwise calculate it.\\n    # pycycle.Turbojet typically provides 'SFC' in the design group.\\n    try:\\n        sfc = prob.get_val('design.SFC', units='lbm/lbf-hr')\\n        fn_ref = prob.get_val('design.Fn', units='lbf')\\n    except KeyError:\\n        # Fallback calculation if specific variable names differ slightly\\n        # Wfuel = FAR * W_air\\n        far = prob.get_val('design.burner.Fl_O:FAR')\\n        w_air = prob.get_val('design.inlet.Fl_O:stat:W', units='lbm/s')\\n        \\n        fn_ref = prob.get_val('design.nozzle.Fn', units='lbf')\\n        w_fuel_ref = far * w_air # lbm/s\\n        \\n        # Convert SFC to lbm/lbf-hr\\n        # SFC = (W_fuel [lbm/s]) / (Fn [lbf]) * 3600 [s/hr]\\n        sfc = (w_fuel_ref / fn_ref) * 3600.0\\n\\n    # Calculate Fuel Flow for the Target Thrust\\n    # W_fuel_target = SFC * Fn_target\\n    # Since SFC is in lbm/lbf-hr, the result is in lbm/hr.\\n    # For the ratio, the units (lbm/hr vs lbm/s) cancel out, as long as consistent.\\n    w_fuel_target = sfc * fn_target\\n    \\n    return w_fuel_target\\n\\n# Main Execution\\nfn_target = 11000.0 # lbf\\nopr_target = 12.0\\nt4_1 = 2250.0 # degR\\nt4_2 = 2550.0 # degR\\n\\nprint(f\\\"Solving for T4 = {t4_1} degR\\\")\\nw_fuel_2250 = run_turbojet_analysis(t4_1, fn_target, opr_target)\\n\\nprint(f\\\"Solving for T4 = {t4_2} degR\\\")\\nw_fuel_2550 = run_turbojet_analysis(t4_2, fn_target, opr_target)\\n\\nif w_fuel_2250 is not None and w_fuel_2550 is not None:\\n    ratio = w_fuel_2550 / w_fuel_2250\\n    \\n    result_data = {\\n        \\\"fuel_ratio_t2550_over_t2250\\\": ratio\\n    }\\n    \\n    # Write to JSON\\n    with open('result.json', 'w') as f:\\n        json.dump(result_data, f)\\n    \\n    print(f\\\"Result saved to result.json. Ratio: {ratio:.4f}\\\")\\nelse:\\n    print(\\\"Analysis failed.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ae2xl_a2/solve.py\\\", line 84, in <module>\\n    w_fuel_2250 = run_turbojet_analysis(t4_1, fn_target, opr_target)\\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ae2xl_a2/solve.py\\\", line 11, in run_turbojet_analysis\\n    prob.model = pyc.Turbojet(design=True)\\n                 ^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Turbojet'. Did you mean: 'Turbine'?\\n\"}"
+  },
+  "timings": {
+    "agent_s": 48.585,
+    "setup_s": 0.0,
+    "grade_s": 1.116
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.12s"
+  ]
+}

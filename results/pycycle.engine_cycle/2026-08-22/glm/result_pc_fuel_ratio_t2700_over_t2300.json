@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_fuel_ratio_t2700_over_t2300",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nfrom pycycle.elements.compressor import AXI_COMP\\nfrom pycycle.elements.turbine import AXI_TURB\\nimport json\\n\\nclass TurbojetCycle(pyc.Cycle):\\n    def setup(self):\\n        # Flight Condition\\n        self.add_subsystem('fc', pyc.FlightCondition())\\n        \\n        # Inlet\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('fc.Mach', 'inlet.Mn')\\n        \\n        # Compressor\\n        self.add_subsystem('comp', pyc.Compressor(map_data=AXI_COMP))\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        \\n        # Burner\\n        self.add_subsystem('burner', pyc.Burner())\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        \\n        # Turbine\\n        self.add_subsystem('turb', pyc.Turbine(map_data=AXI_TURB))\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        \\n        # Nozzle\\n        self.add_subsystem('noz', pyc.Nozzle())\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n        \\n        # Shaft Connections\\n        self.connect('turb.pwr', 'comp.pwr')\\n        self.connect('comp.Nmech', 'turb.Nmech')\\n\\ndef solve_design_point(T4_target):\\n    prob = om.Problem()\\n    model = prob.model\\n    \\n    # Add the Turbojet Cycle\\n    model.add_subsystem('tj', TurbojetCycle())\\n    \\n    # Add Balance for OPR (Target: 13.5)\\n    # We vary Compressor Nmech to achieve target PR\\n    model.add_subsystem('opr_bal', om.BalanceComp(name='Nmech', val=1.0, lhs_name='lhs', rhs_name='rhs', lower=0.1, upper=2.0))\\n    model.connect('opr_bal.lhs', 'tj.comp.PR')\\n    model.connect('opr_bal.rhs', 'opr_target')\\n    model.connect('opr_bal.Nmech', 'tj.comp.Nmech')\\n    \\n    # Add Balance for Thrust (Target: 11800 lbf)\\n    # We vary Nozzle Throat Area to achieve target Gross Thrust\\n    model.add_subsystem('thrust_bal', om.BalanceComp(name='A_throat', val=1.0, lhs_name='lhs', rhs_name='rhs', eq_units='lbf', lower=0.1, upper=5.0))\\n    model.connect('thrust_bal.lhs', 'tj.noz.Fg')\\n    model.connect('thrust_bal.rhs', 'thrust_target')\\n    model.connect('thrust_bal.A_throat', 'tj.noz.Throat:A')\\n    \\n    # Solver Setup\\n    model.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n    model.nonlinear_solver.options['maxiter'] = 20\\n    model.linear_solver = om.DirectSolver()\\n    \\n    prob.setup()\\n    \\n    # Set Fixed Inputs\\n    prob['tj.fc.Mach'] = 0.0\\n    prob['tj.fc.alt'] = 0.0\\n    prob['tj.burner.Tt4'] = T4_target\\n    \\n    # Set Balance Targets\\n    prob['opr_target'] = 13.5\\n    prob['thrust_target'] = 11800.0\\n    \\n    # Set Initial Guesses\\n    prob['opr_bal.Nmech'] = 1.0\\n    prob['thrust_bal.A_throat'] = 1.5 \\n    \\n    # Run\\n    prob.run_model()\\n    \\n    # Return Fuel Flow\\n    return prob['tj.burner.Wfuel']\\n\\n# Calculate for T4 = 2300 R\\nwf_2300 = solve_design_point(2300.0)\\n\\n# Calculate for T4 = 2700 R\\nwf_2700 = solve_design_point(2700.0)\\n\\n# Compute Ratio\\nratio = wf_2700 / wf_2300\\n\\n# Write Result\\nresult = {'fuel_ratio_t2700_over_t2300': float(ratio)}\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=4)\\n\\nprint(f\\\"Result: {result}\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ch8k2zb1/solve.py\\\", line 3, in <module>\\n    from pycycle.elements.compressor import AXI_COMP\\nImportError: cannot import name 'AXI_COMP' from 'pycycle.elements.compressor' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/elements/compressor.py)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 241.173,
+    "setup_s": 0.0,
+    "grade_s": 1.029
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn13p5k_t2400_opr115",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nclass TurbojetCycle(pyc.Cycle):\\n    def setup(self):\\n        # Thermodynamics: TABULAR with AIR_JETA_TAB_SPEC\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n        self.options['thermo_method'] = 'TABULAR'\\n\\n        # Components\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\n        self.add_subsystem('burner', pyc.Combustor())\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\n        self.add_subsystem('nozzle', pyc.Nozzle())\\n        self.add_subsystem('shaft', pyc.Shaft())\\n\\n        # Flow path connections\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozzle.Fl_I')\\n\\n        # Shaft connections\\n        self.connect('comp.power', 'shaft.power_in')\\n        self.connect('turb.power', 'shaft.power_out')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # Define targets as inputs to the cycle\\n        self.add_input('T4_target', 2400.0, units='degR')\\n        self.add_input('Fn_target', 13500.0, units='lbf')\\n\\n        # Balance 1: Burner Temperature\\n        # Vary fuel flow (W_Fuel) to hit T4_target\\n        self.add_balance('T4_balance',\\n                         lhs_name='burner.Fl_O:tot:T',\\n                         rhs_name='T4_target',\\n                         var_name='burner.W_Fuel',\\n                         eq_units='degR',\\n                         lower=0.1, upper=10.0)\\n\\n        # Balance 2: Shaft Power\\n        # Vary turbine PR to match compressor power\\n        self.add_balance('power_balance',\\n                         lhs_name='turb.power',\\n                         rhs_name='comp.power',\\n                         var_name='turb.PR',\\n                         eq_units='hp',\\n                         lower=1.0, upper=5.0)\\n\\n        # Balance 3: Net Thrust\\n        # Vary nozzle area to hit Fn_target\\n        self.add_balance('thrust_balance',\\n                         lhs_name='Fn',\\n                         rhs_name='Fn_target',\\n                         var_name='nozzle.area',\\n                         eq_units='lbf',\\n                         lower=0.1, upper=10.0)\\n\\n# Build the problem\\nprob = om.Problem()\\nprob.model = TurbojetCycle()\\n\\n# Configure the driver\\nprob.driver = om.ScipyOptimizeDriver()\\nprob.driver.options['tol'] = 1e-4\\nprob.driver.options['maxiter'] = 100\\n\\n# Setup the problem\\nprob.setup()\\n\\n# Set design point conditions\\nprob.set_val('design.flight.mach', 0.0)\\nprob.set_val('design.flight.alt', 0.0, units='ft')\\nprob.set_val('design.comp.PR', 11.5) # OPR target\\nprob.set_val('T4_target', 2400.0, units='degR')\\nprob.set_val('Fn_target', 13500.0, units='lbf')\\n\\n# Initial guesses for the balances\\nprob.set_val('T4_balance.burner.W_Fuel', 2.0, units='lbm/s')\\nprob.set_val('power_balance.turb.PR', 2.5)\\nprob.set_val('thrust_balance.nozzle.area', 2.0, units='ft**2')\\n\\n# Run the analysis\\nprob.run_model()\\n\\n# Extract results\\nFn = prob.get_val('Fn', units='lbf')\\nTSFC = prob.get_val('TSFC', units='lbm/lbf*h')\\nOPR = prob.get_val('comp.PR')\\nWfuel = prob.get_val('burner.W_Fuel', units='lbm/s')\\n\\n# Write to result.json\\nresult = {\\n    \\\"Fn_lbf\\\": float(Fn),\\n    \\\"TSFC\\\": float(TSFC),\\n    \\\"OPR\\\": float(OPR),\\n    \\\"Wfuel_lbm_s\\\": float(Wfuel)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"anz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_5f3r94yr/solve.py\\\", line 32, in setup\\n    self.add_input('T4_target', 2400.0, units='degR')\\n    ^^^^^^^^^^^^^^\\nAttributeError: 'TurbojetCycle' object has no attribute 'add_input'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 416.247,
+    "setup_s": 0.0,
+    "grade_s": 1.01
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.01s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurboJet(pyc.Cycle):\\n    def setup(self):\\n        # Set thermo properties for the cycle\\n        self.options['thermo_method'] = 'TABULAR'\\n        self.options['thermo_data'] = 'AIR_JETA_TAB_SPEC'\\n\\n        # Add Elements\\n        self.add_subsystem('fc', pyc.FlightCondition())\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\n        self.add_subsystem('burner', pyc.Combustor())\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\n        self.add_subsystem('nozz', pyc.CDNozzle())\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n        self.add_subsystem('perf', pyc.Performance(num_nodes=1))\\n\\n        # Balance Comp: Power Balance\\n        # Equation: Shaft dNdt = 0 (Steady state)\\n        # Variable: Turbine Design Pressure Ratio (turb.PRdes)\\n        power_bal = self.add_subsystem('power_bal', om.BalanceComp())\\n        power_bal.add_balance('turb_pr', val=3.0, lhs_name='dNdt', rhs_val=0.0, units='rpm/s')\\n\\n        # Balance Comp: Thrust Balance\\n        # Equation: Net Thrust - 15000 lbf = 0\\n        # Variable: Nozzle Throat Area (nozz.Throat:stat:area)\\n        thrust_bal = self.add_subsystem('thrust_bal', om.BalanceComp())\\n        # Using rhs_val = -15000 so equation is Fn + (-15000) = 0\\n        thrust_bal.add_balance('nozzle_area', val=200.0, lhs_name='Fn', rhs_val=-15000.0, units='lbf')\\n\\n        # Flow Path Connections\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n        self.connect('nozz.Fl_O', 'perf.Fl_I')\\n\\n        # Shaft Connections\\n        # Shaft sums torques. comp.trq is negative (load), turb.trq is positive (source)\\n        self.connect('comp.trq', 'shaft.trq_in[0]')\\n        self.connect('turb.trq', 'shaft.trq_in[1]')\\n        \\n        # Mechanical speed connection\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # Balance Connections\\n        # Connect power balance residual and variable\\n        self.connect('shaft.dNdt', 'power_bal.dNdt')\\n        self.connect('power_bal.turb_pr', 'turb.PRdes')\\n\\n        # Connect thrust balance residual and variable\\n        self.connect('perf.Fn', 'thrust_bal.Fn')\\n        self.connect('thrust_bal.nozzle_area', 'nozz.Throat:stat:area')\\n\\n        # Solver Setup\\n        self.nonlinear_solver = om.NewtonSolver()\\n        self.linear_solver = om.DirectSolver()\\n        self.nonlinear_solver.options['solve_subsystems'] = True\\n        self.nonlinear_solver.options['maxiter'] = 20\\n        self.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\n        self.nonlinear_solver.linesearch.options['maxiter'] = 10\\n        self.nonlinear_solver.linesearch.options['c'] = 0.5\\n\\nif __name__ == \\\"__main__\\\":\\n    prob = om.Problem()\\n    prob.model = TurboJet()\\n\\n    # Setup Driver\\n    prob.driver = om.ScipyOptimizeDriver()\\n    # 1% tolerance requested for result\\n    prob.driver.options['tol'] = 1e-2 \\n\\n    # Initial Conditions and Fixed Design Parameters\\n    prob.set_val('fc.MN', 0.0)\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n    prob.set_val('inlet.MN', 0.0)\\n\\n    # Compressor Design: OPR = 15.0\\n    prob.set_val('comp.PRdes', 15.0)\\n    # Fix Compressor Map Speed Line (RlineMap = 1.0 implies design speed line)\\n    prob.set_val('comp.map.RlineMap', 1.0)\\n\\n    # Combustor Design: T4 = 2800 degR\\n    prob.set_val('burner.Tt_out', 2800.0, units='degR')\\n\\n    # Initial Guesses for Balance Variables\\n    prob.set_val('power_bal.turb_pr', 3.5)\\n    prob.set_val('thrust_bal.nozzle_area', 150.0, units='inch**2')\\n\\n    prob.setup()\\n    \\n    # Run the analysis\\n    prob.run_model()\\n\\n    # Extract Results\\n    Fn_lbf = prob.get_val('perf.Fn', units='lbf')[0]\\n    TSFC = prob.get_val('perf.TSFC')[0]\\n    OPR = prob.get_va\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_g1b4v15i/solve.py\\\", line 79, in <module>\\n    prob.set_val('fc.MN', 0.0)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 595, in set_val\\n    self.model.set_val(name, val, units=units, indices=indices)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/system.py\\\", line 5351, in set_val\\n    raise RuntimeError(f\\\"{self.msginfo}: Called set_val({name}, ...) before setup \\\"\\nRuntimeError: <class TurboJet>: Called set_val(fc.MN, ...) before setup completes.\\n\"}"
+  },
+  "timings": {
+    "agent_s": 275.523,
+    "setup_s": 0.0,
+    "grade_s": 0.981
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.98s"
+  ]
+}

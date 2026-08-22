@@ -1,0 +1,40 @@
+{
+  "task_id": "av_grossmass_sweep",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport copy\\nimport os\\nimport glob\\n\\nfrom aviary.interface.methods_for_level2 import run_aviary\\nfrom aviary.models.missions.two_dof import phase_info as default_phase_info\\n\\ndef find_csv_for_mass(mass):\\n    \\\"\\\"\\\"\\n    Helper to find the CSV file corresponding to a specific gross mass\\n    in the current working directory.\\n    \\\"\\\"\\\"\\n    # Search for files containing the mass number in their name\\n    candidates = glob(f\\\"./*{mass}*.csv\\\")\\n    if not candidates:\\n        raise FileNotFoundError(f\\\"No CSV file found for mass {mass} in current directory.\\\")\\n    # Return the first match\\n    return candidates[0]\\n\\ndef main():\\n    # Define the target gross masses\\n    masses = [165400, 170400, 175400, 180400, 185400]\\n    \\n    # Results dictionary\\n    results = {}\\n    fuel_values = []\\n    \\n    # Prepare phase_info\\n    # Use deepcopy as requested in the prompt instructions\\n    phase_info = copy.deepcopy(default_phase_info)\\n    \\n    # Set cruise Mach to 0.80\\n    phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n    \\n    # Iterate through each mass variant\\n    for mass in masses:\\n        csv_file = find_csv_for_mass(mass)\\n        \\n        # Run the mission analysis\\n        # Constraints: run_driver=False, optimizer=\\\"SLSQP\\\", verbosity=0, make_plots=False\\n        prob = run_aviary(\\n            csv_file,\\n            phase_info=phase_info,\\n            run_driver=False,\\n            optimizer=\\\"SLSQP\\\",\\n            verbosity=0,\\n            make_plots=False\\n        )\\n        \\n        # Explicitly run the driver to execute the analysis and solve the mission\\n        prob.run_driver()\\n        \\n        # Extract fuel burn\\n        # Promoted name: 'mission:total_fuel_mass', Units: 'lbm'\\n        fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n        \\n        # Store result\\n        key = f'fuel_{mass}_lbm'\\n        results[key] = float(fuel)\\n        fuel_values.append(fuel)\\n        \\n    # Calculate least-squares slope of fuel vs gross mass\\n    # x = masses, y = fuel_values\\n    slope, _ = np.polyfit(masses, fuel_values, 1)\\n    \\n    results['dfuel_dgrossmass_lbm_per_lbm'] = float(slope)\\n    \\n    # Write to result.json\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=4)\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_319tqvtu/solve.py\\\", line 7, in <module>\\n    from aviary.interface.methods_for_level2 import run_aviary\\nModuleNotFoundError: No module named 'aviary.interface.methods_for_level2'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 173.021,
+    "setup_s": 0.0,
+    "grade_s": 0.093
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.09s"
+  ]
+}

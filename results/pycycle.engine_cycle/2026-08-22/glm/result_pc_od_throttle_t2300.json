@@ -1,0 +1,37 @@
+{
+  "task_id": "pc_od_throttle_t2300",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\nimport os\\n\\n# Resolve map file paths\\n# Assuming pycycle is installed, maps are in pycycle/maps\\ntry:\\n    pycycle_path = os.path.dirname(pycycle.__file__)\\n    map_dir = os.path.join(pycycle_path, 'maps')\\n    # Check if standard map files exist, otherwise use strings that might resolve via pycycle API\\n    comp_map_path = os.path.join(map_dir, 'AXI5map.dat')\\n    turb_map_path = os.path.join(map_dir, 'LPT2269map.dat')\\n    \\n    if not os.path.exists(comp_map_path):\\n        comp_map_path = 'AXI5' # Fallback to key if path fails\\n    if not os.path.exists(turb_map_path):\\n        turb_map_path = 'LPT2269'\\nexcept Exception:\\n    # Fallback if environment is weird\\n    comp_map_path = 'AXI5'\\n    turb_map_path = 'LPT2269'\\n\\nclass TurbojetDesign(pyc.Cycle):\\n    def setup(self):\\n        # Thermodynamic data\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n        self.options['balance_python'] = False # Use OpenMDAO solvers\\n        \\n        # Design Point Targets (as inputs for the balances to target)\\n        indep = self.add_subsystem('indep', om.IndepVarComp(), promotes=['*'])\\n        indep.add_output('Fn_target', 11800.0, units='lbf')\\n        indep.add_output('T4_target', 2300.0, units='degR')\\n        indep.add_output('OPR_target', 13.5)\\n        \\n        # Initial Guesses / Driver Variables\\n        indep.add_output('W', 100.0, units='lbm/s')\\n        indep.add_output('Nmech', 10000.0, units='rpm')\\n        indep.add_output('Wfuel', 1.0, units='lbm/s')\\n        indep.add_output('Throat', 200.0, units='inch**2') # Nozzle Throat Area\\n        \\n        # Flow Conditions\\n        indep.add_output('MN', 0.0)\\n        indep.add_output('alt', 0.0, units='ft')\\n        indep.add_output('dTs', 0.0, units='degR') # Temp rise split (if needed)\\n\\n        # --- Components ---\\n        \\n        # Inlet\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        \\n        # Compressor (AXI5 Map)\\n        self.add_subsystem('comp', pyc.Compressor(map_data=comp_map_path))\\n        \\n        # Combustor\\n        self.add_subsystem('burner', pyc.Combustor())\\n        \\n        # Turbine (LPT2269 Map)\\n        self.add_subsystem('turb', pyc.Turbine(map_data=turb_map_path))\\n        \\n        # Nozzle (Convergent-Divergent)\\n        self.add_subsystem('nozz', pyc.Nozzle())\\n        \\n        # Shaft\\n        # We will use a manual torque balance instead of the Shaft component's internal solver\\n        # because we are driving Nmech directly to satisfy OPR.\\n        self.add_subsystem('shaft_trq', om.ExecComp('net_trq = trq_comp + trq_turb',\\n                                                    trq_comp={'units': 'lbf*ft'},\\n                                                    trq_turb={'units': 'lbf*ft'},\\n                                                    net_trq={'units': 'lbf*ft'}))\\n\\n        # --- Connections ---\\n        \\n        # Flow\\n        self.link_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.link_flow('comp.Fl_O', 'burner.Fl_I')\\n        self.link_flow('burner.Fl_O', 'turb.Fl_I')\\n        self.link_flow('turb.Fl_O', 'nozz.Fl_I')\\n        \\n        # Flight Condition to Inlet\\n        self.connect('MN', 'inlet.MN')\\n        self.connect('alt', 'inlet.alt')\\n        \\n        # Mechanical\\n        self.connect('Nmech', 'comp.N')\\n        self.connect('Nmech', 'turb.N')\\n        \\n        self.connect('comp.trq', 'shaft_trq.trq_comp')\\n        self.connect('turb.trq', 'shaft_trq.trq_turb')\\n        \\n        # Fuel\\n        self.connect('Wfuel', 'burner.W_fuel')\\n        \\n        # Nozzle Geometry\\n        self.connect('Throat', 'nozz.Throat') # throat area\\n        # We might need to fix the exit area ratio or let it float. \\n        # CD nozzle usually calculates exit conditions based on area ratio or pressure.\\n        # For design, we often fix Throat and maybe Area Ratio or let it expand to ambient.\\n        # Let's add an indep var for Area Ratio if needed, or assume expansion.\\n        # pyc.Nozzle has option 'Ps_exhaus\""
+  },
+  "timings": {
+    "agent_s": 349.206,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

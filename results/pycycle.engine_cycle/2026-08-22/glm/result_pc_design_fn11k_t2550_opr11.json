@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_design_fn11k_t2550_opr11",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurbojetSLDesign(pyc.Cycle):\\n    def initialize(self):\\n        self.options.declare('thermo_data', default=pycycle.AIR_JETA_TAB_SPEC, desc='Thermodynamic data')\\n        self.options.declare('design', default=True, desc='Design mode flag')\\n\\n    def setup(self):\\n        thermo_data = self.options['thermo_data']\\n        design = self.options['design']\\n\\n        # Add Elements\\n        self.add_subsystem('inlet', pyc.Inlet(design=design))\\n        self.add_subsystem('comp', pyc.AxiComp(map_data=pycycle.AXI5, design=design))\\n        self.add_subsystem('burner', pyc.Combustor(design=design, thermo_data=thermo_data))\\n        self.add_subsystem('turb', pyc.LPTurbine(map_data=pycycle.LPT2269, design=design))\\n        self.add_subsystem('noz', pyc.CDNozzle(design=design))\\n        \\n        # Shaft element connects compressor and turbine\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # Balances\\n        # 1. Thrust Balance: Adjust Inlet Mass Flow (W) to match Target Thrust\\n        self.add_subsystem('bal_W', om.BalanceComp())\\n        self.bal_W.add_balance('W', val=120.0, units='lbm/s', eq_units='lbf', lhs_name='Fn', rhs_name='Fn_target')\\n        \\n        # 2. T4 Balance: Adjust Fuel Flow (W_fuel) to match Target T4\\n        self.add_subsystem('bal_fuel', om.BalanceComp())\\n        self.bal_fuel.add_balance('W_fuel', val=1.5, units='lbm/s', eq_units='degR', lhs_name='T4', rhs_name='T4_target')\\n        \\n        # 3. Speed Balance: Adjust Shaft Speed (N) to match Torque Equilibrium\\n        self.add_subsystem('bal_N', om.BalanceComp())\\n        self.bal_N.add_balance('N', val=12000.0, units='rpm', eq_units='ft*lbf', lhs_name='trq_net', rhs_name='0.0')\\n\\n        # Flow Connections\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n        # Mechanical Connections\\n        # Connect Shaft Speed to components\\n        self.connect('bal_N.N', 'shaft.N')\\n        self.connect('shaft.N', 'comp.N')\\n        self.connect('shaft.N', 'turb.N')\\n        \\n        # Connect Torques to Shaft\\n        # Compressor requires torque (positive), Turbine produces torque (negative)\\n        self.connect('comp.trq', 'shaft.trq_in')\\n        self.connect('turb.trq', 'shaft.trq_out')\\n        \\n        # Connect Balances\\n        # Thrust\\n        self.connect('bal_W.W', 'inlet.W')\\n        self.connect('noz.Fn', 'bal_W.Fn')\\n        \\n        # Temperature\\n        self.connect('bal_fuel.W_fuel', 'burner.W_fuel')\\n        self.connect('burner.Fl_O:tot:T', 'bal_fuel.T4')\\n        \\n        # Torque/Power Balance (Shaft equilibrium)\\n        self.connect('shaft.trq_net', 'bal_N.trq_net')\\n\\n    def configure(self):\\n        # Solver configuration for the design point\\n        self.nonlinear_solver = om.NewtonSolver()\\n        self.linear_solver = om.DirectSolver()\\n        self.nonlinear_solver.options['maxiter'] = 20\\n        self.nonlinear_solver.options['rtol'] = 1e-5\\n        self.nonlinear_solver.options['atol'] = 1e-6\\n        self.nonlinear_solver.options['iprint'] = 2\\n        \\n        # To help convergence, we can set tighter tolerances on sub-solvers if needed\\n        # but for this simple cycle, the main Newton solver should suffice.\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    # Build the problem\\n    prob = om.Problem()\\n    prob.model = TurbojetSLDesign()\\n\\n    # Setup Optimization Driver (ScipyOptimizeDriver) or just run the solver\\n    # Since we used BalanceComp + NewtonSolver inside the group, \\n    # we can simply call run_model if the initial guess is good, \\n    # or use a driver to refine. \\n    # However, for this setup, the internal NewtonSolver solves the balances.\\n    # We will use run_driver() which triggers the internal solver.\\n    prob.driver = om.ScipyOptimizeDriver()\\n    prob.driver.options['optimizer'] = 'SLSQP'\\n    prob.driver.options['tol'] = 1e-6\\n    prob.dr\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"4mj5gmv40000gp/T/bm_sandbox_2ug3r07a/solve.py\\\", line 82, in <module>\\n    prob.model = TurbojetSLDesign()\\n                 ^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 212, in __init__\\n    super().__init__(**kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/system.py\\\", line 508, in __init__\\n    self.initialize()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_2ug3r07a/solve.py\\\", line 7, in initialize\\n    self.options.declare('thermo_data', default=pycycle.AIR_JETA_TAB_SPEC, desc='Thermodynamic data')\\n                                                ^^^^^^^\\nNameError: name 'pycycle' is not defined\\n\"}"
+  },
+  "timings": {
+    "agent_s": 281.001,
+    "setup_s": 0.0,
+    "grade_s": 1.034
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.03s"
+  ]
+}

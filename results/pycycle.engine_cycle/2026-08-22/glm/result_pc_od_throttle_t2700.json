@@ -1,0 +1,40 @@
+{
+  "task_id": "pc_od_throttle_t2700",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\ndef main():\\n    # Create the OpenMDAO problem\\n    prob = om.Problem()\\n\\n    # Initialize the Turbojet model\\n    # pycycle.Turbojet includes: Inlet, Compressor (AXI5), Burner, Turbine (LPT2269), Nozzle (CD), Shaft\\n    # We specify the thermo data as AIR_JETA_TAB_SPEC\\n    thermo = pyc.Thermo(species_data=pyc.AIR_JETA_TAB_SPEC, method='TABULAR')\\n    prob.model = pyc.Turbojet(thermo_data=thermo)\\n\\n    # Setup the Driver to solve for the design point\\n    # We use ScipyOptimizeDriver to find the W and Nmech that satisfy our constraints\\n    prob.driver = om.ScipyOptimizeDriver()\\n    prob.driver.options['tol'] = 1e-6\\n    prob.driver.options['maxiter'] = 50\\n\\n    # Design Variables\\n    # 1. Inlet mass flow (W) - primary driver for Thrust\\n    prob.model.add_design_var('inlet.W', lower=50.0, upper=200.0)\\n    \\n    # 2. Shaft mechanical speed (Nmech) - primary driver for Compressor OPR\\n    prob.model.add_design_var('shaft.Nmech', lower=0.5, upper=1.2)\\n\\n    # Constraints\\n    # 1. Target Net Thrust: 11800 lbf\\n    prob.model.add_constraint('nozz.Fn', equals=11800.0, scaler=1.0/11800.0)\\n    \\n    # 2. Target Compressor OPR: 13.5\\n    prob.model.add_constraint('comp.PR', equals=13.5, scaler=1.0/13.5)\\n\\n    # Objective\\n    # Minimize fuel flow (Wfuel) while satisfying constraints. \\n    # Since the problem is 0-DOF (2 vars, 2 constraints), the objective value is just a result of the feasibility.\\n    prob.model.add_objective('burner.Wfuel')\\n\\n    # Set Operating Conditions (Sea Level Static)\\n    prob.set_val('fltcond.h', 0.0, units='ft')\\n    prob.set_val('fltcond.MN', 0.0)\\n\\n    # Set Design Target T4 (Burner Exit Temperature)\\n    prob.set_val('burner.T_out', 2700.0, units='degR')\\n\\n    # Initial Guesses\\n    # Based on rough estimation: Fn ~ 100 * 3600 ~ 36000? No, 100 lbf/s air -> 100 lbf/s * 1.1 * 1000 ft/s ~ 110,000? \\n    # Let's re-estimate: Jet engine TSFC ~ 1.0 lbm/hr/lbf. Wfuel ~ 11800/3600 = 3.2 lbm/s.\\n    # FAR ~ 0.02 -> W_air ~ 160 lbm/s.\\n    # Or simple momentum: F = m_dot * V. V ~ 3000 ft/s. m_dot = 11800/3000 = 3.9 slugs/s = 126 lbm/s.\\n    # Let's start with W=120 lbm/s.\\n    prob.set_val('inlet.W', 120.0, units='lbm/s')\\n    prob.set_val('shaft.Nmech', 1.0) # Design speed is usually normalized to 1.0\\n\\n    # Setup Solvers\\n    # Newton solver is required to converge the non-linear cycle (shaft power balance)\\n    prob.model.nonlinear_solver = om.NewtonSolver(solve_subsystems=False, iprint=2)\\n    prob.model.linear_solver = om.DirectSolver()\\n    prob.model.nonlinear_solver.options['maxiter'] = 20\\n    prob.model.nonlinear_solver.options['rtol'] = 1e-7\\n    prob.model.nonlinear_solver.options['atol'] = 1e-7\\n\\n    # Setup the Problem\\n    prob.setup()\\n\\n    # Run the optimization/design driver\\n    prob.run_driver()\\n\\n    # Extract Results\\n    # Note: We assume the solver converged to the targets within tolerance.\\n    Fn_lbf = prob.get_val('nozz.Fn', units='lbf')\\n    OPR = prob.get_val('comp.PR')\\n    Wfuel_lbm_s = prob.get_val('burner.Wfuel', units='lbm/s')\\n\\n    # Calculate TSFC (Thrust Specific Fuel Consumption)\\n    # TSFC = Wfuel (lbm/hr) / Fn (lbf)\\n    TSFC = (Wfuel_lbm_s * 3600.0) / Fn_lbf\\n\\n    # Prepare the result dictionary\\n    result_data = {\\n        \\\"Fn_lbf\\\": float(Fn_lbf),\\n        \\\"TSFC\\\": float(TSFC),\\n        \\\"OPR\\\": float(OPR),\\n        \\\"Wfuel_lbm_s\\\": float(Wfuel_lbm_s)\\n    }\\n\\n    # Write to result.json\\n    with open('result.json', 'w') as f:\\n        json.dump(result_data, f, indent=4)\\n\\n    print(\\\"Design point solved successfully.\\\")\\n    print(json.dumps(result_data, indent=2))\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_am0upjvi/solve.py\\\", line 96, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_am0upjvi/solve.py\\\", line 12, in main\\n    thermo = pyc.Thermo(species_data=pyc.AIR_JETA_TAB_SPEC, method='TABULAR')\\n             ^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'Thermo'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 201.779,
+    "setup_s": 0.0,
+    "grade_s": 1.125
+  },
+  "environment_digest": "sha256:2a2103cff2a0d19e19eb401ef8dcbba5531b1724b941c2a5d1fed411a68033dd",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.12s"
+  ]
+}

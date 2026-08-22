@@ -1,0 +1,36 @@
+{
+  "task_id": "mechvqa_q170",
+  "registry_id": "mechvqa.public_eval",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.1415,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "vqa_free_obj",
+    "robustness": "N/A"
+  },
+  "score": 0.1415,
+  "artifacts": {
+    "answer": "\"d₁=30时h=28.5，d₁=40时h=28，h随d₁增大而减小，两者无近似比例关系。\"",
+    "model_meta": "{\"provider\": \"glmvl\", \"model\": \"glm-4.6v\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"vqa\", \"parsed_answer\": \"d₁=30时h=28.5，d₁=40时h=28，h随d₁增大而减小，两者无近似比例关系。\", \"reference_answer\": \"根据图纸参数表的数据，d₁ 与 h 并不存在近似的比例关系。具体分析如下：\\n\\n1. **关键数据计算**\\n   - 当 d₁ = 30 mm 时，h = 28.5 mm，比例 h/d₁ = 28.5 / 30 ≈ **0.95**。\\n   - 当 d₁ = 40 mm 时，h = 28 mm，比例 h/d₁ = 28 / 40 = **0.70**。\\n   - 两组比例相差约 0.25（相对误差约\", \"capability\": \"Reasoning\", \"difficulty\": \"Hard\", \"subcategory\": \"Geometric Calculation\"}"
+  },
+  "timings": {
+    "agent_s": 5.5,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:cbae749aa71cd55631eb65446f6636e7d6e41afd96f9ab4e71c68c822419f4c5",
+  "assets_revision": "mechvqa@github-HEAD-2026-08-19",
+  "logs": [
+    "answer='d₁=30时h=28.5，d₁=40时h=28，h随d₁增大而减小，两者无近似比例关系。' attempts=1"
+  ]
+}

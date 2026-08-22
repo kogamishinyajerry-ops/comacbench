@@ -1,0 +1,40 @@
+{
+  "task_id": "av_repair_range_v2",
+  "registry_id": "aviary.transport_mission",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport os\\nimport copy\\nimport tempfile\\nimport csv\\n\\nfrom aviary.api import run_aviary\\nfrom aviary.models.missions.two_dof_default import phase_info\\n\\n# Constants and Configuration\\nCORRUPTED_CSV_PATH = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/data/aviary/transport_mission/derived/av_repair_range_v2_corrupt.csv\\\"\\nREFERENCE_FUEL = 43389.55\\nTOLERANCE = 0.1  # Numerical tolerance for comparison\\n\\n# Candidates to test: (parameter_name, true_value)\\n# Based on the problem description:\\n# 1. aircraft:design:range true value is 3400 NM\\n# 2. aircraft:design:gross_mass true value is 180400 lbm\\nCANDIDATES = [\\n    (\\\"aircraft:design:range\\\", 3400.0),\\n    (\\\"aircraft:design:gross_mass\\\", 180400.0)\\n]\\n\\ndef create_modified_csv(original_path, param_name, new_value):\\n    \\\"\\\"\\\"\\n    Reads the original CSV, updates the specified parameter to the new value,\\n    and writes to a temporary CSV file.\\n    \\\"\\\"\\\"\\n    rows = []\\n    with open(original_path, 'r', newline='') as f:\\n        reader = csv.DictReader(f)\\n        fieldnames = reader.fieldnames\\n        for row in reader:\\n            if row['name'] == param_name:\\n                row['val'] = str(new_value)\\n            rows.append(row)\\n    \\n    # Create a temporary file\\n    fd, temp_path = tempfile.mkstemp(suffix='.csv')\\n    with os.fdopen(fd, 'w', newline='') as f:\\n        writer = csv.DictWriter(f, fieldnames=fieldnames)\\n        writer.writeheader()\\n        writer.writerows(rows)\\n    \\n    return temp_path\\n\\ndef main():\\n    # Configure Phase Info\\n    # Use deepcopy to avoid modifying the global default if reused\\n    current_phase_info = copy.deepcopy(phase_info)\\n    # Set cruise Mach to 0.80\\n    current_phase_info['cruise']['user_options']['mach_cruise'] = 0.80\\n\\n    result_data = {}\\n\\n    # Iterate through candidates to find which one restores the model\\n    for param_name, true_val in CANDIDATES:\\n        temp_csv = None\\n        try:\\n            # Create a temporary CSV with the candidate parameter restored\\n            temp_csv = create_modified_csv(CORRUPTED_CSV_PATH, param_name, true_val)\\n            \\n            # Run Aviary\\n            # Constraints: run_driver=False, optimizer=\\\"SLSQP\\\", verbosity=0, make_plots=False\\n            prob = run_aviary(\\n                temp_csv, \\n                current_phase_info, \\n                run_driver=False, \\n                optimizer=\\\"SLSQP\\\", \\n                verbosity=0, \\n                make_plots=False\\n            )\\n            \\n            # Retrieve fuel burn\\n            # Output variable: 'mission:total_fuel_mass' (lbm)\\n            fuel = prob.get_val('mission:total_fuel_mass', units='lbm')[0]\\n            \\n            # Check if the fuel burn matches the reference\\n            if abs(fuel - REFERENCE_FUEL) < TOLERANCE:\\n                result_data['corrupted_param'] = param_name\\n                result_data['restored_value'] = float(true_val)\\n                break  # Correct parameter found\\n        \\n        except Exception as e:\\n            # In case of error during run, log and continue\\n            print(f\\\"Error testing candidate {param_name}: {e}\\\")\\n        \\n        finally:\\n            # Clean up temporary file\\n            if temp_csv and os.path.exists(temp_csv):\\n                os.remove(temp_csv)\\n\\n    # Write the result to result.json\\n    if result_data:\\n        with open('result.json', 'w') as f:\\n            json.dump(result_data, f, indent=4)\\n    else:\\n        # Fallback if loop completes without finding a match (should not happen per problem statement)\\n        print(\\\"Could not determine the corrupted parameter.\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"missing\": \"result.json\"}"
+  },
+  "timings": {
+    "agent_s": 111.898,
+    "setup_s": 0.0,
+    "grade_s": 0.962
+  },
+  "environment_digest": "sha256:0c3b1a49977bc87f76a4b85fa72bc06d2d550fecc28d0171423d677201fa0c5b",
+  "assets_revision": "aviary-mission@selfbuilt-2026-08-19+aviary1.0.1",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=0 0.96s"
+  ]
+}
