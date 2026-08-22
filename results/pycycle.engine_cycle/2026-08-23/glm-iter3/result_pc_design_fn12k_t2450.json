@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn12k_t2450",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport json\\nfrom pycycle.constants import AIR_JETA_TAB_SPEC\\nfrom pycycle.elements import Inlet, AXI5, Combustor, LPT2269, CDNozzle, Shaft\\n\\nclass TurbojetDesign(om.Group):\\n    def initialize(self):\\n        self.options.declare('thermo_method', default='TABULAR')\\n        self.options.declare('thermo_data', default=AIR_JETA_TAB_SPEC)\\n\\n    def setup(self):\\n        # Elements\\n        self.add_subsystem('inlet', Inlet())\\n        self.add_subsystem('comp', AXI5())\\n        self.add_subsystem('burner', Combustor())\\n        self.add_subsystem('turb', LPT2269())\\n        self.add_subsystem('nozz', CDNozzle())\\n        self.add_subsystem('shaft', Shaft())\\n\\n        # Flow path connections\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # Shaft connections\\n        self.connect('comp.trq', 'shaft.trq_in')\\n        self.connect('turb.trq', 'shaft.trq_out')\\n        self.connect('shaft.N', 'comp.Nmech')\\n        self.connect('shaft.N', 'turb.Nmech')\\n\\n        # Balance: Thrust\\n        # We vary the inlet mass flow (W) to achieve the target thrust\\n        self.add_subsystem('bal_thrust', om.BalanceComp())\\n        self.bal_thrust.add_balance('W', val=200.0, units='lbm/s', eq_units='lbf', lhs_name='Fn', rhs_val=12000.0)\\n        self.connect('nozz.Fn', 'bal_thrust.Fn')\\n        self.connect('bal_thrust.W', 'inlet.Fl_I:stat:W')\\n\\n        # Balance: Shaft Power (dNdt = 0)\\n        # We vary the nozzle throat area (A) to adjust the backpressure on the turbine, \\n        # thereby matching turbine power to compressor power.\\n        self.add_subsystem('bal_power', om.BalanceComp())\\n        self.bal_power.add_balance('Area', val=300.0, units='inch**2', eq_units='rpm/s', lhs_name='dNdt', rhs_val=0.0)\\n        self.connect('shaft.dNdt', 'bal_power.dNdt')\\n        self.connect('bal_power.Area', 'nozz.Throat:A')\\n\\n        # Solver configuration\\n        self.nonlinear_solver = om.NewtonSolver(iprint=2, solve_subsystems=True, maxiter=50, atol=1e-6, rtol=1e-6)\\n        self.linear_solver = om.DirectSolver()\\n\\n# Problem Setup\\nprob = om.Problem()\\nprob.model = TurbojetDesign()\\n\\nprob.setup()\\n\\n# Set fixed design inputs\\nprob['inlet.Fl_I:stat:MN'] = 0.0      # Mach 0 (Static)\\nprob['comp.PR'] = 14.0                # OPR\\nprob['burner.Tt_out'] = 2450.0        # T4 (degR)\\nprob['burner.dPs'] = 0.03             # Burner pressure loss\\nprob['nozz.Throat:MN'] = 1.0          # Choked Nozzle\\nprob['shaft.mech_eff'] = 0.99         # Mechanical efficiency\\n\\n# Initial guesses for balances\\nprob['inlet.Fl_I:stat:W'] = 200.0     # Initial flow guess\\nprob['nozz.Throat:A'] = 250.0         # Initial Area guess\\n\\n# Initial guess for rotational speed (helps map lookup)\\nprob['comp.Nmech'] = 10000.0\\nprob['turb.Nmech'] = 10000.0\\n\\n# Run the solver\\nprob.run_model()\\n\\n# Extract Results\\nFn_lbf = float(prob['nozz.Fn'])\\nWfuel_lbm_s = float(prob['burner.Wfuel'])\\n\\n# Calculate TSFC in standard units (lbm/hr/lbf)\\nTSFC = (Wfuel_lbm_s * 3600.0) / Fn_lbf \\n\\nOPR = float(prob['comp.PR'])\\n\\nresults = {\\n    \\\"Fn_lbf\\\": Fn_lbf,\\n    \\\"TSFC\\\": TSFC,\\n    \\\"OPR\\\": OPR,\\n    \\\"Wfuel_lbm_s\\\": Wfuel_lbm_s\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_qx4k42wd/solve.py\\\", line 4, in <module>\\n    from pycycle.elements import Inlet, AXI5, Combustor, LPT2269, CDNozzle, Shaft\\nImportError: cannot import name 'Inlet' from 'pycycle.elements' (/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/elements/__init__.py)\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 292.946,
+    "setup_s": 0.0,
+    "grade_s": 1.047
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.04s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nfrom pycycle.thermo.thermo_tabular import AIR_JETA_TAB_SPEC\\nfrom pycycle.maps import AXI5, LPT2269\\nimport json\\n\\ndef main():\\n    prob = om.Problem()\\n    model = prob.model\\n\\n    # Thermodynamics setup\\n    thermo_method = 'TABULAR'\\n    thermo_data = AIR_JETA_TAB_SPEC\\n\\n    # --- Components ---\\n    \\n    # Inlet\\n    model.add_subsystem('inlet', pyc.Inlet(thermo_method=thermo_method, thermo_data=thermo_data))\\n    \\n    # Compressor (AXI5 map)\\n    model.add_subsystem('comp', pyc.Compressor(map_data=AXI5, \\n                                               thermo_method=thermo_method, thermo_data=thermo_data))\\n    \\n    # Combustor\\n    model.add_subsystem('burner', pyc.Combustor(thermo_method=thermo_method, thermo_data=thermo_data))\\n    \\n    # Turbine (LPT2269 map)\\n    model.add_subsystem('turb', pyc.Turbine(map_data=LPT2269, \\n                                            thermo_method=thermo_method, thermo_data=thermo_data))\\n    \\n    # Nozzle (CD)\\n    model.add_subsystem('nozz', pyc.Nozzle(thermo_method=thermo_method, thermo_data=thermo_data))\\n\\n    # --- Flow Path Connections ---\\n    model.connect('inlet.Fl_O', 'comp.Fl_I')\\n    model.connect('comp.Fl_O', 'burner.Fl_I')\\n    model.connect('burner.Fl_O', 'turb.Fl_I')\\n    model.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n    # --- Balance Execs ---\\n    \\n    # Power Balance Calculation: P_comp - P_turb = 0\\n    model.add_subsystem('power_exec', om.ExecComp('dP = P_comp - P_turb', \\n                                                  P_comp=1e6, P_turb=1e6, dP=0.0))\\n    model.connect('comp.power', 'power_exec.P_comp')\\n    model.connect('turb.power', 'power_exec.P_turb')\\n\\n    # OPR Calculation: P3 / P2\\n    model.add_subsystem('opr_exec', om.ExecComp('OPR = P3 / P2', P3=14.7, P2=1.0, OPR=1.0))\\n    model.connect('comp.Fl_O:tot:P', 'opr_exec.P3')\\n    model.connect('inlet.Fl_O:tot:P', 'opr_exec.P2')\\n\\n    # --- Design Balances ---\\n    \\n    # 1. Thrust Balance: Vary W (Inlet Mass Flow) to hit Fn_target\\n    thrust_bal = model.add_subsystem('thrust_bal', om.BalanceComp())\\n    thrust_bal.add_balance('W', val=200.0, units='lbm/s', lhs_name='Fn', rhs_name='Fn_target')\\n    model.set_input_defaults('thrust_bal.Fn_target', 15500.0, units='lbf')\\n    model.connect('thrust_bal.W', 'inlet.W')\\n    model.connect('nozz.F_net', 'thrust_bal.Fn')\\n\\n    # 2. T4 Balance: Vary W_F (Fuel Flow) to hit T4_target\\n    t4_bal = model.add_subsystem('t4_bal', om.BalanceComp())\\n    t4_bal.add_balance('W_F', val=3.5, units='lbm/s', lhs_name='T4', rhs_name='T4_target')\\n    model.set_input_defaults('t4_bal.T4_target', 2500.0, units='degR')\\n    model.connect('t4_bal.W_F', 'burner.W_F')\\n    model.connect('turb.Fl_I:tot:T', 't4_bal.T4')\\n\\n    # 3. Shaft Power Balance: Vary A4 (Turbine Inlet Area) to balance Power\\n    power_bal = model.add_subsystem('power_bal', om.BalanceComp())\\n    power_bal.add_balance('A4', val=0.3, units='ft**2', lhs_name='dP', rhs_name='0.0')\\n    model.connect('power_bal.A4', 'turb.area_in')\\n    model.connect('power_exec.dP', 'power_bal.dP')\\n\\n    # 4. Nozzle Balance: Vary A9 (Nozzle Throat Area) to match P_exit = P_amb\\n    nozz_bal = model.add_subsystem('nozz_bal', om.BalanceComp())\\n    nozz_bal.add_balance('A9', val=0.6, units='ft**2', lhs_name='P_exit', rhs_name='P_amb')\\n    model.connect('nozz_bal.A9', 'nozz.Throat:stat:area')\\n    model.connect('nozz.Fl_O:stat:P', 'nozz_bal.P_exit')\\n    model.connect('inlet.Ps_amb', 'nozz_bal.P_amb')\\n\\n    # 5. OPR Balance: Vary N_r to hit OPR_target = 13.5\\n    opr_bal = model.add_subsystem('opr_bal', om.BalanceComp())\\n    opr_bal.add_balance('N_r', val=1.0, lower=0.5, upper=1.5, lhs_name='OPR', rhs_name='OPR_target')\\n    model.set_input_defaults('opr_bal.OPR_target', 13.5)\\n    \\n    # Connect Speed to Compressor and Turbine\\n    model.connect('opr_bal.N_r', 'comp.N_r')\\n    model.connect('opr_bal.N_r', 'turb.N_r')\\n\\n    # --- Solver Setup ---\\n    # Newton solver to converge the balances\\n    model.nonlinear_solver = om.NewtonSolver(solve_subsystems=Fa\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_hfznd6gi/solve.py\\\", line 3, in <module>\\n    from pycycle.thermo.thermo_tabular import AIR_JETA_TAB_SPEC\\nModuleNotFoundError: No module named 'pycycle.thermo.thermo_tabular'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 201.695,
+    "setup_s": 0.0,
+    "grade_s": 0.931
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.93s"
+  ]
+}

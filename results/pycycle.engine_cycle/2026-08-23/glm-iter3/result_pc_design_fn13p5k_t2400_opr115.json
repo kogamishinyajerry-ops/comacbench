@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn13p5k_t2400_opr115",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\n# Create the problem instance\\nprob = om.Problem()\\nmodel = prob.model\\n\\n# -----------------------------------------------------------\\n# Instantiate flowpath elements\\n# -----------------------------------------------------------\\ninlet = pyc.Inlet()\\ncomp = pyc.Compressor(map_data=pyc.AXI5)\\nburner = pyc.Combustor()\\nturb = pyc.Turbine(map_data=pyc.LPT2269)\\nnozz = pyc.Nozzle()  # Corrected: Use pyc.Nozzle instead of CDNozzle\\nshaft = pyc.Shaft()\\n\\n# Set thermo properties on the elements\\nthermo_method = 'TABULAR'\\nthermo_data = pyc.AIR_JETA_TAB_SPEC\\n\\nfor element in [inlet, comp, burner, turb, nozz]:\\n    element.options['thermo_method'] = thermo_method\\n    element.options['thermo_data'] = thermo_data\\n\\n# Add subsystems to the model\\nmodel.add_subsystem('inlet', inlet, promotes_inputs=['Fl_I:stat:MN', 'h'])\\nmodel.add_subsystem('comp', comp, promotes_inputs=['Nmech'])\\nmodel.add_subsystem('burner', burner)\\nmodel.add_subsystem('turb', turb, promotes_inputs=['Nmech'])\\nmodel.add_subsystem('nozz', nozz)\\nmodel.add_subsystem('shaft', shaft)\\n\\n# -----------------------------------------------------------\\n# Balance Comps\\n# -----------------------------------------------------------\\n\\n# 1. Balance Fuel-to-Air Ratio (FAR) to achieve T4_target\\nbal_t4 = om.BalanceComp(name='FAR', val=0.02, eq_units='degR', lhs_name='T4', rhs_name='T4_target')\\nmodel.add_subsystem('bal_t4', bal_t4, promotes_inputs=['T4_target'])\\n\\n# 2. Balance Nozzle Throat Area to achieve Fn_target\\nbal_fn = om.BalanceComp(name='area', val=1.5, units='ft**2', eq_units='lbf', lhs_name='Fn', rhs_name='Fn_target')\\nmodel.add_subsystem('bal_fn', bal_fn, promotes_inputs=['Fn_target'])\\n\\n# 3. Balance Turbine PR_des to achieve Shaft Power Balance (dSdt = 0)\\nbal_pr = om.BalanceComp(name='PR_turb', val=4.0, units='unitless', eq_units='rpm/s', lhs_name='dSdt', rhs_name='dSdt_target')\\nmodel.add_subsystem('bal_pr', bal_pr, promotes_inputs=['dSdt_target'])\\n\\n# -----------------------------------------------------------\\n# Connections\\n# -----------------------------------------------------------\\n\\n# Flowpath\\nmodel.connect('inlet.Fl_O', 'comp.Fl_I')\\nmodel.connect('comp.Fl_O', 'burner.Fl_I')\\nmodel.connect('burner.Fl_O', 'turb.Fl_I')\\nmodel.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n# Mechanical\\nmodel.connect('turb.trq', 'shaft.trq_in')\\nmodel.connect('comp.trq', 'shaft.trq_out')\\n\\n# Balances\\n# T4 Balance\\nmodel.connect('bal_t4.FAR', 'burner.FAR')\\nmodel.connect('burner.Fl_O:tot:T', 'bal_t4.T4')\\n\\n# Thrust Balance\\nmodel.connect('bal_fn.area', 'nozz.Throat:stat:area')\\nmodel.connect('nozz.F_net', 'bal_fn.Fn')\\n\\n# Power Balance\\nmodel.connect('bal_pr.PR_turb', 'turb.PR_des')\\nmodel.connect('shaft.dSdt', 'bal_pr.dSdt')\\n\\n# -----------------------------------------------------------\\n# Setup & Initialization\\n# -----------------------------------------------------------\\n\\n# Set Design Mode for turbomachinery\\ncomp.design = True\\nturb.design = True\\n\\nprob.setup()\\n\\n# Flight Conditions: Sea Level, Mach 0\\nprob['h'] = 0.0\\nprob['Fl_I:stat:MN'] = 0.0\\n\\n# Targets\\nprob['T4_target'] = 2400.0  # degR\\nprob['Fn_target'] = 13500.0 # lbf\\nprob['dSdt_target'] = 0.0   # Steady state\\n\\n# Design Parameters\\nprob['comp.PR_des'] = 11.5\\nprob['burner.dPqP'] = 0.03  # Typical combustor pressure loss\\n\\n# Initial Guesses\\nprob['bal_t4.FAR'] = 0.025\\nprob['bal_fn.area'] = 1.5  # ft^2\\nprob['bal_pr.PR_turb'] = 4.0\\nprob['Nmech'] = 10000.0\\n\\n# -----------------------------------------------------------\\n# Solver Configuration\\n# -----------------------------------------------------------\\n\\n# Newton solver is required to converge the coupled cycle\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['maxiter'] = 50\\nprob.model.nonlinear_solver.options['iprint'] = 2\\nprob.model.nonlinear_solver.options['rtol'] = 1e-5\\nprob.model.nonlinear_solver.options['atol'] = 1e-5\\nprob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\nprob.model.linear_solver = om.DirectSolver()\\n\\n# Run the analysis\\n\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"rsonal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 638, in _setup_procs\\n    subsys._setup_procs(subsys.pathname, sub_comm, prob_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/elements/inlet.py\\\", line 148, in setup\\n    composition = self.Fl_I_data['Fl_I']\\n                  ~~~~~~~~~~~~~~^^^^^^^^\\nKeyError: 'Fl_I'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 85.564,
+    "setup_s": 0.0,
+    "grade_s": 0.958
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.96s"
+  ]
+}

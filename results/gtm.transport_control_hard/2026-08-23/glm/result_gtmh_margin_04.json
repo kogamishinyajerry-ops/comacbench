@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_04",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"% Clear workspace and define s variable\\ns = tf('s');\\n\\n% --- INNER LOOP ---\\n% Plant G_in(s) = 1 / (s * (s + 4.0))\\nG_in = 1 / (s * (s + 4.0));\\n\\n% Feedback gain ki = 9.0\\nki = 9.0;\\n\\n% Closed Inner Loop G_in_cl(s) = ki * G_in(s) / (1 + ki * G_in(s))\\n% Using feedback command for unity negative feedback\\nG_in_cl = feedback(ki * G_in, 1);\\n\\n% --- OUTER LOOP ---\\n% Plant/Compensator G_out(s) = 3.0 / (s * (s + 4.0))\\nG_out = 3.0 / (s * (s + 4.0));\\n\\n% --- TOTAL OPEN LOOP ---\\n% Cascaded total open loop L(s) = G_out(s) * G_in_cl(s)\\nL_total = G_out * G_in_cl;\\n\\n% --- STABILITY MARGINS ---\\n% Compute gain margin (Gm), phase margin (Pm), \\n% phase crossover frequency (Wgm), and gain crossover frequency (Wpm).\\n% Note: \\n% Wgm is the frequency where phase is -180 degrees (Phase Crossover).\\n% Wpm is the frequency where gain is 1 (0 dB) (Gain Crossover).\\n[Gm, Pm, Wgm, Wpm] = margin(L_total);\\n\\n% Convert Gain Margin to dB\\ngm_db_val = 20 * log10(Gm);\\n\\n% --- SAVE RESULTS ---\\n% Map results to the required keys\\n% w_gc corresponds to Gain Crossover Frequency (Wpm)\\n% w_pc corresponds to Phase Crossover Frequency (Wgm)\\nresult = struct();\\nresult.gm_db = gm_db_val;\\nresult.pm_deg = Pm;\\nresult.w_gc = Wpm;\\nresult.w_pc = Wgm;\\n\\n% Write to result.json\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.669518050667117, \"ref\": 10.669518050667117}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 60.17331225409221, \"ref\": 60.17331225409221}, \"w_gc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.650575, \"got\": 0.7411036994679286, \"ref\": 2.120923852697917}, \"w_pc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.861845, \"got\": 2.120923852697917, \"ref\": 0.7411036994679286}}, \"physics_hits\": \"2/4\", \"rel_tol\": 0.01, \"matlab_s\": 10.92}"
+  },
+  "timings": {
+    "agent_s": 82.177,
+    "setup_s": 0.0,
+    "grade_s": 10.922
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 10.92s"
+  ]
+}

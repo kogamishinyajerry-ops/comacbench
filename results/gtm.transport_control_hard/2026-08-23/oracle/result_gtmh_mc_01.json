@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control_hard / mc_01）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nV = 710.0; \\nXu = -0.0066; Xw = 0.039; Zu = -0.032;\\nZw0 = -0.72; Mw0 = -0.0053; Mq0 = -0.9;\\nZde = -6.0; Mde = -4.0;\\nwn_cl = 2.0; z_cl = 0.6;\\npct = 0.25; wn_lo = 1.88; wn_hi = 2.12; z_th = 0.51;\\nseed = 20260827; Ns = 200;\\nG = 32.174;\\nA0 = [Xu Xw 0 -G; Zu Zw0 V 0; 0 Mw0 Mq0 0; 0 0 1 0];\\nB = [0; Zde; Mde; 0];\\nev0 = eig(A0);\\nlam0 = ev0(imag(ev0) > 0); [~, ord0] = sort(abs(lam0), 'descend'); lam0 = lam0(ord0);\\nph = lam0(2);\\nsp = -z_cl*wn_cl + 1i*wn_cl*sqrt(1-z_cl^2);\\nK = place(A0, B, [ph; conj(ph); sp; conj(sp)]);\\n% 200 确定性采样：rng(seed) 独立均匀盒缩放 Mw/Zw/Mq\\nrng(seed);\\nfM = 1 + pct * (2*rand(Ns,1) - 1);\\nrng(seed + 1000);\\nfZ = 1 + pct * (2*rand(Ns,1) - 1);\\nrng(seed + 2000);\\nfx = 1 + pct * (2*rand(Ns,1) - 1);\\nnpass = 0;\\nfor jj = 1:Ns\\n  Acur = [Xu Xw 0 -G; Zu Zw0*fZ(jj) V 0; 0 Mw0*fM(jj) Mq0*fx(jj) 0; 0 0 1 0];\\n  evc = eig(Acur - B*K);\\n  lamc = evc(imag(evc) > 0);\\n  [~, ordc] = sort(abs(lamc), 'descend');\\n  lamc = lamc(ordc);\\n  wnx = abs(lamc(1)); zex = -real(lamc(1))/abs(lamc(1));\\n  if wnx >= wn_lo && wnx <= wn_hi && zex >= z_th\\n    npass = npass + 1;\\n  end\\nend\\nr = struct('pass_fraction', npass / Ns, 'failing_case_count', Ns - npass);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.475, \"ref\": 0.475}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 105, \"ref\": 105}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 8.34}"
+  },
+  "timings": {
+    "agent_s": 8.342,
+    "setup_s": 0.0,
+    "grade_s": 8.342
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.34s"
+  ]
+}

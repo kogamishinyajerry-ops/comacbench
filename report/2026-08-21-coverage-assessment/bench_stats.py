@@ -38,7 +38,7 @@ def norm_provider(name: str) -> str:
         return "minimax-m3"
     return name
 
-# 18 integrated 基准（registry SSOT；顺序=九维报告主表）
+# 19 integrated 基准（registry SSOT；顺序=九维报告主表）
 BENCHMARKS = [
     "cfdllm.cfdquery", "aeroengqa.gold", "mechvqa.public_eval",
     "scicode.physics", "cfdllm.cfdcode", "humaneval.python",
@@ -47,6 +47,7 @@ BENCHMARKS = [
     "superwing.coeff_lite", "hilift_aeroml.lite", "cfdllm.foam_basic",
     "pycycle.engine_cycle", "aviary.transport_mission",
     "cadgen.local_validity", "gtm.transport_control",
+    "gtm.transport_control_hard",
 ]
 
 
@@ -56,9 +57,11 @@ def model_runs(rid: str) -> dict[str, tuple[str, list[float]]]:
     latest: dict[str, tuple[str, list[float]]] = {}
     if not root.exists():
         return latest
-    # glob 已按 日期/provider 排序 → 同家族后见覆盖前见 = 保留最新日期目录
+    # glob 已按 日期/provider 排序 → 同家族后见覆盖前见 = 保留最新日期目录。
+    # 注意：-iter* 目录是迭代协议实验（v0.2 §9 单独报告），非基线——排除，
+    # 否则 sub10 试点会覆盖全量单轮基线。
     for prov_dir in sorted(root.glob("*/*/")):
-        if prov_dir.name in SKIP_PROVIDERS:
+        if prov_dir.name in SKIP_PROVIDERS or "-iter" in prov_dir.name:
             continue
         fs = list(prov_dir.glob("result_*.json"))
         if not fs:

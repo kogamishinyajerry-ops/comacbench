@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_gs_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Clear workspace\\nclear;\\nclose all;\\nclc;\\n\\n% --- System Data Definition ---\\n\\n% Flight Condition 1 (700 ft/s)\\nA1 = [ -0.0058, 0.036, 0.0, -32.174; ...\\n       -0.029, -0.68, 700.0, 0.0; ...\\n       0.0, -0.0048, -0.86, 0.0; ...\\n       0.0, 0.0, 1.0, 0.0 ];\\nB1 = [ 0.0; -7.5; -3.5; 0.0 ];\\ntarget_wn_1 = 2.4;\\ntarget_zeta_1 = 0.62;\\n\\n% Flight Condition 2 (720 ft/s)\\nA2 = [ -0.0056, 0.028, 0.0, -32.174; ...\\n       -0.021, -0.58, 720.0, 0.0; ...\\n       0.0, -0.0038, -0.7, 0.0; ...\\n       0.0, 0.0, 1.0, 0.0 ];\\nB2 = [ 0.0; -7.5; -3.5; 0.0 ];\\ntarget_wn_2 = 2.1;\\ntarget_zeta_2 = 0.55;\\n\\n% Flight Condition 3 (680 ft/s)\\nA3 = [ -0.0055, 0.024, 0.0, -32.174; ...\\n       -0.018, -0.54, 680.0, 0.0; ...\\n       0.0, -0.0035, -0.65, 0.0; ...\\n       0.0, 0.0, 1.0, 0.0 ];\\nB3 = [ 0.0; -7.5; -3.5; 0.0 ];\\ntarget_wn_3 = 1.9;\\ntarget_zeta_3 = 0.5;\\n\\n% --- Helper Function for Controller Design ---\\nfunction [cl_omega, cl_zeta, K] = design_controller(A, B, wn_des, zeta_des)\\n    % 1. Get Open Loop Poles\\n    p_open = eig(A);\\n    \\n    % 2. Identify Phugoid Poles (Low Frequency)\\n    % Sort by magnitude (ascending) to find the slowest poles\\n    p_mag = abs(p_open);\\n    [~, idx] = sort(p_mag, 'ascend');\\n    p_phugoid = p_open(idx(1:2));\\n    \\n    % 3. Define Desired Poles\\n    % Target Short Period poles\\n    p_sp_desired = roots([1, 2*zeta_des*wn_des, wn_des^2]);\\n    \\n    % Desired set: Target Short Period + Open Loop Phugoid\\n    p_desired = [p_sp_desired; p_phugoid];\\n    \\n    % 4. Place Poles\\n    K = place(A, B, p_desired);\\n    \\n    % 5. Calculate Closed Loop Poles\\n    p_cl = eig(A - B*K);\\n    \\n    % 6. Identify Achieved Short Period Poles (High Frequency)\\n    p_cl_mag = abs(p_cl);\\n    [~, idx_cl] = sort(p_cl_mag, 'descend');\\n    p_sp_achieved = p_cl(idx_cl(1:2));\\n    \\n    % 7. Compute Achieved Characteristics from the dominant SP pole\\n    pole = p_sp_achieved(1);\\n    cl_omega = abs(pole);\\n    cl_zeta = -real(pole) / cl_omega;\\nend\\n\\n% --- Compute Controllers and Metrics ---\\n\\n% FC1\\n[cl_omega_sp_1, cl_zeta_sp_1, ~] = design_controller(A1, B1, target_wn_1, target_zeta_1);\\n\\n% FC2\\n[cl_omega_sp_2, cl_zeta_sp_2, ~] = design_controller(A2, B2, target_wn_2, target_zeta_2);\\n\\n% FC3\\n[cl_omega_sp_3, cl_zeta_sp_3, ~] = design_controller(A3, B3, target_wn_3, target_zeta_3);\\n\\n% --- Output Results ---\\n\\n% Populate structure\\nresults.cl_omega_sp_1 = cl_omega_sp_1;\\nresults.cl_zeta_sp_1 = cl_zeta_sp_1;\\nresults.cl_omega_sp_2 = cl_omega_sp_2;\\nresults.cl_zeta_sp_2 = cl_zeta_sp_2;\\nresults.cl_omega_sp_3 = cl_omega_sp_3;\\nresults.cl_zeta_sp_3 = cl_zeta_sp_3;\\n\\n% Write to JSON\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(results));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"cl_omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.399999999997137, \"ref\": 2.3999999999972745}, \"cl_omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.100000000003032, \"ref\": 2.10000000000294}, \"cl_omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9000000000033792, \"ref\": 1.9000000000032344}, \"cl_zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.62000000000077, \"ref\": 0.6200000000007259}, \"cl_zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5499999999992538, \"ref\": 0.549999999999235}, \"cl_zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.4999999999991153, \"ref\": 0.49999999999915323}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 11.09}"
+  },
+  "timings": {
+    "agent_s": 212.223,
+    "setup_s": 0.0,
+    "grade_s": 11.095
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 11.09s"
+  ]
+}

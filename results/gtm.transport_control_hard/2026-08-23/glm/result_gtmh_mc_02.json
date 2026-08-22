@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Monte Carlo robustness screening for closed-loop short-period spec\\n\\n% 1. Define Nominal System\\n% States x = [u, w, q, theta]\\ng = 32.174;\\nV = 740.0;\\nXu = -0.006;\\nXw = 0.033;\\nZu = -0.027;\\nZw = -0.66;\\nMw = -0.0046;\\nMq = -0.78;\\n\\nA_nom = [Xu,  Xw,  0,   -g;\\n         Zu,  Zw,  V,    0;\\n         0,   Mw,  Mq,   0;\\n         0,   0,   1,    0];\\n\\nB = [0; -5.5; -4.5; 0];\\n\\n% 2. Design State Feedback Gain K\\n% Goal: Place short-period poles at omega_n=2.1, zeta=0.55\\n% Constraint: Phugoid held at open-loop -> K = [0, *, *, 0]\\n\\n% Short-period subsystem (w, q) states\\nA_sp = A_nom(2:3, 2:3);\\nB_sp = B(2:3);\\n\\n% Desired poles\\nwn_des = 2.1;\\nz_des = 0.55;\\np_des = -z_des*wn_des + 1i*wn_des*sqrt(1-z_des^2);\\n\\n% Compute gains for SP subsystem\\nK_sp = place(A_sp, B_sp, [p_des, conj(p_des)]);\\n\\n% Construct full K\\nK = [0, K_sp, 0];\\n\\n% 3. Monte Carlo Setup\\nN = 200;\\npct = 0.20; % 20% uncertainty\\n\\n% Generate deterministic samples with specific seeds\\nrng(20260828);\\nf_Mw = 1 + pct * (2*rand(N,1) - 1);\\n\\nrng(20261828);\\nf_Zw = 1 + pct * (2*rand(N,1) - 1);\\n\\nrng(20262828);\\nf_Mq = 1 + pct * (2*rand(N,1) - 1);\\n\\n% 4. Evaluation Loop\\npass_count = 0;\\n\\nfor i = 1:N\\n    % Create perturbed A matrix\\n    A_i = A_nom;\\n    \\n    % Apply uncertainties to Mw, Zw, Mq\\n    A_i(2,2) = A_i(2,2) * f_Zw(i); % Zw\\n    A_i(3,2) = A_i(3,2) * f_Mw(i); % Mw\\n    A_i(3,3) = A_i(3,3) * f_Mq(i); % Mq\\n    \\n    % Closed-loop system matrix\\n    A_cl = A_i - B*K;\\n    \\n    % Compute eigenvalues\\n    ev = eig(A_cl);\\n    \\n    % Identify Short-Period poles\\n    % SP poles are the fast poles (highest natural frequency)\\n    % Phugoid poles are very slow (approx 0.06 rad/s)\\n    % Sort poles by magnitude (natural frequency) descending\\n    [mags, sortIdx] = sort(abs(ev), 'descend');\\n    \\n    % The first two are the SP poles\\n    sp_p1 = ev(sortIdx(1));\\n    sp_p2 = ev(sortIdx(2));\\n    \\n    % Calculate omega_n and zeta from the poles\\n    % For a 2nd order system s^2 + 2*zeta*wn*s + wn^2 = (s - p1)(s - p2)\\n    % wn = sqrt(p1 * p2)\\n    % zeta = -(p1 + p2) / (2 * wn)\\n    \\n    p_prod = sp_p1 * sp_p2;\\n    p_sum = sp_p1 + sp_p2;\\n    \\n    % Check validity (product must be positive for real wn)\\n    if p_prod > 0\\n        wn = sqrt(p_prod);\\n        zeta = -p_sum / (2 * wn);\\n        \\n        % Check Spec\\n        if (wn >= 2.0) && (wn <= 2.2) && (zeta >= 0.52)\\n            pass_count = pass_count + 1;\\n        end\\n    end\\nend\\n\\n% 5. Output Results\\nresult.pass_fraction = pass_count / N;\\nresult.failing_case_count = N - pass_count;\\n\\n% Write to JSON\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.545, \"ref\": 0.545}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 91, \"ref\": 91}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 11.84}"
+  },
+  "timings": {
+    "agent_s": 299.052,
+    "setup_s": 0.0,
+    "grade_s": 11.843
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 11.84s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "gtmh_gs_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"% Define system matrices for three flight conditions\\n% FC1\\nA1 = [-0.0066, 0.042, 0.0, -32.174; \\n      -0.036, -0.78, 720.0, 0.0; \\n      0.0, -0.0058, -1.0, 0.0; \\n      0.0, 0.0, 1.0, 0.0];\\nB1 = [0.0; -5.0; -5.0; 0.0];\\ntarget_wn1 = 2.2;\\ntarget_z1 = 0.58;\\n\\n% FC2\\nA2 = [-0.006, 0.03, 0.0, -32.174; \\n      -0.024, -0.6, 690.0, 0.0; \\n      0.0, -0.004, -0.72, 0.0; \\n      0.0, 0.0, 1.0, 0.0];\\nB2 = [0.0; -5.0; -5.0; 0.0];\\ntarget_wn2 = 2.0;\\ntarget_z2 = 0.52;\\n\\n% FC3\\nA3 = [-0.0059, 0.022, 0.0, -32.174; \\n      -0.017, -0.53, 640.0, 0.0; \\n      0.0, -0.0033, -0.63, 0.0; \\n      0.0, 0.0, 1.0, 0.0];\\nB3 = [0.0; -5.0; -5.0; 0.0];\\ntarget_wn3 = 1.8;\\ntarget_z3 = 0.48;\\n\\n% Compute gains and closed-loop properties for each condition\\n[cl_omega_sp_1, cl_zeta_sp_1] = design_and_analyze(A1, B1, target_wn1, target_z1);\\n[cl_omega_sp_2, cl_zeta_sp_2] = design_and_analyze(A2, B2, target_wn2, target_z2);\\n[cl_omega_sp_3, cl_zeta_sp_3] = design_and_analyze(A3, B3, target_wn3, target_z3);\\n\\n% Store results\\nresult = struct();\\nresult.cl_omega_sp_1 = cl_omega_sp_1;\\nresult.cl_zeta_sp_1 = cl_zeta_sp_1;\\nresult.cl_omega_sp_2 = cl_omega_sp_2;\\nresult.cl_zeta_sp_2 = cl_zeta_sp_2;\\nresult.cl_omega_sp_3 = cl_omega_sp_3;\\nresult.cl_zeta_sp_3 = cl_zeta_sp_3;\\n\\n% Write to JSON\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\\n\\n% Local function to design controller and extract closed-loop metrics\\nfunction [omega_n, zeta] = design_and_analyze(A, B, wn_target, z_target)\\n    % 1. Get open-loop eigenvalues\\n    p_ol = eig(A);\\n    \\n    % 2. Identify Open-Loop Phugoid Poles (the slower mode)\\n    % Sort by magnitude (natural frequency). The two smallest are phugoid.\\n    [~, idx] = sort(abs(p_ol));\\n    p_ph_ol = p_ol(idx(1:2));\\n    \\n    % 3. Define Target Short-Period Poles\\n    % s = -zeta*wn +/- j*wn*sqrt(1-zeta^2)\\n    sigma = -z_target * wn_target;\\n    wd = wn_target * sqrt(1 - z_target^2);\\n    p_sp_target = [sigma + 1j*wd, sigma - 1j*wd];\\n    \\n    % 4. Construct Desired Pole Vector\\n    % Combine target SP poles with open-loop Phugoid poles\\n    p_desired = [p_sp_target; p_ph_ol];\\n    \\n    % 5. Place Poles using Control System Toolbox\\n    K = place(A, B, p_desired);\\n    \\n    % 6. Compute Closed-Loop Eigenvalues\\n    p_cl = eig(A - B*K);\\n    \\n    % 7. Identify Closed-Loop Short-Period Poles\\n    % Short-period is the faster mode (larger magnitude). \\n    % Sort by magnitude descending.\\n    [~, idx_cl] = sort(abs(p_cl), 'descend');\\n    p_sp_cl = p_cl(idx_cl(1:2));\\n    \\n    % 8. Calculate Natural Frequency and Damping from the dominant SP pole\\n    % Using the first pole of the conjugate pair\\n    p = p_sp_cl(1);\\n    omega_n = abs(p);\\n    zeta = -real(p) / omega_n;\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b错误使用 vertcat\\n要串联的数组的维度不一致。\\n\\n出错 model>design_and_analyze (第 66 行)\\n    p_desired = [p_sp_target; p_ph_ol];\\n                ^^^^^^^^^^^^^^^^^^^^^^\\n出错 model (第 30 行)\\n[cl_omega_sp_1, cl_zeta_sp_1] = design_and_analyze(A1, B1, target_wn1, target_z1);\\n                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 313.378,
+    "setup_s": 0.0,
+    "grade_s": 11.628
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 11.63s"
+  ]
+}

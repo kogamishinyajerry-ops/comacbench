@@ -1,0 +1,64 @@
+id: gtmh_gs_01
+registry_id: gtm.transport_control_hard
+domain: flight_control
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- matlab
+input:
+  prompt_file: tasks/gtm.transport_control_hard/gtmh_gs_01.md
+  prompt_sha256: ef81341c748d391a71ae165d489c071fc5058af3661bdf5d9c1378c7d8205502
+  assets: []
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（MATLAB R2026a -batch，确定性；自建加硬任务）
+  revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a
+  values:
+    cl_omega_sp_1: 1.9999999999989486
+    cl_omega_sp_2: 1.9000000000027133
+    cl_omega_sp_3: 1.699999999997161
+    cl_zeta_sp_1: 0.6000000000003328
+    cl_zeta_sp_2: 0.5499999999992136
+    cl_zeta_sp_3: 0.5000000000008572
+  rel_tol: 0.01
+  uncertainty_note: 钉死口径/确定性 seeded 采样/辨识管线；容差覆盖数值口径差
+grader:
+  answer_format: matlab
+  exec_kind: gtm_matlab
+  validity_gate: true
+  result_keys:
+  - cl_omega_sp_1
+  - cl_omega_sp_2
+  - cl_omega_sp_3
+  - cl_zeta_sp_1
+  - cl_zeta_sp_2
+  - cl_zeta_sp_3
+  numeric_rel_tol: 0.01
+  exact_keys: []
+  solver_backend: matlab-batch-r2026a
+  oracle_source: data/gtm/transport_control_hard/gold/gs_01.m
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（1% 容差，failing_case_count 5%）；requirements=result.json 键完备
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: 自建（受 NASA GTM 定位启发，未镜像 GTM_DesignSim）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a

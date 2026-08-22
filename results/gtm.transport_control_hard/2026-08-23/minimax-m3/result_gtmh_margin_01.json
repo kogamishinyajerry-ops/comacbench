@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"% Define the open-loop transfer function L(s) = num/den\\nnum = [1.8];\\nden = [1.0, 3.0, 2.0, 0.0];\\nL = tf(num, den);\\n\\n% Compute classical stability margins\\n% Gm  -> gain margin (linear, absolute)\\n% Pm  -> phase margin (degrees)\\n% Wgm -> frequency at which phase crosses -180 deg (w_pc)\\n% Wpm -> frequency at which gain crosses 0 dB (w_gc)\\n[Gm, Pm, Wgm, Wpm] = margin(L);\\n\\n% Convert gain margin to dB\\ngm_db = 20*log10(Gm);\\n\\n% Map to the required output keys\\nw_pc = Wgm;\\nw_gc = Wpm;\\n\\n% Build the results struct\\nresult = struct( ...\\n    'gm_db', gm_db, ...\\n    'pm_deg', Pm, ...\\n    'w_gc',   w_gc, ...\\n    'w_pc',   w_pc );\\n\\n% Serialize and write result.json to the current working directory\\njson_text = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, json_text);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.457574905606755, \"ref\": 10.457574905606755}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 35.90170870867279, \"ref\": 35.90170870867279}, \"w_gc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.507054, \"got\": 0.6971302321046832, \"ref\": 1.4142135623730954}, \"w_pc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.028622, \"got\": 1.4142135623730954, \"ref\": 0.6971302321046832}}, \"physics_hits\": \"2/4\", \"rel_tol\": 0.01, \"matlab_s\": 9.61}"
+  },
+  "timings": {
+    "agent_s": 51.226,
+    "setup_s": 0.0,
+    "grade_s": 9.613
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.61s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% model.m\\nfunction model()\\n    % --- Aircraft Parameters ---\\n    W = 280000.0;       % Weight (lbf)\\n    S = 2730.0;         % Wing Area (ft^2)\\n    h = 35000.0;        % Altitude (ft)\\n    V = 780.0;          % True Airspeed (ft/s)\\n    gamma_deg = 5.0;    % Climb angle (deg)\\n    phi_deg = 40.0;     % Bank angle (deg)\\n    \\n    % Aerodynamics\\n    CL0 = 0.18;\\n    CLa = 5.6;          % per rad\\n    CLde = 0.3;         % per rad\\n    CD0 = 0.019;\\n    k = 0.045;\\n    \\n    % Atmosphere\\n    rho0 = 0.0023769;   % slug/ft^3\\n    h_scale = 23800.0;  % ft\\n    rho = rho0 * exp(-h / h_scale);\\n    q = 0.5 * rho * V^2;\\n    \\n    % Thrust & Geometry\\n    iT_deg = 3.0;       % Thrust pitch angle vs body (deg)\\n    zT = 2.2;           % Thrust arm (ft)\\n    cbar = 19.5;        % Mean chord (ft)\\n    \\n    % Pitching Moment\\n    Cm0 = 0.025;\\n    Cma = -0.34;        % per rad\\n    Cmde = -0.9;        % per rad\\n    \\n    % --- Derived Constants (Radians) ---\\n    gamma = deg2rad(gamma_deg);\\n    phi = deg2rad(phi_deg);\\n    iT = deg2rad(iT_deg);\\n    \\n    % --- Optimization Setup ---\\n    % We use fminsearch (available in base MATLAB) to minimize the sum of squared residuals.\\n    % Variables to solve for: [alpha_deg, T_kips, de_deg]\\n    % Scaling helps the optimizer perform better.\\n    \\n    % Initial Guess:\\n    % Alpha approx 5 deg, Thrust approx 45 kips, Elevator approx -1 deg\\n    x0 = [5.0; 45.0; -1.0];\\n    \\n    % Options\\n    options = optimset('Display', 'off', 'TolX', 1e-8, 'TolFun', 1e-8, 'MaxIter', 1000, 'MaxFunEvals', 5000);\\n    \\n    % Objective Function\\n    objective = @(x) compute_residuals_squared(x, ...\\n        W, S, q, gamma, phi, iT, zT, cbar, ...\\n        CL0, CLa, CLde, CD0, k, ...\\n        Cm0, Cma, Cmde);\\n        \\n    % Solve\\n    x_sol = fminsearch(objective, x0, options);\\n    \\n    % --- Extract and Convert Results ---\\n    alpha_trim_deg = x_sol(1);\\n    thrust_lbf = x_sol(2) * 1000.0;\\n    delta_e_trim_deg = x_sol(3);\\n    \\n    % Load Factor\\n    n = cos(gamma) / cos(phi);\\n    \\n    % --- Output ---\\n    result.alpha_trim_deg = alpha_trim_deg;\\n    result.thrust_lbf = thrust_lbf;\\n    result.delta_e_trim_deg = delta_e_trim_deg;\\n    result.load_factor = n;\\n    \\n    % Write to JSON\\n    fid = fopen('result.json', 'w');\\n    fprintf(fid, '%s', jsonencode(result));\\n    fclose(fid);\\nend\\n\\nfunction E = compute_residuals_squared(x, ...\\n    W, S, q, gamma, phi, iT, zT, cbar, ...\\n    CL0, CLa, CLde, CD0, k, ...\\n    Cm0, Cma, Cmde)\\n    \\n    % Unpack and un-scale variables\\n    % x(1) = alpha (deg)\\n    % x(2) = T (kips)\\n    % x(3) = de (deg)\\n    \\n    alpha = deg2rad(x(1));\\n    T = x(2) * 1000.0;\\n    de = deg2rad(x(3));\\n    \\n    % Aerodynamic Coefficients\\n    CL = CL0 + CLa * alpha + CLde * de;\\n    CD = CD0 + k * CL^2;\\n    Cm = Cm0 + Cma * alpha + Cmde * de;\\n    \\n    % Equilibrium Equations\\n    % 1. Vertical force balance (perpendicular to flight path in vertical plane)\\n    % q*S*CL*cos(phi) + T*sin(alpha + iT) - W*cos(gamma) = 0\\n    F1 = q * S * CL * cos(phi) + T * sin(alpha + iT) - W * cos(gamma);\\n    \\n    % 2. Along flight path force balance\\n    % T*cos(alpha + iT) - q*S*CD - W*sin(gamma) = 0\\n    F2 = T * cos(alpha + iT) - q * S * CD - W * sin(gamma);\\n    \\n    % 3. Pitching moment balance about CG\\n    % q*S*cbar*(Cm) + T*sin(iT)*z_T = 0\\n    F3 = q * S * cbar * Cm + T * sin(iT) * zT;\\n    \\n    % Sum of squared errors\\n    E = F1^2 + F2^2 + F3^2;\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 6.192912777455596, \"ref\": 6.192912777696382}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 46082.14114341212, \"ref\": 46082.14114435781}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.7098065448866553, \"ref\": -0.709806544998307}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.3004398204831333, \"ref\": 1.3004398204831333}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 15.86}"
+  },
+  "timings": {
+    "agent_s": 170.119,
+    "setup_s": 0.0,
+    "grade_s": 15.863
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 15.86s"
+  ]
+}

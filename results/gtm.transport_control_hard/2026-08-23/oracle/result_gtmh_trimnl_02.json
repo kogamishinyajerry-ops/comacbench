@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control_hard / trimnl_02）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nW = 280000.0; S = 2730.0; h = 35000.0; V = 780.0;\\ngam = deg2rad(5.0); phi = deg2rad(40.0);\\nCLa = 5.6; CL0 = 0.18; CLde = 0.3; CD0 = 0.019; kk = 0.045;\\niT = deg2rad(3.0); zT = 2.2; cbar = 19.5;\\nCm0 = 0.025; Cma = -0.34; Cmde = -0.9;\\nrho0 = 0.0023769;\\nrho = rho0 * exp(-h / 23800.0);\\nq = 0.5 * rho * V^2;\\nres = @(x) [ q*S*(CL0 + CLa*x(1) + CLde*x(3))*cos(phi) + x(2)*sin(x(1)+iT) - W*cos(gam);\\n             x(2)*cos(x(1)+iT) - q*S*(CD0 + kk*(CL0+CLa*x(1)+CLde*x(3))^2) - W*sin(gam);\\n             q*S*cbar*(Cm0 + Cma*x(1) + Cmde*x(3)) + x(2)*sin(iT)*zT ];\\nx = [deg2rad(3.0); 20000.0; deg2rad(-1.0)];   % 初值\\nfor it = 1:60\\n  f = res(x);\\n  if norm(f) < 1e-12, break; end\\n  J = zeros(3,3); eps = 1e-6;\\n  for j = 1:3\\n    xp = x; xp(j) = xp(j) + eps;\\n    J(:, j) = (res(xp) - f) / eps;\\n  end\\n  x = x - J \\\\ f;\\nend\\nnf = cos(gam) / cos(phi);\\nr = struct('alpha_trim_deg', rad2deg(x(1)), 'thrust_lbf', x(2), ...\\n           'delta_e_trim_deg', rad2deg(x(3)), 'load_factor', nf);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 6.192912777696382, \"ref\": 6.192912777696382}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 46082.14114435781, \"ref\": 46082.14114435781}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.709806544998307, \"ref\": -0.709806544998307}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.3004398204831333, \"ref\": 1.3004398204831333}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 7.83}"
+  },
+  "timings": {
+    "agent_s": 7.832,
+    "setup_s": 0.0,
+    "grade_s": 7.832
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.83s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_gs_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A1 = [-0.0064, 0.038, 0.0, -32.174;\\n      -0.031, -0.71, 740.0, 0.0;\\n      0.0, -0.0051, -0.9, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\nB1 = [0.0; -6.0; -4.0; 0.0];\\n\\nA2 = [-0.0059, 0.026, 0.0, -32.174;\\n      -0.019, -0.55, 700.0, 0.0;\\n      0.0, -0.0034, -0.64, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\nB2 = [0.0; -6.0; -4.0; 0.0];\\n\\nA3 = [-0.0057, 0.02, 0.0, -32.174;\\n      -0.015, -0.5, 660.0, 0.0;\\n      0.0, -0.003, -0.58, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\nB3 = [0.0; -6.0; -4.0; 0.0];\\n\\ntargets = [2.0, 0.6;\\n           1.9, 0.55;\\n           1.7, 0.5];\\n\\nAs = {A1, A2, A3};\\nBs = {B1, B2, B3};\\n\\nresults = struct();\\nfor i = 1:3\\n    A = As{i};\\n    B = Bs{i};\\n    ol_poles = eig(A);\\n\\n    % Identify open-loop phugoid poles (small |imag|) vs short-period (large |imag|)\\n    [~, idx] = sort(abs(imag(ol_poles)), 'descend');\\n    ph_poles = ol_poles(idx(3:4));\\n\\n    wn_sp = targets(i,1);\\n    z_sp  = targets(i,2);\\n    sd    = wn_sp * sqrt(1 - z_sp^2);\\n    desired_sp = [-z_sp*wn_sp + 1i*sd; -z_sp*wn_sp - 1i*sd];\\n\\n    desired_poles = [ph_poles(:); desired_sp];\\n\\n    K = place(A, B, desired_poles);\\n\\n    cl_poles = eig(A - B*K);\\n\\n    % Extract short-period closed-loop pair (largest |imag|)\\n    [~, idx_cl] = sort(abs(imag(cl_poles)), 'descend');\\n    sp_cl = cl_poles(idx_cl(1:2));\\n\\n    wn_cl = abs(sp_cl(1));\\n    z_cl  = -real(sp_cl(1)) / wn_cl;\\n\\n    results.(sprintf('cl_omega_sp_%d', i)) = wn_cl;\\n    results.(sprintf('cl_zeta_sp_%d', i))  = z_cl;\\nend\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(results));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"cl_omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9999999999989486, \"ref\": 1.9999999999989486}, \"cl_omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9000000000027133, \"ref\": 1.9000000000027133}, \"cl_omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.699999999997161, \"ref\": 1.699999999997161}, \"cl_zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.6000000000003328, \"ref\": 0.6000000000003328}, \"cl_zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5499999999992136, \"ref\": 0.5499999999992136}, \"cl_zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5000000000008572, \"ref\": 0.5000000000008572}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 10.73}"
+  },
+  "timings": {
+    "agent_s": 112.331,
+    "setup_s": 0.0,
+    "grade_s": 10.733
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 10.73s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nSolve a simple turbojet cycle at the design point:\\n  Sea-level static, MN ~ 0\\n  Fn_target  = 15500 lbf\\n  T4_target  = 2500 degR\\n  Compressor OPR = 13.5\\n\\nUses pycycle (om-pycycle) with the TABULAR JETA_TAB_SPEC thermo package.\\nCycle layout: Inlet -> Compressor -> Combustor -> Turbine -> Nozzle, with a Shaft.\\n\\\"\\\"\\\"\\n\\nimport json\\n\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef build_turbojet():\\n    prob = om.Problem()\\n\\n    # ----- Build the cycle -----\\n    # Use the generic Cycle class from pycycle (pyc.Cycle is the cycle container).\\n    # NOTE: pycycle.api does NOT export an 'Engine' class; the cycle container is\\n    # 'pyc.Cycle' and is added as a Group/Component to the OpenMDAO problem.\\n    prob.model = pyc.Cycle(thermo_mode='TAB', thermo_method='JETA_TAB_SPEC')\\n\\n    # Flow path: Inlet -> Compressor -> Combustor -> Turbine -> Nozzle\\n    prob.model.pyc_add_cycle('flow',\\n                             pyc.Inlet,\\n                             pyc.Compressor,\\n                             pyc.Combustor,\\n                             pyc.Turbine,\\n                             pyc.Nozzle)\\n\\n    # Shaft connecting compressor and turbine\\n    prob.model.pyc_add_component('shaft', pyc.Shaft)\\n    prob.model.connect('flow.compressor.trq', 'shaft.trq_in')\\n    prob.model.connect('flow.turbine.trq',  'shaft.trq_out')\\n\\n    # ----- Inlet : sea-level static, MN ~ 0 -----\\n    prob.model.set_input_defaults('flow.inlet.MN',           0.0)\\n    prob.model.set_input_defaults('flow.inlet.alt',          0.0,    units='ft')\\n    prob.model.set_input_defaults('flow.inlet.dPqP',         0.0)\\n    prob.model.set_input_defaults('flow.inlet.ram_recovery', 1.0)\\n    prob.model.set_input_defaults('flow.inlet.W',            100.0)  # initial guess\\n\\n    # ----- Compressor (AXI5-like generic axial) -----\\n    prob.model.set_input_defaults('flow.compressor.MN',        0.4)\\n    prob.model.set_input_defaults('flow.compressor.eff_poly',  0.9)\\n    # Design-point pressure ratio is specified directly (no map needed for design).\\n    prob.model.set_input_defaults('flow.compressor.PR',        13.5)\\n\\n    # ----- Combustor -----\\n    prob.model.set_input_defaults('flow.combustor.MN',     0.3)\\n    prob.model.set_input_defaults('flow.combustor.dPqP',   0.05)\\n    prob.model.set_input_defaults('flow.combustor.Wfuel',  5.0)     # initial guess\\n\\n    # ----- Turbine (LPT2269-like generic) -----\\n    prob.model.set_input_defaults('flow.turbine.MN',       0.4)\\n    prob.model.set_input_defaults('flow.turbine.eff_poly', 0.9)\\n\\n    # ----- Nozzle (CD = convergent) -----\\n    prob.model.set_input_defaults('flow.nozzle.Cfg',  1.0)\\n    prob.model.set_input_defaults('flow.nozzle.dPqP', 0.0)\\n\\n    # ----- Shaft mechanical efficiency -----\\n    prob.model.set_input_defaults('shaft.eta', 1.0)\\n\\n    # ----- Design-point balances -----\\n    # 1) Net thrust 15500 lbf -> drive inlet mass flow\\n    prob.model.pyc_add_balanced_output('W',\\n                                       eq_units='lbf',\\n                                       val=15500.0,\\n                                       path='flow.inlet.W')\\n\\n    # 2) T4 = 2500 degR -> drive combustor fuel flow\\n    prob.model.pyc_add_balanced_output('Wf',\\n                                       eq_units='degR',\\n                                       val=2500.0,\\n                                       path='flow.combustor.Wfuel')\\n\\n    # 3) Compressor OPR = 13.5 -> specified as input above (design-point mode).\\n    #    The cycle solver will enforce shaft power balance (compressor work = turbine work).\\n\\n    prob.setup(check=False)\\n    return prob\\n\\n\\ndef main():\\n    prob = build_turbojet()\\n\\n    # Initial guesses (also set via set_input_defaults above, but be explicit)\\n    prob['flow.inlet.W']          = 100.0\\n    prob['flow.combustor.Wfuel']  = 5.0\\n\\n    prob.set_solver_print(level=-1)\\n    prob.run_model()\\n\\n    # ----- Pull results from the cycle -----\\n    # Try the standard pycycle performance output paths first, fall back to computing.\\n    def _get(path, units=None):\\n \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"e/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Cycle: Option 'thermo_mode' cannot be set because it has not been declared.\\\"\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 268.572,
+    "setup_s": 0.0,
+    "grade_s": 1.346
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.35s"
+  ]
+}

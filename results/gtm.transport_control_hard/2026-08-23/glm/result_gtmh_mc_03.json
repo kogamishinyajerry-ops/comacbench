@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Clear workspace\\nclear; clc; close all;\\n\\n% 1. Define Nominal Longitudinal Model\\n% States x = [u; w; q; theta]\\nV = 690.0;   % ft/s\\nXu = -0.007;\\nXw = 0.045;\\nZu = -0.04;\\nZw = -0.8;\\nMw = -0.0062;\\nMq = -1.05;\\ng = 32.174;\\n\\n% State Matrix A\\nA = [Xu, Xw, 0, -g;\\n     Zu, Zw, V, 0;\\n     0,  Mw, Mq, 0;\\n     0,  0,  1, 0];\\n\\n% Input Matrix B\\nB = [0; -6.5; -5.0; 0];\\n\\n% 2. Design Feedback Gain K\\n% Desired Short-Period poles\\nwn_sp = 2.3;\\nzeta_sp = 0.58;\\ndesired_sp_poles = roots([1, 2*zeta_sp*wn_sp, wn_sp^2]);\\n\\n% Get Open-Loop Poles\\nol_poles = eig(A);\\n\\n% Identify Phugoid poles (slowest 2)\\n[~, idx] = sort(abs(ol_poles), 'ascend');\\nphugoid_poles = ol_poles(idx(1:2));\\n\\n% Target poles: Keep Phugoid at open-loop, place SP at desired\\ntarget_poles = [phugoid_poles; desired_sp_poles];\\n\\n% Calculate K using pole placement\\n% Check controllability\\nif rank(ctrb(A,B)) < 4\\n    error('System is not controllable.');\\nend\\nK = place(A, B, target_poles);\\n\\n% 3. Monte Carlo Simulation\\nN = 200;\\npct = 0.30;\\n\\n% Generate deterministic random samples for uncertain parameters\\n% f_Mw\\nrng(20260829);\\nf_Mw = 1 + pct * (2 * rand(N, 1) - 1);\\n\\n% f_Zw\\nrng(20261829);\\nf_Zw = 1 + pct * (2 * rand(N, 1) - 1);\\n\\n% f_Mq\\nrng(20262829);\\nf_Mq = 1 + pct * (2 * rand(N, 1) - 1);\\n\\n% Initialize counter\\ncount_pass = 0;\\n\\n% Loop over N samples\\nfor i = 1:N\\n    % Construct perturbed A matrix\\n    A_pert = A;\\n    A_pert(2,2) = Zw * f_Zw(i); % Zw\\n    A_pert(3,2) = Mw * f_Mw(i); % Mw\\n    A_pert(3,3) = Mq * f_Mq(i); % Mq\\n    \\n    % Compute Closed-Loop Poles\\n    cl_poles = eig(A_pert - B * K);\\n    \\n    % Identify Short-Period poles (the two fastest poles with largest magnitude)\\n    [~, idx_fast] = sort(abs(cl_poles), 'descend');\\n    sp_poles = cl_poles(idx_fast(1:2));\\n    \\n    % Calculate Natural Frequency (wn) and Damping Ratio (zeta)\\n    % For a complex pair p1, p2: wn = sqrt(p1*p2), zeta = -real(p1+p2)/(2*wn)\\n    % This formula generalizes to real roots as well.\\n    p1 = sp_poles(1);\\n    p2 = sp_poles(2);\\n    \\n    wn_curr = sqrt(abs(p1 * p2));\\n    sum_p = p1 + p2;\\n    zeta_curr = -real(sum_p) / (2 * wn_curr);\\n    \\n    % Check specifications\\n    if (wn_curr >= 2.2 && wn_curr <= 2.4) && (zeta_curr >= 0.55)\\n        count_pass = count_pass + 1;\\n    end\\nend\\n\\n% 4. Prepare Results\\npass_fraction = count_pass / N;\\nfailing_case_count = N - count_pass;\\n\\n% Create result struct\\nresultStruct = struct();\\nresultStruct.pass_fraction = pass_fraction;\\nresultStruct.failing_case_count = failing_case_count;\\n\\n% Write to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(resultStruct));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.265, \"ref\": 0.265}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 147, \"ref\": 147}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 21.97}"
+  },
+  "timings": {
+    "agent_s": 510.429,
+    "setup_s": 0.0,
+    "grade_s": 21.974
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 21.97s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"% Monte Carlo robustness screening of the closed-loop short-period mode\\n\\nV = 690.0;\\ng = 32.174;\\n\\nA_nominal = [\\n    -0.007,  0.045, 0.0,     -g;\\n    -0.04,   -0.8,  V,       0.0;\\n     0.0,   -0.0062, -1.05,  0.0;\\n     0.0,    0.0,   1.0,     0.0\\n];\\n\\nB = [0.0; -6.5; -5.0; 0.0];\\n\\n% Place the nominal short-period poles and retain the open-loop phugoid.\\nomegaN = 2.3;\\nzeta = 0.58;\\ndampingRate = zeta * omegaN;\\noscillatoryFrequency = sqrt(omegaN^2 - dampingRate^2);\\n\\nshortPeriodPole = -dampingRate + 1i * oscillatoryFrequency;\\nopenLoopPoles = eig(A_nominal);\\ndesiredPoles = [\\n    shortPeriodPole;\\n    conj(shortPeriodPole);\\n    openLoopPoles(1);\\n    openLoopPoles(2)\\n];\\n\\nK = place(A_nominal, B, desiredPoles);\\n\\n% Deterministic Monte Carlo samples.\\nN = 200;\\npct = 0.30;\\n\\nrng(20260829);\\nf_Mw = 1 + pct * (2 * rand(N, 1) - 1);\\n\\nrng(20261829);\\nf_Zw = 1 + pct * (2 * rand(N, 1) - 1);\\n\\nrng(20262829);\\nf_Mq = 1 + pct * (2 * rand(N, 1) - 1);\\n\\npassCount = 0;\\n\\nfor i = 1:N\\n    A_sampled = A_nominal;\\n    A_sampled(2, 2) = A_nominal(2, 2) * f_Zw(i);\\n    A_sampled(3, 2) = A_nominal(3, 2) * f_Mw(i);\\n    A_sampled(3, 3) = A_nominal(3, 3) * f_Mq(i);\\n\\n    closedLoopPoles = eig(A_sampled - B * K);\\n\\n    % The short-period mode is the high-frequency complex pair.\\n    [~, shortPeriodIndex] = max(abs(imag(closedLoopPoles)));\\n    sampledShortPeriodPole = closedLoopPoles(shortPeriodIndex);\\n\\n    sampledOmegaN = abs(sampledShortPeriodPole);\\n    sampledZeta = -real(sampledShortPeriodPole) / sampledOmegaN;\\n\\n    if sampledOmegaN >= 2.2 && sampledOmegaN <= 2.4 && sampledZeta >= 0.55\\n        passCount = passCount + 1;\\n    end\\nend\\n\\nresult = struct( ...\\n    'pass_fraction', passCount / N, ...\\n    'failing_case_count', N - passCount ...\\n);\\n\\nresultFile = fopen('result.json', 'w');\\nif resultFile == -1\\n    error('Unable to open result.json for writing.');\\nend\\nfprintf(resultFile, '%s\\\\n', jsonencode(result));\\nfclose(resultFile);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.0, \"got\": 0.0, \"ref\": 0.265}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": false, \"got\": 200, \"ref\": 147}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.01, \"matlab_s\": 9.78}"
+  },
+  "timings": {
+    "agent_s": 126.439,
+    "setup_s": 0.0,
+    "grade_s": 9.782
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.78s"
+  ]
+}

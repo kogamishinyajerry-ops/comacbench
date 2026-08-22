@@ -1,0 +1,38 @@
+{
+  "task_id": "foam_bernardcells_4",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport os\\nimport math\\n\\n# ----------------------------------------------------------------------------\\n# Domain dimensions and discretization\\n# ----------------------------------------------------------------------------\\nLx = 9.0   # x extent (m)\\nLy = 1.0   # y extent (m)\\nLz = 2.0   # z extent (m)\\n\\n# Coarse mesh so the run finishes quickly\\nnx = 30\\nny = 10\\nnz = 10\\n\\n# Wall temperatures\\nThot = 315.0   # hot wall\\nTcold = 300.0  # cold wall\\nTinit = 300.0  # uniform initial temperature\\n\\n# Time controls\\nendTime = 1000\\ndeltaT = 1\\nwriteInterval = 50\\n\\n# Thermophysical / buoyancy properties\\nrho0 = 1.0\\nnu = 1e-4\\nPr = 0.7\\ng_mag = 9.81\\nbeta = 0.0033  # thermal expansion coeff (1/K)\\n\\n# ----------------------------------------------------------------------------\\n# Create directory layout\\n# ----------------------------------------------------------------------------\\nfor d in ('system', 'constant', '0'):\\n    os.makedirs(d, exist_ok=True)\\n\\n# ----------------------------------------------------------------------------\\n# system/blockMeshDict\\n# ----------------------------------------------------------------------------\\nblockMeshDict = f\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| ==========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nscale   1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({Lx} 0 0)\\n    ({Lx} {Ly} 0)\\n    (0 {Ly} 0)\\n    (0 0 {Lz})\\n    ({Lx} 0 {Lz})\\n    ({Lx} {Ly} {Lz})\\n    (0 {Ly} {Lz})\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\"",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 234.886,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:32409a878557911efa8da87d278d3d0f75f52be81efe611a869492cdecb649d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "foam_bernardcells_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# ---- Case parameters ----\\ncase_dir = os.getcwd()\\n\\n# Domain\\nLx, Ly, Lz = 9.0, 1.0, 2.0\\nnx, ny, nz = 90, 10, 20\\n\\n# Time controls\\nendTime = 1000\\ndeltaT = 1.0\\nwriteInterval = 50\\n\\n# Solver\\nsolver = \\\"buoyantFoam\\\"\\n\\n# ---- Helper to write file ----\\ndef w(path, content):\\n    full = os.path.join(case_dir, path)\\n    os.makedirs(os.path.dirname(full), exist_ok=True)\\n    with open(full, \\\"w\\\") as f:\\n        f.write(content)\\n\\n# ---- system/blockMeshDict ----\\nblockMeshDict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd            | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation   |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (9 0 0)\\n    (9 1 0)\\n    (0 1 0)\\n    (0 0 2)\\n    (9 0 2)\\n    (9 1 2)\\n    (0 1 2)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (90 10 20) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    bottomWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    topWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    sides\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 4 7 3)\\n            (1 2 6 5)\\n        );\\n    }\\n    frontBack\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\"\\n\\nw('system/blockMeshDict', blockMeshDict)\\n\\n# ---- system/controlDict ----\\ncontrolDict = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd            | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation   |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}\\n\\napplication     SOLVER_NAME;\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         END_TIME;\\ndeltaT          DELTA_T;\\nwriteControl    timeStep;\\nwriteInterval   WRITE_INTERVAL;\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\ntimeFormat      general;\\ntimePrecision   6;\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n\\ncontrolDict = controlDict.replace(\\\"SOLVER_NAME\\\", solver)\\ncontrolDict = controlDict.replace(\\\"END_TIME\\\", str(endTime))\\ncontrolDict = controlDict.replace(\\\"DELTA_T\\\", str(deltaT))\\ncontrolDict = controlDict.replace(\\\"WRITE_INTERVAL\\\", str(writeInterval))\\n\\nw('system/controlDict', controlDict)\\n\\n# ---- system/fvSchemes ----\\nfvSchemes = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd            | Website:  www.openfoam.com                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation   |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n  \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 156.147,
+    "setup_s": 0.0,
+    "grade_s": 2.914
+  },
+  "environment_digest": "sha256:32409a878557911efa8da87d278d3d0f75f52be81efe611a869492cdecb649d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.9s last_time=0"
+  ]
+}

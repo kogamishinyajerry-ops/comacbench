@@ -1,0 +1,38 @@
+{
+  "task_id": "pc_design_fn13k_t2650_opr13",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n\\\"\\\"\\\"\\nSimple turbojet design point calculation using pycycle.\\n\\nDesign conditions:\\n- Static sea level (SL), alt = 0 ft, MN ~ 0\\n- Net thrust target: 13000 lbf\\n- Turbine inlet temperature T4: 2650 degR\\n- Overall pressure ratio (OPR): 13.0\\n- Tabulated air properties: AIR_JETA_TAB_SPEC\\n- Compressor map: AXI5\\n- Turbine map: LPT2269\\n\\\"\\\"\\\"\\n\\nimport os\\nimport json\\n\\nimport openmdao.api as om\\n\\nimport pycycle.api as pyc\\n\\n\\ndef build_turbojet():\\n    \\\"\\\"\\\"Build and solve a simple turbojet design point.\\\"\\\"\\\"\\n    prob = om.Problem()\\n\\n    # Build the thermodynamic cycle using the high-level helper, which\\n    # creates a flow station for each element plus a shaft.\\n    prob.model.add_subsystem(\\n        'cycle',\\n        pyc.cycle_setup(\\n            thermo_method='TABULAR',\\n            thermo_data=pyc.AIR_JETA_TAB_SPEC,\\n            elements=[\\n                pyc.Inlet,\\n                pyc.Compressor,\\n                pyc.Combustor,\\n                pyc.Turbine,\\n                pyc.Nozzle,\\n            ],\\n            map_data={\\n                'comp': pyc.AXI5,\\n                'turb': pyc.LPT2269,\\n            },\\n        ),\\n        promotes_inputs=['W', 'MN', 'alt'],\\n    )\\n\\n    # Add design point solver with target constraints\\n    DESIGN = prob.model.add_subsystem(\\n        'DESIGN',\\n        pyc.Design(\\n            thermo_data=pyc.AIR_JETA_TAB_SPEC,\\n            elements=[\\n                pyc.Inlet,\\n                pyc.Combustor,\\n                pyc.Nozzle,\\n            ],\\n        ),\\n    )\\n\\n    # Connect flow path from cycle to DESIGN\\n    prob.model.connect('cycle.flow_initial.Fl_O', 'DESIGN.Fl_I')\\n    prob.model.connect('cycle.inlet.Fl_O', 'DESIGN.inlet.Fl_I')\\n    prob.model.connect('cycle.burn.Fl_O', 'DESIGN.burn.Fl_O')\\n    prob.model.connect('cycle.nozzle.Fl_O', 'DESIGN.nozzle.Fl_O')\\n\\n    prob.setup()\\n\\n    # ---- Set independent (free) inputs ----\\n    # Flight conditions: static sea level\\n    prob.set_val('W', 100.0, units='lbm/s')      # initial guess for inlet mass flow\\n    prob.set_val('\"",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 302.416,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:78917c6ff95c09ecbe3ac0b2f500b014ae506ed0f2e70fd15b265980cc3f7615",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

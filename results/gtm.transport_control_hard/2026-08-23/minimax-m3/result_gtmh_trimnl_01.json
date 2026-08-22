@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Trim analysis: steady climbing coordinated turn\\n% Three coupled nonlinear equations in unknowns (alpha, T, delta_e)\\n% Solved by Newton-Raphson iteration\\n\\n% Aircraft parameters\\nW   = 230000.0;      % lbf, weight\\nS   = 2400.0;        % ft^2, wing area\\nh   = 31000.0;       % ft, altitude\\nV   = 730.0;         % ft/s, true airspeed\\ngamma_deg = 3.0;     % deg, climb angle\\nphi_deg   = 30.0;    % deg, bank angle\\n\\n% Lift coefficients\\nCL0  = 0.15;\\nCLa  = 5.2;          % per rad\\nCLde = 0.35;         % per rad\\n\\n% Drag (parabolic)\\nCD0 = 0.021;\\nk   = 0.043;\\n\\n% Pitching moment about CG\\nCm0        = 0.02;\\nCmalpha    = -0.3;   % per rad\\nCmdelta_e  = -0.85;  % per rad\\ncbar       = 17.0;   % ft, mean aerodynamic chord\\n\\n% Atmosphere (exponential)\\nrho0    = 0.0023769;     % slug/ft^3\\nh_scale = 23800.0;       % ft\\nrho     = rho0 * exp(-h/h_scale);\\nq       = 0.5 * rho * V^2;   % dynamic pressure, lbf/ft^2\\n\\n% Thrust installation\\ni_T_deg = 2.5;       % deg, thrust line pitch vs body axis\\nz_T     = 2.0;       % ft, perpendicular arm from CG\\n\\n% Angles in radians\\ngamma = gamma_deg * pi/180;\\nphi   = phi_deg   * pi/180;\\ni_T   = i_T_deg   * pi/180;\\n\\n% Initial guess (within physical range)\\nx = [5.0*pi/180; 30000.0; -1.0*pi/180];   % [alpha; T; delta_e]\\n\\n% Newton-Raphson iteration\\nmax_iter = 100;\\ntol      = 1e-10;\\nconverged = false;\\n\\nfor iter = 1:max_iter\\n    a  = x(1);\\n    Tv = x(2);\\n    de = x(3);\\n\\n    % Aerodynamic functions\\n    CL = CL0 + CLa*a + CLde*de;\\n    CD = CD0 + k*CL^2;\\n\\n    % Three coupled equilibrium residuals\\n    F1 = q*S*CL*cos(phi) + Tv*sin(a + i_T) - W*cos(gamma);\\n    F2 = Tv*cos(a + i_T) - q*S*CD - W*sin(gamma);\\n    F3 = q*S*cbar*(Cm0 + Cmalpha*a + Cmdelta_e*de) + Tv*sin(i_T)*z_T;\\n    F  = [F1; F2; F3];\\n\\n    if norm(F) < tol\\n        converged = true;\\n        break;\\n    end\\n\\n    % Jacobian dF/dx\\n    J = zeros(3,3);\\n    J(1,1) = q*S*CLa*cos(phi) + Tv*cos(a + i_T);\\n    J(1,2) = sin(a + i_T);\\n    J(1,3) = q*S*CLde*cos(phi);\\n\\n    J(2,1) = -Tv*sin(a + i_T) - q*S*2*k*CL*CLa;\\n    J(2,2) = cos(a + i_T);\\n    J(2,3) = -q*S*2*k*CL*CLde;\\n\\n    J(3,1) = q*S*cbar*Cmalpha;\\n    J(3,2) = sin(i_T)*z_T;\\n    J(3,3) = q*S*cbar*Cmdelta_e;\\n\\n    % Newton step\\n    dx = -J\\\\F;\\n\\n    % Damped step to keep variables in physical range\\n    step = 1.0;\\n    x_trial = x + step*dx;\\n    for kk = 1:30\\n        if (x_trial(1) > 0 && x_trial(1) < 0.35) && ...\\n           (x_trial(2) > 100 && x_trial(2) < 500000) && ...\\n           (x_trial(3) > -0.6 && x_trial(3) < 0.6)\\n            break;\\n        end\\n        step  = step * 0.5;\\n        x_trial = x + step*dx;\\n    end\\n    x = x_trial;\\nend\\n\\n% Extract trim solution\\nalpha_trim_deg   = x(1) * 180/pi;\\ndelta_e_trim_deg = x(3) * 180/pi;\\nthrust_lbf       = x(2);\\nload_factor      = cos(gamma)/cos(phi);\\n\\n% Build result struct\\nresult = struct( ...\\n    'alpha_trim_deg',   alpha_trim_deg, ...\\n    'thrust_lbf',       thrust_lbf, ...\\n    'delta_e_trim_deg', delta_e_trim_deg, ...\\n    'load_factor',      load_factor );\\n\\n% Write JSON to current working directory\\njson_text = jsonencode(result);\\nfid = fopen('result.json','w');\\nfwrite(fid, json_text);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 5.33620458149504, \"ref\": 5.336204581495041}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 28054.67705119155, \"ref\": 28054.677051191557}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.5117443143632319, \"ref\": -0.5117443143632321}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.1531180614225278, \"ref\": 1.1531180614225278}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 11.01}"
+  },
+  "timings": {
+    "agent_s": 165.457,
+    "setup_s": 0.0,
+    "grade_s": 11.014
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 11.01s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% model.m\\n\\n% 1. Define Nominal System\\nV = 710.0;\\nXu = -0.0066;\\nXw = 0.039;\\nZu = -0.032;\\nZw = -0.72;\\nMw = -0.0053;\\nMq = -0.9;\\ng = 32.174;\\n\\nA = [Xu, Xw, 0, -g;\\n     Zu, Zw, V, 0;\\n     0,  Mw, Mq, 0;\\n     0,  0,  1, 0];\\n\\nB = [0; -6.0; -4.0; 0];\\n\\n% 2. Design State Feedback Gain K\\n% Desired Short-Period Poles\\nwn_sp = 2.0;\\nzeta_sp = 0.6;\\n% Characteristic polynomial: s^2 + 2*zeta*wn*s + wn^2 = 0\\np_sp = roots([1, 2*zeta_sp*wn_sp, wn_sp^2]);\\n\\n% Identify Nominal Phugoid Poles (to be held at open-loop)\\neig_ol = eig(A);\\nwn_ol = abs(eig_ol);\\n[~, idx_ol] = sort(wn_ol, 'ascend');\\np_ph = eig_ol(idx_ol(1:2)); % Two lowest frequency poles are Phugoid\\n\\n% Assemble target poles for placement\\np_target = [p_sp; p_ph];\\n\\n% Compute K\\nK = place(A, B, p_target);\\n\\n% 3. Monte Carlo Simulation\\nN = 200;\\npct = 0.25;\\n\\n% Generate independent random multipliers with specific seeds\\nrng(20260827);\\nf_Mw = 1 + pct * (2 * rand(N, 1) - 1);\\n\\nrng(20261827);\\nf_Zw = 1 + pct * (2 * rand(N, 1) - 1);\\n\\nrng(20262827);\\nf_Mq = 1 + pct * (2 * rand(N, 1) - 1);\\n\\npass_count = 0;\\n\\nfor i = 1:N\\n    % Create perturbed A matrix\\n    A_i = A;\\n    \\n    % Apply perturbations\\n    % Mw is A(3,2), Zw is A(2,2), Mq is A(3,3)\\n    A_i(3,2) = A(3,2) * f_Mw(i);\\n    A_i(2,2) = A(2,2) * f_Zw(i);\\n    A_i(3,3) = A(3,3) * f_Mq(i);\\n    \\n    % Closed-loop eigenvalues\\n    ev = eig(A_i - B * K);\\n    \\n    % Identify Short-Period poles (highest natural frequency)\\n    wn_all = abs(ev);\\n    [wn_sorted, idx] = sort(wn_all, 'descend');\\n    \\n    % The two highest frequencies correspond to the short-period mode\\n    sp_eigs = ev(idx(1:2));\\n    \\n    % Calculate metrics\\n    wn_current = abs(sp_eigs);\\n    zeta_current = -real(sp_eigs) ./ wn_current;\\n    \\n    % Check specifications\\n    % Spec 1: 1.88 <= wn <= 2.12\\n    cond_wn = all(wn_current >= 1.88 & wn_current <= 2.12);\\n    \\n    % Spec 2: zeta >= 0.51\\n    cond_zeta = all(zeta_current >= 0.51);\\n    \\n    if cond_wn && cond_zeta\\n        pass_count = pass_count + 1;\\n    end\\nend\\n\\n% 4. Write Results\\nresult.pass_fraction = pass_count / N;\\nresult.failing_case_count = N - pass_count;\\n\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.475, \"ref\": 0.475}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 105, \"ref\": 105}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 12.56}"
+  },
+  "timings": {
+    "agent_s": 357.263,
+    "setup_s": 0.0,
+    "grade_s": 12.562
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 12.56s"
+  ]
+}

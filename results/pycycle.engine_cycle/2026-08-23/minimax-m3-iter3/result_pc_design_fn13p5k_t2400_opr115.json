@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn13p5k_t2400_opr115",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\nprob = om.Problem()\\nprob.model = pyc.Cycle()\\n\\n# Thermodynamic method\\nprob.model.options['thermo_method'] = 'TABULAR'\\nprob.model.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n\\n# Flight conditions (provides freestream flow to the inlet)\\nprob.model.add_subsystem('fc', pyc.FlightConditions())\\n\\n# Cycle elements\\nprob.model.add_subsystem('inlet', pyc.Inlet())\\nprob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, design=True))\\nprob.model.add_subsystem('shaft', pyc.Shaft(num_ports=2), promotes_inputs=['nmech'])\\nprob.model.add_subsystem('burn', pyc.Combustor(design=True))\\nprob.model.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, design=True))\\nprob.model.add_subsystem('noz', pyc.Nozzle(nozzType='CD'))\\n\\n# Freestream -> inlet\\nprob.model.connect('fc.Fl_O', 'inlet.Fl_I')\\n\\n# Flow path\\nprob.model.connect('inlet.Fl_O', 'comp.Fl_I')\\nprob.model.connect('comp.Fl_O', 'burn.Fl_I')\\nprob.model.connect('burn.Fl_O', 'turb.Fl_I')\\nprob.model.connect('turb.Fl_O', 'noz.Fl_I')\\n\\n# Shaft (turbine drives compressor)\\nprob.model.connect('comp.trq', 'shaft.trq_0')\\nprob.model.connect('turb.trq', 'shaft.trq_1')\\n\\n# RAM drag feedback\\nprob.model.connect('noz.Fg', 'inlet.F_ram')\\n\\n# Design-point matching: solve for W and fuel-air ratio to hit targets\\nprob.model.add_design_var('W', lower=10.0, upper=2000.0)\\nprob.model.add_design_var('burn.FAR', lower=0.005, upper=0.05)\\nprob.model.add_objective('W')\\nprob.model.add_constraint('noz.Fg', equals=13500.0, ref=13500.0)\\nprob.model.add_constraint('burn.Fl_O:tot:T', equals=2400.0, ref=2400.0)\\n\\nprob.driver = om.ScipyOptimizeDriver()\\nprob.driver.options['optimizer'] = 'SLSQP'\\n\\nprob.setup()\\n\\n# Flight conditions: SL static (MN~0)\\nprob['fc.alt'] = 0.0\\nprob['fc.MN'] = 0.0\\n\\n# Component design parameters\\nprob['comp.PR'] = 11.5\\nprob['comp.eff'] = 0.9\\nprob['turb.eff'] = 0.9\\nprob['burn.dPqP'] = 0.05\\nprob['noz.Cv'] = 0.99\\nprob['inlet.ram_recovery'] = 1.0\\nprob['shaft.nmech'] = 1000.0\\n\\n# Initial guesses\\nprob.set_val('W', 200.0)\\nprob.set_val('burn.FAR', 0.02)\\n\\n# Solve\\nprob.run_driver()\\n\\n# Extract design-point results\\nFn_lbf = float(prob.get_val('noz.Fg')[0])\\nWfuel_lbm_s = float(prob.get_val('burn.Wfuel')[0])\\nOPR = float(prob.get_val('comp.PR')[0])\\nTSFC = Wfuel_lbm_s / Fn_lbf * 3600.0\\n\\nresult = {\\n    'Fn_lbf': Fn_lbf,\\n    'TSFC': TSFC,\\n    'OPR': OPR,\\n    'Wfuel_lbm_s': Wfuel_lbm_s,\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/mp_cycle.py\\\", line 125, in setup\\n    node_element.pyc_setup_output_ports()\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/elements/inlet.py\\\", line 139, in pyc_setup_output_ports\\n    self.copy_flow('Fl_I', 'Fl_O')\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/pycycle/element_base.py\\\", line 39, in copy_flow\\n    self.Fl_O_data[output_port] = self.Fl_I_data[src_port]\\n                                  ~~~~~~~~~~~~~~^^^^^^^^^^\\nKeyError: 'Fl_I'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 288.032,
+    "setup_s": 0.0,
+    "grade_s": 1.341
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.34s"
+  ]
+}

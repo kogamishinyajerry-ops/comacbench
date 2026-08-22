@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_gs_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control_hard / gs_03）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nA1 = [-0.0058 0.036 0.0 -32.174; -0.029 -0.68 700.0 0.0; 0.0 -0.0048 -0.86 0.0; 0.0 0.0 1.0 0.0];\\nB1 = [0.0; -7.5; -3.5; 0.0];\\nA2 = [-0.0056 0.028 0.0 -32.174; -0.021 -0.58 720.0 0.0; 0.0 -0.0038 -0.7 0.0; 0.0 0.0 1.0 0.0];\\nB2 = [0.0; -7.5; -3.5; 0.0];\\nA3 = [-0.0055 0.024 0.0 -32.174; -0.018 -0.54 680.0 0.0; 0.0 -0.0035 -0.65 0.0; 0.0 0.0 1.0 0.0];\\nB3 = [0.0; -7.5; -3.5; 0.0];\\nwnt = [2.4, 2.1, 1.9]; zet = [0.62, 0.55, 0.5];\\nclw = zeros(1,3); clz = zeros(1,3);\\nfor jj = 1:3\\n  if jj == 1, Acur = A1; Bcur = B1; elseif jj == 2, Acur = A2; Bcur = B2; else, Acur = A3; Bcur = B3; end\\n  wn = wnt(jj); ze = zet(jj);\\n  ev = eig(Acur);\\n  lam = ev(imag(ev) > 0);\\n  [~, ord] = sort(abs(lam), 'descend');\\n  lam = lam(ord);\\n  ph = lam(2);                          % 长周期对保持不动\\n  sp = -ze*wn + 1i*wn*sqrt(1-ze^2);\\n  K = place(Acur, Bcur, [ph; conj(ph); sp; conj(sp)]);\\n  evcl = eig(Acur - Bcur*K);\\n  lamcl = evcl(imag(evcl) > 0);\\n  [~, ordc] = sort(abs(lamcl), 'descend');\\n  lamcl = lamcl(ordc);\\n  clw(jj) = abs(lamcl(1)); clz(jj) = -real(lamcl(1))/abs(lamcl(1));\\nend\\nr = struct('cl_omega_sp_1', clw(1), 'cl_zeta_sp_1', clz(1), ...\\n           'cl_omega_sp_2', clw(2), 'cl_zeta_sp_2', clz(2), ...\\n           'cl_omega_sp_3', clw(3), 'cl_zeta_sp_3', clz(3));\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"cl_omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.3999999999972745, \"ref\": 2.3999999999972745}, \"cl_omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.10000000000294, \"ref\": 2.10000000000294}, \"cl_omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9000000000032344, \"ref\": 1.9000000000032344}, \"cl_zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.6200000000007259, \"ref\": 0.6200000000007259}, \"cl_zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.549999999999235, \"ref\": 0.549999999999235}, \"cl_zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.49999999999915323, \"ref\": 0.49999999999915323}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 7.11}"
+  },
+  "timings": {
+    "agent_s": 7.108,
+    "setup_s": 0.0,
+    "grade_s": 7.108
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.11s"
+  ]
+}

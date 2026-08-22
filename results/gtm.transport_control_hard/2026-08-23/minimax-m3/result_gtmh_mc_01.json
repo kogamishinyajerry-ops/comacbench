@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_mc_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"clear all\\n\\n% Nominal longitudinal model parameters\\nV  = 710.0;   Xu = -0.0066; Xw = 0.039;\\nZu = -0.032;  Zw = -0.72;\\nMw = -0.0053; Mq = -0.9;   g  = 32.174;\\n\\n% Nominal state matrix\\nA_nom = [Xu, Xw, 0,  -g ;\\n         Zu, Zw, V,   0 ;\\n         0,  Mw, Mq,  0 ;\\n         0,  0,  1,   0 ];\\n\\n% Input matrix\\nB = [0; -6.0; -4.0; 0];\\n\\n% Open-loop eigenvalues\\neig_ol = eig(A_nom);\\n\\n% Identify phugoid poles (smallest |imag|)\\n[~, sort_idx] = sort(abs(imag(eig_ol)));\\nph_ol = eig_ol(sort_idx(1:2));\\n\\n% Desired short-period poles\\nwn = 2.0; z = 0.6;\\nsp_des = [-z*wn + 1j*wn*sqrt(1-z^2);\\n          -z*wn - 1j*wn*sqrt(1-z^2)];\\n\\n% Pole placement: short-period at desired, phugoid held at open-loop\\nP = [sp_des; ph_ol];\\nK = place(A_nom, B, P);\\n\\n% Monte Carlo over N=200 deterministic samples\\nN   = 200;\\npct = 0.25;\\n\\nrng(20260827);\\nf_Mw = 1 + pct*(2*rand(N,1) - 1);\\nrng(20261827);\\nf_Zw = 1 + pct*(2*rand(N,1) - 1);\\nrng(20262827);\\nf_Mq = 1 + pct*(2*rand(N,1) - 1);\\n\\ncount = 0;\\nfor i = 1:N\\n    A_i = A_nom;\\n    A_i(2,2) = Zw * f_Zw(i);   % perturb Zw\\n    A_i(3,2) = Mw * f_Mw(i);   % perturb Mw\\n    A_i(3,3) = Mq * f_Mq(i);   % perturb Mq\\n    \\n    eig_cl = eig(A_i - B*K);\\n    \\n    % Identify the short-period pair (largest |imag|)\\n    [~, idx_sp] = sort(abs(imag(eig_cl)), 'descend');\\n    sp_poles = eig_cl(idx_sp(1:2));\\n    \\n    wn_sp   = abs(sp_poles(1));\\n    zeta_sp = -real(sp_poles(1)) / wn_sp;\\n    \\n    if (wn_sp >= 1.88 && wn_sp <= 2.12 && zeta_sp >= 0.51)\\n        count = count + 1;\\n    end\\nend\\n\\nresult.pass_fraction      = count / N;\\nresult.failing_case_count = N - count;\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"pass_fraction\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.475, \"ref\": 0.475}, \"failing_case_count\": {\"status\": \"exact\", \"ok\": true, \"got\": 105, \"ref\": 105}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 8.99}"
+  },
+  "timings": {
+    "agent_s": 171.358,
+    "setup_s": 0.0,
+    "grade_s": 8.993
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.99s"
+  ]
+}

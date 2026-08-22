@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"% Define the open-loop transfer function L(s)\\nnum = [9.0];\\nden = [1.0, 5.0, 6.0, 0.0];\\nsys = tf(num, den);\\n\\n% Compute stability margins\\n% [Gm, Pm, Wcg, Wcp]\\n% Gm: Gain margin (absolute value)\\n% Pm: Phase margin (degrees)\\n% Wcg: Frequency where phase crossover occurs (phase = -180 deg) -> w_pc\\n% Wcp: Frequency where gain crossover occurs (magnitude = 0 dB) -> w_gc\\n[Gm, Pm, Wcg, Wcp] = margin(sys);\\n\\n% Convert Gain Margin to decibels\\nGm_dB = 20 * log10(Gm);\\n\\n% Populate results structure according to required keys\\nresults = struct();\\nresults.gm_db = Gm_dB;\\nresults.pm_deg = Pm;\\nresults.w_gc = Wcp;  % Gain crossover frequency\\nresults.w_pc = Wcg;  % Phase crossover frequency\\n\\n% Write results to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(results));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.457574905606752, \"ref\": 10.457574905606752}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 37.39295782979206, \"ref\": 37.39295782979206}, \"w_gc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.511821, \"got\": 1.1957897028219016, \"ref\": 2.4494897427831783}, \"w_pc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.048429, \"got\": 2.4494897427831783, \"ref\": 1.1957897028219016}}, \"physics_hits\": \"2/4\", \"rel_tol\": 0.01, \"matlab_s\": 8.86}"
+  },
+  "timings": {
+    "agent_s": 59.844,
+    "setup_s": 0.0,
+    "grade_s": 8.857
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.86s"
+  ]
+}

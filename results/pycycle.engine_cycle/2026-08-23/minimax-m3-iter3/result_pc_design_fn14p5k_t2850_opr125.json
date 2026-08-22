@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn14p5k_t2850_opr125",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nSimple turbojet design point using pycycle (om-pycycle).\\n\\nDesign point: SL static, Fn_target = 14500 lbf, T4 = 2850 degR, OPR = 12.5\\nComponents: Inlet + AXI5 Compressor + Combustor + LPT2269 Turbine + CD Nozzle + Shaft\\nThermo: AIR_JETA_TAB_SPEC\\nOutputs: result.json with Fn_lbf, TSFC, OPR, Wfuel_lbm_s\\n\\\"\\\"\\\"\\n\\nimport json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\ndef main():\\n    prob = om.Problem()\\n\\n    # ----- Flow path connections -----\\n    flow_connections = [\\n        ('inlet.Fl_O', 'comp.Fl_I'),\\n        ('comp.Fl_O', 'comb.Fl_I'),\\n        ('comb.Fl_O', 'turb.Fl_I'),\\n        ('turb.Fl_O', 'nozzle.Fl_I'),\\n    ]\\n\\n    # ----- Mechanical (shaft) connections -----\\n    # Single shaft: compressor driven by turbine\\n    mech_connections = [\\n        ('comp.trq', 'shaft.trq_0'),\\n        ('turb.trq', 'shaft.trq_1'),\\n    ]\\n\\n    # ----- Build the cycle group -----\\n    prob.model = pyc.Cycle(\\n        name='cycle',\\n        thermo_method='TABULAR',\\n        thermo_data=pyc.AIR_JETA_TAB_SPEC,\\n        elements=[\\n            pyc.Inlet(name='inlet'),\\n            pyc.Compressor(name='comp', map_data=pyc.AXI5),\\n            pyc.Combustor(name='comb', fuel_type='JetA'),\\n            pyc.Turbine(name='turb', map_data=pyc.LPT2269),\\n            pyc.Nozzle(name='nozzle', nozzType='CD'),\\n        ],\\n        shafts=[pyc.Shaft(num_ports=2)],\\n        flow_connections=flow_connections,\\n        mech_connections=mech_connections,\\n        inflow_elements=['inlet'],\\n    )\\n\\n    # ----- Independent design variables -----\\n    prob.model.add_design_var('comp.PR', lower=1.5, upper=20.0)\\n    prob.model.add_design_var('turb.PR', lower=1.0, upper=20.0)\\n    prob.model.add_design_var('comp.map.RlineMap', lower=0.5, upper=2.0)\\n    prob.model.add_design_var('turb.map.RlineMap', lower=0.5, upper=2.0)\\n    prob.model.add_design_var('shaft.Nmech', lower=1000.0, upper=20000.0, units='rpm')\\n\\n    # ----- Equality constraints -----\\n    # Map matching: RlineMap must equal computed Rline\\n    prob.model.add_constraint('comp.map.RlineMap - comp.map.Rline', equals=0)\\n    prob.model.add_constraint('turb.map.RlineMap - turb.map.Rline', equals=0)\\n\\n    # Nozzle pressure ratio: ideally fully expanded\\n    prob.model.add_constraint('nozzle.PR', equals=1.0)\\n\\n    # ----- Target constraints (design point) -----\\n    prob.model.add_constraint('cycle.Fn', equals=14500.0, ref=14500.0)\\n    prob.model.add_constraint('cycle.T4', equals=2850.0, ref=2850.0, units='degR')\\n    prob.model.add_constraint('comp.PR', equals=12.5, ref=12.5)\\n\\n    # ----- Objective: minimize fuel flow -----\\n    prob.model.add_objective('cycle.Wfuel', scaler=1.0)\\n\\n    # ----- Setup -----\\n    prob.setup()\\n\\n    # ----- Initial guesses (SL static conditions) -----\\n    prob.set_val('cycle.inlet.Tt', 518.67, units='degR')         # SL std temp\\n    prob.set_val('cycle.inlet.Pt', 14.696, units='lbf/inch**2') # SL std pressure\\n    prob.set_val('cycle.inlet.MN', 0.0)\\n    prob.set_val('cycle.comp.PR', 12.5)\\n    prob.set_val('cycle.turb.PR', 4.0)\\n    prob.set_val('cycle.shaft.Nmech', 8000.0, units='rpm')\\n    prob.set_val('cycle.comp.map.RlineMap', 1.0)\\n    prob.set_val('cycle.turb.map.RlineMap', 1.0)\\n\\n    # ----- Solve -----\\n    prob.run_model()\\n\\n    # ----- Extract results -----\\n    fn_lbf = float(prob.get_val('cycle.Fn', units='lbf')[0])\\n    tsfc = float(prob.get_val('cycle.TSFC')[0])\\n    opr = float(prob.get_val('cycle.comp.PR')[0])\\n    wfuel_lbm_s = float(prob.get_val('cycle.Wfuel', units='lbm/s')[0])\\n\\n    results = {\\n        'Fn_lbf': fn_lbf,\\n        'TSFC': tsfc,\\n        'OPR': opr,\\n        'Wfuel_lbm_s': wfuel_lbm_s,\\n    }\\n\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=2)\\n\\n    print(\\\"Design point solved successfully.\\\")\\n    print(json.dumps(results, indent=2))\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"dao/core/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Inlet: Option 'name' cannot be set because it has not been declared.\\\"\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 64.706,
+    "setup_s": 0.0,
+    "grade_s": 0.987
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.99s"
+  ]
+}

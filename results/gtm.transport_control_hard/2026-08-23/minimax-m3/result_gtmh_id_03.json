@@ -1,0 +1,40 @@
+{
+  "task_id": "gtmh_id_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"% Noisy sampled-data identification of the short-period mode.\\ndt = 0.02;\\n\\n% Validate the supplied sampled-response dimensions.\\nif size(X,2) ~= 4 || numel(u) ~= size(X,1)\\n    error('Expected X to be N-by-4 and u to be N-by-1 with the same N.');\\nend\\n\\n% x[k+1] = Ad*x[k] + Bd*delta_e[k]\\nPhi = [X(1:end-1,:), u(1:end-1)];\\nTheta = Phi \\\\ X(2:end,:);\\n\\nAd = Theta(1:4,:).';\\nBd = Theta(5,:).';\\n\\n% Convert the discrete eigenvalues to continuous-time poles.\\nlambda = eig(Ad);\\nsPoles = log(lambda) / dt;\\n\\n% The short-period mode is the stable conjugate pair farthest from the\\n% origin in the continuous-time plane.\\n[~, idx] = sort(abs(sPoles), 'descend');\\np = sPoles(idx(1));\\n[~, idxPair] = min(abs(sPoles - conj(p)));\\npPair = sPoles(idxPair);\\n\\n% Average the two members of the selected conjugate pair.\\np = 0.5 * (p + pPair);\\n\\nomega_sp_id = abs(p);\\nzeta_sp_id = -real(p) / omega_sp_id;\\n\\nresult = struct( ...\\n    'omega_sp_id', omega_sp_id, ...\\n    'zeta_sp_id', zeta_sp_id);\\n\\nfid = fopen('result.json', 'w');\\nif fid == -1\\n    error('Unable to open result.json for writing.');\\nend\\nfwrite(fid, jsonencode(result), 'char');\\nfwrite(fid, sprintf('\\\\n'), 'char');\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b函数或变量 'X' 无法识别。\\n\\n出错 model (第 5 行)\\nif size(X,2) ~= 4 || numel(u) ~= size(X,1)\\n        ^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 38.328,
+    "setup_s": 0.0,
+    "grade_s": 8.186
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 8.18s"
+  ]
+}

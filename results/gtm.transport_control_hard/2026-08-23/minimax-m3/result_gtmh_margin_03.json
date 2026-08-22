@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"% model.m - Robust stability margins of cascaded inner + outer loop\\n\\n% Inner loop plant\\ns = tf('s');\\nG_in = 1 / (s * (s + 4.0));\\n\\n% Inner-loop feedback gain\\nki = 12.0;\\n\\n% Close the inner loop with unity negative feedback around ki*G_in\\nG_in_cl = feedback(ki * G_in, 1);\\n\\n% Outer-loop plant/compensator\\nG_out = 2.5 / (s * (s + 2.0));\\n\\n% Total open loop: outer cascade of the closed inner loop\\nL = G_out * G_in_cl;\\n\\n% Compute gain and phase margins\\n[Gm, Pm, Wcg, Wcp] = margin(L);\\n\\n% Convert gain margin to dB\\ngm_db  = 20 * log10(Gm);\\npm_deg = Pm;\\n\\n% Wcg = frequency at which phase crosses -180 deg  -> phase crossover w_pc\\n% Wcp = frequency at which magnitude crosses 0 dB  -> gain crossover  w_gc\\nw_pc = Wcg;\\nw_gc = Wcp;\\n\\n% Build result struct\\nresult.gm_db  = gm_db;\\nresult.pm_deg = pm_deg;\\nresult.w_gc   = w_gc;\\nresult.w_pc   = w_pc;\\n\\n% Write result.json in the current working directory\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 6.581174385284504, \"ref\": 6.581174385284504}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 37.964799144232124, \"ref\": 37.964799144232124}, \"w_gc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.438254, \"got\": 1.1234919503040393, \"ref\": 2.0}, \"w_pc\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.780164, \"got\": 2.0, \"ref\": 1.1234919503040393}}, \"physics_hits\": \"2/4\", \"rel_tol\": 0.01, \"matlab_s\": 11.36}"
+  },
+  "timings": {
+    "agent_s": 61.428,
+    "setup_s": 0.0,
+    "grade_s": 11.366
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 11.36s"
+  ]
+}

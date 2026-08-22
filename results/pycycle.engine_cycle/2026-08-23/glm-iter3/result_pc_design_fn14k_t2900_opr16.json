@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurbojetCycle(om.Group):\\n    def setup(self):\\n        # --- Add Elements ---\\n        \\n        # Flight Conditions\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        \\n        # Inlet: Use TABULAR thermo AIR_JETA_TAB_SPEC\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        \\n        # Compressor: AXI5\\n        # Instantiate Compressor element and pass AXI5 map data\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        \\n        # Combustor\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        \\n        # Turbine: LPT2269\\n        # Instantiate Turbine element and pass LPT2269 map data\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        \\n        # Nozzle: CD Nozzle\\n        # Using CVDNozzle class for Convergent-Divergent behavior\\n        self.add_subsystem('nozz', pyc.CVDNozzle(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n        \\n        # Shaft\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # --- Balances ---\\n        \\n        # 1. Thrust Balance: Vary Mass Flow (W) to hit Target Thrust\\n        self.add_subsystem('bal_W', om.BalanceComp())\\n        self.bal_W.add_balance('W', val=150.0, units='lbm/s', eq_units='lbf', lhs_name='Fn', rhs_name='Fn_target')\\n\\n        # 2. Speed/Power Balance: Vary Nmech to balance Power (P_turb - P_comp = 0)\\n        self.add_subsystem('bal_N', om.BalanceComp())\\n        self.bal_N.add_balance('Nmech', val=10000.0, units='rpm', eq_units='hp', lhs_name='P_net', rhs_val=0.0)\\n        \\n        # ExecComp to calculate net power for the balance\\n        self.add_subsystem('power_balance', om.ExecComp('P_net = P_turb - P_comp', units='hp'))\\n\\n        # --- Connections ---\\n        \\n        # Flow Path\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # Shaft Connections\\n        # Speed\\n        self.connect('bal_N.Nmech', 'shaft.Nmech')\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n        \\n        # Power Balance\\n        self.connect('comp.power', 'power_balance.P_comp')\\n        self.connect('turb.power', 'power_balance.P_turb')\\n        self.connect('power_balance.P_net', 'bal_N.P_net')\\n\\n        # Thrust Balance\\n        self.connect('bal_W.W', 'inlet.W')\\n        self.connect('nozz.F_net', 'bal_W.Fn')\\n\\n        # --- Solver Configuration ---\\n        # Use Newton solver to converge the coupled system of balances and flow\\n        self.nonlinear_solver = om.NewtonSolver()\\n        self.linear_solver = om.DirectSolver()\\n        self.nonlinear_solver.options['solve_subsystems'] = True\\n        self.nonlinear_solver.options['maxiter'] = 50\\n        self.nonlinear_solver.options['iprint'] = 2\\n        self.nonlinear_solver.options['rtol'] = 1e-5\\n        self.nonlinear_solver.options['atol'] = 1e-5\\n        self.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS()\\n\\nif __name__ == \\\"__main__\\\":\\n    prob = om.Problem()\\n    prob.model = TurbojetCycle()\\n\\n    prob.setup()\\n\\n    # --- Set Initial Conditions & Design Parameters ---\\n    \\n    # Flight Conditions: Sea Level (alt=0), Mach ~0\\n    prob.set_val('fc.MN', 0.0)\\n    prob.set_val('fc.alt', 0.0, units='ft')\\n\\n    # Compressor Design: OPR = 16.0\\n    prob.set_val('comp.PR_des', 16.0)\\n    \\n    # Combustor Design: T4 = 2900 degR\\n    prob.set_val('burner.T_out', 2900.0, units='degR')\\n\\n    # Target Thrust: 14000 lbf\\n    prob.set_val('bal_W.Fn_target', 14000.0, units='lbf')\\n\\n    # Initial Guesses for Balances\\n    prob.set_val('bal_W.W', 180.0, units='lbm/s')\\n    prob.set_val('bal_N.Nmech', 12000.0, units='rpm')\\n    \\n    # Run the model\\n    prob.run_model()\\n\\n\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ckages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_y2rtq7wp/solve.py\\\", line 28, in setup\\n    self.add_subsystem('nozz', pyc.CVDNozzle(thermo_data=pyc.AIR_JETA_TAB_SPEC))\\n                               ^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'CVDNozzle'. Did you mean: 'Nozzle'?\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 355.706,
+    "setup_s": 0.0,
+    "grade_s": 1.089
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.09s"
+  ]
+}

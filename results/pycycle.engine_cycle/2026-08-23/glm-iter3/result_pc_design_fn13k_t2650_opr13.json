@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn13k_t2650_opr13",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport pycycle\\nimport json\\n\\nclass Turbojet(pyc.Cycle):\\n    def initialize(self):\\n        self.options.declare('thermo_data', default=pyc.AIR_JETA_TAB_SPEC, recordable=False)\\n\\n    def setup(self):\\n        # Thermodynamics setup\\n        # Import TABULAR from pycycle directly to avoid attribute errors in pyc.api\\n        self.options['thermo_method'] = pycycle.TABULAR\\n        self.options['thermo_data'] = self.options['thermo_data']\\n\\n        # Components\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\n        self.add_subsystem('burner', pyc.Combustor())\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\n        self.add_subsystem('nozzle', pyc.Nozzle(no_type='CD'))\\n        self.add_subsystem('perf', pyc.Performance(num_nozzles=1, num_burners=1))\\n        self.add_subsystem('shaft', pyc.Shaft())\\n\\n        # Flow Connections\\n        self.connect('inlet.Fl_O:out', 'comp.Fl_I:in')\\n        self.connect('comp.Fl_O:out', 'burner.Fl_I:in')\\n        self.connect('burner.Fl_O:out', 'turb.Fl_I:in')\\n        self.connect('turb.Fl_O:out', 'nozzle.Fl_I:in')\\n\\n        # Performance Connections\\n        self.connect('inlet.Fl_O:out', 'perf.Fl_I:in')\\n        self.connect('nozzle.Fl_O:out', 'perf.Fl_O:out')\\n        self.connect('nozzle.Fg', 'perf.Fg_0')\\n        self.connect('burner.W_fuel', 'perf.W_fuel')\\n\\n        # Mechanical Connections\\n        self.connect('shaft.Nmech', 'comp.Nmech')\\n        self.connect('shaft.Nmech', 'turb.Nmech')\\n\\n        # Balance 1: Power Balance (Nmech)\\n        # Find Nmech such that Compressor Power = Turbine Power\\n        self.add_subsystem('power_bal', om.BalanceComp())\\n        self.power_bal.add_balance('Nmech', val=10000.0, units='rpm', eq_units='hp', rhs_val=0.0)\\n        \\n        self.connect('comp.power', 'power_bal.lhs:Nmech')\\n        self.connect('turb.power', 'power_bal.rhs:Nmech')\\n        self.connect('power_bal.Nmech', 'shaft.Nmech')\\n\\n        # Balance 2: Thrust Balance (Inlet Area)\\n        # Find Inlet Area such that Net Thrust = 13000 lbf\\n        self.add_subsystem('thrust_bal', om.BalanceComp())\\n        self.thrust_bal.add_balance('area', val=200.0, units='inch**2', eq_units='lbf', rhs_val=13000.0)\\n        \\n        self.connect('perf.Fn', 'thrust_bal.lhs:area')\\n        self.connect('thrust_bal.area', 'inlet.Fl_O:stat:area')\\n\\n        # Connection for Nozzle Area (Simplification: Match Turbine Exit Area)\\n        # This ensures flow continuity without adding another design variable.\\n        self.connect('turb.Fl_O:stat:area', 'nozzle.Throat:stat:area')\\n\\n        # Solver Setup\\n        self.nonlinear_solver = om.NewtonSolver()\\n        self.linear_solver = om.DirectSolver()\\n        self.nonlinear_solver.options['solve_subsystems'] = True\\n        self.nonlinear_solver.options['maxiter'] = 20\\n        self.nonlinear_solver.options['rtol'] = 1e-5\\n        self.nonlinear_solver.options['atol'] = 1e-6\\n\\nif __name__ == \\\"__main__\\\":\\n    prob = om.Problem()\\n    prob.model = Turbojet()\\n    \\n    prob.setup()\\n    \\n    # Set Design Point Inputs\\n    prob.set_val('inlet.MN', 0.0)\\n    prob.set_val('inlet.alt', 0.0, units='ft')\\n    \\n    prob.set_val('comp.PR', 13.0)\\n    prob.set_val('burner.Tt_out', 2650.0, units='degR')\\n    \\n    # Initial Guesses for Balances\\n    prob.set_val('power_bal.Nmech', 10000.0, units='rpm')\\n    prob.set_val('thrust_bal.area', 200.0, units='inch**2')\\n    \\n    # Run\\n    prob.run_model()\\n    \\n    # Extract Results\\n    results = {\\n        \\\"Fn_lbf\\\": float(prob.get_val('perf.Fn', units='lbf')),\\n        \\\"TSFC\\\": float(prob.get_val('perf.TSFC', units='lbm/lbf/h')),\\n        \\\"OPR\\\": float(prob.get_val('comp.PR')),\\n        \\\"Wfuel_lbm_s\\\": float(prob.get_val('burner.W_fuel', units='lbm/s'))\\n    }\\n    \\n    # Write to JSON\\n    with open('result.json', 'w') as f:\\n        json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"onal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xnx38kom/solve.py\\\", line 13, in setup\\n    self.options['thermo_method'] = pycycle.TABULAR\\n                                    ^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle' has no attribute 'TABULAR'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 215.66,
+    "setup_s": 0.0,
+    "grade_s": 1.017
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.02s"
+  ]
+}

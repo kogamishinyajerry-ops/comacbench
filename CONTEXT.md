@@ -1,0 +1,23 @@
+# CONTEXT.md — JerryDSH-COMACBench 词汇表
+
+> 领域建模纪律：术语敲定的当场写在这里；本文件只收词汇，不收实现决策（决策见 ADR 与 `docs/wayfinder/` 地图）。
+
+## 评测体系
+
+- **registry**：`registry/registry.yaml`，全部基准的接入清单 SSOT；条目状态机 `proposed → staged → integrated → active`，任意状态可挂 `paused-env`。
+- **adapter**：五类标准运行器接口（qa_grounded / code_exec / simulation_agent / field_prediction 等），任务差异只通过任务 YAML 表达，禁止 fork runner。
+- **gate（ValidityGate）**：评分底线检查器，先于子分执行；gate 失败分布是结果分析的核心维度。
+- **九维度**：结果报告的评分维度体系（见 `scoring/README.md`）。
+- **run_manifest**：每次运行的可复现性档案（seed / environment_digest / assets sha256 / 重跑命令）。
+
+## 工作台 UI（2026-08-22 wayfinder 地图命名）
+
+- **工作台（workbench）**：规划中的 DSH GUI 内嵌只读分析界面；第一受众是评测运营，核心心智"结果说明什么"。
+- **数据桥（data bridge）**：工作台页获取仓库数据（registry.yaml / results/ / reports/）的机制；具体选型是地图票 T3。
+- **里程碑快照（milestone snapshot）**：结果数据的可归档冻结导出（自包含、可进 git），与活读层并存的第二数据面；格式纪律是地图票 T4。
+- **本地化硬规矩**：工作台一切依赖必须可完全本地化打包、禁止运行时外部请求——为 intranet 移植预留的不可妥协约束。
+
+## 环境
+
+- **dev**：外网开发终端（当前活跃，OpenFOAM + FoamAgent）。
+- **intranet**：内网商业栈目标环境（离线，ANSYS 系/StarCCM+/CATIA 等，Python 包按 env-matrix 分阶段手工导入）。

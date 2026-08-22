@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        # Thermo properties using the requested tabular data\\n        thermo_dict = {\\n            'thermo_method': 'TABULAR',\\n            'thermo_data': pyc.AIR_JETA_TAB_SPEC\\n        }\\n\\n        # --- Add Cycle Elements ---\\n        self.add_subsystem('fc', pyc.FlightConditions())\\n        self.add_subsystem('inlet', pyc.Inlet(**thermo_dict))\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, **thermo_dict))\\n        # Note: Corrected from Burner to Combustor based on API requirements\\n        self.add_subsystem('burner', pyc.Combustor(**thermo_dict))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, **thermo_dict))\\n        self.add_subsystem('nozzle', pyc.Nozzle(noz_type='CD', **thermo_dict))\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # --- Add Balances ---\\n        # Balance 1: Thrust. Adjust Inlet Area to achieve 15,000 lbf\\n        self.add_subsystem('bal_Fn', om.BalanceComp())\\n        self.bal_Fn.add_balance('area', val=10.0, units='ft**2', eq_units='lbf', lhs_name='Fn', rhs_val=15000.0)\\n\\n        # Balance 2: Power. Adjust Turbine PR to achieve 0 hp power balance\\n        self.add_subsystem('bal_Pw', om.BalanceComp())\\n        self.bal_Pw.add_balance('turb_PR', val=4.0, eq_units='hp', lhs_name='pwr', rhs_val=0.0)\\n\\n        # --- Connect Flow Path ---\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozzle.Fl_I')\\n\\n        # --- Connect Shaft ---\\n        # Speed must be common between compressor and turbine\\n        self.connect('comp.N', 'turb.N')\\n        self.connect('comp.N', 'shaft.N_in_0')\\n        self.connect('turb.N', 'shaft.N_in_1')\\n        \\n        # Torque connections to shaft\\n        self.connect('comp.trq', 'shaft.trq_0')\\n        self.connect('turb.trq', 'shaft.trq_1')\\n\\n        # --- Connect Balances ---\\n        # Thrust Balance\\n        self.connect('nozzle.Fn', 'bal_Fn.Fn')\\n        self.connect('bal_Fn.area', 'inlet.Fl_O:stat:area')\\n\\n        # Power Balance\\n        self.connect('shaft.power_balance', 'bal_Pw.pwr')\\n        self.connect('bal_Pw.turb_PR', 'turb.s_PR')\\n\\n# --- Problem Setup ---\\nprob = om.Problem(model=TurbojetDesign())\\n\\n# Driver settings\\nprob.driver = om.ScipyOptimizeDriver()\\nprob.driver.options['tol'] = 1e-5\\nprob.driver.options['maxiter'] = 50\\n\\n# Solver settings\\nprob.model.nonlinear_solver = om.NewtonSolver()\\nprob.model.nonlinear_solver.options['solve_subsystems'] = True\\nprob.model.nonlinear_solver.options['maxiter'] = 20\\nprob.model.nonlinear_solver.options['iprint'] = 0\\nprob.model.linear_solver = om.DirectSolver()\\n\\nprob.setup()\\n\\n# --- Set Initial Values ---\\n# Flight Conditions: Sea Level Static\\nprob.set_val('fc.MN', 0.0)\\nprob.set_val('fc.alt', 0.0, units='ft')\\nprob.set_val('fc.dT', 0.0, units='degR')\\n\\n# Cycle Parameters\\nprob.set_val('comp.PR', 15.0)            # OPR\\nprob.set_val('burner.T_exit', 2800.0, units='degR') # T4\\nprob.set_val('comp.N', 1.0)              # Initial guess for normalized speed\\n\\n# --- Define Optimization Problem ---\\nprob.model.add_design_var('bal_Fn.area', lower=1.0, upper=50.0)\\nprob.model.add_constraint('bal_Fn.Fn', equals=15000.0)\\n\\nprob.model.add_design_var('bal_Pw.turb_PR', lower=1.01, upper=15.0)\\nprob.model.add_constraint('bal_Pw.pwr', equals=0.0)\\n\\n# --- Run ---\\nprob.run_driver()\\n\\n# --- Extract and Save Results ---\\n# Retrieve values with units\\nFn = prob.get_val('nozzle.Fn', units='lbf')[0]\\nWfuel = prob.get_val('burner.W_fuel', units='lbm/s')[0]\\nOPR = prob.get_val('comp.PR')[0]\\n\\n# Calculate TSFC manually to ensure availability\\nTSFC = Wfuel / Fn\\n\\nresults = {\\n    \\\"Fn_lbf\\\": float(Fn),\\n    \\\"TSFC\\\": float(TSFC),\\n    \\\"OPR\\\": float(OPR),\\n    \\\"Wfuel_lbm_s\\\": float(Wfuel)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(results, f, indent=4)\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"ore/system.py\\\", line 510, in __init__\\n    self.options.update(kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 473, in update\\n    self[name] = in_dict[name]\\n    ~~~~^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 517, in __setitem__\\n    self._raise(f\\\"Option '{name}' cannot be set because it has not been declared.\\\",\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/utils/options_dictionary.py\\\", line 245, in _raise\\n    raise exc_type(full_msg)\\nKeyError: \\\"Nozzle: Option 'noz_type' cannot be set because it has not been declared.\\\"\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 233.974,
+    "setup_s": 0.0,
+    "grade_s": 1.591
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.59s"
+  ]
+}

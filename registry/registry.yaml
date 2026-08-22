@@ -280,6 +280,25 @@ entries:
     paused_env_note: dev 终端无 MATLAB（matlabengine 不可用）——GTM 层 blocked；JSBSim 快层（python_sandbox）可先行，许可 needs-verification 未核。（2026-08-22 已解除：dev 装 MATLAB R2026a U3）
     status: integrated
     integrated_note: 2026-08-22 MATLAB R2026a U3 到位（Sponsored License，CST/Aerospace TB 齐备，batch ~8-28s/次）——gtm_matlab 分支落地（runners/solvers/matlab.py 执行后端 + simulation_agent 分支 + providers expect=matlab + 正则级 MATLAB 逃逸检查含注释/字符串剥离）。任务集：自建 8 族 25 题（纵向模态×5/配平×3/静稳定×2/控制律极点配置×4/时域指标×3/修复×2/包线鲁棒×3/横航向×3；未镜像 GTM_DesignSim——Simulink 工程依赖+许可未核；稳定性导数量级取公开运输机文献典型值；F5 钉死精确离散口径 dt=0.01s）。判分 100% 本地数值可复现（result_keys 1% 容差 + exact_keys）。基线：stub 25/25 地板 / oracle 25/25 满分自检 / minimax-m3 0.9800（24/25 满分，1 部分分）/ glm-4.6 0.8900（21/25，gate 23/25：2 code_not_executable）——飞控维两家模型均高可达（与 pycycle 全灭互证维度区分度有效）。规格偏离记录于 PROVENANCE（phugoid ωn 可达包络 [0.025,0.06]、F8 Lβ 量级、F6 自检口径）。JSBSim 快层仍为后续可选项（python_sandbox）
+    anchor_note: 2026-08-23 v0.2 口径——双模型 ≥0.89，按 bench_stats 锚点标准（≥0.93 任一被测）本基准定位为「飞控可达域锚点」不参与模型排序；区分度由 gtm.transport_control_hard 承接
+
+  - id: gtm.transport_control_hard
+    name: GTM 飞控加硬版（自建 v2）
+    source: https://github.com/nasa/GTM_DesignSim ; https://github.com/JSBSim-Team/jsbsim
+    tier: A
+    order: 13b
+    batch: batch-2
+    adapter: simulation_agent
+    env_class: matlab
+    license: 自建参数化任务（GTM 定位启发，未镜像上游）
+    license_status: confirmed-selfbuilt
+    self_built: true
+    content: 含噪系统辨识/鲁棒裕度(含级联回路)/增益调度/非线性配平/蒙特卡洛鲁棒筛选
+    env: 同 gtm.transport_control（MATLAB R2026a U3 batch；gtm_matlab 分支）
+    hidden_dynamic: true
+    assets_revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a
+    status: integrated
+    integrated_note: 2026-08-23 v2 加硬版——v1 双模型饱和（0.98/0.89）归因=题面给 A 矩阵教科书化；v2 五族 17 题（含噪辨识×4[PRBS 数据 LS 辨识+离散→连续映射]/鲁棒裕度×4[margin 含内环+外环级联]/增益调度×3[三 FC 并行各异目标]/非线性配平×3[推力-阻力-升力-安装角互锁]/蒙特卡洛×3[200 点 seeded 盒采样统计]）+ hidden/ 评审件（seeded 生成器+answers.b64）。基线：stub 17/17 地板 / oracle 17/17 满分 / minimax-m3 0.7059（gate 13/17：4 code_not_executable）——精准落入 ≤0.7 目标区分带（v1 同模型 0.98）；族级梯度：辨识 0.25 < 蒙特卡洛 0.50 < 裕度 0.875 < 调度/非线性配平 1.0。偏差如实：噪声级 2e-4~4e-4（为 SP 可辨识性校准，加硬点转辨识管线结构）、phugoid 结构性不可辨识（离散极点贴单位圆）仅判 SP、H4 gold 解析式与任何正确数值解同解——详见 data/gtm/transport_control_hard/PROVENANCE.md
 
   - id: mechvqa.public_eval
     name: MechVQA 公开评测集

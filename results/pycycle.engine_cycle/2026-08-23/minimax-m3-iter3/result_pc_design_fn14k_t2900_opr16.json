@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn14k_t2900_opr16",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n# Build simple turbojet cycle and solve design point: SL static, MN~0, Fn=14000 lbf, T4=2900 R, OPR=16\\nprob = om.Problem()\\nprob.model = om.Group()  # Use Group instead of non-existent pyc.Element\\n\\n# Components\\nprob.model.add_subsystem('fc', pyc.FlightCondition())\\nprob.model.add_subsystem('inlet', pyc.Inlet())\\nprob.model.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\nprob.model.add_subsystem('burn', pyc.Combustor())\\nprob.model.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\nprob.model.add_subsystem('noz', pyc.Nozzle())\\nprob.model.add_subsystem('shaft', pyc.Shaft())\\nprob.model.add_subsystem('thrust', pyc.Thrust())\\n\\n# Input defaults (SL static)\\nprob.model.set_input_defaults('fc.alt', 0.0, units='ft')\\nprob.model.set_input_defaults('fc.MN', 0.0)\\nprob.model.set_input_defaults('fc.W', 100.0, units='lbm/s')\\nprob.model.set_input_defaults('inlet.ram_recovery', 1.0)\\n\\n# Flow connections\\npyc.connect_flow(prob.model, 'fc.fl_out', 'inlet.fl_in')\\npyc.connect_flow(prob.model, 'inlet.fl_out', 'comp.fl_in')\\npyc.connect_flow(prob.model, 'comp.fl_out', 'burn.fl_in')\\npyc.connect_flow(prob.model, 'burn.fl_out', 'turb.fl_in')\\npyc.connect_flow(prob.model, 'turb.fl_out', 'noz.fl_in')\\npyc.connect_flow(prob.model, 'noz.fl_out', 'thrust.fl_in')\\n\\n# Mechanical shaft connections\\nprob.model.connect('comp.trq', 'shaft.trq_in')\\nprob.model.connect('turb.trq', 'shaft.trq_out')\\nprob.model.connect('shaft.HPX', 'comp.HPX')\\n\\n# Thrust connections\\nprob.model.connect('fc.Fl_O', 'thrust.Fl_O')\\n\\n# Design balance 1: shaft power (turbine drives compressor)\\nprob.model.add_subsystem('shaft_bal', pyc.Balance())\\nprob.model.connect('turb.power', 'shaft_bal.lhs')\\nprob.model.connect('comp.power', 'shaft_bal.rhs')\\nprob.model.connect('shaft_bal.x', 'turb.PR')\\nprob.model.set_val('shaft_bal.x', 4.0)\\n\\n# Design balance 2: nozzle area (choked, mass flow matches)\\nprob.model.add_subsystem('noz_bal', pyc.Balance())\\nprob.model.connect('noz.mass_flow', 'noz_bal.lhs')\\nprob.model.connect('fc.W', 'noz_bal.rhs')\\nprob.model.connect('noz_bal.x', 'noz.Throat')\\nprob.model.set_val('noz_bal.x', 100.0, units='inch**2')\\n\\n# Design balance 3: thrust target (drive W to hit Fn=14000 lbf)\\nprob.model.add_subsystem('fn_bal', pyc.Balance())\\nprob.model.connect('thrust.Fg', 'fn_bal.lhs')\\nprob.model.connect('fn_bal.x', 'fc.W')\\nprob.model.set_val('fn_bal.rhs', 14000.0, units='lbf')\\nprob.model.set_val('fn_bal.x', 100.0, units='lbm/s')\\n\\n# Component design values\\nprob.set_val('comp.PR', 16.0)\\nprob.set_val('comp.eff', 0.9)\\nprob.set_val('comp.Nmech', 8000.0, units='rpm')\\nprob.set_val('burn.dPqP', 0.0)\\nprob.set_val('burn.eff', 0.99)\\nprob.set_val('burn.Tt4', 2900.0, units='degR')\\nprob.set_val('turb.eff', 0.9)\\nprob.set_val('turb.Nmech', 8000.0, units='rpm')\\nprob.set_val('noz.Cfg', 1.0)\\n\\n# Solve design point\\nprob.setup()\\nprob.set_solver_print(level=-1)\\nprob.run_model()\\n\\n# Extract results\\nWfuel = prob.get_val('burn.Wfuel', units='lbm/s')[0]\\nFn = prob.get_val('thrust.Fg', units='lbf')[0]\\nTSFC_hr = (Wfuel / Fn) * 3600.0  # lbm/(lbf*hr)\\n\\nresult = {\\n    'Fn_lbf': float(Fn),\\n    'TSFC': float(TSFC_hr),\\n    'OPR': float(prob.get_val('comp.PR')[0]),\\n    'Wfuel_lbm_s': float(Wfuel)\\n}\\n\\nwith open('result.json', 'w') as f:\\n    json.dump(result, f, indent=2)\\n\\nprint(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ar5alci6/solve.py\\\", line 10, in <module>\\n    prob.model.add_subsystem('fc', pyc.FlightCondition())\\n                                   ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 211.373,
+    "setup_s": 0.0,
+    "grade_s": 0.945
+  },
+  "environment_digest": "sha256:4739890f3d81a15f5786e23ef8071a6ef6953170f83d090af0090aa6516c22ee",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 0.94s"
+  ]
+}

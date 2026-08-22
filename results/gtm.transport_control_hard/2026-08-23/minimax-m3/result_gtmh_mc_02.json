@@ -1,0 +1,40 @@
+{
+  "task_id": "gtmh_mc_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"% Monte Carlo robustness screening - closed-loop short-period spec\\n\\nclear; clc;\\n\\n% Nominal longitudinal parameters\\nV = 740.0;\\nXu = -0.006; Xw = 0.033;\\nZu = -0.027; Zw = -0.66;\\nMw = -0.0046; Mq = -0.78;\\ng = 32.174;\\n\\nA_nom = [Xu,  Xw,  0,  -g;\\n         Zu,  Zw,  V,   0;\\n         0,   Mw,  Mq,  0;\\n         0,    0,  1,   0];\\n\\nB = [0; -5.5; -4.5; 0];\\n\\n% Open-loop eigenvalues\\nol_poles = eig(A_nom);\\n\\n% Identify phugoid poles (lowest natural frequency)\\nmags_ol = abs(ol_poles);\\n[~, idx_ol] = sort(mags_ol);\\nphugoid_poles = ol_poles(idx_ol(1:2));\\n\\n% Desired short-period poles (omega_n = 2.1, zeta = 0.55)\\nomega_n_d = 2.1;\\nzeta_d = 0.55;\\nsp_desired = [-zeta_d*omega_n_d + 1j*omega_n_d*sqrt(1-zeta_d^2), ...\\n              -zeta_d*omega_n_d - 1j*omega_n_d*sqrt(1-zeta_d^2)];\\n\\n% Pole placement: short-period at desired location, phugoid held at open-loop\\ndesired_poles = [sp_desired, phugoid_poles];\\nK = place(A_nom, B, desired_poles);\\n\\n% Monte Carlo sampling (deterministic via fixed seeds)\\nN = 200;\\npct = 0.20;\\n\\nrng(20260828);\\nf_Mw = 1 + pct*(2*rand(N,1) - 1);\\n\\nrng(20261828);\\nf_Zw = 1 + pct*(2*rand(N,1) - 1);\\n\\nrng(20262828);\\nf_Mq = 1 + pct*(2*rand(N,1) - 1);\\n\\n% Evaluate closed-loop short-period at each sample\\ncount = 0;\\nfor i = 1:N\\n    A_i = A_nom;\\n    A_i(2,2) = f_Zw(i) * Zw;\\n    A_i(3,2) = f_Mw(i) * Mw;\\n    A_i(3,3) = f_Mq(i) * Mq;\\n    \\n    cl_poles_i = eig(A_i - B*K);\\n    \\n    % Identify short-period mode (highest natural frequency)\\n    mags_i = abs(cl_poles_i);\\n    [~, sp_idx] = max(mags_i);\\n    s_sp = cl_poles_i(sp_idx);\\n    \\n    omega_n_i = abs(s_sp);\\n    zeta_i = -real(s_sp) / omega_n_i;\\n    \\n    if (omega_n_i >= 2.0) && (omega_n_i <= 2.2) && (zeta_i >= 0.52)\\n        count = count + 1;\\n    end\\nend\\n\\npass_fraction = count / N;\\nfailing_case_count = N - count;\\n\\n% Write result.json\\nresult.pass_fraction = pass_fraction;\\nresult.failing_case_count = failing_case_count;\\n\\njson_text = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, json_text);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b错误使用 horzcat\\n要串联的数组的维度不一致。\\n\\n出错 model (第 34 行)\\ndesired_poles = [sp_desired, phugoid_poles];\\n                 ^^^^^^^^^^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 250.278,
+    "setup_s": 0.0,
+    "grade_s": 9.859
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 9.86s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% model.m\\n% Trim a transport aircraft in a steady climbing coordinated turn.\\n% Solves 3 coupled nonlinear equations using Newton-Raphson iteration.\\n\\n% --- 1. Define Constants ---\\nW = 230000.0;      % lbf\\nS = 2400.0;        % ft^2\\nh = 31000.0;       % ft\\nV = 730.0;         % ft/s\\ngamma_deg = 3.0;   % deg\\nphi_deg = 30.0;    % deg\\n\\nCL0 = 0.15;\\nCLa = 5.2;         % /rad\\nCLde = 0.35;       % /rad\\n\\nCD0 = 0.021;\\nk = 0.043;\\n\\nrho0 = 0.0023769;  % slug/ft^3\\nh_scale = 23800.0; % ft\\n\\niT_deg = 2.5;      % deg\\nzT = 2.0;          % ft\\n\\nCm0 = 0.02;\\nCma = -0.3;        % /rad\\nCmde = -0.85;      % /rad\\ncbar = 17.0;       % ft\\n\\n% --- 2. Derived Quantities ---\\n% Convert angles to radians for calculation\\ngamma = deg2rad(gamma_deg);\\nphi = deg2rad(phi_deg);\\niT = deg2rad(iT_deg);\\n\\n% Atmosphere\\nrho = rho0 * exp(-h / h_scale);\\nq = 0.5 * rho * V^2;\\n\\n% Load Factor (analytical)\\nload_factor = cos(gamma) / cos(phi);\\n\\n% --- 3. Newton-Raphson Solver ---\\n% Unknowns: x(1) = alpha (rad), x(2) = T (lbf), x(3) = delta_e (rad)\\n\\n% Initial Guess\\n% Alpha: ~2 deg, Thrust: ~25000 lbf (estimated from drag), Elevator: ~0 deg\\nx = [deg2rad(2.0); 25000.0; 0.0]; \\n\\n% Tolerances\\ntol = 1e-8;\\nmax_iter = 50;\\n\\nfor iter = 1:max_iter\\n    alpha = x(1);\\n    T = x(2);\\n    de = x(3);\\n    \\n    % Aerodynamic Coefficients\\n    CL = CL0 + CLa * alpha + CLde * de;\\n    CD = CD0 + k * CL^2;\\n    \\n    % --- Residuals F(x) ---\\n    % Eq 1: Vertical Force Balance\\n    % q*S*CL*cos(phi) + T*sin(alpha + iT) - W*cos(gamma) = 0\\n    f1 = q * S * CL * cos(phi) + T * sin(alpha + iT) - W * cos(gamma);\\n    \\n    % Eq 2: Flight Path Force Balance\\n    % T*cos(alpha + iT) - q*S*CD - W*sin(gamma) = 0\\n    f2 = T * cos(alpha + iT) - q * S * CD - W * sin(gamma);\\n    \\n    % Eq 3: Pitching Moment Balance\\n    % q*S*cbar*(Cm0 + Cma*alpha + Cmde*de) + T*sin(iT)*zT = 0\\n    f3 = q * S * cbar * (Cm0 + Cma * alpha + Cmde * de) + T * sin(iT) * zT;\\n    \\n    F = [f1; f2; f3];\\n    \\n    % Check convergence\\n    if norm(F) < tol\\n        break;\\n    end\\n    \\n    % --- Jacobian J(x) ---\\n    % Derivatives of CL\\n    dCL_da = CLa;\\n    dCL_dT = 0;\\n    dCL_dde = CLde;\\n    \\n    % Derivatives of CD\\n    dCD_da = 2 * k * CL * dCL_da;\\n    dCD_dT = 0;\\n    dCD_dde = 2 * k * CL * dCL_dde;\\n    \\n    % Row 1 (Vertical Eq)\\n    J11 = q * S * cos(phi) * dCL_da + T * cos(alpha + iT);\\n    J12 = sin(alpha + iT);\\n    J13 = q * S * cos(phi) * dCL_dde;\\n    \\n    % Row 2 (Path Eq)\\n    J21 = -T * sin(alpha + iT) - q * S * dCD_da;\\n    J22 = cos(alpha + iT);\\n    J23 = -q * S * dCD_dde;\\n    \\n    % Row 3 (Moment Eq)\\n    J31 = q * S * cbar * Cma;\\n    J32 = sin(iT) * zT;\\n    J33 = q * S * cbar * Cmde;\\n    \\n    J = [J11, J12, J13;\\n         J21, J22, J23;\\n         J31, J32, J33];\\n         \\n    % Newton Step\\n    dx = J \\\\ (-F);\\n    x = x + dx;\\nend\\n\\n% --- 4. Prepare Results ---\\nalpha_trim_deg = rad2deg(x(1));\\nthrust_lbf = x(2);\\ndelta_e_trim_deg = rad2deg(x(3));\\n\\n% Create struct for JSON output\\nresultStruct.alpha_trim_deg = alpha_trim_deg;\\nresultStruct.thrust_lbf = thrust_lbf;\\nresultStruct.delta_e_trim_deg = delta_e_trim_deg;\\nresultStruct.load_factor = load_factor;\\n\\n% --- 5. Write JSON ---\\njsonStr = jsonencode(resultStruct);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonStr);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 5.336204581495042, \"ref\": 5.336204581495041}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 28054.677051191553, \"ref\": 28054.677051191557}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.5117443143632326, \"ref\": -0.5117443143632321}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.1531180614225278, \"ref\": 1.1531180614225278}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 13.52}"
+  },
+  "timings": {
+    "agent_s": 473.818,
+    "setup_s": 0.0,
+    "grade_s": 13.522
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 13.52s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Trim solver for nonlinear climb + coordinated-turn\\n% System: 3 coupled nonlinear equations in alpha, T, delta_e\\n\\n% --- Given Parameters ---\\nW = 200000.0;      % lbf\\nS = 2100.0;        % ft^2\\nh = 27000.0;       % ft\\nV = 700.0;         % ft/s\\ngamma_deg = 4.0;   % deg\\nphi_deg = 25.0;    % deg\\n\\n% Lift parameters\\nCL0 = 0.12;\\nCLa = 4.9;         % /rad\\nCLde = 0.4;        % /rad\\n\\n% Drag parameters\\nCD0 = 0.023;\\nk = 0.041;\\n\\n% Atmosphere\\nrho0 = 0.0023769;  % slug/ft^3\\nH_atm = 23800.0;   % ft (scale height)\\n\\n% Thrust parameters\\niT_deg = 2.0;      % deg (thrust line pitch vs body)\\nzT = 1.8;          % ft (perpendicular arm)\\n\\n% Pitching moment parameters\\nCm0 = 0.018;\\nCma = -0.28;       % /rad\\nCmde = -0.8;       % /rad\\ncbar = 16.0;       % ft (mean chord)\\n\\n% --- Derived Constants (Convert angles to radians) ---\\ngamma = deg2rad(gamma_deg);\\nphi = deg2rad(phi_deg);\\niT = deg2rad(iT_deg);\\n\\n% --- Atmosphere & Dynamic Pressure ---\\nrho = rho0 * exp(-h / H_atm);\\nq = 0.5 * rho * V^2;\\n\\n% --- Residuals Function ---\\n% x = [alpha (rad), T (lbf), delta_e (rad)]\\nfunction F = residuals(x, params)\\n    % Unpack parameters\\n    W = params.W; S = params.S; gamma = params.gamma; phi = params.phi;\\n    q = params.q; iT = params.iT; zT = params.zT; cbar = params.cbar;\\n    CL0 = params.CL0; CLa = params.CLa; CLde = params.CLde;\\n    CD0 = params.CD0; k = params.k;\\n    Cm0 = params.Cm0; Cma = params.Cma; Cmde = params.Cmde;\\n    \\n    % Unpack state\\n    alpha = x(1);\\n    T = x(2);\\n    de = x(3);\\n    \\n    % Coefficients\\n    CL = CL0 + CLa * alpha + CLde * de;\\n    CD = CD0 + k * CL^2;\\n    Cm = Cm0 + Cma * alpha + Cmde * de;\\n    \\n    % Forces and Moments\\n    Lift = q * S * CL;\\n    Drag = q * S * CD;\\n    M_aero = q * S * cbar * Cm;\\n    M_thrust = T * sin(iT) * zT;\\n    \\n    % Equations of Equilibrium\\n    % 1. Vertical Force Balance\\n    Eq1 = Lift * cos(phi) + T * sin(alpha + iT) - W * cos(gamma);\\n    \\n    % 2. Along Flight Path Force Balance\\n    Eq2 = T * cos(alpha + iT) - Drag - W * sin(gamma);\\n    \\n    % 3. Pitching Moment Balance\\n    Eq3 = M_aero + M_thrust;\\n    \\n    F = [Eq1; Eq2; Eq3];\\nend\\n\\n% --- Solver Setup (Newton-Raphson) ---\\n% Pack parameters struct\\np = struct(...\\n    'W', W, 'S', S, 'gamma', gamma, 'phi', phi, ...\\n    'q', q, 'iT', iT, 'zT', zT, 'cbar', cbar, ...\\n    'CL0', CL0, 'CLa', CLa, 'CLde', CLde, ...\\n    'CD0', CD0, 'k', k, ...\\n    'Cm0', Cm0, 'Cma', Cma, 'Cmde', Cmde);\\n\\n% Initial Guess\\n% alpha ~ 5 deg, T ~ 30000 lbf, de ~ 0 deg\\nx = [deg2rad(5.0); 30000.0; 0.0];\\n\\n% Newton Iteration\\ntol = 1e-10;\\nmax_iter = 50;\\ndx = 1e-6; % Finite difference step\\n\\nfor iter = 1:max_iter\\n    F = residuals(x, p);\\n    if norm(F) < tol\\n        break;\\n    end\\n    \\n    % Numerical Jacobian\\n    J = zeros(3, 3);\\n    for i = 1:3\\n        x_pert = x;\\n        x_pert(i) = x(i) + dx;\\n        F_pert = residuals(x_pert, p);\\n        J(:, i) = (F_pert - F) / dx;\\n    end\\n    \\n    % Update step\\n    delta = J \\\\ (-F);\\n    x = x + delta;\\n    \\n    % Simple damping if step is too large (safety for robustness)\\n    if norm(delta) > 0.1\\n        x = x - 0.5 * delta; \\n    end\\nend\\n\\n% --- Output Formatting ---\\nalpha_rad = x(1);\\nthrust_lbf = x(2);\\nde_rad = x(3);\\n\\n% Load Factor Calculation\\nn = cos(gamma) / cos(phi);\\n\\n% Prepare Result Struct\\nresult.alpha_trim_deg = rad2deg(alpha_rad);\\nresult.thrust_lbf = thrust_lbf;\\nresult.delta_e_trim_deg = rad2deg(de_rad);\\nresult.load_factor = n;\\n\\n% Write JSON\\njsonStr = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonStr);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 5.066399465106611, \"ref\": 5.066399465106611}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 28088.77892212658, \"ref\": 28088.778922126585}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.4640018046810074, \"ref\": -0.4640018046810074}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.1006901458074794, \"ref\": 1.1006901458074794}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 8.42}"
+  },
+  "timings": {
+    "agent_s": 128.038,
+    "setup_s": 0.0,
+    "grade_s": 8.421
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.42s"
+  ]
+}

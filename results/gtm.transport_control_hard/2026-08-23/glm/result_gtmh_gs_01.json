@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_gs_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6667,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.83335,
+  "artifacts": {
+    "code": "\"% gs_01 Gain Scheduling Script\\n\\n% Flight Condition 1\\nA1 = [-0.0064, 0.038, 0.0, -32.174; ...\\n      -0.031, -0.71, 740.0, 0.0; ...\\n       0.0, -0.0051, -0.9, 0.0; ...\\n       0.0, 0.0, 1.0, 0.0];\\nB1 = [0.0; -6.0; -4.0; 0.0];\\nwn_target_1 = 2.0;\\nzeta_target_1 = 0.6;\\n\\n% Flight Condition 2\\nA2 = [-0.0059, 0.026, 0.0, -32.174; ...\\n      -0.019, -0.55, 700.0, 0.0; ...\\n       0.0, -0.0034, -0.64, 0.0; ...\\n       0.0, 0.0, 1.0, 0.0];\\nB2 = [0.0; -6.0; -4.0; 0.0];\\nwn_target_2 = 1.9;\\nzeta_target_2 = 0.55;\\n\\n% Flight Condition 3\\nA3 = [-0.0057, 0.02, 0.0, -32.174; ...\\n      -0.015, -0.5, 660.0, 0.0; ...\\n       0.0, -0.003, -0.58, 0.0; ...\\n       0.0, 0.0, 1.0, 0.0];\\nB3 = [0.0; -6.0; -4.0; 0.0];\\nwn_target_3 = 1.7;\\nzeta_target_3 = 0.5;\\n\\n% Design and Evaluate for each condition\\n[~, w_ach_1, z_ach_1] = design_fc(A1, B1, wn_target_1, zeta_target_1);\\n[~, w_ach_2, z_ach_2] = design_fc(A2, B2, wn_target_2, zeta_target_2);\\n[~, w_ach_3, z_ach_3] = design_fc(A3, B3, wn_target_3, zeta_target_3);\\n\\n% Prepare results struct\\nresults = struct(...\\n    'cl_omega_sp_1', w_ach_1, ...\\n    'cl_zeta_sp_1', z_ach_1, ...\\n    'cl_omega_sp_2', w_ach_2, ...\\n    'cl_zeta_sp_2', z_ach_2, ...\\n    'cl_omega_sp_3', w_ach_3, ...\\n    'cl_zeta_sp_3', z_ach_3 ...\\n);\\n\\n% Write to JSON\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(results));\\nfclose(fid);\\n\\n% ---------------------------------------------------------\\nfunction [K, wn_ach, zeta_ach] = design_fc(A, B, wn_tar, zeta_tar)\\n    % 1. Get Open Loop Poles\\n    p_ol = eig(A);\\n    \\n    % 2. Identify Phugoid Poles (Lowest Frequency Mode)\\n    % Group poles into conjugate pairs or real pairs\\n    modes_ol = get_modes(p_ol);\\n    \\n    % Sort modes by Frequency (Primary), then Magnitude (Secondary)\\n    % Phugoid is slow (low freq) and usually closer to origin (low mag)\\n    freqs = cellfun(@(m) mean(abs(imag(m))), modes_ol);\\n    mags = cellfun(@(m) mean(abs(m)), modes_ol);\\n    [~, idx] = sortrows([freqs, mags], [1, 2]);\\n    modes_ol = modes_ol(idx);\\n    \\n    % The first mode is the Phugoid\\n    p_phugoid = modes_ol{1};\\n    \\n    % 3. Create Desired Poles\\n    % Short period target (complex conjugate)\\n    p_sp_target = roots([1, 2*zeta_tar*wn_tar, wn_tar^2]);\\n    \\n    % Combine: Keep Phugoid, Move SP\\n    p_desired = [p_phugoid; p_sp_target];\\n    \\n    % 4. Compute Feedback Gain\\n    K = place(A, B, p_desired);\\n    \\n    % 5. Analyze Closed Loop\\n    p_cl = eig(A - B*K);\\n    \\n    % 6. Identify Achieved Short Period Poles\\n    % The SP poles are the ones with the higher frequency/magnitude\\n    modes_cl = get_modes(p_cl);\\n    freqs_cl = cellfun(@(m) mean(abs(imag(m))), modes_cl);\\n    mags_cl = cellfun(@(m) mean(abs(m)), modes_cl);\\n    [~, idx_cl] = sortrows([freqs_cl, mags_cl], [1, 2]);\\n    modes_cl = modes_cl(idx_cl);\\n    \\n    % The last mode is the Short Period\\n    p_sp_achieved = modes_cl{end};\\n    \\n    % 7. Extract Characteristics\\n    % Assume SP is a pair. Take the first pole.\\n    sp_pole = p_sp_achieved(1);\\n    \\n    sigma = real(sp_pole);\\n    omega_d = imag(sp_pole);\\n    \\n    wn_ach = sqrt(sigma^2 + omega_d^2);\\n    zeta_ach = -sigma / wn_ach;\\nend\\n\\nfunction modes = get_modes(poles)\\n    % Helper to group poles into conjugate pairs or real pairs\\n    poles = poles(:);\\n    n = length(poles);\\n    used = false(n, 1);\\n    modes = {};\\n    \\n    for i = 1:n\\n        if ~used(i)\\n            if abs(imag(poles(i))) > 1e-6\\n                % Complex pole: find its conjugate\\n                dist = abs(poles - conj(poles(i)));\\n                dist(used) = inf; \\n                [~, idx] = min(dist);\\n                \\n                if dist(idx) < 1e-4 \\n                    modes{end+1} = [poles(i); poles(idx)];\\n                    used(i) = true;\\n                    used(idx) = true;\\n                else\\n                    modes{end+1} = poles(i);\\n                    used(i) = true;\\n                end\\n            else\\n                % Real pole\\n                used(i) = true;\\n                modes{end+1} = poles(i);\\n            end\\n        end\\n    \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"cl_omega_sp_1\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.050395, \"got\": 2.100789207104839, \"ref\": 1.9999999999989486}, \"cl_omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9000000000016337, \"ref\": 1.9000000000027133}, \"cl_omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.6999999999949515, \"ref\": 1.699999999997161}, \"cl_zeta_sp_1\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.361279, \"got\": 0.38323234415431806, \"ref\": 0.6000000000003328}, \"cl_zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5499999999977303, \"ref\": 0.5499999999992136}, \"cl_zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5000000000043655, \"ref\": 0.5000000000008572}}, \"physics_hits\": \"4/6\", \"rel_tol\": 0.01, \"matlab_s\": 10.89}"
+  },
+  "timings": {
+    "agent_s": 312.665,
+    "setup_s": 0.0,
+    "grade_s": 10.892
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 10.89s"
+  ]
+}

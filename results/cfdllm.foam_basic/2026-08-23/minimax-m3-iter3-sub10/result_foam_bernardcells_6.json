@@ -1,0 +1,42 @@
+{
+  "task_id": "foam_bernardcells_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Domain dimensions\\nLX, LY, LZ = 9.0, 1.0, 2.0\\nTHOT = 305.0\\nTCOLD = 290.0\\nT_REF = 300.0\\nSOLVER = \\\"buoyantFoam\\\"\\n\\n# Time control\\nEND_TIME = 1000.0\\nDELTA_T = 1.0\\nWRITE_INTERVAL = 50.0\\n\\n# Mesh resolution (coarse for fast run)\\nnx, ny, nz = 20, 4, 10\\n\\ndef write(path, content):\\n    dirname = os.path.dirname(path)\\n    if dirname:\\n        os.makedirs(dirname, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\nheader = \\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\\\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\\\\\\\\\    /   O peration     | Version:  10                                    |\\n|   \\\\\\\\\\\\\\\\  /    A nd           | Website:  www.openfoam.org                      |\\n|    \\\\\\\\\\\\\\\\/     M anipulation  |                                                 |\\n\\\\\\\\*---------------------------------------------------------------------------*/\\n\\\"\\\"\\\"\\n\\n# 1. system/blockMeshDict - Hot bottom (z=0), Cold top (z=LZ) for Bernard cell\\nwrite(\\\"system/blockMeshDict\\\", header + f\\\"\\\"\\\"FoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}}\\n\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    ({LX} 0 0)\\n    ({LX} {LY} 0)\\n    (0 {LY} 0)\\n    (0 0 {LZ})\\n    ({LX} 0 {LZ})\\n    ({LX} {LY} {LZ})\\n    (0 {LY} {LZ})\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) ({nx} {ny} {nz}) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    hotWall\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (0 3 2 1)\\n        );\\n    }}\\n    coldWall\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (4 5 6 7)\\n        );\\n    }}\\n    sideWalls\\n    {{\\n        type wall;\\n        faces\\n        (\\n            (0 4 7 3)\\n            (1 2 6 5)\\n            (0 1 5 4)\\n            (2 3 7 6)\\n        );\\n    }}\\n);\\n\\\"\\\"\\\")\\n\\n# 2. system/controlDict\\nwrite(\\\"system/controlDict\\\", header + f\\\"\\\"\\\"FoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}}\\n\\napplication     {SOLVER};\\nstartFrom       startTime;\\nstartTime       0;\\nstopAt          endTime;\\nendTime         {END_TIME:g};\\ndeltaT          {DELTA_T:g};\\nwriteControl    timeStep;\\nwriteInterval   {WRITE_INTERVAL:g};\\npurgeWrite      0;\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\ntimeFormat      general;\\ntimePrecision   6;\\nrunTimeModifiable true;\\n\\\"\\\"\\\")\\n\\n# 3. system/fvSchemes\\nwrite(\\\"system/fvSchemes\\\", header + \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      bounded Gauss linearUpwind grad(U);\\n    div(phi,h)      bounded Gauss linearUpwind;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\\"\\\"\\\")\\n\\n# 4. system/fvSolution\\nwrite(\\\"system/fvSolution\\\", header + \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    p_rgh\\n    {\\n        solver           GAMG;\\n        tolerance        1e-8;\\n        relTol           0.01;\\n        smoother         GaussSeidel;\\n    }\\n\\n    \\\"(U|h)\\\"\\n    {\\n        solver           PBiCGStab;\\n        preconditioner   DILU;\\n        tolerance        1e-7;\\n        relTol           0.1;\\n    }\\n}\\n\\nPIMPLE\\n{\\n    momentumPredictor   yes;\\n    nOuterCorrectors    1;\\n    nCorrectors         2;\\n    nNonOrthogonalCorrectors 0;\\n    pRefCell            0;\\n    pRefValue           0;\\n}\\n\\nrelaxationFactors\\n{\\n    fields\\n    {\\n        p_rgh           0.7;\\n    }\\n    equations\\n    {\\n        U               0.3;\\n        h               0.5;\\n    }\\n}\\n\\\"\\\"\\\")\\n\\n# 5. constant/physicalProperties\\nwrite(\\\"constant/physicalProperties\\\", header + \\\"\\\"\\\"FoamFile\\n{\\n    ve\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 213.672,
+    "setup_s": 0.0,
+    "grade_s": 2.504
+  },
+  "environment_digest": "sha256:32409a878557911efa8da87d278d3d0f75f52be81efe611a869492cdecb649d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.5s last_time=0"
+  ]
+}

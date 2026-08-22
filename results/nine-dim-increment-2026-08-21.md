@@ -140,3 +140,75 @@ seed=0，--resume 幂等可续。
   flight_control 0→1.00（1/1 在册 integrated+双基线）。
 
 registry：integrated 17→**18**，任务总量 2361→**2386**。
+
+## 9. v0.2 评测体系强化（2026-08-23 追记：harness 评测 + 加硬 + 报告口径）
+
+> 触发：用户对 v0.1 的两点质询——(a) 只测裸 LLM，未测 harness 作为能力放大器；
+> (b) 分数疑似过于饱和。数据核查确认：(a) 属实（五 adapter 全为单轮盲写协议）；
+> (b) 部分属实（18 基准呈哑铃形分布，但通识锚 6 项结构性饱和 + gtm v1 0.98 偏易）。
+
+### 9.1 迭代协议（harness 增益首次可度量）
+
+- **实现**：simulation_agent 新增 `--iterate N --limit K`。失败且可修复
+  （code_not_executable / missing_output / simulation_failed）时，把上一轮代码 +
+  stderr 尾部 + 诊断喂回模型修订重跑，至多 N 轮；`rounds_to_success` 落
+  artifacts.iteration **不进 score**（评分语义不变，增益=迭代均分−单轮均分，
+  单独报告）。单轮路径（`--iterate 1`，默认）零改动——pycycle/aviary 回归验证无恙。
+- **试点结果**（2026-08-23，同子集单轮 vs 迭代=3 对照）：
+
+| 试点 | n | 单轮→迭代失败模式转移 | 均分增益 |
+| --- | --- | --- | --- |
+| foam×M3 | 10 | code_not_executable 5/7 恢复为可执行（→simulation_failed）；剩 1 不动 | **0.00**（gate 仍 0） |
+| foam×GLM | 10 | code_not_executable 2/3 恢复；7 例 simulation_failed 原地打转 | **0.00** |
+| pycycle×M3 | 10 | code_not_executable ×10 全部原地（烧满 3 轮 API 幻觉依旧） | **0.00** |
+| pycycle×GLM | 10 | 同上 ×10 原地 | **0.00** |
+
+- **读数（harness 增益的实测画像）**：
+  1. **反馈能修「语法/结构层」失败**（foam 两家 7/10 从不可执行恢复为可执行）——
+     harness 对脚本骨架错误有真实修复力；
+  2. **反馈不救「语料外知识」失败**——pycycle 全部 3 轮原地（stderr 无法补
+     pycycle API 事实）、foam 恢复后卡在 simulation_failed（算例物理仍错）；
+  3. **结论**：当前两家模型在深水区（OpenFOAM/pycycle）的瓶颈是**知识边界而非
+     调试带宽**——「带反馈循环的 harness」提升有限，这一否定性结果本身就是
+     v0.2 的核心证据，修订了「多轮 agent 就能翻盘」的预期。
+- 试点目录：`results/{cfdllm.foam_basic,pycycle.engine_cycle}/2026-08-23/*-iter3*`
+  （manifest 含 protocol=iterate 字段；不进基线统计，bench_stats 已排除 -iter 目录）。
+
+### 9.2 gtm 加硬版（gtm.transport_control_hard，17 题）
+
+- **动机**：v1 双模型 0.98/0.89 饱和，归因=题面给 A 矩阵、eig/place/fzero 一步出
+  ——考「会用计算器」而非工程判断。v1 保留为**飞控可达域锚点**（registry
+  anchor_note），区分度由 hard 版承接。
+- **五族 17 题**：含噪系统辨识×4（PRBS 响应数据内嵌、LS 辨识+离散→连续映射）/
+  鲁棒裕度×4（margin()，2 题内环+外环级联）/ 增益调度×3（三 FC 并行各异目标）/
+  非线性配平×3（推力-阻力-升力-安装角互锁 3×3 Newton）/ 蒙特卡洛筛选×3
+  （200 点 seeded 盒不确定性统计）+ hidden/ 评审件。
+- **双基线落入目标区分带**：
+
+| provider | 均分 | 满分 | gate | v1 对照 |
+| --- | --- | --- | --- | --- |
+| stub / oracle | 0.0 地板 / **1.0×17** | — | 17/17 自检 | — |
+| minimax-m3 | **0.7059** | 10/17 | 13/17 | 0.9800 |
+| glm-4.6 | **0.6520** | 8/17 | 12/17 | 0.8900 |
+
+- **失分语义转移**（v2 与 v1 的本质差异）：v1 失分是执行噪声；v2 失分转移到
+  语义/数据处理层——H1 辨识管线结构（M3 0.25/GLM 0.0，最难族）、H2 crossover
+  频率语义（wcg/wcp 对调）、H5 seeded 采样循环。族级模型分化出现：
+  蒙特卡洛 GLM 1.0 > M3 0.5；增益调度 M3 1.0 > GLM 0.61。
+- 偏差如实（PROVENANCE）：H1 噪声级 2e-4~1e-4（为 SP-ζ 可辨识性校准，加硬点
+  转为管线结构）；phugoid 离散极点贴单位圆结构性不可辨识（仅判 SP）；H4 gold
+  自写 Newton 免 Optimization Toolbox 依赖。
+
+### 9.3 报告口径修正（锚点标记 + 区分度工具）
+
+- **工具**：`report/2026-08-21-coverage-assessment/bench_stats.py`——逐基准输出
+  双家分差 / 任务级方差 / 饱和锚点标记（任一被测 ≥0.93=校准用，不参与模型排序）。
+- **实测（19 integrated 基准）**：锚点 **6/19**（humaneval×2/mbpp×2/gsm8k/
+  gtm-v1），区分带 **13**。分布哑铃形确认：双零分（foam/pycycle-GLM）与锚点
+  并存，中间区分带厚度足够（scicode 分差 0.196、cadgen 方差 0.442、gtm-hard 0.413）。
+- 此后所有汇总表采用该口径（v1 gtm 已在 registry 标 anchor_note）。
+
+### 9.4 盘面更新
+
+integrated **18→19/39**（+gtm.transport_control_hard），任务 2386→**2403**。
+v0.2 三线全部落盘：迭代协议（含否定性结论）、gtm-hard（区分带达成）、口径工具。

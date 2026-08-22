@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_04",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control_hard / margin_04）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\ns = tf('s');\\nai = 4.0; ki = 9.0; aout = 4.0; Kout = 3.0;\\nG_in = 1 / (s * (s + ai));\\nG_in_cl = feedback(ki * G_in, 1);        % 内环单位反馈闭合\\nG_out = Kout / (s * (s + aout));          % 外环\\nL = G_out * G_in_cl;                       % 级联总开环\\n[Gm, Pm, Wcg, Wcp] = margin(L);\\ngm_db = 20 * log10(Gm);\\nr = struct('gm_db', gm_db, 'pm_deg', Pm, 'w_gc', Wcg, 'w_pc', Wcp);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.669518050667117, \"ref\": 10.669518050667117}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 60.17331225409221, \"ref\": 60.17331225409221}, \"w_gc\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.120923852697917, \"ref\": 2.120923852697917}, \"w_pc\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.7411036994679286, \"ref\": 0.7411036994679286}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 8.99}"
+  },
+  "timings": {
+    "agent_s": 8.992,
+    "setup_s": 0.0,
+    "grade_s": 8.992
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.99s"
+  ]
+}

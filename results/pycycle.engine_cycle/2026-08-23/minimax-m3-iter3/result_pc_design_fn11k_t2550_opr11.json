@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn11k_t2550_opr11",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.Cycle):\\n    def initialize(self):\\n        super().initialize()\\n        self.options.declare('thermo_method', default='TABULAR')\\n        self.options.declare('thermo_data', default=pyc.AIR_JETA_TAB_SPEC)\\n        self.options.declare('p_init', default=14.696)\\n        self.options.declare('T_init', default=518.67)\\n\\n    def setup(self):\\n        super().setup()\\n\\n        # Add cycle components\\n        self.add_subsystem('inlet', pyc.Inlet())\\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5))\\n        self.add_subsystem('comb', pyc.Combustor(thermo_method=self.options['thermo_method'],\\n                                                  thermo_data=self.options['thermo_data']))\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269))\\n        self.add_subsystem('nozz', pyc.CD_nozzle())\\n        self.add_subsystem('shaft', pyc.Shaft())\\n        self.add_subsystem('perf', pyc.Performance(num_burners=1, num_nozzles=1))\\n\\n        # Connect flow stations\\n        self.pyc_connect_flow('inlet.Fl_O', 'comp.Fl_I')\\n        self.pyc_connect_flow('comp.Fl_O', 'comb.Fl_I')\\n        self.pyc_connect_flow('comb.Fl_O', 'turb.Fl_I')\\n        self.pyc_connect_flow('turb.Fl_O', 'nozz.Fl_I')\\n        self.pyc_connect_flow('nozz.Fl_O', 'perf.Fl_O')\\n\\n        # Shaft connections\\n        self.connect('comp.trq', 'shaft.trq_in')\\n        self.connect('turb.trq', 'shaft.trq_out')\\n\\n        # Burner balance: solve Wfuel to hit T4 = 2550 degR\\n        burner_bal = om.BalanceComp()\\n        burner_bal.add_balance('Wfuel', val=1.0, units='lbm/s', eq_units='degR', rhs_val=2550.0)\\n        self.add_subsystem('burner_bal', burner_bal)\\n        self.connect('comb.Fl_O:Tt', 'burner_bal.lhs_in')\\n        self.connect('burner_bal.rhs_out', 'comb.Wfuel')\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    prob = om.Problem()\\n    prob.model = Turbojet()\\n\\n    prob.setup()\\n\\n    # ---- Top-level independent design variables (SL static, MN ~ 0) ----\\n    prob['inlet.MN'] = 0.0\\n    prob['inlet.alt'] = 0.0\\n    prob['inlet.ram_recovery'] = 1.0\\n\\n    prob['comp.PR'] = 11.0          # OPR target\\n    prob['comp.MN'] = 0.20\\n\\n    prob['turb.PR'] = 3.0\\n    prob['turb.MN'] = 0.30\\n\\n    prob['nozz.Cfg'] = 1.0          # choked\\n\\n    prob['perf.Fn_target'] = 11000.0  # used for TSFC calculation\\n\\n    # Burner balance RHS = T4 target\\n    prob['burner_bal.rhs_val'] = 2550.0\\n\\n    # ---- Initial flow guesses to help convergence ----\\n    prob['inlet.Fl_I:Tt'] = 518.67\\n    prob['inlet.Fl_I:Pt'] = 14.696\\n    prob['inlet.Fl_I:W'] = 100.0\\n\\n    prob['comb.Wfuel'] = 1.5\\n\\n    # ---- Solver configuration ----\\n    prob.model.nonlinear_solver = om.NewtonSolver()\\n    prob.model.nonlinear_solver.options['maxiter'] = 50\\n    prob.model.nonlinear_solver.options['iprint'] = 2\\n    prob.model.linear_solver = om.DirectSolver()\\n\\n    prob.run_model()\\n\\n    # ---- Extract results ----\\n    Fn_lbf = float(prob.get_val('perf.Fn', units='lbf')[0])\\n    TSFC = float(prob.get_val('perf.TSFC')[0])\\n    OPR = float(prob.get_val('comp.PR')[0])\\n    Wfuel_lbm_s = float(prob.get_val('comb.Wfuel', units='lbm/s')[0])\\n\\n    result = {\\n        'Fn_lbf': Fn_lbf,\\n        'TSFC': TSFC,\\n        'OPR': OPR,\\n        'Wfuel_lbm_s': Wfuel_lbm_s,\\n    }\\n\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=2)\\n\\n    print(json.dumps(result, indent=2))\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_qvwmtz86/solve.py\\\", line 23, in setup\\n    self.add_subsystem('nozz', pyc.CD_nozzle())\\n                               ^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'CD_nozzle'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 50.28,
+    "setup_s": 0.0,
+    "grade_s": 1.618
+  },
+  "environment_digest": "sha256:78917c6ff95c09ecbe3ac0b2f500b014ae506ed0f2e70fd15b265980cc3f7615",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.62s"
+  ]
+}

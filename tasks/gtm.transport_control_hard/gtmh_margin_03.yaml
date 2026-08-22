@@ -1,0 +1,60 @@
+id: gtmh_margin_03
+registry_id: gtm.transport_control_hard
+domain: flight_control
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- matlab
+input:
+  prompt_file: tasks/gtm.transport_control_hard/gtmh_margin_03.md
+  prompt_sha256: 095e30749be8752286404ac90e3e6611bac1892fc28e90a7385c2352634c7474
+  assets: []
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（MATLAB R2026a -batch，确定性；自建加硬任务）
+  revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a
+  values:
+    gm_db: 6.581174385284504
+    pm_deg: 37.964799144232124
+    w_gc: 2
+    w_pc: 1.1234919503040393
+  rel_tol: 0.01
+  uncertainty_note: 钉死口径/确定性 seeded 采样/辨识管线；容差覆盖数值口径差
+grader:
+  answer_format: matlab
+  exec_kind: gtm_matlab
+  validity_gate: true
+  result_keys:
+  - gm_db
+  - pm_deg
+  - w_gc
+  - w_pc
+  numeric_rel_tol: 0.01
+  exact_keys: []
+  solver_backend: matlab-batch-r2026a
+  oracle_source: data/gtm/transport_control_hard/gold/margin_03.m
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（1% 容差，failing_case_count 5%）；requirements=result.json 键完备
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: 自建（受 NASA GTM 定位启发，未镜像 GTM_DesignSim）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a

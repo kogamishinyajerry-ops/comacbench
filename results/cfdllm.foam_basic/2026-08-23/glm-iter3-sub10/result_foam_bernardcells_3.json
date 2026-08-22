@@ -1,0 +1,42 @@
+{
+  "task_id": "foam_bernardcells_3",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport math\\n\\ndef create_openfoam_case():\\n    # Configuration\\n    L, W, H = 9.0, 1.0, 2.0\\n    T_hot = 310.0\\n    T_cold = 300.0\\n    T_ref = 298.15  # Reference temperature for enthalpy calculation\\n    Cp = 1005.0     # Specific heat capacity (J/kg.K)\\n    \\n    # Enthalpy calculation h = Cp * (T - T_ref)\\n    h_hot = Cp * (T_hot - T_ref)\\n    h_cold = Cp * (T_cold - T_ref)\\n\\n    case_dir = os.getcwd()\\n    dirs = [\\\"0\\\", \\\"system\\\", \\\"constant\\\", \\\"constant/polyMesh\\\"]\\n    for d in dirs:\\n        os.makedirs(os.path.join(case_dir, d), exist_ok=True)\\n\\n    def write_file(path, content):\\n        with open(path, \\\"w\\\") as f:\\n            f.write(content)\\n\\n    # --- 0/ Files ---\\n\\n    # 0/p\\n    write_file(os.path.join(case_dir, \\\"0\\\", \\\"p\\\"), r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\  /    A nd           | Web:      www.openfoam.org                      |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [1 -1 -2 0 0 0 0];\\n\\ninternalField   uniform 101325;\\n\\nboundaryField\\n{\\n    \\\".*\\\"\\n    {\\n        type            calculated;\\n        value           $internalField;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\")\\n\\n    # 0/p_rgh\\n    write_file(os.path.join(case_dir, \\\"0\\\", \\\"p_rgh\\\"), r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\  /    A nd           | Web:      www.openfoam.org                      |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volScalarField;\\n    object      p_rgh;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [1 -1 -2 0 0 0 0];\\n\\ninternalField   uniform 0;\\n\\nboundaryField\\n{\\n    \\\".*\\\"\\n    {\\n        type            fixedFluxPressure;\\n        gradient        uniform 0;\\n        value           uniform 0;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\")\\n\\n    # 0/U\\n    write_file(os.path.join(case_dir, \\\"0\\\", \\\"U\\\"), r\\\"\\\"\\\"/*--------------------------------*- C++ -*----------------------------------*\\\\\\n| =========                 |                                                 |\\n| \\\\\\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\\n|  \\\\\\\\    /   O peration     | Version:  10                                     |\\n|   \\\\\\\\  /    A nd           | Web:      www.openfoam.org                      |\\n|    \\\\\\\\/     M anipulation  |                                                 |\\n\\\\*---------------------------------------------------------------------------*/\\nFoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       volVectorField;\\n    object      U;\\n}\\n// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\\n\\ndimensions      [0 1 -1 0 0 0 0];\\n\\ninternalField   uniform (0 0 0);\\n\\nboundaryField\\n{\\n    \\\".*\\\"\\n    {\\n        type            noSlip;\\n    }\\n}\\n\\n// ************************************************************************* //\\n\\\"\\\"\\\")\\n\\n    # 0/T\\n    write_file(os.path.join(case_dir, \\\"0\\\", \\\"T\\\"), f\\\"\\\"\\\"/*---------\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 209.13,
+    "setup_s": 0.0,
+    "grade_s": 2.724
+  },
+  "environment_digest": "sha256:32409a878557911efa8da87d278d3d0f75f52be81efe611a869492cdecb649d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.7s last_time=0"
+  ]
+}

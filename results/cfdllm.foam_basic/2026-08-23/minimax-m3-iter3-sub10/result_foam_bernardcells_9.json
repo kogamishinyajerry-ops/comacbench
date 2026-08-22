@@ -1,0 +1,42 @@
+{
+  "task_id": "foam_bernardcells_9",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\n\\nCASE_DIR = os.getcwd()\\n\\n# Domain dimensions (m)\\nLX, LY, LZ = 9.0, 1.0, 2.0\\nNX, NY, NZ = 18, 4, 8  # modest cell count so the case runs quickly\\n\\n# Simulation settings\\nT_HOT = 315.0\\nT_COLD = 295.0\\nT_REF = (T_HOT + T_COLD) / 2.0\\nEND_TIME = 1000\\nDELTA_T = 1\\nWRITE_INTERVAL = 50\\n\\nSOLVER = \\\"buoyantFoam\\\"\\n\\n\\ndef write_file(path, content):\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\ndef make_dirs():\\n    for d in [\\\"system\\\", \\\"constant\\\", \\\"0\\\"]:\\n        os.makedirs(os.path.join(CASE_DIR, d), exist_ok=True)\\n\\n\\ndef write_block_mesh():\\n    content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      blockMeshDict;\\n}\\n\\nscale 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (9 0 0)\\n    (9 1 0)\\n    (0 1 0)\\n    (0 0 2)\\n    (9 0 2)\\n    (9 1 2)\\n    (0 1 2)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (18 4 8) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    hotWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (1 5 4 0)\\n        );\\n    }\\n    coldWall\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    sideWalls\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 4 7 3)\\n            (2 6 5 1)\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n);\\n\\\"\\\"\\\"\\n    write_file(os.path.join(CASE_DIR, \\\"system\\\", \\\"blockMeshDict\\\"), content)\\n\\n\\ndef write_control_dict():\\n    content = f\\\"\\\"\\\"FoamFile\\n{{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      controlDict;\\n}}\\n\\napplication     {SOLVER};\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         {END_TIME};\\n\\ndeltaT          {DELTA_T};\\n\\nwriteControl    timeStep;\\n\\nwriteInterval   {WRITE_INTERVAL};\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\n\\nwritePrecision  6;\\n\\nwriteCompression off;\\n\\ntimeFormat      general;\\n\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\\"\\\"\\\"\\n    write_file(os.path.join(CASE_DIR, \\\"system\\\", \\\"controlDict\\\"), content)\\n\\n\\ndef write_fv_schemes():\\n    content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSchemes;\\n}\\n\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n    div(phi,U)      Gauss linearUpwind grad(U);\\n    div(phi,T)      Gauss linearUpwind;\\n    div(phi,K)      Gauss linearUpwind;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\\"\\\"\\\"\\n    write_file(os.path.join(CASE_DIR, \\\"system\\\", \\\"fvSchemes\\\"), content)\\n\\n\\ndef write_fv_solution():\\n    content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      fvSolution;\\n}\\n\\nsolvers\\n{\\n    p\\n    {\\n        solver          PCG;\\n        preconditioner  DIC;\\n        tolerance       1e-6;\\n        relTol          0.05;\\n    }\\n\\n    \\\"(U|T|k|epsilon|R)\\\"\\n    {\\n        solver          PBiCG;\\n        preconditioner  DILU;\\n        tolerance       1e-6;\\n        relTol          0.1;\\n    }\\n}\\n\\nPIMPLE\\n{\\n    nOuterCorrectors 1;\\n    nCorrectors      2;\\n    nNonOrthogonalCorrectors 0;\\n    momentumPredictor yes;\\n}\\n\\nrelaxationFactors\\n{\\n    equations\\n    {\\n        U               0.7;\\n        T               0.7;\\n        p               0.3;\\n    }\\n}\\n\\\"\\\"\\\"\\n    write_file(os.path.join(CASE_DIR, \\\"system\\\", \\\"fvSolution\\\"), content)\\n\\n\\ndef write_thermophysical_properties():\\n    content = \\\"\\\"\\\"FoamFile\\n{\\n    version     2.0;\\n    format      ascii;\\n    class       dictionary;\\n    object      thermophysicalProperties;\\n}\\n\\nthermoType\\n{\\n    type            heRhoThermo;\\n    mixture         pureMixture;\\n    transport       sutherland;\\n    thermo          hConst;\\n    equationOfState perfectGas;\\n    specie          specie;\\n    energy          sensibleEnthalpy;\\n}\\n\\nmixture\\n{\\n    specie\\n    {\\n        molWeight   28.96;\\n    }\\n    equationOfState\\n    {\\n        rho         1.0;\\n    }\\n    thermodynamics\\n    {\\n        Cp \"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 127, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"./Allrun: 2: cd: can't cd to ./Allrun\\n./Allrun: 3: source: not found\\n./Allrun: 4: runApplication: not found\\n./Allrun: 5: runApplication: not found\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 179.133,
+    "setup_s": 0.0,
+    "grade_s": 1.936
+  },
+  "environment_digest": "sha256:32409a878557911efa8da87d278d3d0f75f52be81efe611a869492cdecb649d9",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=127 1.9s last_time=0"
+  ]
+}

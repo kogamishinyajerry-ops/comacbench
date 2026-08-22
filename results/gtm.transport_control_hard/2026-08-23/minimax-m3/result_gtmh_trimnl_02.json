@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_trimnl_02",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"function model\\n    % Given parameters\\n    W = 280000.0;          % weight, lbf\\n    S = 2730.0;            % wing area, ft^2\\n    h = 35000.0;           % altitude, ft\\n    V = 780.0;             % true airspeed, ft/s\\n    gamma_deg = 5.0;       % climb angle, deg\\n    phi_deg = 40.0;        % bank angle, deg\\n    \\n    % Lift coefficients\\n    CL0 = 0.18;\\n    CLa = 5.6;             % per rad\\n    CLde = 0.3;            % per rad\\n    \\n    % Drag coefficients\\n    CD0 = 0.019;\\n    k = 0.045;\\n    \\n    % Atmosphere\\n    rho0 = 0.0023769;      % slug/ft^3\\n    rho = rho0 * exp(-h/23800);\\n    q = 0.5 * rho * V^2;\\n    \\n    % Thrust installation\\n    i_T_deg = 3.0;         % thrust line pitch vs body axis, deg\\n    z_T = 2.2;             % perpendicular arm from CG, ft\\n    \\n    % Pitch coefficients\\n    Cm0 = 0.025;\\n    Cmalpha = -0.34;       % per rad\\n    Cmdelta_e = -0.9;      % per rad\\n    cbar = 19.5;           % mean aerodynamic chord, ft\\n    \\n    % Convert given angles to radians\\n    gamma = gamma_deg * pi/180;\\n    phi = phi_deg * pi/180;\\n    i_T = i_T_deg * pi/180;\\n    \\n    % Initial guess for unknowns [alpha (rad), T (lbf), delta_e (rad)]\\n    alpha = 5.0*pi/180;\\n    T = 30000.0;\\n    delta_e = -1.0*pi/180;\\n    \\n    % Newton-Raphson iteration on the three coupled equilibrium equations\\n    for iter = 1:100\\n        CL = CL0 + CLa*alpha + CLde*delta_e;\\n        CD = CD0 + k*CL^2;\\n        \\n        % Residual vector F = [F1; F2; F3]\\n        F1 = q*S*CL*cos(phi) + T*sin(alpha + i_T) - W*cos(gamma);\\n        F2 = T*cos(alpha + i_T) - q*S*CD - W*sin(gamma);\\n        F3 = q*S*cbar*(Cm0 + Cmalpha*alpha + Cmdelta_e*delta_e) + T*sin(i_T)*z_T;\\n        F = [F1; F2; F3];\\n        \\n        % Jacobian matrix (partial derivatives of F w.r.t. [alpha; T; delta_e])\\n        J = zeros(3,3);\\n        J(1,1) = q*S*CLa*cos(phi) + T*cos(alpha + i_T);\\n        J(1,2) = sin(alpha + i_T);\\n        J(1,3) = q*S*CLde*cos(phi);\\n        \\n        J(2,1) = -T*sin(alpha + i_T) - q*S*2*k*CL*CLa;\\n        J(2,2) = cos(alpha + i_T);\\n        J(2,3) = -q*S*2*k*CL*CLde;\\n        \\n        J(3,1) = q*S*cbar*Cmalpha;\\n        J(3,2) = sin(i_T)*z_T;\\n        J(3,3) = q*S*cbar*Cmdelta_e;\\n        \\n        % Newton update\\n        dx = -J\\\\F;\\n        \\n        alpha = alpha + dx(1);\\n        T = T + dx(2);\\n        delta_e = delta_e + dx(3);\\n        \\n        if norm(dx, inf) < 1e-12\\n            break;\\n        end\\n    end\\n    \\n    % Convert to output units\\n    alpha_deg = alpha * 180/pi;\\n    delta_e_deg = delta_e * 180/pi;\\n    n = cos(gamma)/cos(phi);\\n    \\n    % Build result struct and write to result.json\\n    result.alpha_trim_deg = alpha_deg;\\n    result.thrust_lbf = T;\\n    result.delta_e_trim_deg = delta_e_deg;\\n    result.load_factor = n;\\n    \\n    fid = fopen('result.json', 'w');\\n    fprintf(fid, '%s', jsonencode(result));\\n    fclose(fid);\\nend\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 6.1929127776963835, \"ref\": 6.192912777696382}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 46082.14114435781, \"ref\": 46082.14114435781}, \"delta_e_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.7098065449983074, \"ref\": -0.709806544998307}, \"load_factor\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.3004398204831333, \"ref\": 1.3004398204831333}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 33.17}"
+  },
+  "timings": {
+    "agent_s": 188.762,
+    "setup_s": 0.0,
+    "grade_s": 33.169
+  },
+  "environment_digest": "sha256:b181a607bded76105dcc8aa6db24595b8e1ba1cebb53e6fe456f85d64de9b6e9",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 33.17s"
+  ]
+}

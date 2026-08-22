@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn10p5k_t2750_opr145",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openmdao.api as om\\nimport pycycle.api as pyc\\nimport json\\n\\nclass TurbojetDesign(om.Group):\\n    def setup(self):\\n        # Define thermodynamic data and method\\n        thermo_spec = pyc.AIR_JETA_TAB_SPEC\\n        thermo_method = 'TABULAR'\\n\\n        # -----------------------------------------------------------------\\n        # Add Elements\\n        # -----------------------------------------------------------------\\n        \\n        # Flight Condition: SL static, so MN=0, Alt=0\\n        self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo_spec, thermo_method=thermo_method),\\n                           promotes_inputs=['MN', 'alt'])\\n\\n        # Inlet\\n        self.add_subsystem('inlet', pyc.Inlet(thermo_data=thermo_spec, thermo_method=thermo_method))\\n\\n        # Compressor: AXI5 map. \\n        self.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, design=True,\\n                                                   thermo_data=thermo_spec, thermo_method=thermo_method))\\n\\n        # Combustor\\n        self.add_subsystem('burner', pyc.Combustor(thermo_data=thermo_spec, thermo_method=thermo_method, \\n                                                   fuel_type='Fuel-AIR-JETA'))\\n\\n        # Turbine: LPT2269 map.\\n        self.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, design=True,\\n                                               thermo_data=thermo_spec, thermo_method=thermo_method))\\n\\n        # Nozzle: Using pyc.Nozzle (corrected from CDNozzle)\\n        self.add_subsystem('nozz', pyc.Nozzle(thermo_data=thermo_spec, thermo_method=thermo_method))\\n\\n        # Shaft\\n        self.add_subsystem('shaft', pyc.Shaft(num_nodes=1))\\n\\n        # -----------------------------------------------------------------\\n        # Connect Flow Path\\n        # -----------------------------------------------------------------\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # -----------------------------------------------------------------\\n        # Connect Shaft Mechanics\\n        # -----------------------------------------------------------------\\n        # Torque balance\\n        self.connect('comp.trq', 'shaft.trq_in[0]')\\n        self.connect('turb.trq', 'shaft.trq_in[1]')\\n        \\n        # Speed matching\\n        self.connect('comp.Nmech', 'turb.Nmech')\\n        self.connect('comp.Nmech', 'shaft.Nmech')\\n\\n        # -----------------------------------------------------------------\\n        # Balancers\\n        # -----------------------------------------------------------------\\n        \\n        # 1. Thrust Balance: Vary Inlet Flow (W) to hit Fn = 10500 lbf\\n        self.add_subsystem('thrust_bal', om.BalanceComp())\\n        self.thrust_bal.add_balance('W', val=150.0, lower=10.0, upper=500.0, \\n                                    rhs_val=10500.0, units='lbm/s')\\n        self.connect('thrust_bal.W', 'inlet.Fl_I:stat:W')\\n        self.connect('nozz.Fn', 'thrust_bal.lhs:W')\\n\\n        # 2. T4 Balance: Vary Burner Fuel Flow to hit T4 = 2750 R\\n        self.add_subsystem('t4_bal', om.BalanceComp())\\n        self.t4_bal.add_balance('Wfuel', val=2.0, lower=0.1, upper=10.0, \\n                                rhs_val=2750.0, units='lbm/s')\\n        self.connect('t4_bal.Wfuel', 'burner.Wfuel')\\n        self.connect('burner.Fl_O:stat:T', 't4_bal.lhs:Wfuel')\\n\\n        # 3. OPR Balance: Vary Nmech to hit OPR = 14.5\\n        # We need an ExecComp to calculate OPR = P_out / P_in\\n        self.add_subsystem('opr_calc', om.ExecComp('opr=P_out/P_in'))\\n        self.connect('comp.Fl_O:stat:P', 'opr_calc.P_out')\\n        self.connect('inlet.Fl_O:stat:P', 'opr_calc.P_in')\\n        \\n        self.add_subsystem('opr_bal', om.BalanceComp())\\n        self.opr_bal.add_balance('Nmech', val=12000.0, lower=8000.0, upper=20000.0, \\n                                 rhs_val=14.5, units='rpm')\\n        self.connect(\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \", in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_qjsohd4c/solve.py\\\", line 16, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(thermo_data=thermo_spec, thermo_method=thermo_method),\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 199.627,
+    "setup_s": 0.0,
+    "grade_s": 1.074
+  },
+  "environment_digest": "sha256:78917c6ff95c09ecbe3ac0b2f500b014ae506ed0f2e70fd15b265980cc3f7615",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.07s"
+  ]
+}
