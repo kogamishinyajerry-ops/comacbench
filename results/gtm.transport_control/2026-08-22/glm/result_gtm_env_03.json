@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_env_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Define Flight Condition 1\\nA1 = [-0.0056, 0.044, 0.0, -32.174;\\n      -0.038, -0.76, 720.0, 0.0;\\n      0.0, -0.0058, -0.98, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\n% Define Flight Condition 2\\nA2 = [-0.0058, 0.034, 0.0, -32.174;\\n      -0.028, -0.66, 665.0, 0.0;\\n      0.0, -0.0046, -0.84, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\n% Define Flight Condition 3\\nA3 = [-0.006, 0.024, 0.0, -32.174;\\n      -0.02, -0.56, 610.0, 0.0;\\n      0.0, -0.0036, -0.68, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\n% Compute Short Period parameters for each condition\\n[omega_sp_1, zeta_sp_1] = compute_short_period(A1);\\n[omega_sp_2, zeta_sp_2] = compute_short_period(A2);\\n[omega_sp_3, zeta_sp_3] = compute_short_period(A3);\\n\\n% Create result structure\\nresults = struct(...\\n    'omega_sp_1', omega_sp_1, ...\\n    'zeta_sp_1', zeta_sp_1, ...\\n    'omega_sp_2', omega_sp_2, ...\\n    'zeta_sp_2', zeta_sp_2, ...\\n    'omega_sp_3', omega_sp_3, ...\\n    'zeta_sp_3', zeta_sp_3 ...\\n);\\n\\n% Write to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(results));\\nfclose(fid);\\n\\n% Local function to compute short period characteristics\\nfunction [omega_n, zeta] = compute_short_period(A)\\n    % Compute eigenvalues of the system matrix\\n    eigenvalues = eig(A);\\n    \\n    % Calculate natural frequencies (magnitude of eigenvalues)\\n    natural_frequencies = abs(eigenvalues);\\n    \\n    % Identify the Short Period mode.\\n    % The Short Period mode is the faster oscillatory mode compared to the Phugoid mode.\\n    % It corresponds to the pair of eigenvalues with the largest magnitude (natural frequency).\\n    [omega_n, idx] = max(natural_frequencies);\\n    \\n    % Extract the corresponding eigenvalue\\n    lambda = eigenvalues(idx);\\n    \\n    % Calculate damping ratio\\n    % For a complex eigenvalue lambda = sigma + j*omega_d:\\n    % omega_n = |lambda|\\n    % zeta = -sigma / omega_n\\n    zeta = -real(lambda) / omega_n;\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.2184089799825677, \"ref\": 2.2184089799825677}, \"zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.39221288266671167, \"ref\": 0.39221288266671167}, \"omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9009435733132725, \"ref\": 1.9009435733132725}, \"zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.39460800788899525, \"ref\": 0.39460800788899525}, \"omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.6052285337866368, \"ref\": 1.6052285337866368}, \"zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3863331415813916, \"ref\": 0.3863331415813916}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 13.37}"
+  },
+  "timings": {
+    "agent_s": 156.444,
+    "setup_s": 0.0,
+    "grade_s": 13.37
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 13.37s"
+  ]
+}

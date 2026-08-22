@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_repair_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% Repair corrupted stability derivative (Mw or Mq)\\n% Longitudinal model x = [u, w, q, theta]\\n% Corrupted matrix has exactly one of Mw, Mq scaled by a constant factor.\\n% Find which one and restore it using reference modal data.\\n\\nA_corrupt = [-0.0068, 0.04, 0.0, -32.174;\\n             -0.035, -0.72, 700.0, 0.0;\\n             0.0, -0.0165, -0.95, 0.0;\\n             0.0, 0.0, 1.0, 0.0];\\n\\n% Extract physical parameters from the matrix\\nXu = A_corrupt(1,1);\\nXw = A_corrupt(1,2);\\ng_val = -A_corrupt(1,4);     % 32.174\\nZu = A_corrupt(2,1);\\nZw = A_corrupt(2,2);\\nV  = A_corrupt(2,3);\\nMw_given = A_corrupt(3,2);\\nMq_given = A_corrupt(3,3);\\n\\n% Target modal parameters from independent test\\nomega_sp = 2.12941;\\nzeta_sp  = 0.392177;\\nomega_ph = 0.036958;\\nzeta_ph  = 0.0891501;\\n\\n% Target characteristic polynomial:\\n% (s^2 + 2*zeta_sp*omega_sp*s + omega_sp^2) * (s^2 + 2*zeta_ph*omega_ph*s + omega_ph^2)\\np_target = conv([1, 2*zeta_sp*omega_sp, omega_sp^2], ...\\n                [1, 2*zeta_ph*omega_ph, omega_ph^2]);\\n\\n% For the 4x4 system (Mu = 0), the symbolic coefficients of det(sI - A) are:\\n%   a3 = -(Xu + Zw) - Mq\\n%   a2 = (Xu + Zw)*Mq - V*Mw + (Xu*Zw - Xw*Zu)\\n%   a1 = Xu*V*Mw - (Xu*Zw - Xw*Zu)*Mq\\n%   a0 = g*Zu*Mw\\n\\nsum_XZ = Xu + Zw;\\ndet_2x2 = Xu*Zw - Xw*Zu;\\n\\n% Test which parameter is corrupted by checking the coefficients that\\n% are independent of one parameter:\\n%   a3 depends only on Mq (not Mw)\\n%   a0 depends only on Mw (not Mq)\\na3_if_Mq_correct = -sum_XZ - Mq_given;       % hypothesis 1: Mw corrupted\\na0_if_Mw_correct = g_val * Zu * Mw_given;     % hypothesis 2: Mq corrupted\\n\\nerr_h1 = abs(a3_if_Mq_correct - p_target(2));\\nerr_h2 = abs(a0_if_Mw_correct - p_target(5));\\n\\nif err_h1 < err_h2\\n    % Hypothesis 1 is correct: Mw was corrupted, Mq_given is correct\\n    corrupted_param = 'Mw';\\n    Mq_true = Mq_given;\\n    % Solve for Mw using three independent coefficients and average\\n    Mw_a2 = ( sum_XZ*Mq_true + det_2x2 - p_target(3) ) / V;\\n    Mw_a1 = ( p_target(4) + det_2x2*Mq_true ) / (Xu*V);\\n    Mw_a0 = p_target(5) / (g_val * Zu);\\n    restored_value = mean([Mw_a2, Mw_a1, Mw_a0]);\\nelse\\n    % Hypothesis 2 is correct: Mq was corrupted, Mw_given is correct\\n    corrupted_param = 'Mq';\\n    Mw_true = Mw_given;\\n    Mq_a3 = -sum_XZ - p_target(2);\\n    Mq_a2 = ( p_target(3) + V*Mw_true - det_2x2 ) / sum_XZ;\\n    Mq_a1 = ( Xu*V*Mw_true - p_target(4) ) / det_2x2;\\n    restored_value = mean([Mq_a3, Mq_a2, Mq_a1]);\\nend\\n\\n% Verification: build the restored matrix and check eigenvalues\\nA_fixed = A_corrupt;\\nif strcmp(corrupted_param, 'Mw')\\n    A_fixed(3,2) = restored_value;\\nelse\\n    A_fixed(3,3) = restored_value;\\nend\\n\\neigvals = eig(A_fixed);\\nfor i = 1:length(eigvals)\\n    if imag(eigvals(i)) > 1e-8\\n        lambda = eigvals(i);\\n        wn = abs(lambda);\\n        z  = -real(lambda)/wn;\\n        if wn > 1.0\\n            fprintf('SP: omega=%.6f (target %.6f), zeta=%.6f (target %.6f)\\\\n', ...\\n                    wn, omega_sp, z, zeta_sp);\\n        else\\n            fprintf('PH: omega=%.6f (target %.6f), zeta=%.6f (target %.6f)\\\\n', ...\\n                    wn, omega_ph, z, zeta_ph);\\n        end\\n    end\\nend\\n\\n% Write result.json\\nresult = struct();\\nresult.corrupted_param = corrupted_param;\\nresult.restored_value = restored_value;\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\\n\\nfprintf('\\\\nCorrupted parameter: %s\\\\n', corrupted_param);\\nfprintf('Restored value: %.6f\\\\n', restored_value);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": true, \"got\": \"Mw\", \"ref\": \"Mw\"}, \"restored_value\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.0055000010335380725, \"ref\": -0.0055}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 7.59}"
+  },
+  "timings": {
+    "agent_s": 250.233,
+    "setup_s": 0.0,
+    "grade_s": 7.594
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.59s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_tdm_02",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A_cl = [-0.8, 1.0; -6.2, -1.9];\\nB_cl = [0.0; 1.0];\\nC_cl = [1.0, 0.0];\\n\\ndt = 0.01;\\nT = 30;\\nt = (0:dt:T)';\\nN = length(t);\\n\\nAd = expm(A_cl*dt);\\nI2 = eye(2);\\nBd = A_cl \\\\ ((Ad - I2)*B_cl);\\n\\nx = zeros(2, N);\\ny = zeros(N, 1);\\ny(1) = C_cl * x(:,1);\\nfor k = 1:N-1\\n    x(:,k+1) = Ad*x(:,k) + Bd*1.0;\\n    y(k+1) = C_cl * x(:,k+1);\\nend\\n\\ny_inf = -C_cl * (A_cl \\\\ B_cl);\\n\\n% Rise time: first 10% to first 90% crossing of y_inf (linear interpolation)\\ntarget_10 = 0.1 * y_inf;\\ntarget_90 = 0.9 * y_inf;\\n\\nt_10 = NaN;\\nt_90 = NaN;\\n\\nfor k = 2:N\\n    if y(k-1) < target_10 && y(k) >= target_10\\n        t_10 = t(k-1) + (target_10 - y(k-1))/(y(k) - y(k-1)) * dt;\\n        break;\\n    end\\nend\\n\\nfor k = 2:N\\n    if y(k-1) < target_90 && y(k) >= target_90\\n        t_90 = t(k-1) + (target_90 - y(k-1))/(y(k) - y(k-1)) * dt;\\n        break;\\n    end\\nend\\n\\nrise_time_s = t_90 - t_10;\\n\\n% Percent overshoot\\nmax_y = max(y);\\novershoot_pct = (max_y - y_inf)/abs(y_inf) * 100;\\n\\n% 2% settling time: time of LAST grid sample where |y - y_inf| > 0.02*|y_inf|\\ntol = 0.02 * abs(y_inf);\\nexceeded = abs(y - y_inf) > tol;\\nidx_settling = find(exceeded, 1, 'last');\\nif isempty(idx_settling)\\n    settling_time_s = 0;\\nelse\\n    settling_time_s = t(idx_settling);\\nend\\n\\nresult.rise_time_s = rise_time_s;\\nresult.overshoot_pct = overshoot_pct;\\nresult.settling_time_s = settling_time_s;\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"rise_time_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5797743646405176, \"ref\": 0.5797743646405176}, \"overshoot_pct\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 17.438750410702845, \"ref\": 17.438750410702845}, \"settling_time_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.94, \"ref\": 2.94}}, \"physics_hits\": \"3/3\", \"rel_tol\": 0.01, \"matlab_s\": 7.91}"
+  },
+  "timings": {
+    "agent_s": 27.629,
+    "setup_s": 0.0,
+    "grade_s": 7.91
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.91s"
+  ]
+}

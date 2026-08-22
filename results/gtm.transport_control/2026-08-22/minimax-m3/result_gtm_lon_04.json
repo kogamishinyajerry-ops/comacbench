@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_04",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A = [-0.0075, 0.055, 0.0, -32.174;\\n     -0.048, -0.78, 660.0, 0.0;\\n     0.0, -0.0072, -1.05, 0.0;\\n     0.0, 0.0, 1.0, 0.0];\\n\\neigs_A = eig(A);\\n\\nwn_list = [];\\nzeta_list = [];\\n\\ni = 1;\\nwhile i <= length(eigs_A)\\n    s = eigs_A(i);\\n    if abs(imag(s)) > 1e-10\\n        sigma = real(s);\\n        omega_d = abs(imag(s));\\n        wn = sqrt(sigma^2 + omega_d^2);\\n        z = -sigma/wn;\\n        wn_list(end+1) = wn;\\n        zeta_list(end+1) = z;\\n        i = i + 2;\\n    else\\n        i = i + 1;\\n    end\\nend\\n\\n[wn_sorted, idx] = sort(wn_list);\\n\\nomega_ph = wn_sorted(1);\\nzeta_ph = zeta_list(idx(1));\\nomega_sp = wn_sorted(2);\\nzeta_sp = zeta_list(idx(2));\\n\\nresult = struct('omega_sp', omega_sp, 'zeta_sp', zeta_sp, ...\\n                'omega_ph', omega_ph, 'zeta_ph', zeta_ph);\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.360494575680176, \"ref\": 2.360494575680176}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3876643602365953, \"ref\": 0.3876643602365953}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.04467210206497272, \"ref\": 0.04467210206497272}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.08216269902974259, \"ref\": 0.08216269902974259}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 17.4}"
+  },
+  "timings": {
+    "agent_s": 68.492,
+    "setup_s": 0.0,
+    "grade_s": 17.4
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 17.4s"
+  ]
+}

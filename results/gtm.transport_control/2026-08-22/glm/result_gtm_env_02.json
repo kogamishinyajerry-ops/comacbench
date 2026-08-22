@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_env_02",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Define the system matrices for the three flight conditions\\nA1 = [\\n    -0.0058, 0.05, 0.0, -32.174;\\n    -0.046, -0.84, 800.0, 0.0;\\n    0.0, -0.0068, -1.1, 0.0;\\n    0.0, 0.0, 1.0, 0.0\\n];\\n\\nA2 = [\\n    -0.006, 0.04, 0.0, -32.174;\\n    -0.034, -0.72, 745.0, 0.0;\\n    0.0, -0.0054, -0.94, 0.0;\\n    0.0, 0.0, 1.0, 0.0\\n];\\n\\nA3 = [\\n    -0.0062, 0.03, 0.0, -32.174;\\n    -0.024, -0.6, 680.0, 0.0;\\n    0.0, -0.0042, -0.76, 0.0;\\n    0.0, 0.0, 1.0, 0.0\\n];\\n\\n% Function to compute Short Period natural frequency and damping ratio\\n% The Short Period mode is the \\\"fast\\\" longitudinal mode compared to the \\\"slow\\\" Phugoid mode.\\n% We identify it by selecting the eigenvalues with the largest magnitude.\\nfunction [omega, zeta] = compute_short_period_params(A)\\n    e = eig(A);\\n    \\n    % Calculate natural frequencies (magnitudes of eigenvalues)\\n    magnitudes = abs(e);\\n    \\n    % Sort eigenvalues by magnitude in descending order\\n    [~, sortIdx] = sort(magnitudes, 'descend');\\n    \\n    % The Short Period mode corresponds to the highest frequency eigenvalues.\\n    % Since complex conjugate pairs have identical magnitude, the top two indices\\n    % correspond to the Short Period mode. We take the first one for calculation.\\n    sp_pole = e(sortIdx(1));\\n    \\n    % Natural frequency (rad/s)\\n    omega = abs(sp_pole);\\n    \\n    % Damping ratio: zeta = -real(pole) / |pole|\\n    zeta = -real(sp_pole) / omega;\\nend\\n\\n% Compute parameters for each flight condition\\n[omega_sp_1, zeta_sp_1] = compute_short_period_params(A1);\\n[omega_sp_2, zeta_sp_2] = compute_short_period_params(A2);\\n[omega_sp_3, zeta_sp_3] = compute_short_period_params(A3);\\n\\n% Populate the result structure\\nresult.omega_sp_1 = omega_sp_1;\\nresult.zeta_sp_1 = zeta_sp_1;\\nresult.omega_sp_2 = omega_sp_2;\\nresult.zeta_sp_2 = zeta_sp_2;\\nresult.omega_sp_3 = omega_sp_3;\\nresult.zeta_sp_3 = zeta_sp_3;\\n\\n% Write the results to result.json\\njsonStr = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonStr);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.522872125457842, \"ref\": 2.522872125457842}, \"zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.38449932776689094, \"ref\": 0.38449932776689094}, \"omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.1679917958780983, \"ref\": 2.1679917958780983}, \"zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.38288254261146315, \"ref\": 0.38288254261146315}, \"omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.8199070800231483, \"ref\": 1.8199070800231483}, \"zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3737105761823421, \"ref\": 0.3737105761823421}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 14.33}"
+  },
+  "timings": {
+    "agent_s": 155.221,
+    "setup_s": 0.0,
+    "grade_s": 14.334
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 14.33s"
+  ]
+}

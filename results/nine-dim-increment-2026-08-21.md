@@ -116,3 +116,27 @@ integrated 基准 15→**17**，任务总量 2119→**2361**（实测 `ls tasks/
 
 口径注记：本节数据日期目录 `results/*/2026-08-22/{glm,glm-4.6v}/`，
 seed=0，--resume 幂等可续。
+
+## 8. flight_control 维解零（2026-08-22 追记，MATLAB 到位）
+
+- **环境**：dev 终端装 MATLAB R2026a U3（Sponsored License，Control System/Aerospace
+  Toolbox 齐备，batch 启动 8-28s/次）。执行后端 `runners/solvers/matlab.py`
+  （`matlab -batch` 子进程 + 进程组超时杀 + MATLAB_BIN 覆写）；不用 matlabengine
+  （版本配对脆弱）。matlabengine 原计划的 Phase-C 导入项作废。
+- **gtm_matlab 分支**：simulation_agent 新 exec_kind（与 aviary 分支同构的
+  result.json 数值判分）；providers 新 expect="matlab"（```matlab 围栏提取）；
+  MATLAB 方言正则级逃逸检查（system/unix/dos/web/websave/ftp/parpool/! shell，
+  含注释与字符串字面量剥离，9 用例单测全过）。
+- **任务集**：自建 8 族 25 题——纵向模态 5 / 配平 3 / 静稳定 2 / 控制律极点配置 4 /
+  时域指标 3（钉死精确离散 dt=0.01s 口径）/ 模型修复 2 / 包线鲁棒 3 / 横航向 3。
+  未镜像 GTM_DesignSim（Simulink 工程依赖 + 许可 needs-verification 未核）；
+  判分 100% 本地数值可复现。规格偏离（phugoid ωn 可达包络 [0.025,0.06] 等）
+  见 data/gtm/transport_control/PROVENANCE.md。
+- **双基线**：stub 25/25 地板 / oracle 25/25 满分自检；
+  **minimax-m3 0.9800**（24/25 满分）/ **glm-4.6 0.8900**（21/25，gate 23/25）。
+- **读数**：飞控（经典控制/线性系统 MATLAB 任务）是两家模型的高可达域——与
+  pycycle 双模型全灭（0.0393/0.0000）形成维度级对照：**「会调 MATLAB 控制工具箱、
+  不会写 pycycle/OpenMDAO 循环」**是当前 LLM 工程能力的清晰画像分界。九维中
+  flight_control 0→1.00（1/1 在册 integrated+双基线）。
+
+registry：integrated 17→**18**，任务总量 2361→**2386**。

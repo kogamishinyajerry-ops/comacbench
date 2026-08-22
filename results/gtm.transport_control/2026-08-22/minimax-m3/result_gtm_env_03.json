@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_env_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Envelope robustness — short-period modes across three flight conditions\\n% Compute short-period natural frequency (rad/s) and damping ratio\\n% for three longitudinal linearizations.\\n\\nA1 = [-0.0056, 0.044, 0.0, -32.174;\\n      -0.038, -0.76, 720.0, 0.0;\\n      0.0, -0.0058, -0.98, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\nA2 = [-0.0058, 0.034, 0.0, -32.174;\\n      -0.028, -0.66, 665.0, 0.0;\\n      0.0, -0.0046, -0.84, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\nA3 = [-0.006, 0.024, 0.0, -32.174;\\n      -0.02, -0.56, 610.0, 0.0;\\n      0.0, -0.0036, -0.68, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\n% Compute eigenvalues for each flight condition\\ne1 = eig(A1);\\ne2 = eig(A2);\\ne3 = eig(A3);\\n\\n% Extract short-period mode (higher-frequency complex pair)\\n[omega_sp_1, zeta_sp_1] = short_period_mode(e1);\\n[omega_sp_2, zeta_sp_2] = short_period_mode(e2);\\n[omega_sp_3, zeta_sp_3] = short_period_mode(e3);\\n\\n% Save results\\nresult = struct( ...\\n    'omega_sp_1', omega_sp_1, 'zeta_sp_1', zeta_sp_1, ...\\n    'omega_sp_2', omega_sp_2, 'zeta_sp_2', zeta_sp_2, ...\\n    'omega_sp_3', omega_sp_3, 'zeta_sp_3', zeta_sp_3);\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\\n\\nfunction [omega_n, zeta] = short_period_mode(eigs)\\n    % Select the complex-conjugate pair with the largest natural frequency\\n    % (short-period is the higher-frequency longitudinal mode; phugoid is low).\\n    mask = abs(imag(eigs)) > 1e-10;\\n    ce = eigs(mask);\\n    om = abs(ce);\\n    [~, k] = max(om);\\n    sp = ce(k);\\n    omega_n = abs(sp);\\n    zeta = -real(sp) / omega_n;\\nend\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.2184089799825677, \"ref\": 2.2184089799825677}, \"zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.39221288266671167, \"ref\": 0.39221288266671167}, \"omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9009435733132725, \"ref\": 1.9009435733132725}, \"zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.39460800788899525, \"ref\": 0.39460800788899525}, \"omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.6052285337866368, \"ref\": 1.6052285337866368}, \"zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3863331415813916, \"ref\": 0.3863331415813916}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 12.29}"
+  },
+  "timings": {
+    "agent_s": 37.032,
+    "setup_s": 0.0,
+    "grade_s": 12.297
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 12.29s"
+  ]
+}

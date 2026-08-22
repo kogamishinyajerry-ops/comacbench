@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_repair_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control / repair_01）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\n% 真机构纵向模型（修复后）；损坏参数 Mw 的正确值 = -0.0055。\\nA_true = [-0.0068 0.04 0.0 -32.174; -0.035 -0.72 700.0 0.0; 0.0 -0.0055 -0.95 0.0; 0.0 0.0 1.0 0.0];\\nev = eig(A_true);\\nlam = ev(imag(ev) > 0);\\n[~, ord] = sort(abs(lam), 'descend');\\nlam = lam(ord);\\nwn = abs(lam); ze = -real(lam) ./ wn;\\n% 复核：修复后 SP 模态与题面参考一致（wn(1)=omega_sp, ze(1)=zeta_sp）\\nassert(abs(wn(1) - 2.1294093202125235) < 1e-6);\\nassert(abs(ze(1) - 0.3921769206877866) < 1e-6);\\nr = struct('corrupted_param', 'Mw', 'restored_value', -0.0055);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": true, \"got\": \"Mw\", \"ref\": \"Mw\"}, \"restored_value\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.0055, \"ref\": -0.0055}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 10.23}"
+  },
+  "timings": {
+    "agent_s": 10.233,
+    "setup_s": 0.0,
+    "grade_s": 10.233
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 10.23s"
+  ]
+}

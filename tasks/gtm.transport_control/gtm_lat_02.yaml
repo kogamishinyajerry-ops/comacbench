@@ -1,0 +1,60 @@
+id: gtm_lat_02
+registry_id: gtm.transport_control
+domain: flight_control
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: gtm-flight@selfbuilt-2026-08-22+matlabR2026a
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- matlab
+input:
+  prompt_file: tasks/gtm.transport_control/gtm_lat_02.md
+  prompt_sha256: e442ddcd16843b6fe014dbb10554b874f9313ada1520aa73a8638d3ecf217740
+  assets: []
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（MATLAB R2026a -batch，确定性；自建任务）
+  revision: gtm-flight@selfbuilt-2026-08-22+matlabR2026a
+  values:
+    dutch_roll_omega: 1.1045166837551001
+    dutch_roll_zeta: 0.11534276067910697
+    roll_mode_lambda: -1.568164434275938
+    spiral_mode_lambda: -0.05703955868316827
+  rel_tol: 0.01
+  uncertainty_note: 确定性特征值/钉死协议口径计算；容差覆盖数值口径差
+grader:
+  answer_format: matlab
+  exec_kind: gtm_matlab
+  validity_gate: true
+  result_keys:
+  - dutch_roll_omega
+  - dutch_roll_zeta
+  - roll_mode_lambda
+  - spiral_mode_lambda
+  numeric_rel_tol: 0.01
+  exact_keys: []
+  solver_backend: matlab-batch-r2026a
+  oracle_source: data/gtm/transport_control/gold/lat_02.m
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（1% 容差）；requirements=result.json 键完备
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: 自建（受 NASA GTM 定位启发，未镜像 GTM_DesignSim）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: gtm-flight@selfbuilt-2026-08-22+matlabR2026a

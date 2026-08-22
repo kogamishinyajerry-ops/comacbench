@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_trim_02",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Steady level-flight trim — transport aircraft\\n% Solves lift = weight and drag = thrust for alpha and thrust\\n\\n% --- Inputs ---\\nW       = 280000.0;     % lbf\\nS       = 2730.0;       % ft^2\\nh       = 35000.0;      % ft\\nV       = 780.0;        % ft/s\\n\\nCL0     = 0.18;         % lift-curve zero-alpha intercept\\nCLalpha = 5.6;          % per rad\\nCD0     = 0.019;        % parasitic drag coefficient\\nk       = 0.045;        % induced-drag factor\\n\\nrho0    = 0.0023769;    % slug/ft^3 (sea-level)\\nT0      = 68000.0;      % lbf at V0\\nV0      = 780.0;        % ft/s\\n\\n% --- Atmosphere / dynamic pressure ---\\nrho  = rho0 * exp(-h/23800);\\nqbar = 0.5 * rho * V^2;\\n\\n% --- Trim solve ---\\n% Lift  = Weight  ->  qbar * S * (CL0 + CLalpha*alpha) = W\\nCL_trim      = W / (qbar * S);\\nalpha_rad    = (CL_trim - CL0) / CLalpha;\\nalpha_deg    = alpha_rad * 180/pi;\\n\\n% Drag = Thrust\\nCD_trim      = CD0 + k * CL_trim^2;\\nthrust_lbf   = qbar * S * CD_trim;\\n\\n% --- Sanity: required throttle (informational only) ---\\ndelta_t = thrust_lbf / (T0 * (V/V0)^0.8);\\n\\n% --- Write result.json ---\\nresult = struct( ...\\n    'alpha_trim_deg', alpha_deg, ...\\n    'thrust_lbf',     thrust_lbf );\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 4.474147852448442, \"ref\": 4.474147852448443}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 16396.161068583817, \"ref\": 16396.161068583817}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 8.45}"
+  },
+  "timings": {
+    "agent_s": 29.14,
+    "setup_s": 0.0,
+    "grade_s": 8.451
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.45s"
+  ]
+}

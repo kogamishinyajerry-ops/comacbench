@@ -29,7 +29,7 @@
 > 判分侧经 `runners/solvers/openfoam.py` 调 docker；本条不改变求解器无关原则（grader 只认产物+判据+场结果）。
 | `commercial_cfd` | Fluent / StarCCM+ 无界面批处理 | ✅ 已许可（仅内网层） | 与 IT 确认批处理许可座席调度窗口 + 版本锁定 | nasa_tmr、crm_dpw_hlpw（内网移植目标态） |
 | `commercial_fea` | ANSYS Mechanical APDL（PyMAPDL gRPC） | ✅ 已许可 | 同上（APDL 座席） | simjeb |
-| `matlab` | MATLAB + matlabengine-for-python | ✅ 已许可 | 确认 MATLAB 版本与 Python 版本兼容对应表 | gtm（JSBSim 侧归 python_sandbox） |
+| `matlab` | MATLAB（batch 子进程；matlabengine 不用——版本配对脆弱，`matlab -batch` 更稳且与沙箱隔离子进程语义一致） | ✅ **dev 已就绪**（2026-08-22 装 R2026a U3，Sponsored License，CST/Aerospace TB 齐备，batch 启动 ~28s/次，执行后端 `runners/solvers/matlab.py`，MATLAB_BIN 可覆写） | 内网层移植时版本锁定 | gtm（JSBSim 侧归 python_sandbox） |
 | `missing` | 内网不存在且不部署的工具 | ❌ | 见第 4 节恢复条件 | foam_basic(OpenFOAM)、openvsp、bscw(气弹链) |
 
 ## 2. Python 离线导入清单（分阶段，每阶段一次批量导入）

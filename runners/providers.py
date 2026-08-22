@@ -116,13 +116,35 @@ _SYSTEM_PROMPT_MATH = (
     "numeric answer on its own last line in the exact format:\n#### <number>"
 )
 
+_SYSTEM_PROMPT_MATLAB = (
+    "You are an expert flight control engineer using MATLAB.\n"
+    "Write complete, correct, runnable MATLAB script code for the given task.\n"
+    "Respond with a single ```matlab code block and nothing else."
+)
+
 _CODE_FENCE_RE = re.compile(r"```(?:python|py)?\s*\n(.*?)```", re.S)
+_MATLAB_FENCE_RE = re.compile(r"```(?:matlab|m|octave)?\s*\n(.*?)```", re.S)
 
 
 def extract_code_block(raw: str) -> str | None:
     """剥思考后取第一个 ```python 围栏块；无围栏时取非空全文。"""
     s = strip_think(raw)
     m = _CODE_FENCE_RE.search(s)
+    if m:
+        return m.group(1).strip()
+    return s.strip() or None
+
+
+def extract_matlab_block(raw: str) -> str | None:
+    """剥思考后取第一个 ```matlab 围栏块；无围栏标签时取非空全文
+    （matlab 围栏的正则同时接受裸 ``` —— MATLAB 代码与 Python 不同形，
+    裸围栏几乎必为 MATLAB；与 extract_code_block 同构）。"""
+    s = strip_think(raw)
+    # 先试带语言标签的围栏（优先，防误取普通文字块）
+    m = re.search(r"```(?:matlab|m|octave)\s*\n(.*?)```", s, re.S)
+    if m:
+        return m.group(1).strip()
+    m = _MATLAB_FENCE_RE.search(s)
     if m:
         return m.group(1).strip()
     return s.strip() or None
@@ -202,6 +224,7 @@ def _chat_completions_answer(
               "free_text": _SYSTEM_PROMPT_FREE_TEXT,
               "free_vqa": _SYSTEM_PROMPT_FREE_TEXT,   # VQA 复用中性系统提示
               "code": _SYSTEM_PROMPT_CODE,
+              "matlab": _SYSTEM_PROMPT_MATLAB,
               "json": _SYSTEM_PROMPT_JSON,
               "math_answer": _SYSTEM_PROMPT_MATH}[expect]
 
@@ -228,11 +251,14 @@ def _chat_completions_answer(
         return json.dumps(req_body).encode()
 
     def accept(raw: str) -> int | None | str:
-        """mcq: 选项号；code: python 围栏块；json: dict；math/free_text: 剥思考原文。"""
+        """mcq: 选项号；code: python 围栏块；matlab: MATLAB 围栏块；json: dict；
+        math/free_text/free_vqa: 剥思考原文。"""
         if expect == "mcq":
             return parse_answer(raw)
         if expect == "code":
             return extract_code_block(raw)
+        if expect == "matlab":
+            return extract_matlab_block(raw)
         if expect == "json":
             return extract_json(raw)
         return strip_think(raw) or None
@@ -460,6 +486,10 @@ def get_answer(
             return {"answer": raw, "raw": raw, "attempts": 1,
                     "meta": {"provider": "oracle", "note": "vqa 参考答案回显"}}
     if provider == "stub":
+        if expect == "matlab":
+            # 注释桩：执行后无 result.json => gate missing_output（地板）
+            return {"answer": "% stub — no output\n", "raw": "% stub", "attempts": 1,
+                    "meta": {"provider": "stub", "seed": seed}}
         if expect == "code":
             return {"answer": "pass\n", "raw": "pass", "attempts": 1,
                     "meta": {"provider": "stub", "seed": seed}}
@@ -497,6 +527,8 @@ def get_answer(
     if provider == "oracle":
         if expect == "code":
             raise ProviderError("oracle code 由 adapter 从 grader.oracle_source 读取，不走 provider")
+        if expect == "matlab":
+            raise ProviderError("oracle matlab 由 adapter 从 grader.oracle_source 读取，不走 provider")
         if expect == "json":
             ref = task["reference"]["true"]
             raw = json.dumps(ref, ensure_ascii=False)

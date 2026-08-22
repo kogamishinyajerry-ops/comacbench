@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_repair_02",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Define target modal data\\nw_sp = 1.99883;\\nz_sp = 0.38779;\\nw_ph = 0.0364518;\\nz_ph = 0.0843678;\\n\\n% Calculate target eigenvalues\\n% Eigenvalues for a damped 2nd order system: s = -z*w + j*w*sqrt(1-z^2)\\nlambda_sp = -z_sp * w_sp + 1i * w_sp * sqrt(1 - z_sp^2);\\nlambda_ph = -z_ph * w_ph + 1i * w_ph * sqrt(1 - z_ph^2);\\n\\n% Combine into a vector of 4 eigenvalues\\nlambda_target = [lambda_sp, conj(lambda_sp), lambda_ph, conj(lambda_ph)];\\n\\n% Calculate target characteristic polynomial coefficients\\n% poly returns [1, a1, a2, a3, a4] corresponding to s^4 + a1*s^3 + a2*s^2 + a3*s + a4\\npoly_target = poly(lambda_target);\\n\\n% Define the corrupted state matrix A\\n% States x = [u; w; q; theta]\\n% System: xdot = A*x\\nA_corrupt = [\\n    -0.0064, 0.038, 0.0, -32.174;\\n    -0.033, -0.7, 680.0, 0.0;\\n    0.0, -0.005, -0.34, 0.0;\\n    0.0, 0.0, 1.0, 0.0\\n];\\n\\n% Extract constants and initial guesses from the matrix\\nXu = A_corrupt(1,1);\\nZw = A_corrupt(2,2);\\nZu = A_corrupt(2,1);\\nMw_initial = A_corrupt(3,2);\\nMq_initial = A_corrupt(3,3);\\ng = 32.174;\\n\\n% --- Analysis to determine the corrupted parameter ---\\n% The characteristic polynomial coefficients are functions of the stability derivatives.\\n% a4 (constant term) = det(-A) = g * Zu * Mw. \\n% This depends on Mw but NOT on Mq.\\n%\\n% a1 (coefficient of s^3) = -(Trace(A)) = -(Xu + Zw + Mq).\\n% This depends on Mq but NOT on Mw (since Mw is off-diagonal).\\n\\npoly_corrupt = poly(A_corrupt);\\na4_current = poly_corrupt(end);\\na4_target = poly_target(end);\\n\\n% Check if a4 matches. \\n% If a4 matches, Mw is correct.\\n% If a4 does not match, Mw is corrupted.\\n% Since exactly one parameter is corrupted, this logic is sufficient.\\n\\n% Define a cost function to minimize the error between current and target polynomials\\n% Arguments: Mw, Mq\\ncost_function = @(Mw, Mq) norm(poly([Xu, 0.038, 0, -g; ...\\n                                    Zu, Zw, 680, 0; ...\\n                                    0, Mw, Mq, 0; ...\\n                                    0, 0, 1, 0]) - poly_target);\\n\\n% Optimization options\\noptions = optimset('Display', 'off', 'TolX', 1e-12, 'TolFun', 1e-12);\\n\\nif abs(a4_current - a4_target) < 1e-6\\n    % a4 matches, so Mw is correct. Therefore Mq must be the corrupted parameter.\\n    % Optimize for Mq while keeping Mw fixed.\\n    obj_func = @(x) cost_function(Mw_initial, x);\\n    optimal_val = fminsearch(obj_func, Mq_initial, options);\\n    param_name = 'Mq';\\nelse\\n    % a4 does not match, so Mw must be the corrupted parameter.\\n    % Optimize for Mw while keeping Mq fixed.\\n    obj_func = @(x) cost_function(x, Mq_initial);\\n    optimal_val = fminsearch(obj_func, Mw_initial, options);\\n    param_name = 'Mw';\\nend\\n\\n% Construct the result structure\\nresult = struct();\\nresult.corrupted_param = param_name;\\nresult.restored_value = optimal_val;\\n\\n% Write result to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": true, \"got\": \"Mq\", \"ref\": \"Mq\"}, \"restored_value\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 9e-06, \"got\": -0.850007502744907, \"ref\": -0.85}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 11.26}"
+  },
+  "timings": {
+    "agent_s": 212.57,
+    "setup_s": 0.0,
+    "grade_s": 11.26
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 11.26s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Longitudinal modal analysis - lon_03\\n% Cruise linear model: x = [u, w, q, theta], xdot = A*x\\nA = [ -0.006, 0.025, 0.0, -32.174\\n      -0.02, -0.55, 780.0, 0.0\\n       0.0, -0.0035, -0.65, 0.0\\n       0.0, 0.0, 1.0, 0.0 ];\\n\\n% Eigenvalues of the longitudinal system\\nV = eig(A);\\n\\n% For a stable real matrix, eigenvalues come in complex-conjugate pairs.\\n% Sort by |imaginary part|: phugoid has the smaller damped frequency,\\n% short-period has the larger one.\\n[~, idx] = sort(abs(imag(V)));\\nV = V(idx);\\n\\n% First pair (lowest |imag|)  -> phugoid\\n% Second pair (highest |imag|) -> short-period\\nlambda_ph = V(1);\\nlambda_sp = V(3);\\n\\n% Phugoid: omega_n, zeta\\nsigma_ph = real(lambda_ph);\\nwd_ph    = abs(imag(lambda_ph));\\nomega_ph = sqrt(sigma_ph^2 + wd_ph^2);\\nzeta_ph  = -sigma_ph / omega_ph;\\n\\n% Short-period: omega_n, zeta\\nsigma_sp = real(lambda_sp);\\nwd_sp    = abs(imag(lambda_sp));\\nomega_sp = sqrt(sigma_sp^2 + wd_sp^2);\\nzeta_sp  = -sigma_sp / omega_sp;\\n\\n% Build result struct and write JSON\\nresult = struct( 'omega_sp', omega_sp, ...\\n                 'zeta_sp',  zeta_sp,  ...\\n                 'omega_ph', omega_ph, ...\\n                 'zeta_ph',  zeta_ph );\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.7571236211304584, \"ref\": 1.7571236211304584}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3415178778855253, \"ref\": 0.3415178778855253}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.0270084233039195, \"ref\": 0.0270084233039195}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.1077763665150383, \"ref\": 0.1077763665150383}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 9.32}"
+  },
+  "timings": {
+    "agent_s": 140.44,
+    "setup_s": 0.0,
+    "grade_s": 9.318
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.32s"
+  ]
+}

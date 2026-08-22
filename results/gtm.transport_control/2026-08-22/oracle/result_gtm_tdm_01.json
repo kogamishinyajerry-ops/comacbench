@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_tdm_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control / tdm_01）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nA = [-0.55 1.0; -3.9 -1.3];\\nB = [0.0; 1.0];\\nC = [1.0 0.0];\\ndt = 0.01; Tend = 30.0; N = round(Tend / dt);\\nAd = expm(A * dt);\\nBd = A \\\\ ((Ad - eye(2)) * B);\\nx = zeros(2, 1); y = zeros(N + 1, 1); y(1) = C * x;\\nfor kk = 1:N\\n  x = Ad * x + Bd;\\n  y(kk + 1) = C * x;\\nend\\nyinf = -(C * (A \\\\ B)); yinf = yinf(1);\\nt = (0:N)' * dt;\\nt10 = NaN; t90 = NaN;\\nfor kk = 1:N\\n  if isnan(t10) && (y(kk) - 0.1 * yinf) * (y(kk + 1) - 0.1 * yinf) <= 0 && y(kk + 1) ~= y(kk)\\n    t10 = t(kk) + dt * (0.1 * yinf - y(kk)) / (y(kk + 1) - y(kk));\\n  end\\n  if isnan(t90) && (y(kk) - 0.9 * yinf) * (y(kk + 1) - 0.9 * yinf) <= 0 && y(kk + 1) ~= y(kk)\\n    t90 = t(kk) + dt * (0.9 * yinf - y(kk)) / (y(kk + 1) - y(kk));\\n  end\\nend\\novershoot = (max(y) - yinf) / abs(yinf) * 100;\\nband = 0.02 * abs(yinf);\\nviol = find(abs(y - yinf) > band);\\ntset = t(viol(end));\\nr = struct('rise_time_s', t90 - t10, 'overshoot_pct', overshoot, 'settling_time_s', tset);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"rise_time_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.7042998398065543, \"ref\": 0.7042998398065543}, \"overshoot_pct\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 22.340566984495343, \"ref\": 22.340566984495343}, \"settling_time_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 3.9, \"ref\": 3.9}}, \"physics_hits\": \"3/3\", \"rel_tol\": 0.01, \"matlab_s\": 9.32}"
+  },
+  "timings": {
+    "agent_s": 9.321,
+    "setup_s": 0.0,
+    "grade_s": 9.321
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.32s"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_sm_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% sm_01: Static margin and neutral point calculation\\nCLalpha = 5.3;\\nCmalpha = -0.85;\\nh_cg = 0.25;\\n\\nstatic_margin = -Cmalpha / CLalpha;\\nh_n = h_cg + static_margin;\\n\\nresults = struct('static_margin', static_margin, 'h_n', h_n);\\n\\njson_text = jsonencode(results);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, json_text);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"static_margin\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.16037735849056603, \"ref\": 0.16037735849056603}, \"h_n\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.410377358490566, \"ref\": 0.410377358490566}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 9.18}"
+  },
+  "timings": {
+    "agent_s": 11.12,
+    "setup_s": 0.0,
+    "grade_s": 9.186
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 9.18s"
+  ]
+}

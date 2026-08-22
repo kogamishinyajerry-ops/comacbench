@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lat_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Define the lateral-directional state matrix\\nA = [ -0.14, 0.02, -0.88, 0.055; \\n      -8.5, -1.45, -0.06, 0.0; \\n      1.55, -0.05, -0.42, 0.0; \\n      0.0, 1.0, 0.0, 0.0 ];\\n\\n% Compute eigenvalues\\nevals = eig(A);\\n\\n% Tolerance for identifying imaginary parts\\ntol = 1e-6;\\n\\n% Identify the complex conjugate pair (Dutch Roll)\\nis_complex = abs(imag(evals)) > tol;\\ndr_evals = evals(is_complex);\\n\\n% Ensure we found exactly one complex pair\\nif length(dr_evals) ~= 2\\n    error('Expected one complex-conjugate pair for Dutch Roll mode.');\\nend\\n\\n% Calculate Dutch Roll parameters using one of the complex eigenvalues\\n% lambda = -zeta * omega_n + j * omega_n * sqrt(1 - zeta^2)\\n% omega_n = |lambda|\\n% zeta = -real(lambda) / omega_n\\nlambda_dr = dr_evals(1);\\ndutch_roll_omega = abs(lambda_dr);\\ndutch_roll_zeta = -real(lambda_dr) / dutch_roll_omega;\\n\\n% Identify the real eigenvalues (Roll and Spiral)\\nreal_evals = real(evals(~is_complex));\\n\\n% Roll convergence is the more negative real root\\n[roll_mode_lambda, idx] = min(real_evals);\\n\\n% Spiral mode is the other real root\\nspiral_idx = setdiff(1:length(real_evals), idx);\\nspiral_mode_lambda = real_evals(spiral_idx);\\n\\n% Package results into a struct\\nresults = struct(...\\n    'dutch_roll_omega', dutch_roll_omega, ...\\n    'dutch_roll_zeta', dutch_roll_zeta, ...\\n    'roll_mode_lambda', roll_mode_lambda, ...\\n    'spiral_mode_lambda', spiral_mode_lambda ...\\n);\\n\\n% Write result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(results));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"dutch_roll_omega\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.3199021433738907, \"ref\": 1.3199021433738907}, \"dutch_roll_zeta\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.12211193823306876, \"ref\": 0.12211193823306876}, \"roll_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -1.6160917093832918, \"ref\": -1.6160917093832918}, \"spiral_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.07155667260597635, \"ref\": -0.07155667260597635}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 8.2}"
+  },
+  "timings": {
+    "agent_s": 81.979,
+    "setup_s": 0.0,
+    "grade_s": 8.205
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.2s"
+  ]
+}

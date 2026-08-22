@@ -277,8 +277,9 @@ entries:
     content: 配平线性化/静稳定与模态/控制器设计/发动机失效与舵面故障/包线鲁棒性/错误气动表修复
     env: "GTM 层: MATLAB + matlabengine-for-python（内网已有 MATLAB 许可）；JSBSim 快层: 纯 Python wheel"
     hidden_dynamic: true
-    paused_env_note: dev 终端无 MATLAB（matlabengine 不可用）——GTM 层 blocked；JSBSim 快层（python_sandbox）可先行，许可 needs-verification 未核
-    status: proposed
+    paused_env_note: dev 终端无 MATLAB（matlabengine 不可用）——GTM 层 blocked；JSBSim 快层（python_sandbox）可先行，许可 needs-verification 未核。（2026-08-22 已解除：dev 装 MATLAB R2026a U3）
+    status: integrated
+    integrated_note: 2026-08-22 MATLAB R2026a U3 到位（Sponsored License，CST/Aerospace TB 齐备，batch ~8-28s/次）——gtm_matlab 分支落地（runners/solvers/matlab.py 执行后端 + simulation_agent 分支 + providers expect=matlab + 正则级 MATLAB 逃逸检查含注释/字符串剥离）。任务集：自建 8 族 25 题（纵向模态×5/配平×3/静稳定×2/控制律极点配置×4/时域指标×3/修复×2/包线鲁棒×3/横航向×3；未镜像 GTM_DesignSim——Simulink 工程依赖+许可未核；稳定性导数量级取公开运输机文献典型值；F5 钉死精确离散口径 dt=0.01s）。判分 100% 本地数值可复现（result_keys 1% 容差 + exact_keys）。基线：stub 25/25 地板 / oracle 25/25 满分自检 / minimax-m3 0.9800（24/25 满分，1 部分分）/ glm-4.6 0.8900（21/25，gate 23/25：2 code_not_executable）——飞控维两家模型均高可达（与 pycycle 全灭互证维度区分度有效）。规格偏离记录于 PROVENANCE（phugoid ωn 可达包络 [0.025,0.06]、F8 Lβ 量级、F6 自检口径）。JSBSim 快层仍为后续可选项（python_sandbox）
 
   - id: mechvqa.public_eval
     name: MechVQA 公开评测集

@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_repair_02",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"% Repair corrupted stability derivative in longitudinal A matrix\\nA_corrupt = [-0.0064, 0.038, 0.0, -32.174;\\n             -0.033, -0.7, 680.0, 0.0;\\n             0.0, -0.005, -0.34, 0.0;\\n             0.0, 0.0, 1.0, 0.0];\\n\\nomega_sp = 1.99883;      zeta_sp = 0.38779;\\nomega_ph = 0.0364518;    zeta_ph = 0.0843678;\\n\\n% Target complex eigenvalues (choose +imag branch)\\nt_sp = -zeta_sp*omega_sp + 1j*omega_sp*sqrt(1-zeta_sp^2);\\nt_ph = -zeta_ph*omega_ph + 1j*omega_ph*sqrt(1-zeta_ph^2);\\n\\n% Error functions\\nerr_Mw = @(v) modal_err(A_corrupt, 3, 2, v, t_sp, t_ph);\\nerr_Mq = @(v) modal_err(A_corrupt, 3, 3, v, t_sp, t_ph);\\n\\n% Coarse grid + refine with fminsearch\\nbest_Mw_c = -0.005; beM = inf;\\nfor v = linspace(-1.0, 1.0, 4001)\\n    e = err_Mw(v);\\n    if e < beM, beM = e; best_Mw_c = v; end\\nend\\nbest_Mq_c = -0.34; beQ = inf;\\nfor v = linspace(-2.0, 1.0, 6001)\\n    e = err_Mq(v);\\n    if e < beQ, beQ = e; best_Mq_c = v; end\\nend\\n\\nbest_Mw = fminsearch(err_Mw, best_Mw_c, optimset('TolX',1e-12,'Display','off'));\\nbest_Mq = fminsearch(err_Mq, best_Mq_c, optimset('TolX',1e-12,'Display','off'));\\n\\nfM = err_Mw(best_Mw);\\nfQ = err_Mq(best_Mq);\\n\\nif fM < fQ\\n    corrupted_param = 'Mw';\\n    restored_value  = best_Mw;\\nelse\\n    corrupted_param = 'Mq';\\n    restored_value  = best_Mq;\\nend\\n\\nresult = struct('corrupted_param', corrupted_param, ...\\n                'restored_value',  restored_value);\\nfid = fopen('result.json','w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\\n\\nfunction err = modal_err(A, row, col, v, t_sp, t_ph)\\n    A2 = A; A2(row,col) = v;\\n    e = eig(A2);\\n    cplx = e(abs(imag(e)) > 1e-10);\\n    if numel(cplx) < 2\\n        err = inf; return;\\n    end\\n    [~, idx] = sort(abs(imag(cplx)));\\n    sp_eig = cplx(idx(end));\\n    ph_eig = cplx(idx(1));\\n    err = abs(sp_eig - t_sp)/abs(t_sp) + abs(ph_eig - t_ph)/abs(t_ph);\\nend\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": false, \"got\": \"Mw\", \"ref\": \"Mq\"}, \"restored_value\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 125814425.654412, \"got\": 106942260.95625019, \"ref\": -0.85}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.01, \"matlab_s\": 7.94}"
+  },
+  "timings": {
+    "agent_s": 59.477,
+    "setup_s": 0.0,
+    "grade_s": 7.937
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.94s"
+  ]
+}

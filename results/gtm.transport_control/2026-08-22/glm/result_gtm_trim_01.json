@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_trim_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Clear workspace\\nclear; clc;\\n\\n% --- Aircraft Parameters ---\\nW = 230000.0;      % Weight [lbf]\\nS = 2400.0;        % Wing Area [ft^2]\\nh = 31000.0;       % Altitude [ft]\\nV = 730.0;         % True Airspeed [ft/s]\\n\\n% --- Aerodynamic Model ---\\nCL0 = 0.15;        % Zero-alpha lift coefficient\\nCLalpha = 5.2;     % Lift curve slope [1/rad]\\nCD0 = 0.021;       % Zero-lift drag coefficient\\nk = 0.043;         % Induced drag factor\\n\\n% --- Atmosphere Model ---\\nrho0 = 0.0023769;  % Sea level air density [slug/ft^3]\\nH = 23800.0;       % Scale height [ft]\\n\\n% --- Engine Model (for context, though specific throttle not requested) ---\\n% T0 = 62000.0;    % Reference thrust [lbf]\\n% V0 = 730.0;      % Reference velocity [ft/s]\\n\\n% --- Calculations ---\\n\\n% 1. Atmosphere\\nrho = rho0 * exp(-h / H);      % Density at altitude h\\nqbar = 0.5 * rho * V^2;        % Dynamic pressure\\n\\n% 2. Longinal Equilibrium: Lift = Weight\\n% L = qbar * S * CL = W\\nCL_trim = W / (qbar * S);\\n\\n% 3. Solve for Angle of Attack\\n% CL = CL0 + CLalpha * alpha\\nalpha_rad = (CL_trim - CL0) / CLalpha;\\nalpha_deg = rad2deg(alpha_rad);\\n\\n% 4. Longitudinal Equilibrium: Thrust = Drag\\n% Drag Polar: CD = CD0 + k * CL^2\\nCD_trim = CD0 + k * (CL_trim^2);\\n\\n% Thrust Required = Drag\\n% D = qbar * S * CD\\nthrust_req = qbar * S * CD_trim;\\n\\n% --- Output Generation ---\\n\\n% Construct result structure\\nresult.alpha_trim_deg = alpha_deg;\\nresult.thrust_lbf = thrust_req;\\n\\n% Write to JSON file\\njsonStr = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonStr);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 4.480434409025699, \"ref\": 4.480434409025699}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 14182.281390404429, \"ref\": 14182.281390404425}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 12.31}"
+  },
+  "timings": {
+    "agent_s": 79.652,
+    "setup_s": 0.0,
+    "grade_s": 12.317
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 12.31s"
+  ]
+}

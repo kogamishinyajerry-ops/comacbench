@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lat_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A = [-0.14, 0.02, -0.88, 0.055;\\n     -8.5, -1.45, -0.06, 0.0;\\n     1.55, -0.05, -0.42, 0.0;\\n      0.0,  1.0,   0.0, 0.0];\\n\\neigvals = eig(A);\\n\\n% Separate real and complex-conjugate eigenvalues\\nreal_mask   = abs(imag(eigvals)) < 1e-10;\\nreal_eigs   = real(eigvals(real_mask));\\ncomplex_eigs = eigvals(~real_mask);\\n\\n% Dutch roll: take one of the conjugate pair\\ndr        = complex_eigs(1);\\nsigma     = real(dr);\\nomega_d   = abs(imag(dr));\\ndutch_roll_omega = sqrt(sigma^2 + omega_d^2);\\ndutch_roll_zeta  = -sigma / dutch_roll_omega;\\n\\n% Two real modes: roll convergence is the more negative root\\nroll_mode_lambda   = min(real_eigs);\\nspiral_mode_lambda = max(real_eigs);\\n\\nresult = struct( ...\\n    'dutch_roll_omega',   dutch_roll_omega, ...\\n    'dutch_roll_zeta',    dutch_roll_zeta, ...\\n    'roll_mode_lambda',   roll_mode_lambda, ...\\n    'spiral_mode_lambda', spiral_mode_lambda );\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"dutch_roll_omega\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.3199021433738907, \"ref\": 1.3199021433738907}, \"dutch_roll_zeta\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.12211193823306876, \"ref\": 0.12211193823306876}, \"roll_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -1.6160917093832918, \"ref\": -1.6160917093832918}, \"spiral_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.07155667260597635, \"ref\": -0.07155667260597635}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 7.13}"
+  },
+  "timings": {
+    "agent_s": 14.81,
+    "setup_s": 0.0,
+    "grade_s": 7.136
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.13s"
+  ]
+}

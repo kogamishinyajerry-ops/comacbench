@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_repair_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.75,
+  "artifacts": {
+    "code": "\"% Script to determine the corrupted stability derivative and restore its value.\\n\\n% 1. Define the target modal parameters\\nomega_sp = 2.12941;\\nzeta_sp = 0.392177;\\nomega_ph = 0.036958;\\nzeta_ph = 0.0891501;\\n\\n% 2. Define the Corrupted Matrix A_corrupt\\nA_corrupt = [\\n    -0.0068, 0.04,    0.0, -32.174;\\n    -0.035,  -0.72, 700.0,    0.0;\\n     0.0, -0.0165, -0.95,    0.0;\\n     0.0,    0.0,    1.0,    0.0\\n];\\n\\n% Extract constant parameters from the matrix that are assumed correct\\nXu = A_corrupt(1,1);\\nZw = A_corrupt(2,2);\\nZu = A_corrupt(2,1);\\ng = 32.174; % Given in problem description (and magnitude matches A(1,4))\\n\\n% 3. Compute the Target Characteristic Polynomial Coefficients\\n% Calculate eigenvalues from modal parameters\\nsp_roots = roots([1, 2*zeta_sp*omega_sp, omega_sp^2]);\\nph_roots = roots([1, 2*zeta_ph*omega_ph, omega_ph^2]);\\n\\n% Combine all roots\\ntarget_eigs = [sp_roots; ph_roots];\\n\\n% Form the characteristic polynomial: s^4 + a1*s^3 + a2*s^2 + a3*s + a4\\n% The 'poly' function returns coefficients in descending order of power\\ntarget_poly = poly(target_eigs);\\n\\n% Extract relevant coefficients\\n% target_poly(1) is 1 (for s^4)\\na1_target = target_poly(2);\\na2_target = target_poly(3);\\na3_target = target_poly(4);\\na4_target = target_poly(5);\\n\\n% 4. Derive relationships between matrix entries and polynomial coefficients\\n% For the longitudinal state matrix [u, w, q, theta]:\\n% Trace(A) = Xu + Zw + Mq + 0 = -a1\\n% => a1 = -(Xu + Zw + Mq)\\n% => Mq = -Xu - Zw - a1\\n%\\n% Det(A) = -g * Zu * Mw (assuming Mu = 0 and standard structure)\\n% The constant term a4 of det(sI - A) is Det(A).\\n% => a4 = -g * Zu * Mw\\n% => Mw = -a4 / (g * Zu)\\n\\n% Calculate the restored values based on target coefficients\\n% Trace relation\\ntrace_sum = Xu + Zw;\\nMq_restored = -trace_sum - a1_target;\\n\\n% Determinant relation\\n% Note: A(1,4) is -g. \\n% Using the formula derived: a4 = Det(A) = -g * Zu * Mw\\nMw_restored = -a4_target / (g * Zu);\\n\\n% 5. Compare with the corrupted values to identify the corrupted parameter\\nMw_corrupt = A_corrupt(3,2);\\nMq_corrupt = A_corrupt(3,3);\\n\\n% Calculate relative errors\\nrel_err_Mw = abs(Mw_restored - Mw_corrupt) / abs(Mw_restored);\\nrel_err_Mq = abs(Mq_restored - Mq_corrupt) / abs(Mq_restored);\\n\\n% Determine which one is corrupted (the one with the significant difference)\\n% A tolerance of 0.01 (1%) is mentioned for grading, the corruption is obvious.\\nif rel_err_Mw > 0.01 % If error is larger than 1%, assume this is the corrupted one\\n    corrupted_param = 'Mw';\\n    restored_value = Mw_restored;\\nelse\\n    corrupted_param = 'Mq';\\n    restored_value = Mq_restored;\\nend\\n\\n% 6. Write result to result.json\\nresult_struct.corrupted_param = corrupted_param;\\nresult_struct.restored_value = restored_value;\\n\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result_struct));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"corrupted_param\": {\"status\": \"exact\", \"ok\": true, \"got\": \"Mw\", \"ref\": \"Mw\"}, \"restored_value\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.999999, \"got\": 0.005499996319985773, \"ref\": -0.0055}}, \"physics_hits\": \"1/2\", \"rel_tol\": 0.01, \"matlab_s\": 12.95}"
+  },
+  "timings": {
+    "agent_s": 178.347,
+    "setup_s": 0.0,
+    "grade_s": 12.947
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 12.95s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "gtm_kdesign_04",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"% Define the system matrices\\nA = [-0.0058, 0.052, 0.0, -32.174;\\n     -0.046, -0.8, 690.0, 0.0;\\n     0.0, -0.007, -1.0, 0.0;\\n     0.0, 0.0, 1.0, 0.0];\\n\\nB = [0.0; -4.5; -2.5; 0.0];\\n\\n% 1. Analyze Open-Loop Poles to identify Phugoid modes\\neig_ol = eig(A);\\nwn_ol = abs(eig_ol);\\n\\n% The Phugoid mode is the slow oscillation (low natural frequency).\\n% The Short-Period mode is the fast oscillation (high natural frequency).\\n% For this aircraft model, Phugoid wn < 0.5 rad/s and Short-Period wn > 2.0 rad/s.\\n% We use a threshold to separate them.\\nphugoid_idx = find(wn_ol < 1.0);\\nshort_period_idx = find(wn_ol >= 1.0);\\n\\np_phugoid_ol = eig_ol(phugoid_idx);\\n\\n% 2. Define Desired Closed-Loop Poles\\n% Short-period target: wn = 2.5 rad/s, zeta = 0.62\\nwn_sp_target = 2.5;\\nzeta_sp_target = 0.62;\\n\\nsigma = -zeta_sp_target * wn_sp_target;\\nwd = wn_sp_target * sqrt(1 - zeta_sp_target^2);\\n\\n% Target short-period poles (complex conjugate pair)\\np_sp_target = [sigma + 1i*wd, sigma - 1i*wd];\\n\\n% Desired poles: Target Short-Period + Open-Loop Phugoid\\np_desired = [p_sp_target, p_phugoid_ol];\\n\\n% 3. Design Full-State Feedback Controller (u = -Kx)\\nK = place(A, B, p_desired);\\n\\n% 4. Compute Achieved Closed-Loop Eigenvalues\\nA_cl = A - B*K;\\neig_cl = eig(A_cl);\\nwn_cl = abs(eig_cl);\\n\\n% 5. Extract the Achieved Short-Period Poles\\n% These will be the poles with natural frequency closest to the target (or simply the fast ones)\\ncl_sp_idx = find(wn_cl > 1.0);\\np_sp_achieved = eig_cl(cl_sp_idx);\\n\\n% Calculate achieved natural frequency and damping\\n% Both poles in the complex conjugate pair yield the same wn and zeta\\np = p_sp_achieved(1);\\ncl_omega_sp = abs(p);\\ncl_zeta_sp = -real(p) / cl_omega_sp;\\n\\n% 6. Write result to JSON\\nresult = struct(...\\n    'cl_omega_sp', cl_omega_sp, ...\\n    'cl_zeta_sp', cl_zeta_sp ...\\n);\\n\\njsonStr = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonStr);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b错误使用 horzcat\\n要串联的数组的维度不一致。\\n\\n出错 model (第 34 行)\\np_desired = [p_sp_target, p_phugoid_ol];\\n             ^^^^^^^^^^^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 174.387,
+    "setup_s": 0.0,
+    "grade_s": 17.655
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 17.65s"
+  ]
+}

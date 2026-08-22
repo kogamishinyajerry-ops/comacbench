@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_trim_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control / trim_03）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nW = 175000.0; S = 2050.0; h = 26000.0; V = 690.0;\\nCLa = 4.9; CL0 = 0.12; CD0 = 0.023; kk = 0.041;\\nrho0 = 0.0023769;\\nrho = rho0 * exp(-h / 23800.0);\\nqbar = 0.5 * rho * V^2;\\nCLfun = @(al) CL0 + CLa * al;          % alpha in rad\\nal = fzero(@(a) qbar * S * CLfun(a) - W, deg2rad(2.0));   % L = W\\nCL = CLfun(al);\\nCD = CD0 + kk * CL^2;\\nThr = qbar * S * CD;                   % 定直平飞 D = T\\nr = struct('alpha_trim_deg', rad2deg(al), 'thrust_lbf', Thr);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 3.8566594021892953, \"ref\": 3.8566594021892953}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 12175.40733851003, \"ref\": 12175.40733851003}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 12.25}"
+  },
+  "timings": {
+    "agent_s": 12.247,
+    "setup_s": 0.0,
+    "grade_s": 12.247
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 12.25s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "gtm_kdesign_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"% Clear workspace\\nclear; clc; close all;\\n\\n% System Matrices\\nA = [-0.0068, 0.04, 0.0, -32.174;\\n     -0.034, -0.73, 715.0, 0.0;\\n     0.0, -0.0054, -0.92, 0.0;\\n     0.0, 0.0, 1.0, 0.0];\\n\\nB = [0.0; -6.0; -4.0; 0.0];\\n\\n% 1. Analyze Open Loop Poles\\neig_ol = eig(A);\\n\\n% Identify Phugoid (low frequency) vs Short Period (high frequency)\\n% Sort by absolute value of imaginary part\\n[~, idx] = sort(abs(imag(eig_ol)));\\neig_ol_sorted = eig_ol(idx);\\n\\n% Phugoid poles are the first two (lowest frequency)\\neig_ph = eig_ol_sorted(1:2);\\n\\n% 2. Define Target Short Period Poles\\nwn_sp = 2.0;\\nzeta_sp = 0.6;\\n% Characteristic equation: s^2 + 2*zeta*wn*s + wn^2 = 0\\neig_sp_target = roots([1, 2*zeta_sp*wn_sp, wn_sp^2]);\\n\\n% 3. Constraint Derivation: Keep Phugoid Poles Unchanged\\n% To keep eigenvalues lambda_ph, we need K * V_ph = 0\\n% where V_ph are the eigenvectors corresponding to lambda_ph.\\n\\n[V, ~] = eig(A);\\n% Sort eigenvectors to match the sorted eigenvalues\\nV = V(:, idx);\\n% Extract phugoid eigenvectors\\nV_ph = V(:, 1:2);\\n\\n% Construct a real constraint matrix M\\n% If eigenvectors are complex, use real and imaginary parts\\nif isreal(eig_ph(1))\\n    M = V_ph;\\nelse\\n    M = [real(V_ph(:,1)), imag(V_ph(:,1))];\\nend\\n\\n% Find basis P for the gain K such that K * M = 0\\n% K is in the null space of M'. \\n% Let P be a matrix whose columns span the null space of M'.\\n% Then K can be written as K = k' * P' where k is a vector of free parameters.\\nP = null(M'); \\n\\n% 4. Initial Guess for k\\n% Use the standard short-period approximation (states w and q) for a good guess\\nA_sp = A(2:3, 2:3);\\nB_sp = B(2:3);\\n% Design unconstrained gain for the 2-state system\\nK_sp_guess = place(A_sp, B_sp, eig_sp_target);\\n% Map to full state feedback vector [0, kw, kq, 0]\\nK_full_guess = [0, K_sp_guess];\\n\\n% Project K_full_guess onto the constrained subspace spanned by P'\\n% We want k' * P' approx K_full_guess\\n% K_full_guess * P approx k' * (P' * P)\\n% k' approx K_full_guess * P * inv(P' * P)\\nk0 = (K_full_guess * P * inv(P'*P))';\\n\\n% 5. Optimization\\n% Minimize the error between achieved SP poles and target SP poles\\ncostFunc = @(k) polePlacementError(k, A, B, P, eig_ph, eig_sp_target);\\noptions = optimset('Display', 'off', 'TolX', 1e-9, 'TolFun', 1e-9);\\nk_opt = fminsearch(costFunc, k0, options);\\n\\n% 6. Compute Final Gain and Closed Loop System\\nK_final = k_opt' * P';\\ncl_poles = eig(A - B*K_final);\\n\\n% 7. Identify Achieved Short Period Poles\\n% The SP poles are the ones that moved (furthest from open-loop phugoid poles)\\nd_mat = abs(cl_poles' - eig_ph); % Distance matrix\\nd_vec = min(d_mat, [], 2);        % Min distance to any phugoid pole\\n[~, idx_sp] = sort(d_vec, 'descend');\\ncl_sp_poles = cl_poles(idx_sp(1:2));\\n\\n% 8. Compute Performance Metrics\\n% Extract natural frequency and damping from the achieved poles\\n% (Using the first pole of the complex conjugate pair)\\ns_achieved = cl_sp_poles(1);\\ncl_omega_sp = abs(s_achieved);\\ncl_zeta_sp = -real(s_achieved) / cl_omega_sp;\\n\\n% 9. Write Result to JSON\\nresult.cl_omega_sp = cl_omega_sp;\\nresult.cl_zeta_sp = cl_zeta_sp;\\n\\njsonStr = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonStr);\\nfclose(fid);\\n\\n% --- Helper Function ---\\nfunction err = polePlacementError(k, A, B, P, eig_ph, target_sp)\\n    % Construct gain from free parameters\\n    K = k' * P';\\n    \\n    % Compute closed-loop eigenvalues\\n    eig_curr = eig(A - B*K);\\n    \\n    % Identify current SP poles (furthest from phugoid poles)\\n    d_mat = abs(eig_curr' - eig_ph);\\n    d_vec = min(d_mat, [], 2);\\n    [~, sorted_idx] = sort(d_vec, 'descend');\\n    poles_sp_curr = eig_curr(sorted_idx(1:2));\\n    \\n    % Calculate error: sum of squared distances to target poles\\n    % Handle permutation (matching order of conjugate pairs)\\n    e1 = sum(abs(poles_sp_curr - target_sp).^2);\\n    e2 = sum(abs(poles_sp_curr - flip(target_sp)).^2);\\n    \\n    err = min(e1, e2);\\nend\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stdout_tail\": \"\\n\\tSponsored License -- for use in support of a program or activity sponsored by MathWorks.\\n\\tNot for government, commercial or other non-sponsored organizational use.\\n\\n{\\b错误使用 *\\n用于矩阵乘法的维度不正确。请检查并确保第一个矩阵中的列数与第二个矩阵中的行数匹配。要单独对矩阵的\\n每个元素进行运算，请使用 TIMES (.*)执行按元素相乘。\\n\\n出错 model (第 66 行)\\nk0 = (K_full_guess * P * inv(P'*P))';\\n                   ^\\n}\\b \\n\"}"
+  },
+  "timings": {
+    "agent_s": 374.733,
+    "setup_s": 0.0,
+    "grade_s": 9.467
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=1 9.47s"
+  ]
+}

@@ -142,6 +142,97 @@ def _run_aviary_task(
     return _ret(1, [], None, subs, details)
 
 
+# ---------------------------------------------------------------- gtm_matlab 分支
+
+def _run_matlab_task(
+    task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
+    logs: list[str], applicability: dict[str, str], timeout: float,
+) -> dict[str, Any]:
+    """gtm_matlab：模型 MATLAB 脚本在隔离目录 matlab -batch 执行，写 result.json 判分。
+
+    判分口径与 _run_aviary_task 完全同构（result_keys/numeric_rel_tol/exact_keys，
+    数值对锁定参考的相对误差）——本函数为镜像实现，不改 _run_aviary_task
+    （pycycle/aviary 回归已锁定，动它需整链重验）。
+    """
+    from .solvers.matlab import run_matlab
+    grade_t0 = time.time()
+    iso = IsolatedRun()
+    iso.write("model.m", code)
+    rr = run_matlab(iso.dir, "model", timeout)
+    logs.append(f"matlab exit={rr['exit']} {rr['duration_s']}s"
+                + (" TIMEOUT" if rr["timeout"] else ""))
+
+    def _ret(gate: int, gf: list[str], fm: str | None, subs: dict, details: dict):
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subs.items()}, weights, gate)
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=gf, subscores=subs, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": time.time() - grade_t0},
+            env_digest=env_digest, logs=logs, failure_mode=fm,
+            applicability=applicability)
+
+    if rr["timeout"] or rr["exit"] != 0:
+        return _ret(0, ["timeout" if rr["timeout"] else _SCRIPT_FAIL],
+                    "timeout" if rr["timeout"] else _SCRIPT_FAIL,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None,
+                     "robustness": None},
+                    {"stdout_tail": rr["stdout_tail"][-800:]})
+
+    rj = iso.dir / "result.json"
+    if not rj.exists():
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None,
+                     "robustness": None}, {"missing": "result.json"})
+    try:
+        got = json.loads(rj.read_text())
+        if not isinstance(got, dict):
+            raise ValueError("result.json 顶层必须是对象")
+    except Exception as e:  # noqa: BLE001
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None,
+                     "robustness": None}, {"parse_error": str(e)[:200]})
+
+    g = task["grader"]
+    keys = list(g["result_keys"])
+    exact_keys = set(g.get("exact_keys", []))
+    ref = dict(task["reference"]["values"])
+    tol = float(g.get("numeric_rel_tol", 0.01))
+    present = [k for k in keys if k in got]
+    req_ratio = round(len(present) / len(keys), 4)
+    if len(present) < len(keys):
+        logs.append(f"missing keys: {sorted(set(keys) - set(got))}")
+
+    hits: dict[str, Any] = {}
+    for k in keys:
+        if k not in got:
+            hits[k] = {"status": "missing"}
+            continue
+        if k in exact_keys or not isinstance(got[k], (int, float)) or not isinstance(ref.get(k), (int, float)):
+            ok = (str(got[k]) == str(ref.get(k)))
+            hits[k] = {"status": "exact", "ok": bool(ok),
+                       "got": got[k], "ref": ref.get(k)}
+        else:
+            rv = float(ref[k])
+            gv = float(got[k])
+            rel = abs(gv - rv) / max(abs(rv), 1e-12)
+            ok = rel <= tol
+            hits[k] = {"status": "tol", "ok": bool(ok), "rel_err": round(rel, 6),
+                       "got": gv, "ref": rv}
+    n_ok = sum(1 for v in hits.values() if v.get("ok"))
+    physics = round(n_ok / max(1, len(keys)), 4)
+    subs = {"physics": physics, "requirements": req_ratio,
+            "objective": None, "robustness": None}
+    details = {"kind": "gtm_matlab", "hits": hits,
+               "physics_hits": f"{n_ok}/{len(keys)}", "rel_tol": tol,
+               "matlab_s": rr["duration_s"]}
+    return _ret(1, [], None, subs, details)
+
+
 def run_task(
     task: TaskSpec, *, provider: str, model: str | None, seed: int,
     env_digest: str, prompt_cache: dict[str, str], assets_root: Path,
@@ -153,6 +244,7 @@ def run_task(
     prompt = prompt_cache[task.id]
     g = task["grader"]
     timeout = float(task["limits"]["wall_clock_s"])
+    kind = g.get("exec_kind", "foam_basic")
 
     # ---- 模型脚本 ----
     if provider == "oracle":
@@ -160,16 +252,21 @@ def run_task(
         meta = {"provider": "oracle", "note": "GT files verbatim writer"}
     else:
         out = get_answer(provider, task, prompt, seed=seed, model=model,
-                         max_attempts=int(task["limits"]["attempts"]), expect="code")
+                         max_attempts=int(task["limits"]["attempts"]),
+                         expect="matlab" if kind == "gtm_matlab" else "code")
         code, meta = out["answer"], out["meta"]
 
     if provider == "oracle":
         violations, syntax_ok = [], True
+    elif kind == "gtm_matlab":
+        # MATLAB 方言：正则级逃逸检查（无 AST）；语法错误由 -batch 非零退出拦截
+        from .solvers.matlab import matlab_static_check
+        violations = matlab_static_check(code)
+        syntax_ok = True
     else:
         violations, syntax_ok = static_check(code)
     logs = [f"violations={violations}", f"syntax_ok={syntax_ok}"]
-    kind = task["grader"].get("exec_kind", "foam_basic")
-    if kind in ("aviary_mission", "pycycle_cycle"):
+    if kind in ("aviary_mission", "pycycle_cycle", "gtm_matlab"):
         applicability = {"physics": "numeric_vs_reference", "requirements": "result.json 键完备",
                          "objective": "N/A(静态任务)", "robustness": "N/A(无扰动重算)"}
     else:
@@ -199,6 +296,9 @@ def run_task(
     if kind in ("aviary_mission", "pycycle_cycle"):
         return _run_aviary_task(task, code, meta, t0, env_digest, logs,
                                 applicability, companions=companions)
+    if kind == "gtm_matlab":
+        return _run_matlab_task(task, code, meta, t0, env_digest, logs,
+                                applicability, timeout)
 
     # ---- 1) 沙箱跑脚本 → 算例目录 ----
     grade_t0 = time.time()

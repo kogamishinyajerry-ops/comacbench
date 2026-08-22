@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_05",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Define the longitudinal state matrix A\\nA = [-0.0055, 0.03, 0.0, -32.174;\\n     -0.025, -0.62, 745.0, 0.0;\\n      0.0, -0.0042, -0.75, 0.0;\\n      0.0, 0.0, 1.0, 0.0];\\n\\n% Compute the eigenvalues of the system matrix\\ne = eig(A);\\n\\n% Vectors to store the natural frequencies and damping ratios\\nomegas = [];\\nzetas = [];\\n\\n% Process eigenvalues to find complex pairs\\n% We look for eigenvalues with positive imaginary parts to identify the pairs\\nfor i = 1:length(e)\\n    val = e(i);\\n    if imag(val) > 0\\n        % Natural frequency (magnitude of the eigenvalue)\\n        wn = abs(val);\\n        % Damping ratio (zeta = -sigma / omega_n)\\n        sigma = real(val);\\n        zeta = -sigma / wn;\\n        \\n        omegas = [omegas, wn];\\n        zetas = [zetas, zeta];\\n    end\\nend\\n\\n% Sort results by frequency to identify modes\\n% The Short Period mode has the higher frequency\\n% The Phugoid mode has the lower frequency\\n[omegas, idx] = sort(omegas);\\nzetas = zetas(idx);\\n\\n% Assign values to the corresponding modes\\n% Index 1 is lower frequency (Phugoid)\\n% Index 2 is higher frequency (Short Period)\\nomega_ph = omegas(1);\\nzeta_ph = zetas(1);\\n\\nomega_sp = omegas(2);\\nzeta_sp = zetas(2);\\n\\n% Create the result structure\\nresult.omega_sp = omega_sp;\\nresult.zeta_sp = zeta_sp;\\nresult.omega_ph = omega_ph;\\nresult.zeta_ph = zeta_ph;\\n\\n% Write the results to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.8958073941628517, \"ref\": 1.8958073941628517}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3613768924577617, \"ref\": 0.3613768924577617}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.03065864561839391, \"ref\": 0.03065864561839391}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.08640352975646677, \"ref\": 0.08640352975646677}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 7.8}"
+  },
+  "timings": {
+    "agent_s": 48.74,
+    "setup_s": 0.0,
+    "grade_s": 7.806
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.8s"
+  ]
+}

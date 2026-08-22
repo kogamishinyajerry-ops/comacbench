@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lat_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A = [ -0.08, 0.02, -0.92, 0.048 ;\\n      -3.9,  -1.35, -0.05, 0.0 ;\\n       0.58, -0.03, -0.3,  0.0 ;\\n       0.0,   1.0,   0.0,  0.0 ];\\n\\nV = eig(A);\\n\\n% Separate real eigenvalues from the Dutch-roll complex pair\\ntol = 1e-12;\\nis_real = abs(imag(V)) < tol;\\nreal_eigs = sort(real(V(is_real)));   % ascending: most negative first\\n\\n% Roll mode = more negative real root; spiral = the other real root\\nroll_mode_lambda   = real_eigs(1);\\nspiral_mode_lambda = real_eigs(2);\\n\\n% Dutch roll: pick one member of the conjugate pair\\ndr_idx = find(~is_real, 1);\\nlambda_dr = V(dr_idx);\\nsigma_dr  = real(lambda_dr);\\nomega_d   = abs(imag(lambda_dr));\\nomega_n   = sqrt(sigma_dr^2 + omega_d^2);\\nzeta_dr   = -sigma_dr / omega_n;\\n\\ndutch_roll_omega = omega_n;\\ndutch_roll_zeta  = zeta_dr;\\n\\n% Build result struct with required key order\\nresult.dutch_roll_omega  = dutch_roll_omega;\\nresult.dutch_roll_zeta   = dutch_roll_zeta;\\nresult.roll_mode_lambda  = roll_mode_lambda;\\nresult.spiral_mode_lambda = spiral_mode_lambda;\\n\\nfid = fopen('result.json','w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"dutch_roll_omega\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.8405339422193666, \"ref\": 0.8405339422193666}, \"dutch_roll_zeta\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.1435007766744307, \"ref\": 0.1435007766744307}, \"roll_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -1.4318742618421867, \"ref\": -1.4318742618421867}, \"spiral_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.05689119109841225, \"ref\": -0.05689119109841225}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 7.74}"
+  },
+  "timings": {
+    "agent_s": 23.349,
+    "setup_s": 0.0,
+    "grade_s": 7.739
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.74s"
+  ]
+}

@@ -1,0 +1,56 @@
+id: gtm_trim_03
+registry_id: gtm.transport_control
+domain: flight_control
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: gtm-flight@selfbuilt-2026-08-22+matlabR2026a
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- matlab
+input:
+  prompt_file: tasks/gtm.transport_control/gtm_trim_03.md
+  prompt_sha256: 52daf36f80b7528d7c2dd15a7f66accf41e64f4d18bc0b2f5401107076ca4d4f
+  assets: []
+output_contract:
+- result.json
+reference:
+  source: gold 脚本预计算（MATLAB R2026a -batch，确定性；自建任务）
+  revision: gtm-flight@selfbuilt-2026-08-22+matlabR2026a
+  values:
+    alpha_trim_deg: 3.8566594021892953
+    thrust_lbf: 12175.40733851003
+  rel_tol: 0.01
+  uncertainty_note: 确定性特征值/钉死协议口径计算；容差覆盖数值口径差
+grader:
+  answer_format: matlab
+  exec_kind: gtm_matlab
+  validity_gate: true
+  result_keys:
+  - alpha_trim_deg
+  - thrust_lbf
+  numeric_rel_tol: 0.01
+  exact_keys: []
+  solver_backend: matlab-batch-r2026a
+  oracle_source: data/gtm/transport_control/gold/trim_03.m
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=数值字段命中均值（1% 容差）；requirements=result.json 键完备
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 900
+  attempts: 3
+license_provenance:
+  source: 自建（受 NASA GTM 定位启发，未镜像 GTM_DesignSim）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: gtm-flight@selfbuilt-2026-08-22+matlabR2026a

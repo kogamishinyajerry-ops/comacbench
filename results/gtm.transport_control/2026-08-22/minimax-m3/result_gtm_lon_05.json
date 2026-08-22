@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_05",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A = [-0.0055, 0.03,   0.0, -32.174;\\n     -0.025,  -0.62,  745.0, 0.0;\\n      0.0,   -0.0042, -0.75, 0.0;\\n      0.0,    0.0,     1.0,   0.0];\\n\\n% Eigenvalues of the longitudinal state matrix\\neigA = eig(A);\\n\\nn = length(eigA);\\nomega_n_arr = zeros(n,1);\\nzeta_arr    = zeros(n,1);\\n\\nfor i = 1:n\\n    lam    = eigA(i);\\n    sigma  = real(lam);                      % real part (negative for stable)\\n    omega_d = abs(imag(lam));                % damped natural frequency\\n    omega_n_arr(i) = sqrt(sigma^2 + omega_d^2);\\n    zeta_arr(i)    = -sigma / omega_n_arr(i);% damping ratio\\nend\\n\\n% Keep only the complex-conjugate pair members in the upper half-plane\\ncomplex_idx = imag(eigA) > 0;\\nwn_complex   = omega_n_arr(complex_idx);\\nzeta_complex = zeta_arr(complex_idx);\\n\\n% Sort by natural frequency (descending): highest = short-period, lowest = phugoid\\n[wn_sorted, sort_idx] = sort(wn_complex, 'descend');\\nzeta_sorted = zeta_complex(sort_idx);\\n\\nomega_sp = wn_sorted(1);\\nzeta_sp  = zeta_sorted(1);\\nomega_ph = wn_sorted(end);\\nzeta_ph  = zeta_sorted(end);\\n\\nresult = struct( ...\\n    'omega_sp', omega_sp, ...\\n    'zeta_sp',  zeta_sp,  ...\\n    'omega_ph', omega_ph, ...\\n    'zeta_ph',  zeta_ph );\\n\\nfid = fopen('result.json','w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.8958073941628515, \"ref\": 1.8958073941628517}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3613768924577618, \"ref\": 0.3613768924577617}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.03065864561839391, \"ref\": 0.03065864561839391}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.08640352975646677, \"ref\": 0.08640352975646677}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 7.58}"
+  },
+  "timings": {
+    "agent_s": 20.947,
+    "setup_s": 0.0,
+    "grade_s": 7.578
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.58s"
+  ]
+}

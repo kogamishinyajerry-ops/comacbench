@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control / lon_03）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nA = [-0.006 0.025 0.0 -32.174; -0.02 -0.55 780.0 0.0; 0.0 -0.0035 -0.65 0.0; 0.0 0.0 1.0 0.0];\\nev = eig(A);\\nlam = ev(imag(ev) > 0);            % 每对共轭取一个（结构已验证：恰两对）\\n[~, ord] = sort(abs(lam), 'descend');\\nlam = lam(ord);                    % 大模=短周期，小模=长周期\\nwn = abs(lam); ze = -real(lam) ./ wn;\\nr = struct('omega_sp', wn(1), 'zeta_sp', ze(1), 'omega_ph', wn(2), 'zeta_ph', ze(2));\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.7571236211304584, \"ref\": 1.7571236211304584}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3415178778855253, \"ref\": 0.3415178778855253}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.0270084233039195, \"ref\": 0.0270084233039195}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.1077763665150383, \"ref\": 0.1077763665150383}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 10.74}"
+  },
+  "timings": {
+    "agent_s": 10.741,
+    "setup_s": 0.0,
+    "grade_s": 10.741
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 10.74s"
+  ]
+}

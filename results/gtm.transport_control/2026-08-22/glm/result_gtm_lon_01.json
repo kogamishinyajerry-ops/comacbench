@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Define the state-space matrix A\\nA = [\\n    -0.0065, 0.035, 0.0, -32.174;\\n    -0.03,   -0.7,   700.0, 0.0;\\n     0.0,    -0.005, -0.9,  0.0;\\n     0.0,     0.0,    1.0,  0.0\\n];\\n\\n% Compute the eigenvalues of the system\\neigenvalues = eig(A);\\n\\n% Calculate natural frequency (omega_n) and damping ratio (zeta)\\n% omega_n = |lambda|\\n% zeta = -real(lambda) / |lambda|\\nomega_n = abs(eigenvalues);\\nzeta = -real(eigenvalues) ./ omega_n;\\n\\n% Sort the natural frequencies in descending order.\\n% The higher frequency corresponds to the Short Period mode.\\n% The lower frequency corresponds to the Phugoid mode.\\n[omega_sorted, sort_idx] = sort(omega_n, 'descend');\\nzeta_sorted = zeta(sort_idx);\\n\\n% Since eigenvalues come in complex conjugate pairs, the sorted array\\n% will have the SP pair first (indices 1 and 2) and Phugoid pair last (indices 3 and 4).\\nomega_sp = omega_sorted(1);\\nzeta_sp   = zeta_sorted(1);\\n\\nomega_ph = omega_sorted(3);\\nzeta_ph   = zeta_sorted(3);\\n\\n% Construct the result structure\\nresult.omega_sp = omega_sp;\\nresult.zeta_sp  = zeta_sp;\\nresult.omega_ph = omega_ph;\\nresult.zeta_ph  = zeta_ph;\\n\\n% Write the results to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.0322989399361586, \"ref\": 2.0322989399361586}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.3936980582295175, \"ref\": 0.3936980582295175}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.03418303090364133, \"ref\": 0.03418303090364133}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.0917956518856822, \"ref\": 0.0917956518856822}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 8.15}"
+  },
+  "timings": {
+    "agent_s": 80.205,
+    "setup_s": 0.0,
+    "grade_s": 8.146
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.15s"
+  ]
+}

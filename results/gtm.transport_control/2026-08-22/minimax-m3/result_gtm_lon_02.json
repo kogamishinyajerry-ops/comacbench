@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lon_02",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"A = [ -0.006, 0.045, 0.0, -32.174;\\n      -0.042, -0.85, 620.0, 0.0;\\n       0.0, -0.0065, -1.1, 0.0;\\n       0.0, 0.0, 1.0, 0.0 ];\\n\\nV = eig(A);\\n\\n% Identify short-period (high frequency) and phugoid (low frequency) pairs\\nmags = abs(V);\\n[~, idx] = sort(mags);\\nph_idx = idx(1:2);   % smallest |lambda| -> phugoid\\nsp_idx = idx(3:4);   % largest  |lambda| -> short period\\n\\n% Use one eigenvalue from each complex conjugate pair\\nlambda_ph = V(ph_idx(1));\\nlambda_sp = V(sp_idx(1));\\n\\nomega_ph = abs(lambda_ph);\\nzeta_ph  = -real(lambda_ph) / abs(lambda_ph);\\n\\nomega_sp = abs(lambda_sp);\\nzeta_sp  = -real(lambda_sp) / abs(lambda_sp);\\n\\nresult = struct( ...\\n    'omega_sp', omega_sp, ...\\n    'zeta_sp',  zeta_sp,  ...\\n    'omega_ph', omega_ph, ...\\n    'zeta_ph',  zeta_ph );\\n\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"omega_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.228375957492065, \"ref\": 2.228375957492065}, \"zeta_sp\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.4376004944739859, \"ref\": 0.4376004944739859}, \"omega_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.04205768734529087, \"ref\": 0.04205768734529087}, \"zeta_ph\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.06803938371687934, \"ref\": 0.06803938371687934}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 7.77}"
+  },
+  "timings": {
+    "agent_s": 36.576,
+    "setup_s": 0.0,
+    "grade_s": 7.77
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 7.77s"
+  ]
+}

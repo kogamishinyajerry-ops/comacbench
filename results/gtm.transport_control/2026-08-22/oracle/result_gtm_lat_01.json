@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lat_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"%% gold 解（gtm.transport_control / lat_01）——判分参考预计算用，模型不可见。\\n% 自包含确定性脚本：以 model.m 在隔离目录 matlab -batch model 执行，cwd 写 result.json。\\nA = [-0.08 0.02 -0.92 0.048; -3.9 -1.35 -0.05 0.0; 0.58 -0.03 -0.3 0.0; 0.0 1.0 0.0 0.0];\\nev = eig(A);\\ncpx = ev(imag(ev) > 0);            % 荷兰滚对（结构已验证：恰一对）\\nrl  = ev(abs(imag(ev)) < 1e-9);    % 两个实根（结构已验证）\\nlam = cpx(1);\\nwn_dr = abs(lam); z_dr = -real(lam) / wn_dr;\\nroll_lam = min(real(rl)); spiral_lam = max(real(rl));\\nr = struct('dutch_roll_omega', wn_dr, 'dutch_roll_zeta', z_dr, ...\\n           'roll_mode_lambda', roll_lam, 'spiral_mode_lambda', spiral_lam);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"dutch_roll_omega\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.8405339422193666, \"ref\": 0.8405339422193666}, \"dutch_roll_zeta\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.1435007766744307, \"ref\": 0.1435007766744307}, \"roll_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -1.4318742618421867, \"ref\": -1.4318742618421867}, \"spiral_mode_lambda\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -0.05689119109841225, \"ref\": -0.05689119109841225}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 8.85}"
+  },
+  "timings": {
+    "agent_s": 8.851,
+    "setup_s": 0.0,
+    "grade_s": 8.85
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.85s"
+  ]
+}

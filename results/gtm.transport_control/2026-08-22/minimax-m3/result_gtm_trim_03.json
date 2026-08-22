@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_trim_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Steady level-flight trim for a transport aircraft\\n% Trim conditions: L = W, T = D\\n% Solve for alpha and required thrust\\n\\nW       = 175000.0;   % weight (lbf)\\nS       = 2050.0;     % wing area (ft^2)\\nh       = 26000.0;    % altitude (ft)\\nV       = 690.0;      % true airspeed (ft/s)\\n\\n% Aerodynamic coefficients\\nCL0     = 0.12;       % lift at zero alpha\\nCLalpha = 4.9;        % lift curve slope (1/rad)\\nCD0     = 0.023;      % zero-lift drag coefficient\\nk       = 0.041;      % induced drag factor\\n\\n% Atmosphere\\nrho0   = 0.0023769;   % sea-level density (slug/ft^3)\\nHscale = 23800.0;     % scale height (ft)\\n\\n% Engine\\nT0 = 54000.0;         % reference thrust (lbf)\\nV0 = 690.0;           % reference speed (ft/s)\\n\\n% --- Atmosphere and dynamic pressure ---\\nrho  = rho0 * exp(-h / Hscale);\\nqbar = 0.5 * rho * V^2;\\n\\n% --- Trim lift coefficient and angle of attack ---\\n% L = qbar * S * CL = W  ->  CL = W/(qbar*S)\\nCL_trim   = W / (qbar * S);\\nalpha_rad = (CL_trim - CL0) / CLalpha;\\nalpha_deg = alpha_rad * 180.0 / pi;\\n\\n% --- Trim drag and required thrust ---\\n% D = qbar * S * CD,  with CD = CD0 + k * CL^2\\nCD_trim = CD0 + k * CL_trim^2;\\nD_trim  = qbar * S * CD_trim;\\n\\n% Steady level flight: thrust equals drag\\nT_required = D_trim;\\n\\n% --- Build result struct and write JSON ---\\nresult = struct();\\nresult.alpha_trim_deg = alpha_deg;\\nresult.thrust_lbf     = T_required;\\n\\njson_text = jsonencode(result);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, json_text);\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 3.8566594021892953, \"ref\": 3.8566594021892953}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 12175.40733851003, \"ref\": 12175.40733851003}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 11.03}"
+  },
+  "timings": {
+    "agent_s": 27.74,
+    "setup_s": 0.0,
+    "grade_s": 11.031
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 11.03s"
+  ]
+}

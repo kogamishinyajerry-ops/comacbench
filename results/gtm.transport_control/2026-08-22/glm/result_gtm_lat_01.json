@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_lat_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"% Define the state-space matrix A\\nA = [ -0.08, 0.02, -0.92, 0.048;\\n      -3.9,  -1.35, -0.05, 0.0;\\n       0.58, -0.03, -0.3,  0.0;\\n       0.0,   1.0,   0.0,  0.0 ];\\n\\n% Compute eigenvalues and natural frequencies/damping ratios\\n% damp(A) returns eigenvalues, natural frequencies (Wn), and damping ratios (Zeta)\\n[evals, Wn, Zeta] = damp(A);\\n\\n% Tolerance for identifying real vs complex eigenvalues\\ntol = 1e-6;\\n\\n% Identify indices of complex (Dutch Roll) and real (Roll/Spiral) modes\\nis_complex = abs(imag(evals)) > tol;\\nis_real = ~is_complex;\\n\\n% Extract Dutch Roll parameters (complex conjugate pair)\\n% Take the first entry of the complex pair\\nidx_dr = find(is_complex, 1);\\ndutch_roll_omega = Wn(idx_dr);\\ndutch_roll_zeta = Zeta(idx_dr);\\n\\n% Extract Real eigenvalues\\nreal_evals = evals(is_real);\\n\\n% Sort the real eigenvalues to identify Roll and Spiral modes\\n% Roll convergence is the more negative root (smaller value)\\n% Spiral mode is the other real root (larger value)\\nsorted_real_evals = sort(real_evals);\\n\\nroll_mode_lambda = sorted_real_evals(1);\\nspiral_mode_lambda = sorted_real_evals(2);\\n\\n% Ensure the output values are real scalars\\ndutch_roll_omega = real(dutch_roll_omega);\\ndutch_roll_zeta = real(dutch_roll_zeta);\\nroll_mode_lambda = real(roll_mode_lambda);\\nspiral_mode_lambda = real(spiral_mode_lambda);\\n\\n% Construct the results structure\\nresults = struct(...\\n    'dutch_roll_omega', dutch_roll_omega, ...\\n    'dutch_roll_zeta', dutch_roll_zeta, ...\\n    'roll_mode_lambda', roll_mode_lambda, ...\\n    'spiral_mode_lambda', spiral_mode_lambda ...\\n);\\n\\n% Write results to result.json\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(results));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"dutch_roll_omega\": {\"status\": \"exact\", \"ok\": false, \"got\": [], \"ref\": 0.8405339422193666}, \"dutch_roll_zeta\": {\"status\": \"exact\", \"ok\": false, \"got\": [], \"ref\": 0.1435007766744307}, \"roll_mode_lambda\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.039732, \"got\": 0.05689119109841225, \"ref\": -1.4318742618421867}, \"spiral_mode_lambda\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 15.774413, \"got\": 0.8405339422193666, \"ref\": -0.05689119109841225}}, \"physics_hits\": \"0/4\", \"rel_tol\": 0.01, \"matlab_s\": 13.92}"
+  },
+  "timings": {
+    "agent_s": 69.852,
+    "setup_s": 0.0,
+    "grade_s": 13.921
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 13.92s"
+  ]
+}

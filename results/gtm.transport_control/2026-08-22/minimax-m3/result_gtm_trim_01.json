@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_trim_01",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Inputs\\nW = 230000.0;       % lbf\\nS = 2400.0;         % ft^2\\nh = 31000.0;        % ft\\nV = 730.0;          % ft/s\\nCL0 = 0.15;\\nCLalpha = 5.2;      % per rad\\nCD0 = 0.021;\\nk = 0.043;\\nrho0 = 0.0023769;   % slug/ft^3\\nH_scale = 23800;    % ft\\nT0 = 62000.0;       % lbf at V0 = 730 ft/s\\nV0 = 730.0;         % ft/s\\n\\n% Atmosphere (simple exponential)\\nrho = rho0 * exp(-h/H_scale);\\nqbar = 0.5 * rho * V^2;\\n\\n% Steady level-flight trim: lift equals weight\\nCL_trim = W / (qbar * S);\\n\\n% Angle of attack from lift curve (CL = CL0 + CLalpha*alpha)\\nalpha_trim_rad = (CL_trim - CL0) / CLalpha;\\nalpha_trim_deg = alpha_trim_rad * 180 / pi;\\n\\n% Drag from drag polar; required thrust equals drag in steady level flight\\nCD_trim = CD0 + k * CL_trim^2;\\nthrust_lbf = qbar * S * CD_trim;\\n\\n% Write result.json\\nresult = struct('alpha_trim_deg', alpha_trim_deg, 'thrust_lbf', thrust_lbf);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(result), 'char');\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"alpha_trim_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 4.480434409025699, \"ref\": 4.480434409025699}, \"thrust_lbf\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 14182.281390404429, \"ref\": 14182.281390404425}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.01, \"matlab_s\": 8.6}"
+  },
+  "timings": {
+    "agent_s": 45.308,
+    "setup_s": 0.0,
+    "grade_s": 8.599
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.6s"
+  ]
+}

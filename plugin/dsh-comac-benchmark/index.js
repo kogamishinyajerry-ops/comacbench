@@ -57,6 +57,7 @@ const ENV_NEEDS = {
   "pycycle.engine_cycle": { venv: true, note: "需仓库 .venv（om-pycycle 钉子栈）" },
   "aviary.transport_mission": { venv: true, note: "需仓库 .venv-aviary（aviary 1.0.1 + openmdao 3.45 栈）" },
   "cadgen.local_validity": { venv: true, note: "需仓库 .venv-cad（cadquery 2.8 + OCP，判分侧几何检查）" },
+  "gtm.transport_control": { matlab: true, note: "需 MATLAB batch（runners/solvers/matlab.py：MATLAB_BIN 或 /Applications/MATLAB_R2026a.app/bin/matlab）" },
 };
 // provider → keychain service（起跑时注入 env；离线 provider 不需要）
 // glmvl = GLM 视觉通道（multimodal_only 任务准入；免费档 glm-4v-flash 实测可用）
@@ -139,6 +140,12 @@ function envCheck(rid, provider) {
   }
   const kc = KEYCHAIN_OF_PROVIDER[provider];
   if (kc && !keychainKey(kc.service)) problems.push(`Keychain 无 ${kc.service}（无法注入 ${kc.env}）`);
+  if (needs?.matlab) {
+    const bin = process.env.MATLAB_BIN ?? "/Applications/MATLAB_R2026a.app/bin/matlab";
+    if (!existsSync(bin) && !spawnSync("which", ["matlab"], { encoding: "utf8" }).stdout?.trim()) {
+      problems.push(`MATLAB 不可用（${bin} 且 PATH 无 matlab）——gtm 判分需要`);
+    }
+  }
   return problems;
 }
 

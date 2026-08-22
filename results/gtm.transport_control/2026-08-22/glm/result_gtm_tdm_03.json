@@ -1,0 +1,38 @@
+{
+  "task_id": "gtm_tdm_03",
+  "registry_id": "gtm.transport_control",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Closed-loop pitch-axis tracking simulation\\n% Define system matrices\\nA_cl = [-0.6, 1.0, 0.1; -4.4, -1.6, 0.2; 1.0, 0.5, -4.0];\\nB_cl = [0.0; 1.0; 0.5];\\nC_cl = [1.0, 0.0, 0.0];\\n\\n% Simulation parameters\\ndt = 0.01;\\nT = 30;\\nt_steps = 0:dt:T;\\nN_steps = length(t_steps);\\n\\n% Exact zero-order-hold discretization\\nI_mat = eye(size(A_cl));\\nAd = expm(A_cl * dt);\\nBd = A_cl \\\\ ((Ad - I_mat) * B_cl);\\n\\n% Initialize state vector x[0] = 0\\nx = zeros(3, N_steps);\\nu = 1; % Unit step input\\n\\n% Time-stepping simulation\\nfor k = 1:(N_steps-1)\\n    x(:, k+1) = Ad * x(:, k) + Bd * u;\\nend\\n\\n% Output response y(t)\\ny = C_cl * x;\\ny = y(:); % Ensure column vector\\n\\n% Compute DC value y_inf\\ny_inf = -C_cl * (A_cl \\\\ B_cl);\\n\\n% --- Rise Time (10% - 90%) ---\\nthr_low = 0.10 * y_inf;\\nthr_high = 0.90 * y_inf;\\n\\n% Find first indices exceeding thresholds\\nidx_low = find(y >= thr_low, 1);\\nidx_high = find(y >= thr_high, 1);\\n\\n% Linear interpolation for time\\nt_low = 0;\\nif ~isempty(idx_low) && idx_low > 1\\n    k_l = idx_low - 1;\\n    t_k = t_steps(k_l);\\n    y_k = y(k_l);\\n    y_k1 = y(idx_low);\\n    if y_k1 ~= y_k\\n        t_low = t_k + (thr_low - y_k) * dt / (y_k1 - y_k);\\n    else\\n        t_low = t_steps(idx_low);\\n    end\\nend\\n\\nt_high = 0;\\nif ~isempty(idx_high) && idx_high > 1\\n    k_h = idx_high - 1;\\n    t_k = t_steps(k_h);\\n    y_k = y(k_h);\\n    y_k1 = y(idx_high);\\n    if y_k1 ~= y_k\\n        t_high = t_k + (thr_high - y_k) * dt / (y_k1 - y_k);\\n    else\\n        t_high = t_steps(idx_high);\\n    end\\nend\\n\\nrise_time_s = t_high - t_low;\\n\\n% --- Percent Overshoot ---\\nmax_y = max(y);\\novershoot_pct = (max_y - y_inf) / abs(y_inf) * 100;\\n\\n% --- Settling Time (2%) ---\\ntol = 0.02 * abs(y_inf);\\n% Find indices where error exceeds tolerance\\nerr_indices = find(abs(y - y_inf) > tol);\\n\\nsettling_time_s = 0;\\nif ~isempty(err_indices)\\n    % Time of the LAST grid sample where condition is met\\n    settling_time_s = t_steps(err_indices(end));\\nend\\n\\n% --- Save Results ---\\nresult = struct();\\nresult.rise_time_s = rise_time_s;\\nresult.overshoot_pct = overshoot_pct;\\nresult.settling_time_s = settling_time_s;\\n\\nfid = fopen('result.json', 'w');\\nfprintf(fid, '%s', jsonencode(result));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"rise_time_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.6893234586915161, \"ref\": 0.6893234586915161}, \"overshoot_pct\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 18.82295751113392, \"ref\": 18.82295751113392}, \"settling_time_s\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 3.61, \"ref\": 3.61}}, \"physics_hits\": \"3/3\", \"rel_tol\": 0.01, \"matlab_s\": 8.19}"
+  },
+  "timings": {
+    "agent_s": 30.734,
+    "setup_s": 0.0,
+    "grade_s": 8.194
+  },
+  "environment_digest": "sha256:19a19f0c9da6ccb8ed1e59bb770b8b44e73012c113b3f8e517037deffad4bec6",
+  "assets_revision": "gtm-flight@selfbuilt-2026-08-22+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.19s"
+  ]
+}
