@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_md_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck 'model.inp' (current directory) for the\\nfirst natural frequencies of a cantilever beam.\\n\\nGeometry : 200 (x) x 12 (y) x 6 (z) mm, clamped at x = 0\\nUnits    : mm, N, MPa, tonne  (steel: E=210000 MPa, nu=0.3, rho=7.85e-9)\\nElements : C3D20 20-node hexahedra on a structured mesh (>=16 x >=4 x >=2)\\nAnalysis : *STEP / *FREQUENCY, 4 modes (linear perturbation)\\n\\nThe script only writes the deck; it does not run any solver and needs no\\nexternal files, network or subprocesses.\\n\\\"\\\"\\\"\\n\\n# ------------------------------------------------------------------ parameters\\nLX, LY, LZ = 200.0, 12.0, 6.0          # geometry (mm): x, y, z\\nE, NU, RHO = 210000.0, 0.3, 7.85e-9    # steel (MPa, -, tonne/mm^3)\\nNELX, NELY, NELZ = 32, 4, 2            # elements along x, y, z (>=16, >=4, >=2)\\nNMODES = 4                             # number of eigenvalues requested\\nMAXFLD = 16                            # max comma-separated entries per data line\\n\\n# ------------------------------------------------------ structured node layout\\n# Grid of (2*NEL+1) points per direction; C3D20 only uses element corners\\n# (all indices even) and edge mid-side nodes (exactly one index odd).\\nNXA, NYA, NZA = 2 * NELX, 2 * NELY, 2 * NELZ\\n\\nnode_num = {}      # (a, b, c) grid index -> node number\\nnodes = []         # (num, x, y, z)\\nnum = 0\\nfor a in range(NXA + 1):\\n    for b in range(NYA + 1):\\n        for c in range(NZA + 1):\\n            if (a % 2) + (b % 2) + (c % 2) > 1:\\n                continue                      # face/body centres: not used by C3D20\\n            num += 1\\n            node_num[(a, b, c)] = num\\n            nodes.append((num, LX * a / NXA, LY * b / NYA, LZ * c / NZA))\\n\\n# C3D20 local node ordering (Abaqus/CalculiX convention), (xi, eta, zeta)\\nLOC = [\\n    (-1, -1, -1), (1, -1, -1), (1, 1, -1), (-1, 1, -1),   # 1-4  bottom corners\\n    (-1, -1,  1), (1, -1,  1), (1, 1,  1), (-1, 1,  1),   # 5-8  top corners\\n    ( 0, -1, -1), (1,  0, -1), (0, 1, -1), (-1, 0, -1),   # 9-12 bottom edges\\n    ( 0, -1,  1), (1,  0,  1), (0, 1,  1), (-1, 0,  1),   # 13-16 top edges\\n    (-1, -1,  0), (1, -1,  0), (1, 1,  0), (-1, 1,  0),   # 17-20 vertical edges\\n]\\n\\nelements = []\\neid = 0\\nfor i in range(NELX):\\n    for j in range(NELY):\\n        for k in range(NELZ):\\n            eid += 1\\n            conn = [node_num[(2 * i + p + 1, 2 * j + q + 1, 2 * k + r + 1)]\\n                    for (p, q, r) in LOC]\\n            elements.append((eid, conn))\\n\\n# ------------------------------------------------------------------- node sets\\nnroot = sorted(n for (a, b, c), n in node_num.items() if a == 0)    # clamped face\\nntip = sorted(n for (a, b, c), n in node_num.items() if a == NXA)   # tip face\\n\\n# ---------------------------------------------------------------- deck writing\\ndef emit_fields(lines, values, limit=MAXFLD):\\n    \\\"\\\"\\\"Append values wrapped over data lines with at most `limit` entries each.\\\"\\\"\\\"\\n    vals = [str(v) for v in values]\\n    for s in range(0, len(vals), limit):\\n        lines.append(\\\", \\\".join(vals[s:s + limit]))\\n\\nlines = []\\nlines.append(\\\"** Cantilever beam natural frequencies (mm, N, MPa, tonne/mm^3)\\\")\\nlines.append(\\\"** Structured C3D20 mesh: %d x %d x %d elements\\\" % (NELX, NELY, NELZ))\\nlines.append(\\\"**\\\")\\n\\n# nodes\\nlines.append(\\\"*NODE, NSET=NALL\\\")\\nfor n, x, y, z in nodes:\\n    lines.append(\\\"%d, %.6f, %.6f, %.6f\\\" % (n, x, y, z))\\n\\n# elements (connectivity wrapped: 16 entries max per data line -> 16 + 5)\\nlines.append(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\nfor e, conn in elements:\\n    emit_fields(lines, [e] + conn)\\n\\n# node sets (wrapped at 16 entries per line)\\nlines.append(\\\"*NSET, NSET=NROOT\\\")\\nemit_fields(lines, nroot)\\nlines.append(\\\"*NSET, NSET=NTIP\\\")\\nemit_fields(lines, ntip)\\n\\n# material (density required for *FREQUENCY)\\nlines.append(\\\"*MATERIAL, NAME=STEEL\\\")\\nlines.append(\\\"*ELASTIC, TYPE=ISO\\\")\\nlines.append(\\\"%.1f, %.1f\\\" % (E, NU))\\nlines.append(\\\"*DENSITY\\\")\\nlines.append(\\\"%.6e\\\" % RHO)\\nlines.append(\\\"*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\")\\n\\n# fully clampe\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"f1_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.000388, \"got\": 125.7768, \"ref\": 125.728}, \"f2_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.000311, \"got\": 250.6882, \"ref\": 250.6103}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.03, \"ccx_s\": 0.3}"
+  },
+  "timings": {
+    "agent_s": 108.729,
+    "setup_s": 0.0,
+    "grade_s": 0.337
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.3s"
+  ]
+}

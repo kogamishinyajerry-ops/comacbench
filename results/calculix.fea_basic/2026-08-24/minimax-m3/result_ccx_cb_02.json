@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_cb_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nBuild a CalculiX 2.23 input deck for a cantilever beam\\nL=120, H=10, T=5 mm, tip load -800 N, C3D20 mesh.\\nWrites 'model.inp' in the current working directory.\\n\\\"\\\"\\\"\\nimport os\\n\\n# ---------------------------------------------------------------\\n#  Geometry / material\\n# ---------------------------------------------------------------\\nL = 120.0          # length along x [mm]\\nH = 10.0           # height along y [mm]\\nT = 5.0            # width  along z [mm]\\nFy_total = -800.0  # total tip force [N]\\nE  = 210000.0      # MPa\\nNU = 0.3\\nRHO = 7.85e-9      # tonne/mm^3\\n\\n# Mesh (>= 16, 4, 2) -- use 20 x 4 x 2 -> 5*2*1*1 = 20 elements along length? we need >=16.\\nNX = 20            # elements along length\\nNY = 4             # elements through height\\nNZ = 2             # elements through width\\n\\n# ---------------------------------------------------------------\\n#  Node / element generation (structured C3D20 hex mesh)\\n# ---------------------------------------------------------------\\n# Node layout: (NX+1) x (NY+1) x (NZ+1) corner nodes\\n# First create corner nodes, then add mid-edge nodes for C3D20.\\n\\n# Numbering convention:\\n#   node_id(ix, iy, iz) where ix in [0..NX], iy in [0..NY], iz in [0..NZ]\\n#   corner nodes numbered first in lexicographic order.\\n\\nNCX = NX + 1\\nNCY = NY + 1\\nNCZ = NZ + 1\\nn_corners = NCX * NCY * NCZ\\n\\n# Map (ix,iy,iz) -> corner node id (1-based)\\ndef corner_id(ix, iy, iz):\\n    return 1 + (ix * NCY + iy) * NCZ + iz\\n\\n# Corner coordinates\\ndef corner_xyz(ix, iy, iz):\\n    x = ix * (L / NX)\\n    y = -H/2.0 + iy * (H / NY)\\n    z = -T/2.0 + iz * (T / NZ)\\n    return x, y, z\\n\\n# ---------------------------------------------------------------\\n#  Assign global node ids:\\n#   1..n_corners        : corner nodes\\n#   then mid-edge nodes (C3D20 has 12 edge mid-nodes per element,\\n#   but shared between elements -> 1 per element edge)\\n#\\n# C3D20 connectivity node ordering (CalculiX / Abaqus convention):\\n#   corners  1..8\\n#   mid-edges 9..20\\n#   mapping per element local index:\\n#     1:(-,-,-)  2:(+,-,-)  3:(+,+,-)  4:(-,+,-)\\n#     5:(-,-,+)  6:(+,-,+)  7:(+,+,+)  8:(-,+,+)\\n#     edge mid-nodes (between corner pairs):\\n#       9:  1-2  (x)\\n#      10:  2-3  (y)\\n#      11:  3-4  (x)\\n#      12:  1-4  (y)\\n#      13:  5-6  (x)\\n#      14:  6-7  (y)\\n#      15:  7-8  (x)\\n#      16:  4-8  (y)\\n#      17:  1-5  (z)\\n#      18:  2-6  (z)\\n#      19:  3-7  (z)\\n#      20:  4-8  (z)\\n# ---------------------------------------------------------------\\n\\n# Collect all nodes (corner + mid-edge) in a global dict, and remember\\n# which elements use which mid-edges so we don't duplicate them.\\n\\n# We'll assign mid-edge node ids once per unique edge, in a deterministic\\n# traversal order (just iterate elements and assign new ids when needed).\\n\\n# Storage\\nnode_xyz = {}        # node_id -> (x,y,z)\\nnext_id = 1\\n\\n# Initialize with corner nodes\\nfor ix in range(NCX):\\n    for iy in range(NCY):\\n        for iz in range(NCZ):\\n            nid = corner_id(ix, iy, iz)\\n            node_xyz[nid] = corner_xyz(ix, iy, iz)\\nnext_id = n_corners + 1\\n\\n# Helper: get or create a mid-edge node id for an edge between two\\n# global corner node ids.  We compute midpoint xyz.\\nedge_node = {}  # (n1, n2) sorted tuple -> node id\\ndef get_edge_node(n1, n2):\\n    key = tuple(sorted((n1, n2)))\\n    if key in edge_node:\\n        return edge_node[key]\\n    global next_id\\n    x1, y1, z1 = node_xyz[n1]\\n    x2, y2, z2 = node_xyz[n2]\\n    midxyz = (0.5*(x1+x2), 0.5*(y1+y2), 0.5*(z1+z2))\\n    nid = next_id\\n    node_xyz[nid] = midxyz\\n    next_id += 1\\n    edge_node[key] = nid\\n    return nid\\n\\n# Build element connectivity.  For each hex element (ex,ey,ez),\\n# ex in [0..NX-1], ey in [0..NY-1], ez in [0..NZ-1].\\n# Local C3D20 corners use the standard (i,j,k) offsets.\\n\\nelems = []  # list of 20-node tuples\\n\\n# offset for each C3D20 corner in (di,dj,dk)  (corner indices 1..8)\\nC20_CORNERS = [\\n    (0,0,0),  # 1\\n    (1,0,0),  # 2\\n    (1,1,0),  # 3\\n    (0,1,0),  # 4\\n    (0,0,1),  # 5\\n    (1,0,1),  # 6\\n    (1,1,1),  # 7\\n    (0,1,1),  # 8\\n]\\n# Edges (corner_\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"ccx_stdout_tail\": \"\\n************************************************************\\n\\nCalculiX Version 2.23, Copyright(C) 1998-2025 Guido Dhondt\\nCalculiX comes with ABSOLUTELY NO WARRANTY. This is free\\nsoftware, and you are welcome to redistribute it under\\ncertain conditions, see gpl.htm\\n\\n************************************************************\\n\\nYou are using an executable made on Sat May 16 10:47:10 UTC 2026\\n *ERROR in splitline: there should not\\n        be more than 16 entries in a \\n        line; \\n1,1,16,19,4,2,17,20,5,316,317,318,319,320,321,322,323\\n\"}"
+  },
+  "timings": {
+    "agent_s": 198.683,
+    "setup_s": 0.0,
+    "grade_s": 0.132
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=201 0.09s"
+  ]
+}

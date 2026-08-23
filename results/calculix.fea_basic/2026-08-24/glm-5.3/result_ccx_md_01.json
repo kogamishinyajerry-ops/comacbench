@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_md_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck (model.inp) for the first natural\\nfrequencies of a steel cantilever beam.\\n\\nGeometry : L = 100 mm (x), H = 10 mm (y), T = 5 mm (z)   (H = 2T)\\nMaterial : E = 210000 MPa, nu = 0.3, rho = 7.85e-9 tonne/mm^3 (steel)\\nMesh     : structured grid of 20-node hexahedra (C3D20),\\n           NX x NY x NZ = 16 x 4 x 2 elements (>= 16 / >= 4 / >= 2)\\nBC       : root face x = 0 fully clamped (node set NROOT)\\nSets     : NROOT (all nodes with x = 0), NTIP (all nodes with x = L)\\nStep     : *STEP with *FREQUENCY, 4 modes (linear perturbation)\\n\\nThe script only writes model.inp into the current working directory.\\nIt does NOT run the solver, uses no subprocess/network and no external files.\\nUnits: mm, N, MPa, tonne/mm^3.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ------------------------------------------------------------------ input\\nL, H, T = 100.0, 10.0, 5.0            # mm: length (x), height (y), width (z)\\nE, NU = 210000.0, 0.3                 # MPa, -\\nRHO = 7.85e-9                         # tonne/mm^3\\nNMODES = 4                            # eigenmodes requested\\n\\nNX, NY, NZ = 16, 4, 2                 # elements along x, y, z\\nMAX_FIELDS = 16                       # max comma-separated entries per data line\\n\\nassert (NX, NY, NZ) >= (16, 4, 2), \\\"mesh finer than the minimum is required\\\"\\n\\n# --------------------------------------------------- structured C3D20 mesh\\n# Every mesh node is keyed on a doubled integer lattice (I, J, K):\\n#   corner nodes   -> all indices even\\n#   mid-side nodes -> exactly one index odd\\n# This makes each node of the 20-node brick unique and shared between\\n# neighbouring elements (conforming mesh).\\n_node_id = {}\\n_nodes = []                           # (label, x, y, z) in creation order\\n\\n\\ndef get_node(I, J, K):\\n    \\\"\\\"\\\"Return the label of the node at doubled lattice position (I, J, K).\\\"\\\"\\\"\\n    key = (I, J, K)\\n    lab = _node_id.get(key)\\n    if lab is None:\\n        x = 0.5 * I * (L / NX)\\n        y = -0.5 * H + 0.5 * J * (H / NY)\\n        z = -0.5 * T + 0.5 * K * (T / NZ)\\n        lab = len(_nodes) + 1\\n        _node_id[key] = lab\\n        _nodes.append((lab, x, y, z))\\n    return lab\\n\\n\\ndef c3d20(i, j, k):\\n    \\\"\\\"\\\"Connectivity of element (i, j, k) in CalculiX C3D20 node order\\n    (nodes 1-8 corners, 9-20 mid-side).\\\"\\\"\\\"\\n    return [\\n        get_node(2 * i,     2 * j,     2 * k),        #  1 corner (-1,-1,-1)\\n        get_node(2 * i + 2, 2 * j,     2 * k),        #  2 corner (+1,-1,-1)\\n        get_node(2 * i + 2, 2 * j + 2, 2 * k),        #  3 corner (+1,+1,-1)\\n        get_node(2 * i,     2 * j + 2, 2 * k),        #  4 corner (-1,+1,-1)\\n        get_node(2 * i,     2 * j,     2 * k + 2),    #  5 corner (-1,-1,+1)\\n        get_node(2 * i + 2, 2 * j,     2 * k + 2),    #  6 corner (+1,-1,+1)\\n        get_node(2 * i + 2, 2 * j + 2, 2 * k + 2),    #  7 corner (+1,+1,+1)\\n        get_node(2 * i,     2 * j + 2, 2 * k + 2),    #  8 corner (-1,+1,+1)\\n        get_node(2 * i + 1, 2 * j,     2 * k),        #  9 mid-side 1-2\\n        get_node(2 * i + 2, 2 * j + 1, 2 * k),        # 10 mid-side 2-3\\n        get_node(2 * i + 1, 2 * j + 2, 2 * k),        # 11 mid-side 3-4\\n        get_node(2 * i,     2 * j + 1, 2 * k),        # 12 mid-side 4-1\\n        get_node(2 * i + 1, 2 * j,     2 * k + 2),    # 13 mid-side 5-6\\n        get_node(2 * i + 2, 2 * j + 1, 2 * k + 2),    # 14 mid-side 6-7\\n        get_node(2 * i + 1, 2 * j + 2, 2 * k + 2),    # 15 mid-side 7-8\\n        get_node(2 * i,     2 * j + 1, 2 * k + 2),    # 16 mid-side 8-5\\n        get_node(2 * i,     2 * j,     2 * k + 1),    # 17 mid-side 1-5\\n        get_node(2 * i + 2, 2 * j,     2 * k + 1),    # 18 mid-side 2-6\\n        get_node(2 * i + 2, 2 * j + 2, 2 * k + 1),    # 19 mid-side 3-7\\n        get_node(2 * i,     2 * j + 2, 2 * k + 1),    # 20 mid-side 4-8\\n    ]\\n\\n\\nelements = []\\nfor k in range(NZ):\\n    for j in range(NY):\\n        for i in range(NX):\\n            elements.append((len(elements) + 1, c3d20(i, j, k)))\\n\\n# node sets: root face (x = 0) and tip face (x = L), all nodes on\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"f1_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.000824, \"got\": 420.2037, \"ref\": 419.8579}, \"f2_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.000685, \"got\": 833.5918, \"ref\": 833.0215}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.03, \"ccx_s\": 0.19}"
+  },
+  "timings": {
+    "agent_s": 239.957,
+    "setup_s": 0.0,
+    "grade_s": 0.226
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=0 0.19s"
+  ]
+}

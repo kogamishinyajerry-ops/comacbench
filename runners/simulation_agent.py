@@ -233,6 +233,93 @@ def _run_matlab_task(
     return _ret(1, [], None, subs, details)
 
 
+# ---------------------------------------------------------------- ccx_fea 分支
+
+def _run_ccx_task(
+    task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
+    logs: list[str], applicability: dict[str, str], timeout: float,
+) -> dict[str, Any]:
+    """ccx_fea：模型 python 脚本写出 model.inp（不执行求解器），runner 跑 ccx
+    并解析 .dat 数值判分（structures 维，brew calculix-ccx）。
+
+    两段执行（foam 同构）：脚本沙箱段只写文件；求解段由本 runner 调
+    solvers.calculix.run_ccx。判分口径与 gtm_matlab 同构（result_keys/
+    numeric_rel_tol，数值对 gold ccx 运行的相对误差）——mesh 自由度由
+    题面钉死最小网格与单元类型，离散化差进容差带。
+    """
+    from .solvers.calculix import parse_dat, run_ccx
+    grade_t0 = time.time()
+    iso = IsolatedRun()
+    script = iso.write("make_case.py", code)
+    r1 = iso.run(script, min(timeout, 120.0))
+    logs.append(f"make_case exit={r1['exit']} {r1['duration_s']}s")
+
+    def _ret(gate: int, gf: list[str], fm: str | None, subs: dict, details: dict):
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subs.items()}, weights, gate)
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=gf, subscores=subs, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": time.time() - grade_t0},
+            env_digest=env_digest, logs=logs, failure_mode=fm,
+            applicability=applicability)
+
+    if r1["timeout"] or r1["exit"] != 0:
+        return _ret(0, ["timeout" if r1["timeout"] else _SCRIPT_FAIL],
+                    "timeout" if r1["timeout"] else _SCRIPT_FAIL,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None,
+                     "robustness": None},
+                    {"stderr_tail": r1["stderr"][-800:]})
+
+    inp = iso.dir / "model.inp"
+    if not inp.exists():
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None,
+                     "robustness": None}, {"missing": "model.inp"})
+
+    rr = run_ccx(iso.dir, "model", timeout - (time.time() - t0))
+    logs.append(f"ccx exit={rr['exit']} {rr['duration_s']}s"
+                + (" TIMEOUT" if rr["timeout"] else ""))
+    if rr["timeout"] or rr["exit"] != 0:
+        return _ret(0, ["timeout" if rr["timeout"] else _SIM_FAIL],
+                    "timeout" if rr["timeout"] else _SIM_FAIL,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None,
+                     "robustness": None},
+                    {"ccx_stdout_tail": rr["stdout_tail"][-800:]})
+
+    g = task["grader"]
+    got = parse_dat(iso.dir / "model.dat", dict(g["extract"]))
+    keys = list(g["result_keys"])
+    ref = dict(task["reference"]["values"])
+    tol = float(g.get("numeric_rel_tol", 0.05))
+    present = [k for k in keys if k in got]
+    req_ratio = round(len(present) / len(keys), 4)
+    if len(present) < len(keys):
+        logs.append(f"missing keys: {sorted(set(keys) - set(got))}")
+
+    hits: dict[str, Any] = {}
+    for k in keys:
+        if k not in got:
+            hits[k] = {"status": "missing"}
+            continue
+        rv, gv = float(ref[k]), float(got[k])
+        rel = abs(gv - rv) / max(abs(rv), 1e-12)
+        hits[k] = {"status": "tol", "ok": bool(rel <= tol),
+                   "rel_err": round(rel, 6), "got": gv, "ref": rv}
+    n_ok = sum(1 for v in hits.values() if v.get("ok"))
+    physics = round(n_ok / max(1, len(keys)), 4)
+    subs = {"physics": physics, "requirements": req_ratio,
+            "objective": None, "robustness": None}
+    details = {"kind": "ccx_fea", "hits": hits,
+               "physics_hits": f"{n_ok}/{len(keys)}", "rel_tol": tol,
+               "ccx_s": rr["duration_s"]}
+    return _ret(1, [], None, subs, details)
+
+
 def run_task(
     task: TaskSpec, *, provider: str, model: str | None, seed: int,
     env_digest: str, prompt_cache: dict[str, str], assets_root: Path,
@@ -270,6 +357,9 @@ def run_task(
     if kind in ("aviary_mission", "pycycle_cycle", "gtm_matlab"):
         applicability = {"physics": "numeric_vs_reference", "requirements": "result.json 键完备",
                          "objective": "N/A(静态任务)", "robustness": "N/A(无扰动重算)"}
+    elif kind == "ccx_fea":
+        applicability = {"physics": "numeric_vs_reference", "requirements": "model.inp+dat 键完备",
+                         "objective": "N/A(静态任务)", "robustness": "N/A(无扰动重算)"}
     else:
         applicability = {"physics": "field_nmse_vs_gt", "requirements": "case_structure",
                          "objective": "N/A(基础题无目标函数)", "robustness": "N/A(无扰动重算)"}
@@ -300,6 +390,9 @@ def run_task(
     if kind == "gtm_matlab":
         return _run_matlab_task(task, code, meta, t0, env_digest, logs,
                                 applicability, timeout)
+    if kind == "ccx_fea":
+        return _run_ccx_task(task, code, meta, t0, env_digest, logs,
+                             applicability, timeout)
 
     # ---- 1) 沙箱跑脚本 → 算例目录 ----
     grade_t0 = time.time()

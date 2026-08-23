@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_md_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# Cantilever beam natural frequencies - CalculiX input deck generator\\n# Geometry: 200 x 12 x 6 mm, mesh 16x4x2 C3D20, clamped at x=0\\n\\nL = 200.0   # length along x\\nH = 12.0    # height along y\\nT = 6.0     # thickness along z\\nnx = 16     # elements along x (min 16)\\nny = 4      # elements along y (min 4)\\nnz = 2      # elements along z (min 2)\\n\\nE_val = 210000.0    # MPa\\nnu_val = 0.3\\nrho_val = 7.85e-9   # tonne/mm^3\\n\\n# Node grid: 2*nx+1 positions in x, etc., so that mid-edge nodes are included\\nnnx = 2*nx + 1\\nnny = 2*ny + 1\\nnnz = 2*nz + 1\\n\\n# Generate node coordinates and mapping (i,j,k) -> node_id\\nnode_id_map = {}\\nnodes = []\\nnid = 1\\nfor i in range(nnx):\\n    x = i * L / (2*nx)\\n    for j in range(nny):\\n        y = j * H / (2*ny)\\n        for k in range(nnz):\\n            z = k * T / (2*nz)\\n            node_id_map[(i, j, k)] = nid\\n            nodes.append((nid, x, y, z))\\n            nid += 1\\n\\n# Generate elements (C3D20)\\nelements = []\\neid = 1\\nfor ie in range(nx):\\n    for je in range(ny):\\n        for ke in range(nz):\\n            # 8 corner nodes\\n            n1  = node_id_map[(2*ie,   2*je,   2*ke)]\\n            n2  = node_id_map[(2*ie+2, 2*je,   2*ke)]\\n            n3  = node_id_map[(2*ie+2, 2*je+2, 2*ke)]\\n            n4  = node_id_map[(2*ie,   2*je+2, 2*ke)]\\n            n5  = node_id_map[(2*ie,   2*je,   2*ke+2)]\\n            n6  = node_id_map[(2*ie+2, 2*je,   2*ke+2)]\\n            n7  = node_id_map[(2*ie+2, 2*je+2, 2*ke+2)]\\n            n8  = node_id_map[(2*ie,   2*je+2, 2*ke+2)]\\n            # 12 mid-edge nodes (standard C3D20 ordering)\\n            n9  = node_id_map[(2*ie+1, 2*je,   2*ke)]     # mid 1-2\\n            n10 = node_id_map[(2*ie+2, 2*je+1, 2*ke)]     # mid 2-3\\n            n11 = node_id_map[(2*ie+1, 2*je+2, 2*ke)]     # mid 3-4\\n            n12 = node_id_map[(2*ie,   2*je+1, 2*ke)]     # mid 4-1\\n            n13 = node_id_map[(2*ie+1, 2*je,   2*ke+2)]   # mid 5-6\\n            n14 = node_id_map[(2*ie+2, 2*je+1, 2*ke+2)]   # mid 6-7\\n            n15 = node_id_map[(2*ie+1, 2*je+2, 2*ke+2)]   # mid 7-8\\n            n16 = node_id_map[(2*ie,   2*je+1, 2*ke+2)]   # mid 8-5\\n            n17 = node_id_map[(2*ie,   2*je,   2*ke+1)]   # mid 1-5\\n            n18 = node_id_map[(2*ie+2, 2*je,   2*ke+1)]   # mid 2-6\\n            n19 = node_id_map[(2*ie+2, 2*je+2, 2*ke+1)]   # mid 3-7\\n            n20 = node_id_map[(2*ie,   2*je+2, 2*ke+1)]   # mid 4-8\\n            elements.append((eid, n1, n2, n3, n4, n5, n6, n7, n8,\\n                             n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20))\\n            eid += 1\\n\\n# Node sets\\nnroot_nodes = [node_id_map[(0, j, k)] for j in range(nny) for k in range(nnz)]\\nntip_nodes  = [node_id_map[(2*nx, j, k)] for j in range(nny) for k in range(nnz)]\\n\\n# Helper to write a list with line wrapping (max 16 entries per line)\\ndef write_wrapped(f, values, comma_end=True):\\n    for i in range(0, len(values), 16):\\n        chunk = values[i:i+16]\\n        line = ', '.join(str(v) for v in chunk)\\n        if comma_end or i + 16 < len(values):\\n            line += ','\\n        f.write(line + '\\\\n')\\n\\n# Write the input file\\nwith open('model.inp', 'w') as f:\\n    f.write('*HEADING\\\\n')\\n    f.write('Cantilever beam - natural frequency analysis\\\\n')\\n    f.write('*NODE\\\\n')\\n    for nid, x, y, z in nodes:\\n        f.write(f'{nid}, {x:.6f}, {y:.6f}, {z:.6f}\\\\n')\\n    \\n    f.write('*ELEMENT, TYPE=C3D20, ELSET=EALL\\\\n')\\n    for elem in elements:\\n        # 21 entries total (el_id + 20 nodes). Split across two lines: 11 + 10.\\n        line1 = ', '.join(str(v) for v in elem[:11])\\n        line2 = ', '.join(str(v) for v in elem[11:])\\n        f.write(line1 + ',\\\\n')\\n        f.write(line2 + '\\\\n')\\n    \\n    f.write('*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\\n')\\n    f.write('*MATERIAL, NAME=STEEL\\\\n')\\n    f.write('*DENSITY\\\\n')\\n    f.write(f'{rho_val}\\\\n')\\n    f.write('*ELASTIC\\\\n')\\n    f.write(f'{E_val}, {nu_val}\\\\n')\\n    \\n    f.write('*NSET, NSET=NROOT\\\\n')\\n    write_wrapped(f, nroot_nodes)\\n    \\n    f.write('*NSET, NSET=NTIP\\\\n')\\n    write_wrapped(f, ntip_nodes)\\n   \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"f1_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.002632, \"got\": 126.0589, \"ref\": 125.728}, \"f2_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.002251, \"got\": 251.1744, \"ref\": 250.6103}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.03, \"ccx_s\": 0.2}"
+  },
+  "timings": {
+    "agent_s": 88.248,
+    "setup_s": 0.0,
+    "grade_s": 0.242
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.2s"
+  ]
+}

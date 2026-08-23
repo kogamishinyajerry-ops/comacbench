@@ -1,0 +1,37 @@
+{
+  "task_id": "ccx_lb_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nWrite a CalculiX 2.23 input deck for a wall-mounted L-bracket.\\nGeometry: L-shape cross-section (10 mm thick arms, 60 mm long),\\nextruded in z over W=20 mm.  Clamped at x=0, total -500 N on x=60.\\n\\nMesh: structured C3D20 hex mesh with >=2 across each arm thickness,\\n>=6 along each arm length, >=2 through the width.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# --- Material (steel) --------------------------------------------------------\\nE = 210000.0        # MPa\\nNU = 0.3\\nRHO = 7.85e-9       # tonne/mm^3\\nFY_TOTAL = -500.0   # N (downward, -y)\\n\\n# --- Geometry ----------------------------------------------------------------\\nT = 10.0            # arm thickness (mm)\\nL = 60.0            # arm length (mm)\\nW = 20.0            # extrusion width (mm)\\n\\n# Mesh counts (>= 2 across, >= 6 along, >= 2 through)\\nN_THICK = 2         # elements across thickness\\nN_LEN   = 6         # elements along arm length\\nN_W     = 2         # elements through width\\n\\n# --- Node coordinates --------------------------------------------------------\\n# Build three structured hex blocks (C3D20-compatible), 20 nodes each:\\n#\\n#   Block V : vertical arm, x in [0,T], y in [0,L], z in [0,W]\\n#   Block H1: horizontal-arm lower strip, x in [0,T], y in [0,T], z in [0,W]\\n#   Block H2: horizontal-arm upper strip, x in [T,L], y in [0,T], z in [0,W]\\n#\\n# Each block has 3 subdivisions per direction (2 elements, 3 nodes along\\n# edges -> 27 corner+midside nodes, but we use the canonical C3D20\\n# ordering: 8 corners + 12 edge mids + 0 face/center -> 20 nodes).\\n#\\n# We define each block on a (3x3x3) bilinear grid of seed points, then\\n# emit the 20 node ids in CalculiX C3D20 order.\\n\\ndef seed_ids(nx, ny, nz):\\n    \\\"\\\"\\\"Return a function (i,j,k) -> node id in a (nx,ny,nz) grid of seeds.\\\"\\\"\\\"\\n    def gid(i, j, k):\\n        return 1 + i + j * nx + k * nx * ny\\n    return gid\\n\\ndef emit_block(gid, ox, oy, oz, dx, dy, dz):\\n    \\\"\\\"\\\"\\n    Emit the 20 C3D20 node ids for one hex block defined by an origin\\n    (ox,oy,oz), corner spacings (dx,dy,dz) (each = element length, i.e.\\n    two elements -> three nodes per edge), and a seed-id function gid\\n    for a 3x3x3 grid of seeds with id step 1 in each direction.\\n    Returns a list of 20 ints in C3D20 corner-mid-face ordering.\\n    \\\"\\\"\\\"\\n    # C3D20 node numbering (CalculiX / Abaqus convention):\\n    # corners 1..8, then edge midpoints 9..20.\\n    # Local cube corners (i,j,k) with i,j,k in {0,1,2}:\\n    #  1:(0,0,0)  2:(2,0,0)  3:(2,1,0)  4:(0,1,0)   z=0 face\\n    #  5:(0,0,2)  6:(2,0,2)  7:(2,1,2)  8:(0,1,2)   z=2 face\\n    # Edge mids (per node-id reference):\\n    #  9 : mid of 1-2  -> (1,0,0)\\n    # 10 : mid of 2-3  -> (2,1,0)\\n    # 11 : mid of 3-4  -> (1,1,0)\\n    # 12 : mid of 4-1  -> (0,1,0)  (block uses (0,1,0) -> wait: 4 is (0,1,0), 1 is (0,0,0) -> mid (0,1,0)? No: (0, 0.5, 0))\\n    # Actually edge mid indices are averages.  Let me restate cleanly.\\n\\n    # Edge midpoint seeds (average of the two corner seeds along an edge):\\n    #  9 : 1-2  -> (1,0,0)\\n    # 10 : 2-3  -> (2,1,0)\\n    # 11 : 3-4  -> (1,1,0)\\n    # 12 : 4-1  -> (0,1,0)?  No: 4 is (0,1,0), 1 is (0,0,0) -> (0, 0.5, 0)\\n    # Hmm, but C3D20 midpoints must lie on edges.  Let me use fraction 0.5:\\n    #   9  = (1,0,0)\\n    #  10  = (2,1,0)  -> average of (2,0,0) and (2,1,0)\\n    #  11  = (1,1,0)  -> average of (2,1,0) and (0,1,0)?  No: avg(2,1,0)&(0,1,0)=(1,1,0) yes\\n    #  12  = (0,1,0)  -> average of (0,1,0) and (0,0,0) = (0,0.5,0) -> seed index (0,0.5,0)\\n    # This gets messy because (0.5) is not an integer seed index.\\n\\n    # Easier: emit 27 actual nodes (3x3x3), then pick the 20 in C3D20 order.\\n    # Coordinates are computed directly.\\n    pass\\n\\n# The above helper sketch is just planning.  Below is the real implementation\\n# that builds explicit 3x3x3 grids per block and picks the 20 C3D20 nodes.\\n\\n# Build per-block nodes: 27 per block on a 3x3x3 grid.\\n# Local grid coordinates (xi, yj, zk) each in {0,1,2}.\\n# Global coordinates:\\n#   x = ox + xi * sx, where sx = dx, dy = ... actually:\\n#   Block V : x in [0,T]  -> sx = T/2 (\""
+  },
+  "timings": {
+    "agent_s": 178.527,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

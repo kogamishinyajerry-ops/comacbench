@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_cb_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n# -*- coding: utf-8 -*-\\n\\\"\\\"\\\"\\nCantilever beam static deflection -- CalculiX 2.23 input deck generator.\\n\\nGeometry : L = 100 mm along +x (root at x=0), H = 10 mm (y), T = 5 mm (z)\\nLoad     : total Fy = -1000.0 N equally distributed on ALL nodes of x = L\\nMaterial : steel, E = 210000 MPa, nu = 0.3, rho = 7.85e-9 tonne/mm^3\\nUnits    : mm, N, MPa, tonne/mm^3\\n\\nWrites 'model.inp' into the current working directory.  No solver is run,\\nno external files / network / subprocess are used.\\n\\\"\\\"\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Parameters\\n# ---------------------------------------------------------------------------\\nL, H, T = 100.0, 10.0, 5.0            # geometry [mm]\\nF_TIP = -1000.0                       # total tip force in y-direction [N]\\n\\nNX, NY, NZ = 20, 4, 2                 # element counts (>=16 / >=4 / >=2)\\nassert NX >= 16 and NY >= 4 and NZ >= 2\\n\\nYOUNG = 210000.0                      # [MPa]\\nPOISSON = 0.3                         # [-]\\nDENSITY = 7.85e-9                     # [tonne/mm^3]\\n\\nMAXFIELDS = 16                        # max comma-separated entries per data line\\n\\n# ---------------------------------------------------------------------------\\n# Structured node grid (corner + midside nodes) for 20-node hexahedra\\n# ---------------------------------------------------------------------------\\nNA, NB, NC = 2 * NX, 2 * NY, 2 * NZ   # node-grid intervals (midside included)\\n\\n\\ndef nid(a, b, c):\\n    \\\"\\\"\\\"Unique 1-based node number for node-grid index (a, b, c).\\\"\\\"\\\"\\n    return 1 + a + (NA + 1) * (b + (NB + 1) * c)\\n\\n\\nxs = [i * L / NX for i in range(NA + 1)]                 # x in [0, L]\\nys = [-0.5 * H + j * H / NY for j in range(NB + 1)]      # y in [-H/2, H/2]\\nzs = [-0.5 * T + k * T / NZ for k in range(NC + 1)]      # z in [-T/2, T/2]\\n\\n# C3D20 local node map: (p,q,r) in element-local grid {0,1,2}^3 (Abaqus/CCX order)\\nC3D20_MAP = (\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),   #  1- 4 corners, face r=0\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),   #  5- 8 corners, face r=2\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),   #  9-12 midside, face r=0\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),   # 13-16 midside, face r=2\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),   # 17-20 midside, between faces\\n)\\n\\ndeck = []\\nA = deck.append\\n\\n# ---------------------------------------------------------------------------\\n# Header comments\\n# ---------------------------------------------------------------------------\\nA(\\\"** \\\" + \\\"=\\\" * 72)\\nA(\\\"** Cantilever beam: L=100 mm (+x), H=10 mm (y), T=5 mm (z)\\\")\\nA(\\\"** Steel: E=210000 MPa, nu=0.3, rho=7.85e-9 tonne/mm^3\\\")\\nA(\\\"** Units: mm / N / MPa / tonne per mm^3 -- linear static analysis\\\")\\nA(\\\"** Tip shear load: total Fy = -1000.0 N shared equally by all NTIP nodes\\\")\\nA(\\\"** Mesh: %d x %d x %d C3D20 elements\\\" % (NX, NY, NZ))\\nA(\\\"** \\\" + \\\"=\\\" * 72)\\n\\n# ---------------------------------------------------------------------------\\n# Nodes\\n# ---------------------------------------------------------------------------\\nA(\\\"*NODE, NSET=NALL\\\")\\nfor c in range(NC + 1):\\n    for b in range(NB + 1):\\n        for a in range(NA + 1):\\n            A(\\\"%d, %.6f, %.6f, %.6f\\\" % (nid(a, b, c), xs[a], ys[b], zs[c]))\\n\\n# ---------------------------------------------------------------------------\\n# Elements (C3D20 only); connectivity wrapped at 16 comma-separated entries\\n# ---------------------------------------------------------------------------\\nA(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\neid = 0\\nfor k in range(NZ):\\n    for j in range(NY):\\n        for i in range(NX):\\n            eid += 1\\n            conn = [nid(2 * i + p, 2 * j + q, 2 * k + r)\\n                    for (p, q, r) in C3D20_MAP]\\n            head = [eid] + conn[:MAXFIELDS - 1]     # 16 entries\\n            tail = conn[MAXFIELDS - 1:]             # remaining 5 entries\\n            A(\\\", \\\".join(str(v) for v in head))\\n            A(\\\", \\\".join(str(v) for v in tail))\\n\\n# --------------------------------------------------------------------\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"nstraints:            0\\n   dependent nodes tied by cyclic constraints:            0\\n   dependent nodes in pre-tension constraints:            0\\n\\n   sets:            4\\n   terms in all sets:         3940\\n\\n   materials:            1\\n   constants per material and temperature:            2\\n   temperature points per material:            1\\n   plastic data points per material:            0\\n\\n   orientations:            0\\n   amplitudes:            2\\n   data points in all amplitudes:            2\\n   print requests:            2\\n   transformations:            0\\n   property cards:            0\\n\\n\\n STEP            1\\n\\n *ERROR reading *CLOAD. Card image:\\n        41,2,-2.222222222222222E+01\\n\\n *ERROR in calinput: at least one fatal\\n        error message while reading the\\n        input deck: CalculiX stops.\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 147.099,
+    "setup_s": 0.0,
+    "grade_s": 0.141
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=201 0.11s"
+  ]
+}

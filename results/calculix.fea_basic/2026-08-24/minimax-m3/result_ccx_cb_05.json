@@ -1,0 +1,40 @@
+{
+  "task_id": "ccx_cb_05",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck for a cantilever beam (C3D20, linear static).\\n\\nBeam: 100 x 8 x 4 mm (L x H x T) along +x.\\nRoot at x=0 clamped, tip at x=L=100 mm loaded with total Fy = -1500.0 N\\ndistributed equally among the tip-face nodes as concentrated nodal loads.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ------------------------------------------------------------------\\n# Problem parameters\\n# ------------------------------------------------------------------\\nL = 100.0    # length  (mm)\\nH = 8.0      # height  (mm) -> y in [-H/2, +H/2]\\nT = 4.0      # width   (mm) -> z in [-T/2, +T/2]\\n\\nE = 210000.0          # Young's modulus  (MPa)\\nNU = 0.3              # Poisson's ratio\\nRHO = 7.85e-9         # density          (tonne/mm^3)\\n\\nFY_TOTAL = -1500.0    # total tip load in y (N)\\n\\n# Mesh counts (>= minimum required)\\nNX = 20   # elements along length\\nNY = 4    # elements through height\\nNZ = 2    # elements through width\\n\\n# ------------------------------------------------------------------\\n# Node / element generation (structured hex mesh, C3D20 ordering)\\n# ------------------------------------------------------------------\\n# We work with a (NX+1) x (NY+1) x (NZ+1) grid of node positions.\\n# Indices:\\n#   i in 0..NX  -> x position\\n#   j in 0..NY  -> y position\\n#   k in 0..NZ  -> z position\\n# Each hex element uses 20 nodes following the CalculiX C3D20 convention:\\n# bottom face (y-) corners first (1..4), then top face (y+) corners (5..8),\\n# then mid-edge nodes (9..20) in the same order as the corner nodes of\\n# a quad face of the element.\\n\\n# Helper: linear index for the (NX+1)*(NY+1)*(NZ+1) grid\\ndef nid(i, j, k):\\n    \\\"\\\"\\\"Global node id (1-based) for grid index (i,j,k).\\\"\\\"\\\"\\n    return 1 + i * (NY + 1) * (NZ + 1) + j * (NZ + 1) + k\\n\\n\\nnodes = {}      # id -> (x, y, z)\\nnode_id_map = {}  # (i,j,k) -> id (kept for clarity; same as nid)\\n\\ncounter = 1\\nfor i in range(NX + 1):\\n    x = L * i / NX\\n    for j in range(NY + 1):\\n        y = -H / 2 + H * j / NY\\n        for k in range(NZ + 1):\\n            z = -T / 2 + T * k / NZ\\n            nodes[counter] = (x, y, z)\\n            node_id_map[(i, j, k)] = counter\\n            counter += 1\\n\\n# Identify root and tip node sets\\nroot_nodes = []\\ntip_nodes = []\\nfor i in range(NX + 1):\\n    for j in range(NY + 1):\\n        for k in range(NZ + 1):\\n            nid_ijk = nid(i, j, k)\\n            if i == 0:\\n                root_nodes.append(nid_ijk)\\n            if i == NX:\\n                tip_nodes.append(nid_ijk)\\n\\n# ------------------------------------------------------------------\\n# Element connectivity (C3D20)\\n# ------------------------------------------------------------------\\n# For each (iex, jey, kez) in [0,NX) x [0,NY) x [0,NZ):\\n# 8 corner nodes from grid (iex..iex+1, jey..jey+1, kez..kez+1):\\n#   1: (iex,   jey,   kez)       -> bottom-near-left   (y-, z-)\\n#   2: (iex+1, jey,   kez)       -> bottom-near-right\\n#   3: (iex+1, jey,   kez+1)     -> bottom-far-right\\n#   4: (iex,   jey,   kez+1)     -> bottom-far-left\\n#   5: (iex,   jey+1, kez)       -> top-near-left\\n#   6: (iex+1, jey+1, kez)       -> top-near-right\\n#   7: (iex+1, jey+1, kez+1)     -> top-far-right\\n#   8: (iex,   jey+1, kez+1)     -> top-far-left\\n#\\n# Mid-edge / mid-face nodes (9..20) follow CalculiX C3D20 numbering:\\n#   9 : mid of edge 1-2 (x-dir, y=z-)\\n#  10 : mid of edge 2-3 (z-dir, y=-)\\n#  11 : mid of edge 3-4 (x-dir, y=-, z=+)\\n#  12 : mid of edge 4-1 (z-dir, y=-)\\n#  13 : mid of edge 5-6 (x-dir, y=+)\\n#  14 : mid of edge 6-7 (z-dir, y=+)\\n#  15 : mid of edge 7-8 (x-dir, y=z+)\\n#  16 : mid of edge 8-5 (z-dir, y=+)\\n#  17 : mid of edge 1-5 (y-dir, x-, z-)\\n#  18 : mid of edge 2-6 (y-dir, x+, z-)\\n#  19 : mid of edge 3-7 (y-dir, x+, z+)\\n#  20 : mid of edge 4-8 (y-dir, x-, z+)\\n#\\n# Corner connectivity grid indices (relative to element origin (iex,jey,kez)):\\n# We compose 20 ids in the order above.\\ndef elem_nodes(iex, jey, kez):\\n    # Corners\\n    n1 = nid(iex,     jey,     kez)\\n    n2 = nid(iex + 1, jey,     kez)\\n    n3 = nid(iex + 1, jey,     kez + 1)\\n    n4 = nid(\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_gws6dz99/make_case.py\\\", line 177\\n    nonlocal node_counter\\n    ^^^^^^^^^^^^^^^^^^^^^\\nSyntaxError: no binding for nonlocal 'node_counter' found\\n\"}"
+  },
+  "timings": {
+    "agent_s": 163.412,
+    "setup_s": 0.0,
+    "grade_s": 0.04
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.04s"
+  ]
+}

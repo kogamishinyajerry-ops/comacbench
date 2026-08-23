@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_ssb_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"# Generate CalculiX input deck for simply supported beam (C3D20)\\n\\n# Parameters\\nL = 200.0\\nH = 10.0\\nT = 5.0\\nNEX = 16\\nNEY = 4\\nNEZ = 2\\nE = 210000.0\\nnu = 0.3\\nrho = 7.85e-9\\nFY = -1000.0\\n\\n# Derived quantities\\ndx = L / NEX\\ndy = H / NEY\\ndz = T / NEZ\\n\\n# Node grid dimensions (corners + edge midpoints in structured C3D20 mesh)\\nNXN = 2 * NEX + 1\\nNYN = 2 * NEY + 1\\nNZN = 2 * NEZ + 1\\n\\n\\ndef node_id(i, j, k):\\n    \\\"\\\"\\\"Compute global node id for fine grid indices (i,j,k).\\\"\\\"\\\"\\n    return i * NYN * NZN + j * NZN + k + 1\\n\\n\\n# Generate node coordinates\\nnodes = []\\nfor i in range(NXN):\\n    x = i * dx / 2.0\\n    for j in range(NYN):\\n        y = -H / 2.0 + j * dy / 2.0\\n        for k in range(NZN):\\n            z = -T / 2.0 + k * dz / 2.0\\n            nodes.append((node_id(i, j, k), x, y, z))\\n\\n\\ndef element_connectivity(i, j, k):\\n    \\\"\\\"\\\"Return 20 node ids for C3D20 element at element-index (i,j,k).\\\"\\\"\\\"\\n    c1 = node_id(2 * i,     2 * j,     2 * k)\\n    c2 = node_id(2 * i + 2, 2 * j,     2 * k)\\n    c3 = node_id(2 * i + 2, 2 * j + 2, 2 * k)\\n    c4 = node_id(2 * i,     2 * j + 2, 2 * k)\\n    c5 = node_id(2 * i,     2 * j,     2 * k + 2)\\n    c6 = node_id(2 * i + 2, 2 * j,     2 * k + 2)\\n    c7 = node_id(2 * i + 2, 2 * j + 2, 2 * k + 2)\\n    c8 = node_id(2 * i,     2 * j + 2, 2 * k + 2)\\n    m9  = node_id(2 * i + 1, 2 * j,     2 * k)\\n    m10 = node_id(2 * i + 2, 2 * j + 1, 2 * k)\\n    m11 = node_id(2 * i + 1, 2 * j + 2, 2 * k)\\n    m12 = node_id(2 * i,     2 * j + 1, 2 * k)\\n    m13 = node_id(2 * i + 1, 2 * j,     2 * k + 2)\\n    m14 = node_id(2 * i + 2, 2 * j + 1, 2 * k + 2)\\n    m15 = node_id(2 * i + 1, 2 * j + 2, 2 * k + 2)\\n    m16 = node_id(2 * i,     2 * j + 1, 2 * k + 2)\\n    m17 = node_id(2 * i,     2 * j,     2 * k + 1)\\n    m18 = node_id(2 * i + 2, 2 * j,     2 * k + 1)\\n    m19 = node_id(2 * i + 2, 2 * j + 2, 2 * k + 1)\\n    m20 = node_id(2 * i,     2 * j + 2, 2 * k + 1)\\n    return [c1, c2, c3, c4, c5, c6, c7, c8,\\n            m9, m10, m11, m12, m13, m14, m15, m16,\\n            m17, m18, m19, m20]\\n\\n\\n# Generate elements\\nelements = []\\neid = 1\\nfor i in range(NEX):\\n    for j in range(NEY):\\n        for k in range(NEZ):\\n            elements.append((eid, element_connectivity(i, j, k)))\\n            eid += 1\\n\\n# Node sets\\nNLEFT  = [node_id(0, 0, k) for k in range(NZN)]\\nNRIGHT = [node_id(2 * NEX, 0, k) for k in range(NZN)]\\nNMID   = [node_id(NEX, j, k) for j in range(NYN) for k in range(NZN)]\\n# PIN: one node of NLEFT, at the middle of the width (z = 0)\\nPIN    = [node_id(0, 0, NEZ)]\\n\\n\\ndef write_chunked(f, values):\\n    \\\"\\\"\\\"Write a list of integers with at most 16 entries per line.\\\"\\\"\\\"\\n    for i in range(0, len(values), 16):\\n        chunk = values[i:i + 16]\\n        f.write(', '.join(str(v) for v in chunk) + ',\\\\n')\\n\\n\\n# Write the .inp file\\nwith open('model.inp', 'w') as f:\\n    f.write('*HEADING\\\\n')\\n    f.write('Simply supported beam, mid-span load (C3D20)\\\\n')\\n    f.write('**\\\\n')\\n\\n    # Nodes\\n    f.write('*NODE\\\\n')\\n    for nid, x, y, z in nodes:\\n        f.write(f'{nid}, {x:.6f}, {y:.6f}, {z:.6f}\\\\n')\\n    f.write('**\\\\n')\\n\\n    # Elements (C3D20), wrapped across two lines (eid+15, then 5 nodes)\\n    f.write('*ELEMENT, TYPE=C3D20, ELSET=EALL\\\\n')\\n    for eid, nlist in elements:\\n        f.write(f'{eid}, ')\\n        f.write(', '.join(str(n) for n in nlist[:15]) + ',\\\\n')\\n        f.write(', '.join(str(n) for n in nlist[15:]) + ',\\\\n')\\n    f.write('**\\\\n')\\n\\n    # Node sets\\n    f.write('*NSET, NSET=NLEFT\\\\n')\\n    write_chunked(f, NLEFT)\\n    f.write('*NSET, NSET=NRIGHT\\\\n')\\n    write_chunked(f, NRIGHT)\\n    f.write('*NSET, NSET=NMID\\\\n')\\n    write_chunked(f, NMID)\\n    f.write('*NSET, NSET=PIN\\\\n')\\n    write_chunked(f, PIN)\\n    f.write('**\\\\n')\\n\\n    # Material\\n    f.write('*MATERIAL, NAME=STEEL\\\\n')\\n    f.write('*ELASTIC\\\\n')\\n    f.write(f'{E:.1f}, {nu}\\\\n')\\n    f.write('*DENSITY\\\\n')\\n    f.write(f'{rho}\\\\n')\\n    f.write('**\\\\n')\\n\\n    # Solid section\\n    f.write('*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\\n')\\n    f.write('**\\\\n')\\n\\n    # Boundary conditions\\n    f.write('*BOUNDARY\\\\n')\\n    f.write('NLEFT, 2, 2, 0.0\\\\n')\\n    f.\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"mid_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.17847, \"got\": -1.578851, \"ref\": -1.921842}, \"support_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.177778, \"got\": 411.11118, \"ref\": 500.00001}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.15}"
+  },
+  "timings": {
+    "agent_s": 104.815,
+    "setup_s": 0.0,
+    "grade_s": 0.195
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.15s"
+  ]
+}

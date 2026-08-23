@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_ssb_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"Generate a CalculiX input file for a simply supported beam with mid-span load.\\\"\\\"\\\"\\n\\n\\ndef main():\\n    # Problem parameters\\n    L = 240.0      # mm, length along x\\n    H = 10.0       # mm, height along y (from -H/2 to +H/2)\\n    T = 6.0        # mm, width along z (from -T/2 to +T/2)\\n    Fy_total = -800.0  # N, total mid-span load in y-direction\\n\\n    # Material (steel): mm, N, MPa, tonne/mm^3\\n    E = 210000.0   # MPa, Young's modulus\\n    nu = 0.3       # Poisson's ratio\\n    rho = 7.85e-9  # tonne/mm^3, density\\n\\n    # Structured C3D20 mesh: meets minimum counts (16, 4, 2)\\n    nx = 16  # elements along length (x)\\n    ny = 4   # elements through height (y)\\n    nz = 2   # elements through width (z)\\n\\n    # Node grid positions (corners + mid-edge nodes for quadratic hex)\\n    npx = 2 * nx + 1  # 33 positions along x\\n    npy = 2 * ny + 1  # 9 positions along y\\n    npz = 2 * nz + 1  # 5 positions along z\\n\\n    # Helpers\\n    def nid(i, j, k):\\n        \\\"\\\"\\\"Global node id (1-based) for grid position (i,j,k).\\\"\\\"\\\"\\n        return i * npy * npz + j * npz + k + 1\\n\\n    def coord(i, j, k):\\n        \\\"\\\"\\\"Coordinates for grid position (i,j,k).\\\"\\\"\\\"\\n        x = i * L / (2 * nx)\\n        y = -H / 2 + j * H / (2 * ny)\\n        z = -T / 2 + k * T / (2 * nz)\\n        return x, y, z\\n\\n    def elem_conn(ix, iy, iz):\\n        \\\"\\\"\\\"C3D20 connectivity for element (ix,iy,iz) in standard node ordering.\\\"\\\"\\\"\\n        c = [0] * 20\\n        # Corner nodes 1-8\\n        c[0]  = nid(2 * ix,     2 * iy,     2 * iz)       # 1: (-1,-1,-1)\\n        c[1]  = nid(2 * ix + 2, 2 * iy,     2 * iz)       # 2: ( 1,-1,-1)\\n        c[2]  = nid(2 * ix + 2, 2 * iy + 2, 2 * iz)       # 3: ( 1, 1,-1)\\n        c[3]  = nid(2 * ix,     2 * iy + 2, 2 * iz)       # 4: (-1, 1,-1)\\n        c[4]  = nid(2 * ix,     2 * iy,     2 * iz + 2)   # 5: (-1,-1, 1)\\n        c[5]  = nid(2 * ix + 2, 2 * iy,     2 * iz + 2)   # 6: ( 1,-1, 1)\\n        c[6]  = nid(2 * ix + 2, 2 * iy + 2, 2 * iz + 2)   # 7: ( 1, 1, 1)\\n        c[7]  = nid(2 * ix,     2 * iy + 2, 2 * iz + 2)   # 8: (-1, 1, 1)\\n        # Mid-edge nodes on z- face (9-12)\\n        c[8]  = nid(2 * ix + 1, 2 * iy,     2 * iz)       # 9:  ( 0,-1,-1)\\n        c[9]  = nid(2 * ix + 2, 2 * iy + 1, 2 * iz)       # 10: ( 1, 0,-1)\\n        c[10] = nid(2 * ix + 1, 2 * iy + 2, 2 * iz)       # 11: ( 0, 1,-1)\\n        c[11] = nid(2 * ix,     2 * iy + 1, 2 * iz)       # 12: (-1, 0,-1)\\n        # Mid-edge nodes connecting z- to z+ (13-16)\\n        c[12] = nid(2 * ix,     2 * iy,     2 * iz + 1)   # 13: (-1,-1, 0)\\n        c[13] = nid(2 * ix + 2, 2 * iy,     2 * iz + 1)   # 14: ( 1,-1, 0)\\n        c[14] = nid(2 * ix + 2, 2 * iy + 2, 2 * iz + 1)   # 15: ( 1, 1, 0)\\n        c[15] = nid(2 * ix,     2 * iy + 2, 2 * iz + 1)   # 16: (-1, 1, 0)\\n        # Mid-edge nodes on z+ face (17-20)\\n        c[16] = nid(2 * ix + 1, 2 * iy,     2 * iz + 2)   # 17: ( 0,-1, 1)\\n        c[17] = nid(2 * ix + 2, 2 * iy + 1, 2 * iz + 2)   # 18: ( 1, 0, 1)\\n        c[18] = nid(2 * ix + 1, 2 * iy + 2, 2 * iz + 2)   # 19: ( 0, 1, 1)\\n        c[19] = nid(2 * ix,     2 * iy + 1, 2 * iz + 2)   # 20: (-1, 0, 1)\\n        return c\\n\\n    # Node sets\\n    NLEFT = [nid(0, 0, k) for k in range(npz)]\\n    NRIGHT = [nid(2 * nx, 0, k) for k in range(npz)]\\n    NMID = [nid(nx, j, k) for j in range(npy) for k in range(npz)]\\n    PIN = [NLEFT[0]]  # single node from NLEFT to remove rigid-body modes\\n\\n    # Equal distribution of total load across mid-span nodes\\n    load_per_node = Fy_total / len(NMID)\\n\\n    # ---- Write the CalculiX input deck ----\\n    with open('model.inp', 'w') as f:\\n        f.write(\\\"*HEADING\\\\n\\\")\\n        f.write(\\\"Simply supported beam, mid-span load (240x10x6 mm, P=-800 N)\\\\n\\\")\\n        f.write(\\\"**\\\\n\\\")\\n\\n        # Nodes\\n        f.write(\\\"*NODE\\\\n\\\")\\n        for i in range(npx):\\n            for j in range(npy):\\n                for k in range(npz):\\n                    n = nid(i, j, k)\\n                    x, y, z = coord(i, j, k)\\n                    f.write(f\\\"{n}, {x:.6f}, {y:.6f}, {z:.6f}\\\\n\\\")\\n\\n        # Elements (connectiv\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n *ERROR in e_c3d: nonpositive jacobian\\n        determinant in element         128\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 114.957,
+    "setup_s": 0.0,
+    "grade_s": 0.15
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=201 0.12s"
+  ]
+}

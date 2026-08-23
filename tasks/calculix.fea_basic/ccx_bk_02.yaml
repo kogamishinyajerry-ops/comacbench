@@ -1,0 +1,64 @@
+id: ccx_bk_02
+registry_id: calculix.fea_basic
+domain: structures
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- calculix
+input:
+  prompt_file: tasks/calculix.fea_basic/ccx_bk_02.md
+  prompt_sha256: 0a08e67f377d5839ee282e05ddadc00fdf6cf5675422dd8abaef6b5e5ada08c1
+  assets: []
+output_contract:
+- model.inp
+reference:
+  source: gold make_case.py 实跑 ccx 2.23 的 .dat 解析值（确定性；自建任务）
+  revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+  values:
+    buckle_factor_1: 4994.196
+    buckle_factor_2: 19861.83
+  rel_tol: 0.05
+  uncertainty_note: 解析交叉验证：buckle_factor_1=4974; buckle_factor_2=1.99e+04；容差覆盖模型网格离散化差（题面钉死最小网格与 C3D20）
+grader:
+  answer_format: code
+  exec_kind: ccx_fea
+  validity_gate: true
+  result_keys:
+  - buckle_factor_1
+  - buckle_factor_2
+  numeric_rel_tol: 0.05
+  exact_keys: []
+  extract:
+    buckle_factor_1:
+      type: buckle_factor
+      mode: 1
+    buckle_factor_2:
+      type: buckle_factor
+      mode: 2
+  solver_backend: calculix-ccx-native
+  oracle_source: data/calculix/fea_basic/gold/ccx_bk_02.py
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=.dat 数值字段命中均值；requirements=模型可执行+model.inp+dat 键完备
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: 自建（受 SimJEB 支架域启发，未镜像其数据；求解器 CalculiX GPL-2.0 仅作执行后端）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: ccxfea@selfbuilt-2026-08-24+ccx2.23

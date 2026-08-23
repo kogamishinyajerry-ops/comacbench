@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_bk_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCantilever column buckling - CalculiX 2.23 input-deck generator.\\n\\nWrites  model.inp  into the current working directory for the linear buckling\\n(*BUCKLE) analysis of a clamped-free column:\\n\\n    length L = 120 mm (x), section height H = 8 mm (y), thickness T = 4 mm (z)\\n    root face x = 0  : fully clamped                     -> node set NROOT\\n    tip  face x = L  : reference load Fx = -1 N total (compression) shared\\n                       EQUALLY by ALL tip-face nodes     -> node set NTIP\\n    mesh             : structured C3D20 hexahedra, 24 x 4 x 2 elements\\n                       (>= 16 along length, >= 4 through height,\\n                        >= 2 through width)\\n    step             : *BUCKLE, 4 eigenvalues (factors multiply reference load)\\n\\nUnits: mm, N, MPa, tonne/mm^3.  The script only writes the deck; it does not\\ninvoke any solver and uses no external files.\\n\\\"\\\"\\\"\\n\\nimport math\\n\\n# ------------------------------------------------------------------ constants\\nL, H, T = 120.0, 8.0, 4.0          # geometry [mm]\\nNX, NY, NZ = 24, 4, 2              # elements along x / y / z (min 16 / 4 / 2)\\nNMODES = 4                         # buckling modes requested\\nE, NU, RHO = 210000.0, 0.3, 7.85e-9   # steel (MPa, -, tonne/mm^3)\\nFX_TOTAL = -1.0                    # N, reference compressive resultant\\nOUT_FILE = \\\"model.inp\\\"\\n\\n# C3D20 topology: local node positions on the 2x2x2 integer lattice of one\\n# brick (Abaqus/CalculiX order: 1-8 corners, 9-12/13-16 bottom/top mid-edges,\\n# 17-20 vertical mid-edges).\\nC3D20 = (\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),\\n)\\n\\n# --------------------------------------------------------------- mesh builder\\ndef build_mesh():\\n    \\\"\\\"\\\"Structured C3D20 mesh -> (nodes, elements, nroot_ids, ntip_ids).\\\"\\\"\\\"\\n    # Full grid indices i=0..2NX, j=0..2NY, k=0..2NZ; keep only points with at\\n    # most one odd index (corners + mid-edge nodes = exactly the C3D20 nodes).\\n    key2id = {}\\n    nodes = []\\n    nid = 0\\n    for k in range(2 * NZ + 1):\\n        for j in range(2 * NY + 1):\\n            for i in range(2 * NX + 1):\\n                if (i % 2) + (j % 2) + (k % 2) > 1:\\n                    continue\\n                nid += 1\\n                key2id[(i, j, k)] = nid\\n                nodes.append((nid,\\n                              L * i / (2.0 * NX),\\n                              H * j / (2.0 * NY),\\n                              T * k / (2.0 * NZ)))\\n\\n    elements = []\\n    eid = 0\\n    for k in range(NZ):\\n        for j in range(NY):\\n            for i in range(NX):\\n                eid += 1\\n                conn = [key2id[(2 * i + du, 2 * j + dv, 2 * k + dw)]\\n                        for (du, dv, dw) in C3D20]\\n                elements.append((eid, conn))\\n\\n    nroot = sorted(n for (i, _j, _k), n in key2id.items() if i == 0)\\n    ntip = sorted(n for (i, _j, _k), n in key2id.items() if i == 2 * NX)\\n    return nodes, elements, nroot, ntip\\n\\n\\n# ----------------------------------------------------------------- formatting\\ndef fmt(v):\\n    \\\"\\\"\\\"Compact fixed-point number string (all values are exact halves).\\\"\\\"\\\"\\n    s = (\\\"%.6f\\\" % v).rstrip(\\\"0\\\")\\n    if s.endswith(\\\".\\\"):\\n        s += \\\"0\\\"\\n    return s\\n\\n\\ndef chunk(items, size=16):\\n    \\\"\\\"\\\"Split a list into sub-lists of at most `size` entries (16 max/line).\\\"\\\"\\\"\\n    for a in range(0, len(items), size):\\n        yield items[a:a + size]\\n\\n\\n# ---------------------------------------------------------------- deck writer\\ndef write_deck(path):\\n    nodes, elements, nroot, ntip = build_mesh()\\n    ftip = FX_TOTAL / len(ntip)          # equal share per tip node [N]\\n\\n    ln = []\\n    ap = ln.append\\n\\n    ap(\\\"** ==================================================================\\\")\\n    ap(\\\"** Cantilever column - linear buckling (*BUCKLE) - CalculiX 2.23\\\")\\n    ap(\\\"** Units: mm, N, MPa, tonne/mm^3\\\")\\n    ap(\\\"** Mesh: %\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"nstraints:            0\\n   dependent nodes tied by cyclic constraints:            0\\n   dependent nodes in pre-tension constraints:            0\\n\\n   sets:            3\\n   terms in all sets:          458\\n\\n   materials:            1\\n   constants per material and temperature:            2\\n   temperature points per material:            1\\n   plastic data points per material:            0\\n\\n   orientations:            0\\n   amplitudes:            2\\n   data points in all amplitudes:            2\\n   print requests:            2\\n   transformations:            0\\n   property cards:            0\\n\\n\\n STEP            1\\n\\n *ERROR reading *CLOAD. Card image:\\n        49,1,-2.702702702702703E-02\\n\\n *ERROR in calinput: at least one fatal\\n        error message while reading the\\n        input deck: CalculiX stops.\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 189.797,
+    "setup_s": 0.0,
+    "grade_s": 0.136
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=201 0.1s"
+  ]
+}

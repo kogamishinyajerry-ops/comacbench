@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_lb_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n# -*- coding: utf-8 -*-\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck `model.inp` (current directory) for the\\nlinear-static analysis of a wall-mounted L-bracket.\\n\\nUnits: mm, N, MPa, tonne/mm^3.\\n\\nGeometry\\n--------\\nCross-section in the x-y plane, extruded in z over W = 20 mm:\\n    vertical arm   : x in [0, 10], y in [0, 70]\\n    horizontal arm : y in [0, 10], x in [0, 70]\\n    extrusion      : z in [0, 20]\\n\\nBC / load\\n---------\\n    * whole face x = 0 clamped                              (node set NROOT)\\n    * face x = 70 : total Fy = -600 N split EQUALLY between\\n      ALL of its nodes                                       (node set NLOAD)\\n\\nMesh\\n----\\nStructured C3D20 hexahedra, multi-block layout, conformal at the re-entrant\\ncorner (coincident nodes on shared block faces are merged):\\n    * 2 elements across each 10 mm arm thickness      (minimum 2)\\n    * 8 elements along each 70 mm arm length          (minimum 6)\\n    * 2 elements through the 20 mm width              (minimum 2)\\n\\nThe script only writes the deck; it does not run any solver.\\n\\\"\\\"\\\"\\n\\n# ------------------------------------------------------------------ geometry\\nW = 20.0        # bracket width in z [mm]\\nT = 10.0        # arm thickness      [mm]\\nL = 70.0        # arm length         [mm]\\n\\n# ------------------------------------------------------------------ material\\nEMOD = 210000.0     # Young's modulus [MPa] (steel)\\nNU = 0.3            # Poisson's ratio [-]\\nRHO = 7.85e-9       # density [tonne/mm^3]\\n\\n# ---------------------------------------------------------------------- load\\nFY_TOTAL = -600.0   # total force in y [N] on face x = L\\n\\n# ---------------------------------------------------------------- mesh counts\\nNE_THK = 2      # elements across each arm thickness        (>= 2 required)\\nNE_LEN = 6      # elements along outboard 60 mm of each arm (2+6 = 8 >= 6)\\nNE_WID = 2      # elements through the width                (>= 2 required)\\n\\n# multi-block decomposition of the L-shaped cross-section; neighbouring\\n# blocks share matching face meshes -> conformal after node merging\\n#            x0    x1    y0    y1    nex     ney\\nBLOCKS = [\\n    (0.0,  T,   0.0,  T,    NE_THK, NE_THK),    # re-entrant corner block\\n    (0.0,  T,   T,    L,    NE_THK, NE_LEN),    # vertical arm (upper part)\\n    (T,    L,   0.0,  T,    NE_LEN, NE_THK),    # horizontal arm (outer part)\\n]\\nZ0, Z1, NEZ = 0.0, W, NE_WID\\n\\n# --------------------------------------------------------------- mesh builder\\n_key = {}        # rounded (x,y,z) -> node id (merges coincident nodes)\\ncoords = []      # node id -> (x, y, z)\\nelements = []    # element id -> [20 node ids]\\n\\n\\ndef get_node(x, y, z):\\n    \\\"\\\"\\\"Return the id of the node at (x,y,z), creating it if necessary.\\\"\\\"\\\"\\n    key = (round(x, 6), round(y, 6), round(z, 6))\\n    nid = _key.get(key)\\n    if nid is None:\\n        nid = len(coords) + 1\\n        _key[key] = nid\\n        coords.append((x, y, z))\\n    return nid\\n\\n\\nfor x0, x1, y0, y1, nex, ney in BLOCKS:\\n    # 1-D node coordinates (2*n+1 values for n quadratic elements)\\n    xs = [x0 + (x1 - x0) * i / (2.0 * nex) for i in range(2 * nex + 1)]\\n    ys = [y0 + (y1 - y0) * j / (2.0 * ney) for j in range(2 * ney + 1)]\\n    zs = [Z0 + (Z1 - Z0) * k / (2.0 * NEZ) for k in range(2 * NEZ + 1)]\\n\\n    # create/merge all grid nodes of this block\\n    for z in zs:\\n        for y in ys:\\n            for x in xs:\\n                get_node(x, y, z)\\n\\n    # C3D20 connectivity (CalculiX/Abaqus node numbering)\\n    for i in range(nex):\\n        for j in range(ney):\\n            for k in range(NEZ):\\n                I, J, K = 2 * i, 2 * j, 2 * k\\n\\n                def g(di, dj, dk, xs=xs, ys=ys, zs=zs, I=I, J=J, K=K):\\n                    return get_node(xs[I + di], ys[J + dj], zs[K + dk])\\n\\n                elements.append([\\n                    # corner nodes 1-8\\n                    g(0, 0, 0), g(2, 0, 0), g(2, 2, 0), g(0, 2, 0),\\n                    g(0, 0, 2), g(2, 0, 2), g(2, 2, 2), g(0, 2, 2),\\n                    # mid-edge nodes 9-12 (bottom z-low \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.166147, \"got\": -0.1286461, \"ref\": -0.1542792}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.16, \"got\": 503.9999569000001, \"ref\": 600.00024214}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 192.458,
+    "setup_s": 0.0,
+    "grade_s": 0.146
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.11s"
+  ]
+}

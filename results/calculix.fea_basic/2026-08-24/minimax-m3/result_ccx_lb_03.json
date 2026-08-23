@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_lb_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck for an L-bracket static deflection analysis.\\n\\nGeometry:\\n    Vertical arm: x in [0,12], y in [0,80]\\n    Horizontal arm: x in [0,50], y in [0,12]\\n    Extruded in z: z in [0, 24]\\n    Wall (clamped) face: x = 0 (both arms)\\n    Load face: x = 50, y in [0,12], z in [0,24] -> total Fy = -800 N\\n\\nMesh (structured, C3D20):\\n    Vertical arm:   nx_v = 2, ny_v = 6, nz = 2\\n    Horizontal arm: nx_h = 6, ny_h = 2, nz = 2\\n    The two arm meshes share a conformal seam at x in [0,12], y in [0,12].\\n\\nUnits: mm, N, MPa, tonne/mm^3\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ---------------------------------------------------------------------------\\n# Geometry / mesh parameters\\n# ---------------------------------------------------------------------------\\nTV = 12.0      # vertical arm thickness (x-direction)\\nTH = 12.0      # horizontal arm thickness (y-direction)\\nLV = 80.0      # vertical arm length (y-direction)\\nLH = 50.0      # horizontal arm length (x-direction)\\nW  = 24.0      # extrusion width (z-direction)\\n\\n# Mesh divisions (>= minimum required)\\nnx_v = 2       # across vertical arm thickness\\nny_v = 6       # along vertical arm length\\nnx_h = 6       # along horizontal arm length\\nny_h = 2       # across horizontal arm thickness\\nnz   = 2       # through width\\n\\n# Material (steel)\\nE = 210000.0\\nNU = 0.3\\nRHO = 7.85e-9\\n\\n# Load\\nFY_TOTAL = -800.0\\n\\n# ---------------------------------------------------------------------------\\n# Build structured node grid for the L-shape\\n# ---------------------------------------------------------------------------\\n# We'll generate nodes in a structured way:\\n#   * \\\"vertical arm\\\" grid: nx_v x ny_v x nz, x in [0, TV], y in [0, LV]\\n#   * \\\"horizontal arm\\\" grid: nx_h x ny_h x nz, x in [0, LH], y in [0, TH]\\n# The two share nodes in the overlap region x in [0, TV], y in [0, TH].\\n# We use a single node list and avoid duplicates.\\n\\n# Tolerance for duplicate detection\\nTOL = 1.0e-9\\n\\nnodes = []       # list of (nid, x, y, z)\\nnode_index = {}  # (ix, iy, iz, region) -> nid  for vertical arm\\n# We use integer grid indices per region.\\n\\n# Helper: append a node if not already present (within tolerance).\\ndef add_node(coord):\\n    for (nid, x, y, z) in nodes:\\n        if (abs(x - coord[0]) < TOL and abs(y - coord[1]) < TOL\\n                and abs(z - coord[2]) < TOL):\\n            return nid\\n    nid = len(nodes) + 1\\n    nodes.append((nid, coord[0], coord[1], coord[2]))\\n    return nid\\n\\n# Vertical arm grid\\nvert_grid = {}  # (ix, iy, iz) -> nid, ix in [0,nx_v], iy in [0,ny_v], iz in [0,nz]\\nfor iy in range(ny_v + 1):\\n    y = LV * iy / ny_v\\n    for ix in range(nx_v + 1):\\n        x = TV * ix / nx_v\\n        for iz in range(nz + 1):\\n            z = W * iz / nz\\n            nid = add_node((x, y, z))\\n            vert_grid[(ix, iy, iz)] = nid\\n\\n# Horizontal arm grid\\nhoriz_grid = {}  # (ix, iy, iz) -> nid, ix in [0,nx_h], iy in [0,ny_h], iz in [0,nz]\\nfor iy in range(ny_h + 1):\\n    y = TH * iy / ny_h\\n    for ix in range(nx_h + 1):\\n        x = LH * ix / nx_h\\n        for iz in range(nz + 1):\\n            z = W * iz / nz\\n            nid = add_node((x, y, z))\\n            horiz_grid[(ix, iy, iz)] = nid\\n\\n# A unified grid for iteration when emitting connectivity\\n# We'll treat vertical arm separately and horizontal arm separately.\\n\\n# ---------------------------------------------------------------------------\\n# Build C3D20 elements\\n# ---------------------------------------------------------------------------\\n# C3D20 node ordering (CalculiX/ABAQUS hex20):\\n#  1..8  bottom face (z=0) corners 1,2,3,4 + midsides 9,10,11,12\\n# 13..20 top    face (z=W) corners + midsides\\n# Corners:\\n#  1:(-,-,-) 2:(+,-,-) 3:(+,+,-) 4:(-,+,-)\\n# 13:(-,-,+) 14:(+,-,+) 15:(+,+,+) 16:(-,+,+)\\n# Midsides:\\n#  9: 1-2, 10: 2-3, 11: 3-4, 12: 4-1\\n# 17:13-14, 18:14-15, 19:15-16, 20:16-13\\n\\ndef make_hex20(c000, c100, c110, c010, c001, c101, c111, c011):\\n    \\\"\\\"\\\"Given the 8 corner node ids in order\\n       c000(-,-,-) c100(+,-,-) c110(+,+,-) c010(-,+,-)\\n       c001(-,-,+) c101(+,-,\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"ccx_stdout_tail\": \"\\n************************************************************\\n\\nCalculiX Version 2.23, Copyright(C) 1998-2025 Guido Dhondt\\nCalculiX comes with ABSOLUTELY NO WARRANTY. This is free\\nsoftware, and you are welcome to redistribute it under\\ncertain conditions, see gpl.htm\\n\\n************************************************************\\n\\nYou are using an executable made on Sat May 16 10:47:10 UTC 2026\\n *ERROR in splitline: there should not\\n        be more than 16 entries in a \\n        line; \\n1,1,4,13,10,124,125,126,127,2,5,14,11,128,129,130,131,132,133,134,135,\\n\"}"
+  },
+  "timings": {
+    "agent_s": 255.334,
+    "setup_s": 0.0,
+    "grade_s": 0.144
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.06s",
+    "ccx exit=201 0.09s"
+  ]
+}

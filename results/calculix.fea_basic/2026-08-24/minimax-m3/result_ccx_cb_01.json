@@ -1,0 +1,40 @@
+{
+  "task_id": "ccx_cb_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck for a cantilever beam linear static analysis.\\n\\nBeam: 100 x 10 x 5 mm, tip load -1000 N, C3D20 elements only.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# --- Geometry (mm) ---\\nL = 100.0   # length along +x\\nH = 10.0    # height along y\\nT = 5.0     # width along z\\n\\n# --- Mesh counts ---\\nNX = 20     # elements along length (>=16)\\nNY = 4      # elements through height (>=4)\\nNZ = 2      # elements through width (>=2)\\n\\n# --- Material (steel) ---\\nE_MPA = 210000.0\\nNU = 0.3\\nRHO = 7.85e-9  # tonne/mm^3\\n\\n# --- Load ---\\nFY = -1000.0  # total tip force (N)\\n\\n\\ndef main():\\n    # C3D20: 27 nodes per element if using full bricks, but we want clean\\n    # structured hex mesh with C3D20 nodes. Build node grid then assemble\\n    # element connectivity using the 20-node hex template (corners + midside\\n    # per edge; face-centers not used -> 20 nodes total).\\n\\n    # Build a structured grid of corner nodes first:\\n    #   node index array [ix, iy, iz]  (corner grid only)\\n    # Number of corner-points along each axis = NE + 1\\n    cx = NX + 1\\n    cy = NY + 1\\n    cz = NZ + 1\\n\\n    # Map (ix,iy,iz) -> node id, 1-based\\n    nid = {}\\n    next_id = 1\\n    corner_coords = {}\\n\\n    dx = L / NX\\n    dy = H / NY\\n    dz = T / NZ\\n\\n    for ix in range(cx):\\n        x = ix * dx\\n        for iy in range(cy):\\n            y = -H / 2.0 + iy * dy\\n            for iz in range(cz):\\n                z = -T / 2.0 + iz * dz\\n                nid[(ix, iy, iz)] = next_id\\n                corner_coords[(ix, iy, iz)] = (x, y, z)\\n                next_id += 1\\n\\n    n_corner = next_id - 1\\n\\n    # Add mid-edge nodes along all edges of the structured mesh.\\n    # For each element edge (between two adjacent corners) we may need a mid-node.\\n    # CalculiX C3D20 connectivity uses 20 nodes per element.\\n    # Use the same mid-node for shared edges (conformity).\\n    # Edges go in x, y, z directions; mid-nodes stored by the two corner endpoints.\\n    mid = {}\\n    def mid_node(a, b):\\n        if a < b:\\n            key = (a, b)\\n        else:\\n            key = (b, a)\\n        if key not in mid:\\n            nonlocal next_id\\n            xa, ya, za = corner_coords[a]\\n            xb, yb, zb = corner_coords[b]\\n            mid[key] = (next_id, ((xa + xb) / 2.0,\\n                                  (ya + yb) / 2.0,\\n                                  (za + zb) / 2.0))\\n            next_id += 1\\n        return mid[key][0]\\n\\n    def coord_of(n):\\n        # Look up coords for a node id (corner or mid)\\n        for (a, b), (nid_, c) in mid.items():\\n            if nid_ == n:\\n                return c\\n        # else search corners\\n        for k, (x, y, z) in corner_coords.items():\\n            if nid[k] == n:\\n                return (x, y, z)\\n        raise KeyError(n)\\n\\n    # Build elements\\n    elements = []\\n    # C3D20 node ordering (CalculiX convention) for a brick from\\n    # (i,j,k) corner to (i+1,j+1,k+1). The 20 nodes are:\\n    # 1..8  corners: bottom-face then top-face (face1 lower-z, face2 higher-z)\\n    # For CCX C3D20, standard ordering is:\\n    #   face1 (z-): 1=(i,j,k), 2=(i+1,j,k), 3=(i+1,j+1,k), 4=(i,j+1,k)\\n    #   face2 (z+): 5=(i,j,k+1), 6=(i+1,j,k+1), 7=(i+1,j+1,k+1), 8=(i,j+1,k+1)\\n    # mid-edge nodes:\\n    #  9  edge between 1-2 (x-dir, z-)\\n    # 10  edge between 2-3 (y-dir, z-)\\n    # 11  edge between 3-4 (x-dir, z-)\\n    # 12  edge between 4-1 (y-dir, z-)\\n    # 13  edge between 5-6 (x-dir, z+)\\n    # 14  edge between 6-7 (y-dir, z+)\\n    # 15  edge between 7-8 (x-dir, z+)\\n    # 16  edge between 8-5 (y-dir, z+)\\n    # 17  edge between 1-5 (z-dir, y-)\\n    # 18  edge between 2-6 (z-dir, y-)\\n    # 19  edge between 3-7 (z-dir, y+)\\n    # 20  edge between 4-8 (z-dir, y+)\\n\\n    # Determine which axis is \\\"z\\\" in the local element. We'll use global\\n    # coordinate axes directly, mapping local (xi, eta, zeta) -> global (x,y,z).\\n    def c(ix, iy, iz):\\n        return nid[(ix, iy, iz)]\\n\\n    nelem = 0\\n    for ix in range(NX):\\n        for iy in range(NY):\\n            for iz in range(NZ):\\n                # corne\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_y8ylic20/make_case.py\\\", line 293, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_y8ylic20/make_case.py\\\", line 184, in main\\n    if ca[0] == NX and cb[0] == NX - 1 or ca[0] == NX - 1 and cb[0] == NX:\\n       ~~^^^\\nTypeError: 'NoneType' object is not subscriptable\\n\"}"
+  },
+  "timings": {
+    "agent_s": 206.853,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.04s"
+  ]
+}

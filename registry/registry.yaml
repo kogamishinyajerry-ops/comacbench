@@ -263,6 +263,23 @@ entries:
     paused_env_note: dev 终端无 ANSYS MAPDL（commercial 类）——batch-2 会话核验，intranet 层可启动后接入；许可亦未完成（needs-verification/version-lock）
     status: proposed
 
+  - id: calculix.fea_basic
+    name: CalculiX 结构有限元基础包（自建）
+    source: http://www.calculix.de/ （求解器；任务自建，受 SimJEB 支架域启发未镜像其数据）
+    tier: A
+    order: 12b
+    batch: batch-3
+    adapter: simulation_agent
+    env_class: calculix_native
+    license: 自建参数化任务（CalculiX GPL-2.0 仅作执行后端，不随仓库分发）
+    license_status: confirmed-selfbuilt
+    self_built: true
+    content: 悬臂/简支梁静力、悬臂模态与欧拉屈曲、L 支架静力（解析交叉验证 + ccx gold 自洽）
+    env: "brew calculix-ccx 2.23（/opt/homebrew/bin/ccx，CCX_BIN 可覆写）；执行后端 runners/solvers/calculix.py；ccx_fea 分支（模型写 make_case.py 生成 model.inp，runner 跑 ccx 解析 .dat 数值判分）"
+    assets_revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+    status: integrated
+    integrated_note: 2026-08-24 structures 维解零——simjeb 卡商业 FEA（MAPDL dev 不可得）后以开源 CalculiX 自建替代落地：5 族 21 题（悬臂静力×5 δ=PL³/3EI 互证 0.03-0.79%/简支中载×4 δ=PL³/48EI 互证 0.6-2.2% 含剪切/悬臂模态×4 EB 互证 0.3-0.5% 弱强轴/欧拉屈曲×4 互证 0.3-0.5%/L 支架×4 无解析 gold=ccx）。判分 100% 本地复现（gold=ccx 实跑 .dat 解析；oracle 21/21 满分 max_rel_err=0，stub 21/21 地板）；工程陷阱全入题面纪律（16 项/行折行、C3D20 节点序、.dat 集合名契约）。基线（固定对，2026-08-24）：minimax-m3 0.2381（满分 3/21，gate 7/21：7 simulation_failed + 6 code_not_executable + 1 timeout；模态族最强 0.75）、glm-5.3 0.3810（满分 5/21，gate 11/21：deck 可写率更高；屈曲族 0.25）——两家正落区分带（无饱和无全灭），过 gate 但 physics=0 的题均为真实语义错误（过约束 17-19% 反力偏差、刚体模态 f=0），反力校验键可独立捕获载荷施加错误。详见 data/calculix/fea_basic/PROVENANCE.md 与 results/structures-calculix-2026-08-24.md
+
   - id: gtm.transport_control
     name: GTM / JSBSim 飞控包（自建）
     source: https://github.com/nasa/GTM_DesignSim ; https://github.com/JSBSim-Team/jsbsim

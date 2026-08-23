@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_ssb_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n# -*- coding: utf-8 -*-\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 linear-static input deck 'model.inp' (current dir) for a\\nsimply supported beam on knife-edge supports with a mid-span load.\\n\\nGeometry : L = 180 mm (x), H = 8 mm (y in [-4, +4]), T = 5 mm (z in [-2.5, +2.5])\\nMesh     : 20-node hexahedra C3D20, structured, 18 x 4 x 2 elements\\n           (>= 16 along length, >= 4 through height, >= 2 through width)\\nUnits    : mm, N, MPa, tonne/mm^3  (steel: E=210000 MPa, nu=0.3, rho=7.85e-9)\\n\\nThe script only writes the deck; it does NOT run any solver.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ----------------------------------------------------------------------\\n# Parameters\\n# ----------------------------------------------------------------------\\nL, H, T = 180.0, 8.0, 5.0        # mm\\nnx, ny, nz = 18, 4, 2            # element counts (nx>=16, ny>=4, nz>=2)\\nE, NU, RHO = 210000.0, 0.3, 7.85e-9   # MPa, -, tonne/mm^3\\nFY = -600.0                      # total mid-span load (N)\\n\\nMAXFIELDS = 16                   # max comma-separated entries per data line\\n\\n\\ndef build_deck():\\n    A, B, C = 2 * nx, 2 * ny, 2 * nz   # half-index bounds (midsides at odd idx)\\n\\n    # ------------------------------------------------------------------\\n    # Nodes: corner nodes have all half-indices even; midside nodes have\\n    # exactly one odd half-index. Numbered 1..N deterministically.\\n    # ------------------------------------------------------------------\\n    node_of = {}\\n    node_lines = []\\n    nid = 0\\n    for a in range(A + 1):\\n        for b in range(B + 1):\\n            for c in range(C + 1):\\n                if (a % 2) + (b % 2) + (c % 2) > 1:\\n                    continue\\n                nid += 1\\n                node_of[(a, b, c)] = nid\\n                x = L * a / A\\n                y = -0.5 * H + H * b / B\\n                z = -0.5 * T + T * c / C\\n                node_lines.append(\\\"%d, %.6f, %.6f, %.6f\\\" % (nid, x, y, z))\\n\\n    # ------------------------------------------------------------------\\n    # C3D20 connectivity (Abaqus/CalculiX node order)\\n    # local r -> x (a), s -> y (b), t -> z (c); positive Jacobian.\\n    # Corner offsets 0/2, midside offset 1 in exactly one direction.\\n    # ------------------------------------------------------------------\\n    local = [\\n        (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),   # 1-4   (t = -1)\\n        (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),   # 5-8   (t = +1)\\n        (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),   # 9-12  (bottom edges)\\n        (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),   # 13-16 (top edges)\\n        (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),   # 17-20 (vertical edges)\\n    ]\\n    elem_lines = []\\n    eid = 0\\n    for ei in range(nx):\\n        for ej in range(ny):\\n            for ek in range(nz):\\n                eid += 1\\n                a0, b0, c0 = 2 * ei, 2 * ej, 2 * ek\\n                conn = [node_of[(a0 + da, b0 + db, c0 + dc)]\\n                        for (da, db, dc) in local]\\n                # 16 fields on first line (eid + 15 nodes), then 5 on next\\n                elem_lines.append(\\\"%d, \\\" % eid +\\n                                  \\\", \\\".join(str(v) for v in conn[:15]))\\n                elem_lines.append(\\\", \\\".join(str(v) for v in conn[15:]))\\n\\n    # ------------------------------------------------------------------\\n    # Node sets\\n    # ------------------------------------------------------------------\\n    nleft = [node_of[(0, 0, c)] for c in range(C + 1)]           # x=0, y=-H/2\\n    nright = [node_of[(A, 0, c)] for c in range(C + 1)]          # x=L, y=-H/2\\n    amid = nx                                                   # x = L/2 plane\\n    nmid = sorted(node_of[(amid, b, c)]\\n                  for b in range(B + 1) for c in range(C + 1)\\n                  if (b % 2) + (c % 2) <= 1)\\n    pin = [nleft[0]]                       # single NLEFT node: fix Ux, Uz\\n\\n    # ------------------------------------------------------------------\\n    # Mid-span load: equal split over ALL NMID nodes, exact total FY\\n    # (last node ca\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"mid_defl_mm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.000538, \"got\": -1.637776, \"ref\": -1.638658}, \"support_rf_sum_n\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 300.0, \"ref\": 299.99998999999997}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.16}"
+  },
+  "timings": {
+    "agent_s": 133.87,
+    "setup_s": 0.0,
+    "grade_s": 0.205
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.16s"
+  ]
+}

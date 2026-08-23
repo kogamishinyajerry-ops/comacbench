@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_bk_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 buckling input deck 'model.inp' (written to the\\ncurrent working directory) for a cantilever column:\\n\\n  L = 150 mm along x, cross-section H = 12 mm (y) x T = 6 mm (z)\\n  structured C3D20 mesh: 16 elements along x, 4 through y, 2 through z\\n  NROOT = all nodes on x = 0  (clamped)\\n  NTIP  = all nodes on x = L  (reference load: total Fx = -1 N shared\\n                               equally by every NTIP node)\\n  *STEP / *BUCKLE with 4 requested eigenvalues\\n\\nThe script only writes the deck (no solver run, no subprocess, no network).\\n\\\"\\\"\\\"\\n\\n# ------------------------------------------------------------------ geometry / mesh\\nL = 150.0          # mm, length along x\\nH = 12.0           # mm, section height along y\\nT = 6.0            # mm, section width along z\\nnx, ny, nz = 16, 4, 2   # elements along x / y / z (>= 16 / >= 4 / >= 2)\\n\\n# ------------------------------------------------------------------ material (mm-N-MPa-tonne)\\nE_MOD = 210000.0        # MPa\\nNU = 0.3                # -\\nRHO = 7.85e-9           # tonne/mm^3 (unused by *BUCKLE, kept in the deck)\\n\\n# ------------------------------------------------------------------ analysis\\nF_TOTAL = -1.0          # N, total reference compressive force on tip face\\nN_MODES = 4             # eigenvalues requested in *BUCKLE\\nFNAME = \\\"model.inp\\\"\\n\\n# ------------------------------------------------------------------ structured node grid\\n# C3D20 needs corner + midside nodes: build a grid at half-element spacing.\\nnx2, ny2, nz2 = 2 * nx, 2 * ny, 2 * nz\\n\\n\\ndef nid(i, j, k):\\n    \\\"\\\"\\\"1-based node id of grid point (i, j, k).\\\"\\\"\\\"\\n    return 1 + i + j * (nx2 + 1) + k * (nx2 + 1) * (ny2 + 1)\\n\\n\\nnode_lines = []\\nfor k in range(nz2 + 1):\\n    z = T * k / nz2\\n    for j in range(ny2 + 1):\\n        y = H * j / ny2\\n        for i in range(nx2 + 1):\\n            x = L * i / nx2\\n            node_lines.append(\\\"%d, %.6f, %.6f, %.6f\\\" % (nid(i, j, k), x, y, z))\\n\\n# ------------------------------------------------------------------ C3D20 connectivity\\n# Local node order (Abaqus/CalculiX C3D20): 8 corners then 12 midside nodes.\\n# Offsets in half-element units from the element's origin grid point.\\nOFF = [\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),   # corners bottom\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),   # corners top\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),   # midside bottom\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),   # midside top\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),   # midside vertical edges\\n]\\n\\nelem_lines = []\\neid = 0\\nfor k in range(nz):\\n    for j in range(ny):\\n        for i in range(nx):\\n            eid += 1\\n            entries = [eid] + [nid(2 * i + a, 2 * j + b, 2 * k + c)\\n                               for (a, b, c) in OFF]\\n            for s in range(0, len(entries), 16):        # max 16 entries/line\\n                elem_lines.append(\\\", \\\".join(str(v) for v in entries[s:s + 16]))\\n\\n# ------------------------------------------------------------------ node sets\\nnroot = sorted(nid(0, j, k) for k in range(nz2 + 1) for j in range(ny2 + 1))\\nntip = sorted(nid(nx2, j, k) for k in range(nz2 + 1) for j in range(ny2 + 1))\\nf_node = F_TOTAL / len(ntip)   # equal share of the -1 N reference load\\n\\n\\ndef set_lines(ids):\\n    out = []\\n    for s in range(0, len(ids), 16):                    # max 16 entries/line\\n        out.append(\\\", \\\".join(str(v) for v in ids[s:s + 16]))\\n    return out\\n\\n\\n# ------------------------------------------------------------------ assemble deck\\ndeck = []\\ndeck.append(\\\"** Cantilever column buckling - C3D20 - unit compressive reference load\\\")\\ndeck.append(\\\"** units mm / N / MPa / tonne per mm^3\\\")\\ndeck.append(\\\"*NODE\\\")\\ndeck.extend(node_lines)\\ndeck.append(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\ndeck.extend(elem_lines)\\ndeck.append(\\\"*NSET, NSET=NROOT\\\")\\ndeck.extend(set_lines(nroot))\\ndeck.append(\\\"*NSET, NSET=NTIP\\\")\\ndeck.extend(set_lines(ntip))\\ndeck.append(\\\"*MATERIAL, NAME=STEEL\\\")\\ndeck.append(\\\"*ELASTIC, TYPE=ISO\\\")\\ndeck.append(\\\"%.1f, %.1f\\\" % (E_MOD, NU))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"buckle_factor_1\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.218663, \"got\": 6086.241, \"ref\": 4994.196}, \"buckle_factor_2\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.218236, \"got\": 24196.39, \"ref\": 19861.83}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.25}"
+  },
+  "timings": {
+    "agent_s": 168.356,
+    "setup_s": 0.0,
+    "grade_s": 0.291
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.25s"
+  ]
+}

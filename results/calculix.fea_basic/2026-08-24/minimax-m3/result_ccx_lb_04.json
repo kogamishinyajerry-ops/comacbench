@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_lb_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import numpy as np\\n\\ndef generate_mesh():\\n    # Geometry (mm)\\n    t = 10.0   # arm thickness\\n    L = 70.0   # arm length\\n    W = 20.0   # extrusion width\\n\\n    # Mesh counts (minimum requirements)\\n    nx_thick = 2   # elements across vertical-arm thickness\\n    ny_thick = 2   # elements across horizontal-arm thickness\\n    n_long   = 6   # elements along each arm length\\n    n_width  = 2   # elements through width\\n\\n    # Node coordinate arrays (include mid-edge nodes for C3D20)\\n    # Vertical-arm part:  x in [0,t], y in [t,L]\\n    x1 = np.linspace(0.0, t, 2*nx_thick + 1)            # [0, 2.5, 5, 7.5, 10]\\n    y1 = np.linspace(t, L, 2*n_long + 1)               # [10, 15, ..., 70]\\n\\n    # Horizontal-arm part: x in [0,L], y in [0,t]\\n    x2a = np.linspace(0.0, t, 2*nx_thick + 1)           # [0, 2.5, 5, 7.5, 10]\\n    x2b = np.linspace(t, L, 2*n_long + 1)[1:]          # [15, 20, ..., 70] (drop duplicated 10)\\n    x2  = np.concatenate([x2a, x2b])\\n    y2  = np.linspace(0.0, t, 2*ny_thick + 1)          # [0, 2.5, 5, 7.5, 10]\\n\\n    z = np.linspace(0.0, W, 2*n_width + 1)             # [0, 5, 10, 15, 20]\\n\\n    # Build nodes with deduplication so the re-entrant interface is conformal\\n    nodes = {}                       # node_id -> (x, y, z)\\n    coord_to_id = {}                 # (rx, ry, rz) -> node_id\\n    next_id = [1]\\n\\n    def add_node(x, y, z):\\n        key = (round(x, 6), round(y, 6), round(z, 6))\\n        if key in coord_to_id:\\n            return coord_to_id[key]\\n        nid = next_id[0]\\n        coord_to_id[key] = nid\\n        nodes[nid] = (x, y, z)\\n        next_id[0] += 1\\n        return nid\\n\\n    # Region 1 nodes (vertical arm above corner)\\n    for xi in x1:\\n        for yj in y1:\\n            for zk in z:\\n                add_node(float(xi), float(yj), float(zk))\\n\\n    # Region 2 nodes (horizontal arm + corner pad)\\n    # Boundary y=t shares nodes with Region 1 by coordinate\\n    for xi in x2:\\n        for yj in y2:\\n            for zk in z:\\n                add_node(float(xi), float(yj), float(zk))\\n\\n    def nid(x, y, z):\\n        return coord_to_id[(round(x, 6), round(y, 6), round(z, 6))]\\n\\n    # C3D20 connectivity builder\\n    # Corners 1..8, mid-edges 9..20 in standard CalculiX order\\n    def make_conn(xa, xb, ya, yb, za, zb):\\n        xm, ym, zm = 0.5*(xa+xb), 0.5*(ya+yb), 0.5*(za+zb)\\n        return [\\n            nid(xa,ya,za), nid(xb,ya,za), nid(xb,yb,za), nid(xa,yb,za),\\n            nid(xa,ya,zb), nid(xb,ya,zb), nid(xb,yb,zb), nid(xa,yb,zb),\\n            nid(xm,ya,za), nid(xb,ym,za), nid(xm,yb,za), nid(xa,ym,za),\\n            nid(xm,ya,zb), nid(xb,ym,zb), nid(xm,yb,zb), nid(xa,ym,zb),\\n            nid(xa,ya,zm), nid(xb,ya,zm), nid(xb,yb,zm), nid(xa,yb,zm)\\n        ]\\n\\n    elements = []\\n\\n    # Region 1 elements: 2 x 6 x 2 = 24\\n    for ix in range(nx_thick):\\n        for iy in range(n_long):\\n            for iz in range(n_width):\\n                conn = make_conn(\\n                    x1[2*ix],   x1[2*(ix+1)],\\n                    y1[2*iy],   y1[2*(iy+1)],\\n                    z[2*iz],    z[2*(iz+1)]\\n                )\\n                elements.append(conn)\\n\\n    # Region 2 elements: 8 x 2 x 2 = 32\\n    nx2 = nx_thick + n_long\\n    for ix in range(nx2):\\n        for iy in range(ny_thick):\\n            for iz in range(n_width):\\n                conn = make_conn(\\n                    x2[2*ix],   x2[2*(ix+1)],\\n                    y2[2*iy],   y2[2*(iy+1)],\\n                    z[2*iz],    z[2*(iz+1)]\\n                )\\n                elements.append(conn)\\n\\n    return nodes, elements\\n\\n\\ndef write_inp(filename, nodes, elements):\\n    # Node sets\\n    nroot = sorted(i for i, (x, y, z) in nodes.items() if abs(x)        < 1e-9)\\n    nload = sorted(i for i, (x, y, z) in nodes.items() if abs(x - 70.0) < 1e-9)\\n\\n    f_per_node = -600.0 / len(nload)\\n\\n    def wrap(values, width=16):\\n        out = []\\n        for j in range(0, len(values), width):\\n            out.append(\\\", \\\".join(str(v) for v in values[j:j+width]))\\n        return \\\"\\\\n\\\".join(out) + (\\\"\\\\n\\\" if out else \\\"\\\")\\n\\n    with open(filename, \\\"w\\\") \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.166147, \"got\": -0.1286461, \"ref\": -0.1542792}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.16, \"got\": 503.9999569000001, \"ref\": 600.00024214}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.1}"
+  },
+  "timings": {
+    "agent_s": 244.026,
+    "setup_s": 0.0,
+    "grade_s": 0.285
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.18s",
+    "ccx exit=0 0.1s"
+  ]
+}

@@ -8,7 +8,7 @@
 
 | 层 | 机器 | 可用求解器 | 用途 |
 | --- | --- | --- | --- |
-| `dev`（当前活跃） | 外网开发终端 | **OpenFOAM + FoamAgent**、Python/pip 直连 | 当前一切开发与评测在此跑 |
+| `dev`（当前活跃） | 外网开发终端 | **OpenFOAM + FoamAgent**、**MATLAB R2026a**、**CalculiX ccx**（brew）、Python/pip 直连 | 当前一切开发与评测在此跑 |
 | `intranet`（移植目标） | 内网 | ANSYS 系、StarCCM+、CATIA、Amesim、FENSAP、MATLAB；无 OpenFOAM | 最终部署；CFD 端到端换 Fluent journal / StarCCM macro runner |
 
 **求解器无关原则**：simulation_agent / design_artifact 的 grader 只认 result.json + 残差/守恒/目标量，不绑定求解器 CLI。开发期 OpenFOAM runner 与内网 Fluent/StarCCM runner 是同一 adapter 下的两个可替换执行后端。
@@ -30,6 +30,7 @@
 | `commercial_cfd` | Fluent / StarCCM+ 无界面批处理 | ✅ 已许可（仅内网层） | 与 IT 确认批处理许可座席调度窗口 + 版本锁定 | nasa_tmr、crm_dpw_hlpw（内网移植目标态） |
 | `commercial_fea` | ANSYS Mechanical APDL（PyMAPDL gRPC） | ✅ 已许可 | 同上（APDL 座席） | simjeb |
 | `matlab` | MATLAB（batch 子进程；matlabengine 不用——版本配对脆弱，`matlab -batch` 更稳且与沙箱隔离子进程语义一致） | ✅ **dev 已就绪**（2026-08-22 装 R2026a U3，Sponsored License，CST/Aerospace TB 齐备，batch 启动 ~28s/次，执行后端 `runners/solvers/matlab.py`，MATLAB_BIN 可覆写） | 内网层移植时版本锁定 | gtm（JSBSim 侧归 python_sandbox） |
+| `calculix_native` | CalculiX ccx（`ccx -i` 子进程 + 进程组超时杀；GPL-2.0，执行后端 `runners/solvers/calculix.py`，CCX_BIN 可覆写） | ✅ **dev 已就绪**（2026-08-24 brew calculix-ccx 实测 2.23；烟测与解析互证：悬臂静力 0.06%/模态 0.5%/屈曲 0.5%） | 内网层移植：源码编译或离线二进制导入 + 版本锁定 | calculix.fea_basic（structures 维自建，simjeb 商业 FEA 线之外的 dev 层落地） |
 | `missing` | 内网不存在且不部署的工具 | ❌ | 见第 4 节恢复条件 | foam_basic(OpenFOAM)、openvsp、bscw(气弹链) |
 
 ## 2. Python 离线导入清单（分阶段，每阶段一次批量导入）

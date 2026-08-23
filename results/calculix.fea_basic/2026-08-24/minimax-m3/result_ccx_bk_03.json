@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_bk_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"# Write a CalculiX 2.23 input deck for cantilever column buckling.\\n# Mesh: structured C3D20 hex mesh, 16 x 4 x 2 brick cells along x,y,z.\\n# Geometry: L=120, H=8, T=4 (mm).\\n\\nimport os\\n\\n# ---- Mesh parameters ----\\nNx = 16   # elements along length (x) -> >=16\\nNy = 4    # elements along height (y)  -> >=4\\nNz = 2    # elements along width  (z)  -> >=2\\nLx = 120.0\\nLy = 8.0\\nLz = 4.0\\n\\n# C3D20 node ordering (CalculiX): for each brick 20 nodes in a fixed order.\\n# Vertices 1-8 then mid-edge 9-20.\\ndef brick20(i, j, k, nx, ny, nz, nx1, ny1, nz1):\\n    # Node index convention (1-based):\\n    # bottom face: (i,j,k) corners of brick (i,j,k)\\n    # bottom-face vertices: 1,2,3,4\\n    # top-face   vertices: 5,6,7,8\\n    # mid-side nodes: 9..20\\n    def nid(a, b, c):\\n        return a + (nx1 + 1) * (b + (ny1 + 1) * c)  # 0-based\\n    n1 = nid(i,     j,     k    ) + 1\\n    n2 = nid(i + 1, j,     k    ) + 1\\n    n3 = nid(i + 1, j + 1, k    ) + 1\\n    n4 = nid(i,     j + 1, k    ) + 1\\n    n5 = nid(i,     j,     k + 1) + 1\\n    n6 = nid(i + 1, j,     k + 1) + 1\\n    n7 = nid(i + 1, j + 1, k + 1) + 1\\n    n8 = nid(i,     j + 1, k + 1) + 1\\n\\n    # mid-edge nodes (face centers excluded; only edge midpoints)\\n    m12 = nid(i,        j,     k    ) + (nx1 + 1) // 2 if (nx1 % 2 == 0) else None\\n    # We need proper structured mid-edge node addressing.\\n    # Rebuild using helper that places mid-edge nodes at i+0.5 etc.\\n    raise RuntimeError(\\\"Use helper implementation below\\\")\\n\\n\\n# Use a cleaner explicit node generation: store all nodes, then build C3D20 connectivity\\n# by reading 8 corner nodes and locating the 12 mid-edge nodes.\\n\\nnx_nodes = 2 * Nx + 1\\nny_nodes = 2 * Ny + 1\\nnz_nodes = 2 * Nz + 1\\n\\nxcoords = [Lx * xi / (nx_nodes - 1) for xi in range(nx_nodes)]\\nycoords = [Ly * yi / (ny_nodes - 1) for yi in range(ny_nodes)]\\nzcoords = [Lz * zi / (nz_nodes - 1) for zi in range(nz_nodes)]\\n\\n# node id helper\\ndef node_id(i, j, k):\\n    # i,j,k are 0..nx_nodes-1 etc.\\n    return 1 + i + nx_nodes * (j + ny_nodes * k)\\n\\n# Build node coordinate list\\nnodes = []  # list of (id, x, y, z)\\nnode_lookup = {}\\nfor k in range(nz_nodes):\\n    for j in range(ny_nodes):\\n        for i in range(nx_nodes):\\n            nid = node_id(i, j, k)\\n            nodes.append((nid, xcoords[i], ycoords[j], zcoords[k]))\\n            node_lookup[(i, j, k)] = nid\\n\\ndef mid(i1, j1, k1, i2, j2, k2):\\n    \\\"\\\"\\\"Return the id of the midpoint node between two grid points.\\\"\\\"\\\"\\n    # Each coordinate index moves by 1 between two corners -> midpoint is at +1 step.\\n    # mid-edge node indices are odd if both endpoints are even, or mix.\\n    # We use the simple rule: if indices differ by 1 in exactly one direction,\\n    # the midpoint is at the half-step index.\\n    di = i2 - i1\\n    dj = j2 - j1\\n    dk = k2 - k1\\n    if (abs(di) + abs(dj) + abs(dk)) != 1:\\n        raise ValueError(\\\"Endpoints are not adjacent\\\")\\n    mi = i1 + di // 2 if di != 0 else i1\\n    mj = j1 + dj // 2 if dj != 0 else j1\\n    mk = k1 + dk // 2 if dk != 0 else k1\\n    return node_id(mi, mj, mk)\\n\\n# Build C3D20 connectivity\\n# CalculiX C3D20 vertex ordering:\\n# 1: (i,j,k)        2: (i+1,j,k)     3: (i+1,j+1,k)   4: (i,j+1,k)\\n# 5: (i,j,k+1)      6: (i+1,j,k+1)   7: (i+1,j+1,k+1) 8: (i,j+1,k+1)\\n# 9: mid 1-2 (bottom edge along x)\\n# 10: mid 2-3 (bottom edge along y)\\n# 11: mid 3-4 (bottom edge along x)\\n# 12: mid 4-1 (bottom edge along y)\\n# 13: mid 5-6 (top edge along x)\\n# 14: mid 6-7 (top edge along y)\\n# 15: mid 7-8 (top edge along x)\\n# 16: mid 8-5 (top edge along y)\\n# 17: mid 1-5 (vertical edge along z)\\n# 18: mid 2-6 (vertical edge along z)\\n# 19: mid 3-7 (vertical edge along z)\\n# 20: mid 4-8 (vertical edge along z)\\nelements = []\\neid = 0\\nfor k in range(Nz):\\n    for j in range(Ny):\\n        for i in range(Nx):\\n            # grid cell corners at (2i,2j,2k) ... (2i+1,2j+1,2k+1)\\n            I = 2 * i\\n            J = 2 * j\\n            K = 2 * k\\n\\n            p1 = node_id(I,     J,     K    )\\n            p2 = node_id(I + 1, J,     K    )\\n            p3 = node_id(I + 1, J + 1, K    )\\n            p4\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"ccx_stdout_tail\": \"rientations:            0\\n   amplitudes:            2\\n   data points in all amplitudes:            2\\n   print requests:            3\\n   transformations:            0\\n   property cards:            0\\n\\n *WARNING reading *NODE: parameter not recognized:\\n          INPUT\\n *WARNING reading *NODE. Card image:\\n          *NODE,INPUT\\n\\n *WARNING reading *ELEMENT: parameter not recognized:\\n          INPUT\\n *WARNING reading *ELEMENT. Card image:\\n          *ELEMENT,TYPE=C3D20,ELSET=EALL,INPUT\\n\\n *ERROR reading *ELEMENT: increase ne_\\n\\n STEP            1\\n\\n *WARNING reading *STEP: parameter not recognized:\\n          NAME=BUCKLE\\n *WARNING reading *STEP. Card image:\\n          *STEP,NAME=BUCKLE\\n\\n *ERROR in calinput: at least one fatal\\n        error message while reading the\\n        input deck: CalculiX stops.\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 200.365,
+    "setup_s": 0.0,
+    "grade_s": 0.127
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=201 0.09s"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_md_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# Script to generate a CalculiX input deck for a cantilever beam frequency analysis\\nimport os\\n\\n# Beam geometry (mm)\\nL = 150.0  # length along x\\nH = 12.0   # height along y\\nT = 6.0    # thickness along z\\n\\n# Mesh counts (minimum requirements: 16, 4, 2)\\nNx = 16\\nNy = 4\\nNz = 2\\n\\n# Derived spacing and node counts\\ndx = L / (2 * Nx)\\ndy = H / (2 * Ny)\\ndz = T / (2 * Nz)\\n\\nn_nodes_x = 2 * Nx + 1\\nn_nodes_y = 2 * Ny + 1\\nn_nodes_z = 2 * Nz + 1\\n\\ndef node_id(i, j, k):\\n    return i * (n_nodes_y * n_nodes_z) + j * n_nodes_z + k + 1\\n\\n# Generate nodes and collect node sets\\nnodes = []\\nnroot_nodes = []\\nntip_nodes = []\\n\\nfor i in range(n_nodes_x):\\n    x = i * dx\\n    for j in range(n_nodes_y):\\n        y = j * dy\\n        for k in range(n_nodes_z):\\n            z = k * dz\\n            nid = node_id(i, j, k)\\n            nodes.append((nid, x, y, z))\\n            if i == 0:\\n                nroot_nodes.append(nid)\\n            elif i == 2 * Nx:\\n                ntip_nodes.append(nid)\\n\\n# Generate elements\\nelements = []\\n\\nfor ex in range(Nx):\\n    for ey in range(Ny):\\n        for ez in range(Nz):\\n            eid = ex * (Ny * Nz) + ey * Nz + ez + 1\\n            # Grid indices for this element\\n            i1 = 2 * ex\\n            i2 = 2 * ex + 2\\n            j1 = 2 * ey\\n            j2 = 2 * ey + 2\\n            k1 = 2 * ez\\n            k2 = 2 * ez + 2\\n            i_mid = 2 * ex + 1\\n            j_mid = 2 * ey + 1\\n            k_mid = 2 * ez + 1\\n\\n            # Node IDs in C3D20 order\\n            n1 = node_id(i1, j1, k1)\\n            n2 = node_id(i2, j1, k1)\\n            n3 = node_id(i2, j2, k1)\\n            n4 = node_id(i1, j2, k1)\\n            n5 = node_id(i1, j1, k2)\\n            n6 = node_id(i2, j1, k2)\\n            n7 = node_id(i2, j2, k2)\\n            n8 = node_id(i1, j2, k2)\\n            n9 = node_id(i_mid, j1, k1)\\n            n10 = node_id(i2, j_mid, k1)\\n            n11 = node_id(i_mid, j2, k1)\\n            n12 = node_id(i1, j_mid, k1)\\n            n13 = node_id(i_mid, j1, k2)\\n            n14 = node_id(i2, j_mid, k2)\\n            n15 = node_id(i_mid, j2, k2)\\n            n16 = node_id(i1, j_mid, k2)\\n            n17 = node_id(i1, j1, k_mid)\\n            n18 = node_id(i2, j1, k_mid)\\n            n19 = node_id(i2, j2, k_mid)\\n            n20 = node_id(i1, j2, k_mid)\\n\\n            conn = [n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17, n18, n19, n20]\\n            elements.append((eid, conn))\\n\\n# Write the input deck\\nfilename = \\\"model.inp\\\"\\nwith open(filename, \\\"w\\\") as f:\\n    # Heading\\n    f.write(\\\"*HEADING\\\\n\\\")\\n    f.write(\\\"Cantilever beam natural frequencies\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Nodes\\n    f.write(\\\"*NODE\\\\n\\\")\\n    for nid, x, y, z in nodes:\\n        f.write(f\\\"{nid}, {x}, {y}, {z}\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Elements\\n    f.write(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\\n\\\")\\n    for eid, conn in elements:\\n        # First line: element ID + first 15 nodes (16 entries total)\\n        first = [eid] + conn[:15]\\n        line = \\\", \\\".join(map(str, first))\\n        f.write(line + \\\"\\\\n\\\")\\n        # Second line: remaining 5 nodes\\n        second = conn[15:]\\n        line = \\\", \\\".join(map(str, second))\\n        f.write(line + \\\"\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Node sets\\n    f.write(\\\"*NSET, NSET=NROOT\\\\n\\\")\\n    for i in range(0, len(nroot_nodes), 16):\\n        chunk = nroot_nodes[i:i+16]\\n        line = \\\", \\\".join(map(str, chunk))\\n        f.write(line + \\\"\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    f.write(\\\"*NSET, NSET=NTIP\\\\n\\\")\\n    for i in range(0, len(ntip_nodes), 16):\\n        chunk = ntip_nodes[i:i+16]\\n        line = \\\", \\\".join(map(str, chunk))\\n        f.write(line + \\\"\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Material\\n    f.write(\\\"*MATERIAL, NAME=STEEL\\\\n\\\")\\n    f.write(\\\"*ELASTIC\\\\n\\\")\\n    f.write(\\\"210000.0, 0.3\\\\n\\\")\\n    f.write(\\\"*DENSITY\\\\n\\\")\\n    f.write(\\\"7.85e-9\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Solid section\\n    f.write(\\\"*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Boundary conditions (clamp root face)\\n    f.write(\\\"*BOUNDARY\\\\n\\\")\\n    f.write(\\\"NROOT, 1, 6, 0.0\\\\n\\\")\\n    f.write(\\\"\\\\n\\\")\\n\\n    # Frequency analysis ste\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"f1_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.001945, \"got\": 224.1158, \"ref\": 223.6808}, \"f2_hz\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.001631, \"got\": 445.6738, \"ref\": 444.9482}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.03, \"ccx_s\": 0.19}"
+  },
+  "timings": {
+    "agent_s": 94.029,
+    "setup_s": 0.0,
+    "grade_s": 0.239
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.19s"
+  ]
+}

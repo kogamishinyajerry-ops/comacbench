@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_cb_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate `model.inp` -- a CalculiX 2.23 linear-static input deck for a\\nstraight cantilever beam (120 x 10 x 5 mm steel, tip load Fy = -800 N).\\n\\nGeometry : L = 120 mm along +x (root at x = 0), H = 10 mm in y, T = 5 mm in z\\nMesh     : structured grid of C3D20 20-node hexahedra (24 x 4 x 2 elements)\\nBCs      : root face x = 0 fully clamped (node set NROOT)\\nLoad     : total Fy = -800 N shared equally by ALL tip-face (x = L) nodes\\n           (node set NTIP) as concentrated nodal loads (*CLOAD)\\nUnits    : mm, N, MPa, tonne/mm^3\\n\\nThe script only WRITES the deck; it does not run any solver.\\n\\\"\\\"\\\"\\n\\nfrom decimal import Decimal, getcontext\\n\\n# ---------------------------------------------------------------------------\\n# Parameters\\n# ---------------------------------------------------------------------------\\nL = 120.0          # beam length along +x (mm)\\nH = 10.0           # cross-section height along y (mm)\\nT = 5.0            # cross-section width along z (mm)\\n\\nE = 210000.0       # Young's modulus (MPa)\\nNU = 0.3           # Poisson's ratio\\nRHO = 7.85e-9      # mass density (tonne/mm^3)\\nFY = -800.0        # total tip force along y (N)\\n\\nNELX = 24          # elements along the length  (requirement: >= 16)\\nNELY = 4           # elements through the height (requirement: >= 4)\\nNELZ = 2           # elements through the width  (requirement: >= 2)\\nassert NELX >= 16 and NELY >= 4 and NELZ >= 2, \\\"mesh below required minimum\\\"\\n\\nMAXCOL = 16        # maximum comma-separated entries on one data line\\n\\n# ---------------------------------------------------------------------------\\n# Structured node grid in index space (i, j, k).\\n# A C3D20 mesh needs only vertices and edge midpoints: grid points with at\\n# most one odd index.  Every such point is referenced by at least one\\n# element, so the deck contains no orphan nodes.\\n# ---------------------------------------------------------------------------\\nNI, NJ, NK = 2 * NELX + 1, 2 * NELY + 1, 2 * NELZ + 1\\n\\nnode_id = {}       # (i, j, k) -> node number (1-based)\\nnode_order = []    # node number - 1 -> (i, j, k)\\nfor k in range(NK):\\n    for j in range(NJ):\\n        for i in range(NI):\\n            if (i % 2) + (j % 2) + (k % 2) <= 1:\\n                node_id[(i, j, k)] = len(node_order) + 1\\n                node_order.append((i, j, k))\\nnum_nodes = len(node_order)\\n\\n\\ndef gx(i):\\n    return L * i / (2.0 * NELX)\\n\\n\\ndef gy(j):\\n    return -0.5 * H + H * j / (2.0 * NELY)\\n\\n\\ndef gz(k):\\n    return -0.5 * T + T * k / (2.0 * NELZ)\\n\\n\\n# C3D20 local node order as (a, b, c) offsets in {0,1,2}^3,\\n# a -> x, b -> y, c -> z (standard ordering, positive element Jacobian).\\nC3D20_LOCAL = (\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),    #  1- 4  corner nodes\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),    #  5- 8  corner nodes\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),    #  9-12  midside nodes\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),    # 13-16  midside nodes\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),    # 17-20  midside nodes\\n)\\n\\n\\ndef chunk(items, width=MAXCOL):\\n    \\\"\\\"\\\"Wrap a list into data lines of at most `width` comma-separated items.\\\"\\\"\\\"\\n    return [\\\", \\\".join(str(v) for v in items[s:s + width])\\n            for s in range(0, len(items), width)]\\n\\n\\ndef main():\\n    lines = []\\n    add = lines.append\\n\\n    add(\\\"** =====================================================================\\\")\\n    add(\\\"** Cantilever beam -- linear static analysis (CalculiX 2.23)\\\")\\n    add(\\\"** Units: mm, N, MPa, tonne/mm^3\\\")\\n    add(\\\"** Geometry: L = %g mm (x), H = %g mm (y), T = %g mm (z)\\\" % (L, H, T))\\n    add(\\\"** Tip load: total Fy = %g N shared equally by all NTIP nodes\\\" % FY)\\n    add(\\\"** Mesh: %d x %d x %d C3D20 elements\\\" % (NELX, NELY, NELZ))\\n    add(\\\"** =====================================================================\\\")\\n\\n    # ---------------------------------------------------------------- nodes\\n    add(\\\"*NODE\\\")\\n    for nnum, (i, j, k) in enumerate(node_order, start=1):\\n        add(\\\"%d, %r, %r, %r\\\" % (nnum, gx(i), gy(j\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -5.263023, \"ref\": -5.263023}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 800.0004999999996, \"ref\": 800.0004999999996}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.17}"
+  },
+  "timings": {
+    "agent_s": 256.311,
+    "setup_s": 0.0,
+    "grade_s": 0.21
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.17s"
+  ]
+}

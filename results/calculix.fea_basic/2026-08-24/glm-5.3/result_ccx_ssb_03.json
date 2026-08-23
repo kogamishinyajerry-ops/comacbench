@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_ssb_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX (ccx 2.23) linear-static input deck for a simply supported\\nbeam (240 x 10 x 6 mm) with a mid-span load Fy = -800 N.\\n\\nMesh : structured C3D20 hexahedra (24 x 4 x 2 elements)\\nUnits: mm, N, MPa, tonne/mm^3\\n\\nThe script only writes 'model.inp' into the current working directory.\\nIt does NOT run any solver and uses no external files.\\n\\\"\\\"\\\"\\n\\n# ----------------------------------------------------------------- geometry\\nL = 240.0          # mm, length along x\\nH = 10.0           # mm, cross-section height, y in [-H/2, +H/2]\\nT = 6.0            # mm, cross-section width,  z in [-T/2, +T/2]\\n\\n# ----------------------------------------------------------------- material\\nE_MOD = 210000.0   # MPa\\nNU = 0.3           # Poisson ratio\\nRHO = 7.85e-9      # tonne/mm^3\\n\\n# ----------------------------------------------------------------- loading\\nFY_TOTAL = -800.0  # N, total force at mid-span section\\n\\n# ----------------------------------------------------------------- mesh seed\\nNELX = 24          # elements along length  (>= 16)\\nNELY = 4           # elements through height (>= 4)\\nNELZ = 2           # elements through width  (>= 2)\\n\\nMAX_ENTRIES = 16   # max comma-separated entries per data line\\n\\nNX = 2 * NELX + 1  # node planes along x (corners + midside)\\nNY = 2 * NELY + 1\\nNZ = 2 * NELZ + 1\\n\\nXS = [i * L / (2.0 * NELX) for i in range(NX)]\\nYS = [-H / 2.0 + j * H / (2.0 * NELY) for j in range(NY)]\\nZS = [-T / 2.0 + k * T / (2.0 * NELZ) for k in range(NZ)]\\n\\nI_MID = NELX       # node-plane index with x = L/2 (NELX even -> element boundary)\\nassert abs(XS[I_MID] - L / 2.0) < 1.0e-12\\n\\n\\ndef nid(i, j, k):\\n    \\\"\\\"\\\"1-based node number of structured grid point (i, j, k).\\\"\\\"\\\"\\n    return 1 + i + j * NX + k * NX * NY\\n\\n\\ndef wrap(entries):\\n    \\\"\\\"\\\"Split a list of numbers into data lines of <= 16 comma entries.\\\"\\\"\\\"\\n    out = []\\n    for s in range(0, len(entries), MAX_ENTRIES):\\n        out.append(\\\", \\\".join(str(v) for v in entries[s:s + MAX_ENTRIES]))\\n    return out\\n\\n\\n# ------------------------------------------------------------------- node sets\\nN_LEFT = [nid(0, 0, k) for k in range(NZ)]                 # x=0,    y=-H/2\\nN_RIGHT = [nid(NX - 1, 0, k) for k in range(NZ)]           # x=L,    y=-H/2\\nN_MID = [nid(I_MID, j, k) for k in range(NZ) for j in range(NY)]  # x=L/2\\nN_PIN = [N_LEFT[0]]                                        # one node of NLEFT\\n\\n# --------------------------------------------------------------- build deck\\ndeck = []\\ndeck.append(\\\"*HEADING\\\")\\ndeck.append(\\\"Simply supported beam 240x10x6 mm, C3D20 mesh, mid-span Fy=-800 N\\\")\\ndeck.append(\\\"**\\\")\\ndeck.append(\\\"** Nodes\\\")\\ndeck.append(\\\"*NODE\\\")\\nfor k in range(NZ):\\n    for j in range(NY):\\n        for i in range(NX):\\n            deck.append(\\\"%d, %.9g, %.9g, %.9g\\\" % (nid(i, j, k), XS[i], YS[j], ZS[k]))\\n\\ndeck.append(\\\"**\\\")\\ndeck.append(\\\"** 20-node hexahedra\\\")\\ndeck.append(\\\"*ELEMENT, TYPE=C3D20, ELSET=EBEAM\\\")\\neid = 0\\nfor k in range(NELZ):\\n    for j in range(NELY):\\n        for i in range(NELX):\\n            eid += 1\\n            I, J, K = 2 * i, 2 * j, 2 * k\\n            conn = (\\n                # corners: bottom face (z-), then top face (z+)\\n                nid(I, J, K), nid(I + 2, J, K), nid(I + 2, J + 2, K), nid(I, J + 2, K),\\n                nid(I, J, K + 2), nid(I + 2, J, K + 2), nid(I + 2, J + 2, K + 2), nid(I, J + 2, K + 2),\\n                # midside nodes, bottom face edges 1-2,2-3,3-4,4-1\\n                nid(I + 1, J, K), nid(I + 2, J + 1, K), nid(I + 1, J + 2, K), nid(I, J + 1, K),\\n                # midside nodes, top face edges 5-6,6-7,7-8,8-5\\n                nid(I + 1, J, K + 2), nid(I + 2, J + 1, K + 2), nid(I + 1, J + 2, K + 2), nid(I, J + 1, K + 2),\\n                # midside nodes, vertical edges 1-5,2-6,3-7,4-8\\n                nid(I, J, K + 1), nid(I + 2, J, K + 1), nid(I + 2, J + 2, K + 1), nid(I, J + 2, K + 1),\\n            )\\n            deck.append(\\\", \\\".join([str(eid)] + [str(n) for n in conn[:15]]))\\n            deck.append(\\\", \\\".join(str(n) for n in conn[15:]))\\n\\ndeck.append(\\\"**\\\"\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"NAME=NLEFT\\n\\n *WARNING reading *NSET/ELSET: parameter not recognized:\\n          NAME=NRIGHT\\n *WARNING reading *NSET or *ELSET. Card image:\\n          *NSET,NAME=NRIGHT\\n\\n *WARNING reading *NSET/ELSET: parameter not recognized:\\n          NAME=PIN\\n *WARNING reading *NSET or *ELSET. Card image:\\n          *NSET,NAME=PIN\\n\\n *WARNING reading *NSET/ELSET: parameter not recognized:\\n          NAME=NMID\\n *WARNING reading *NSET or *ELSET. Card image:\\n          *NSET,NAME=NMID\\n\\n\\n STEP            1\\n\\n *ERROR in calinput: no material was assigned\\n        to element           38\\n *ERROR in calinput: no material was assigned\\n        to element           87\\n *ERROR in calinput: no material was assigned\\n        to element          136\\n *ERROR in calinput: no material was assigned\\n        to element          185\\n\"}"
+  },
+  "timings": {
+    "agent_s": 113.882,
+    "setup_s": 0.0,
+    "grade_s": 0.154
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.05s",
+    "ccx exit=201 0.1s"
+  ]
+}

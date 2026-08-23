@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_lb_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 linear-static input deck `model.inp` for a\\nwall-mounted L-bracket (units: mm, N, MPa, tonne/mm^3).\\n\\nCross-section (L-shape in x-y): vertical arm x in [0,12], y in [0,80];\\n                                horizontal arm y in [0,12], x in [0,50].\\nExtruded in z over [0, 24].\\n\\nMesh: structured 20-node hexahedra (C3D20) on a single global grid, so the\\nmesh is conformal at the re-entrant corner (nodes shared on x=12 / y=12).\\nMesh counts: 2 elements across each 12 mm arm thickness, 8 elements along\\neach outboard arm segment (10 along each full arm), 2 through the width.\\n\\\"\\\"\\\"\\n\\n# --------------------------------------------------------------------------\\n# Parameters\\n# --------------------------------------------------------------------------\\nT    = 12.0      # arm thickness (mm)\\nLX   = 50.0      # horizontal arm length (mm)\\nLY   = 80.0      # vertical arm length (mm)\\nW    = 24.0      # bracket width (mm)\\nE    = 210000.0  # Young's modulus (MPa)\\nNU   = 0.3       # Poisson's ratio\\nRHO  = 7.85e-9   # density (tonne/mm^3)\\nFTOT = -800.0    # total load in y direction (N)\\n\\nNX_T, NX_L = 2, 8    # x: 2 across thickness (0..12), 8 along arm (12..50)\\nNY_T, NY_L = 2, 8    # y: 2 across thickness (0..12), 8 along arm (12..80)\\nNZ        = 2        # z: 2 through the width\\n\\n\\ndef quadratic_nodes(a, b, n):\\n    \\\"\\\"\\\"Node coordinates (corners + midside) of n quadratic elements on [a,b].\\\"\\\"\\\"\\n    pts = []\\n    for e in range(n):\\n        x0 = a + (b - a) * e / n\\n        x1 = a + (b - a) * (e + 1) / n\\n        pts.append(x0)\\n        pts.append(0.5 * (x0 + x1))\\n    pts.append(b)\\n    return pts\\n\\n\\nxs = quadratic_nodes(0.0, T, NX_T) + quadratic_nodes(T, LX, NX_L)[1:]\\nys = quadratic_nodes(0.0, T, NY_T) + quadratic_nodes(T, LY, NY_L)[1:]\\nzs = quadratic_nodes(0.0, W, NZ)\\n\\nI_T = 2 * NX_T      # grid index of structural line x = 12\\nJ_T = 2 * NY_T      # grid index of structural line y = 12\\n\\n# --------------------------------------------------------------------------\\n# Nodes (grid point belongs to the L-section if x <= 12 or y <= 12)\\n# --------------------------------------------------------------------------\\nnode_id = {}\\ncoords = []\\nnid = 0\\nfor k in range(len(zs)):\\n    for j in range(len(ys)):\\n        for i in range(len(xs)):\\n            if i <= I_T or j <= J_T:\\n                nid += 1\\n                node_id[(i, j, k)] = nid\\n                coords.append((nid, xs[i], ys[j], zs[k]))\\n\\n# --------------------------------------------------------------------------\\n# C3D20 elements (standard node numbering, a->x, b->y, c->z; positive J)\\n# --------------------------------------------------------------------------\\nLOCAL = (\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),\\n)\\n\\nelements = []\\nfor ek in range(NZ):\\n    for ej in range(NY_T + NY_L):\\n        for ei in range(NX_T + NX_L):\\n            i0, j0, k0 = 2 * ei, 2 * ej, 2 * ek\\n            # element exists only if all corner grid points lie in the L-domain\\n            if all(((i0 + a) <= I_T) or ((j0 + b) <= J_T) for (a, b, c) in LOCAL[:8]):\\n                conn = [node_id[(i0 + a, j0 + b, k0 + c)] for (a, b, c) in LOCAL]\\n                elements.append((len(elements) + 1, conn))\\n\\n# --------------------------------------------------------------------------\\n# Node sets\\n# --------------------------------------------------------------------------\\nnroot = sorted(n for (i, j, k), n in node_id.items() if abs(xs[i]) < 1.0e-12)\\nnload = sorted(n for (i, j, k), n in node_id.items() if abs(xs[i] - LX) < 1.0e-12)\\nfnode = FTOT / len(nload)   # equal share; 25 nodes * (-32.0) = -800.0 exactly\\n\\nassert len(nroot) > 0 and len(nload) > 0\\nassert abs(len(nload) * fnode - FTOT) < 1.0e-9\\n\\n# --------------------------------------------------------------------------\\n# Deck assembly\\n# --------------------------------\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.161781, \"got\": -0.02647272, \"ref\": -0.03158211}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.16, \"got\": 671.9997908, \"ref\": 799.9999488999999}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.11}"
+  },
+  "timings": {
+    "agent_s": 161.143,
+    "setup_s": 0.0,
+    "grade_s": 0.153
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.11s"
+  ]
+}

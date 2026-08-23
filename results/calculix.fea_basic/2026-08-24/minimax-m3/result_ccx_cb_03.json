@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_cb_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import os\\n\\n# Beam geometry\\nL = 80.0   # length in mm\\nH = 12.0   # height in mm\\nT = 6.0    # width in mm\\n\\n# Mesh: minimum required (elements)\\nnx = 16    # along length (x)\\nny = 4     # along height (y)\\nnz = 2     # along width (z)\\n\\n# Material (steel)\\nE = 210000.0   # MPa\\nnu = 0.3\\nrho = 7.85e-9  # tonne/mm^3\\n\\n# Load\\nFy_total = -2000.0  # N\\n\\n# Node grid dimensions (including mid-nodes for C3D20)\\nnxn = 2 * nx + 1\\nnyn = 2 * ny + 1\\nnzn = 2 * nz + 1\\n\\n# Spacing between adjacent nodes in the structured grid\\ndx = L / (2.0 * nx)\\ndy = H / (2.0 * ny)\\ndz = T / (2.0 * nz)\\n\\n# Generate nodes\\nnodes = []\\nnode_map = {}\\nnid_counter = 0\\nfor k in range(nzn):\\n    for j in range(nyn):\\n        for i in range(nxn):\\n            x = i * dx\\n            y = j * dy - H / 2.0\\n            z = k * dz - T / 2.0\\n            nid_counter += 1\\n            node_map[(i, j, k)] = nid_counter\\n            nodes.append((nid_counter, x, y, z))\\n\\n# Identify tip and root node sets\\nroot_nodes = []\\ntip_nodes = []\\nfor j in range(nyn):\\n    for k in range(nzn):\\n        root_nodes.append(node_map[(0, j, k)])\\n        tip_nodes.append(node_map[(2 * nx, j, k)])\\n\\n# Generate C3D20 elements\\nelements = []\\neid_counter = 0\\nfor k in range(nz):\\n    for j in range(ny):\\n        for i in range(nx):\\n            eid_counter += 1\\n            i0, i1, i2 = 2 * i, 2 * i + 1, 2 * i + 2\\n            j0, j1, j2 = 2 * j, 2 * j + 1, 2 * j + 2\\n            k0, k1, k2 = 2 * k, 2 * k + 1, 2 * k + 2\\n            conn = [\\n                node_map[(i0, j0, k0)],  # 1\\n                node_map[(i2, j0, k0)],  # 2\\n                node_map[(i2, j2, k0)],  # 3\\n                node_map[(i0, j2, k0)],  # 4\\n                node_map[(i0, j0, k2)],  # 5\\n                node_map[(i2, j0, k2)],  # 6\\n                node_map[(i2, j2, k2)],  # 7\\n                node_map[(i0, j2, k2)],  # 8\\n                node_map[(i1, j0, k0)],  # 9\\n                node_map[(i2, j1, k0)],  # 10\\n                node_map[(i1, j2, k0)],  # 11\\n                node_map[(i0, j1, k0)],  # 12\\n                node_map[(i1, j0, k2)],  # 13\\n                node_map[(i2, j1, k2)],  # 14\\n                node_map[(i1, j2, k2)],  # 15\\n                node_map[(i0, j1, k2)],  # 16\\n                node_map[(i0, j0, k1)],  # 17\\n                node_map[(i2, j0, k1)],  # 18\\n                node_map[(i2, j2, k1)],  # 19\\n                node_map[(i0, j2, k1)],  # 20\\n            ]\\n            elements.append((eid_counter, conn))\\n\\n# Load per node on tip face\\nN_tip = len(tip_nodes)\\nFy_per_node = Fy_total / N_tip\\n\\n# Helper to write a list as comma-separated entries with max 16 per line\\ndef write_chunked(f, values, prefix=\\\"\\\"):\\n    line_parts = []\\n    if prefix:\\n        line_parts.append(prefix)\\n    line_parts.extend(str(v) for v in values)\\n    # If we have more than 16 total entries, we need to split\\n    # But prefix counts as one entry if present\\n    max_per_line = 16\\n    if prefix:\\n        available = max_per_line - 1\\n    else:\\n        available = max_per_line\\n    for i in range(0, len(values), available):\\n        chunk = values[i:i + available]\\n        if i == 0 and prefix:\\n            f.write(prefix + \\\", \\\" + \\\", \\\".join(str(v) for v in chunk) + \\\"\\\\n\\\")\\n        else:\\n            f.write(\\\", \\\".join(str(v) for v in chunk) + \\\"\\\\n\\\")\\n\\n# Write the input deck\\nwith open(\\\"model.inp\\\", \\\"w\\\") as f:\\n    f.write(\\\"*HEADING\\\\n\\\")\\n    f.write(\\\"Cantilever beam static deflection (80x12x6 mm, tip load -2000.0 N)\\\\n\\\")\\n    \\n    f.write(\\\"*NODE\\\\n\\\")\\n    for nid, x, y, z in nodes:\\n        f.write(f\\\"{nid}, {x:.6f}, {y:.6f}, {z:.6f}\\\\n\\\")\\n    \\n    f.write(\\\"*ELEMENT, TYPE=C3D20, ELSET=EBEAM\\\\n\\\")\\n    for eid, conn in elements:\\n        # Split connectivity: eid + first 15 nodes (16 entries), then remaining 5\\n        first_part = [eid] + conn[:15]\\n        second_part = conn[15:]\\n        f.write(\\\", \\\".join(str(v) for v in first_part) + \\\"\\\\n\\\")\\n        f.write(\\\", \\\".join(str(v) for v in second_part) + \\\"\\\\n\\\")\\n    \\n    f.write(\\\"*NSET, NSET=NROOT\\\\n\\\")\\n    for i in range(0, len(root_nodes), 16):\\n        chunk = root_nodes[\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.177778, \"got\": -1.559073, \"ref\": -1.89617}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.177778, \"got\": 1644.4443399999998, \"ref\": 2000.0003}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.15}"
+  },
+  "timings": {
+    "agent_s": 58.505,
+    "setup_s": 0.0,
+    "grade_s": 0.193
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.15s"
+  ]
+}

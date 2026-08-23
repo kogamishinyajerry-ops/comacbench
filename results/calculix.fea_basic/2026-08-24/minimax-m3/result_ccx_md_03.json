@@ -1,0 +1,37 @@
+{
+  "task_id": "ccx_md_03",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"Generate CalculiX 2.23 input deck for cantilever beam natural frequencies.\\\"\\\"\\\"\\n\\n# Geometry (mm)\\nL, H, T = 120.0, 8.0, 4.0\\n\\n# Structured mesh: >=16 along x (length), >=4 through y (height), >=2 through z (width)\\nnx, ny, nz = 16, 4, 2\\n\\n# Material (steel): E [MPa], nu [-], rho [tonne/mm^3]\\nE, nu, rho = 210000.0, 0.3, 7.85e-9\\n\\n# Total node counts by category\\nNc   = (nx+1)*(ny+1)*(nz+1)        # corner nodes\\nNm_x = nx*(ny+1)*(nz+1)             # mid-side nodes on x-edges\\nNm_y = (nx+1)*ny*(nz+1)             # mid-side nodes on y-edges\\nNm_z = (nx+1)*(ny+1)*nz             # mid-side nodes on z-edges\\n\\ndx, dy, dz = L/nx, H/ny, T/nz\\n\\n# Global node ID helpers (sequential)\\ndef cid(i, j, k):\\n    return 1 + i + (nx+1)*j + (nx+1)*(ny+1)*k\\n\\ndef mx(ex, j, k):\\n    return Nc + 1 + ex + nx*j + nx*(ny+1)*k\\n\\ndef my(i, ey, k):\\n    return Nc + Nm_x + 1 + i + (nx+1)*ey + (nx+1)*ny*k\\n\\ndef mz(i, j, ez):\\n    return Nc + Nm_x + Nm_y + 1 + i + (nx+1)*j + (nx+1)*(ny+1)*ez\\n\\n# Build node coordinates\\nnodes = {}\\n\\n# Corners\\nfor i in range(nx+1):\\n    for j in range(ny+1):\\n        for k in range(nz+1):\\n            nodes[cid(i, j, k)] = (i*dx, j*dy, k*dz)\\n\\n# Mid-x edges\\nfor ex in range(nx):\\n    for j in range(ny+1):\\n        for k in range(nz+1):\\n            nodes[mx(ex, j, k)] = ((ex+0.5)*dx, j*dy, k*dz)\\n\\n# Mid-y edges\\nfor i in range(nx+1):\\n    for ey in range(ny):\\n        for k in range(nz+1):\\n            nodes[my(i, ey, k)] = (i*dx, (ey+0.5)*dy, k*dz)\\n\\n# Mid-z edges\\nfor i in range(nx+1):\\n    for j in range(ny+1):\\n        for ez in range(nz):\\n            nodes[mz(i, j, ez)] = (i*dx, j*dy, (ez+0.5)*dz)\\n\\n# Build element connectivity (C3D20: 8 corners + 12 mid-edge nodes)\\nelements = []\\nfor ex in range(nx):\\n    for ey in range(ny):\\n        for ez in range(nz):\\n            conn = [\\n                cid(ex,   ey,   ez  ), cid(ex+1, ey,   ez  ),\\n                cid(ex+1, ey+1, ez  ), cid(ex,   ey+1, ez  ),\\n                cid(ex,   ey,   ez+1), cid(ex+1, ey,   ez+1),\\n                cid(ex+1, ey+1, ez+1), cid(ex,   ey+1, ez+1),\\n                mx (ex,   ey,   ez  ), my (ex+1, ey,   ez  ),\\n                mx (ex,   ey+1, ez  ), my (ex,   ey,   ez  ),\\n                mx (ex,   ey,   ez+1), my (ex+1, ey,   ez+1),\\n                mx (ex,   ey+1, ez+1), my (ex,   ey,   ez+1),\\n                mz (ex,   ey,   ez  ), mz (ex+1, ey,   ez  ),\\n                mz (ex+1, ey+1, ez  ), mz (ex,   ey+1, ez  ),\\n            ]\\n            elements.append(conn)\\n\\n# Node sets: NROOT = all nodes with x=\""
+  },
+  "timings": {
+    "agent_s": 177.252,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_bk_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerates a CalculiX 2.23 input deck for a cantilever column buckling analysis.\\n\\nGeometry:\\n  Length L = 100 mm along x\\n  Height H = 10 mm along y\\n  Width  T = 5 mm  along z\\n\\nMesh (structured C3D20 hex):\\n  >= 16 elements along length\\n  >=  4 elements through height\\n  >=  2 elements through width\\n\\nLoads:\\n  Reference axial compressive load Fx = -1 N distributed equally on the tip face.\\n\\nBuckling analysis:\\n  *BUCKLE requesting 4 modes.\\n\\nOutput:\\n  Writes exactly one file: model.inp in the current directory.\\n\\\"\\\"\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Mesh parameters\\n# ---------------------------------------------------------------------------\\nNX = 16   # elements along length (x) -- minimum 16\\nNY = 4    # elements along height (y) -- minimum 4\\nNZ = 2    # elements along width  (z) -- minimum 2\\n\\nL = 100.0   # mm\\nH = 10.0    # mm\\nT = 5.0     # mm\\n\\nE = 210000.0     # MPa\\nNU = 0.3\\nRHO = 7.85e-9    # tonne/mm^3\\n\\n\\n# ---------------------------------------------------------------------------\\n# Helpers\\n# ---------------------------------------------------------------------------\\ndef fmt(v):\\n    \\\"\\\"\\\"Format a float without scientific notation, trimming trailing zeros.\\\"\\\"\\\"\\n    s = f\\\"{v:.10f}\\\"\\n    if \\\".\\\" in s:\\n        s = s.rstrip(\\\"0\\\").rstrip(\\\".\\\")\\n    return s if s else \\\"0\\\"\\n\\n\\n# ---------------------------------------------------------------------------\\n# Generate structured C3D20 mesh node coordinates.\\n# C3D20 = 20-node hex, node ordering follows CalculiX convention.\\n# The 20 nodes per element are arranged in 2x2x2 corners (8) + 12 mid-edge nodes\\n# on the bottom (4), middle (4) and top (4) layers.\\n# ---------------------------------------------------------------------------\\n\\n# Each element block has 3 node grids per direction:\\n# corner nodes:    nc = (nx_corners, ny_corners, nz_corners)\\n# mid-edge nodes:  nm = (nx_mids,    ny_mids,    nz_mids)   -- for interior nodes\\n# We build a single regular grid of \\\"brick\\\" nodes (2*nx x 2*ny x 2*nz) and then\\n# drop the interior nodes per element (using 2x2x2 = 20 nodes per element).\\n\\nnx_c = NX + 1\\nny_c = NY + 1\\nnz_c = NZ + 1\\n\\n# Node coordinates in brick-20 layout: (2*NX+1) x (2*NY+1) x (2*NZ+1) grid\\ngx = [L * i / (2 * NX) for i in range(2 * NX + 1)]\\ngy = [H * j / (2 * NY) for j in range(2 * NY + 1)]\\ngz = [T * k / (2 * NZ) for k in range(2 * NZ + 1)]\\n\\n# Assign sequential node ids in row-major order\\nnode_id = {}\\nnext_id = 1\\nfor k, zk in enumerate(gz):\\n    for j, yj in enumerate(gy):\\n        for i, xi in enumerate(gx):\\n            node_id[(i, j, k)] = next_id\\n            next_id += 1\\n\\n# Cache node id list for connectivity building\\nnx_b = 2 * NX\\nny_b = 2 * NY\\nnz_b = 2 * NZ\\n\\n# ---------------------------------------------------------------------------\\n# Helper: build the 20-node connectivity for an element located at brick\\n# indices (ex, ey, ez) where ex in 0..NX-1, ey in 0..NY-1, ez in 0..NZ-1.\\n# CalculiX C3D20 node ordering (face-based):\\n#   corners: bottom face (z=0), then top face (z=1) in same order\\n#   bottom mid-edges (z=0): 4 nodes between adjacent corners (edges on z=0)\\n#   middle mid-edges:        4 nodes on z=0.5 (vertical edges and z-edges)\\n#   top mid-edges (z=1):     4 nodes between adjacent corners on top\\n# ---------------------------------------------------------------------------\\ndef elem_nodes(ex, ey, ez):\\n    i0, j0, k0 = 2 * ex, 2 * ey, 2 * ez\\n    # 8 corner indices\\n    c000 = (i0,     j0,     k0)\\n    c100 = (i0 + 1, j0,     k0)\\n    c110 = (i0 + 1, j0 + 1, k0)\\n    c010 = (i0,     j0 + 1, k0)\\n    c001 = (i0,     j0,     k0 + 1)\\n    c101 = (i0 + 1, j0,     k0 + 1)\\n    c111 = (i0 + 1, j0 + 1, k0 + 1)\\n    c011 = (i0,     j0 + 1, k0 + 1)\\n\\n    # mid-edge on bottom face z=0\\n    b01 = (i0,     j0,     k0)     # placeholder, replaced below\\n    b02 = (i0,     j0,     k0)\\n    b03 = (i0,     j0,     k0)\\n    b04 = (i0,     j0,     k0)\\n    # we don't actually need named mid corners; use direct grid coords.\\n\\n    # bottom mid-edges (z = k0): \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"ccx_stdout_tail\": \"\\n************************************************************\\n\\nCalculiX Version 2.23, Copyright(C) 1998-2025 Guido Dhondt\\nCalculiX comes with ABSOLUTELY NO WARRANTY. This is free\\nsoftware, and you are welcome to redistribute it under\\ncertain conditions, see gpl.htm\\n\\n************************************************************\\n\\nYou are using an executable made on Sat May 16 10:47:10 UTC 2026\\n *ERROR in splitline: there should not\\n        be more than 16 entries in a \\n        line; \\n1,1,3,101,99,1275,1277,1375,1373,2,52,100,50,1276,1326,1374,1324,\\n\"}"
+  },
+  "timings": {
+    "agent_s": 157.437,
+    "setup_s": 0.0,
+    "grade_s": 0.164
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.05s",
+    "ccx exit=201 0.11s"
+  ]
+}

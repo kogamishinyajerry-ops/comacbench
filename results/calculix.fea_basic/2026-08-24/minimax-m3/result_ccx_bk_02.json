@@ -1,0 +1,37 @@
+{
+  "task_id": "ccx_bk_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck for cantilever column buckling.\\n\\nGeometry : L = 150 mm (x), H = 12 mm (y), T = 6 mm (z)   [H = 2T]\\nMesh     : 16 x 4 x 2 C3D20 elements (meets the minimum counts)\\nMaterial : steel, E = 210000 MPa, nu = 0.3, rho = 7.85e-9 t/mm^3\\nBCs      : root face x=0 fully clamped (set NROOT)\\nLoading  : tip face x=L, total axial Fx = -1 N split equally among NTIP\\nAnalysis : *STEP, *BUCKLE, 4 modes\\n\\nOutput: model.inp\\n\\\"\\\"\\\"\\n\\n\\ndef main():\\n    # ----- Geometry (mm) -----\\n    L = 150.0\\n    H = 12.0\\n    T = 6.0\\n\\n    # ----- Mesh (cells per direction, >= minimum required) -----\\n    nx, ny, nz = 16, 4, 2\\n\\n    # ----- Material -----\\n    E_MPa = 210000.0   # MPa (= N/mm^2)\\n    nu    = 0.3\\n    rho   = 7.85e-9    # tonne/mm^3\\n\\n    # ----- Analysis -----\\n    n_modes = 4\\n    F_total = -1.0     # N (axial compression)\\n\\n    # ----- Build structured C3D20 mesh -----\\n    # For a structured C3D20 mesh, node lines run 2*nx+1, 2*ny+1, 2*nz+1.\\n    nx_n = 2 * nx + 1\\n    ny_n = 2 * ny + 1\\n    nz_n = 2 * nz + 1\\n\\n    nodes = []            # list of (nid, x, y, z)\\n    node_id = {}          # (i, j, k) -> nid   (i,j,k are integer grid indices)\\n\\n    for k in range(nz_n):\\n        for j in range(ny_n):\\n            for i in range(nx_n):\\n                x = L * i / (2 * nx)\\n                y = H * j / (2 * ny)\\n                z = T * k / (2 * nz)\\n                nid = len(nodes) + 1\\n                nodes.append((nid, x, y, z))\\n                node_id[(i, j, k)] = nid\\n\\n    # C3D20 elements: 8 corners + 12 mid-side = 20 nodes per element.\\n    elements = []\\n    for ke in range(nz):\\n        for je in range(ny):\\n            for ie in range(nx):\\n                # 8 corner nodes\\n                n1  = node_id[(2*ie,   2*je,   2*ke)]    # (-x,-y,-z)\\n                n2  = node_id[(2*ie+2, 2*je,   2*ke)]    # (+x,-y,-z)\\n                n3  = node_id[(2*ie+2, 2*je+2, 2*ke)]    # (+x,+y,-z)\\n                n4  = node_id[(2*ie,   2*je+2, 2*ke)]    # (-x,+y,-z)\\n                n5  = node_id[(2*ie,   2*je,   2*ke+2)]  # (-x,-y,+z)\\n                n6  = node_id[(2*ie+2, 2*je,   2*ke+2)]  # (+x,-y,+z)\\n                n7  = node_id[(2*ie+2, 2*je+2, 2*ke+2)]  # (+x,+y,+z)\\n                n8  = node_id[(2*ie,   2*je+2, 2*ke+2)]  # (-x,+y,+z)\\n                # 12 mid-side nodes\\n                n9  = node_id[(2*ie+1, 2*je,   2*ke)]    # mid of n1-n2\\n                n10 = node_id[(2*ie+2, 2*je+1, 2*ke)]    # mid of n2-n3\\n                n11 = node_id[(2*ie+1, 2*je+2, 2*ke)]    # mid of n3-n4\\n                n12 = node_id[(2*ie,   2*je+1, 2*ke)]    # mid of n4-n1\\n                n13 = node_id[(2*ie,   2*je,   2*ke+1)]  # mid of n1-n5\\n                n14 = node_id[(2*ie+2, 2*je,   2*ke+1)]  # mid of n2-n6\\n                n15 = node_id[(2*ie+2, 2*je+2, 2*ke+1)]  # mid of n3-n7\\n                n16 = node_id[(2*ie,   2*je+2, 2*ke+1)]  # mid of n4-n8\\n                n17 = node_id[(2*ie+1, 2*je,   2*ke+2)]  # mid of n5-n6\\n                n18 = node_id[(2*ie+2, 2*je+1, 2*ke+2)]  # mid of n6-n7\\n                n19 = node_id[(2*ie+1, 2*je+2, 2*ke+2)]  # mid of n7-n8\\n                n20 = node_id[(2*ie,   2*je+1, 2*ke+2)]  # mid of n8-n5\\n                eid = len(elements) + 1\\n                elements.append((eid, [n1, n2, n3, n4, n5, n6, n7, n8,\\n                                       n9, n10, n11, n12, n13, n14, n15, n16,\\n                                       n17, n18, n19, n20]))\\n\\n    # Node sets (graded by name)\\n    nroot = sorted(node_id[(0, j, k)]                # x = 0 face\\n                   for k in range(nz_n) for j in range(ny_n))\\n    ntip  = sorted(node_id[(2*nx, j, k)]             # x = L face\\n                   for k in range(nz_n) for j in range(ny_n))\\n\\n    F_per_node = F_total / len(ntip)\\n\\n    # ----- Write the input deck -----\\n    with open(\\\"model.inp\\\", \\\"w\\\") as f:\\n        # Header\\n        f.write(\\\"*HEADING\\\\n\\\")\\n        f.write(\\\"Cantilever column buckling - C3D20 structured mesh\\\\n\\\")\\n        f.write(\\\"**\\\\n\\\")\\n        f.write(\\\"\""
+  },
+  "timings": {
+    "agent_s": 164.277,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False"
+  ]
+}

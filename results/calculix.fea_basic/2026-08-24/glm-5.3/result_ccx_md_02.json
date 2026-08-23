@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_md_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nWrite a CalculiX 2.23 input deck `model.inp` (in the current directory) for\\nthe first natural frequencies of a steel cantilever beam:\\n\\n    geometry : L = 150 mm (x), H = 12 mm (y), T = 6 mm (z), H = 2*T\\n               (first mode bends about the weak axis -> z-deflection)\\n    material : E = 210000 MPa, nu = 0.3, rho = 7.85e-9 tonne/mm^3\\n    mesh     : structured C3D20 hexahedra, 24 x 4 x 2 elements\\n               (>= 16 along length, >= 4 through height, >= 2 through width)\\n    BCs      : root face x = 0 fully clamped via node set NROOT\\n               tip face nodes collected in node set NTIP\\n    analysis : *STEP with *FREQUENCY (linear perturbation), 4 modes\\n\\nUnits: mm, N, MPa, tonne/mm^3.\\nThe script only writes the deck; it never invokes a solver, uses no\\nsubprocess and no network.\\n\\\"\\\"\\\"\\n\\n# ----------------------------------------------------------------------\\n# parameters\\n# ----------------------------------------------------------------------\\nL, H, T = 150.0, 12.0, 6.0             # geometry [mm]\\nNELX, NELY, NELZ = 24, 4, 2            # elements along x, y, z\\nE, NU, RHO = 210000.0, 0.3, 7.85e-9    # steel, consistent unit system\\nNMODES = 4                             # requested eigenmodes\\nMAXFLD = 16                            # max comma-separated fields / data line\\n\\n\\ndef num(v):\\n    \\\"\\\"\\\"Compact decimal string (trailing zeros stripped).\\\"\\\"\\\"\\n    s = (\\\"%.6f\\\" % v).rstrip(\\\"0\\\").rstrip(\\\".\\\")\\n    return s if s else \\\"0\\\"\\n\\n\\ndef wrap(items, per=MAXFLD):\\n    \\\"\\\"\\\"Wrap a list of numbers into data lines with at most `per` fields.\\\"\\\"\\\"\\n    lines = []\\n    for s in range(0, len(items), per):\\n        chunk = items[s:s + per]\\n        line = \\\", \\\".join(str(v) for v in chunk)\\n        if s + per < len(items):\\n            line += \\\",\\\"\\n        lines.append(line)\\n    return lines\\n\\n\\ndef build_deck():\\n    \\\"\\\"\\\"Return (list of deck lines, node count, element count).\\\"\\\"\\\"\\n    NX, NY, NZ = 2 * NELX, 2 * NELY, 2 * NELZ   # half-step grid indices\\n\\n    # ------------------------------------------------------------------\\n    # nodes: a grid point (i,j,k) is needed by the C3D20 connectivity\\n    # iff at most one of its indices is odd (corners + midside nodes).\\n    # ------------------------------------------------------------------\\n    def is_used(i, j, k):\\n        return (i % 2) + (j % 2) + (k % 2) <= 1\\n\\n    node_id = {}\\n    node_lines = []\\n    nid = 0\\n    for k in range(NZ + 1):\\n        for j in range(NY + 1):\\n            for i in range(NX + 1):\\n                if is_used(i, j, k):\\n                    nid += 1\\n                    node_id[(i, j, k)] = nid\\n                    x = L * i / NX\\n                    y = H * j / NY\\n                    z = T * k / NZ\\n                    node_lines.append(\\\"%d, %s, %s, %s\\\"\\n                                      % (nid, num(x), num(y), num(z)))\\n\\n    # ------------------------------------------------------------------\\n    # C3D20 local node offsets (a,b,c) inside one element cell, in\\n    # CalculiX order: 1-8 corners, 9-12 / 13-16 face midsides,\\n    # 17-20 vertical midsides.  a->x, b->y, c->z gives a positive\\n    # Jacobian for the node numbering below.\\n    # ------------------------------------------------------------------\\n    c3d20 = (\\n        (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),\\n        (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),\\n        (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),\\n        (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),\\n        (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),\\n    )\\n\\n    elem_lines = []\\n    eid = 0\\n    for ek in range(NELZ):\\n        for ej in range(NELY):\\n            for ei in range(NELX):\\n                eid += 1\\n                conn = [node_id[(2 * ei + a, 2 * ej + b, 2 * ek + c)]\\n                        for (a, b, c) in c3d20]\\n                # element number + 15 nodes on line 1, remaining 5 on line 2\\n                first = [eid] + conn[:15]\\n                elem_lines.append(\\\", \\\".join(str(v) for v in first) + \\\",\\\")\\n                elem_lines.append(\\\", \\\".join(str(v) fo\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"f1_hz\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.0, \"got\": 0.0, \"ref\": 223.6808}, \"f2_hz\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 1.0, \"got\": 0.0, \"ref\": 444.9482}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.03, \"ccx_s\": 0.24}"
+  },
+  "timings": {
+    "agent_s": 210.42,
+    "setup_s": 0.0,
+    "grade_s": 0.285
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.24s"
+  ]
+}

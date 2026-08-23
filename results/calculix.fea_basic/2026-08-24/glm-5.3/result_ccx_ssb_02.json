@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_ssb_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "timeout"
+  ],
+  "failure_mode": "timeout",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck `model.inp` (linear static) for a\\nsimply supported beam on knife-edge supports with a mid-span load.\\n\\nUnits: mm, N, MPa, tonne/mm^3 (steel).\\nThe script only writes the deck; it does NOT run the solver.\\n\\\"\\\"\\\"\\n\\n# ------------------------------------------------------------------ geometry / material\\nL, H, T = 160.0, 12.0, 6.0        # length (x), height (y), width (z) [mm]\\nE, NU = 210000.0, 0.3             # Young's modulus [MPa], Poisson's ratio\\nRHO = 7.85e-9                     # density [tonne/mm^3]\\nFY = -1200.0                      # total mid-span load [N]\\n\\n# ------------------------------------------------------------------ mesh (>= 16 x 4 x 2)\\nNX, NY, NZ = 16, 4, 2             # C3D20 elements along x, y, z\\nNPX, NPY, NPZ = 2 * NX + 1, 2 * NY + 1, 2 * NZ + 1   # nodes per direction\\n\\n\\ndef node_id(i, j, k):\\n    \\\"\\\"\\\"Label of structured-grid node (i:x, j:y, k:z).\\\"\\\"\\\"\\n    return k * (NPX * NPY) + j * NPX + i + 1\\n\\n\\ndef wrap(items, per_line=16):\\n    \\\"\\\"\\\"Split a list into data lines with at most `per_line` comma entries.\\\"\\\"\\\"\\n    return [\\\", \\\".join(str(v) for v in items[s:s + per_line])\\n            for s in range(0, len(items), per_line)]\\n\\n\\ndeck = []\\ndeck.append(\\\"*HEADING\\\")\\ndeck.append(\\\"SIMPLY SUPPORTED BEAM 160 X 12 X 6 MM, MID-SPAN LOAD FY = -1200 N\\\")\\n\\n# ------------------------------------------------------------------ nodes\\ndeck.append(\\\"*NODE\\\")\\nfor k in range(NPZ):\\n    z = -T / 2.0 + T * k / (2 * NZ)\\n    for j in range(NPY):\\n        y = -H / 2.0 + H * j / (2 * NY)\\n        for i in range(NPX):\\n            x = L * i / (2 * NX)\\n            deck.append(\\\"{:d}, {:.6f}, {:.6f}, {:.6f}\\\".format(\\n                node_id(i, j, k), x, y, z))\\n\\n# ------------------------------------------------------------------ 20-node hex elements\\ndeck.append(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\neid = 0\\nfor ek in range(NZ):\\n    for ej in range(NY):\\n        for ei in range(NX):\\n            eid += 1\\n            i0, i1, i2 = 2 * ei, 2 * ei + 1, 2 * ei + 2\\n            j0, j1, j2 = 2 * ej, 2 * ej + 1, 2 * ej + 2\\n            k0, k1, k2 = 2 * ek, 2 * ek + 1, 2 * ek + 2\\n            conn = [\\n                node_id(i0, j0, k0), node_id(i2, j0, k0),   # 1,2\\n                node_id(i2, j2, k0), node_id(i0, j2, k0),   # 3,4\\n                node_id(i0, j0, k2), node_id(i2, j0, k2),   # 5,6\\n                node_id(i2, j2, k2), node_id(i0, j2, k2),   # 7,8\\n                node_id(i1, j0, k0), node_id(i2, j1, k0),   # 9,10\\n                node_id(i1, j2, k0), node_id(i0, j1, k0),   # 11,12\\n                node_id(i1, j0, k2), node_id(i2, j1, k2),   # 13,14\\n                node_id(i1, j2, k2), node_id(i0, j1, k2),   # 15,16\\n                node_id(i0, j0, k1), node_id(i2, j0, k1),   # 17,18\\n                node_id(i2, j2, k1), node_id(i0, j2, k1),   # 19,20\\n            ]\\n            deck.append(\\\", \\\".join([str(eid)] + [str(n) for n in conn[:15]]))\\n            deck.append(\\\", \\\".join(str(n) for n in conn[15:]))\\n\\n# ------------------------------------------------------------------ node sets\\nnleft = [node_id(0, 0, k) for k in range(NPZ)]                 # x=0,  y=-H/2 (all z)\\nnright = [node_id(2 * NX, 0, k) for k in range(NPZ)]           # x=L,  y=-H/2 (all z)\\nnmid = [node_id(NX, j, k) for k in range(NPZ) for j in range(NPY)]  # x=L/2 (all y,z)\\npin = [nleft[0]]                                               # ONE node of NLEFT\\n\\nfor name, nodes in ((\\\"NLEFT\\\", nleft), (\\\"NRIGHT\\\", nright),\\n                    (\\\"NMID\\\", nmid), (\\\"PIN\\\", pin)):\\n    deck.append(\\\"*NSET, NSET={}\\\".format(name))\\n    deck.extend(wrap(nodes))\\n\\n# ------------------------------------------------------------------ material / section\\ndeck.append(\\\"*MATERIAL, NAME=STEEL\\\")\\ndeck.append(\\\"*ELASTIC\\\")\\ndeck.append(\\\"{:.1f}, {:.1f}\\\".format(E, NU))\\ndeck.append(\\\"*DENSITY\\\")\\ndeck.append(\\\"{:.6E}\\\".format(RHO))\\ndeck.append(\\\"*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\")\\n\\n# ------------------------------------------------------------------ step\\ndeck.append(\\\"*STEP\\\")\\ndeck.append(\\\"*STATI\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 337.901,
+    "setup_s": 0.0,
+    "grade_s": 0.038
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=-9 0.0s TIMEOUT"
+  ]
+}

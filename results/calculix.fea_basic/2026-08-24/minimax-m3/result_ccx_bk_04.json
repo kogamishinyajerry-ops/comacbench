@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_bk_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "timeout"
+  ],
+  "failure_mode": "timeout",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"from pathlib import Path\\n\\n# Structured mesh dimensions (elements along x, y, and z).\\nnx, ny, nz = 16, 4, 3\\nlength, height, width = 200.0, 10.0, 5.0\\n\\nlines = [\\n    \\\"*HEADING\\\",\\n    \\\"CANTILEVER COLUMN BUCKLING\\\",\\n    \\\"*NODE\\\",\\n]\\n\\n# Global node numbering: fastest index is z, then y, then x.\\ndef node_id(ix, iy, iz):\\n    return ix * (ny * nz) + iy * nz + iz + 1\\n\\ndef fmt(value):\\n    value = 0.0 if abs(value) < 1.0e-12 else value\\n    return f\\\"{value:.10g}\\\"\\n\\nfor ix in range(nx + 1):\\n    x = length * ix / nx\\n    for iy in range(ny + 1):\\n        y = height * iy / ny\\n        for iz in range(nz + 1):\\n            z = width * iz / nz\\n            lines.append(\\n                f\\\"{node_id(ix, iy, iz)},{fmt(x)},{fmt(y)},{fmt(z)}\\\"\\n            )\\n\\nlines.extend(\\n    [\\n        \\\"*ELEMENT, TYPE=C3D20, ELSET=SOLID\\\",\\n    ]\\n)\\n\\n# Standard C3D20 ordering:\\n# 1-8 are corners, 9-16 are midside nodes on the two in-plane\\n# faces, and 17-20 are midside nodes on the four z-directed edges.\\nelement_id = 0\\nfor ix in range(nx):\\n    for iy in range(ny):\\n        for iz in range(nz):\\n            c000 = node_id(ix,     iy,     iz)\\n            c100 = node_id(ix + 1, iy,     iz)\\n            c110 = node_id(ix + 1, iy + 1, iz)\\n            c010 = node_id(ix,     iy + 1, iz)\\n            c001 = node_id(ix,     iy,     iz + 1)\\n            c101 = node_id(ix + 1, iy,     iz + 1)\\n            c111 = node_id(ix + 1, iy + 1, iz + 1)\\n            c011 = node_id(ix,     iy + 1, iz + 1)\\n\\n            connectivity = [\\n                c000, c100, c110, c010,\\n                c001, c101, c111, c011,\\n                node_id(ix + 1, iy,     iz),\\n                node_id(ix + 1, iy + 1, iz),\\n                node_id(ix + 1, iy + 1, iz),\\n                node_id(ix,     iy + 1, iz),\\n                node_id(ix + 1, iy,     iz + 1),\\n                node_id(ix + 1, iy + 1, iz + 1),\\n                node_id(ix + 1, iy + 1, iz + 1),\\n                node_id(ix,     iy + 1, iz + 1),\\n                node_id(ix,     iy,     iz + 1),\\n                node_id(ix + 1, iy,     iz + 1),\\n                node_id(ix + 1, iy + 1, iz + 1),\\n                node_id(ix,     iy + 1, iz + 1),\\n            ]\\n\\n            element_id += 1\\n            first_line = [str(element_id)] + [\\n                str(node) for node in connectivity[:14]\\n            ]\\n            second_line = [str(node) for node in connectivity[14:]]\\n            lines.append(\\\",\\\".join(first_line))\\n            lines.append(\\\",\\\".join(second_line))\\n\\nroot_nodes = [\\n    node_id(ix, iy, iz)\\n    for iz in range(nz + 1)\\n    for iy in range(ny + 1)\\n    for ix in range(1)\\n]\\ntip_nodes = [\\n    node_id(nx, iy, iz)\\n    for iz in range(nz + 1)\\n    for iy in range(ny + 1)\\n]\\n\\nfor set_name, set_nodes in ((\\\"NROOT\\\", root_nodes), (\\\"NTIP\\\", tip_nodes)):\\n    lines.append(f\\\"*NSET,NSET={set_name}\\\")\\n    for start in range(0, len(set_nodes), 15):\\n        lines.append(\\\",\\\".join(str(n) for n in set_nodes[start:start + 15]))\\n\\nlines.extend(\\n    [\\n        \\\"*MATERIAL, NAME=STEEL\\\",\\n        \\\"*ELASTIC, TYPE=ISO\\\",\\n        \\\"210000.,0.3\\\",\\n        \\\"*DENSITY\\\",\\n        \\\"7.85E-9\\\",\\n        \\\"*SOLID SECTION, ELSET=SOLID, MATERIAL=STEEL\\\",\\n        \\\"*STEP\\\",\\n        \\\"*BUCKLE\\\",\\n        \\\"4\\\",\\n        \\\"*BOUNDARY\\\",\\n        \\\"NROOT,1,6,0.\\\",\\n    ]\\n)\\n\\n# Apply a total reference force of -1 N equally to all tip-face nodes.\\ntip_force = -1.0 / len(tip_nodes)\\nfor tip_node in tip_nodes:\\n    lines.append(f\\\"{tip_node},1,{tip_force:.12f}\\\")\\n\\nlines.extend(\\n    [\\n        \\\"*NODE PRINT, NSET=NROOT\\\",\\n        \\\"1\\\",\\n        \\\"U\\\",\\n        \\\"*NODE PRINT, NSET=NTIP\\\",\\n        \\\"1\\\",\\n        \\\"U\\\",\\n        \\\"*END STEP\\\",\\n    ]\\n)\\n\\nPath(\\\"model.inp\\\").write_text(\\\"\\\\n\\\".join(lines) + \\\"\\\\n\\\", encoding=\\\"ascii\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 328.776,
+    "setup_s": 0.0,
+    "grade_s": 0.047
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=-9 0.0s TIMEOUT"
+  ]
+}

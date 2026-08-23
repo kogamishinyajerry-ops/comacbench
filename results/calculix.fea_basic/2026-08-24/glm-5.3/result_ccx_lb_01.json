@@ -1,0 +1,40 @@
+{
+  "task_id": "ccx_lb_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck `model.inp` for a wall-mounted L-bracket\\n(linear static analysis).  Units: mm, N, MPa, tonne/mm^3.\\n\\nCross section (x-y plane), extruded in z over [0, 20]:\\n    vertical arm   : x in [0, 10], y in [0, 60]\\n    horizontal arm : y in [0, 10], x in [0, 60]\\n\\nMesh: two structured blocks of 20-node hexahedra (C3D20) whose nodes are\\nMERGED on the shared interface (x = 10, y in [0, 10]) -> fully conformal\\nmesh, also at the re-entrant corner edge (x = 10, y = 10).\\n    block A (vertical arm)  : 2 (x, thickness) x 12 (y, length) x 2 (z)\\n    block B (horizontal arm): 10 (x, length)   x 2 (y, thickness) x 2 (z)\\nmeets/exceeds: >=2 across each arm thickness, >=6 along each arm length,\\n>=2 through the width.\\n\\nBC  : NROOT = ALL nodes with x = 0, clamped (ux = uy = uz = 0)\\nLoad: NLOAD = ALL nodes with x = 60; total Fy = -500 N split equally,\\n      25 nodes x (-20.0 N) = -500.0 N exactly.\\n\\nThe script ONLY writes the deck (no solver, no subprocess, no network).\\n\\\"\\\"\\\"\\n\\n# ------------------------------------------------------------ parameters ---\\nE_STEEL = 210000.0        # Young's modulus [MPa]\\nNU_STEEL = 0.3            # Poisson's ratio [-]\\nRHO_STEEL = 7.85e-9       # density [tonne/mm^3]\\nF_TOTAL_Y = -500.0        # total applied force in y [N]\\n\\nT = 10.0                  # arm thickness [mm]\\nL = 60.0                  # arm length [mm]\\nW = 20.0                  # bracket width in z [mm]\\n\\n# element divisions (uniform 5 mm in x/y, 10 mm in z)\\nNE_THICK_V = 2            # >= 2 across the vertical-arm thickness (x)\\nNE_LONG_V = 12            # >= 6 along the vertical-arm length (y)\\nNE_LONG_H = 10            # >= 6 along the horizontal-arm length (x, [10,60])\\nNE_THICK_H = 2            # >= 2 across the horizontal-arm thickness (y)\\nNE_Z = 2                  # >= 2 through the width (z)\\n\\nMAX_FIELDS = 16           # max comma-separated entries per data line\\n\\n\\n# --------------------------------------------------------------- meshing ---\\ndef _c3d20(grid, i, j, k):\\n    \\\"\\\"\\\"20-node connectivity (standard CalculiX/ABAQUS C3D20 ordering) for\\n    element (i,j,k) of a structured grid whose nodes live on half-index\\n    positions (I,J,K) with I in 0..2*nelx etc.\\\"\\\"\\\"\\n    return [\\n        grid[2 * i,     2 * j,     2 * k],      #  1 corner (-1,-1,-1)\\n        grid[2 * i + 2, 2 * j,     2 * k],      #  2 corner (+1,-1,-1)\\n        grid[2 * i + 2, 2 * j + 2, 2 * k],      #  3 corner (+1,+1,-1)\\n        grid[2 * i,     2 * j + 2, 2 * k],      #  4 corner (-1,+1,-1)\\n        grid[2 * i,     2 * j,     2 * k + 2],  #  5 corner (-1,-1,+1)\\n        grid[2 * i + 2, 2 * j,     2 * k + 2],  #  6 corner (+1,-1,+1)\\n        grid[2 * i + 2, 2 * j + 2, 2 * k + 2],  #  7 corner (+1,+1,+1)\\n        grid[2 * i,     2 * j + 2, 2 * k + 2],  #  8 corner (-1,+1,+1)\\n        grid[2 * i + 1, 2 * j,     2 * k],      #  9 midside 1-2\\n        grid[2 * i + 2, 2 * j + 1, 2 * k],      # 10 midside 2-3\\n        grid[2 * i + 1, 2 * j + 2, 2 * k],      # 11 midside 3-4\\n        grid[2 * i,     2 * j + 1, 2 * k],      # 12 midside 4-1\\n        grid[2 * i + 1, 2 * j,     2 * k + 2],  # 13 midside 5-6\\n        grid[2 * i + 2, 2 * j + 1, 2 * k + 2],  # 14 midside 6-7\\n        grid[2 * i + 1, 2 * j + 2, 2 * k + 2],  # 15 midside 7-8\\n        grid[2 * i,     2 * j + 1, 2 * k + 2],  # 16 midside 8-5\\n        grid[2 * i,     2 * j,     2 * k + 1],  # 17 midside 1-5\\n        grid[2 * i + 2, 2 * j,     2 * k + 1],  # 18 midside 2-6\\n        grid[2 * i + 2, 2 * j + 2, 2 * k + 1],  # 19 midside 3-7\\n        grid[2 * i,     2 * j + 2, 2 * k + 1],  # 20 midside 4-8\\n    ]\\n\\n\\ndef build_mesh():\\n    \\\"\\\"\\\"Return (coords, elements, nroot, nload).\\n    coords   : list of (x,y,z); node id = index + 1\\n    elements : list of 20-node connectivity lists (1-based node ids)\\n    nroot    : sorted node ids with x = 0\\n    nload    : sorted node ids with x = 60\\n    \\\"\\\"\\\"\\n    node_map = {}\\n    coords = []\\n\\n    def get_node(x, y, z):\\n        key = (round(x, 9), round(y, 9), round(z, 9))\\n        nid = n\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_9by39irt/make_case.py\\\", line 215, in <module>\\n    write_deck(\\\"model.inp\\\")\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_9by39irt/make_case.py\\\", line 168, in write_deck\\n    add.extend(wrap_fields([str(eid)] + [str(n) for n in conn]))\\n    ^^^^^^^^^^\\nAttributeError: 'builtin_function_or_method' object has no attribute 'extend'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 210.025,
+    "setup_s": 0.0,
+    "grade_s": 0.047
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.05s"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "ccx_cb_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX (2.23) input deck for a cantilever beam static deflection.\\nMaterial: steel (E=210000 MPa, nu=0.3, rho=7.85e-9 tonne/mm^3).\\nUnits: mm, N, MPa, tonne/mm^3.\\n\\\"\\\"\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Parameters (geometry, material, mesh, load)\\n# ---------------------------------------------------------------------------\\nL = 150.0          # beam length along +x [mm]\\nH = 12.0           # cross-section height in y [mm]\\nT = 6.0            # cross-section width in z [mm]\\n\\nE = 210000.0       # Young's modulus [MPa]\\nNU = 0.3           # Poisson's ratio\\nRHO = 7.85e-9      # density [tonne/mm^3]\\n\\nNX = 20            # elements along length (>=16)\\nNY = 4             # elements through height (>=4)\\nNZ = 2             # elements through width (>=2)\\n\\nF_TIP = -500.0     # total tip force in y [N]\\n\\n# ---------------------------------------------------------------------------\\n# Helper: write a line of data with a maximum number of comma-separated fields.\\n# ---------------------------------------------------------------------------\\ndef write_data_line(f, values, per_line=16, end=\\\"\\\\n\\\"):\\n    \\\"\\\"\\\"Write comma-separated values wrapped at `per_line` entries per line.\\\"\\\"\\\"\\n    vals = [f\\\"{v:g}\\\" for v in values]\\n    for i in range(0, len(vals), per_line):\\n        f.write(\\\", \\\".join(vals[i:i+per_line]) + \\\",\\\\n\\\")\\n\\n\\n# ---------------------------------------------------------------------------\\n# Build the structured C3D20 mesh.\\n#\\n# Layout:\\n#   * NX, NY, NZ elements along x, y, z respectively.\\n#   * Each block of elements contributes (2, 3, 2) corner-line nodes in (x, y, z)\\n#     directions (because C3D20 inserts mid-side nodes).\\n#\\n# We assign global node numbers in a deterministic order so we can rebuild the\\n# structured topology simply.\\n# ---------------------------------------------------------------------------\\n\\n# Node-counts per direction:\\n#   nx_nodes = 2*NX + 1\\n#   ny_nodes = 2*NY + 1\\n#   nz_nodes = 2*NZ + 1\\n# but C3D20 nodes are placed only at \\\"structured\\\" positions:\\n#   corner nodes:  full grid (2*NX+1) x (2*NY+1) x (2*NZ+1)\\n#   mid-side nodes along x: at i=2*k+1 for k=1..NX  (no corner duplicates)\\n#       i.e. positions (2*k+1, *, *) for k=1..NX-1\\n#       only on the 4 corner lines that are NOT corners... Actually we insert\\n#       mid-side nodes ONLY when an element spans that edge.\\n#\\n# A cleaner approach: enumerate all (i, j, k) triplets in the\\n# (2*NX+1)x(2*NY+1)x(2*NZ+1) \\\"corner grid\\\" as corner nodes, then for each\\n# element add a unique mid-side node at the centre of each non-aligned edge.\\n#\\n# This mirrors how CalculiX/ABAQUS assign node IDs for structured C3D20 meshes.\\n\\nNXi = 2 * NX + 1    # 41\\nNYi = 2 * NY + 1    # 9\\nNZi = 2 * NZ + 1    # 5\\n\\nNCORNER = NXi * NYi * NZi\\n\\n# Map (i, j, k) -> corner node id\\ncorner_id = {}\\nnodes_corner = [None] * (NCORNER + 1)  # 1-indexed placeholder\\ncounter = 0\\nfor k in range(NZi):\\n    for j in range(NYi):\\n        for i in range(NXi):\\n            counter += 1\\n            nodes_corner[counter] = (i, j, k)\\n            corner_id[(i, j, k)] = counter\\n\\nnext_node_id = NCORNER + 1\\n\\n# Mid-side node id storage keyed by the global (i,j,k) of the centre of the edge.\\nmid_id = {}\\n\\n\\ndef get_mid_id(i1, j1, k1, i2, j2, k2):\\n    \\\"\\\"\\\"Return (and lazily create) the mid-side node id between two\\n    structural corner positions along an element edge.\\\"\\\"\\\"\\n    nonlocal next_node_id\\n    mi, mj, mk = (i1 + i2) // 2, (j1 + j2) // 2, (k1 + k2) // 2\\n    key = (mi, mj, mk)\\n    if key in mid_id:\\n        return mid_id[key]\\n    nid = next_node_id\\n    next_node_id += 1\\n    mid_id[key] = nid\\n    return nid\\n\\n\\n# ---------------------------------------------------------------------------\\n# Element connectivity generator for C3D20 from an (ex, ey, ez) element index.\\n# Each element spans the unit cells:\\n#   x : ix0 = 2*ex     ix1 = 2*ex + 2       (so it includes mid at 2*ex+1)\\n#   y : jy0 = 2*ey     jy1 = 2*ey + 2\\n#   z : kz0 = 2*ez     kz1 = 2*ez + 2\\n#\\n# C3D20 node orderin\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4ggd5a5y/make_case.py\\\", line 90\\n    nonlocal next_node_id\\n    ^^^^^^^^^^^^^^^^^^^^^\\nSyntaxError: no binding for nonlocal 'next_node_id' found\\n\"}"
+  },
+  "timings": {
+    "agent_s": 219.034,
+    "setup_s": 0.0,
+    "grade_s": 0.05
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.05s"
+  ]
+}

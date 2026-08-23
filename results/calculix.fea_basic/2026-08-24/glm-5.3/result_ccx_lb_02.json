@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_lb_02",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n# -*- coding: utf-8 -*-\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 linear-static input deck `model.inp` for a\\nwall-mounted L-bracket.\\n\\nGeometry (units: mm):\\n    cross-section in the x-y plane (L shape):\\n        vertical arm   : x in [0, 8],  y in [0, 50]\\n        horizontal arm : y in [0, 8],  x in [0, 80]\\n    extruded in z over the width W = 16 (z in [0, 16]).\\n\\nMesh: structured 20-node hexahedra (C3D20) built as two rectangular blocks\\nthat share the plane x = 8, y in [0, 8] with identical node distributions\\n(conformal at the re-entrant corner at (8, 8)):\\n    block 1 (vertical arm)   : x 0..8   (2 elems)  x  y 0..50 (2+7 elems) x  z (2 elems)\\n    block 2 (horizontal arm) : x 8..80  (9 elems)  x  y 0..8  (2 elems)    x  z (2 elems)\\nMesh minimums satisfied: >= 2 elements across each 8 mm arm thickness,\\n>= 6 elements along each arm length (9 vertical, 11 horizontal),\\n>= 2 elements through the 16 mm width.\\n\\nBC  : NROOT = all nodes with x = 0, clamped (DOF 1-3).\\nLoad: NLOAD = all nodes with x = 80; total Fy = -400 N split equally.\\n\\nThe script only writes `model.inp` into the current working directory.\\nIt does NOT run any solver and uses no external resources.\\n\\\"\\\"\\\"\\n\\nOUT = \\\"model.inp\\\"\\n\\n# ----------------------------------------------------------------------\\n# Parameters (units: mm, N, MPa, tonne/mm^3)\\n# ----------------------------------------------------------------------\\nT       = 8.0        # arm thickness (mm)\\nLV      = 50.0       # vertical arm length (mm)   -> y\\nLH      = 80.0       # horizontal arm length (mm) -> x\\nW       = 16.0       # bracket width (mm)         -> z\\n\\nE       = 210000.0   # Young's modulus (MPa)\\nNU      = 0.3        # Poisson's ratio\\nRHO     = 7.85e-9    # density (tonne/mm^3)\\n\\nF_TOTAL = -400.0     # total load (N) in global -y on face x = LH\\n\\n# Mesh divisions (structured quadratic hexahedra)\\nN_THICK = 2          # elements across each arm thickness (x for vertical, y for horizontal)\\nN_WIDTH = 2          # elements through the width (z)\\nN_YLOW  = 2          # vertical arm, y in [0, 8]  (thickness band, matches horizontal)\\nN_YUP   = 7          # vertical arm, y in [8, 50]\\nN_XEXT  = 9          # horizontal arm, x in [8, 80]\\n\\n\\ndef qgrid(a, b, n):\\n    \\\"\\\"\\\"Node coordinates for n quadratic (C3D20) elements spanning [a, b]:\\n    corner nodes plus edge midside nodes, uniformly spaced -> 2n+1 values.\\\"\\\"\\\"\\n    h = (b - a) / n\\n    return [a + 0.5 * i * h for i in range(2 * n + 1)]\\n\\n\\ndef build_mesh():\\n    \\\"\\\"\\\"Return (nodes, elements, nroot, nload).\\\"\\\"\\\"\\n    # block 1 (vertical arm):   x in [0,8], y in [0,50]\\n    xs_v = qgrid(0.0, T, N_THICK)\\n    ys_v = qgrid(0.0, T, N_YLOW)[:-1] + qgrid(T, LV, N_YUP)\\n    # block 2 (horizontal arm): x in [8,80], y in [0,8]\\n    xs_h = qgrid(T, LH, N_XEXT)\\n    ys_h = qgrid(0.0, T, N_THICK)\\n    # shared width\\n    zs = qgrid(0.0, W, N_WIDTH)\\n\\n    nodes = []       # nodes[i] = (x, y, z); node number = i + 1\\n    index = {}       # rounded coordinate key -> node number (merges interface nodes)\\n\\n    def node(x, y, z):\\n        key = (round(x, 6), round(y, 6), round(z, 6))\\n        n = index.get(key)\\n        if n is None:\\n            n = len(nodes) + 1\\n            index[key] = n\\n            nodes.append(key)\\n        return n\\n\\n    def block(xs, ys, zs):\\n        \\\"\\\"\\\"C3D20 connectivity for one structured rectangular block.\\\"\\\"\\\"\\n        nx = (len(xs) - 1) // 2\\n        ny = (len(ys) - 1) // 2\\n        nz = (len(zs) - 1) // 2\\n        elems = []\\n        for a in range(nx):\\n            for b in range(ny):\\n                for c in range(nz):\\n                    i0, j0, k0 = 2 * a, 2 * b, 2 * c\\n                    # CalculiX/ABAQUS C3D20 local node order\\n                    g = [\\n                        (i0,     j0,     k0    ),   #  1\\n                        (i0 + 2, j0,     k0    ),   #  2\\n                        (i0 + 2, j0 + 2, k0    ),   #  3\\n                        (i0,     j0 + 2, k0    ),   #  4\\n                        (i0,     j0,     k0 + 2),   #  5\\n                        (i0 + 2, j0,     k0 + 2),   #\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.00065, \"got\": -0.4006601, \"ref\": -0.4009206}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 400.00007400000004, \"ref\": 400.00017390000005}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.13}"
+  },
+  "timings": {
+    "agent_s": 183.089,
+    "setup_s": 0.0,
+    "grade_s": 0.171
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=0 0.13s"
+  ]
+}

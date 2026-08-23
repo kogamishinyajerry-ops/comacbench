@@ -1,0 +1,40 @@
+{
+  "task_id": "ccx_cb_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 linear-static input deck `model.inp` for a straight\\ncantilever beam (L=150 mm, H=12 mm, T=6 mm) with total tip load Fy = -500 N\\ndistributed equally over all nodes of the tip face.\\n\\nUnits: mm, N, MPa, tonne/mm^3.  The script only WRITES the deck\\n(it does not run any solver, no subprocess, no network, no external files).\\n\\nMesh: structured grid of 20-node hexahedra (C3D20).\\n     NX x NY x NZ = 24 x 12 x 2 elements  (>= 16 x 4 x 2 required).\\n     Tip face has (2*12+1)*(2*2+1) = 125 nodes -> per-node load -4.0 N,\\n     summing EXACTLY to -500.0 N.\\n\\\"\\\"\\\"\\n\\n# --------------------------------------------------------------- parameters\\nL     = 150.0      # mm, beam length along +x (root at x = 0)\\nH     = 12.0       # mm, cross-section height (y from -H/2 to +H/2)\\nT     = 6.0        # mm, cross-section width  (z from -T/2 to +T/2)\\nF_TIP = -500.0     # N, total tip force in global y\\n\\nE_MOD = 210000.0   # MPa  (steel)\\nNU    = 0.3        # Poisson's ratio\\nRHO   = 7.85e-9    # tonne/mm^3\\n\\n# element counts (contract minimums: >=16 along length, >=4 through height, >=2 through width)\\nNX, NY, NZ = 24, 12, 2\\nassert NX >= 16 and NY >= 4 and NZ >= 2\\n\\nNPX, NPY, NPZ = 2 * NX + 1, 2 * NY + 1, 2 * NZ + 1     # nodes per direction\\n\\n# node numbering: 1 + a + NPX*(b + NPY*c), a fastest\\ndef nid(a, b, c):\\n    return 1 + a + NPX * (b + NPY * c)\\n\\n# ------------------------------------------------------------- build the deck\\nlines = []\\nadd = lines.append\\n\\nadd(\\\"*HEADING\\\")\\nadd(\\\"Cantilever beam 150 x 12 x 6 mm, steel, tip load Fy = -500 N (linear static)\\\")\\nadd(\\\"** units: mm, N, MPa, tonne/mm^3\\\")\\n\\n# ------------------------------------------------------------------- nodes\\nadd(\\\"** structured node grid: {} x {} x {} nodes\\\".format(NPX, NPY, NPZ))\\nadd(\\\"*NODE\\\")\\nfor c in range(NPZ):\\n    for b in range(NPY):\\n        for a in range(NPX):\\n            x = L * a / (2.0 * NX)\\n            y = -0.5 * H + H * b / (2.0 * NY)\\n            z = -0.5 * T + T * c / (2.0 * NZ)\\n            add(\\\"{:d}, {:.6f}, {:.6f}, {:.6f}\\\".format(nid(a, b, c), x, y, z))\\n\\n# ---------------------------------------------------------------- elements\\n# C3D20 (Abaqus/CalculiX numbering): 1-8 corners, 9-12/13-16 midside on\\n# zeta- / zeta+ faces, 17-20 midside on the remaining (vertical) edges.\\nadd(\\\"** 20-node hexahedra: {} elements\\\".format(NX * NY * NZ))\\nadd(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\neid = 0\\nfor k in range(NZ):\\n    for j in range(NY):\\n        for i in range(NX):\\n            eid += 1\\n            a0, b0, c0 = 2 * i, 2 * j, 2 * k\\n            conn = [\\n                nid(a0,     b0,     c0),     nid(a0 + 2, b0,     c0),\\n                nid(a0 + 2, b0 + 2, c0),     nid(a0,     b0 + 2, c0),\\n                nid(a0,     b0,     c0 + 2), nid(a0 + 2, b0,     c0 + 2),\\n                nid(a0 + 2, b0 + 2, c0 + 2), nid(a0,     b0 + 2, c0 + 2),\\n                nid(a0 + 1, b0,     c0),     nid(a0 + 2, b0 + 1, c0),\\n                nid(a0 + 1, b0 + 2, c0),     nid(a0,     b0 + 1, c0),\\n                nid(a0 + 1, b0,     c0 + 2), nid(a0 + 2, b0 + 1, c0 + 2),\\n                nid(a0 + 1, b0 + 2, c0 + 2), nid(a0,     b0 + 1, c0 + 2),\\n                nid(a0,     b0,     c0 + 1), nid(a0 + 2, b0,     c0 + 1),\\n                nid(a0 + 2, b0 + 2, c0 + 1), nid(a0,     b0 + 2, c0 + 1),\\n            ]\\n            ent = [eid] + conn\\n            # max 16 comma-separated entries per data line: id + 15 nodes, then 5\\n            add(\\\", \\\".join(str(v) for v in ent[:16]) + \\\",\\\")\\n            add(\\\", \\\".join(str(v) for v in ent[16:]))\\n\\n# ---------------------------------------------------------------- node sets\\ndef write_nset(name, ids):\\n    add(\\\"*NSET, NSET={}\\\".format(name))\\n    for s in range(0, len(ids), 16):\\n        chunk = ids[s:s + 16]\\n        suffix = \\\",\\\" if s + 16 < len(ids) else \\\"\\\"\\n        add(\\\", \\\".join(str(v) for v in chunk) + suffix)\\n\\nnroot = sorted(nid(0, b, c) for c in range(NPZ) for b in range(NPY))       # x = 0\\nntip = sorted(nid(2 * NX, b, c) for c in range(NPZ) for b in range(NP\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_z7buwu5k/make_case.py\\\", line 135, in <module>\\n    assert ln.count(\\\",\\\") + 1 <= 16, \\\"data line exceeds 16 entries: \\\" + ln\\n           ^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: data line exceeds 16 entries: 1, 1, 3, 101, 99, 2451, 2453, 2551, 2549, 2, 52, 100, 50, 2452, 2502, 2550,\\n\"}"
+  },
+  "timings": {
+    "agent_s": 120.829,
+    "setup_s": 0.0,
+    "grade_s": 0.061
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=1 0.06s"
+  ]
+}

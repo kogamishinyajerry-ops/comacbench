@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_bk_04",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nCantilever column linear buckling - CalculiX 2.23 input-deck generator.\\n\\nWrites `model.inp` into the current working directory (the solver is NOT run;\\nno subprocess, no network, no external files).\\n\\nGeometry : L = 200 mm along x, cross-section H = 10 mm (y) x T = 5 mm (z)\\nMesh     : structured C3D20 (20-node hexahedra), 16 x 4 x 2 elements\\n           -> 33 x 9 x 5 = 1485 nodes\\nSupport  : root face x = 0 fully clamped        (node set NROOT)\\nLoad     : reference load Fx = -1 N (compression) split equally over all\\n           nodes of the tip face x = L          (node set NTIP);\\n           buckling factors multiply this reference load\\nUnits    : mm, N, MPa, tonne/mm^3\\n\\\"\\\"\\\"\\n\\n# ----------------------------------------------------------- parameters\\nL, H, T = 200.0, 10.0, 5.0            # mm\\nNE_X, NE_Y, NE_Z = 16, 4, 2           # elements (>=16 along L, >=4 H, >=2 T)\\nE, NU = 210000.0, 0.3                 # MPa, -\\nRHO = 7.85e-9                         # tonne/mm^3 (allowed, unused by *BUCKLE)\\nF_TOTAL = -1.0                        # N, total reference axial force\\nNMODES = 4                            # buckling modes requested\\n\\nNX, NY, NZ = 2 * NE_X + 1, 2 * NE_Y + 1, 2 * NE_Z + 1   # nodes per direction\\n\\n\\ndef nid(i, j, k):\\n    \\\"\\\"\\\"Node label on the structured node grid (x fastest, then y, then z).\\\"\\\"\\\"\\n    return 1 + i + NX * (j + NY * k)\\n\\n\\ndeck = []\\nA = deck.append\\n\\n# -------------------------------------------------------------- header\\nA(\\\"** ==============================================================\\\")\\nA(\\\"** Cantilever column - linear buckling analysis (CalculiX 2.23)\\\")\\nA(\\\"** units: mm / N / MPa / tonne/mm^3\\\")\\nA(\\\"** ==============================================================\\\")\\n\\n# --------------------------------------------------------------- nodes\\nA(\\\"*NODE, NSET=NALL\\\")\\nfor k in range(NZ):\\n    z = T * k / (2.0 * NE_Z)\\n    for j in range(NY):\\n        y = H * j / (2.0 * NE_Y)\\n        for i in range(NX):\\n            x = L * i / (2.0 * NE_X)\\n            A(\\\"%d, %.6f, %.6f, %.6f\\\" % (nid(i, j, k), x, y, z))\\n\\n# ------------------------------------------------------------ elements\\nA(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\neid = 0\\nfor ek in range(NE_Z):\\n    K = 2 * ek\\n    for ej in range(NE_Y):\\n        J = 2 * ej\\n        for ei in range(NE_X):\\n            I = 2 * ei\\n            eid += 1\\n            # C3D20 (Abaqus/CalculiX convention):\\n            # 1-8 corners, 9-12 / 13-16 bottom/top face mid-sides,\\n            # 17-20 vertical edge mid-sides\\n            loc = (\\n                (I, J, K), (I + 2, J, K), (I + 2, J + 2, K), (I, J + 2, K),\\n                (I, J, K + 2), (I + 2, J, K + 2), (I + 2, J + 2, K + 2),\\n                (I, J + 2, K + 2),\\n                (I + 1, J, K), (I + 2, J + 1, K), (I + 1, J + 2, K),\\n                (I, J + 1, K),\\n                (I + 1, J, K + 2), (I + 2, J + 1, K + 2),\\n                (I + 1, J + 2, K + 2), (I, J + 1, K + 2),\\n                (I, J, K + 1), (I + 2, J, K + 1), (I + 2, J + 2, K + 1),\\n                (I, J + 2, K + 1),\\n            )\\n            conn = [str(nid(*p)) for p in loc]\\n            # at most 16 comma-separated entries per data line:\\n            # id + 15 nodes, then the remaining 5 nodes\\n            A(\\\"%d, %s\\\" % (eid, \\\", \\\".join(conn[:15])))\\n            A(\\\", \\\".join(conn[15:]))\\n\\n# ----------------------------------------------------------- node sets\\nNROOT_NODES = [nid(0, j, k) for k in range(NZ) for j in range(NY)]      # x = 0\\nNTIP_NODES = [nid(NX - 1, j, k) for k in range(NZ) for j in range(NY)]  # x = L\\n\\n\\ndef write_nset(name, nodes):\\n    A(\\\"*NSET, NSET=%s\\\" % name)\\n    for m in range(0, len(nodes), 8):          # 8 entries per line (<= 16)\\n        A(\\\", \\\".join(str(n) for n in nodes[m:m + 8]))\\n\\n\\nwrite_nset(\\\"NROOT\\\", NROOT_NODES)   # root face x = 0 (fully clamped)\\nwrite_nset(\\\"NTIP\\\", NTIP_NODES)     # tip face   x = L (loaded)\\n\\n# ----------------------------------------------------- material & section\\nA(\\\"*MATERIAL, NAME=STEEL\\\")\\nA(\\\"*ELASTIC, TYPE=ISO\\\")\\nA(\\\"%.1f, %.1f\\\" % \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"buckle_factor_1\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.219768, \"got\": 1650.93, \"ref\": 1353.479}, \"buckle_factor_2\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.219187, \"got\": 6582.753, \"ref\": 5399.299}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.23}"
+  },
+  "timings": {
+    "agent_s": 247.304,
+    "setup_s": 0.0,
+    "grade_s": 0.271
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=0 0.23s"
+  ]
+}

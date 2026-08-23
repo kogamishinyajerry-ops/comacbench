@@ -1,0 +1,39 @@
+{
+  "task_id": "ccx_cb_05",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 linear-static input deck `model.inp` for a cantilever\\nbeam: L = 100 mm (+x), H = 8 mm (+y), T = 4 mm (+z), tip load FY = -1500 N.\\n\\n  - structured mesh of 20-node hexahedra (C3D20 only): 20 x 7 x 2 elements\\n    (>= 16 along length, >= 4 through height, >= 2 through width)\\n  - root face x = 0 fully clamped  -> node set NROOT\\n  - tip face  x = L: FY split equally over ALL NTIP nodes via *CLOAD\\n    (75 tip nodes x -20.0 N = -1500.0 N exactly)\\n  - *NODE PRINT (U on NTIP, RF on NROOT) inside the *STATIC step\\n\\nUnits: mm, N, MPa, tonne/mm^3.  The script only WRITES the deck -- it never\\nruns a solver, uses no subprocess/network, and needs no external files.\\n\\\"\\\"\\\"\\n\\nOUT_FILE = \\\"model.inp\\\"\\n\\n# ------------------------------------------------------------------ geometry\\nL = 100.0            # mm, length along +x (root at x = 0)\\nH = 8.0              # mm, height along +y  (y from -H/2 to +H/2)\\nT = 4.0              # mm, width  along +z  (z from -T/2 to +T/2)\\n\\n# ------------------------------------------------------------------ mesh\\nNELX = 20            # elements along the length  (>= 16 required)\\nNELY = 7             # elements through the height (>= 4 required)\\nNELZ = 2             # elements through the width  (>= 2 required)\\n# 20-node hexes -> nodes at every half-element station:\\nNX = 2 * NELX + 1    # node stations along x\\nNY = 2 * NELY + 1    # node stations along y\\nNZ = 2 * NELZ + 1    # node stations along z\\n\\n# ------------------------------------------------------------------ material\\nE_MOD = 210000.0     # MPa  (steel)\\nNU = 0.3\\nRHO = 7.85e-9        # tonne/mm^3\\n\\n# ------------------------------------------------------------------ load\\nF_TIP = -1500.0      # N, total force in y on tip face x = L (equal split)\\n\\n\\ndef nid(i, j, k):\\n    \\\"\\\"\\\"1-based, contiguous node number of grid station (i, j, k).\\\"\\\"\\\"\\n    return 1 + i + j * NX + k * NX * NY\\n\\n\\ndef wrap(items, per_line=16):\\n    \\\"\\\"\\\"Chunk values into data lines with at most 16 comma-separated entries.\\\"\\\"\\\"\\n    items = [str(v) for v in items]\\n    return [\\\", \\\".join(items[s:s + per_line])\\n            for s in range(0, len(items), per_line)]\\n\\n\\ndef build_deck():\\n    out = []\\n    out.append(\\\"*HEADING\\\")\\n    out.append(\\\"Cantilever beam L=100 H=8 T=4 mm, C3D20 hex mesh, tip load \\\"\\n               \\\"FY=-1500 N (units: mm, N, MPa, tonne/mm^3)\\\")\\n\\n    # ------------------------------------------------------------- nodes --\\n    out.append(\\\"** ------------------------------ nodes ------------------------------\\\")\\n    out.append(\\\"*NODE, NSET=NALL\\\")\\n    n_nodes = 0\\n    for k in range(NZ):\\n        z = -T / 2.0 + T * k / (NZ - 1)\\n        for j in range(NY):\\n            y = -H / 2.0 + H * j / (NY - 1)\\n            for i in range(NX):\\n                x = L * i / (NX - 1)\\n                out.append(f\\\"{nid(i, j, k)}, {x:.6f}, {y:.6f}, {z:.6f}\\\")\\n                n_nodes += 1\\n    assert n_nodes == NX * NY * NZ\\n\\n    # ---------------------------------------------------------- elements --\\n    out.append(\\\"** --------------------------- C3D20 elements --------------------------\\\")\\n    out.append(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\n    eid = 0\\n    for k in range(NELZ):\\n        for j in range(NELY):\\n            for i in range(NELX):\\n                a, b, c = 2 * i, 2 * j, 2 * k          # corner grid stations\\n                conn = [\\n                    nid(a,     b,     c    ), nid(a + 2, b,     c    ),   #  1  2\\n                    nid(a + 2, b + 2, c    ), nid(a,     b + 2, c    ),   #  3  4\\n                    nid(a,     b,     c + 2), nid(a + 2, b,     c + 2),   #  5  6\\n                    nid(a + 2, b + 2, c + 2), nid(a,     b + 2, c + 2),   #  7  8\\n                    nid(a + 1, b,     c    ), nid(a + 2, b + 1, c    ),   #  9 10\\n                    nid(a + 1, b + 2, c    ), nid(a,     b + 1, c    ),   # 11 12\\n                    nid(a + 1, b,     c + 2), nid(a + 2, b + 1, c + 2),   # 13 14\\n                    nid(a + 1, b + 2, c + 2), nid(a,     b + 1, c + 2),   # 15 16\\n    \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.186522, \"got\": -11.33013, \"ref\": -13.92801}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.186666, \"got\": 1220.0007000000005, \"ref\": 1499.9994000000002}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.22}"
+  },
+  "timings": {
+    "agent_s": 156.191,
+    "setup_s": 0.0,
+    "grade_s": 0.269
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.05s",
+    "ccx exit=0 0.22s"
+  ]
+}

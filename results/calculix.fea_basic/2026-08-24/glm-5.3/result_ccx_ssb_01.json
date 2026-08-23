@@ -1,0 +1,41 @@
+{
+  "task_id": "ccx_ssb_01",
+  "registry_id": "calculix.fea_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nSimply supported beam on knife-edge supports with a mid-span load,\\nmeshed with 20-node hexahedra (C3D20) for CalculiX 2.23 (linear static).\\n\\nGeometry : L = 200 mm along x, H = 10 mm (y in [-5, +5]), T = 5 mm (z in [-2.5, +2.5])\\nSupports : Uy = 0 on the bottom edge lines (y = -H/2) of both end faces (NLEFT/NRIGHT);\\n           Ux = Uz = 0 on one node of NLEFT (set PIN) to remove rigid-body modes.\\nLoad     : total Fy = -1000 N shared equally among ALL nodes of the mid-span\\n           section x = L/2 (set NMID).\\n\\nRunning this script writes 'model.inp' into the current working directory.\\nIt does NOT run any solver, uses no subprocess/network and no external files.\\nUnits: mm, N, MPa, tonne/mm^3.\\n\\\"\\\"\\\"\\n\\n# ----------------------------------------------------------------------\\n# Parameters\\n# ----------------------------------------------------------------------\\nL, H, T = 200.0, 10.0, 5.0            # mm\\nE, NU, RHO = 210000.0, 0.3, 7.85e-9   # MPa, -, tonne/mm^3\\nFTOT = -1000.0                        # N (total mid-span load, direction y)\\n\\nNX, NY, NZ = 16, 4, 2                 # element counts (>=16, >=4, >=2)\\nMAXPERLINE = 16                       # max comma-separated entries per data line\\n\\n# ----------------------------------------------------------------------\\n# Structured node grid: (2NX+1) x (2NY+1) x (2NZ+1) points (midside included)\\n# ----------------------------------------------------------------------\\nnix, nij, nkz = 2 * NX + 1, 2 * NY + 1, 2 * NZ + 1\\n\\n\\ndef nid(i, j, k):\\n    \\\"\\\"\\\"Node number of grid point (i, j, k); i fastest.\\\"\\\"\\\"\\n    return 1 + (k * nij + j) * nix + i\\n\\n\\ndef x_of(i):\\n    return L * i / (2.0 * NX)\\n\\n\\ndef y_of(j):\\n    return -0.5 * H + H * j / (2.0 * NY)\\n\\n\\ndef z_of(k):\\n    return -0.5 * T + T * k / (2.0 * NZ)\\n\\n\\n# C3D20 local node positions on the element's 3x3x3 sub-grid, in CalculiX\\n# order: corners 1..8 first, then midside nodes 9..20.\\nC3D20_OFFSETS = (\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),\\n)\\n\\n# ----------------------------------------------------------------------\\n# Node sets (selected by grid index -> exact geometry match)\\n# ----------------------------------------------------------------------\\nNLEFT = [nid(0, 0, k) for k in range(nkz)]                    # x=0,   y=-H/2, all z\\nNRIGHT = [nid(2 * NX, 0, k) for k in range(nkz)]              # x=L,   y=-H/2, all z\\nNMID = [nid(NX, j, k) for k in range(nkz) for j in range(nij)]  # x=L/2, whole section\\nPIN = [NLEFT[0]]                                              # one node of NLEFT\\n\\n\\ndef chunks(seq, n):\\n    for s in range(0, len(seq), n):\\n        yield seq[s:s + n]\\n\\n\\ndef build_deck():\\n    out = []\\n    a = out.append\\n\\n    a(\\\"** simply supported beam 200 x 10 x 5 mm, mid-span load Fy = -1000.0 N\\\")\\n    a(\\\"** CalculiX 2.23, linear static, units: mm / N / MPa / tonne/mm^3\\\")\\n    a(\\\"** structured mesh: %d x %d x %d C3D20 elements\\\" % (NX, NY, NZ))\\n\\n    # ---- nodes -------------------------------------------------------\\n    a(\\\"*NODE, NSET=NALL\\\")\\n    for k in range(nkz):\\n        for j in range(nij):\\n            for i in range(nix):\\n                a(\\\"%d, %.6f, %.6f, %.6f\\\"\\n                  % (nid(i, j, k), x_of(i), y_of(j), z_of(k)))\\n\\n    # ---- elements ------------------------------------------------------\\n    a(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\")\\n    eid = 0\\n    for K in range(NZ):\\n        for J in range(NY):\\n            for I in range(NX):\\n                eid += 1\\n                entries = [str(eid)]\\n                entries += [str(nid(2 * I + di, 2 * J + dj, 2 * K + dk))\\n                            for (di, dj, dk) in C3D20_OFFSETS]\\n                for part in chunks(entries, MAXPERLINE):   # 21 entries -> 16 + 5\\n                    a(\\\", \\\".join(part))\\n    n_el = eid\\n\\n    # ---- node sets -----------------------------------------------------\\n    for \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"ccx_stdout_tail\": \"ie constraints:            0\\n   dependent nodes tied by cyclic constraints:            0\\n   dependent nodes in pre-tension constraints:            0\\n\\n   sets:            6\\n   terms in all sets:         3154\\n\\n   materials:            1\\n   constants per material and temperature:            2\\n   temperature points per material:            1\\n   plastic data points per material:            0\\n\\n   orientations:            0\\n   amplitudes:            2\\n   data points in all amplitudes:            2\\n   print requests:            2\\n   transformations:            0\\n   property cards:            0\\n\\n *ERROR reading *CLOAD: *CLOAD should only be used\\n   within a STEP\\n\\n STEP            1\\n\\n *ERROR in calinput: at least one fatal\\n        error message while reading the\\n        input deck: CalculiX stops.\\n\\n\"}"
+  },
+  "timings": {
+    "agent_s": 147.81,
+    "setup_s": 0.0,
+    "grade_s": 0.131
+  },
+  "environment_digest": "sha256:216002960d078eb73bbb275c0f3cbabb9949c3ce56215b8e74684109e5965deb",
+  "assets_revision": "ccxfea@selfbuilt-2026-08-24+ccx2.23",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "ccx exit=201 0.09s"
+  ]
+}
