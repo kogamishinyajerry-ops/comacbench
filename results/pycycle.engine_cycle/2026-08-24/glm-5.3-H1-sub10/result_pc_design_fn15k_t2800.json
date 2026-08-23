@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn15k_t2800",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\nfrom scipy.optimize import fsolve\\n\\n\\nclass Turbojet(pyc.Cycle):\\n\\n    def setup(self):\\n        self.options['thermo_data'] = pyc.AIR_JETA_TAB_SPEC\\n\\n        self.add_subsystem('fc', pyc.FlightCondition(), promotes=['MN', 'alt'])\\n        self.add_subsystem('inlet', pyc.Inlet(design=True), promotes_inputs=['MN'])\\n        self.add_subsystem('comp', pyc.Compressor(design=True))\\n        self.add_subsystem('burner', pyc.Combustor(design=True))\\n        self.add_subsystem('turb', pyc.Turbine(design=True))\\n        self.add_subsystem('nozz', pyc.Nozzle(design=True), promotes_inputs=['MN'])\\n\\n        # flow path\\n        self.connect('fc.Fl_O', 'inlet.Fl_I')\\n        self.connect('inlet.Fl_O', 'comp.Fl_I')\\n        self.connect('comp.Fl_O', 'burner.Fl_I')\\n        self.connect('burner.Fl_O', 'turb.Fl_I')\\n        self.connect('turb.Fl_O', 'nozz.Fl_I')\\n\\n        # shaft coupling turbine -> compressor\\n        self.connect('turb.shaft_out', 'comp.shaft_in')\\n\\n        # nozzle exhaust static pressure from freestream\\n        self.connect('fc.Ps', 'nozz.Ps')\\n\\n\\ndef set_any(prob, names, val):\\n    for n in names:\\n        try:\\n            prob.set_val(n, val)\\n            return\\n        except Exception:\\n            continue\\n    print('warning: could not set', names)\\n\\n\\ndef main():\\n    prob = om.Problem(model=Turbojet())\\n    prob.setup()\\n    prob.final_setup()\\n\\n    MN = 0.01\\n    alt = 0.0\\n    prob.set_val('MN', MN)\\n    prob.set_val('alt', alt)\\n\\n    # compressor: OPR 15, poly/iso eff 0.9\\n    set_any(prob, ['comp.PR', 'comp.PR_design'], 15.0)\\n    set_any(prob, ['comp.eff', 'comp.eff_design'], 0.90)\\n    # turbine efficiency\\n    set_any(prob, ['turb.eff', 'turb.eff_design'], 0.90)\\n    # mechanical speed guess (optional)\\n    try:\\n        prob.set_val('turb.Nmech', 12000.0)\\n    except Exception:\\n        pass\\n\\n    Tt4_target = 2800.0\\n    Fn_target = 15000.0\\n    gc = 32.174\\n\\n    state = {}\\n\\n    def residuals(x):\\n        W, FAR, PRt = x\\n        try:\\n            prob.set_val('fc.W', float(W))\\n            set_any(prob, ['burner.FAR', 'burner.FAR_design'], float(FAR))\\n            set_any(prob, ['turb.PR', 'turb.PR_design'], float(PRt))\\n            prob.run_model()\\n\\n            Tt4 = prob.get_val('burner.Tt')[0]\\n            Fn_gross = prob.get_val('nozz.Fn')[0]\\n            Wf = prob.get_val('burner.Wfuel')[0]\\n            Pc = prob.get_val('comp.power')[0]\\n            Pt = prob.get_val('turb.power')[0]\\n            Ts = prob.get_val('fc.Ts')[0]\\n            sos = np.sqrt(1.4 * 1716.49 * Ts)  # ft/s\\n            V0 = MN * sos\\n            Fn_net = Fn_gross - W * V0 / gc\\n\\n            state.update(dict(Fn=Fn_net, Wf=Wf, Tt4=Tt4, Pc=Pc, Pt=Pt, W=W))\\n            return np.array([Tt4 - Tt4_target,\\n                             (Pt + Pc),\\n                             Fn_net - Fn_target])\\n        except Exception as e:\\n            print('eval failure:', e)\\n            return np.array([1e4, 1e4, 1e4])\\n\\n    x0 = np.array([200.0, 0.020, 2.4])\\n    sol, info, ier, msg = fsolve(residuals, x0, full_output=True, xtol=1e-8)\\n    print('solve:', sol, ier, msg)\\n    print('residuals:', residuals(sol))\\n\\n    # final run with converged values\\n    W, FAR, PRt = sol\\n    residuals(sol)\\n\\n    Fn = state['Fn']\\n    Wf = state['Wf']\\n    TSFC = Wf * 3600.0 / Fn  # lbm/lbf/hr\\n    OPR = 15.0\\n\\n    result = {\\n        'Fn_lbf': float(Fn),\\n        'TSFC': float(TSFC),\\n        'OPR': float(OPR),\\n        'Wfuel_lbm_s': float(Wf),\\n    }\\n    print(json.dumps(result, indent=2))\\n    with open('result.json', 'w') as f:\\n        json.dump(result, f, indent=2)\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"/core/problem.py\\\", line 1025, in setup\\n    model._setup(model_comm, self._metadata)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 733, in _setup\\n    self._setup_procs(self.pathname, comm, self._problem_meta)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 583, in _setup_procs\\n    self.setup()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_58eco0hf/solve.py\\\", line 13, in setup\\n    self.add_subsystem('fc', pyc.FlightCondition(), promotes=['MN', 'alt'])\\n                             ^^^^^^^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'FlightCondition'. Did you mean: 'FlightConditions'?\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 557.39,
+    "setup_s": 0.0,
+    "grade_s": 1.074
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.07s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "pc_design_fn15p5k_t2500_opr135",
+  "registry_id": "pycycle.engine_cycle",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nSL static design point of a simple turbojet using pycycle.\\nWrites result.json with Fn_lbf, TSFC, OPR, Wfuel_lbm_s.\\n\\\"\\\"\\\"\\nimport json\\nimport numpy as np\\nimport openmdao.api as om\\nimport pycycle.api as pyc\\n\\n\\nclass Turbojet(pyc.MPCycle):\\n\\n    def initialize(self):\\n        self.options.declare('thermo_data', default=pyc.constants.AIR_JETA_TAB_SPEC)\\n\\n    def setup(self):\\n        super().setup()\\n\\n        design = self.pyc_add_pnt('DESIGN')\\n\\n        design.add_subsystem('fc', pyc.FlightCondition())\\n        design.add_subsystem('inlet', pyc.Inlet())\\n        design.add_subsystem('comp', pyc.Compressor(map_data=pyc.AXI5, map_extrap=True))\\n        design.add_subsystem('burner', pyc.Combustor())\\n        design.add_subsystem('turb', pyc.Turbine(map_data=pyc.LPT2269, map_extrap=True))\\n        design.add_subsystem('noz', pyc.Nozzle(lossCoef='CV'))\\n        design.add_subsystem('shaft', pyc.Shaft(num_rods=1))\\n        design.add_subsystem('perf', pyc.Performance(num_elements=4))\\n        design.add_subsystem('balance', om.BalanceComp())\\n\\n        connects = [\\n            ('fc.Fl_O:tot', 'inlet.Fl_I'),\\n            ('inlet.Fl_O:tot', 'comp.Fl_I'),\\n            ('comp.Fl_O:tot', 'burner.Fl_I'),\\n            ('burner.Fl_O:tot', 'turb.Fl_I'),\\n            ('turb.Fl_O:tot', 'noz.Fl_I'),\\n            ('fc.Fl_O:tot', 'perf.Fl_I'),\\n            ('noz.Fl_O:stat', 'perf.Fl_O'),\\n            ('noz.FG', 'perf.FG'),\\n            ('shaft.mech_out', 'comp.shaft:mech_in'),\\n            ('comp.shaft:mech_out', 'turb.shaft:mech_in'),\\n            ('turb.shaft:mech_out', 'shaft.mech_in'),\\n            ('balance.W', 'fc.W'),\\n            ('balance.FAR', 'burner.FAR'),\\n            ('balance.Nmech', 'shaft.Nmech'),\\n            ('perf.Fn', 'balance.lhs_W'),\\n            ('burner.Fl_O:tot:T', 'balance.lhs_FAR'),\\n            ('shaft.trq_net', 'balance.lhs_Nmech'),\\n        ]\\n        for out, inp in connects:\\n            design.connect(out, inp)\\n\\n        # ---------------- design point problem definition ----------------\\n        self.set_input_defaults('DESIGN.fc.alt', 0.0, units='ft')\\n        self.set_input_defaults('DESIGN.fc.MN', 0.0001)\\n\\n        self.pyc_add_cycle_des_vars('DESIGN.comp.PR')\\n        self.set_input_defaults('DESIGN.comp.PR', 13.5)\\n        self.pyc_add_cycle_des_vars('DESIGN.comp.eff')\\n        self.set_input_defaults('DESIGN.comp.eff', 0.9)\\n        self.pyc_add_cycle_des_vars('DESIGN.turb.eff')\\n        self.set_input_defaults('DESIGN.turb.eff', 0.9)\\n\\n        self.set_input_defaults('DESIGN.inlet.MN', 0.6)\\n        self.set_input_defaults('DESIGN.comp.MN', 0.7)\\n        self.set_input_defaults('DESIGN.burner.MN', 0.2)\\n        self.set_input_defaults('DESIGN.turb.MN', 0.6)\\n        self.set_input_defaults('DESIGN.noz.MN', 1.0)\\n\\n        # balance setup: W for Fn, FAR for T4, Nmech for zero net torque\\n        bal = design.balance\\n        bal.add_balance('W', val=150.0, units='lbm/s', eq_units='lbf',\\n                        lhs_name='lhs_W', rhs_name='Fn_target')\\n        bal.add_balance('FAR', val=0.02, units=None, eq_units='degR',\\n                        lhs_name='lhs_FAR', rhs_name='T4_target')\\n        bal.add_balance('Nmech', val=10000.0, units='rpm', eq_units='lbf*ft',\\n                        lhs_name='lhs_Nmech', rhs_name='trq_target')\\n\\n        self.set_input_defaults('DESIGN.balance.Fn_target', 15500.0, units='lbf')\\n        self.set_input_defaults('DESIGN.balance.T4_target', 2500.0, units='degR')\\n        self.set_input_defaults('DESIGN.balance.trq_target', 0.0, units='lbf*ft')\\n\\n        # newton solver on design point\\n        newton = design.nonlinear_solver = om.NewtonSolver(solve_subsystems=True)\\n        newton.options['maxiter'] = 50\\n        newton.options['atol'] = 1e-9\\n        newton.options['rtol'] = 1e-9\\n        newton.options['iprint'] = 2\\n        newton.linesearch = om.BoundsEnforceLS()\\n        newton.linear_solver = om.DirectSolver(assemble_jac=True)\\n        design.linear_solver = om.DirectSolver(assemble_jac=True)\\n\\n\\ndef main():\\n    prob = om.Problem()\\n    pr\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"stderr_tail\": \"CBench/.venv/lib/python3.12/site-packages/pycycle/mp_cycle.py\\\", line 205, in __init__\\n    super(MPCycle, self).__init__(**kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/group.py\\\", line 212, in __init__\\n    super().__init__(**kwargs)\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openmdao/core/system.py\\\", line 508, in __init__\\n    self.initialize()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_39x9dzo9/solve.py\\\", line 14, in initialize\\n    self.options.declare('thermo_data', default=pyc.constants.AIR_JETA_TAB_SPEC)\\n                                                ^^^^^^^^^^^^^\\nAttributeError: module 'pycycle.api' has no attribute 'constants'\\n\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 443.742,
+    "setup_s": 0.0,
+    "grade_s": 1.075
+  },
+  "environment_digest": "sha256:598bbd3f0977ed77605eccb4852002e6e4b68dfeb3fbb5435b731234fb8c5663",
+  "assets_revision": "pycycle-pack@selfbuilt-2026-08-19+ompycycle_src",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "solve exit=1 1.07s"
+  ]
+}
