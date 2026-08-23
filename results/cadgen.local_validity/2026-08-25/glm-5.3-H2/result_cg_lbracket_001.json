@@ -1,0 +1,42 @@
+{
+  "task_id": "cg_lbracket_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# --- L-bracket parameters (mm), hard-coded from the task statement ---\\nLEG_X = 80.0      # horizontal leg length along +X (x from 0 to 80)\\nH = 60.0          # vertical leg height along +Z (z from 0 to 60)\\nT = 10.0          # leg thickness (horizontal leg: z 0..10; vertical leg: x 0..10)\\nWID = 40.0        # shared width along +Y (y from 0 to 40)\\nFILLET_R = 12.0   # inner concave fillet radius at the leg junction\\nHOLE_D = 9.0      # through-hole diameter in each leg\\nHX = 45.0         # horizontal-leg hole center: x\\nHY = 20.0         # hole centers: y (both legs, mid-width)\\nVZ = 35.0         # vertical-leg hole center: z\\nOVER = 1.0        # cutter overshoot beyond the material (avoids coplanar booleans)\\n\\n# --- L profile sketched on the XZ workplane with the fillet drawn into the\\n#     section (sketch x -> global X, sketch y -> global Z; extrusion is -Y) ---\\nprofile = (cq.Workplane(\\\"XZ\\\")\\n           .moveTo(0.0, 0.0)                # (x=0, z=0) outer bottom corner\\n           .lineTo(LEG_X, 0.0)              # bottom edge to (80, 0)\\n           .lineTo(LEG_X, T)                # outer right edge up to (80, 10)\\n           .lineTo(T + FILLET_R, T)         # top of horizontal leg to arc start (22, 10)\\n           .threePointArc((T + FILLET_R - FILLET_R / (2.0 ** 0.5),\\n                           T + FILLET_R - FILLET_R / (2.0 ** 0.5)),   # arc midpoint\\n                          (T, T + FILLET_R))                          # arc end (10, 22)\\n           .lineTo(T, H)                    # inner face of vertical leg to (10, 60)\\n           .lineTo(0.0, H)                  # top edge to (0, 60)\\n           .close()                         # back down to (0, 0)\\n           .extrude(WID))\\n\\nsolid = profile.val()\\nif solid.Center().y < 0.0:                  # if the solid landed on -Y, move to y in [0, 40]\\n    solid = solid.translate(cq.Vector(0.0, WID, 0.0))\\n\\n# --- Through holes via slightly overlong cylinders (no coplanar end faces) ---\\n# Horizontal-leg hole: axis parallel to Z, centered at (x=45, y=20), through z=0..10\\nhole_h = cq.Solid.makeCylinder(HOLE_D / 2.0, T + 2.0 * OVER,\\n                               cq.Vector(HX, HY, -OVER), cq.Vector(0.0, 0.0, 1.0))\\n# Vertical-leg hole: axis parallel to X, centered at (y=20, z=35), through x=0..10\\nhole_v = cq.Solid.makeCylinder(HOLE_D / 2.0, T + 2.0 * OVER,\\n                               cq.Vector(-OVER, HY, VZ), cq.Vector(1.0, 0.0, 0.0))\\n\\nsolid = solid.cut(hole_h).cut(hole_v)\\n\\n# --- Export the single solid ---\\ncq.exporters.export(solid, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.51}, {\"exit\": 0, \"duration_s\": 2.63}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 51963.761554, \"bbox_len\": [80.0, 40.0, 60.0], \"n_faces\": 11, \"n_solids\": 1, \"cyl_radii\": [4.5, 4.5, 12.0]}, \"reference\": {\"volume_mm3\": 51963.761554, \"bbox_len\": [80.0, 40.0, 60.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 51963.761554, \"ref\": 51963.761554}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 40.0, \"ref\": 40.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.5, \"expect\": 2, \"got\": 2, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 12.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 11, \"got\": 11, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}",
+    "iteration": "{\"rounds_used\": 1, \"iterate_max\": 1, \"converged\": true}"
+  },
+  "timings": {
+    "agent_s": 80.957,
+    "setup_s": 0.0,
+    "grade_s": 5.158
+  },
+  "environment_digest": "sha256:23cbe4f0f19afcc1653cfbe731479e65858dbff83c614b883eb881a849b2cb03",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2540",
+    "run1 exit=0 2.51s",
+    "run2 exit=0 2.63s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

@@ -176,9 +176,10 @@ def run_task(
     task: TaskSpec, *, provider: str, model: str | None, seed: int,
     env_digest: str, prompt_cache: dict[str, str], assets_root: Path,
     oracle_cache: dict[str, str] | None,
+    prompt_override: str | None = None,
 ) -> dict[str, Any]:
     t0 = time.time()
-    prompt = prompt_cache[task.id]
+    prompt = prompt_override if prompt_override is not None else prompt_cache[task.id]
     g = task["grader"]
     timeout = float(task["limits"]["wall_clock_s"])
 
@@ -334,6 +335,61 @@ def run_task(
     return _ret(1, [], None, subs, details)
 
 
+# ---------------------------------------------------------------- 迭代协议（v0.3，镜像 simulation_agent）
+
+# 可反馈修复：脚本/产物/几何/非确定（timeout=资源、sandbox=策略违规不进迭代）
+_DA_FIXABLE = {_SCRIPT_FAIL, FM_MISSING_OUTPUT, _GEOM_FAIL, _NONDET_FAIL}
+
+
+def build_feedback_prompt(base_prompt: str, prev_result: dict[str, Any],
+                          round_no: int) -> str:
+    """design_artifact 反馈提示：原题面 + 上一轮代码 + 执行/几何诊断。"""
+    try:
+        code = json.loads(prev_result["artifacts"].get("code") or '""')
+    except Exception:  # noqa: BLE001
+        code = ""
+    code = str(code)[:6000]
+    det = json.loads(prev_result["artifacts"].get("grade_details") or "{}")
+    diag = [f"- failure_mode: {prev_result.get('failure_mode')}",
+            f"- gate_failures: {prev_result.get('gate_failures')}"]
+    for k in ("stderr_tail", "missing", "volume_nonpositive", "parse_error",
+              "n_faces", "n_solids", "determinism", "measured", "reference"):
+        if det.get(k) is not None:
+            diag.append(f"- {k}: {det[k]}")
+    return (f"{base_prompt}\n\n---\n\n## ITERATION FEEDBACK — attempt {round_no} FAILED\n\n"
+            f"Your previous script:\n```python\n{code}\n```\n\n"
+            f"Execution diagnostics:\n" + "\n".join(diag) +
+            "\n\nFix the failure. Respond with a single complete "
+            "```python code block (the full revised script, not a diff).")
+
+
+def run_task_iterate(
+    task: TaskSpec, *, iterate: int, provider: str, model: str | None, seed: int,
+    env_digest: str, prompt_cache: dict[str, str], assets_root: Path,
+    oracle_cache: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """迭代协议包装（与 simulation_agent.run_task_iterate 同构）：
+    rounds_to_success 落 artifacts.iteration 不进 score；iterate=1 行为与直调一致。"""
+    r = run_task(task, provider=provider, model=model, seed=seed,
+                 env_digest=env_digest, prompt_cache=prompt_cache,
+                 assets_root=assets_root, oracle_cache=oracle_cache)
+    rounds_used = 1
+    while (r["validity_gate"] == 0 and rounds_used < iterate
+           and (r.get("failure_mode") in _DA_FIXABLE)):
+        fb = build_feedback_prompt(prompt_cache[task.id], r, rounds_used)
+        r = run_task(task, provider=provider, model=model, seed=seed,
+                     env_digest=env_digest, prompt_cache=prompt_cache,
+                     assets_root=assets_root, oracle_cache=oracle_cache,
+                     prompt_override=fb)
+        rounds_used += 1
+    r["artifacts"]["iteration"] = json.dumps(
+        {"rounds_used": rounds_used, "iterate_max": iterate,
+         "converged": r["validity_gate"] == 1}, ensure_ascii=False)
+    if "applicability" in r:
+        r["applicability"]["iteration"] = f"rounds {rounds_used}/{iterate}"
+    return r
+
+
 # ---------------------------------------------------------------- summary
 
 def write_summary(out_dir: Path, results: list[dict[str, Any]],
@@ -395,6 +451,14 @@ def main() -> int:
     ap.add_argument("--resume", action="store_true",
                     help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
                          "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
+    ap.add_argument("--iterate", type=int, default=1,
+                    help="迭代协议轮数上限（v0.3 harness 臂 H3）：失败且可修复时"
+                         "把诊断喂回模型修订重跑；1=单轮（默认，与既有行为一致）")
+    ap.add_argument("--limit", type=int, default=0,
+                    help="只跑前 K 个任务（0=全量）")
+    ap.add_argument("--scaffold", default=None,
+                    help="H2/H3 harness 臂：蒸馏工作流文档路径，注入每题 prompt"
+                         "前部（反馈轮自动携带）；与 --iterate 组合构成臂矩阵")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -432,6 +496,17 @@ def main() -> int:
         asset_paths.append(pf)
     env_digest = environment_digest(extra_paths=asset_paths)
 
+    tasks = tasks[:args.limit] if args.limit > 0 else tasks
+
+    # H2/H3 harness 臂：蒸馏工作流文档注入 prompt 前部（镜像 simulation_agent）
+    if args.scaffold:
+        sp = Path(args.scaffold)
+        if not sp.is_absolute():
+            sp = (common.BENCH_ROOT / sp).resolve()
+        scaffold_text = sp.read_text(encoding="utf-8").strip() + "\n\n---\n\n# TASK\n\n"
+        for tid in prompt_cache:
+            prompt_cache[tid] = scaffold_text + prompt_cache[tid]
+
     oracle_cache: dict[str, str] = {}
     if args.provider == "oracle":
         for t in tasks:
@@ -465,10 +540,18 @@ def main() -> int:
             except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
                 pass
         try:
-            r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
-                         env_digest=env_digest, prompt_cache=prompt_cache,
-                         assets_root=assets_root,
-                         oracle_cache=oracle_cache or None)
+            if args.iterate > 1 or args.scaffold:
+                r = run_task_iterate(t, iterate=max(1, args.iterate),
+                                     provider=args.provider, model=args.model,
+                                     seed=args.seed, env_digest=env_digest,
+                                     prompt_cache=prompt_cache,
+                                     assets_root=assets_root,
+                                     oracle_cache=oracle_cache or None)
+            else:
+                r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
+                             env_digest=env_digest, prompt_cache=prompt_cache,
+                             assets_root=assets_root,
+                             oracle_cache=oracle_cache or None)
         except ProviderError as e:
             raise SystemExit(f"[终止] provider 失败: {e}")
         except Exception as e:  # noqa: BLE001
@@ -490,6 +573,12 @@ def main() -> int:
                             rerun_command=rerun,
                             extra={"crash_tasks": crash, "model": model_label,
                                    "resumed_tasks": resumed,
+                                   "harness_arm": ("H3" if (args.scaffold and args.iterate > 1)
+                                                   else "H2" if args.scaffold
+                                                   else "H1" if args.iterate > 1 else "H0"),
+                                   "scaffold": (args.scaffold or None),
+                                   "iterate_rounds": args.iterate,
+                                   "limit": args.limit,
                                    "python": ".venv-cad/bin/python",
                                    "determinism_rel_tol": DETERMINISM_REL_TOL,
                                    "iface_radius_rel_tol": IFACE_RADIUS_REL_TOL})

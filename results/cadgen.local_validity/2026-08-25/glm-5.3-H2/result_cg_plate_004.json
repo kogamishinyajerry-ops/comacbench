@@ -1,0 +1,42 @@
+{
+  "task_id": "cg_plate_004",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Hard-coded task parameters (mm) -- no randomness\\nL = 90.0        # plate length along X\\nW = 70.0        # plate width along Y\\nT = 6.0         # plate thickness along Z (base at z=0)\\nFILLET_R = 9.0  # radius on all four vertical (Z-parallel) edges\\nHOLE_D = 7.0    # through-hole diameter\\nHX = 29.0       # hole center X offsets (+/-)\\nHY = 19.0       # hole center Y offsets (+/-)\\n\\n# Reliable sequence: plate -> fillet vertical edges FIRST -> through holes LAST\\npart = (cq.Workplane(\\\"XY\\\")\\n        .rect(L, W)                      # centered on origin in XY\\n        .extrude(T)                      # base face at z=0, thickness along +Z\\n        .edges(\\\"|Z\\\")                     # select the 4 vertical edges\\n        .fillet(FILLET_R)                # fillet before drilling\\n        .faces(\\\">Z\\\")                     # start hole sketch on top face\\n        .workplane()\\n        .pushPoints([(-HX, -HY),\\n                     (HX, -HY),\\n                     (-HX, HY),\\n                     (HX, HY)])\\n        .circle(HOLE_D / 2.0)\\n        .cutThruAll())                   # holes through full thickness only\\n\\nsolid = part.val()\\ncq.exporters.export(solid, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.5}, {\"exit\": 0, \"duration_s\": 2.65}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 36459.185789, \"bbox_len\": [90.0, 70.0, 6.0], \"n_faces\": 14, \"n_solids\": 1, \"cyl_radii\": [3.5, 3.5, 3.5, 3.5, 9.0, 9.0, 9.0, 9.0]}, \"reference\": {\"volume_mm3\": 36459.185789, \"bbox_len\": [90.0, 70.0, 6.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 36459.185789, \"ref\": 36459.185789}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 90.0, \"ref\": 90.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 70.0, \"ref\": 70.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 6.0, \"ref\": 6.0}}, \"physics_score\": 1.0, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 3.5, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 9.0, \"expect\": 4, \"got\": 4, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 14, \"got\": 14, \"ok\": true}], \"requirements_score\": 1.0, \"rel_tol\": 0.01}",
+    "iteration": "{\"rounds_used\": 1, \"iterate_max\": 1, \"converged\": true}"
+  },
+  "timings": {
+    "agent_s": 41.726,
+    "setup_s": 0.0,
+    "grade_s": 5.175
+  },
+  "environment_digest": "sha256:23cbe4f0f19afcc1653cfbe731479e65858dbff83c614b883eb881a849b2cb03",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1186",
+    "run1 exit=0 2.5s",
+    "run2 exit=0 2.65s",
+    "physics=1.0 requirements=1.0 vol_rel=0.00e+00"
+  ]
+}

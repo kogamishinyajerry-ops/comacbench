@@ -1,0 +1,42 @@
+{
+  "task_id": "cg_lbracket_001",
+  "registry_id": "cadgen.local_validity",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 0.3333,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.54165,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\nLEG_X = 80.0\\nH = 60.0\\nT = 10.0\\nWID = 40.0\\nFILLET_R = 12.0\\nHOLE_D = 9.0\\nHX = 45.0\\nVZ = 35.0\\nOVER = 1.0\\n\\nprofile = (\\n    cq.Workplane(\\\"XZ\\\")\\n    .moveTo(0.0, 0.0)\\n    .lineTo(LEG_X, 0.0)\\n    .lineTo(LEG_X, T)\\n    .lineTo(T + FILLET_R, T)\\n    .threePointArc(\\n        (T + FILLET_R - FILLET_R / (2.0 ** 0.5),\\n         T + FILLET_R - FILLET_R / (2.0 ** 0.5)),\\n        (T, T + FILLET_R))\\n    .lineTo(T, H)\\n    .lineTo(0.0, H)\\n    .close()\\n    .extrude(WID))\\n\\nsolid = profile.val()\\n\\nhole_h = cq.Solid.makeCylinder(\\n    HOLE_D / 2.0, T + 2.0 * OVER,\\n    cq.Vector(HX, WID / 2.0, -OVER),\\n    cq.Vector(0.0, 0.0, 1.0))\\n\\nhole_v = cq.Solid.makeCylinder(\\n    HOLE_D / 2.0, T + 2.0 * OVER,\\n    cq.Vector(-OVER, WID / 2.0, VZ),\\n    cq.Vector(1.0, 0.0, 0.0))\\n\\nsolid = solid.cut(hole_h).cut(hole_v)\\ncq.exporters.export(solid, \\\"part.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"cadgen_local_validity\", \"runs\": [{\"exit\": 0, \"duration_s\": 2.44}, {\"exit\": 0, \"duration_s\": 2.49}], \"determinism\": {\"tol\": 1e-06, \"volume_rel_diff\": 0.0, \"bbox_rel_diff\": [0.0, 0.0, 0.0], \"bbox_max_rel_diff\": 0.0, \"ok\": true}, \"measured\": {\"volume_mm3\": 53236.106579, \"bbox_len\": [80.0, 40.0, 60.0], \"n_faces\": 9, \"n_solids\": 1, \"cyl_radii\": [12.0]}, \"reference\": {\"volume_mm3\": 51963.761554, \"bbox_len\": [80.0, 40.0, 60.0]}, \"physics_hits\": {\"volume_mm3\": {\"rel_err\": 0.024485237, \"ok\": false, \"got\": 53236.106579, \"ref\": 51963.761554}, \"bbox_len_x\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 80.0, \"ref\": 80.0}, \"bbox_len_y\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 40.0, \"ref\": 40.0}, \"bbox_len_z\": {\"rel_err\": 0.0, \"ok\": true, \"got\": 60.0, \"ref\": 60.0}}, \"physics_score\": 0.75, \"interface_checks\": [{\"check\": \"n_cyl_faces_with_radius\", \"radius\": 4.5, \"expect\": 2, \"got\": 0, \"ok\": false, \"rel_tol\": 0.01}, {\"check\": \"n_cyl_faces_with_radius\", \"radius\": 12.0, \"expect\": 1, \"got\": 1, \"ok\": true, \"rel_tol\": 0.01}, {\"check\": \"n_faces_total\", \"expect\": 11, \"got\": 9, \"ok\": false}], \"requirements_score\": 0.3333, \"rel_tol\": 0.01}",
+    "iteration": "{\"rounds_used\": 1, \"iterate_max\": 3, \"converged\": true}"
+  },
+  "timings": {
+    "agent_s": 92.669,
+    "setup_s": 0.0,
+    "grade_s": 4.946
+  },
+  "environment_digest": "sha256:23cbe4f0f19afcc1653cfbe731479e65858dbff83c614b883eb881a849b2cb03",
+  "assets_revision": "cadgen-local@selfbuilt-2026-08-21+cadquery2.8.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=843",
+    "run1 exit=0 2.44s",
+    "run2 exit=0 2.49s",
+    "physics=0.75 requirements=0.3333 vol_rel=2.45e-02"
+  ]
+}
