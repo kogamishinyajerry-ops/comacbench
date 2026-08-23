@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_03",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% margin_03: cascaded (inner + outer) loop robust stability margins\\n% Inner:  G_in(s) = 1/(s(s+4)),  ki = 12,  unity negative feedback\\n% Outer:  G_out(s) = 2.5/(s(s+2))\\n% Total open loop L(s) = G_out(s) * G_in_cl(s); margins of L(s).\\n\\ns = tf('s');\\n\\n% --- INNER loop: close FIRST with unity negative feedback ---\\nki     = 12.0;\\nG_in   = 1.0 / (s * (s + 4.0));\\nG_in_cl = feedback(ki * G_in, 1);        % feedback() defaults to negative feedback\\n\\n% --- OUTER loop: cascade AFTER inner loop is closed ---\\nG_out  = 2.5 / (s * (s + 2.0));\\nL      = G_out * G_in_cl;                % total open loop\\n\\n% --- margins: margin returns [Gm, Pm, Wcg, Wcp] in this exact order ---\\n[Gm, Pm, Wcg, Wcp] = margin(L);\\n\\n% map outputs by position, no semantic remapping:\\ngm_db  = 20 * log10(Gm);   % linear gain margin -> dB\\npm_deg = Pm;               % phase margin, already degrees\\nw_gc   = Wcg;              % 3rd output -> w_gc\\nw_pc   = Wcp;              % 4th output -> w_pc\\n\\n% --- write result.json ---\\nr = struct('gm_db', gm_db, 'pm_deg', pm_deg, 'w_gc', w_gc, 'w_pc', w_pc);\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 6.581174385284504, \"ref\": 6.581174385284504}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 37.964799144232124, \"ref\": 37.964799144232124}, \"w_gc\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 2.0, \"ref\": 2.0}, \"w_pc\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.1234919503040393, \"ref\": 1.1234919503040393}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 13.39}"
+  },
+  "timings": {
+    "agent_s": 22.159,
+    "setup_s": 0.0,
+    "grade_s": 13.388
+  },
+  "environment_digest": "sha256:3996edb143cb7601e15a7701e469d7ebfe293ed0277a40482226ad917661fc77",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 13.39s"
+  ]
+}

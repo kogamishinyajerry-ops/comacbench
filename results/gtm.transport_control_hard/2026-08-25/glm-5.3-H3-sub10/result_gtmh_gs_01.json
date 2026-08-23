@@ -1,0 +1,39 @@
+{
+  "task_id": "gtmh_gs_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"% Gain scheduling: independent full-state pole placement at 3 flight conditions\\n% State x = [u_x, w, q, theta], input delta_e, control law u = -K x.\\n% At each FC: place the short-period pair at its OWN target (wn, zeta),\\n% keep the phugoid poles at their open-loop values.\\n\\n% ---- Flight-condition data (transcribed verbatim from the task) ----\\nA1 = [ -0.0064,  0.038,  0.0,   -32.174;\\n       -0.031,  -0.71,   740.0,  0.0;\\n        0.0,    -0.0051, -0.9,   0.0;\\n        0.0,     0.0,     1.0,   0.0 ];\\nB1 = [ 0.0; -6.0; -4.0; 0.0 ];\\n\\nA2 = [ -0.0059,  0.026,  0.0,   -32.174;\\n       -0.019,  -0.55,   700.0,  0.0;\\n        0.0,    -0.0034, -0.64,  0.0;\\n        0.0,     0.0,     1.0,   0.0 ];\\nB2 = [ 0.0; -6.0; -4.0; 0.0 ];\\n\\nA3 = [ -0.0057,  0.02,   0.0,   -32.174;\\n       -0.015,  -0.5,    660.0,  0.0;\\n        0.0,    -0.003,  -0.58,  0.0;\\n        0.0,     0.0,     1.0,   0.0 ];\\nB3 = [ 0.0; -6.0; -4.0; 0.0 ];\\n\\nA = {A1, A2, A3};\\nB = {B1, B2, B3};\\nwn_t = [2.0, 1.9, 1.7];      % target short-period natural frequency per FC\\nz_t  = [0.6, 0.55, 0.5];     % target short-period damping per FC\\n\\nr = struct();\\nfor i = 1:3\\n    Ai = A{i};\\n    Bi = B{i};\\n\\n    % ---- open-loop poles; phugoid = slow pair (smallest |s|) ----\\n    ol = eig(Ai);\\n    [~, ord] = sort(abs(ol), 'descend');\\n    ph = ol(ord(3:4));                       % keep phugoid at open-loop values\\n\\n    % ---- target short-period conjugate pair ----\\n    a  = z_t(i) * wn_t(i);\\n    b  = wn_t(i) * sqrt(1 - z_t(i)^2);\\n    sp = -a + 1i*b;\\n\\n    % ---- desired closed-loop pole set = [phugoid pair, target SP pair] ----\\n    des = [ph(1); ph(2); sp; conj(sp)];\\n\\n    % ---- full-state feedback u = -K x  =>  Acl = A - B*K ----\\n    K = place(Ai, Bi, des);\\n\\n    % ---- achieved closed-loop eigenvalues; extract SP pair (largest |s|) ----\\n    cl = eig(Ai - Bi*K);\\n    [~, ord2] = sort(abs(cl), 'descend');\\n    lam_sp = cl(ord2(1));\\n    wn   = abs(lam_sp);\\n    zeta = -real(lam_sp) / wn;\\n\\n    r.(sprintf('cl_omega_sp_%d', i)) = wn;\\n    r.(sprintf('cl_zeta_sp_%d', i))  = zeta;\\nend\\n\\n% ---- write result.json ----\\nfid = fopen('result.json', 'w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"cl_omega_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9999999999989486, \"ref\": 1.9999999999989486}, \"cl_omega_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.9000000000027133, \"ref\": 1.9000000000027133}, \"cl_omega_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.699999999997161, \"ref\": 1.699999999997161}, \"cl_zeta_sp_1\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.6000000000003328, \"ref\": 0.6000000000003328}, \"cl_zeta_sp_2\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5499999999992136, \"ref\": 0.5499999999992136}, \"cl_zeta_sp_3\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.5000000000008572, \"ref\": 0.5000000000008572}}, \"physics_hits\": \"6/6\", \"rel_tol\": 0.01, \"matlab_s\": 8.38}",
+    "iteration": "{\"rounds_used\": 1, \"iterate_max\": 3, \"converged\": true}"
+  },
+  "timings": {
+    "agent_s": 98.507,
+    "setup_s": 0.0,
+    "grade_s": 8.38
+  },
+  "environment_digest": "sha256:3996edb143cb7601e15a7701e469d7ebfe293ed0277a40482226ad917661fc77",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 8.38s"
+  ]
+}

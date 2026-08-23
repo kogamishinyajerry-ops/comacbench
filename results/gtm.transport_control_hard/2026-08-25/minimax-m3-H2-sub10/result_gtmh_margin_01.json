@@ -1,0 +1,38 @@
+{
+  "task_id": "gtmh_margin_01",
+  "registry_id": "gtm.transport_control_hard",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "result.json 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"num = [1.8];\\nden = [1.0, 3.0, 2.0, 0.0];\\nL = tf(num, den);\\n[Gm, Pm, Wcg, Wcp] = margin(L);\\ngm_db  = 20 * log10(Gm);\\npm_deg = Pm;\\nw_gc   = Wcg;\\nw_pc   = Wcp;\\nr = struct('gm_db', gm_db, 'pm_deg', pm_deg, 'w_gc', w_gc, 'w_pc', w_pc);\\nfid = fopen('result.json','w');\\nfwrite(fid, jsonencode(r));\\nfclose(fid);\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"gtm_matlab\", \"hits\": {\"gm_db\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 10.457574905606755, \"ref\": 10.457574905606755}, \"pm_deg\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 35.90170870867279, \"ref\": 35.90170870867279}, \"w_gc\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1.4142135623730954, \"ref\": 1.4142135623730954}, \"w_pc\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 0.6971302321046832, \"ref\": 0.6971302321046832}}, \"physics_hits\": \"4/4\", \"rel_tol\": 0.01, \"matlab_s\": 14.76}"
+  },
+  "timings": {
+    "agent_s": 21.063,
+    "setup_s": 0.0,
+    "grade_s": 14.766
+  },
+  "environment_digest": "sha256:3996edb143cb7601e15a7701e469d7ebfe293ed0277a40482226ad917661fc77",
+  "assets_revision": "gtm-hard@selfbuilt-2026-08-23+matlabR2026a",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "matlab exit=0 14.76s"
+  ]
+}

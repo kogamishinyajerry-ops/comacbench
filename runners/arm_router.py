@@ -54,9 +54,10 @@ POLICY: dict[tuple[str, str], tuple[str, float, str]] = {
     ("glm-thinking", "pycycle.engine_cycle"): ("H3", 0.900, "v0.3 矩阵：改写型需反馈修复（H2 仅 0.3）"),
     ("glm-thinking", "cfdllm.foam_basic"): ("H3", 0.040, "v0.3 矩阵：弱臂但为最优已知（模型入场即难）"),
     ("glm-thinking", "cadgen.local_validity"): ("H0", 0.8636, "固定对基线已强；臂证据补齐前不注入"),
-    ("minimax", "cadgen.local_validity"): ("H2", 0.7083, "H0 基线；谱系化臂证据在途（默认升 H3 亦可——M3 反馈无反例）"),
-    ("minimax", "gtm.transport_control_hard"): ("H3", 0.7059, "H0 基线；谱系化臂证据在途"),
-    ("glm-thinking", "gtm.transport_control_hard"): ("H3", 0.6471, "H0 基线；谱系化臂证据在途"),
+    ("minimax", "cadgen.local_validity"): ("H3", 0.9792, "谱系化 2026-08-25：H2 0.9583/H3 0.9792（lbracket 0.25→0.771）；M3 反馈无反例取 H3"),
+    ("glm-thinking", "cadgen.local_validity"): ("H2", 1.0000, "谱系化 2026-08-25：H2 满分 22/22（H0 0.8636→1.0）"),
+    ("minimax", "gtm.transport_control_hard"): ("H2", 0.8000, "谱系化 2026-08-25：H2/H3 均 0.80（margin 族 1.0；id 族 0.25→0.50）；H2 省轮次"),
+    ("glm-thinking", "gtm.transport_control_hard"): ("H2", 0.6000, "谱系化 2026-08-25：H2/H3 均 0.60（margin 1.0）；id 族=provider 长度墙(32768 截断) scaffold 不可治"),
 }
 
 # 各基准的 runner 入口（interpreter 钉子栈）

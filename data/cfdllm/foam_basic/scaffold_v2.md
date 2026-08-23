@@ -71,10 +71,11 @@ gradSchemes { default Gauss linear; }
 divSchemes
 {
     default none;
-    div(phi,U)  bounded Gauss limitedLinear 0.2;
-    div(phi,K)  bounded Gauss limitedLinear 0.2;
-    div(phi,h)  bounded Gauss limitedLinear 0.2;
-    div(phi,T)  bounded Gauss limitedLinear 0.2;
+    div(phi,U)          Gauss linearUpwind grad(U);   // 迎风保稳（GT 原文）
+    div(phi,e)          Gauss limitedLinear 1;
+    div(phi,h)          Gauss limitedLinear 1;   // e/h 双保险：能量命名随 thermo 设定
+    div(phi,K)          Gauss linear;
+    div(phi,(p|rho))    Gauss limitedLinear 1;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }
 laplacianSchemes { default Gauss linear corrected; }
@@ -85,25 +86,24 @@ snGradSchemes { default corrected; }
 w("system/fvSolution", """FoamFile { format ascii; class dictionary; object fvSolution; location "system/fvSolution"; }
 solvers
 {
-    p_rgh { solver GAMG; tolerance 1e-7; relTol 0.01; smoother DICGaussSeidel; }
-    p_rghFinal { solver GAMG; tolerance 1e-7; relTol 0; smoother DICGaussSeidel; }
-    "(U|h|k|epsilon|omega)"
+    "rho.*" { solver diagonal; }
+    p_rgh { solver GAMG; smoother DIC; tolerance 1e-8; relTol 0.01; }
+    p_rghFinal { $p_rgh; relTol 0; }
+    "(U|e|h|k|epsilon)"
     {
-        solver PBiCGStab; preconditioner DILU; tolerance 1e-8; relTol 0.1;
+        solver PBiCGStab; preconditioner DILU; tolerance 1e-8; relTol 0.01;
     }
-    "(U|h|k|epsilon|omega)Final"
+    "(U|e|h|k|epsilon)Final"
     {
-        solver PBiCGStab; preconditioner DILU; tolerance 1e-8; relTol 0;
-    }
-    "(rho|rhoFinal)"
-    {
-        solver PBiCGStab; preconditioner DILU; tolerance 1e-8; relTol 0;
+        $U;
+        relTol 0;
     }
 }
 PIMPLE
 {
     momentumPredictor no;
     nNonOrthogonalCorrectors 0;
+    nCorrectors 2;      // GT 原文——2 次压力校正是稳定关键（1 次会发散 NaN）
     pRefCell 0;
     pRefValue 0;
 }
@@ -118,11 +118,10 @@ vertices (
 );
 blocks ( hex (0 1 2 3 4 5 6 7) ({NX} {NY} {NZ}) simpleGrading (1 1 1) );
 boundary (
-    bottom {{ type wall; faces ((0 1 5 4)); }}
-    top    {{ type wall; faces ((3 2 6 7)); }}
-    frontAndBack {{ type empty; faces ((0 1 2 3) (4 5 6 7)); }}
-    inlet  {{ type patch; faces ((0 3 7 4)); }}
-    outlet {{ type patch; faces ((1 2 6 5)); }}
+    floor  {{ type wall; faces ((1 5 4 0)); }}
+    ceiling {{ type wall; faces ((3 7 6 2)); }}
+    sideWalls {{ type wall; faces ((0 4 7 3) (2 6 5 1)); }}
+    frontAndBack {{ type empty; faces ((0 3 2 1) (4 5 6 7)); }}
 );
 """)
 
@@ -171,44 +170,39 @@ hot = f"type fixedValue; value uniform {T_HOT};"
 cold = f"type fixedValue; value uniform {T_COLD};"
 
 w("0/T", field("T", "volScalarField", "[0 0 0 1 0 0 0]", T_COLD, f"""
-    bottom {{ {hot} }}
-    top {{ {cold} }}
+    floor {{ {hot} }}
+    ceiling {{ {cold} }}
+    sideWalls {{ type zeroGradient; }}
     frontAndBack {{ type empty; }}
-    inlet {{ {cold} }}
-    outlet {{ type inletOutlet; inletValue uniform {T_COLD}; value uniform {T_COLD}; }}
 """))
 
 # 纪律 1/2：gauge 压力 + 微扰初速
 w("0/U", field("U", "volVectorField", "[0 1 -1 0 0 0 0]", "(1e-4 0 0)", """
-    bottom { type noSlip; }
-    top { type noSlip; }
+    floor { type noSlip; }
+    ceiling { type noSlip; }
+    sideWalls { type noSlip; }
     frontAndBack { type empty; }
-    inlet { type fixedValue; value uniform (1e-4 0 0); }
-    outlet { type pressureInletOutletVelocity; value uniform (1e-4 0 0); }
 """))
 
 w("0/p_rgh", field("p_rgh", "volScalarField", "[1 -1 -2 0 0 0 0]", "0", """
-    bottom { type fixedFluxPressure; value uniform 0; }
-    top { type fixedFluxPressure; value uniform 0; }
+    floor { type fixedFluxPressure; value uniform 0; }
+    ceiling { type fixedFluxPressure; value uniform 0; }
+    sideWalls { type fixedFluxPressure; value uniform 0; }
     frontAndBack { type empty; }
-    inlet { type fixedFluxPressure; value uniform 0; }
-    outlet { type fixedValue; value uniform 0; }
 """))
 
 w("0/p", field("p", "volScalarField", "[1 -1 -2 0 0 0 0]", "0", """
-    bottom { type calculated; value uniform 0; }
-    top { type calculated; value uniform 0; }
+    floor { type calculated; value uniform 0; }
+    ceiling { type calculated; value uniform 0; }
+    sideWalls { type calculated; value uniform 0; }
     frontAndBack { type empty; }
-    inlet { type calculated; value uniform 0; }
-    outlet { type calculated; value uniform 0; }
 """))
 
 w("0/alphat", field("alphat", "volScalarField", "[1 -1 -1 0 0 0 0]", "0", """
-    bottom { type alphatWallFunction; Prt 0.85; value uniform 0; }
-    top { type alphatWallFunction; Prt 0.85; value uniform 0; }
+    floor { type alphatWallFunction; Prt 0.85; value uniform 0; }
+    ceiling { type alphatWallFunction; Prt 0.85; value uniform 0; }
+    sideWalls { type alphatWallFunction; Prt 0.85; value uniform 0; }
     frontAndBack { type empty; }
-    inlet { type calculated; value uniform 0; }
-    outlet { type calculated; value uniform 0; }
 """))
 
 w("Allrun", """#!/bin/sh
@@ -234,3 +228,8 @@ os.chmod("Allrun", 0o755)
    sandbox_escape_attempt）。
 8. **别用嵌套 f-string 三引号写字典**（FoamFile 头 + 多插值点极易抄错——
    v2 实测 M3 三连语法错误全在此）：字段文件一律用上面的字符串拼接 helper。
+9. **闭合胞拓扑**（自然对流类）：floor/ceiling/sideWalls 全墙 + frontAndBack empty，**没有 inlet/outlet**——开盒（出流边界）在对流问题上会跑飞（v2.3 实测 NaN）。
+10. **跑完 ≠ 对**：必须自查末时刻场全有限（`grep -c nan` 末时刻 T/U/p 为 0）。
+   发散（NaN）的算例在判分器里按无公共场记 0——格式纪律之外还有数值稳定性
+   纪律：U 对流用迎风（linearUpwind）、PIMPLE nCorrectors 2、qemu 下网格
+   宁粗勿超时，三条缺一即 NaN/超时。
