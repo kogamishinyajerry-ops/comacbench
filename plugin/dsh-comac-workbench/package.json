@@ -1,0 +1,32 @@
+{
+  "name": "dsh-comac-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "description": "COMACBench 工作台 — DSH Web GUI 内嵌只读分析视图（规格书 docs/specs/workbench-ui-v1.md）",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "scripts": {
+    "bundle": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "dependencies": {
+    "echarts": "^6.0.0"
+  },
+  "devDependencies": {
+    "tsdown": "^0.22.14"
+  }
+}

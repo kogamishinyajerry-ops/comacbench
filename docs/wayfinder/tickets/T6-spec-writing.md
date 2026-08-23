@@ -1,6 +1,6 @@
 # T6 · 规格书 v1 撰写
 
-- Label: `wayfinder:task` · Status: open · Blocked by: T2, T3, T4, T5
+- Label: `wayfinder:task` · Status: **closed**（2026-08-23，规格书 v1 落盘） · Blocked by: —
 
 ## Question
 
@@ -16,4 +16,11 @@
 
 ## Resolution
 
-（待解）
+《COMACBench 工作台 UI 设计规格书》v1 落盘：**`docs/specs/workbench-ui-v1.md`**。
+
+- 五章齐备：决策论证（含被否决备选全记录）/ 信息架构与五页线框（每页数据来源=端点、交互、空/载/错三态）/ 数据契约（统一 result 信封 + 实测 failure_mode 词表 + 9 端点表 + ViewJSON schema + 快照文件 schema）/ 技术选型与打包（两包一逻辑架构、tsdown 配方、ECharts+宿主令牌、内网章 T8 占位含方案 B）/ 分期路线（v1 验收 7 条可测标准 + v1.1 + v2 fog 归位 + 风险登记册）
+- 全部决议（T1/T2/T3/T4/T5/T9）已内化为规格条款，每条可溯源到地图 Decisions so far
+- 内网移植章以 T8 占位（Q2 一票否决级），方案 B（静态壳）已预设计——T8 回答不阻塞实现动工
+- 撰写时补齐的实证：五类 adapter result 信封同构验证、全库 failure_mode 频次扫描、九维度→registry 映射、registry entry 全字段
+
+地图目的地（设计规格书）已抵达。剩余票：T7 可点击原型（后置验证"直观好看"）、T8 内网人工确认（喂 v1.1）。

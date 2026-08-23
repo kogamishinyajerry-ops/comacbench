@@ -7,6 +7,8 @@
 
 一份《COMACBench 工作台 UI 设计规格书》：以评测运营（Jerry）为第一受众、核心心智"结果说明什么"（date×provider×benchmark 交叉对比 + gate 失败下钻）的 **DSH GUI 内嵌只读工作台**。规格书含"要不要做"的决策论证、信息架构+线框、数据契约、技术选型与打包（内网移植）方案、分期路线。动手实现不在这张图里。
 
+> **✅ 已于 2026-08-23 抵达**：`docs/specs/workbench-ui-v1.md`（T6 Resolution）。剩余 T7（原型）/T8（内网确认）为后置票。
+
 ## Notes
 
 - 领域：民机设计 Benchmark Harness（38 基准 registry / 五类 adapter / results/<id>/<date>/<provider>/ 落盘结构 / M0–M4 里程碑）。
@@ -36,6 +38,9 @@
 - [T1 · DSH 内嵌页的数据桥](tickets/T1-dsh-data-bridge.md)：**能内嵌**。页面 = client plugin 注册进 `conversation.view` ViewMap；前端不能调 agent 工具；**推荐桥 = host 插件挂 `/comac/*` prefix JSON 路由活读仓库**（本机 dsh-comfyui 有实证先例），Typert Remote 备选；风险集中于 client bundle 打包格式（→ T9）、裸路由无鉴权、新增插件须重启 → [研究报告](research/T1-dsh-data-bridge.md)。
 - [T9 · client bundle 打包格式验证](tickets/T9-client-bundle-packaging.md)：**全过**。tsdown 0.22 公开版复刻官方 factory 格式（cjs + banner/footer + neverBundle react + clean:false）；双面孔件必须 node_modules/包名挂载（绝对路径 client 半不被发现）；`DSH_HOME` 隔离法验证零接触主实例 → [研究报告](research/T9-client-bundle-packaging.md)，可复现配方 `.attic/t9-hello-client/`。
 - [T3 · 数据桥选型决策](tickets/T3-data-bridge-decision.md)：**方案 1 定案** = host 插件 `/comac/*` prefix JSON 路由活读 + client fetch；Typert 记为非 loopback 升级路径；暴露面 = handler 内置 loopback 检查 + 全 GET + 前缀独占；快照导出走脚本、UI 纯读、host 半零写；host 半与 comac_* 工具共享数据读取层。
+- [T4 · 快照格式与归档纪律](tickets/T4-snapshot-format.md)：**聚合单 JSON**（<2MB）+ 每 run 内联 manifest 可复现字段 + git_commit 指针，落 `results/_snapshots/<tag>.json` 进 git；明细 SSOT 永在 results/（git 历史即冻结），快照模式下钻读当前盘标注时点差；`--full` 全量自包含包仅评审外发不进 git。
+- [T5 · 图表库与视觉系统选型](tickets/T5-chart-visual-stack.md)：**ECharts 按需**（实测 184KB gzip，本地加载代价≈0）+ **继承宿主 `--dsw-*` 令牌**（static/alias/font 梯度/明暗/中文字体栈全现成）+ **命名空间 CSS 注入**（`.comac-wb-` 前缀、零依赖、契合单文件 bundle）；visx 记 fallback；实现纪律：tsdown 必须 `alwaysBundle`、构建 fail-loud → [研究报告](research/T5-chart-visual-stack.md)。
+- [T6 · 规格书 v1 撰写](tickets/T6-spec-writing.md)：**目的地抵达**——`docs/specs/workbench-ui-v1.md` 落盘（五章 + 7 条可测验收标准 + 风险登记册）；内网章 T8 占位、方案 B 静态壳已预设计。
 
 ## Tickets（前沿快照，权威状态以票据文件为准）
 
@@ -43,20 +48,20 @@
 | --- | --- | --- | --- |
 | ~~[T1 · DSH 内嵌页的数据桥](tickets/T1-dsh-data-bridge.md)~~ | research (AFK) | **closed**（能内嵌；推荐 prefix 路由桥） | — |
 | ~~[T2 · 内网前端运行时事实](tickets/T2-intranet-runtime.md)~~ | research (AFK) | **closed**（Resolution 已记） | — |
-| [T4 · 快照格式与归档纪律](tickets/T4-snapshot-format.md) | grilling (HITL) | open | — |
-| [T5 · 图表库与视觉系统选型](tickets/T5-chart-visual-stack.md) | grilling (HITL) | open | — |
+| ~~[T4 · 快照格式与归档纪律](tickets/T4-snapshot-format.md)~~ | grilling (HITL) | **closed**（聚合单 JSON + 指针） | — |
+| ~~[T5 · 图表库与视觉系统选型](tickets/T5-chart-visual-stack.md)~~ | grilling (HITL) | **closed**（ECharts 按需 + 宿主令牌） | — |
 | [T8 · 内网 DSH 形态人工确认](tickets/T8-intranet-dsh-shape.md) | task (HITL，7 问清单) | open | — |
 | ~~[T9 · client bundle 打包格式验证](tickets/T9-client-bundle-packaging.md)~~ | task (AFK) | **closed**（六项验证全 PASS） | — |
 | ~~[T3 · 数据桥选型决策](tickets/T3-data-bridge-decision.md)~~ | grilling (HITL) | **closed**（方案 1 定案） | — |
-| [T6 · 规格书 v1 撰写](tickets/T6-spec-writing.md) | task | open | T4, T5, T8 |
-| [T7 · 可点击高保真原型](tickets/T7-clickable-prototype.md) | prototype (HITL) | open | T6 |
+| ~~[T6 · 规格书 v1 撰写](tickets/T6-spec-writing.md)~~ | task | **closed**（目的地抵达） | — |
+| [T7 · 可点击高保真原型](tickets/T7-clickable-prototype.md) | prototype (HITL) | open | —（已解锁） |
 
 ## Not yet specified
 
 - **运行监控的"进度"语义**：是数 result 文件、解析日志尾，还是让 runner 落 progress.json（要改 runners/，是个真决策）——等 T6 信息架构成形后再切。
 - **单题下钻的跨 adapter 渲染差异**：qa_grounded / code_exec / simulation_agent / field_prediction 的 result.json 形状差异多大、要不要分 adapter 渲染器——数据契约阶段实地看过才知道怎么切。
 - **provider 扩容后的对比交互**：当前 2 个真实 LLM provider + stub/oracle；横向扩容后矩阵交互（ pinning、diff、归一化）长什么样。
-- **评审只读视图**：第二受众（COMAC 评审）的衍生形态——可能只是里程碑快照的叙事化导出，也可能什么也不用做。
+- **评审只读视图**：第二受众（COMAC 评审）的衍生形态——T4 已定 `--full` 自包含外发包为载体；剩下的问题是评审人怎么打开/浏览它（file:// 直开？快照模式只读变体？）以及要不要叙事化包装——等真实评审反馈再切，v1 不做。
 
 ## Out of scope
 

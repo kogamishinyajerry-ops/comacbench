@@ -40,17 +40,45 @@ comac_report  name=nine-dim                                    # 回到全景
 - 长跑事实（2026-08 实测）：LLM 基线单题 3-44 min、全量 100+ 题 = 小时级——
   `comac_run` 一律脱离返回，重复调用幂等（resume 跳过已有结果）
 
+## 工作台数据面（v1 已实现，规格书 docs/specs/workbench-ui-v1.md）
+
+host 半新增 `/comac/*` prefix 路由（只读 GET · loopback 守卫 · 与 comac_* 工具共享数据层）：
+
+| 端点 | 用途 |
+| --- | --- |
+| `/comac/overview` | 家底计数 + 九维雷达 + 最近运行 + 快照清单 |
+| `/comac/registry` `/comac/runs` `/comac/runstatus` | registry 全字段 / run 索引(含 manifest 内联) / 在跑批监控 |
+| `/comac/matrix?date=` | date×provider×基准 聚合矩阵 |
+| `/comac/bench/<rid>[?date&provider]` | 基准详情 + 任务行（只给 date 时自动选最新 provider） |
+| `/comac/task/<rid>/<date>/<prov>/<task_id>` | 单题完整信封 |
+| `/comac/snapshots` `/comac/snapshot/<tag>` | 快照清单 / 快照 ViewJSON |
+
+配套：`snapshot.mjs --tag <t> [--full]` 生成里程碑快照（聚合 ViewJSON 进 git；`--full` 外发包不进 git）。
+
+UI 在 `plugin/dsh-comac-workbench/`（client plugin，注册进 conversation.view ViewMap「工作台」tab）。
+
 ## 安装 / 更新
 
 ```bash
-# 源码在仓库 plugin/dsh-comac-benchmark/（版本库内）；安装 = 拷两文件 + patch 条目
+# 1) host 半（本插件）：拷三文件 + patch 条目
 mkdir -p ~/.dsh/plugins/dsh-comac-benchmark
-cp plugin/dsh-comac-benchmark/{index.js,package.json} ~/.dsh/plugins/dsh-comac-benchmark/
-# ~/.dsh/profiles/web/cordis.patch.yml 追加：
+cp plugin/dsh-comac-benchmark/{index.js,package.json,snapshot.mjs} ~/.dsh/plugins/dsh-comac-benchmark/
+# ~/.dsh/profiles/web/cordis.patch.yml 追加（若已有 dsh-comac-benchmark 条目则把 inject 改为 [tools, webServer]）：
 #   - insert:
 #       - id: dsh-comac-benchmark
 #         name: /Users/Zhuanz/.dsh/plugins/dsh-comac-benchmark/index.js
-# 新会话生效（当前会话不热载）
+
+# 2) client 半（工作台 UI）：包名形态挂载（T9 定论：双面孔件不能绝对路径）
+mkdir -p ~/.dsh/profiles/web/node_modules
+ln -sfn /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/plugin/dsh-comac-workbench \
+  ~/.dsh/profiles/web/node_modules/dsh-comac-workbench
+# ~/.dsh/profiles/web/cordis.patch.yml 追加：
+#   - insert:
+#       - id: dsh-comac-workbench
+#         name: dsh-comac-workbench
+
+# 3) 首次安装需重启 dsh web（此后 bundle 变更 HMR 自动热替换）
+# 4) UI 改动后：cd plugin/dsh-comac-workbench && node build.mjs（fail-loud，格式断言内置）
 ```
 
 更新插件后重新 `cp` 两个文件即可；改判分逻辑请改仓库 `runners/`（无需动插件）。

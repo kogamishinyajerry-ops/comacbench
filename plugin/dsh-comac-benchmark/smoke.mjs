@@ -5,7 +5,11 @@ const src = readFileSync(new URL("./index.js", import.meta.url), "utf8");
 const mod = await import(new URL("./index.js", import.meta.url));
 
 const registered = [];
-const ctx = { tools: { register: (t) => registered.push(t) } };
+const ctx = {
+  tools: { register: (t) => registered.push(t) },
+  // 工作台路由挂载（effect 立即执行；webServer 缺省时不注册——真实环境由 dsh 提供）
+  effect: (fn) => fn(),
+};
 mod.apply(ctx);
 console.log(`registered ${registered.length} tools: ${registered.map((t) => t.name).join(", ")}`);
 

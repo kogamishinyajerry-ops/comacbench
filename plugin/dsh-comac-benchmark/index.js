@@ -13,6 +13,13 @@
  *   comac_results     读某次运行的 summary + 从 result JSON 重算 gate/失败模式分布
  *   comac_report      读报告文档（九维度基线 / batch 总结 / 里程碑 M1-M4）
  *
+ * 工作台数据面（/comac/* prefix 路由，只读 GET，loopback 守卫——规格书
+ * docs/specs/workbench-ui-v1.md §3）：
+ *   /comac/overview /registry /matrix /runs /runstatus /snapshots /snapshot/<tag>
+ *   /comac/bench/<rid> /comac/task/<rid>/<date>/<provider>/<task_id>
+ *   与 comac_* 工具共享同一读取层（薄代理：聚合逻辑零复写）；
+ *   snapshot.mjs 复用同层生成 ViewJSON 快照。
+ *
  * 环境契约：
  *   COMAC_BENCH_HOME  仓库根（默认 .../JerryDSH-COMACBench）
  *   provider=glm      起跑时从 macOS Keychain 注入 GLM_API_KEY（security …
@@ -29,7 +36,7 @@ import path from "node:path";
 import os from "node:os";
 
 export const name = "dsh-comac-benchmark";
-export const inject = ["tools"];
+export const inject = ["tools", "webServer"];
 
 const HOME = process.env.COMAC_BENCH_HOME
   ?? "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench";
@@ -184,6 +191,316 @@ function aggregate(runDir) {
 function head(text, lines = 40) {
   return text.split("\n").slice(0, lines).join("\n");
 }
+
+// ---------- 工作台数据层（/comac/* 路由与 snapshot.mjs 共享，规格书 §3） ----------
+
+/** 九维度 → 基准映射（scoring/README.md §1 的机器可读版；未列者不入雷达只入矩阵） */
+export const NINE_DIMS = [
+  "knowledge", "coding", "cad_geometry", "cfd", "structures",
+  "propulsion", "flight_control", "mdo_design", "robustness_audit",
+];
+export const DIM_OF_RID = {
+  "cfdllm.cfdquery": "knowledge", "aeroengqa.gold": "knowledge", "mechvqa.public_eval": "knowledge",
+  "scicode.physics": "coding", "cfdllm.cfdcode": "coding",
+  "humaneval.python": "coding", "humaneval.python_plus": "coding",
+  "mbpp.sanitized": "coding", "mbpp.sanitized_plus": "coding",
+  "gsm8k.math_reasoning": "coding", "math500.math_reasoning": "coding",
+  "cadgen.local_validity": "cad_geometry",
+  "cfdllm.foam_basic": "cfd", "superwing.coeff_lite": "cfd", "hilift_aeroml.lite": "cfd",
+  "simjeb.structure": "structures",
+  "pycycle.engine_cycle": "propulsion",
+  "gtm.transport_control": "flight_control", "gtm.transport_control_hard": "flight_control",
+  "aviary.transport_mission": "mdo_design", "engdesign.open": "mdo_design",
+};
+
+const _cache = new Map();
+function cached(key, ttlMs, fn) {
+  const hit = _cache.get(key);
+  if (hit && Date.now() - hit.t < ttlMs) return hit.v;
+  const v = fn();
+  _cache.set(key, { t: Date.now(), v });
+  return v;
+}
+
+/** registry.yaml 全字段（python yaml 代理，5s TTL 缓存） */
+export function loadRegistryFull() {
+  return cached("registryFull", 5000, () => {
+    repoMustExist();
+    const rows = pyJson(
+      `import yaml,json\n` +
+      `reg=yaml.safe_load(open('registry/registry.yaml'))\n` +
+      `out=[]\n` +
+      `for e in (reg.get('benchmarks') or reg.get('entries') or []):\n` +
+      `    out.append({k:e.get(k) for k in ('id','name','tier','order','batch','adapter',` +
+      `'env_class','license','license_status','status','risks','integrated_note',` +
+      `'assets_revision','content','scoring','env')})\n` +
+      `print(json.dumps(out))\n`);
+    if (!rows.length) throw new Error("registry.yaml 解析为空");
+    return rows;
+  });
+}
+
+/** run_manifest.json 读取（容错：缺文件返回空对象） */
+function readManifest(runDir) {
+  const f = path.join(runDir, "run_manifest.json");
+  if (!existsSync(f)) return {};
+  try { return JSON.parse(readFileSync(f, "utf8")); } catch { return {}; }
+}
+
+/** 单 run 子分均值（从 result JSON 现算，与 aggregate 同层） */
+function subscoreMeans(runDir, files) {
+  const acc = {};
+  for (const f of files) {
+    let r; try { r = JSON.parse(readFileSync(path.join(runDir, f), "utf8")); } catch { continue; }
+    for (const k of ["physics", "requirements", "objective", "robustness"]) {
+      const v = r.subscores?.[k];
+      if (typeof v === "number") (acc[k] ??= { s: 0, n: 0 }), (acc[k].s += v), (acc[k].n += 1);
+    }
+  }
+  const out = {};
+  for (const [k, { s, n }] of Object.entries(acc)) out[k] = Math.round((s / n) * 10000) / 10000;
+  return out;
+}
+
+/** 全库 run 索引：runs×聚合×manifest 内联（T4 可复现字段），5s TTL */
+export function runsIndex() {
+  return cached("runsIndex", 5000, () => {
+    repoMustExist();
+    const root = path.join(HOME, "results");
+    if (!existsSync(root)) return [];
+    const out = [];
+    for (const rid of readdirSync(root).filter((d) => statSync(path.join(root, d)).isDirectory())) {
+      const rRoot = path.join(root, rid);
+      for (const date of readdirSync(rRoot).filter((d) => statSync(path.join(rRoot, d)).isDirectory()).sort()) {
+        const dRoot = path.join(rRoot, date);
+        for (const prov of readdirSync(dRoot).filter((d) => statSync(path.join(dRoot, d)).isDirectory()).sort()) {
+          const runDir = path.join(dRoot, prov);
+          const files = readdirSync(runDir).filter((f) => /^result_.*\.json$/.test(f)).sort();
+          if (!files.length) continue;
+          const agg = aggregate(runDir);
+          const mf = readManifest(runDir);
+          out.push({
+            registry_id: rid, date, provider: prov,
+            model: mf.extra?.model ?? mf.model ?? null, seed: mf.seed ?? null,
+            n_tasks: agg.n, gate_passed: agg.gate_passed,
+            failure_modes: agg.failure_modes, score_mean: agg.mean_score,
+            subscore_means: subscoreMeans(runDir, files),
+            // T4：可复现字段内联（拷自 run_manifest）
+            environment_digest: mf.environment_digest ?? null,
+            assets: mf.assets ?? null, rerun_command: mf.rerun_command ?? null,
+            git_commit: mf.git_commit ?? null,
+          });
+        }
+      }
+    }
+    return out;
+  });
+}
+
+/** 任务行（单 run 的逐题聚合行；full=true 时返回完整信封） */
+export function taskRows(rid, date, provider, full = false) {
+  const runDir = path.join(HOME, "results", rid, date, provider);
+  if (!existsSync(runDir)) throw new Error(`无运行目录: results/${rid}/${date}/${provider}`);
+  const rows = [];
+  for (const f of readdirSync(runDir).filter((f) => /^result_.*\.json$/.test(f)).sort()) {
+    let r; try { r = JSON.parse(readFileSync(path.join(runDir, f), "utf8")); } catch { continue; }
+    rows.push(full ? r : {
+      task_id: r.task_id, gate: r.validity_gate,
+      ...(r.failure_mode != null ? { failure_mode: r.failure_mode } : {}),
+      score: r.score,
+      ...(r.subscores ? { subscores: Object.fromEntries(
+        Object.entries(r.subscores).filter(([, v]) => v != null)) } : {}),
+      ...(r.timings?.agent_s != null ? { agent_s: Math.round(r.timings.agent_s * 10) / 10 } : {}),
+    });
+  }
+  return rows;
+}
+
+/** 九维度雷达（某日期全部 provider；robustness_audit 取 subscore 均值） */
+export function radarForDate(runs, date) {
+  const dims = NINE_DIMS;
+  const providers = [...new Set(runs.filter((r) => r.date === date).map((r) => r.provider))];
+  return providers.map((p) => {
+    const mine = runs.filter((r) => r.date === date && r.provider === p);
+    const values = dims.map((d) => {
+      if (d === "robustness_audit") {
+        const vs = mine.map((r) => r.subscore_means?.robustness).filter((v) => typeof v === "number");
+        return vs.length ? Math.round((vs.reduce((a, b) => a + b, 0) / vs.length) * 1000) / 1000 : 0;
+      }
+      const vs = mine.filter((r) => DIM_OF_RID[r.registry_id] === d && typeof r.score_mean === "number")
+        .map((r) => r.score_mean);
+      return vs.length ? Math.round((vs.reduce((a, b) => a + b, 0) / vs.length) * 1000) / 1000 : 0;
+    });
+    return { name: p, values };
+  }).filter((s) => s.values.some((v) => v > 0));
+}
+
+/** ViewJSON（活读聚合与快照正文同构，规格书 §3.3） */
+export function buildViewJSON(mode = "live", tag = null) {
+  const registry = loadRegistryFull();
+  const runs = runsIndex();
+  const tasks = [];
+  for (let i = 0; i < runs.length; i++) {
+    const r = runs[i];
+    for (const t of taskRows(r.registry_id, r.date, r.provider)) tasks.push({ run: i, ...t });
+  }
+  return {
+    header: {
+      mode, tag, generated_at_utc: new Date().toISOString(),
+      git_commit: safeGitCommit(), generator: "comac-snapshot/1.0",
+    },
+    registry, runs, tasks,
+  };
+}
+
+function safeGitCommit() {
+  try {
+    const r = spawnSync("git", ["-C", HOME, "rev-parse", "--short", "HEAD"], { encoding: "utf8", timeout: 5000 });
+    return r.status === 0 ? r.stdout.trim() : null;
+  } catch { return null; }
+}
+
+/** 在跑批发现：pgrep 全 runner 进程一次，解析 --tasks/--out/--provider */
+export function monitorStatus() {
+  const r = spawnSync("pgrep", ["-af", "runners\\."], { encoding: "utf8", timeout: 8000 });
+  const out = [];
+  if (r.status === 0 && r.stdout) {
+    for (const line of r.stdout.split("\n").filter(Boolean)) {
+      const outM = line.match(/--out (\S+)/);
+      const provM = line.match(/--provider (\S+)/);
+      const pidM = line.match(/^(\s*\d+)/);
+      if (!outM) continue;
+      const seg = outM[1].split("/");
+      if (seg[0] !== "results" || seg.length < 4) continue;
+      const [, rid, date, provider] = seg;
+      const runDir = path.join(HOME, outM[1]);
+      const nDone = existsSync(runDir) ? readdirSync(runDir).filter((f) => /^result_.*\.json$/.test(f)).length : 0;
+      const tasksDir = path.join(HOME, "tasks", rid);
+      const nTotal = existsSync(tasksDir) ? readdirSync(tasksDir).filter((f) => f.endsWith(".yaml")).length : null;
+      const logPath = path.join(LOG_DIR,
+        `comac_run_${rid.replace(/[^A-Za-z0-9._-]/g, "_")}_${provM?.[1] ?? provider}.log`);
+      out.push({
+        pid: pidM ? Number(pidM[1]) : null, registry_id: rid, date, provider: provM?.[1] ?? provider,
+        results_done: nDone, n_tasks: nTotal,
+        log_tail: existsSync(logPath) ? tail(logPath, 6) : null,
+      });
+    }
+  }
+  return { running: out };
+}
+
+/** 快照目录清单 results/_snapshots/<tag>.json */
+export function snapshotList() {
+  const dir = path.join(HOME, "results", "_snapshots");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).filter((f) => f.endsWith(".json")).sort().map((f) => f.replace(/\.json$/, ""));
+}
+
+export function snapshotRead(tag) {
+  const f = path.join(HOME, "results", "_snapshots", `${tag}.json`);
+  if (!existsSync(f)) throw new Error(`无快照: ${tag}`);
+  return JSON.parse(readFileSync(f, "utf8"));
+}
+
+// ---------- /comac/* 路由（只读 GET · loopback 守卫 · 规格书 §3.2） ----------
+
+function isLoopback(remoteAddress) {
+  return !remoteAddress || remoteAddress === "127.0.0.1" || remoteAddress === "::1"
+    || remoteAddress === "::ffff:127.0.0.1";
+}
+
+function json(res, code, body) {
+  const buf = Buffer.from(JSON.stringify(body));
+  res.writeHead(code, { "Content-Type": "application/json; charset=utf-8", "Content-Length": buf.length });
+  res.end(buf);
+}
+
+function registerWorkbenchRoutes(ctx) {
+  ctx.webServer.register({
+    kind: "prefix", path: "/comac",
+    handler(req, res) {
+      try {
+        if (!isLoopback(req.socket?.remoteAddress)) return json(res, 403, { ok: false, error: "loopback only" });
+        if (req.method !== "GET") return json(res, 405, { ok: false, error: "GET only（纯只读）" });
+        const u = new URL(req.url, "http://localhost");
+        const seg = u.pathname.replace(/^\/comac\/?/, "").split("/").filter(Boolean);
+        const q = u.searchParams;
+        repoMustExist();
+
+        if (seg[0] === "overview") {
+          const reg = loadRegistryFull();
+          const runs = runsIndex();
+          const dates = [...new Set(runs.map((r) => r.date))].sort();
+          const latest = dates[dates.length - 1] ?? null;
+          const counts = {};
+          for (const e of reg) counts[e.status] = (counts[e.status] ?? 0) + 1;
+          return json(res, 200, {
+            ok: true, status_counts: counts, dates, latest_date: latest,
+            integrated: counts.integrated ?? 0, total: reg.length,
+            radar: latest ? radarForDate(runs, latest) : [],
+            recent_runs: runs.slice(-10).reverse(),
+            snapshots: snapshotList(),
+          });
+        }
+        if (seg[0] === "registry") return json(res, 200, { ok: true, entries: loadRegistryFull() });
+        if (seg[0] === "runs") return json(res, 200, { ok: true, runs: runsIndex() });
+        if (seg[0] === "matrix") {
+          const runs = runsIndex();
+          const dates = [...new Set(runs.map((r) => r.date))].sort();
+          const date = q.get("date") ?? dates[dates.length - 1];
+          const sel = runs.filter((r) => r.date === date);
+          const rows = loadRegistryFull().filter((e) => sel.some((r) => r.registry_id === e.id))
+            .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+          const cols = [...new Set(sel.map((r) => r.provider))];
+          const cells = {};
+          for (const r of sel) (cells[r.registry_id] ??= {})[r.provider] = {
+            score_mean: r.score_mean, gate_passed: r.gate_passed, n_tasks: r.n_tasks,
+            failure_modes: r.failure_modes, rerun_command: r.rerun_command,
+          };
+          return json(res, 200, { ok: true, date, dates, rows, cols, cells });
+        }
+        if (seg[0] === "bench" && seg[1]) {
+          const rid = decodeURIComponent(seg[1]);
+          const entry = loadRegistryFull().find((e) => e.id === rid);
+          if (!entry) return json(res, 404, { ok: false, error: `未知基准: ${rid}` });
+          const runs = runsIndex().filter((r) => r.registry_id === rid);
+          const out = { ok: true, entry, runs };
+          const date = q.get("date") ?? runs[runs.length - 1]?.date;
+          let provider = q.get("provider");
+          if (date && !provider) {
+            // 矩阵/总览点入只带 date：自动选该日期最后一个 provider（UI 可切换）
+            const provs = runs.filter((r) => r.date === date).map((r) => r.provider);
+            provider = provs[provs.length - 1];
+          }
+          if (date) {
+            const provs = runs.filter((r) => r.date === date).map((r) => r.provider);
+            out.providers_of_date = provs;
+            out.provider = provider ?? null;
+            if (provider) {
+              try { out.selected = { date, provider, tasks: taskRows(rid, date, provider) }; }
+              catch (e) { out.selected_error = String(e.message ?? e); }
+            }
+          }
+          return json(res, 200, out);
+        }
+        if (seg[0] === "task" && seg.length === 5) {
+          const [rid, date, provider, taskId] = seg.slice(1).map(decodeURIComponent);
+          const rows = taskRows(rid, date, provider, true);
+          const hit = rows.find((r) => r.task_id === taskId);
+          if (!hit) return json(res, 404, { ok: false, error: `无 task: ${taskId}` });
+          return json(res, 200, { ok: true, result: hit });
+        }
+        if (seg[0] === "runstatus") return json(res, 200, { ok: true, ...monitorStatus() });
+        if (seg[0] === "snapshots") return json(res, 200, { ok: true, snapshots: snapshotList() });
+        if (seg[0] === "snapshot" && seg[1]) return json(res, 200, { ok: true, ...snapshotRead(decodeURIComponent(seg[1])) });
+        return json(res, 404, { ok: false, error: `未知端点: ${u.pathname}（规格书 §3.2）` });
+      } catch (e) {
+        return json(res, 500, { ok: false, error: String(e.message ?? e) });
+      }
+    },
+  });
+}
+
 
 // ---------- 工具注册 ----------
 
@@ -359,6 +676,9 @@ export function apply(ctx) {
       } catch (e) { return fail(String(e.message ?? e)); }
     },
   });
+
+  // 工作台路由（webServer 半，T3 定案：loopback 守卫 + 全 GET 零写）
+  ctx.effect(() => { if (ctx.webServer) registerWorkbenchRoutes(ctx); });
 }
 
 // ---------- 杂项 ----------

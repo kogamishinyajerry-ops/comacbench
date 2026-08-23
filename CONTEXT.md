@@ -13,8 +13,9 @@
 ## 工作台 UI（2026-08-22 wayfinder 地图命名）
 
 - **工作台（workbench）**：规划中的 DSH GUI 内嵌只读分析界面；第一受众是评测运营，核心心智"结果说明什么"。
-- **数据桥（data bridge）**：工作台页获取仓库数据（registry.yaml / results/ / reports/）的机制；具体选型是地图票 T3。
-- **里程碑快照（milestone snapshot）**：结果数据的可归档冻结导出（自包含、可进 git），与活读层并存的第二数据面；格式纪律是地图票 T4。
+- **数据桥（data bridge）**：工作台页获取仓库数据（registry.yaml / results/ / reports/）的机制；T3 定案 = host 插件 `/comac/*` prefix 路由活读 + client fetch（loopback 守卫、全 GET、零写）。
+- **ViewJSON**：工作台统一视图 schema——活读聚合与快照正文同构（header/registry/runs/tasks 四节），UI 对两种数据模式无感渲染。
+- **里程碑快照（milestone snapshot）**：聚合视图层的冻结导出，与活读层并存的第二数据面。形态（T4 定案）：全库聚合单 JSON（<2MB，含每 run 内联可复现字段）落 `results/_snapshots/<tag>.json` 进 git；明细 SSOT 永在 results/（git 历史即冻结）；`--full` 全量自包含包仅评审外发、不进 git。
 - **本地化硬规矩**：工作台一切依赖必须可完全本地化打包、禁止运行时外部请求——为 intranet 移植预留的不可妥协约束。
 
 ## 环境
