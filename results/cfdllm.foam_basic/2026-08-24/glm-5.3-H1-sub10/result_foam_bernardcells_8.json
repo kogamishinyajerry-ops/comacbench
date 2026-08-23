@@ -1,0 +1,42 @@
+{
+  "task_id": "foam_bernardcells_8",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nCreate a complete OpenFOAM 10 (Foundation) case for a 3D Bernard cell\\n(Rayleigh-Benard convection) run with the buoyantFoam solver.\\n\\nDomain: 9 m (x) x 1 m (y) x 2 m (z)\\n - bottom wall (y = 0): hot,  T = 310 K\\n - top wall    (y = 1): cold, T = 290 K\\n - side walls: adiabatic, no-slip\\n - gravity: (0 -9.81 0)\\n\\nOnly files are written; no OpenFOAM commands are executed here.\\nRun with:  chmod +x Allrun && ./Allrun\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n\\ndef w(path, content):\\n    d = os.path.dirname(path)\\n    if d:\\n        os.makedirs(d, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(content)\\n\\n\\ndef hdr(obj, cls=\\\"dictionary\\\"):\\n    return (\\n        \\\"FoamFile\\\\n\\\"\\n        \\\"{\\\\n\\\"\\n        \\\"    version     2.0;\\\\n\\\"\\n        \\\"    format      ascii;\\\\n\\\"\\n        \\\"    class       \\\" + cls + \\\";\\\\n\\\"\\n        \\\"    object      \\\" + obj + \\\";\\\\n\\\"\\n        \\\"}\\\\n\\\"\\n    )\\n\\n\\ndef field(obj, cls, dims, internal, boundary):\\n    return (\\n        hdr(obj, cls)\\n        + \\\"\\\\ndimensions      [\\\" + dims + \\\"];\\\\n\\\\n\\\"\\n        + \\\"internalField   uniform \\\" + internal + \\\";\\\\n\\\\n\\\"\\n        + \\\"boundaryField\\\\n{\\\\n\\\" + boundary + \\\"}\\\\n\\\"\\n    )\\n\\n\\n# ---------------------------------------------------------------\\n# system/blockMeshDict\\n# ---------------------------------------------------------------\\nw(\\\"system/blockMeshDict\\\", hdr(\\\"blockMeshDict\\\") + r\\\"\\\"\\\"\\nconvertToMeters 1;\\n\\nvertices\\n(\\n    (0 0 0)\\n    (9 0 0)\\n    (9 1 0)\\n    (0 1 0)\\n    (0 0 2)\\n    (9 0 2)\\n    (9 1 2)\\n    (0 1 2)\\n);\\n\\nblocks\\n(\\n    hex (0 1 2 3 4 5 6 7) (18 6 8) simpleGrading (1 1 1)\\n);\\n\\nedges\\n(\\n);\\n\\nboundary\\n(\\n    bottom\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 1 5 4)\\n        );\\n    }\\n    top\\n    {\\n        type wall;\\n        faces\\n        (\\n            (3 7 6 2)\\n        );\\n    }\\n    frontAndBack\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 3 2 1)\\n            (4 5 6 7)\\n        );\\n    }\\n    leftAndRight\\n    {\\n        type wall;\\n        faces\\n        (\\n            (0 4 7 3)\\n            (1 2 6 5)\\n        );\\n    }\\n);\\n\\nmergePatchPairs\\n(\\n);\\n\\\"\\\"\\\")\\n\\n# ---------------------------------------------------------------\\n# system/controlDict  (short run: 10 s, write every 1 s)\\n# ---------------------------------------------------------------\\nw(\\\"system/controlDict\\\", hdr(\\\"controlDict\\\") + r\\\"\\\"\\\"\\napplication     buoyantFoam;\\n\\nstartFrom       startTime;\\n\\nstartTime       0;\\n\\nstopAt          endTime;\\n\\nendTime         10;\\n\\ndeltaT          1;\\n\\nwriteControl    runTime;\\n\\nwriteInterval   1;\\n\\npurgeWrite      0;\\n\\nwriteFormat     ascii;\\nwritePrecision  6;\\nwriteCompression off;\\n\\ntimeFormat      general;\\ntimePrecision   6;\\n\\nrunTimeModifiable true;\\n\\nfunctions\\n{\\n}\\n\\\"\\\"\\\")\\n\\n# ---------------------------------------------------------------\\n# system/fvSchemes\\n# ---------------------------------------------------------------\\nw(\\\"system/fvSchemes\\\", hdr(\\\"fvSchemes\\\") + r\\\"\\\"\\\"\\nddtSchemes\\n{\\n    default         Euler;\\n}\\n\\ngradSchemes\\n{\\n    default         Gauss linear;\\n    grad(U)         cellLimited Gauss linear 1;\\n}\\n\\ndivSchemes\\n{\\n    default         none;\\n\\n    div(phi,U)      bounded Gauss linearUpwind grad(U);\\n\\n    div(phi,K)      Gauss linear;\\n\\n    div(phi,h)      bounded Gauss limitedLinear 1;\\n    div(phi,he)     bounded Gauss limitedLinear 1;\\n    div(phi,e)      bounded Gauss limitedLinear 1;\\n\\n    div(phi,k)      bounded Gauss limitedLinear 1;\\n    div(phi,epsilon) bounded Gauss limitedLinear 1;\\n\\n    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;\\n    div(muEff*dev2(T(grad(U)))) Gauss linear;\\n    div(nuEff*dev2(T(grad(U)))) Gauss linear;\\n    div(((rho*nu)*dev2(T(grad(U))))) Gauss linear;\\n}\\n\\nlaplacianSchemes\\n{\\n    default         Gauss linear corrected;\\n}\\n\\ninterpolationSchemes\\n{\\n    default         linear;\\n}\\n\\nsnGradSchemes\\n{\\n    default         corrected;\\n}\\n\\\"\\\"\\\")\\n\\n# ---------------------------------------------------------------\\n# system/fvSolution\\n# ---------------------------------------------------------------\\nw(\\\"system/fvSolution\\\", hdr(\\\"fvSolution\\\") + r\\\"\\\"\\\"\\nsolvers\\n{\\n    \\\"(rho|rhoFinal)\\\"\\n    {\\n        solver          diagonal;\\n        smoothSol\"",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 1, \"last_time\": \"0\", \"exec_ok\": false, \"stderr_tail\": \"\"}",
+    "iteration": "{\"rounds_used\": 3, \"iterate_max\": 3, \"converged\": false}"
+  },
+  "timings": {
+    "agent_s": 1278.468,
+    "setup_s": 0.0,
+    "grade_s": 2.695
+  },
+  "environment_digest": "sha256:d5eeec967e1c08c2a6b33c3361201cf114b5bb8b3afa4c8190a86a57571cef40",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=False exit=1 2.6s last_time=0"
+  ]
+}
