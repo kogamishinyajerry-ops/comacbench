@@ -506,6 +506,19 @@ entries:
     condition: 完成 CADGenBench 接入后重审；数据级许可矩阵建立后放行
     status: deferred
 
+  - id: cadbench_seldon.hard
+    name: Seldon CADBench-Hard（公开子集镜像）
+    source: https://huggingface.co/datasets/Seldon-Technologies/CADBench-Hard
+    tier: B+
+    batch: conditional
+    adapter: computer_use       # 第六类，未实现：Fusion GUI/computer-use 操作（题面明令禁用脚本/API）
+    env_class: missing          # Autodesk Fusion dev/intranet 均无；Seldon 沙箱需私下联系
+    license: CC BY 4.0（题面/元数据/参考工件 answer.f3d；Fusion 商标归 Autodesk）
+    license_status: confirmed-dataset
+    condition: 任一解阻后重审——Seldon 公开 verifier+种子文档+沙箱；或合法 f3d→STEP 通道+computer_use adapter 立项；或上游发布脚本/API 版变体
+    status: proposed
+    mirror_note: 2026-08-24 镜像公开子集 43/105 题（hard 35/expert 8：jaw 分章装配 26+j4/j5 多阶段 7+proc 草图 5+jaw_se 轴系 5）至 data/cadbench-seldon/hard/（task.md+answer.f3d+manifest，answer sha256 与官方 43/43 一致）。与 cadbench.cadquery（anniedoris）仅同名不同源。三重阻塞：adapter 类型缺失（纯 GUI 操作，禁用脚本）/Fusion 环境缺失/判分与输入态不可本地复现（verifier 私有+种子文档不在数据集+f3d 私有格式不可解析）——engdesign.open 同模式且更严。详见 data/cadbench-seldon/hard/PROVENANCE.md
+
   - id: afbench.airfoil
     name: AFBench
     source: https://github.com/hitcslj/AFBench

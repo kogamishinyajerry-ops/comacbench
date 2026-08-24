@@ -53,6 +53,7 @@
 | math500.math_reasoning | MIT（权威链：上游 hendrycks/math 根 LICENSE；HF HuggingFaceH4/MATH-500 卡片未填 license 已如实记录，按 cfdquery 同款上游权威口径） | confirmed-repo | —（2026-08-21 已镜像；500 题全量 + LICENSE.MIT 随镜像，证据链见 data/math500/math_reasoning/PROVENANCE.md） |
 | humaneval.python_plus | Apache-2.0（官方 GitHub release v0.1.10 NoExtreme，工具链权威源）/ MIT（复用的原版 prompt） | confirmed-split | —（2026-08-21 镜像；HF 卡片版实证有断言转换缺陷已弃用并留档；换源裁定见 data/humaneval/python_plus/PROVENANCE.md） |
 | mbpp.sanitized_plus | Apache-2.0（官方 GitHub release v0.2.0 NoExtreme）/ CC BY 4.0（上游 MBPP 本体） | confirmed-dataset | —（2026-08-21 镜像；官方 release 权威源；2 题输入-GT 不兼容缺陷排除 + 1 题 GT 覆写原版，处置见 data/mbpp/sanitized_plus/PROVENANCE.md） |
+| cadbench_seldon.hard | CC BY 4.0（HF Seldon-Technologies/CADBench-Hard 卡片明示：题面/元数据/Seldon 自建参考工件） | confirmed-dataset | —（2026-08-24 镜像公开子集 43 题 task.md+answer.f3d+manifest，answer sha256 与官方 manifest 43/43 逐字节一致；BY 归属义务：再分发须署名 Seldon Technologies；Fusion 商标归 Autodesk；verifier/沙箱/种子文档不随数据集发布，集成三重阻塞，PROVENANCE 见 data/cadbench-seldon/hard/） |
 
 ## 许可证巡检节奏
 

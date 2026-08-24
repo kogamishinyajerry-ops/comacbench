@@ -12,12 +12,12 @@
 
 **评测系统已完成三层九维骨架的九维全景闭合：20/40 基准 integrated、2424 任务、九维全部有数（structures 以开源 CalculiX 自建解零）、五类 adapter 与 6 类执行环境 live、集成项双基线全覆盖；评测对象已翻转为「harness」（四臂 H0-H3 矩阵、蒸馏脚手架谱系化、臂自动路由）。「懂航空」与「会工程」的分界已量化；剩余最大空洞是商业求解器线（Fluent/StarCCM+/MAPDL）与 simjeb/engdesign 原计划的商业 FEA 复算层。**
 
-## 1. 总量盘点（registry 40 条目）
+## 1. 总量盘点（registry 41 条目）
 
 | 状态 | 数量 | 占比 | 较 08-24 上午变化 | 含义 |
 | --- | --- | --- | --- | --- |
-| **integrated** | 20 | 50% | 19→20（+calculix.fea_basic） | adapter 跑通 + 双基线落盘 |
-| proposed | 4 | 10% | 不变 | 探查/许可清点完成，集成 blocked |
+| **integrated** | 20 | 49% | 19→20（+calculix.fea_basic） | adapter 跑通 + 双基线落盘 |
+| proposed | 5 | 12% | 4→5（+cadbench_seldon.hard，08-24 收录镜像） | 探查/许可清点完成，集成 blocked |
 | paused-env | 2 | 5% | 不变 | dev/内网均无启动环境（openvsp、bscw） |
 | deferred | 8 | 20% | 不变 | 许可或价值存疑，暂缓 |
 | excluded | 6 | 15% | 不变 | 调研淘汰 |
@@ -61,6 +61,7 @@
 | --- | --- |
 | 商业求解器环境缺失 | simjeb.structure(ANSYS MAPDL，proposed)、nasa_tmr.verification(Fluent/StarCCM+，proposed)、crm_dpw_hlpw.coarse(同，needs-version-lock)、bscw.aeroelastic(气弹链，paused-env) |
 | 原生二进制缺失 | openvsp.geometry_aero（paused-env，needs-legal-review） |
+| **GUI agent 形态 + 判分私有（2026-08-24 新收录）** | cadbench_seldon.hard（CC-BY-4.0 公开子集 43 题已镜像；Fusion 纯 GUI 操作基准——题面禁用脚本/API，verifier/沙箱/种子文档不随数据集发布，f3d 不可解析；需第六类 computer_use adapter，解阻条件见 PROVENANCE） |
 | 判分不可复现（待议） | engdesign.open（官方 eval 脚本未发布；收窄子集 28 题已清点，confirmed-split） |
 | 许可受阻/待核 | designqa.fsae(无许可)、afbench.airfoil(模糊)、camb.selective(NC 边界)、cadbench.cadquery(逐任务审计)、aircraftverse/pdebench/airfrans/openconcept(待核) |
 | 调研淘汰（excluded） | alue_preflight / repospace / cfdbench / blendednet / hilift_full / runtime_commonsense |
@@ -71,7 +72,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | knowledge | cfdquery、aeroengqa、mechvqa、camb(deferred) | 3/4 | 0.75 | ✅ | 文本 0.85+；VLM 0.35-0.40「看得见、判不稳」；单厂商 VLM |
 | 2 | coding | scicode、cfdcode（+6 通识锚） | 2/2 | **1.00** | ✅ | 领域科学代码 0.47-0.67 vs 通识 0.82-0.98 分水岭成立；+变体压泄漏 |
-| 3 | cad_geometry | cadgen、openvsp(paused) | 1/2 | 0.50 | ✅ | cadgen 22 题+H3 后 M3 0.98/5.3 1.0；openvsp 仍卡环境 |
+| 3 | cad_geometry | cadgen、openvsp(paused)、cadbench_seldon(proposed) | 1/3 | 0.33 | ✅ | cadgen 22 题+H3 后 M3 0.98/5.3 1.0；openvsp 卡环境；seldon 为 GUI 形态新增在册（08-24 镜像，不解阻不计覆盖） |
 | 4 | cfd | superwing、hilift、foam_basic、nasa_tmr、crm | 3/5 | 0.60 | ✅+ML 正例 | LLM 系数回归差 ML 4.7-19×；foam 0/110 双败（H2 后结构层开、physics 0） |
 | 5 | structures | calculix.fea_basic、simjeb、engdesign | 1/3 | **0.33** | ✅ | 08-24 解零（CalculiX 自建 21 题，双基线 0.24/0.38 正落区分带）；simjeb/engdesign 仍卡商业栈/官方判分 |
 | 6 | propulsion | pycycle | 1/1 | **1.00** | ✅(厚) | 28 题；H0 双模型全灭 → H2 脚手架 M3 1.0（「知识注入=0→1」核心证据） |

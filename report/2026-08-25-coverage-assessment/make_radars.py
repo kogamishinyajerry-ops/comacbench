@@ -61,7 +61,9 @@ labels1 = ["航空知识\nknowledge\n(cfdquery/aeroengqa/mechvqa)", "科学编�
 # 覆盖度 = 维度内 integrated 基准数 / registry 在册基准数（integrated+proposed+paused-env+deferred）
 # 2026-08-24 structures 解零更新：calculix.fea_basic integrated（simjeb/engdesign 仍 proposed）
 # —— structures 0.00→0.33，九维全部有数（全景闭合）
-coverage = [0.75, 1.00, 0.50, 0.60, 0.33, 1.00, 1.00, 0.33, 0.60]
+# 2026-08-24 晚 seldon 收录更新：cadbench_seldon.hard proposed（GUI 形态在册+1）
+# —— cad_geometry 在册 2→3，覆盖度 0.50→0.33（分母效应，如实反映）
+coverage = [0.75, 1.00, 0.33, 0.60, 0.33, 1.00, 1.00, 0.33, 0.60]
 coverage_prev = [0.75, 1.00, 0.50, 0.60, 0.00, 1.00, 1.00, 0.33, 0.60]  # 08-24 上午时点
 # 基线可得 = 维度内 integrated 基准双基线落盘（M3+GLM 系；mechvqa=双 VLM；ccx=固定对 5.3+M3）
 baseline = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.60]
@@ -71,7 +73,7 @@ radar(ax1, labels1, [
     ("覆盖度 2026-08-24（已集成/在册）", coverage, "#1f77b4", True, ""),
     ("双基线可得性（M3+GLM 系落盘）", baseline, "#d62728", True, ""),
     ("覆盖度 08-24 上午时点（参照）", coverage_prev, "#999999", False, "--"),
-], "九维度评测能力雷达（v0.3，2026-08-24 晚更新）\n20/40 基准 integrated · 2424 任务 · 集成项双基线全覆盖 · 9/9 维有数")
+], "九维度评测能力雷达（v0.3，2026-08-24 晚更新）\n20/41 基准 integrated · 2424 任务 · 集成项双基线全覆盖 · 9/9 维有数")
 fig1.tight_layout()
 fig1.savefig(os.path.join(OUT, "radar_nine_dim.png"), dpi=160, bbox_inches="tight")
 plt.close(fig1)
