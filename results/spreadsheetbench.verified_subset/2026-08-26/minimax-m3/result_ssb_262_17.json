@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_262_17",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import os\\nimport shutil\\nfrom openpyxl import Workbook, load_workbook\\n\\n\\ndef create_sample_input(filename):\\n    \\\"\\\"\\\"Create a representative input workbook matching A1:F14 (13 data rows).\\\"\\\"\\\"\\n    wb = Workbook()\\n    ws1 = wb.active\\n    ws1.title = \\\"Sheet1\\\"\\n\\n    headers = [\\\"Task ID\\\", \\\"Task\\\", \\\"Responsibility\\\",\\n               \\\"Assignee\\\", \\\"Due Date\\\", \\\"Status\\\"]\\n    ws1.append(headers)\\n\\n    data_rows = [\\n        [\\\"T001\\\", \\\"Develop\\\", \\\"Backend\\\",     \\\"Alice\\\",   \\\"2024-02-15\\\", \\\"In Progress\\\"],\\n        [\\\"T002\\\", \\\"Design\\\",  \\\"UI/UX\\\",       \\\"Bob\\\",     \\\"2024-01-30\\\", \\\"Complete\\\"],\\n        [\\\"T003\\\", \\\"Test\\\",    \\\"QA\\\",          \\\"Charlie\\\", \\\"2024-03-01\\\", \\\"Pending\\\"],\\n        [\\\"T004\\\", \\\"Develop\\\", \\\"Frontend\\\",    \\\"Diana\\\",   \\\"2024-02-20\\\", \\\"In Progress\\\"],\\n        [\\\"T005\\\", \\\"Design\\\",  \\\"Graphics\\\",    \\\"Eve\\\",     \\\"2024-01-25\\\", \\\"Complete\\\"],\\n        [\\\"T006\\\", \\\"Test\\\",    \\\"Automation\\\",  \\\"Frank\\\",   \\\"2024-03-05\\\", \\\"Pending\\\"],\\n        [\\\"T007\\\", \\\"Document\\\", \\\"Technical\\\",  \\\"Grace\\\",   \\\"2024-03-10\\\", \\\"Not Started\\\"],\\n        [\\\"T008\\\", \\\"Deploy\\\",  \\\"DevOps\\\",      \\\"Henry\\\",   \\\"2024-03-15\\\", \\\"Not Started\\\"],\\n        [\\\"T009\\\", \\\"Test\\\",    \\\"Performance\\\", \\\"Ivy\\\",     \\\"2024-03-08\\\", \\\"Pending\\\"],\\n        [\\\"T010\\\", \\\"Develop\\\", \\\"Database\\\",    \\\"Jack\\\",    \\\"2024-02-25\\\", \\\"In Progress\\\"],\\n        [\\\"T011\\\", \\\"Design\\\",  \\\"Research\\\",    \\\"Kate\\\",    \\\"2024-01-20\\\", \\\"Complete\\\"],\\n        [\\\"T012\\\", \\\"Test\\\",    \\\"Security\\\",    \\\"Leo\\\",     \\\"2024-03-12\\\", \\\"Pending\\\"],\\n        [\\\"T013\\\", \\\"Maintain\\\", \\\"Support\\\",    \\\"Mike\\\",    \\\"2024-04-01\\\", \\\"Not Started\\\"],\\n    ]\\n    for row in data_rows:\\n        ws1.append(row)\\n\\n    # Sheet2 holds the expected outcome (reference for verification)\\n    ws2 = wb.create_sheet(\\\"Sheet2\\\")\\n    ws2.append(headers)\\n    for row in sorted(data_rows, key=lambda r: (r[1], r[2])):\\n        ws2.append(row)\\n\\n    wb.save(filename)\\n\\n\\ndef dynamic_multi_sort(input_file, output_file,\\n                       primary=\\\"Task\\\", secondary=\\\"Responsibility\\\"):\\n    \\\"\\\"\\\"\\n    VBA-equivalent: dynamically locate 'Task' / 'Responsibility' header\\n    columns, then apply a two-level ascending sort over the data range.\\n    \\\"\\\"\\\"\\n    shutil.copy(input_file, output_file)\\n    wb = load_workbook(output_file)\\n    ws = wb[\\\"Sheet1\\\"]\\n\\n    # --- Dynamically build header -> column index map (no hard coding) ---\\n    header_map = {}\\n    for col_idx in range(1, ws.max_column + 1):\\n        val = ws.cell(row=1, column=col_idx).value\\n        if val is not None:\\n            header_map[str(val).strip()] = col_idx\\n\\n    if primary not in header_map:\\n        raise KeyError(f\\\"Header '{primary}' not found in row 1\\\")\\n    if secondary not in header_map:\\n        raise KeyError(f\\\"Header '{secondary}' not found in row 1\\\")\\n\\n    p_col = header_map[primary]      # 1-based\\n    s_col = header_map[secondary]    # 1-based\\n\\n    last_row = ws.max_row\\n    last_col = ws.max_column\\n\\n    # --- Read body into memory ---\\n    body = []\\n    for r in range(2, last_row + 1):\\n        body.append([ws.cell(row=r, column=c).value for c in range(1, last_col + 1)])\\n\\n    # --- Multi-level sort: primary asc, secondary asc ---\\n    body.sort(key=lambda row: (str(row[p_col - 1]), str(row[s_col - 1])))\\n\\n    # --- Write sorted body back into the same range ---\\n    for r in range(2, last_row + 1):\\n        for c in range(1, last_col + 1):\\n            ws.cell(row=r, column=c).value = None\\n\\n    for r_offset, row_vals in enumerate(body, start=2):\\n        for c_offset, v in enumerate(row_vals, start=1):\\n            ws.cell(row=r_offset, column=c_offset).value = v\\n\\n    wb.save(output_file)\\n    return p_col, s_col\\n\\n\\n# ----------------- Main -----------------\\ninput_file = \\\"input.xlsx\\\"\\noutput_file = \\\"output.xlsx\\\"\\n\\nif not os.path.exists(input_file):\\n    create_sample_input(input_file)\\n\\ntask_col, resp_col = dynamic_multi_sort(input_file, output_file)\\n\\n# Verification: Sheet1 should now equal Sheet2\\nwb_chk = load_workbook(output_file)\\ns1 = wb_chk[\\\"Sheet1\\\"]\\ns2 = wb_chk[\\\"Sheet2\\\"]\\nmatch = all(\\n    s1.cell(row=r, column=c).value == s2.cell(row=r, column=c).value\\n    for r in range(1, 14) for c in range(1, 7)\\n)\\nprint(f\\\"'Task' locat\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"Sheet1'!A1:F14\", \"match\": {\"n_gold\": 84, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"Task ID\", \"ref\": \"Sr. No\"}, {\"cell\": \"Sheet1!R1C2\", \"status\": \"mismatch\", \"got\": \"Task\", \"ref\": \"Team\"}, {\"cell\": \"Sheet1!R1C3\", \"status\": \"mismatch\", \"got\": \"Responsibility\", \"ref\": \"Task\"}, {\"cell\": \"Sheet1!R1C4\", \"status\": \"mismatch\", \"got\": \"Assignee\", \"ref\": \"Start Date\"}, {\"cell\": \"Sheet1!R1C5\", \"status\": \"mismatch\", \"got\": \"Due Date\", \"ref\": \"End Date\"}, {\"cell\": \"Sheet1!R1C6\", \"status\": \"mismatch\", \"got\": \"Status\", \"ref\": \"Responsibility\"}, {\"cell\": \"Sheet1!R2C1\", \"status\": \"mismatch\", \"got\": \"T008\", \"ref\": \"3\"}, {\"cell\": \"Sheet1!R2C2\", \"status\": \"mismatch\", \"got\": \"Deploy\", \"ref\": \"N3\"}, {\"cell\": \"Sheet1!R2C3\", \"status\": \"mismatch\", \"got\": \"DevOps\", \"ref\": \"CT1\"}, {\"cell\": \"Sheet1!R2C4\", \"status\": \"mismatch\", \"got\": \"Henry\", \"ref\": \"2022-02-01 00:00:00\"}, {\"cell\": \"Sheet1!R2C5\", \"status\": \"mismatch\", \"got\": \"2024-03-15\", \"ref\": \"2022-08-01 00:00:00\"}, {\"cell\": \"Sheet1!R2C6\", \"status\": \"mismatch\", \"got\": \"Not Started\", \"ref\": \"R2\"}]}"
+  },
+  "timings": {
+    "agent_s": 83.049,
+    "setup_s": 0.0,
+    "grade_s": 2.909
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=4183",
+    "run1 exit=0 0.31s",
+    "run2 exit=0 0.23s",
+    "physics=0.0 cells=0/84 extra=0"
+  ]
+}

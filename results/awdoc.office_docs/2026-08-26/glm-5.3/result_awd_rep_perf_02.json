@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_02",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom statistics import mean\\n\\nfrom docx import Document\\n\\nCOLS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\nCSV_PATH = \\\"perf_02.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\n\\n\\ndef load_rows(path):\\n    \\\"\\\"\\\"Read the CSV, returning a list of dicts keyed by the canonical column\\n    names, preserving the source text of each value (same rounding as source).\\\"\\\"\\\"\\n    rows = []\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as fh:\\n        reader = csv.DictReader(fh)\\n        if reader.fieldnames:\\n            reader.fieldnames = [fn.strip().lower() for fn in reader.fieldnames]\\n        for rec in reader:\\n            if rec is None:\\n                continue\\n            vals = {c: (rec.get(c) or \\\"\\\").strip() for c in COLS}\\n            if all(vals[c] == \\\"\\\" for c in COLS):\\n                continue  # skip stray blank lines\\n            rows.append(vals)\\n    return rows\\n\\n\\ndef main():\\n    rows = load_rows(CSV_PATH)\\n    n = len(rows)\\n    if n == 0:\\n        raise SystemExit(f\\\"No data records found in {CSV_PATH}\\\")\\n\\n    # All numeric claims computed from the CSV values.\\n    cl_vals = [float(r[\\\"cl_max\\\"]) for r in rows]\\n    cd_vals = [float(r[\\\"cd_cruise\\\"]) for r in rows]\\n    ld_vals = [float(r[\\\"ld_ratio\\\"]) for r in rows]\\n\\n    cl_max_s = f\\\"{max(cl_vals):.3f}\\\"      # e.g. 0.525\\n    cd_mean_s = f\\\"{mean(cd_vals):.4f}\\\"    # e.g. 0.0339\\n    ld_mean_s = f\\\"{mean(ld_vals):.1f}\\\"    # e.g. 15.8\\n    best_cfg = max(rows, key=lambda r: float(r[\\\"ld_ratio\\\"]))[\\\"config\\\"]\\n\\n    doc = Document()\\n\\n    # Title (any wording) as a heading.\\n    doc.add_heading(\\\"Engineering Test Report - Performance Data\\\", level=0)\\n\\n    # Overview section.\\n    doc.add_heading(\\\"Overview\\\", level=1)\\n    doc.add_paragraph(\\n        f\\\"This report summarizes the engineering performance test dataset, \\\"\\n        f\\\"which contains N = {n} data rows.\\\"\\n    )\\n\\n    # Results table section: header row + one row per data record.\\n    doc.add_heading(\\\"Results table\\\", level=1)\\n    table = doc.add_table(rows=1 + n, cols=4)\\n    try:\\n        table.style = \\\"Table Grid\\\"\\n    except KeyError:\\n        pass\\n    for j, name in enumerate(COLS):\\n        table.cell(0, j).text = name\\n    for i, r in enumerate(rows, start=1):\\n        for j, c in enumerate(COLS):\\n            table.cell(i, j).text = r[c]\\n\\n    # Summary section with the exact computed display values.\\n    doc.add_heading(\\\"Summary\\\", level=1)\\n    doc.add_paragraph(\\n        f\\\"Across the {n} tested configurations, the maximum CLmax observed is \\\"\\n        f\\\"{cl_max_s}. The mean CDcruise is {cd_mean_s}, and the mean L/D ratio \\\"\\n        f\\\"is {ld_mean_s}. The best configuration, selected by the maximum L/D \\\"\\n        f\\\"ratio, is {best_cfg}.\\\"\\n    )\\n\\n    # Conclusion section.\\n    doc.add_heading(\\\"Conclusion\\\", level=1)\\n    doc.add_paragraph(\\n        f\\\"The measured performance data show clear differences between the \\\"\\n        f\\\"tested configurations, with configuration {best_cfg} delivering the \\\"\\n        f\\\"highest L/D ratio. These data-anchored results provide a reliable \\\"\\n        f\\\"basis for down-selecting the preferred configuration in the next \\\"\\n        f\\\"phase of the engineering test program.\\\"\\n    )\\n\\n    doc.save(OUT_PATH)\\n    print(f\\\"Wrote {OUT_PATH}: {n} data rows; best config by L/D = {best_cfg}\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 89.205,
+    "setup_s": 0.0,
+    "grade_s": 0.224
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3248",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.09s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

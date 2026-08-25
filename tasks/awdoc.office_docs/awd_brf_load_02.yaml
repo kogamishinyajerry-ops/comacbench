@@ -1,0 +1,63 @@
+id: awd_brf_load_02
+registry_id: awdoc.office_docs
+domain: office_productivity
+task_type: design_artifact
+model_profile: plain_llm
+assets_revision: awdoc@selfbuilt-2026-08-26
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/awdoc.office_docs/awd_brf_load_02.md
+  prompt_sha256: 1d565cb04c98a7582eddc4a8623ff703377565e7cd8fc07e40baa2b4b63e2f5f
+  assets:
+  - path: data/awdoc/office_docs/inputs/load_02.csv
+    digest: 062a3994674de3c202e56a37c5b9dc0ddc55162b4006c42ca6711b596d3f433a
+output_contract:
+- report.pptx
+reference:
+  source: 自建（锚定数字=源数据派生统计；结构契约钉死）
+  revision: awdoc@selfbuilt-2026-08-26
+  values:
+    n_anchors: 4
+  rel_tol: 0.005
+  uncertainty_note: 锚定数字以数值级比对（0.5% 容差）；字符串锚（构型名）不判
+grader:
+  artifact_kind: doc_document
+  doc_format: pptx
+  answer_format: code
+  validity_gate: true
+  anchored_numbers:
+  - 22
+  - 2.39
+  - 1.69
+  - 102294
+  structure_checks:
+  - check: n_slides
+    expect: 4
+  - check: n_tables
+    expect: 1
+  numeric_rel_tol: 0.005
+  oracle_source: data/awdoc/office_docs/gold/awd_brf_load_02.py
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=锚定数字命中；requirements=结构契约
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: 自建（工程报告/汇报数据锚定族）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: awdoc@selfbuilt-2026-08-26

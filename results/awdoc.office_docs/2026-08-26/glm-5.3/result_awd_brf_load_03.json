@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_load_03",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport os\\n\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt, Emu\\n\\nCSV_PATH = \\\"load_03.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\n\\n\\ndef to_float(s):\\n    try:\\n        return float(s)\\n    except (TypeError, ValueError):\\n        return None\\n\\n\\ndef main():\\n    # ---------- 1. Read and parse the CSV ----------\\n    with open(CSV_PATH, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as fh:\\n        raw_rows = [row for row in csv.reader(fh) if any(c.strip() for c in row)]\\n\\n    header = [h.strip().lower() for h in raw_rows[0]]\\n    has_header = any(name in header for name in (\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"))\\n    body = raw_rows[1:] if has_header else raw_rows\\n\\n    def find_col(names, fallback):\\n        for nm in names:\\n            if nm in header:\\n                return header.index(nm)\\n        return fallback\\n\\n    i_case = find_col((\\\"case\\\", \\\"case_id\\\", \\\"id\\\"), 0)\\n    i_load = find_col((\\\"load_factor\\\", \\\"load\\\", \\\"loadfactor\\\"), 1)\\n    i_cyc = find_col((\\\"cycles\\\", \\\"cycle\\\", \\\"cycle_count\\\", \\\"n_cycles\\\"), 2)\\n\\n    records = []  # (case_str, load_str, cycles_str) as they appear in the file\\n    for row in body:\\n        if max(i_case, i_load, i_cyc) >= len(row):\\n            continue\\n        case_s = row[i_case].strip()\\n        load_s = row[i_load].strip()\\n        cyc_s = row[i_cyc].strip()\\n        if to_float(load_s) is None or to_float(cyc_s) is None:\\n            continue\\n        records.append((case_s, load_s, cyc_s))\\n\\n    # ---------- 2. Compute statistics from the data ----------\\n    loads = [float(r[1]) for r in records]\\n    cycles = [float(r[2]) for r in records]\\n\\n    n_cases = len(records)\\n    load_max = max(loads)\\n    load_mean = sum(loads) / n_cases\\n    total_cycles = sum(cycles)\\n\\n    n_disp = str(n_cases)\\n    max_disp = f\\\"{load_max:.2f}\\\"      # rounded to 2 decimals, e.g. 2.39\\n    mean_disp = f\\\"{load_mean:.1f}\\\"    # rounded to 1 decimal, e.g. 1.7\\n    if total_cycles == int(total_cycles):\\n        tot_disp = str(int(total_cycles))\\n    else:\\n        tot_disp = f\\\"{total_cycles:.0f}\\\"\\n\\n    # ---------- 3. Build the deck ----------\\n    prs = Presentation()\\n    blank = prs.slide_layouts[6]\\n\\n    def add_heading(slide, text, size=30):\\n        box = slide.shapes.add_textbox(Inches(0.6), Inches(0.3), Inches(8.8), Inches(0.9))\\n        p = box.text_frame.paragraphs[0]\\n        run = p.add_run()\\n        run.text = text\\n        run.font.size = Pt(size)\\n        run.font.bold = True\\n\\n    # Slide 1: title slide\\n    s1 = prs.slides.add_slide(blank)\\n    tb = s1.shapes.add_textbox(Inches(0.8), Inches(2.4), Inches(8.4), Inches(1.2))\\n    p = tb.text_frame.paragraphs[0]\\n    r = p.add_run()\\n    r.text = \\\"Engineering Test Briefing\\\"\\n    r.font.size = Pt(40)\\n    r.font.bold = True\\n    sb = s1.shapes.add_textbox(Inches(0.8), Inches(3.6), Inches(8.4), Inches(0.6))\\n    p2 = sb.text_frame.paragraphs[0]\\n    r2 = p2.add_run()\\n    r2.text = \\\"Data source: load_03.csv\\\"\\n    r2.font.size = Pt(18)\\n\\n    # Slide 2: \\\"Data\\\" table (header + one row per record)\\n    s2 = prs.slides.add_slide(blank)\\n    add_heading(s2, \\\"Data\\\")\\n\\n    n_rows = 1 + len(records)\\n    tbl_shape = s2.shapes.add_table(n_rows, 3, Inches(0.7), Inches(1.2), Inches(8.6), Inches(5.9))\\n    table = tbl_shape.table\\n    table.columns[0].width = Inches(2.0)\\n    table.columns[1].width = Inches(3.0)\\n    table.columns[2].width = Inches(3.6)\\n\\n    row_h = Emu(int(Inches(5.9) / n_rows))\\n\\n    for ci, htext in enumerate((\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\")):\\n        cell = table.cell(0, ci)\\n        cell.text = htext\\n        cell.margin_top = Inches(0.01)\\n        cell.margin_bottom = Inches(0.01)\\n        for para in cell.text_frame.paragraphs:\\n            for run in para.runs:\\n                run.font.bold = True\\n                run.font.size = Pt(9)\\n    table.rows[0].height = row_h\\n\\n    for ri, rec in enumerate(records, start=1):\\n        table.rows[ri].height = row_h\\n        for ci, val in enumerate(rec):\\n            cell = table.cell(ri, ci)\\n            cell.text = val\\n            cell.margin_top = Inches(0.01)\\n            cell.margin_bottom\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"4/4\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 107.809,
+    "setup_s": 0.0,
+    "grade_s": 0.289
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5777",
+    "run1 exit=0 0.15s",
+    "run2 exit=0 0.13s",
+    "physics=1.0 requirements=1.0 anchors=4/4"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import os\\n\\nfrom openpyxl import Workbook, load_workbook\\n\\nOUT_PATH = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Worksheet1\\\"\\nMAX_ROW = 10411  # last row of the target region A1:J10411\\nMAX_COL = 10     # last column (J) of the target region\\n\\n# ---------------------------------------------------------------------------\\n# The answer to the VBA question, one line per spreadsheet row (column A).\\n# ---------------------------------------------------------------------------\\nanswer_lines = [\\n    'HOW TO FIX YOUR VBA CODE: DELETE ROWS WHOSE COLUMN-B VALUE DOES NOT START WITH \\\"H\\\" OR \\\"A\\\"',\\n    \\\"\\\",\\n    \\\"== 1. WHY YOUR MODIFICATION FAILS ==\\\",\\n    \\\"A single character can never be equal to \\\\\\\"H\\\\\\\" and to \\\\\\\"A\\\\\\\" at the same time. So if you added\\\",\\n    \\\"the extra test using Or between two negative (<>) comparisons, e.g.:\\\",\\n    \\\"\\\",\\n    '    If Left(Cells(i, \\\"B\\\").Value, 1) <> \\\"H\\\" Or Left(Cells(i, \\\"B\\\").Value, 1) <> \\\"A\\\" Then Rows(i).Delete',\\n    \\\"\\\",\\n    \\\"the combined condition is TRUE for EVERY row:\\\",\\n    '    - first char \\\"H\\\" : (\\\"H\\\"<>\\\"H\\\")=False but (\\\"H\\\"<>\\\"A\\\")=True  -> Or -> True -> row deleted',\\n    '    - first char \\\"A\\\" : (\\\"A\\\"<>\\\"H\\\")=True  but (\\\"A\\\"<>\\\"A\\\")=False -> Or -> True -> row deleted',\\n    '    - any other char : both comparisons True                        -> Or -> True -> row deleted',\\n    \\\"So the macro stops keeping any row - exactly the failing behaviour you observe.\\\",\\n    \\\"\\\",\\n    \\\"== 2. THE FIX (De Morgan's law) ==\\\",\\n    \\\"When you negate an OR you must flip it to an AND. Delete the row only when the first\\\",\\n    \\\"character is NOT \\\\\\\"H\\\\\\\" AND is NOT \\\\\\\"A\\\\\\\":\\\",\\n    \\\"\\\",\\n    '    If Left(Cells(i, \\\"B\\\").Value, 1) <> \\\"H\\\" And Left(Cells(i, \\\"B\\\").Value, 1) <> \\\"A\\\" Then',\\n    \\\"        Rows(i).Delete\\\",\\n    \\\"    End If\\\",\\n    \\\"\\\",\\n    \\\"or, equivalently and often easier to read:\\\",\\n    \\\"\\\",\\n    '    If Not (Left(Cells(i, \\\"B\\\").Value, 1) = \\\"H\\\" Or Left(Cells(i, \\\"B\\\").Value, 1) = \\\"A\\\") Then',\\n    \\\"        Rows(i).Delete\\\",\\n    \\\"    End If\\\",\\n    \\\"\\\",\\n    \\\"== 3. SECOND COMMON PITFALL: DIRECTION OF THE LOOP ==\\\",\\n    \\\"If you loop downwards (For i = 1 To lastRow) and delete rows inside the loop, each deletion\\\",\\n    \\\"shifts the remaining rows up by one, so the row that slides into the position you just\\\",\\n    \\\"processed gets skipped. Always loop bottom-up when deleting:\\\",\\n    \\\"    For i = lastRow To 1 Step -1\\\",\\n    \\\"\\\",\\n    \\\"== 4. COMPLETE, CORRECTED MACRO ==\\\",\\n    \\\"\\\",\\n    \\\"Sub DeleteRowsNotStartingWithHOrA()\\\",\\n    \\\"    Dim ws As Worksheet\\\",\\n    \\\"    Dim lastRow As Long\\\",\\n    \\\"    Dim i As Long\\\",\\n    \\\"    Dim firstChar As String\\\",\\n    \\\"\\\",\\n    '    Set ws = ThisWorkbook.Worksheets(\\\"Sheet1\\\")     ' + \\\"' <-- change to your sheet name\\\",\\n    '    lastRow = ws.Cells(ws.Rows.Count, \\\"B\\\").End(xlUp).Row',\\n    \\\"\\\",\\n    \\\"    ' Loop bottom-up so a deletion cannot shift rows that were not checked yet\\\",\\n    \\\"    For i = lastRow To 1 Step -1\\\",\\n    '        firstChar = UCase(Left(Trim(CStr(ws.Cells(i, \\\"B\\\").Value)), 1))',\\n    \\\"        ' *** THE KEY CHANGE: use And, not Or ***\\\",\\n    '        If firstChar <> \\\"H\\\" And firstChar <> \\\"A\\\" Then',\\n    \\\"            ws.Rows(i).Delete\\\",\\n    \\\"        End If\\\",\\n    \\\"    Next i\\\",\\n    \\\"\\\",\\n    '    MsgBox \\\"Done. Remaining rows: \\\" & ws.Cells(ws.Rows.Count, \\\"B\\\").End(xlUp).Row',\\n    \\\"End Sub\\\",\\n    \\\"\\\",\\n    \\\"== 5. NOTES / EXTRA HARDENING ==\\\",\\n    \\\"- UCase(...) makes the test case-insensitive (\\\\\\\"h\\\\\\\" and \\\\\\\"a\\\\\\\" are also kept); remove it if the\\\",\\n    \\\"  comparison must be case-sensitive.\\\",\\n    \\\"- Trim(CStr(...)) protects against leading spaces; Left() of an empty cell returns \\\\\\\"\\\\\\\", which\\\",\\n    \\\"  fails both tests, so rows with an empty column B are deleted - add a Len(...) check first\\\",\\n    \\\"  if blank cells should be kept.\\\",\\n    \\\"- Caching the first character in firstChar avoids evaluating Left() twice and keeps the\\\",\\n    \\\"  If-condition readable.\\\",\\n    \\\"- For very large sheets, deleting row by row is slow. A fast alternative is AutoFilter plus a\\\",\\n    '  single bulk delete of the visible cells (Criteria1:=\\\"<>H*\\\", Operator:=xlAnd, Criteria2:=\\\"<>A*\\\"):',\\n    \\\"\\\",\\n    \\\"Sub DeleteRowsFast()\\\",\\n   \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Worksheet1\", \"region\": \"A1:J10411\", \"match\": {\"n_gold\": 10, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Worksheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"HOW TO FIX YOUR VBA CODE: DELETE ROWS WH\", \"ref\": \"Action\"}, {\"cell\": \"Worksheet1!R1C2\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C3\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C4\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C5\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C6\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C7\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C8\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C9\", \"status\": \"missing\"}, {\"cell\": \"Worksheet1!R1C10\", \"status\": \"missing\"}]}"
+  },
+  "timings": {
+    "agent_s": 90.209,
+    "setup_s": 0.0,
+    "grade_s": 2.998
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=6575",
+    "run1 exit=0 0.22s",
+    "run2 exit=0 0.23s",
+    "physics=0.0 cells=0/10 extra=0"
+  ]
+}

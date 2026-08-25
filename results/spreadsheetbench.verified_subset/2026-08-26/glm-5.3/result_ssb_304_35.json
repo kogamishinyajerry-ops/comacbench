@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_304_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nSolution\\n========\\n1.  Values in column F are deleted for every row whose column E cell is empty.\\n2.  Column A values are copied down column A itself:\\n      * the value is carried down only while column F is populated,\\n      * the copy process terminates as soon as an empty F cell is met,\\n      * repeated *index* cells (identical index rows, e.g. rows 2 and 29)\\n        are never copied further down (A29 -> A30 is NOT filled, and A2 is\\n        not copied into A3 when row 3 is empty).\\n\\nThe result is written to sheet 'start', cells A3:F36, of output.xlsx\\n(a copy of the provided input workbook).\\n\\\"\\\"\\\"\\n\\nimport glob\\nimport os\\nimport shutil\\nfrom collections import Counter\\n\\nfrom openpyxl import load_workbook\\nfrom openpyxl.utils import range_boundaries\\n\\n# --------------------------------------------------------------------------\\n# configuration\\n# --------------------------------------------------------------------------\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"start\\\"\\n\\nFIRST_ROW = 2                      # row 2 = first index row (copy-down source)\\nLAST_ROW = 36                      # answer region ends at row 36  (start!A3:F36)\\nCOL_A, COL_E, COL_F = 1, 5, 6\\n\\n\\n# --------------------------------------------------------------------------\\n# helpers\\n# --------------------------------------------------------------------------\\ndef find_input_file():\\n    \\\"\\\"\\\"Locate the provided workbook.\\\"\\\"\\\"\\n    for name in (\\\"input.xlsx\\\", \\\"Input.xlsx\\\", \\\"INPUT.xlsx\\\"):\\n        if os.path.exists(name):\\n            return name\\n    others = [f for f in glob.glob(\\\"*.xlsx\\\")\\n              if os.path.abspath(f) != os.path.abspath(OUTPUT_FILE)]\\n    return sorted(others)[0] if others else \\\"input.xlsx\\\"\\n\\n\\ndef is_empty(value):\\n    \\\"\\\"\\\"A cell is 'empty' when it is None or a blank / whitespace string.\\\"\\\"\\\"\\n    return value is None or (isinstance(value, str) and value.strip() == \\\"\\\")\\n\\n\\ndef norm(value):\\n    \\\"\\\"\\\"Normalise a value for equality comparison (strip text).\\\"\\\"\\\"\\n    return value.strip() if isinstance(value, str) else value\\n\\n\\ndef get_sheet(wb, name):\\n    if name in wb.sheetnames:\\n        return wb[name]\\n    for s in wb.sheetnames:\\n        if s.strip().lower() == name.strip().lower():\\n            return wb[s]\\n    raise KeyError(\\\"sheet '%s' not found\\\" % name)\\n\\n\\ndef unmerge_overlapping(ws, min_row, max_row, min_col, max_col):\\n    \\\"\\\"\\\"Unmerge merged ranges overlapping the working region so every single\\n    cell can be read from and written to.\\\"\\\"\\\"\\n    for rng in list(ws.merged_cells.ranges):\\n        c1, r1, c2, r2 = range_boundaries(str(rng))\\n        if r1 <= max_row and r2 >= min_row and c1 <= max_col and c2 >= min_col:\\n            ws.unmerge_cells(str(rng))\\n\\n\\n# --------------------------------------------------------------------------\\n# main processing\\n# --------------------------------------------------------------------------\\ndef main():\\n    input_file = find_input_file()\\n\\n    # work on a copy of the provided workbook -----------------------------\\n    shutil.copyfile(input_file, OUTPUT_FILE)\\n    wb = load_workbook(OUTPUT_FILE)\\n    ws = get_sheet(wb, SHEET_NAME)\\n\\n    unmerge_overlapping(ws, FIRST_ROW, LAST_ROW, COL_A, COL_F)\\n\\n    # ------------------------------------------------------------------\\n    # step 1 - delete the values in column F wherever column E is empty\\n    # ------------------------------------------------------------------\\n    for r in range(FIRST_ROW, LAST_ROW + 1):\\n        if is_empty(ws.cell(row=r, column=COL_E).value):\\n            ws.cell(row=r, column=COL_F).value = None\\n\\n    # ------------------------------------------------------------------\\n    # step 2 - find the *index* values of column A\\n    #          (identical index rows, e.g. rows 2 and 29, share a value)\\n    # ------------------------------------------------------------------\\n    counts = Counter()\\n    for r in range(FIRST_ROW, LAST_ROW + 1):\\n        v = norm(ws.cell(row=r, column=COL_A).value)\\n        if not is_empty(v):\\n            counts[v] += 1\\n    index_values = {v for v, n in counts.items() i\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"start\", \"region\": \"A3:F36\", \"match\": {\"n_gold\": 105, \"matched\": 105, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 212.384,
+    "setup_s": 0.0,
+    "grade_s": 5.197
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5718",
+    "run1 exit=0 0.82s",
+    "run2 exit=0 0.76s",
+    "physics=1.0 cells=105/105 extra=0"
+  ]
+}

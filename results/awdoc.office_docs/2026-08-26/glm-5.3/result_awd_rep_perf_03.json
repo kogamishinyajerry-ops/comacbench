@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_03",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\n\\nCSV_PATH = \\\"perf_03.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\n\\n# ---------- Read the source data ----------\\nwith open(CSV_PATH, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n    reader = csv.DictReader(f)\\n    rows = [\\n        {(k.strip() if k else k): (v.strip() if isinstance(v, str) else v)\\n         for k, v in row.items()}\\n        for row in reader\\n        if any((v or \\\"\\\").strip() for v in row.values() if isinstance(v, str))\\n    ]\\n\\nn = len(rows)\\n\\nconfigs = [r[\\\"config\\\"] for r in rows]\\ncl_vals = [float(r[\\\"cl_max\\\"]) for r in rows]\\ncd_vals = [float(r[\\\"cd_cruise\\\"]) for r in rows]\\nld_vals = [float(r[\\\"ld_ratio\\\"]) for r in rows]\\n\\n# ---------- Statistics (computed from the CSV values) ----------\\ncl_max_max = max(cl_vals)\\ncd_mean = sum(cd_vals) / n\\nld_mean = sum(ld_vals) / n\\nbest_config = configs[ld_vals.index(max(ld_vals))]\\n\\n# Display values with the specified rounding\\ncl_max_max_s = f\\\"{cl_max_max:.3f}\\\"   # e.g. 0.606\\ncd_mean_s = f\\\"{cd_mean:.4f}\\\"         # e.g. 0.0333\\nld_mean_s = f\\\"{ld_mean:.1f}\\\"         # e.g. 17.3\\n\\n# ---------- Build the document ----------\\ndoc = Document()\\n\\n# Title (a Heading)\\ndoc.add_heading(\\\"Engineering Test Report — perf_03 Aerodynamic Performance\\\", level=1)\\n\\n# Overview\\ndoc.add_heading(\\\"Overview\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"This engineering test report summarizes the aerodynamic performance data \\\"\\n    f\\\"recorded in perf_03.csv. The dataset contains N = {n} data records \\\"\\n    f\\\"(data rows in the CSV, excluding the header).\\\"\\n)\\n\\n# Results table\\ndoc.add_heading(\\\"Results table\\\", level=1)\\nheaders = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\ntable = doc.add_table(rows=1, cols=len(headers))\\ntable.style = \\\"Table Grid\\\"\\nfor i, h in enumerate(headers):\\n    table.rows[0].cells[i].text = h\\nfor r in rows:\\n    cells = table.add_row().cells\\n    for i, h in enumerate(headers):\\n        # raw source strings -> identical values and rounding as the CSV\\n        cells[i].text = str(r[h])\\n\\n# Summary\\ndoc.add_heading(\\\"Summary\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"Key statistics computed from the {n} data records: \\\"\\n    f\\\"CLmax max = {cl_max_max_s}; \\\"\\n    f\\\"CDcruise mean = {cd_mean_s}; \\\"\\n    f\\\"L/D mean = {ld_mean_s}; \\\"\\n    f\\\"best config (max L/D) = {best_config}.\\\"\\n)\\n\\n# Conclusion\\ndoc.add_heading(\\\"Conclusion\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"Across the {n} configurations tested, the maximum CLmax was {cl_max_max_s}, \\\"\\n    f\\\"the mean cruise drag coefficient was {cd_mean_s}, and the mean lift-to-drag \\\"\\n    f\\\"ratio was {ld_mean_s}. Configuration {best_config} achieved the highest L/D \\\"\\n    f\\\"and is identified as the best-performing configuration in this test campaign.\\\"\\n)\\n\\ndoc.save(OUT_PATH)\\nprint(f\\\"Wrote {OUT_PATH}: {n} data rows, best config = {best_config}, \\\"\\n      f\\\"CLmax max = {cl_max_max_s}, CDcruise mean = {cd_mean_s}, L/D mean = {ld_mean_s}\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 54.175,
+    "setup_s": 0.0,
+    "grade_s": 0.213
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2813",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.08s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

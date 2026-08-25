@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_304_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom collections import Counter\\n\\n# Load the workbook\\nwb = openpyxl.load_workbook('input.xlsx')\\nws = wb['start']\\n\\n# Step 1: Delete values in column F where column E is empty (rows 3-36)\\nfor row in range(3, 37):\\n    e_val = ws.cell(row=row, column=5).value\\n    if e_val is None or (isinstance(e_val, str) and e_val.strip() == ''):\\n        ws.cell(row=row, column=6).value = None\\n\\n# Step 2: Identify \\\"index values\\\" in column A (values appearing more than once)\\n# These represent \\\"identical index rows\\\" (e.g., rows 2 and 29 having the same A value)\\n# We check rows 1-36 to capture row 2 referenced in the example\\na_values_all = []\\nfor row in range(1, 37):\\n    val = ws.cell(row=row, column=1).value\\n    a_values_all.append(val)\\n\\na_count = Counter(a_values_all)\\n\\n# Step 3: Fill down column A in rows 3-36\\n# - Stop the copy process when an empty cell is encountered in column F\\n# - Don't copy from \\\"index cells\\\" (values appearing more than once in column A)\\nlast_value = None\\nfor row in range(3, 37):\\n    a_cell = ws.cell(row=row, column=1)\\n    f_cell = ws.cell(row=row, column=6)\\n    \\n    f_val = f_cell.value\\n    a_val = a_cell.value\\n    \\n    # Stop condition: if F is empty, terminate the copy process for this chain\\n    if f_val is None or (isinstance(f_val, str) and f_val.strip() == ''):\\n        last_value = None\\n        continue\\n    \\n    # If A already has a value, update last_value to track the most recent non-empty A\\n    if a_val is not None and (not isinstance(a_val, str) or a_val.strip() != ''):\\n        last_value = a_val\\n    else:\\n        # A is empty - fill from the row above\\n        # But only if the source value is NOT an \\\"index value\\\" (appears more than once)\\n        # This prevents copying identical index rows like A29 into A30, or A2 into A3\\n        if last_value is not None and a_count[last_value] == 1:\\n            a_cell.value = last_value\\n\\n# Save the modified workbook\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 109.116,
+    "setup_s": 0.0,
+    "grade_s": 0.214
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1933",
+    "run1 exit=1 0.21s"
+  ]
+}

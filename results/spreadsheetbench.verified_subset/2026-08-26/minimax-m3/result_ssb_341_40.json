@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_341_40",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\n# Create the output workbook\\nwb = openpyxl.Workbook()\\nws = wb.active\\nws.title = \\\"Sheet1\\\"\\n\\n# The VBA code that efficiently inserts 'Volkswagen' into column Q\\n# based on three conditions in columns A, B, and C\\nvba_code = '''Sub InsertVolkswagen()\\n    ' Efficient VBA solution using array-based operations\\n    ' Much faster than cell-by-cell processing for large sheets\\n    \\n    Dim ws As Worksheet\\n    Dim lastRow As Long\\n    Dim i As Long\\n    \\n    Application.ScreenUpdating = False\\n    Application.Calculation = xlCalculationManual\\n    \\n    Set ws = ThisWorkbook.Sheets(\\\"Sheet1\\\")\\n    \\n    ' Find last row based on column A\\n    lastRow = ws.Cells(ws.Rows.Count, \\\"A\\\").End(xlUp).Row\\n    \\n    If lastRow < 2 Then Exit Sub\\n    \\n    ' Load columns A, B, C, and Q into memory arrays for speed\\n    Dim dataA As Variant, dataB As Variant, dataC As Variant, dataQ As Variant\\n    \\n    dataA = ws.Range(\\\"A2:A\\\" & lastRow).Value\\n    dataB = ws.Range(\\\"B2:B\\\" & lastRow).Value\\n    dataC = ws.Range(\\\"C2:C\\\" & lastRow).Value\\n    dataQ = ws.Range(\\\"Q2:Q\\\" & lastRow).Value\\n    \\n    ' Single pass through the in-memory arrays\\n    For i = 1 To UBound(dataA, 1)\\n        If dataA(i, 1) = \\\"Government\\\" And _\\n           dataB(i, 1) = \\\"Germany\\\" And _\\n           dataC(i, 1) = \\\"Carretera\\\" Then\\n            dataQ(i, 1) = \\\"Volkswagen\\\"\\n        End If\\n    Next i\\n    \\n    ' Write updated Q column back to sheet in one operation\\n    ws.Range(\\\"Q2:Q\\\" & lastRow).Value = dataQ\\n    \\n    Application.Calculation = xlCalculationAutomatic\\n    Application.ScreenUpdating = True\\n    \\n    MsgBox \\\"Done! Volkswagen inserted in \\\" & lastRow & \\\" rows processed.\\\", _\\n           vbInformation\\nEnd Sub'''\\n\\n# Write explanation and code into Sheet1 cells A1:Q701\\nws[\\\"A1\\\"] = \\\"VBA SOLUTION - Insert 'Volkswagen' based on three conditions\\\"\\nws[\\\"A2\\\"] = \\\"\\\"\\nws[\\\"A3\\\"] = \\\"Conditions: Column A = 'Government', Column B = 'Germany', Column C = 'Carretera'\\\"\\nws[\\\"A4\\\"] = \\\"Action: Insert 'Volkswagen' into Column Q\\\"\\nws[\\\"A5\\\"] = \\\"Method: Array-based batch processing for high efficiency\\\"\\nws[\\\"A6\\\"] = \\\"\\\"\\nws[\\\"A7\\\"] = \\\"Why this is fast:\\\"\\nws[\\\"A8\\\"] = \\\"1. Reads entire columns A, B, C, Q into memory arrays (single read)\\\"\\nws[\\\"A9\\\"] = \\\"2. Loops through arrays in memory (very fast)\\\"\\nws[\\\"A10\\\"] = \\\"3. Writes the modified Q column back in one operation (single write)\\\"\\nws[\\\"A11\\\"] = \\\"4. Disables ScreenUpdating and Calculation during processing\\\"\\nws[\\\"A12\\\"] = \\\"5. No repeated cell access - all operations are batch-based\\\"\\nws[\\\"A13\\\"] = \\\"\\\"\\nws[\\\"A14\\\"] = \\\"VBA Code:\\\"\\nws[\\\"A15\\\"] = \\\"\\\"\\n\\n# Write the code starting at A16, spanning multiple cells\\ncode_lines = vba_code.split('\\\\n')\\nfor idx, line in enumerate(code_lines):\\n    cell_row = 16 + idx\\n    if cell_row <= 701:\\n        ws.cell(row=cell_row, column=1, value=line)\\n\\n# Save the workbook\\nwb.save(\\\"output.xlsx\\\")\\nprint(\\\"VBA solution written to output.xlsx\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:Q701\", \"match\": {\"n_gold\": 11234, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"VBA SOLUTION - Insert 'Volkswagen' based\", \"ref\": \"Segment\"}, {\"cell\": \"Sheet1!R1C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C3\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C4\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C5\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C6\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C7\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C8\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C9\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C10\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C11\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C12\", \"status\": \"missing\"}]}"
+  },
+  "timings": {
+    "agent_s": 28.766,
+    "setup_s": 0.0,
+    "grade_s": 3.427
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2825",
+    "run1 exit=0 0.35s",
+    "run2 exit=0 0.25s",
+    "physics=0.0 cells=0/11234 extra=0"
+  ]
+}

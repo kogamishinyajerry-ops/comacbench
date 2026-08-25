@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_290_1",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\n\\n# Load the input workbook\\nwb = load_workbook('input.xlsx')\\nws = wb['Sheet1']\\n\\n# Read source data from columns A:J (excluding K:V which has manual transpose)\\n# Source is 11 rows × 9 cols to transpose to 9 rows × 11 cols (K2:U10)\\nsource_data = []\\nfor row_idx in range(2, 13):  # rows 2-12 (11 rows)\\n    row_data = []\\n    for col_idx in range(1, 10):  # columns A-I (9 columns)\\n        row_data.append(ws.cell(row=row_idx, column=col_idx).value)\\n    source_data.append(row_data)\\n\\n# Transpose: swap rows and columns (11×9 -> 9×11)\\ntransposed = list(map(list, zip(*source_data)))\\n\\n# Clear existing data in K2:U10\\nfor row_idx in range(2, 11):\\n    for col_idx in range(11, 22):  # K=11 to U=21\\n        ws.cell(row=row_idx, column=col_idx).value = None\\n\\n# Write transposed data to K2:U10 maintaining position correspondence\\nfor i in range(9):\\n    for j in range(11):\\n        if i < len(transposed) and j < len(transposed[i]):\\n            ws.cell(row=2+i, column=11+j).value = transposed[i][j]\\n\\n# Save as output.xlsx\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 59.536,
+    "setup_s": 0.0,
+    "grade_s": 0.258
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1082",
+    "run1 exit=1 0.25s"
+  ]
+}

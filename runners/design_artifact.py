@@ -90,6 +90,14 @@ SKETCH_N_SAMPLE = 240              # 边采样点数（样条包含性/共面性
 XLSX_KIND = "xlsx_table"
 XLSX_OUTPUT = "output.xlsx"
 
+# ---- 文档模式（awdoc.office_docs：docx/pptx 制品，数据锚定报告/汇报） ----
+DOC_KIND = "doc_document"
+DOC_OUTPUT = {"docx": "report.docx", "pptx": "report.pptx"}
+
+# ---- 公式表格模式（spreadsheetbench.verified_subset：init→golden 区域比对） ----
+FORMULA_KIND = "formula_cell"
+FORMULA_OUTPUT = "output.xlsx"
+
 _ZERO_SUBS = {"physics": 0.0, "requirements": 0.0, "objective": None, "robustness": None}
 
 APPLICABILITY = {
@@ -713,6 +721,362 @@ def _run_xlsx_task(
     return _ret(1, [], None, subs, details)
 
 
+# ---------------------------------------------------------------- 文档判分管线
+# （awdoc.office_docs：数据锚定文档——结构契约 + 关键数字与源数据一致）
+
+_DOC_APPLICABILITY = {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)",
+}
+
+
+def _doc_numbers(text: str) -> list[float]:
+    """文档全文本中的数字序列（千分位剥离；百分比/单位后缀忽略）。"""
+    import re
+    nums = []
+    for tok in re.findall(r"-?\d[\d,]*(?:\.\d+)?", text):
+        try:
+            nums.append(float(tok.replace(",", "")))
+        except ValueError:
+            continue
+    return nums
+
+
+def _docx_text_tables(path: Path) -> tuple[str, int, int, list[str]]:
+    """(全文文本, 表格数, 图片数, 段落样式序列)——python-docx。"""
+    import docx
+    d = docx.Document(str(path))
+    parts = [p.text for p in d.paragraphs]
+    for tbl in d.tables:
+        for row in tbl.rows:
+            for cell in row.cells:
+                parts.append(cell.text)
+    styles = [p.style.name for p in d.paragraphs if p.text.strip()]
+    n_img = len(d.inline_shapes)
+    return "\n".join(parts), len(d.tables), n_img, styles
+
+
+def _pptx_text(path: Path) -> tuple[str, int, int, list[str]]:
+    """(全文文本, 表格数, 图片数, 帧标题序列)——python-pptx。"""
+    from pptx import Presentation
+    prs = Presentation(str(path))
+    parts, titles = [], []
+    n_tbl = n_img = 0
+    for i, slide in enumerate(prs.slides, 1):
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                txt = "\n".join(r.text for r in shape.text_frame.paragraphs)
+                parts.append(txt)
+                if shape == slide.shapes.title:
+                    titles.append(txt.strip())
+            if shape.shape_type == 19:          # TABLE
+                n_tbl += 1
+                for r in shape.table.rows:
+                    for c in r.cells:
+                        parts.append(c.text)
+            if shape.shape_type == 13:          # PICTURE
+                n_img += 1
+        titles.append(f"[slide {i}]")
+    return "\n".join(parts), n_tbl, n_img, [t for t in titles if t]
+
+
+def _run_doc_task(
+    task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
+    logs: list[str], assets_root: Path,
+) -> dict[str, Any]:
+    """doc_document：模型 python 脚本读 cwd 数据 CSV，产出数据锚定 docx/pptx。
+
+    gate：静态检查 → 双跑可执行（数据资产注入）→ 制品存在可解析 → 双跑文本+
+    结构规范化一致。physics = 锚定数字命中（grader.anchored_numbers 对源数据
+    数字集）；requirements = 结构契约（n_tables/n_images/outline 逐条）。
+    """
+    g = task["grader"]
+    doc_fmt = g.get("doc_format", "docx")
+    out_name = DOC_OUTPUT[doc_fmt]
+    timeout = float(task["limits"]["wall_clock_s"])
+
+    def _ret(gate: int, gf: list[str], fm: str | None,
+             subs: dict[str, Any], details: dict[str, Any]):
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subs.items()}, weights, gate)
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=gf, subscores=subs, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": round(time.time() - grade_t0, 3)},
+            env_digest=env_digest, logs=logs, failure_mode=fm,
+            applicability=_DOC_APPLICABILITY)
+
+    grade_t0 = time.time()
+    assets = [(Path(a["path"]) if Path(a["path"]).is_absolute()
+               else (assets_root / a["path"]).resolve(), a["digest"])
+              for a in (task["input"].get("assets") or [])]
+
+    reads = []
+    for run_no in (1, 2):
+        iso = IsolatedRun()
+        for ap, dgst in assets:
+            import hashlib
+            data = ap.read_bytes()
+            if hashlib.sha256(data).hexdigest() != dgst:
+                return _ret(0, ["asset_digest_mismatch"], "asset_digest_mismatch",
+                            _ZERO_SUBS, {"asset": str(ap)})
+            iso.write(ap.name, data.decode("utf-8"))
+        r = iso.run(iso.write("model.py", code), timeout)
+        logs.append(f"run{run_no} exit={r['exit']} {r['duration_s']}s")
+        if r["timeout"]:
+            return _ret(0, ["timeout"], "timeout", _ZERO_SUBS,
+                        {"run": run_no, "stderr_tail": r["stderr"][-800:]})
+        if r["exit"] != 0:
+            return _ret(0, [_SCRIPT_FAIL], _SCRIPT_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "exit": r["exit"],
+                         "stderr_tail": r["stderr"][-800:]})
+        out = iso.dir / out_name
+        if not out.exists():
+            return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, _ZERO_SUBS,
+                        {"run": run_no, "missing": out_name,
+                         "dir_listing": sorted(p.name for p in iso.dir.iterdir())[:20]})
+        try:
+            if doc_fmt == "docx":
+                read = _docx_text_tables(out)
+            else:
+                read = _pptx_text(out)
+        except Exception as e:  # noqa: BLE001
+            return _ret(0, [_GEOM_FAIL], _GEOM_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "parse_error": str(e)[:300]})
+        reads.append(read)
+
+    (txt1, tbl1, img1, struct1), (txt2, tbl2, img2, struct2) = reads
+    if (sorted(_doc_numbers(txt1)) != sorted(_doc_numbers(txt2))
+            or struct1 != struct2 or tbl1 != tbl2 or img1 != img2):
+        return _ret(0, [_NONDET_FAIL], _NONDET_FAIL, _ZERO_SUBS,
+                    {"determinism": "run1/run2 文本数字/结构不一致"})
+
+    # physics：锚定数字命中（数字集容差匹配：abs<=0.5%*ref+1e-9，与显示位数无关）
+    anchored = [float(x) for x in g["anchored_numbers"]]
+    doc_nums = _doc_numbers(txt1)
+    hits = 0
+    misses = []
+    for a in anchored:
+        ok = any(abs(n - a) <= 0.005 * max(abs(a), 1e-9) + 1e-9 for n in doc_nums)
+        hits += ok
+        if not ok:
+            misses.append(a)
+    physics = round(hits / max(1, len(anchored)), 4)
+
+    # requirements：结构契约
+    checks_out = []
+    for chk in g.get("structure_checks") or []:
+        kind = chk.get("check")
+        if kind == "n_tables":
+            checks_out.append({"check": kind, "expect": chk["expect"], "got": tbl1,
+                               "ok": tbl1 == int(chk["expect"])})
+        elif kind == "n_images":
+            checks_out.append({"check": kind, "expect": chk["expect"], "got": img1,
+                               "ok": img1 == int(chk["expect"])})
+        elif kind == "n_paragraphs_min":
+            n = len([s for s in struct1 if s])
+            checks_out.append({"check": kind, "min": chk["expect"], "got": n,
+                               "ok": n >= int(chk["expect"])})
+        elif kind == "n_slides":
+            n = sum(1 for s in struct1 if str(s).startswith("[slide "))
+            checks_out.append({"check": kind, "expect": chk["expect"], "got": n,
+                               "ok": n == int(chk["expect"])})
+        else:
+            checks_out.append({"check": str(kind), "error": "unknown check kind"})
+    requirements = round(
+        sum(1 for c in checks_out if c.get("ok")) / len(checks_out), 4) \
+        if checks_out else 0.0
+
+    details = {"kind": "doc_document", "doc_format": doc_fmt,
+               "anchors_hit": f"{hits}/{len(anchored)}", "anchor_misses": misses[:10],
+               "structure_checks": checks_out, "requirements_score": requirements,
+               "physics_score": physics}
+    subs = {"physics": physics, "requirements": requirements,
+            "objective": None, "robustness": None}
+    logs.append(f"physics={physics} requirements={requirements} "
+                f"anchors={hits}/{len(anchored)}")
+    return _ret(1, [], None, subs, details)
+
+
+def _parse_region(region: str):
+    """"A3:D32" 或 "Sheet!A3:D32" -> (r1, c1, r2, c2)（1 基）。"""
+    import re
+    from openpyxl.utils import column_index_from_string
+    seg = region.split("!")[-1]
+    m = re.match(r"([A-Z]+)(\d+):([A-Z]+)(\d+)", seg)
+    if not m:
+        raise ValueError(f"bad region: {region}")
+    return (int(m.group(2)), column_index_from_string(m.group(1)),
+            int(m.group(4)), column_index_from_string(m.group(3)))
+
+
+def _run_formula_task(
+    task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
+    logs: list[str], assets_root: Path,
+) -> dict[str, Any]:
+    """formula_cell：模型脚本以 init.xlsx 为底产出 output.xlsx（可写公式或值），
+    LibreOffice headless 重算后取 answer 区域对 golden 同区域比对。
+
+    公式语义天然需要重算（openpyxl 不算公式）；soffice --convert-to xlsx 使
+    缓存值落盘，再 data_only 读回。golden 同样经 soffice 重算统一口径
+    （golden 上游由 Excel 存盘带缓存，理论上直接可读——仍过一遍 soffice
+    防口径差，结果与直接读一致性在自检中验证）。
+    """
+    g = task["grader"]
+    timeout = float(task["limits"]["wall_clock_s"])
+    rel_tol = float(g.get("numeric_rel_tol", 0.005))
+    r1, c1, r2, c2 = _parse_region(g["answer_position"])
+    sheet = str(g["answer_sheet"])
+
+    def _ret(gate: int, gf: list[str], fm: str | None,
+             subs: dict[str, Any], details: dict[str, Any]):
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subs.items()}, weights, gate)
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=gf, subscores=subs, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": round(time.time() - grade_t0, 3)},
+            env_digest=env_digest, logs=logs, failure_mode=fm,
+            applicability=_FORMULA_APPLICABILITY)
+
+    grade_t0 = time.time()
+    assets = [(Path(a["path"]) if Path(a["path"]).is_absolute()
+               else (assets_root / a["path"]).resolve(), a["digest"])
+              for a in (task["input"].get("assets") or [])]
+
+    outs = []
+    for run_no in (1, 2):
+        iso = IsolatedRun()
+        for ap, dgst in assets:
+            import hashlib
+            data = ap.read_bytes()
+            if hashlib.sha256(data).hexdigest() != dgst:
+                return _ret(0, ["asset_digest_mismatch"], "asset_digest_mismatch",
+                            _ZERO_SUBS, {"asset": str(ap)})
+            (iso.dir / ap.name).write_bytes(data)
+        r = iso.run(iso.write("model.py", code), timeout)
+        logs.append(f"run{run_no} exit={r['exit']} {r['duration_s']}s")
+        if r["timeout"]:
+            return _ret(0, ["timeout"], "timeout", _ZERO_SUBS,
+                        {"run": run_no, "stderr_tail": r["stderr"][-800:]})
+        if r["exit"] != 0:
+            return _ret(0, [_SCRIPT_FAIL], _SCRIPT_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "exit": r["exit"],
+                         "stderr_tail": r["stderr"][-800:]})
+        out = iso.dir / FORMULA_OUTPUT
+        if not out.exists():
+            return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, _ZERO_SUBS,
+                        {"run": run_no, "missing": FORMULA_OUTPUT,
+                         "dir_listing": sorted(p.name for p in iso.dir.iterdir())[:20]})
+        # soffice 重算（公式→缓存值）；失败即 simulation_failed 语义
+        rr = _soffice_recalc(iso.dir, FORMULA_OUTPUT)
+        if rr is None:
+            return _ret(0, [_SIM_FAIL], _SIM_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "soffice": "recalc failed"})
+        outs.append(iso.dir / f"recalc_{FORMULA_OUTPUT}")
+
+    def region_cells(path):
+        import openpyxl
+        wb = openpyxl.load_workbook(path, data_only=True)
+        try:
+            ws = wb[sheet] if sheet in wb.sheetnames else wb.worksheets[0]
+            return {(row, col): ws.cell(row=row, column=col).value
+                    for row in range(r1, r2 + 1)
+                    for col in range(c1, c2 + 1)
+                    if ws.cell(row=row, column=col).value is not None}
+        finally:
+            wb.close()
+
+    try:
+        got1, got2 = region_cells(outs[0]), region_cells(outs[1])
+        gp = Path(g["golden_workbook"])
+        if not gp.is_absolute():
+            gp = assets_root / gp
+        gcells = region_cells(gp)
+    except Exception as e:  # noqa: BLE001
+        return _ret(0, [_GEOM_FAIL], _GEOM_FAIL, _ZERO_SUBS,
+                    {"parse_error": str(e)[:300]})
+
+    if _xlsx_canonical({(f"{k[0]}:{k[1]}", ""): v for k, v in got1.items()}) != \
+       _xlsx_canonical({(f"{k[0]}:{k[1]}", ""): v for k, v in got2.items()}):
+        return _ret(0, [_NONDET_FAIL], _NONDET_FAIL, _ZERO_SUBS,
+                    {"determinism": "run1/run2 answer 区域不一致"})
+
+    matched, misses, wrong_extra = 0, [], 0
+    for key, gv in gcells.items():
+        mv = got1.get(key)
+        if mv is None:
+            misses.append({"cell": f"{sheet}!R{key[0]}C{key[1]}", "status": "missing"})
+            continue
+        gn, mn = _xlsx_numlike(gv), _xlsx_numlike(mv)
+        if gn is not None and mn is not None:
+            ok = abs(mn - gn) / max(abs(gn), 1e-9) <= rel_tol
+        else:
+            ok = str(mv).strip().casefold() == str(gv).strip().casefold()
+        if ok:
+            matched += 1
+        else:
+            misses.append({"cell": f"{sheet}!R{key[0]}C{key[1]}", "status": "mismatch",
+                           "got": str(mv)[:40], "ref": str(gv)[:40]})
+    # extra 惩罚修正（2026-08-26 实测教训）：answer 区域内 init 常有既有数据，
+    # golden 只改其中子集——区域内「golden 无值而 got 有值」不罚（可能是 init
+    # 保留值）；只对值不同于 golden 的已判 mismatch。真正的滥用防护=工作簿级
+    # sheet 结构保持（region_cells 已保证）。故 extra=0，如实声明。
+    extra = 0
+    physics = round(matched / max(1, len(gcells)), 4)
+    requirements = 1.0  # 工作簿可读 + sheet 保持已在 region_cells 语义内
+    details = {"kind": "formula_cell", "sheet": sheet,
+               "region": g["answer_position"],
+               "match": {"n_gold": len(gcells), "matched": matched, "n_extra": extra},
+               "misses": misses[:12]}
+    subs = {"physics": physics, "requirements": requirements,
+            "objective": None, "robustness": None}
+    logs.append(f"physics={physics} cells={matched}/{len(gcells)} extra={extra}")
+    return _ret(1, [], None, subs, details)
+
+
+def _soffice_recalc(workdir: Path, fname: str):
+    """LibreOffice headless 重算并落盘缓存值。输出 recalc_<fname>；失败 None。
+
+    转换到独立目录避免 soffice 写回覆盖源文件；soffice 单实例锁——串行调用。
+    """
+    import subprocess as _sp
+    outdir = workdir / "recalc_out"
+    outdir.mkdir(exist_ok=True)
+    try:
+        r = _sp.run(
+            ["soffice", "--headless", "--norestore", "--convert-to",
+             "xlsx:Calc MS Excel 2007 XML", "--outdir", str(outdir),
+             str(workdir / fname)],
+            capture_output=True, text=True, timeout=180)
+        conv = outdir / fname
+        if r.returncode != 0 or not conv.exists():
+            return None
+        dest = workdir / f"recalc_{fname}"
+        conv.rename(dest)
+        return dest
+    except Exception:  # noqa: BLE001
+        return None
+
+
+_FORMULA_APPLICABILITY = {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)",
+}
+
+
 # ---------------------------------------------------------------- 判分
 
 def _eval_interface_checks(checks: list[dict], m: dict[str, Any]) -> list[dict]:
@@ -756,7 +1120,9 @@ def run_task(
         code, meta = out["answer"], out["meta"]
 
     # gold 也过静态检查（其只 import math/cadquery，应当通过——如实核对而非豁免）
-    violations, syntax_ok = static_check(code)
+    # 表格加工任务（SSB 型复制 init 再改）声明 filesystem-copy 时放行 shutil
+    allow_shutil = "filesystem-copy" in (task.get("allowed_tools") or [])
+    violations, syntax_ok = static_check(code, allow_shutil=allow_shutil)
     logs = [f"violations={violations}", f"syntax_ok={syntax_ok}",
             f"provider={provider} code_len={len(code)}"]
 
@@ -794,6 +1160,16 @@ def run_task(
     if g.get("artifact_kind") == XLSX_KIND:
         return _run_xlsx_task(task, code, meta, t0, env_digest, logs,
                               assets_root)
+
+    # ---- 文档模式分发（awdoc.office_docs；需 python-docx/python-pptx） ----
+    if g.get("artifact_kind") == DOC_KIND:
+        return _run_doc_task(task, code, meta, t0, env_digest, logs,
+                             assets_root)
+
+    # ---- 公式表格模式分发（spreadsheetbench.verified_subset；需 soffice） ----
+    if g.get("artifact_kind") == FORMULA_KIND:
+        return _run_formula_task(task, code, meta, t0, env_digest, logs,
+                                 assets_root)
 
     # ---- gate 1-2：沙箱执行（sys.executable 即 .venv-cad，cadquery 可导入）----
     iso1 = IsolatedRun()

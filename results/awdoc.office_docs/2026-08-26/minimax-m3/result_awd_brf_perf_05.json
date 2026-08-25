@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_05",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\nfrom pptx.dml.color import RGBColor\\n\\n# Read the CSV data\\nwith open('perf_05.csv', 'r') as f:\\n    reader = csv.DictReader(f)\\n    rows = list(reader)\\n\\n# Extract values\\nconfigs = [row['config'] for row in rows]\\ncl_max_values = [float(row['cl_max']) for row in rows]\\ncd_cruise_values = [float(row['cd_cruise']) for row in rows]\\nld_ratio_values = [float(row['ld_ratio']) for row in rows]\\n\\n# Compute statistics\\ncl_max_max = max(cl_max_values)\\ncd_cruise_mean = sum(cd_cruise_values) / len(cd_cruise_values)\\nld_ratio_mean = sum(ld_ratio_values) / len(ld_ratio_values)\\nbest_ld_index = ld_ratio_values.index(max(ld_ratio_values))\\nbest_config = configs[best_ld_index]\\n\\n# Round for display\\ncl_max_max_display = round(cl_max_max, 3)  # 0.556\\ncd_cruise_mean_display = round(cd_cruise_mean, 4)  # 0.0357\\nld_ratio_mean_display = round(ld_ratio_mean, 1)  # 15.8\\n\\n# Create presentation\\nprs = Presentation()\\nprs.slide_width = Inches(10)\\nprs.slide_height = Inches(7.5)\\n\\n# Slide 1: Title slide\\nslide1 = prs.slides.add_slide(prs.slide_layouts[0])  # Title slide layout\\ntitle = slide1.shapes.title\\nsubtitle = slide1.placeholders[1]\\ntitle.text = \\\"Aerodynamic Performance Analysis\\\"\\nsubtitle.text = \\\"Engineering Test Briefing\\\"\\n\\n# Slide 2: Data slide with table\\nslide2 = prs.slides.add_slide(prs.slide_layouts[5])  # Blank layout\\n# Add title\\nleft = Inches(0.5)\\ntop = Inches(0.3)\\nwidth = Inches(9)\\nheight = Inches(0.6)\\ntitle_box = slide2.shapes.add_textbox(left, top, width, height)\\ntitle_frame = title_box.text_frame\\ntitle_frame.text = \\\"Data\\\"\\ntitle_frame.paragraphs[0].runs[0].font.size = Pt(32)\\ntitle_frame.paragraphs[0].runs[0].font.bold = True\\n\\n# Add table\\ntable_left = Inches(0.5)\\ntable_top = Inches(1.2)\\ntable_width = Inches(9)\\ntable_height = Inches(5)\\nrows_count = len(rows) + 1  # header + data rows\\ncols_count = 4\\ntable_shape = slide2.shapes.add_table(rows_count, cols_count, table_left, table_top, table_width, table_height)\\ntable = table_shape.table\\n\\n# Set headers\\nheaders = ['config', 'cl_max', 'cd_cruise', 'ld_ratio']\\nfor col_idx, header in enumerate(headers):\\n    cell = table.cell(0, col_idx)\\n    cell.text = header\\n    cell.text_frame.paragraphs[0].runs[0].font.bold = True\\n\\n# Fill data rows\\nfor row_idx, row in enumerate(rows):\\n    for col_idx, key in enumerate(['config', 'cl_max', 'cd_cruise', 'ld_ratio']):\\n        cell = table.cell(row_idx + 1, col_idx)\\n        cell.text = str(row[key])\\n\\n# Slide 3: Summary slide with bullets\\nslide3 = prs.slides.add_slide(prs.slide_layouts[5])\\ntitle_box = slide3.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.6))\\ntitle_frame = title_box.text_frame\\ntitle_frame.text = \\\"Summary\\\"\\ntitle_frame.paragraphs[0].runs[0].font.size = Pt(32)\\ntitle_frame.paragraphs[0].runs[0].font.bold = True\\n\\n# Add bullet points\\nbullet_left = Inches(0.7)\\nbullet_top = Inches(1.5)\\nbullet_width = Inches(8.5)\\nbullet_height = Inches(4)\\ntext_box = slide3.shapes.add_textbox(bullet_left, bullet_top, bullet_width, bullet_height)\\ntf = text_box.text_frame\\n\\nbullet_lines = [\\n    f\\\"CLmax max = {cl_max_max_display}\\\",\\n    f\\\"CDcruise mean = {cd_cruise_mean_display}\\\",\\n    f\\\"L/D mean = {ld_ratio_mean_display}\\\",\\n    f\\\"best config (max L/D) = {best_config}\\\",\\n]\\n\\nfor i, line in enumerate(bullet_lines):\\n    if i == 0:\\n        p = tf.paragraphs[0]\\n    else:\\n        p = tf.add_paragraph()\\n    p.text = line\\n    p.level = 0\\n\\n# Slide 4: Next steps slide\\nslide4 = prs.slides.add_slide(prs.slide_layouts[5])\\ntitle_box = slide4.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.6))\\ntitle_frame = title_box.text_frame\\ntitle_frame.text = \\\"Next Steps\\\"\\ntitle_frame.paragraphs[0].runs[0].font.size = Pt(32)\\ntitle_frame.paragraphs[0].runs[0].font.bold = True\\n\\n# Add next steps content\\ncontent_left = Inches(0.7)\\ncontent_top = Inches(1.5)\\ncontent_width = Inches(8.5)\\ncontent_height = Inches(4)\\ntext_box = slide4.shapes.add_textbox(content_left, content_top, content_width, content_height)\\ntf = text_box.text_frame\\n\\nne\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 6.968,
+    "setup_s": 0.0,
+    "grade_s": 0.255
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=4537",
+    "run1 exit=0 0.13s",
+    "run2 exit=0 0.11s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

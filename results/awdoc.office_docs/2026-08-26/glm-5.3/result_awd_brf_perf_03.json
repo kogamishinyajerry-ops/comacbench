@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_03",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"Generate a 4-slide engineering test briefing (report.pptx) from perf_03.csv.\\n\\nAll numeric claims are computed directly from the CSV data:\\n  - CLmax max         -> max of the cl_max column, displayed to 3 decimals\\n  - CDcruise mean     -> mean of the cd_cruise column, displayed to 4 decimals\\n  - L/D mean          -> mean of the ld_ratio column, displayed to 1 decimal\\n  - best config (L/D) -> config name of the record with the max ld_ratio\\n\\\"\\\"\\\"\\n\\nimport csv\\nimport os\\nfrom decimal import Decimal, ROUND_HALF_UP\\nfrom fractions import Fraction\\n\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\nCSV_PATH = \\\"perf_03.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\n\\nCOLUMNS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\nDECK_TITLE = \\\"Engineering Test Briefing\\\"\\nDECK_SUBTITLE = \\\"Aerodynamic performance data review\\\"\\n\\n\\n# ------------------------------------------------------------------ data loading\\n\\ndef load_records(path):\\n    \\\"\\\"\\\"Read the CSV and return a list of dicts keyed by COLUMNS (values as strings).\\\"\\\"\\\"\\n    if not os.path.exists(path):\\n        raise FileNotFoundError(f\\\"Input data file not found: {path}\\\")\\n    records = []\\n    with open(path, \\\"r\\\", newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as fh:\\n        reader = csv.DictReader(fh)\\n        if not reader.fieldnames:\\n            raise ValueError(f\\\"{path} is empty or has no header row\\\")\\n        reader.fieldnames = [fn.strip() for fn in reader.fieldnames]\\n        for row in reader:\\n            rec = {}\\n            for col in COLUMNS:\\n                raw = row.get(col, \\\"\\\")\\n                rec[col] = raw.strip() if isinstance(raw, str) else raw\\n            if not any(str(rec[c]) for c in COLUMNS):\\n                continue  # skip fully blank lines\\n            # validate numeric columns early\\n            for col in COLUMNS[1:]:\\n                to_fraction(rec[col])\\n            records.append(rec)\\n    if not records:\\n        raise ValueError(f\\\"No data records found in {path}\\\")\\n    return records\\n\\n\\ndef to_fraction(text):\\n    \\\"\\\"\\\"Convert a numeric string to an exact Fraction (no float error).\\\"\\\"\\\"\\n    try:\\n        return Fraction(str(text))\\n    except (ValueError, ZeroDivisionError):\\n        return Fraction(float(text))\\n\\n\\ndef fmt(value, places):\\n    \\\"\\\"\\\"Round an exact Fraction half-up to `places` decimals; return display string.\\\"\\\"\\\"\\n    quantum = Decimal(1).scaleb(-places)\\n    dec = Decimal(value.numerator) / Decimal(value.denominator)\\n    return str(dec.quantize(quantum, rounding=ROUND_HALF_UP))\\n\\n\\ndef compute_stats(records):\\n    cl = [to_fraction(r[\\\"cl_max\\\"]) for r in records]\\n    cd = [to_fraction(r[\\\"cd_cruise\\\"]) for r in records]\\n    ld = [to_fraction(r[\\\"ld_ratio\\\"]) for r in records]\\n    n = len(records)\\n    best = max(records, key=lambda r: to_fraction(r[\\\"ld_ratio\\\"]))\\n    return {\\n        \\\"n\\\": n,\\n        \\\"clmax_max_s\\\": fmt(max(cl), 3),\\n        \\\"cd_mean_s\\\": fmt(sum(cd) / n, 4),\\n        \\\"ld_mean_s\\\": fmt(sum(ld) / n, 1),\\n        \\\"best_config\\\": str(best[\\\"config\\\"]).strip(),\\n    }\\n\\n\\n# ------------------------------------------------------------------ pptx helpers\\n\\ndef add_heading(slide, text):\\n    box = slide.shapes.add_textbox(Inches(0.6), Inches(0.35), Inches(8.8), Inches(0.9))\\n    tf = box.text_frame\\n    tf.word_wrap = True\\n    run = tf.paragraphs[0].add_run()\\n    run.text = text\\n    run.font.size = Pt(32)\\n    run.font.bold = True\\n    return box\\n\\n\\ndef add_lines(slide, lines, top=1.5, size=20):\\n    box = slide.shapes.add_textbox(Inches(0.8), Inches(top), Inches(8.4), Inches(4.2))\\n    tf = box.text_frame\\n    tf.word_wrap = True\\n    for i, line in enumerate(lines):\\n        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()\\n        run = p.add_run()\\n        run.text = line\\n        run.font.size = Pt(size)\\n    return box\\n\\n\\ndef format_cell(cell, bold, size):\\n    for p in cell.text_frame.paragraphs:\\n        for r in p.runs:\\n            r.font.bold = bold\\n            r.font.size = Pt(size)\\n\\n\\ndef add_data_table(slide, records):\\n    n_rows = len(records) + 1\\n    n_cols = len(COLUMNS)\\n    left,\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 136.112,
+    "setup_s": 0.0,
+    "grade_s": 0.263
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=6920",
+    "run1 exit=0 0.14s",
+    "run2 exit=0 0.11s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

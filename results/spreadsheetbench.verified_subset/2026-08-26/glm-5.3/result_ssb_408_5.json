@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_408_5",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nTask performed with Python/openpyxl (no Excel/VBA runtime is available here,\\nso instead of merely providing a macro, this script performs the task directly):\\n\\n 1. Sum the values in Column D for every row where Column E contains a zero.\\n 2. Write that sum into Column D of the row whose Column C reference\\n    contains 'BR1 Sales'.\\n 3. Delete every row where Column E contains a zero, EXCEPT the rows whose\\n    Column C reference contains 'BR1 Sales'.\\n 4. Delete all blank rows.\\n 5. Save the resulting (modified) copy of the input workbook as output.xlsx.\\n\\nThe equivalent Excel VBA macro, for reference, would be:\\n\\n    Sub CleanBR1()\\n        Dim ws As Worksheet, r As Long, lastRow As Long, total As Double\\n        Set ws = ThisWorkbook.Sheets(\\\"Sheet1\\\")\\n        lastRow = ws.Cells(ws.Rows.Count, \\\"C\\\").End(xlUp).Row\\n        ' 1) sum Column D where Column E = 0\\n        For r = 2 To lastRow\\n            If IsNumeric(ws.Cells(r, \\\"E\\\").Value) And ws.Cells(r, \\\"E\\\").Value = 0 Then\\n                If IsNumeric(ws.Cells(r, \\\"D\\\").Value) Then total = total + ws.Cells(r, \\\"D\\\").Value\\n            End If\\n        Next r\\n        ' 2) put the sum next to 'BR1 Sales'\\n        For r = 2 To lastRow\\n            If InStr(1, CStr(ws.Cells(r, \\\"C\\\").Value), \\\"BR1 Sales\\\", vbTextCompare) > 0 Then\\n                ws.Cells(r, \\\"D\\\").Value = total\\n            End If\\n        Next r\\n        ' 3) & 4) delete zero rows (except 'BR1 Sales') and blank rows, bottom-up\\n        For r = lastRow To 2 Step -1\\n            If IsNumeric(ws.Cells(r, \\\"E\\\").Value) And ws.Cells(r, \\\"E\\\").Value = 0 _\\n               And InStr(1, CStr(ws.Cells(r, \\\"C\\\").Value), \\\"BR1 Sales\\\", vbTextCompare) = 0 Then\\n                ws.Rows(r).Delete\\n            ElseIf Application.CountA(ws.Rows(r).EntireRow) = 0 Then\\n                ws.Rows(r).Delete\\n            End If\\n        Next r\\n    End Sub\\n\\\"\\\"\\\"\\n\\nimport os\\nimport openpyxl\\n\\nINPUT_CANDIDATES = [\\\"input.xlsx\\\", \\\"Input.xlsx\\\", \\\"INPUT.xlsx\\\", \\\"data.xlsx\\\", \\\"workbook.xlsx\\\"]\\nOUTPUT_PATH = \\\"output.xlsx\\\"\\nREF_TEXT = \\\"BR1 Sales\\\"\\n\\n\\ndef find_input():\\n    for name in INPUT_CANDIDATES:\\n        if os.path.exists(name):\\n            return name\\n    raise FileNotFoundError(\\\"Could not find the input workbook. Expected one of: \\\"\\n                            + \\\", \\\".join(INPUT_CANDIDATES))\\n\\n\\ndef cell_is_zero(value):\\n    \\\"\\\"\\\"True when a cell's value represents zero (numeric 0 or text like '0' / '0.00').\\\"\\\"\\\"\\n    if value is None or isinstance(value, bool):\\n        return False\\n    if isinstance(value, (int, float)):\\n        return value == 0\\n    if isinstance(value, str):\\n        s = value.strip().replace(\\\",\\\", \\\"\\\").replace(\\\"£\\\", \\\"\\\").replace(\\\"$\\\", \\\"\\\").replace(\\\"€\\\", \\\"\\\")\\n        if not s:\\n            return False\\n        try:\\n            return float(s) == 0.0\\n        except ValueError:\\n            return False\\n    return False\\n\\n\\ndef to_number(value):\\n    \\\"\\\"\\\"Convert a cell value to float if possible, otherwise None.\\\"\\\"\\\"\\n    if value is None or isinstance(value, bool):\\n        return None\\n    if isinstance(value, (int, float)):\\n        return float(value)\\n    if isinstance(value, str):\\n        s = value.strip().replace(\\\",\\\", \\\"\\\").replace(\\\"£\\\", \\\"\\\").replace(\\\"$\\\", \\\"\\\").replace(\\\"€\\\", \\\"\\\")\\n        try:\\n            return float(s)\\n        except ValueError:\\n            return None\\n    return False if False else None\\n\\n\\ndef main():\\n    input_path = find_input()\\n\\n    # Load twice: one copy keeps formatting/formulas (used for the output),\\n    # one is loaded data_only=True so formula cells yield their cached values.\\n    wb = openpyxl.load_workbook(input_path)\\n    wb_vals = openpyxl.load_workbook(input_path, data_only=True)\\n\\n    ws = wb[\\\"Sheet1\\\"] if \\\"Sheet1\\\" in wb.sheetnames else wb.active\\n    ws_vals = wb_vals[ws.title]\\n\\n    max_row = max(ws.max_row, 1)\\n    max_col = max(ws.max_column, 5)\\n\\n    def value_at(r, c):\\n        v = ws_vals.cell(row=r, column=c).value\\n        if v is None:\\n            v = ws.cell(row=r, column=c).value\\n        return v\\n\\n    # ---- 1) identify rows where Column E contains a zero ----\\n    zero_rows = \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_nsuubf4i/model.py\\\", line 165, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_nsuubf4i/model.py\\\", line 92, in main\\n    input_path = find_input()\\n                 ^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_nsuubf4i/model.py\\\", line 55, in find_input\\n    raise FileNotFoundError(\\\"Could not find the input workbook. Expected one of: \\\"\\nFileNotFoundError: Could not find the input workbook. Expected one of: input.xlsx, Input.xlsx, INPUT.xlsx, data.xlsx, workbook.xlsx\\n\"}"
+  },
+  "timings": {
+    "agent_s": 112.707,
+    "setup_s": 0.0,
+    "grade_s": 0.342
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5973",
+    "run1 exit=1 0.34s"
+  ]
+}

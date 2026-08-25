@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_267_21",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nCompile a consolidated report in the 'merging' sheet of an Excel workbook.\\n\\nLogic\\n------\\n* The workbook contains monthly data sheets (e.g. 'SH1', 'RP1') each holding an\\n  'ID' column and a 'QTY' column, plus a 'merging' report sheet whose column B\\n  holds the IDs.\\n* For every ID in 'merging'!B2:B11:\\n      - Column C  <- matching QTY from sheet 'SH1'\\n      - Column D  <- matching QTY from sheet 'RP1'\\n* If the ID is missing in a source sheet, or the found QTY cell is blank /\\n  contains an error (e.g. '#N/A'), a \\\"-\\\" is written instead.\\n* The result is saved as 'output.xlsx' (a copy of the input workbook).\\n* Because the script reads every data sheet fresh from the file, simply re-run\\n  it each month (new monthly sheets can be added to the SHEET_TO_COLUMN map\\n  below) and the merged report is rebuilt/updated automatically.\\n\\\"\\\"\\\"\\n\\nimport sys\\nimport openpyxl\\n\\n\\n# ---------------------------------------------------------------------------\\n# Configuration: destination column in 'merging' for each source data sheet\\n# ---------------------------------------------------------------------------\\nSHEET_TO_COLUMN = {\\n    \\\"SH1\\\": 3,   # column C\\n    \\\"RP1\\\": 4,   # column D\\n}\\nMERGE_SHEET = \\\"merging\\\"\\nID_COLUMN_IN_MERGE = 2          # column B of the merging sheet\\nANSWER_ROWS = range(2, 12)      # rows 2..11\\n\\n\\ndef norm_key(value):\\n    \\\"\\\"\\\"Normalize a cell value into a comparable string key (handles 123 vs '123' vs 123.0).\\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    if isinstance(value, float) and value.is_integer():\\n        return str(int(value))\\n    return str(value).strip()\\n\\n\\ndef get_sheet(wb, name):\\n    \\\"\\\"\\\"Fetch a worksheet case-insensitively.\\\"\\\"\\\"\\n    for sheet_name in wb.sheetnames:\\n        if sheet_name.strip().lower() == name.strip().lower():\\n            return wb[sheet_name]\\n    raise KeyError(f\\\"Sheet '{name}' not found. Available sheets: {wb.sheetnames}\\\")\\n\\n\\ndef find_id_qty_columns(ws, max_scan_rows=10, max_scan_cols=30):\\n    \\\"\\\"\\\"\\n    Locate the 'ID' and 'QTY' columns by scanning the first rows for headers.\\n    Returns (id_col, qty_col, header_row). Fallback: A=ID, B=QTY.\\n    \\\"\\\"\\\"\\n    for r in range(1, min(ws.max_row, max_scan_rows) + 1):\\n        id_col = qty_col = None\\n        for c in range(1, min(ws.max_column, max_scan_cols) + 1):\\n            v = ws.cell(row=r, column=c).value\\n            if v is None:\\n                continue\\n            s = str(v).strip().upper()\\n            if s == \\\"ID\\\" and id_col is None:\\n                id_col = c\\n            elif s in (\\\"QTY\\\", \\\"QUANTITY\\\") and qty_col is None:\\n                qty_col = c\\n        if id_col and qty_col:\\n            return id_col, qty_col, r\\n\\n    # Fallback: assume ID in col A and QTY in col B; decide if row 1 is a header\\n    first = norm_key(ws.cell(row=1, column=1).value)\\n    header_row = 1 if (first is None or first.upper() == \\\"ID\\\") else 0\\n    return 1, 2, header_row\\n\\n\\ndef build_lookup(ws):\\n    \\\"\\\"\\\"Build {normalized ID: QTY} mapping from a data sheet (first occurrence wins).\\\"\\\"\\\"\\n    id_col, qty_col, header_row = find_id_qty_columns(ws)\\n    lookup = {}\\n    for r in range(header_row + 1, ws.max_row + 1):\\n        key = norm_key(ws.cell(row=r, column=id_col).value)\\n        if not key or key.upper() == \\\"ID\\\":        # skip blanks / header text\\n            continue\\n        if key not in lookup:                     # VLOOKUP-like: first match wins\\n            lookup[key] = ws.cell(row=r, column=qty_col).value\\n    return lookup\\n\\n\\ndef clean_qty(value):\\n    \\\"\\\"\\\"Convert a looked-up QTY into the value to write ('-' for blank/error/missing).\\\"\\\"\\\"\\n    if value is None:\\n        return \\\"-\\\"\\n    if isinstance(value, str):\\n        s = value.strip()\\n        if s == \\\"\\\" or s.startswith(\\\"#\\\"):          # blank or Excel error (#N/A, #REF!, ...)\\n            return \\\"-\\\"\\n        return s\\n    if isinstance(value, float) and value.is_integer():\\n        return int(value)\\n    return value\\n\\n\\ndef main():\\n    input_path = sys.argv[1] if len(sys.argv) > 1 else \\\"input.xlsx\\\"\\n    output_path = sys.argv[2] if len(sys.argv) > 2 \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 107.461,
+    "setup_s": 0.0,
+    "grade_s": 0.232
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5001",
+    "run1 exit=1 0.23s"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "awx_ce_04",
+  "registry_id": "awext.clause_extract",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.8889,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 0.8889,
+  "artifacts": {
+    "answer": "\"{\\\"family\\\":\\\"stall family\\\",\\\"clause_no\\\":\\\"§4.55\\\",\\\"positive_load_limit\\\":3.38,\\\"negative_load_limit\\\":-0.75,\\\"cycles_or_actions\\\":1000,\\\"probability_per_hour\\\":1.7,\\\"applies_to\\\":[\\\"control-surface\\\",\\\"empennage\\\",\\\"engine-mount\\\",\\\"landing-gear\\\"],\\\"compliance_methods\\\":[\\\"inspection\\\",\\\"simulation\\\",\\\"test\\\"],\\\"amendment_year\\\":2016}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"family\", \"ok\": false, \"got\": \"stall family\", \"ref\": \"stall\"}, {\"field\": \"clause_no\", \"ok\": true, \"got\": \"§4.55\", \"ref\": \"§4.55\"}, {\"field\": \"positive_load_limit\", \"ok\": true, \"got\": 3.38, \"ref\": 3.38}, {\"field\": \"negative_load_limit\", \"ok\": true, \"got\": -0.75, \"ref\": -0.75}, {\"field\": \"cycles_or_actions\", \"ok\": true, \"got\": 1000, \"ref\": 1000}, {\"field\": \"probability_per_hour\", \"ok\": true, \"got\": 1.7, \"ref\": 1.7}, {\"field\": \"applies_to\", \"ok\": true, \"got\": [\"control-surface\", \"empennage\", \"engine-mount\", \"landing-gear\"], \"ref\": [\"control-surface\", \"empennage\", \"engine-mount\", \"landing-gear\"]}, {\"field\": \"compliance_methods\", \"ok\": true, \"got\": [\"inspection\", \"simulation\", \"test\"], \"ref\": [\"inspection\", \"simulation\", \"test\"]}, {\"field\": \"amendment_year\", \"ok\": true, \"got\": 2016, \"ref\": 2016}], \"n_fields\": 9, \"n_hit\": 8}"
+  },
+  "timings": {
+    "agent_s": 3.204,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:d0f4bd29593cb13525a30f366b4fd8c353a8a71c6d769890ae6d8c04d391f98c",
+  "assets_revision": "awext@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\"family\":\"stall family\",\"clause_no\":\"§4.55\",\"positive_load_limit\":3.38,\"negative_load_limit\":-0.75,\"cycles_or_actions\":' attempts=1"
+  ]
+}

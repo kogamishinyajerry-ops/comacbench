@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_01",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nEngineering test briefing generator.\\n\\nReads perf_01.csv from the current working directory, computes summary\\nstatistics from the data, and writes a 4-slide report.pptx:\\n\\n  1. Title slide\\n  2. \\\"Data\\\" slide with one table (header + one row per record):\\n     ['config', 'cl_max', 'cd_cruise', 'ld_ratio']\\n  3. \\\"Summary\\\" slide with the required exact numbers\\n  4. \\\"Next steps\\\" slide\\n\\nOnly standard library + python-pptx are used.\\n\\\"\\\"\\\"\\n\\nimport csv\\nimport math\\nimport os\\n\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\nCSV_PATH = \\\"perf_01.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\n\\n\\n# ----------------------------------------------------------------------------\\n# CSV loading with tolerant column-name matching\\n# ----------------------------------------------------------------------------\\n\\ndef _norm(s):\\n    \\\"\\\"\\\"Lowercase and strip non-alphanumeric characters for alias matching.\\\"\\\"\\\"\\n    return \\\"\\\".join(ch for ch in str(s).lower() if ch.isalnum())\\n\\n\\nALIASES = {\\n    \\\"config\\\": (\\\"config\\\", \\\"configuration\\\", \\\"case\\\", \\\"run\\\", \\\"name\\\", \\\"id\\\"),\\n    \\\"cl_max\\\": (\\\"clmax\\\", \\\"cl\\\", \\\"maxcl\\\", \\\"clmaximum\\\", \\\"maximumcl\\\"),\\n    \\\"cd_cruise\\\": (\\\"cdcruise\\\", \\\"cd\\\", \\\"cruisecd\\\", \\\"cdcruise\\\"),\\n    \\\"ld_ratio\\\": (\\\"ldratio\\\", \\\"ld\\\", \\\"lod\\\", \\\"loverd\\\", \\\"ratio\\\"),\\n}\\n\\n\\ndef _canon_map(fieldnames):\\n    \\\"\\\"\\\"Map canonical field name -> actual (stripped) CSV column name.\\\"\\\"\\\"\\n    m = {}\\n    for fn in fieldnames:\\n        n = _norm(fn)\\n        for canon, aliases in ALIASES.items():\\n            if n in aliases and canon not in m:\\n                m[canon] = fn\\n                break\\n    return m\\n\\n\\ndef load_records(path):\\n    \\\"\\\"\\\"Load records from CSV. If ld_ratio is absent, compute cl_max / cd_cruise.\\\"\\\"\\\"\\n    records = []\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        reader = csv.DictReader(f)\\n        fieldnames = [fn.strip() for fn in (reader.fieldnames or [])]\\n        cm = _canon_map(fieldnames)\\n\\n        for rec in reader:\\n            raw = {}\\n            for k, v in rec.items():\\n                if k is None:\\n                    continue\\n                raw[k.strip()] = (v or \\\"\\\").strip()\\n\\n            def get(canon, _raw=raw, _cm=cm):\\n                key = _cm.get(canon)\\n                return _raw.get(key, \\\"\\\") if key else \\\"\\\"\\n\\n            cfg = get(\\\"config\\\")\\n            if not cfg:\\n                continue\\n\\n            cl_s = get(\\\"cl_max\\\")\\n            cd_s = get(\\\"cd_cruise\\\")\\n            ld_s = get(\\\"ld_ratio\\\")\\n\\n            try:\\n                cl = float(cl_s)\\n                cd = float(cd_s)\\n            except ValueError:\\n                continue  # skip malformed rows\\n\\n            if cd == 0.0 and not ld_s:\\n                continue\\n\\n            if ld_s:\\n                try:\\n                    ld = float(ld_s)\\n                except ValueError:\\n                    ld_s = None\\n                    ld = cl / cd\\n            else:\\n                ld_s = None\\n                ld = cl / cd\\n\\n            records.append({\\n                \\\"config\\\": cfg,\\n                \\\"cl\\\": cl,\\n                \\\"cd\\\": cd,\\n                \\\"ld\\\": ld,\\n                \\\"cl_s\\\": cl_s if cl_s else f\\\"{cl:.3f}\\\",\\n                \\\"cd_s\\\": cd_s if cd_s else f\\\"{cd:.4f}\\\",\\n                \\\"ld_s\\\": ld_s if ld_s else f\\\"{ld:.1f}\\\",\\n            })\\n    return records\\n\\n\\n# ----------------------------------------------------------------------------\\n# Statistics computed from the data\\n# ----------------------------------------------------------------------------\\n\\ndef compute_stats(records):\\n    n = len(records)\\n    cl_max_max = max(r[\\\"cl\\\"] for r in records)\\n    cd_mean = sum(r[\\\"cd\\\"] for r in records) / n\\n    ld_vals = [r[\\\"ld\\\"] for r in records if not math.isnan(r[\\\"ld\\\"])]\\n    ld_mean = sum(ld_vals) / len(ld_vals)\\n    best_cfg = max(records, key=lambda r: (r[\\\"ld\\\"] == r[\\\"ld\\\"], r[\\\"ld\\\"]))[\\\"config\\\"]\\n    return {\\n        \\\"count\\\": n,\\n        \\\"cl_max_max\\\": cl_max_max,\\n        \\\"cd_mean\\\": cd_mean,\\n        \\\"ld_mean\\\": ld_mean,\\n        \\\"best_cfg\\\": best_cfg,\\n    }\\n\\n\\n# -------------------------------------------------------------\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 89.568,
+    "setup_s": 0.0,
+    "grade_s": 0.276
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=7794",
+    "run1 exit=0 0.15s",
+    "run2 exit=0 0.11s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

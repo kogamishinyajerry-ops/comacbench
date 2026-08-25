@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_60_7",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nConsolidated Tracker = Existing Task + Additions - Retired\\n\\nThis script:\\n  1. Copies the provided input workbook to `output.xlsx`.\\n  2. Reads the 'Existing Task', 'Additions' and 'Retired' sheets\\n     (auto-detecting whether a title/banner row sits above the header row).\\n  3. Computes the net list of activities:\\n        combined = Existing Task  +  Additions  -  Retired\\n     Rows are removed by exact full-row match first; if that removes\\n     nothing, it falls back to matching on the identifier in column A.\\n     Exact duplicate rows are collapsed (set union semantics), order is kept.\\n  4. Writes the result into the 'Consolidated Tracker' sheet starting at\\n     cell A3, with columns aligned A:E to the header row of the tracker.\\n\\nRequires: pandas, openpyxl   (pip install pandas openpyxl)\\n\\\"\\\"\\\"\\n\\nimport shutil\\nfrom pathlib import Path\\n\\nimport pandas as pd\\nfrom openpyxl import load_workbook\\n\\nOUT_SHEET = \\\"Consolidated Tracker\\\"\\nSTART_ROW = 3      # answer region starts at A3\\nN_COLS = 5         # answer region is A:E\\nANSWER_ROWS = 9    # A3:E11 -> 9 rows\\n\\n\\ndef find_input() -> Path:\\n    \\\"\\\"\\\"Locate the input workbook.\\\"\\\"\\\"\\n    for cand in [\\\"input.xlsx\\\", \\\"input.xls\\\", \\\"book.xlsx\\\", \\\"data.xlsx\\\", \\\"workbook.xlsx\\\"]:\\n        if Path(cand).exists():\\n            return Path(cand)\\n    xl_files = [p for p in Path(\\\".\\\").glob(\\\"*.xls*\\\") if p.name != \\\"output.xlsx\\\"]\\n    if xl_files:\\n        return xl_files[0]\\n    raise FileNotFoundError(\\\"Could not locate the input workbook (.xlsx).\\\")\\n\\n\\ndef resolve_sheet_name(available, wanted):\\n    \\\"\\\"\\\"Match a sheet name tolerantly (exact -> normalized -> substring).\\\"\\\"\\\"\\n    if wanted in available:\\n        return wanted\\n    target = wanted.lower().replace(\\\" \\\", \\\"\\\").strip()\\n    for name in available:\\n        if name.lower().replace(\\\" \\\", \\\"\\\").strip() == target:\\n            return name\\n    for name in available:\\n        if target in name.lower().replace(\\\" \\\", \\\"\\\"):\\n            return name\\n    raise KeyError(f\\\"Sheet '{wanted}' not found. Available sheets: {available}\\\")\\n\\n\\ndef read_sheet(path: Path, wanted: str, default_empty: bool = False) -> pd.DataFrame:\\n    \\\"\\\"\\\"Read a sheet, auto-detecting a banner/title row above the header.\\\"\\\"\\\"\\n    try:\\n        xl = pd.ExcelFile(path)\\n        name = resolve_sheet_name(xl.sheet_names, wanted)\\n        raw = pd.read_excel(path, sheet_name=name, header=None, dtype=object)\\n    except Exception:\\n        if default_empty:\\n            return pd.DataFrame()\\n        raise\\n    raw = raw.dropna(how=\\\"all\\\").dropna(axis=1, how=\\\"all\\\")\\n    if raw.empty:\\n        return pd.DataFrame()\\n    # If the first row is a one-cell banner/title, the real header is row 2\\n    header_idx = 1 if (len(raw) > 1 and raw.iloc[0].notna().sum() <= 1) else 0\\n    header = [str(v).strip() if pd.notna(v) else f\\\"col{i}\\\"\\n              for i, v in enumerate(raw.iloc[header_idx])]\\n    data = raw.iloc[header_idx + 1:].copy()\\n    data.columns = header\\n    return data.dropna(how=\\\"all\\\").reset_index(drop=True)\\n\\n\\ndef norm(v) -> str:\\n    \\\"\\\"\\\"Normalize a cell value for comparison.\\\"\\\"\\\"\\n    if v is None or pd.isna(v):\\n        return \\\"\\\"\\n    return str(v).strip()\\n\\n\\ndef row_key(values, width=N_COLS):\\n    \\\"\\\"\\\"Normalized tuple of the first `width` cells of a row.\\\"\\\"\\\"\\n    vals = list(values)[:width]\\n    vals += [None] * (width - len(vals))\\n    return tuple(norm(v) for v in vals)\\n\\n\\ndef main():\\n    src = find_input()\\n    dst = Path(\\\"output.xlsx\\\")\\n\\n    # 1. Work on a copy of the provided workbook\\n    if dst.exists():\\n        dst.unlink()\\n    shutil.copy(src, dst)\\n\\n    # 2. Read the three source sheets\\n    existing = read_sheet(src, \\\"Existing Task\\\")\\n    additions = read_sheet(src, \\\"Additions\\\", default_empty=True)\\n    retired = read_sheet(src, \\\"Retired\\\", default_empty=True)\\n\\n    # 3. Consolidated Tracker = Existing Task + Additions\\n    combined = pd.concat([existing, additions], ignore_index=True)\\n\\n    wb = load_workbook(dst)\\n    ws = wb[resolve_sheet_name(wb.sheetnames, OUT_SHEET)]\\n\\n    # Align column order with the header already present in the tracker (row 2)\\n    t\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ft1a57ll/model.py\\\", line 22, in <module>\\n    import pandas as pd\\nModuleNotFoundError: No module named 'pandas'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 104.202,
+    "setup_s": 0.0,
+    "grade_s": 0.048
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=6891",
+    "run1 exit=1 0.04s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_384_4",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nCompare the 'Source' and 'Source2' sheets and write the difference to the\\n'Result' sheet (A2:A8) of output.xlsx.\\n\\nRules:\\n  * Values that appear in 'Source' but NOT in 'Source2' -> copied to 'Result'.\\n  * Exception: the value 2 is only included when it is present in BOTH\\n    'Source' and 'Source2' (and then only once).\\n  * Duplicated values are written only once.\\n\\\"\\\"\\\"\\n\\nimport openpyxl\\n\\n\\ndef canonical(value):\\n    \\\"\\\"\\\"Normalize a cell value so comparisons (e.g. 2 vs 2.0 vs '2') work.\\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    if isinstance(value, bool):\\n        return value\\n    if isinstance(value, (int, float)):\\n        return float(value)\\n    return str(value).strip()\\n\\n\\ndef is_two(value):\\n    \\\"\\\"\\\"True if the cell value represents the number 2.\\\"\\\"\\\"\\n    try:\\n        c = canonical(value)\\n        return c is not None and float(c) == 2.0\\n    except (TypeError, ValueError):\\n        return False\\n\\n\\ndef read_column(ws, col=1, start_row=2):\\n    \\\"\\\"\\\"Read all non-empty cell values from a column, starting at start_row.\\\"\\\"\\\"\\n    values = []\\n    for r in range(start_row, ws.max_row + 1):\\n        v = ws.cell(row=r, column=col).value\\n        if v is not None:\\n            values.append(v)\\n    return values\\n\\n\\ndef main():\\n    # Load the provided input workbook (output.xlsx is a copy of it)\\n    wb = openpyxl.load_workbook('input.xlsx')\\n\\n    source_values = read_column(wb['Source'])\\n    source2_set = {canonical(v) for v in read_column(wb['Source2'])}\\n\\n    result = []\\n    seen = set()\\n    for v in source_values:\\n        c = canonical(v)\\n        if c in seen:                      # write each value only once\\n            continue\\n        if is_two(v):\\n            # '2' goes into Result only when it exists in BOTH sources\\n            if c in source2_set:\\n                result.append(v)\\n                seen.add(c)\\n        elif c not in source2_set:\\n            # regular rule: in Source but not in Source2\\n            result.append(v)\\n            seen.add(c)\\n\\n    # Get or create the Result sheet\\n    if 'Result' in wb.sheetnames:\\n        ws_res = wb['Result']\\n    else:\\n        ws_res = wb.create_sheet('Result')\\n\\n    # Write the answer into Result!A2:A8 (blank out unused cells)\\n    for r in range(2, 9):\\n        ws_res.cell(row=r, column=1).value = result[r - 2] if r - 2 < len(result) else None\\n\\n    wb.save('output.xlsx')\\n    print('Result values written to Result!A2:A8:', result)\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 40.549,
+    "setup_s": 0.0,
+    "grade_s": 0.199
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2434",
+    "run1 exit=1 0.2s"
+  ]
+}

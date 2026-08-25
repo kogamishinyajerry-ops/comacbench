@@ -227,6 +227,7 @@ def _chat_completions_answer(
               "code": _SYSTEM_PROMPT_CODE,
               "matlab": _SYSTEM_PROMPT_MATLAB,
               "json": _SYSTEM_PROMPT_JSON,
+              "json_extract": _SYSTEM_PROMPT_JSON,    # awext 型：JSON 输出纪律同 json
               "math_answer": _SYSTEM_PROMPT_MATH}[expect]
 
     def make_body(patch: dict[str, Any] | None) -> bytes:
@@ -268,6 +269,10 @@ def _chat_completions_answer(
             return extract_matlab_block(raw)
         if expect == "json":
             return extract_json(raw)
+        if expect == "json_extract":
+            # 解析在 qa_grounded.extract_json_object（围栏/裸对象均收）——
+            # 此处只剥思考返回原文
+            return strip_think(raw) or None
         return strip_think(raw) or None
 
     last_err = None
@@ -505,6 +510,10 @@ def get_answer(
             return {"answer": {"cl": 0.3, "cd": 0.03, "cm": 0.0},
                     "raw": '{"cl": 0.3, "cd": 0.03, "cm": 0.0}',
                     "attempts": 1, "meta": {"provider": "stub", "seed": seed}}
+        if expect == "json_extract":
+            # awext 型 stub：空 JSON（字段全空 -> requirements 低分地板，可解析）
+            return {"answer": "```json\n{}\n```", "raw": "{}",
+                    "attempts": 1, "meta": {"provider": "stub", "seed": seed}}
         if expect == "free_text":
             raw = _stub_free_text(task, seed, prompt)
             return {"answer": raw, "raw": raw, "attempts": 1,
@@ -541,6 +550,12 @@ def get_answer(
             raw = json.dumps(ref, ensure_ascii=False)
             return {"answer": dict(ref), "raw": raw, "attempts": 1,
                     "meta": {"provider": "oracle"}}
+        if expect == "json_extract":
+            # awext 条款抽取型：回显 reference_json（```json 围栏，与协议一致）
+            ref = task["reference"]["reference_json"]
+            raw = json.dumps(ref, ensure_ascii=False, indent=2)
+            return {"answer": "```json\n" + raw + "\n```", "raw": raw,
+                    "attempts": 1, "meta": {"provider": "oracle"}}
         if expect == "free_text":
             raw = _oracle_free_text(task)
             return {"answer": raw, "raw": raw, "attempts": 1,

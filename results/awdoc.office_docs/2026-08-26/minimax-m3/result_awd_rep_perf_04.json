@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_04",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\n\\nCSV_FILE = \\\"perf_04.csv\\\"\\nOUTPUT_FILE = \\\"report.docx\\\"\\n\\n\\ndef read_csv_rows(path):\\n    with open(path, newline=\\\"\\\") as f:\\n        reader = csv.DictReader(f)\\n        rows = [r for r in reader if r]\\n    return rows\\n\\n\\ndef fmt_num(v, ndigits):\\n    return f\\\"{float(v):.{ndigits}f}\\\"\\n\\n\\ndef main():\\n    rows = read_csv_rows(CSV_FILE)\\n    n = len(rows)\\n\\n    cl_max_vals = [float(r[\\\"cl_max\\\"]) for r in rows]\\n    cd_cruise_vals = [float(r[\\\"cd_cruise\\\"]) for r in rows]\\n    ld_vals = [float(r[\\\"ld_ratio\\\"]) for r in rows]\\n\\n    cl_max_max = max(cl_max_vals)\\n    cd_cruise_mean = sum(cd_cruise_vals) / len(cd_cruise_vals)\\n    ld_mean = sum(ld_vals) / len(ld_vals)\\n    best_idx = ld_vals.index(max(ld_vals))\\n    best_config = rows[best_idx][\\\"config\\\"]\\n\\n    doc = Document()\\n\\n    doc.add_heading(\\\"Engineering Test Report — Performance Sweep 04\\\", level=0)\\n\\n    doc.add_heading(\\\"Overview\\\", level=1)\\n    doc.add_paragraph(\\n        f\\\"This report summarizes the performance test data contained in \\\"\\n        f\\\"perf_04.csv. The dataset comprises {n} data records (excluding \\\"\\n        f\\\"the header row). Key aerodynamic metrics — maximum lift \\\"\\n        f\\\"coefficient (CLmax), cruise drag coefficient (CDcruise), and the \\\"\\n        f\\\"lift-to-drag ratio (L/D) — are reported for each configuration.\\\"\\n    )\\n\\n    doc.add_heading(\\\"Results table\\\", level=1)\\n    table = doc.add_table(rows=1 + n, cols=4)\\n    table.style = \\\"Table Grid\\\"\\n\\n    headers = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n    for i, h in enumerate(headers):\\n        table.rows[0].cells[i].text = h\\n\\n    for r_idx, row in enumerate(rows, start=1):\\n        cells = table.rows[r_idx].cells\\n        cells[0].text = row[\\\"config\\\"]\\n        cells[1].text = fmt_num(row[\\\"cl_max\\\"], 3)\\n        cells[2].text = fmt_num(row[\\\"cd_cruise\\\"], 4)\\n        cells[3].text = fmt_num(row[\\\"ld_ratio\\\"], 1)\\n\\n    doc.add_heading(\\\"Summary\\\", level=1)\\n    summary_para = doc.add_paragraph()\\n    summary_para.add_run(\\n        f\\\"Across the {n} configurations tested, the maximum lift coefficient \\\"\\n        f\\\"reached CLmax max = {cl_max_max:.3f}. The average cruise drag \\\"\\n        f\\\"coefficient was CDcruise mean = {cd_cruise_mean:.4f}, while the \\\"\\n        f\\\"mean lift-to-drag ratio was L/D mean = {ld_mean:.1f}. The \\\"\\n        f\\\"configuration that delivered the highest aerodynamic efficiency \\\"\\n        f\\\"(maximum L/D) was {best_config}.\\\"\\n    )\\n\\n    doc.add_heading(\\\"Conclusion\\\", level=1)\\n    doc.add_paragraph(\\n        f\\\"The performance sweep indicates that configuration {best_config} \\\"\\n        f\\\"offers the most favorable trade-off between lift generation and \\\"\\n        f\\\"cruise drag, achieving the highest L/D ratio in the dataset. The \\\"\\n        f\\\"average L/D of {ld_mean:.1f} and the peak CLmax of {cl_max_max:.3f} \\\"\\n        f\\\"provide useful benchmarks for downstream design refinement. \\\"\\n        f\\\"No single configuration dominates across all metrics, so further \\\"\\n        f\\\"trade studies are recommended to balance lift capability against \\\"\\n        f\\\"drag penalty for the intended mission profile.\\\"\\n    )\\n\\n    doc.save(OUTPUT_FILE)\\n    print(f\\\"Wrote {OUTPUT_FILE} with {n} data rows.\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 5.039,
+    "setup_s": 0.0,
+    "grade_s": 0.231
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=3171",
+    "run1 exit=0 0.1s",
+    "run2 exit=0 0.11s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

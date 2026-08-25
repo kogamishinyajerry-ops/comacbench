@@ -1,0 +1,57 @@
+id: ssb_384_4
+registry_id: spreadsheetbench.verified_subset
+domain: office_productivity
+task_type: design_artifact
+model_profile: plain_llm
+assets_revision: ssb400@adapted-2026-08-26
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- filesystem-copy
+input:
+  prompt_file: tasks/spreadsheetbench.verified_subset/ssb_384_4.md
+  prompt_sha256: f902a5336eb5953e1161b1af1ca2ca13d6f3c1711ff52e1d4775c579ac1edcf2
+  assets:
+  - path: data/spreadsheetbench/verified_400/inputs/ssb_384_4_init.xlsx
+    digest: 7b8839b93688267399cf867bcaaf13b662a3074529e83bf16697b6c50319e9a8
+output_contract:
+- output.xlsx
+reference:
+  source: SpreadsheetBench verified_400 golden（CC-BY-SA-4.0；answer 区域静态值）
+  revision: ssb400@adapted-2026-08-26
+  values:
+    answer_sheet: Result
+    answer_position: "Result'!A2:A8"
+  rel_tol: 0.005
+  uncertainty_note: answer 区域单元格级比对（静态值；公式依赖题已筛除）
+grader:
+  artifact_kind: formula_cell
+  answer_format: code
+  validity_gate: true
+  answer_sheet: Result
+  answer_position: "Result'!A2:A8"
+  golden_workbook: data/spreadsheetbench/verified_400/gold/ssb_384_4_golden.xlsx
+  oracle_source: data/spreadsheetbench/verified_400/gold_scripts/ssb_384_4.py
+  numeric_rel_tol: 0.005
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=answer 区域命中；requirements=工作簿可读+sheet 保持
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: SpreadsheetBench verified_400 子集（HF KAKA22/SpreadsheetBench）
+  license: CC-BY-SA-4.0（SA 衍生同许可——superwing 先例口径）
+  status: confirmed-dataset
+  mirror_allowed: true
+  revision: ssb400@adapted-2026-08-26

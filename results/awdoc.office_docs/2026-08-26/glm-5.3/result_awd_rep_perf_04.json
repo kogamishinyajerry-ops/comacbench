@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_04",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"Generate report.docx (engineering test report) anchored to perf_04.csv data.\\\"\\\"\\\"\\n\\nimport csv\\nfrom decimal import Decimal, ROUND_HALF_UP\\n\\nfrom docx import Document\\n\\nCSV_PATH = \\\"perf_04.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\nCOLUMNS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\n\\ndef read_records(path):\\n    \\\"\\\"\\\"Read the CSV and return list of [config, cl_max, cd_cruise, ld_ratio] raw strings.\\\"\\\"\\\"\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        rows = [r for r in csv.reader(f) if r and any(c.strip() for c in r)]\\n    header = [h.strip() for h in rows[0]]\\n    lookup = {h.lower(): i for i, h in enumerate(header)}\\n    idx = [lookup[c] for c in COLUMNS]\\n    need = max(idx) + 1\\n    return [[row[i].strip() for i in idx] for row in rows[1:] if len(row) >= need]\\n\\n\\ndef fmt(value, places):\\n    \\\"\\\"\\\"Round a Decimal to `places` decimals, half-up, and render as a fixed string.\\\"\\\"\\\"\\n    return str(Decimal(value).quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP))\\n\\n\\n# ---------------------------------------------------------------- load + compute\\nrecords = read_records(CSV_PATH)\\nn = len(records)\\n\\ncl_max_vals = [Decimal(r[1]) for r in records]\\ncd_vals = [Decimal(r[2]) for r in records]\\nld_vals = [Decimal(r[3]) for r in records]\\n\\ncl_max_max = max(cl_max_vals)                       # maximum CLmax\\ncd_mean = sum(cd_vals) / n                          # mean CDcruise\\nld_mean = sum(ld_vals) / n                          # mean L/D\\nbest_config = records[ld_vals.index(max(ld_vals))][0]  # config with max L/D\\n\\ncl_max_max_s = fmt(cl_max_max, 3)   # e.g. 0.613\\ncd_mean_s = fmt(cd_mean, 4)         # e.g. 0.0333\\nld_mean_s = fmt(ld_mean, 1)         # e.g. 17.1\\n\\n# ---------------------------------------------------------------- build document\\ndoc = Document()\\n\\ndoc.add_heading(\\\"Engineering Test Report – Aerodynamic Performance Data\\\", level=0)\\n\\ndoc.add_heading(\\\"Overview\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"This engineering test report summarizes the aerodynamic performance measurements \\\"\\n    f\\\"recorded in {CSV_PATH}. The dataset comprises N = {n} data records (the number of \\\"\\n    f\\\"data rows in the CSV, excluding the header), one for each tested configuration.\\\"\\n)\\n\\ndoc.add_heading(\\\"Results table\\\", level=1)\\ndoc.add_paragraph(\\n    \\\"The table below reproduces the source data for every configuration, with the columns \\\"\\n    \\\"config, cl_max, cd_cruise, and ld_ratio shown with the same values and rounding as \\\"\\n    \\\"the input file.\\\"\\n)\\n\\ntable = doc.add_table(rows=n + 1, cols=len(COLUMNS))\\ntable.style = \\\"Table Grid\\\"\\nfor j, name in enumerate(COLUMNS):\\n    table.cell(0, j).text = name\\nfor i, rec in enumerate(records, start=1):\\n    for j, value in enumerate(rec):\\n        table.cell(i, j).text = value\\n\\ndoc.add_heading(\\\"Summary\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"Key statistics computed directly from the {n} data records: the maximum CLmax is \\\"\\n    f\\\"{cl_max_max_s}; the mean CDcruise is {cd_mean_s}; the mean L/D is {ld_mean_s}; and \\\"\\n    f\\\"the best configuration, defined as the one achieving the maximum L/D, is \\\"\\n    f\\\"{best_config}.\\\"\\n)\\n\\ndoc.add_heading(\\\"Conclusion\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"Based on the {n} measured records, configuration {best_config} achieved the highest \\\"\\n    f\\\"lift-to-drag ratio ({ld_mean_s} being the fleet-wide mean L/D), with a maximum \\\"\\n    f\\\"observed CLmax of {cl_max_max_s} and a mean cruise drag coefficient of {cd_mean_s} \\\"\\n    f\\\"across all configurations. These values, derived entirely from the test data, \\\"\\n    f\\\"support carrying configuration {best_config} forward for further development.\\\"\\n)\\n\\ndoc.save(OUT_PATH)\\nprint(f\\\"Wrote {OUT_PATH} containing {n} data records.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 9, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 152.15,
+    "setup_s": 0.0,
+    "grade_s": 0.237
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3633",
+    "run1 exit=0 0.12s",
+    "run2 exit=0 0.1s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

@@ -58,7 +58,7 @@ def radar(ax, labels, series, title):
 labels1 = ["航空知识\nknowledge\n(cfdquery/aeroengqa/mechvqa)", "科学编程\ncoding\n(scicode/cfdcode)", "CAD/几何\ncad_geometry\n(cadgen/openvsp)",
            "CFD\ncfd\n(superwing/hilift/foam)", "结构\nstructures\n(calculix/simjeb)", "动力\npropulsion\n(pycycle 28题)",
            "飞控\nflight_control\n(gtm v1+hard)", "总体/MDO\nmdo_design\n(aviary 27题)", "鲁棒审计\nrobustness_audit\n(横切)",
-           "工程办公\noffice_productivity\n(engtable 19题)"]
+           "工程办公\noffice_productivity\n(4基准 74题)"]
 # 覆盖度 = 维度内 integrated 基准数 / registry 在册基准数（integrated+proposed+paused-env+deferred）
 # 2026-08-24 structures 解零更新：calculix.fea_basic integrated（simjeb/engdesign 仍 proposed）
 # —— structures 0.00→0.33，九维全部有数（全景闭合）
@@ -74,7 +74,7 @@ radar(ax1, labels1, [
     ("覆盖度 2026-08-24（已集成/在册）", coverage, "#1f77b4", True, ""),
     ("双基线可得性（M3+GLM 系落盘）", baseline, "#d62728", True, ""),
     ("覆盖度 08-24 上午时点（参照）", coverage_prev, "#999999", False, "--"),
-], "评测能力雷达·十维（v0.4，2026-08-25 办公维落地）\n22/43 基准 integrated · 2458 任务 · 集成项双基线全覆盖 · 10/10 维有数")
+], "评测能力雷达·十维（v0.4，2026-08-25 办公维落地）\n25/46 基准 integrated · 2513 任务 · 集成项双基线全覆盖 · 10/10 维有数")
 fig1.tight_layout()
 fig1.savefig(os.path.join(OUT, "radar_nine_dim.png"), dpi=160, bbox_inches="tight")
 plt.close(fig1)

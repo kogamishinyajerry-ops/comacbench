@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_04",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\n\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\nCSV_PATH = \\\"perf_04.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\n\\nCOLUMNS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\n\\ndef norm_header(h):\\n    return h.strip().lower().replace(\\\" \\\", \\\"_\\\").replace(\\\"-\\\", \\\"_\\\")\\n\\n\\n# ---------------------------------------------------------------- read data\\nwith open(CSV_PATH, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n    reader = csv.reader(f)\\n    raw_rows = [row for row in reader if row and any(c.strip() for c in row)]\\n\\nheader = [norm_header(h) for h in raw_rows[0]]\\ndata_rows = [[c.strip() for c in row] for row in raw_rows[1:]]\\n\\ncol_idx = {name: header.index(name) for name in COLUMNS}\\n\\nrecords = [{name: row[col_idx[name]] for name in COLUMNS} for row in data_rows]\\n\\n# ------------------------------------------------------- compute statistics\\ncl_max_vals = [float(r[\\\"cl_max\\\"]) for r in records]\\ncd_vals = [float(r[\\\"cd_cruise\\\"]) for r in records]\\nld_vals = [float(r[\\\"ld_ratio\\\"]) for r in records]\\n\\nn = len(records)\\nclmax_max = max(cl_max_vals)\\ncd_mean = sum(cd_vals) / n\\nld_mean = sum(ld_vals) / n\\nbest_idx = max(range(n), key=lambda i: ld_vals[i])\\nbest_config = records[best_idx][\\\"config\\\"]\\n\\nclmax_max_s = f\\\"{clmax_max:.3f}\\\"   # e.g. 0.613\\ncd_mean_s = f\\\"{cd_mean:.4f}\\\"       # e.g. 0.0333\\nld_mean_s = f\\\"{ld_mean:.1f}\\\"       # e.g. 17.1\\n\\nprint(f\\\"records={n} clmax_max={clmax_max_s} cd_mean={cd_mean_s} \\\"\\n      f\\\"ld_mean={ld_mean_s} best={best_config}\\\")\\n\\n# ---------------------------------------------------------------- build deck\\nprs = Presentation()\\ntitle_layout = prs.slide_layouts[0]      # Title slide\\ncontent_layout = prs.slide_layouts[5]    # Title only\\n\\n# Slide 1 — Title\\ns1 = prs.slides.add_slide(title_layout)\\ns1.shapes.title.text = \\\"Engineering Test Briefing\\\"\\ns1.placeholders[1].text = \\\"Aerodynamic Performance Data Review\\\"\\n\\n# Slide 2 — Data table\\ns2 = prs.slides.add_slide(content_layout)\\ns2.shapes.title.text = \\\"Data\\\"\\n\\nn_table_rows = n + 1\\ntbl_shape = s2.shapes.add_table(\\n    n_table_rows, len(COLUMNS),\\n    Inches(0.7), Inches(1.4), Inches(8.6), Inches(0.32 * n_table_rows),\\n)\\ntable = tbl_shape.table\\n\\nfor j, name in enumerate(COLUMNS):\\n    cell = table.cell(0, j)\\n    cell.text = name\\n    for p in cell.text_frame.paragraphs:\\n        for run in p.runs:\\n            run.font.size = Pt(14)\\n            run.font.bold = True\\n\\nfor i, rec in enumerate(records, start=1):\\n    for j, name in enumerate(COLUMNS):\\n        cell = table.cell(i, j)\\n        cell.text = rec[name]\\n        for p in cell.text_frame.paragraphs:\\n            for run in p.runs:\\n                run.font.size = Pt(14)\\n\\n# Slide 3 — Summary (numbers computed from the CSV)\\ns3 = prs.slides.add_slide(content_layout)\\ns3.shapes.title.text = \\\"Summary\\\"\\n\\nsummary_lines = [\\n    f\\\"CLmax max = {clmax_max_s}\\\",\\n    f\\\"CDcruise mean = {cd_mean_s}\\\",\\n    f\\\"L/D mean = {ld_mean_s}\\\",\\n    f\\\"best config (max L/D) = {best_config}\\\",\\n]\\n\\ntb = s3.shapes.add_textbox(Inches(0.8), Inches(1.6), Inches(8.4), Inches(4.0))\\ntf = tb.text_frame\\ntf.word_wrap = True\\nfor k, line in enumerate(summary_lines):\\n    p = tf.paragraphs[0] if k == 0 else tf.add_paragraph()\\n    p.text = \\\"• \\\" + line\\n    p.font.size = Pt(22)\\n    p.space_after = Pt(10)\\n\\n# Slide 4 — Next steps\\ns4 = prs.slides.add_slide(content_layout)\\ns4.shapes.title.text = \\\"Next steps\\\"\\n\\nnext_steps = [\\n    \\\"Review the best configuration identified in the summary\\\",\\n    \\\"Collect additional repeat runs to confirm the observed trends\\\",\\n    \\\"Circulate this briefing to the engineering team for comment\\\",\\n]\\n\\ntb4 = s4.shapes.add_textbox(Inches(0.8), Inches(1.6), Inches(8.4), Inches(4.0))\\ntf4 = tb4.text_frame\\ntf4.word_wrap = True\\nfor k, line in enumerate(next_steps):\\n    p = tf4.paragraphs[0] if k == 0 else tf4.add_paragraph()\\n    p.text = \\\"• \\\" + line\\n    p.font.size = Pt(22)\\n    p.space_after = Pt(10)\\n\\nprs.save(OUT_PATH)\\nprint(f\\\"Saved {OUT_PATH} ({len(prs.slides)} slides)\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 48.576,
+    "setup_s": 0.0,
+    "grade_s": 0.293
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3878",
+    "run1 exit=0 0.16s",
+    "run2 exit=0 0.12s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

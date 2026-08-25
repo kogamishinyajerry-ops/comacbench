@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_433_47",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\ndef balance_residuals():\\n    # Load the workbook (output.xlsx is a copy of the input workbook)\\n    wb = openpyxl.load_workbook('output.xlsx')\\n    ws = wb['Sheet1']\\n    \\n    # Process data rows (row 1 is header, data is rows 2-21)\\n    for row in range(2, 22):\\n        # Read unit values from columns A-E (units 1 to 5)\\n        units = []\\n        for col in range(1, 6):\\n            val = ws.cell(row=row, column=col).value\\n            units.append(float(val) if val is not None else 0.0)\\n        \\n        # Read minimum and maximum constraints from columns F and G\\n        min_val = ws.cell(row=row, column=6).value\\n        min_val = float(min_val) if min_val is not None else 0.0\\n        \\n        max_val = ws.cell(row=row, column=7).value\\n        max_val = float(max_val) if max_val is not None else float('inf')\\n        \\n        # Read residual from column I\\n        residual = ws.cell(row=row, column=9).value\\n        residual = float(residual) if residual is not None else 0.0\\n        \\n        # Balance the residual\\n        if residual > 0:\\n            # Positive residual: subtract from units, starting from unit 5 (index 4) to unit 1 (index 0)\\n            remaining = residual\\n            for i in range(4, -1, -1):  # E, D, C, B, A\\n                if units[i] == 0:\\n                    continue  # Skip cells that are zero (don't change them)\\n                # Calculate how much we can subtract, limited by min constraint\\n                subtract_amount = min(remaining, units[i] - min_val)\\n                if subtract_amount > 0:\\n                    units[i] -= subtract_amount\\n                    remaining -= subtract_amount\\n                if remaining <= 0:\\n                    break\\n                    \\n        elif residual < 0:\\n            # Negative residual: add to units, starting from unit 1 (index 0) to unit 5 (index 4)\\n            remaining = -residual\\n            for i in range(0, 5):  # A, B, C, D, E\\n                if units[i] == 0:\\n                    continue  # Skip cells that are zero (don't change them)\\n                # Calculate how much we can add, limited by max constraint\\n                add_amount = min(remaining, max_val - units[i])\\n                if add_amount > 0:\\n                    units[i] += add_amount\\n                    remaining -= add_amount\\n                if remaining <= 0:\\n                    break\\n        \\n        # Write adjusted unit values back to columns A-E (preserving original location)\\n        for i, val in enumerate(units):\\n            ws.cell(row=row, column=i+1).value = val\\n        \\n        # Set column I value to 0 at the end\\n        ws.cell(row=row, column=9).value = 0\\n    \\n    # Save the workbook\\n    wb.save('output.xlsx')\\n\\nif __name__ == \\\"__main__\\\":\\n    balance_residuals()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'output.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 92.989,
+    "setup_s": 0.0,
+    "grade_s": 0.338
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2775",
+    "run1 exit=1 0.33s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_267_21",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\n\\n# Load the workbook\\nwb = load_workbook('output.xlsx')\\n\\n# Get the sheets\\nsh1 = wb['SH1']\\nrp1 = wb['RP1']\\nmerging = wb['merging']\\n\\n\\ndef find_column(sheet, keyword):\\n    \\\"\\\"\\\"Find column index (1-based) whose header (row 1) contains keyword.\\\"\\\"\\\"\\n    keyword = keyword.lower()\\n    for col in range(1, sheet.max_column + 1):\\n        header = sheet.cell(row=1, column=col).value\\n        if header is not None and keyword in str(header).lower():\\n            return col\\n    return None\\n\\n\\n# Identify ID and QTY columns in each source sheet\\nsh1_id_col = find_column(sh1, 'id')\\nsh1_qty_col = find_column(sh1, 'qty')\\nrp1_id_col = find_column(rp1, 'id')\\nrp1_qty_col = find_column(rp1, 'qty')\\n\\n\\ndef build_lookup(sheet, id_col, qty_col):\\n    \\\"\\\"\\\"Return a dict mapping ID -> QTY from the given sheet.\\\"\\\"\\\"\\n    lookup = {}\\n    if id_col is None or qty_col is None:\\n        return lookup\\n    for row in range(2, sheet.max_row + 1):\\n        id_val = sheet.cell(row=row, column=id_col).value\\n        qty_val = sheet.cell(row=row, column=qty_col).value\\n        if id_val is None:\\n            continue\\n        # Treat None or empty string as blank\\n        if qty_val is None or (isinstance(qty_val, str) and qty_val.strip() == ''):\\n            lookup[id_val] = None\\n        else:\\n            lookup[id_val] = qty_val\\n    return lookup\\n\\n\\nsh1_lookup = build_lookup(sh1, sh1_id_col, sh1_qty_col)\\nrp1_lookup = build_lookup(rp1, rp1_id_col, rp1_qty_col)\\n\\n\\ndef resolve(lookup, key):\\n    \\\"\\\"\\\"Return the QTY for the key, or '-' if missing / blank.\\\"\\\"\\\"\\n    if key is None:\\n        return \\\"-\\\"\\n    if key not in lookup:\\n        return \\\"-\\\"\\n    val = lookup[key]\\n    if val is None:\\n        return \\\"-\\\"\\n    if isinstance(val, str) and val.strip() == '':\\n        return \\\"-\\\"\\n    return val\\n\\n\\n# Fill the merging sheet rows 2..11, columns C (3) and D (4)\\nfor row in range(2, 12):\\n    id_val = merging.cell(row=row, column=2).value  # Column B\\n    try:\\n        merging.cell(row=row, column=3).value = resolve(sh1_lookup, id_val)\\n    except Exception:\\n        merging.cell(row=row, column=3).value = \\\"-\\\"\\n    try:\\n        merging.cell(row=row, column=4).value = resolve(rp1_lookup, id_val)\\n    except Exception:\\n        merging.cell(row=row, column=4).value = \\\"-\\\"\\n\\n# Save the workbook\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'output.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 11.468,
+    "setup_s": 0.0,
+    "grade_s": 0.23
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2308",
+    "run1 exit=1 0.23s"
+  ]
+}

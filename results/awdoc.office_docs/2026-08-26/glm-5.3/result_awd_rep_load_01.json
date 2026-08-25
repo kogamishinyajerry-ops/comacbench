@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_load_01",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\n\\nCSV_PATH = \\\"load_01.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\nREQUIRED = [\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"]\\n\\n\\ndef norm(s: str) -> str:\\n    return s.strip().lower().replace(\\\" \\\", \\\"_\\\").replace(\\\"-\\\", \\\"_\\\")\\n\\n\\n# ------------------------------------------------------------------\\n# 1. Read the source data, preserving the original text formatting\\n# ------------------------------------------------------------------\\nwith open(CSV_PATH, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n    reader = csv.reader(f)\\n    header = next(reader)\\n    raw_rows = [row for row in reader if any(c.strip() for c in row)]\\n\\nnorm_cols = [norm(c) for c in header]\\nidx = {}\\nfor name in REQUIRED:\\n    if name in norm_cols:\\n        idx[name] = norm_cols.index(name)\\n    else:\\n        raise KeyError(f\\\"Required column '{name}' not found in {CSV_PATH}: {header}\\\")\\n\\ntable_rows = []\\nload_values = []\\ncycle_values = []\\nfor row in raw_rows:\\n    case_raw = row[idx[\\\"case\\\"]].strip()\\n    load_raw = row[idx[\\\"load_factor\\\"]].strip()\\n    cycles_raw = row[idx[\\\"cycles\\\"]].strip()\\n    table_rows.append((case_raw, load_raw, cycles_raw))\\n    load_values.append(float(load_raw))\\n    cycle_values.append(int(float(cycles_raw)))\\n\\n# ------------------------------------------------------------------\\n# 2. Compute statistics from the CSV values (no hand-entered numbers)\\n# ------------------------------------------------------------------\\nn = len(table_rows)\\nmax_load = max(load_values)\\nmean_load = sum(load_values) / n\\ntotal_cycles = sum(cycle_values)\\n\\n\\ndef fmt(x: float, nd: int = 2) -> str:\\n    \\\"\\\"\\\"Round to nd decimals and trim trailing zeros (2.35 -> '2.35', 1.70 -> '1.7').\\\"\\\"\\\"\\n    s = f\\\"{x:.{nd}f}\\\".rstrip(\\\"0\\\").rstrip(\\\".\\\")\\n    return s if s else \\\"0\\\"\\n\\n\\nmax_disp = fmt(max_load, 2)\\nmean_disp = fmt(mean_load, 2)\\n\\n# ------------------------------------------------------------------\\n# 3. Build the document\\n# ------------------------------------------------------------------\\ndoc = Document()\\n\\n# Title (Heading)\\ndoc.add_heading(\\\"Engineering Test Report — Load Case 01\\\", level=1)\\n\\n# Overview\\ndoc.add_heading(\\\"Overview\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"This report summarizes the engineering load-test data recorded in {CSV_PATH}. \\\"\\n    f\\\"The input file contains N = {n} data rows (test records), excluding the header row.\\\"\\n)\\n\\n# Results table\\ndoc.add_heading(\\\"Results table\\\", level=1)\\ntable = doc.add_table(rows=1, cols=len(REQUIRED))\\ntry:\\n    table.style = \\\"Table Grid\\\"\\nexcept KeyError:\\n    pass\\n\\nfor j, name in enumerate(REQUIRED):\\n    cell = table.rows[0].cells[j]\\n    run = cell.paragraphs[0].add_run(name)\\n    run.bold = True\\n\\nfor case_raw, load_raw, cycles_raw in table_rows:\\n    cells = table.add_row().cells\\n    cells[0].text = case_raw\\n    cells[1].text = load_raw\\n    cells[2].text = cycles_raw\\n\\n# Summary (values computed above, formatted as specified)\\ndoc.add_heading(\\\"Summary\\\", level=1)\\ndoc.add_paragraph(\\n    f\\\"Across the dataset, N cases = {n}. The recorded load factors reached a \\\"\\n    f\\\"load max = {max_disp}, with a load mean = {mean_disp} over all runs. \\\"\\n    f\\\"The accumulated endurance testing amounts to total cycles = {total_cycles}.\\\"\\n)\\n\\n# Conclusion\\ndoc.add_heading(\\\"Conclusion\\\", level=1)\\ndoc.add_paragraph(\\n    \\\"The measurements summarized above were computed directly from the source data file, \\\"\\n    \\\"and the complete record set is reproduced verbatim in the results table. The aggregate \\\"\\n    \\\"statistics reported in the summary section can each be traced back to the individual \\\"\\n    \\\"data rows, so this document may serve as the reference record for any follow-on \\\"\\n    \\\"structural assessment of this load case.\\\"\\n)\\n\\ndoc.save(OUT_PATH)\\nprint(f\\\"Wrote {OUT_PATH}: {n} data rows, {len(table.rows)} table rows (1 header + {n}).\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"4/4\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 87.685,
+    "setup_s": 0.0,
+    "grade_s": 0.242
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3723",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.09s",
+    "physics=1.0 requirements=1.0 anchors=4/4"
+  ]
+}

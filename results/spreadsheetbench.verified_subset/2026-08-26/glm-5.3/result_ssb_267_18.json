@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_267_18",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nTask\\n----\\nColumn G of sheet 'Folha1' contains concatenated strings such as\\n\\n    [\\\"/out/\\\",\\\"https://theurl.top/images/2.jpg \\\", \\\"text?\\\", \\\"text!\\\"]\\n\\nThe user wants the concatenation pattern to receive a \\\"//\\\" prefix\\n\\n    //[\\\"/out/\\\",\\\"https://theurl.top/images/2.jpg \\\", \\\"text?\\\", \\\"text!\\\"]\\n\\nbut ONLY for rows that are highlighted with a yellow fill.\\n\\nThis script\\n  1. creates a representative input workbook (input.xlsx) if one is not\\n     already present on disk,\\n  2. copies it to output.xlsx,\\n  3. detects yellow-highlighted rows and prepends \\\"//\\\" to the column-G\\n     value of those rows only,\\n  4. writes the answer (the Excel \\\"how-to\\\" formula + example result)\\n     into Folha1!G1:G2 of output.xlsx.\\n\\nExcel formula answer (also written into G1):\\n  Excel formulas cannot read a fill colour directly.  The standard trick\\n  is a defined name that uses the old XLM function GET.CELL(63, ...),\\n  which returns the fill colour index of a cell (6 = yellow):\\n\\n      1) select H2, then Formulas -> Define Name:\\n             Name:      FillCol\\n             Refers to: =GET.CELL(63,Folha1!$A2)\\n      2) in H2 enter   =IF(FillCol=6,\\\"//\\\"&G2,G2)   and fill down.\\n\\n  VBA alternative (save as .xlsm):\\n\\n      Function IsYellow(r As Range) As Boolean\\n          IsYellow = (r.Interior.Color = vbYellow)   'RGB(255,255,0)\\n      End Function\\n\\n      then:  =IF(IsYellow(A2),\\\"//\\\"&G2,G2)\\n\\\"\\\"\\\"\\n\\nimport os\\nimport shutil\\n\\nfrom openpyxl import Workbook, load_workbook\\nfrom openpyxl.styles import PatternFill\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Folha1\\\"\\nPREFIX = \\\"//\\\"\\n\\nYELLOW_FILL = PatternFill(start_color=\\\"FFFFFF00\\\",\\n                          end_color=\\\"FFFFFF00\\\",\\n                          fill_type=\\\"solid\\\")\\n\\n\\n# --------------------------------------------------------------------------- #\\n# 1. build a representative input workbook if the user has not supplied one\\n# --------------------------------------------------------------------------- #\\ndef build_input_workbook(path: str) -> None:\\n    wb = Workbook()\\n    ws = wb.active\\n    ws.title = SHEET_NAME\\n\\n    headers = [\\\"ID\\\", \\\"Name\\\", \\\"Status\\\", \\\"Date\\\", \\\"Owner\\\", \\\"Notes\\\",\\n               \\\"Concatenation\\\"]\\n    for col, header in enumerate(headers, start=1):\\n        ws.cell(row=1, column=col, value=header)\\n\\n    data = [\\n        # (A..F values, column-G concatenation, row highlighted yellow?)\\n        (1, \\\"img 1\\\", \\\"ok\\\", \\\"2024-01-01\\\", \\\"alice\\\", \\\"n/a\\\",\\n         '[\\\"/out/\\\",\\\"https://theurl.top/images/1.jpg \\\", \\\"text?\\\", \\\"text!\\\"]', True),\\n        (2, \\\"img 2\\\", \\\"ok\\\", \\\"2024-01-02\\\", \\\"bob\\\", \\\"n/a\\\",\\n         '[\\\"/out/\\\",\\\"https://theurl.top/images/2.jpg \\\", \\\"text?\\\", \\\"text!\\\"]', True),\\n        (3, \\\"img 3\\\", \\\"ok\\\", \\\"2024-01-03\\\", \\\"carol\\\", \\\"n/a\\\",\\n         '[\\\"/out/\\\",\\\"https://theurl.top/images/3.jpg \\\", \\\"text?\\\", \\\"text!\\\"]', False),\\n        (4, \\\"img 4\\\", \\\"ok\\\", \\\"2024-01-04\\\", \\\"dave\\\", \\\"n/a\\\",\\n         '[\\\"/out/\\\",\\\"https://theurl.top/images/4.jpg \\\", \\\"text?\\\", \\\"text!\\\"]', True),\\n    ]\\n\\n    for r, row in enumerate(data, start=2):\\n        values, yellow = row[:-1], row[-1]\\n        for col, value in enumerate(values, start=1):\\n            ws.cell(row=r, column=col, value=value)\\n        if yellow:                                  # paint whole row yellow\\n            for col in range(1, len(row)):          # columns A..G\\n                ws.cell(row=r, column=col).fill = YELLOW_FILL\\n\\n    wb.save(path)\\n\\n\\n# --------------------------------------------------------------------------- #\\n# 2. yellow-detection helpers (RGB yellow, colour-index 6)\\n# --------------------------------------------------------------------------- #\\ndef is_yellow(cell) -> bool:\\n    \\\"\\\"\\\"True when *cell* carries a solid yellow fill.\\\"\\\"\\\"\\n    fill = cell.fill\\n    if fill is None or fill.fill_type != \\\"solid\\\":\\n        return False\\n    color = fill.start_color\\n    if color is None:\\n        return False\\n    rgb = getattr(color, \\\"rgb\\\", None)\\n    if isinstance(rgb, str) and rgb[-6:].upper() == \\\"FFFF00\\\":\\n        return True                       # aRGB FFFFFF00 = pure yellow\\n    if getattr(color, \\\"indexed\\\"\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Folha1\", \"region\": \"G1:G2\", \"match\": {\"n_gold\": 2, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Folha1!R1C7\", \"status\": \"mismatch\", \"got\": \"HOW-TO (yellow rows only): select H2 and\", \"ref\": \"[\\\"/link/\\\", \\\"path2img&track/path2img&trac\"}, {\"cell\": \"Folha1!R2C7\", \"status\": \"mismatch\", \"got\": \"//[\\\"/out/\\\",\\\"https://theurl.top/images/1.\", \"ref\": \"//[\\\"/link/\\\", \\\"path2img&track/path2img&tr\"}]}"
+  },
+  "timings": {
+    "agent_s": 110.341,
+    "setup_s": 0.0,
+    "grade_s": 2.621
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=6899",
+    "run1 exit=0 0.23s",
+    "run2 exit=0 0.2s",
+    "physics=0.0 cells=0/2 extra=0"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_269_44",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nTask\\n----\\nThe user needs a corrected VBA macro that deletes the FOUR rows located\\nimmediately ABOVE (before) every occurrence of the text \\\"Chassis\\\" in\\ncolumn A of the sheet named \\\"Import Data\\\".  In the user's workbook the two\\n\\\"Chassis\\\" entries sit in A2 and A3, so the corrected macro must also cope\\nwith the case where fewer than four rows exist above a \\\"Chassis\\\" cell\\n(i.e. it must never reference/delete rows above row 1 - the bug that makes\\nthe original top-down code crash).  The fix is to loop from the BOTTOM of\\nthe data upwards and clamp the start of the deleted range to row 1.\\n\\nDeliverable\\n-----------\\nThe corrected 15-line VBA macro is written (one line per cell) into\\nSheet1!A1:A15 of output.xlsx, which is created as a copy of the provided\\ninput workbook.\\n\\\"\\\"\\\"\\n\\nimport shutil\\nfrom pathlib import Path\\n\\nfrom openpyxl import Workbook, load_workbook\\n\\n# ----------------------------------------------------------------------\\n# 0.  Paths\\n# ----------------------------------------------------------------------\\nWORKDIR = Path(__file__).resolve().parent if \\\"__file__\\\" in globals() else Path(\\\".\\\")\\nOUTPUT_PATH = WORKDIR / \\\"output.xlsx\\\"\\n\\n\\n# ----------------------------------------------------------------------\\n# 1.  Locate the provided input workbook and copy it to output.xlsx\\n# ----------------------------------------------------------------------\\ndef find_input_workbook():\\n    for name in (\\\"input.xlsx\\\", \\\"input.xlsm\\\", \\\"input.xls\\\",\\n                 \\\"Import Data.xlsx\\\", \\\"data.xlsx\\\", \\\"workbook.xlsx\\\"):\\n        candidate = WORKDIR / name\\n        if candidate.exists():\\n            return candidate\\n    # fall back to any Excel file in the folder except the output file\\n    others = sorted(p for p in WORKDIR.glob(\\\"*.xls*\\\")\\n                    if p.name.lower() != \\\"output.xlsx\\\")\\n    return others[0] if others else None\\n\\n\\ninput_path = find_input_workbook()\\n\\nif input_path is not None:\\n    shutil.copy(input_path, OUTPUT_PATH)          # output = copy of the input book\\n    print(f\\\"Copied '{input_path.name}' -> '{OUTPUT_PATH.name}'\\\")\\nelse:\\n    # No workbook supplied -> build a small stand-in so the script still runs\\n    wb = Workbook()\\n    ws = wb.active\\n    ws.title = \\\"Import Data\\\"\\n    ws[\\\"A1\\\"] = \\\"Header row\\\"\\n    ws[\\\"A2\\\"] = \\\"Chassis\\\"                          # the two \\\"Chassis\\\" cells (A2 & A3)\\n    ws[\\\"A3\\\"] = \\\"Chassis\\\"\\n    for row, value in enumerate((\\\"Data 1\\\", \\\"Data 2\\\", \\\"Data 3\\\"), start=4):\\n        ws.cell(row=row, column=1, value=value)\\n    wb.create_sheet(\\\"Sheet1\\\")\\n    wb.save(OUTPUT_PATH)\\n    print(f\\\"No input workbook found - created stand-in '{OUTPUT_PATH.name}'\\\")\\n\\n# ----------------------------------------------------------------------\\n# 2.  The corrected VBA macro  (exactly 15 lines -> Sheet1!A1:A15)\\n#     * loops bottom-up so deletions cannot shift unprocessed rows\\n#     * clamps the delete start to row 1 (Chassis in A2/A3 would otherwise\\n#       produce negative row references -> runtime error)\\n# ----------------------------------------------------------------------\\nVBA_CODE = \\\"\\\\n\\\".join([\\n    'Sub DeleteRowsBeforeChassis()',\\n    '    Dim ws As Worksheet, i As Long, r As Long',\\n    '    Set ws = ThisWorkbook.Worksheets(\\\"Import Data\\\")',\\n    '    i = ws.Cells(ws.Rows.Count, \\\"A\\\").End(xlUp).Row',\\n    '    Do While i >= 2',\\n    '        If Trim(CStr(ws.Cells(i, \\\"A\\\").Value)) = \\\"Chassis\\\" Then',\\n    '            r = i - 4',\\n    '            If r < 1 Then r = 1',\\n    '            ws.Rows(r & \\\":\\\" & (i - 1)).Delete',\\n    '            i = r - 1',\\n    '        Else',\\n    '            i = i - 1',\\n    '        End If',\\n    '    Loop',\\n    'End Sub',\\n])\\n\\nlines = VBA_CODE.splitlines()\\nassert len(lines) == 15, f\\\"Expected 15 VBA lines, got {len(lines)}\\\"\\n\\n# ----------------------------------------------------------------------\\n# 3.  Write the answer into Sheet1!A1:A15 of output.xlsx\\n# ----------------------------------------------------------------------\\nwb = load_workbook(OUTPUT_PATH)\\nif \\\"Sheet1\\\" not in wb.sheetnames:\\n    wb.create_sheet(\\\"Sheet1\\\")\\n\\nsheet1 = wb[\\\"S\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:A15\", \"match\": {\"n_gold\": 2, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R2C1\", \"status\": \"mismatch\", \"got\": \"    Dim ws As Worksheet, i As Long, r As\", \"ref\": \"Chassis\"}, {\"cell\": \"Sheet1!R3C1\", \"status\": \"mismatch\", \"got\": \"    Set ws = ThisWorkbook.Worksheets(\\\"Im\", \"ref\": \"Chassis\"}]}"
+  },
+  "timings": {
+    "agent_s": 163.117,
+    "setup_s": 0.0,
+    "grade_s": 2.928
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=4478",
+    "run1 exit=0 0.36s",
+    "run2 exit=0 0.25s",
+    "physics=0.0 cells=0/2 extra=0"
+  ]
+}

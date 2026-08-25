@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\n# Load the input workbook\\nwb = openpyxl.load_workbook('input.xlsx')\\nws = wb['Worksheet1']\\n\\n# Identify rows to delete where column B's first character is not 'H' or 'A'\\n# Work from bottom to top to keep row indices valid\\nrows_to_delete = []\\nfor row_idx in range(ws.max_row, 0, -1):\\n    cell_value = ws.cell(row=row_idx, column=2).value  # Column B\\n    if cell_value is None or len(str(cell_value)) == 0:\\n        rows_to_delete.append(row_idx)\\n    else:\\n        first_char = str(cell_value)[0]\\n        # Key: use 'and' (not 'or') so the condition is only True\\n        # when the first char is neither 'H' nor 'A'\\n        if first_char != 'H' and first_char != 'A':\\n            rows_to_delete.append(row_idx)\\n\\n# Delete the marked rows in descending order\\nfor row_idx in sorted(rows_to_delete, reverse=True):\\n    ws.delete_rows(row_idx)\\n\\n# Save the modified workbook as output.xlsx\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 22.946,
+    "setup_s": 0.0,
+    "grade_s": 0.179
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=917",
+    "run1 exit=1 0.17s"
+  ]
+}

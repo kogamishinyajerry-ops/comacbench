@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_load_01",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import os\\nimport csv\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\nfrom pptx.enum.text import PP_ALIGN\\n\\n# Load the CSV data\\ncsv_path = 'load_01.csv'\\ndata = []\\nwith open(csv_path, 'r', newline='') as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        data.append({\\n            'case': row['case'],\\n            'load_factor': float(row['load_factor']),\\n            'cycles': int(row['cycles'])\\n        })\\n\\n# Compute required summary stats from data\\nn_cases = len(data)\\nload_values = [d['load_factor'] for d in data]\\ncycle_values = [d['cycles'] for d in data]\\n\\nload_max = round(max(load_values), 2)  # 2.35 expected\\nload_mean = round(sum(load_values) / n_cases, 1)  # 1.7 expected\\ntotal_cycles = sum(cycle_values)  # 87563 expected\\n\\n# Verify computed values match required ones\\nprint(f\\\"N cases = {n_cases}\\\")\\nprint(f\\\"load max = {load_max}\\\")\\nprint(f\\\"load mean = {load_mean}\\\")\\nprint(f\\\"total cycles = {total_cycles}\\\")\\nprint(f\\\"Data rows: {len(data)}\\\")\\nprint(\\\"First few rows:\\\", data[:3])\\n\\n# Build presentation\\nprs = Presentation()\\n\\n# Slide 1: Title slide\\nslide1 = prs.slides.add_slide(prs.slide_layouts[0])  # Title slide layout\\ntitle = slide1.shapes.title\\nsubtitle = slide1.placeholders[1]\\ntitle.text = \\\"Engineering Load Test Report\\\"\\nsubtitle.text = \\\"Fatigue Load Factor Analysis\\\"\\n\\n# Slide 2: Data slide with table\\nslide2 = prs.slides.add_slide(prs.slide_layouts[5])  # Title and Content\\ntitle2 = slide2.shapes.title\\ntitle2.text = \\\"Data\\\"\\n\\nrows = len(data) + 1  # header + data rows\\ncols = 3\\nleft = Inches(0.5)\\ntop = Inches(1.5)\\nwidth = Inches(9.0)\\nheight = Inches(5.0)\\n\\ntable_shape = slide2.shapes.add_table(rows, cols, left, top, width, height)\\ntable = table_shape.table\\n\\n# Header row\\nheaders = ['case', 'load_factor', 'cycles']\\nfor i, h in enumerate(headers):\\n    cell = table.cell(0, i)\\n    cell.text = h\\n    for paragraph in cell.text_frame.paragraphs:\\n        for run in paragraph.runs:\\n            run.font.bold = True\\n            run.font.size = Pt(14)\\n\\n# Data rows\\nfor r_idx, record in enumerate(data, start=1):\\n    table.cell(r_idx, 0).text = str(record['case'])\\n    table.cell(r_idx, 1).text = str(record['load_factor'])\\n    table.cell(r_idx, 2).text = str(record['cycles'])\\n\\n# Slide 3: Summary slide with bullets\\nslide3 = prs.slides.add_slide(prs.slide_layouts[1])  # Title and Content\\ntitle3 = slide3.shapes.title\\ntitle3.text = \\\"Summary\\\"\\n\\nbody = slide3.shapes.placeholders[1]\\ntf = body.text_frame\\ntf.clear()\\n\\nbullets = [\\n    f\\\"N cases = {n_cases}\\\",\\n    f\\\"load max = {load_max}\\\",\\n    f\\\"load mean = {load_mean}\\\",\\n    f\\\"total cycles = {total_cycles}\\\"\\n]\\n\\nfor i, text in enumerate(bullets):\\n    if i == 0:\\n        p = tf.paragraphs[0]\\n    else:\\n        p = tf.add_paragraph()\\n    p.text = text\\n    p.level = 0\\n\\n# Slide 4: Next steps slide\\nslide4 = prs.slides.add_slide(prs.slide_layouts[1])  # Title and Content\\ntitle4 = slide4.shapes.title\\ntitle4.text = \\\"Next steps\\\"\\n\\nbody4 = slide4.shapes.placeholders[1]\\ntf4 = body4.text_frame\\ntf4.clear()\\n\\nnext_steps = [\\n    \\\"Review outliers in high load_factor cases\\\",\\n    \\\"Validate cycle counts against raw test logs\\\",\\n    \\\"Schedule follow-up fatigue testing\\\",\\n    \\\"Update design margin analysis\\\"\\n]\\n\\nfor i, text in enumerate(next_steps):\\n    if i == 0:\\n        p = tf4.paragraphs[0]\\n    else:\\n        p = tf4.add_paragraph()\\n    p.text = text\\n    p.level = 0\\n\\n# Save the presentation\\noutput_path = 'report.pptx'\\nprs.save(output_path)\\nprint(f\\\"\\\\nPresentation saved to {output_path}\\\")\\nprint(f\\\"Number of slides: {len(prs.slides)}\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_xu6j_k0e/model.py\\\", line 16, in <module>\\n    'cycles': int(row['cycles'])\\n              ^^^^^^^^^^^^^^^^^^\\nValueError: invalid literal for int() with base 10: '4282.0'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 13.171,
+    "setup_s": 0.0,
+    "grade_s": 0.154
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=3496",
+    "run1 exit=1 0.15s"
+  ]
+}

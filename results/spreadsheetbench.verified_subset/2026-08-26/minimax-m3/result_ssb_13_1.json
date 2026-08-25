@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_13_1",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\nfrom collections import defaultdict\\n\\ndef main():\\n    # Load the workbook\\n    wb = load_workbook('input.xlsx')\\n    \\n    if 'RANGES' not in wb.sheetnames or 'LISTS' not in wb.sheetnames:\\n        raise ValueError(\\\"Required sheets 'RANGES' and 'LISTS' not found\\\")\\n    \\n    ranges_sheet = wb['RANGES']\\n    lists_sheet = wb['LISTS']\\n    \\n    # Step 1: Clear existing data in LISTS from row 3 onwards (answer region A3:D32)\\n    clear_lists_sheet(lists_sheet, start_row=3, end_row=32)\\n    \\n    # Step 2: Parse RANGES sheet to extract sections with their data\\n    sections = parse_ranges(ranges_sheet)\\n    \\n    # Step 3: Process each section and write to LISTS\\n    output_row = 3\\n    for section in sections:\\n        # Write section header in column A\\n        lists_sheet.cell(row=output_row, column=1, value=section['name'])\\n        output_row += 1\\n        \\n        # Aggregate duplicates by (DATE, REF) - column B and C in RANGES\\n        aggregated = defaultdict(float)\\n        for entry in section['data']:\\n            key = (entry['date'], entry['ref'])\\n            aggregated[key] += entry['amount']\\n        \\n        # Sort by amount ascending (lowest to highest), \\n        # then alphabetically by REF (column C) A to Z\\n        sorted_data = sorted(\\n            aggregated.items(),\\n            key=lambda x: (x[1], str(x[0][1]))\\n        )\\n        \\n        # Write sorted aggregated data\\n        total = 0\\n        for (date, ref), amount in sorted_data:\\n            lists_sheet.cell(row=output_row, column=1, value=date)\\n            lists_sheet.cell(row=output_row, column=2, value=ref)\\n            lists_sheet.cell(row=output_row, column=3, value=amount)\\n            total += amount\\n            output_row += 1\\n        \\n        # Write TOTAL row\\n        lists_sheet.cell(row=output_row, column=2, value='TOTAL')\\n        lists_sheet.cell(row=output_row, column=3, value=total)\\n        output_row += 1\\n    \\n    # Save as output.xlsx\\n    wb.save('output.xlsx')\\n\\n\\ndef clear_lists_sheet(sheet, start_row, end_row):\\n    \\\"\\\"\\\"Clear all cell values in the specified range.\\\"\\\"\\\"\\n    for row in range(start_row, end_row + 1):\\n        for col in range(1, 5):  # Columns A through D\\n            cell = sheet.cell(row=row, column=col)\\n            cell.value = None\\n\\n\\ndef parse_ranges(sheet):\\n    \\\"\\\"\\\"\\n    Parse the RANGES sheet into sections.\\n    Each section starts with a header row (text in column A, empty in B/C).\\n    Data rows have DATE in column B, REF in column C, and amount in column D.\\n    \\\"\\\"\\\"\\n    sections = []\\n    current_section = None\\n    \\n    for row in sheet.iter_rows(values_only=True):\\n        # Skip completely empty rows\\n        if all(cell is None for cell in row):\\n            continue\\n        \\n        cell_a = row[0] if len(row) > 0 else None\\n        cell_b = row[1] if len(row) > 1 else None\\n        cell_c = row[2] if len(row) > 2 else None\\n        cell_d = row[3] if len(row) > 3 else None\\n        \\n        # Detect header row: text in column A, no numeric date in column B\\n        if cell_a is not None and isinstance(cell_a, str):\\n            # Check if this is a header (no valid date in B)\\n            if cell_b is None or not is_date_like(cell_b):\\n                if current_section is not None:\\n                    sections.append(current_section)\\n                current_section = {'name': cell_a, 'data': []}\\n                continue\\n        \\n        # Data row - need DATE and REF (columns B and C)\\n        if current_section is not None and cell_b is not None and cell_c is not None:\\n            amount = cell_d if cell_d is not None else 0\\n            current_section['data'].append({\\n                'date': cell_b,\\n                'ref': cell_c,\\n                'amount': amount if isinstance(amount, (int, float)) else 0\\n            })\\n    \\n    # Append the last section\\n    if current_section is not None:\\n        sections.append(current_section)\\n    \\n    return sections\\n\\n\\ndef is_date_like(value):\\n    \\\"\\\"\\\"Check if a value look\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 40.366,
+    "setup_s": 0.0,
+    "grade_s": 0.189
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=4348",
+    "run1 exit=1 0.19s"
+  ]
+}

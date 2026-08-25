@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_269_43",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import openpyxl\\nimport os\\n\\n# Load the provided input workbook if it exists, otherwise create a new one\\ninput_file = 'input.xlsx'\\nif os.path.exists(input_file):\\n    wb = openpyxl.load_workbook(input_file)\\nelse:\\n    wb = openpyxl.Workbook()\\n\\nws = wb['Sheet1'] if 'Sheet1' in wb.sheetnames else wb.active\\n\\n# VBA macro to delete rows where column I has a value but column H is blank\\n# Looping bottom-up is essential so that deleted rows do not cause rows to be skipped\\nvba_code_lines = [\\n    \\\"VBA Macro: Delete rows where Column I has a value but Column H is blank\\\",\\n    \\\"Sub DeleteRowsIfBlankH()\\\",\\n    \\\"    Dim i As Long, lastRow As Long\\\",\\n    \\\"    lastRow = Cells(Rows.Count, \\\\\\\"I\\\\\\\").End(xlUp).Row\\\",\\n    \\\"    For i = lastRow To 1 Step -1\\\",\\n    \\\"        If Cells(i, \\\\\\\"H\\\\\\\").Value = \\\\\\\"\\\\\\\" And Cells(i, \\\\\\\"I\\\\\\\").Value <> \\\\\\\"\\\\\\\" Then Rows(i).Delete\\\",\\n    \\\"    Next i: End Sub\\\"\\n]\\n\\n# Write the VBA code into cells A1:A7\\nfor idx, line in enumerate(vba_code_lines):\\n    ws.cell(row=idx + 1, column=1, value=line)\\n\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:I7\", \"match\": {\"n_gold\": 20, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"VBA Macro: Delete rows where Column I ha\", \"ref\": \"XXMTKGMA\"}, {\"cell\": \"Sheet1!R1C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C8\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R1C9\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R2C1\", \"status\": \"mismatch\", \"got\": \"Sub DeleteRowsIfBlankH()\", \"ref\": \"XXMRKAMA\"}, {\"cell\": \"Sheet1!R2C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R2C8\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R2C9\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R3C1\", \"status\": \"mismatch\", \"got\": \"    Dim i As Long, lastRow As Long\", \"ref\": \"XXMTKGMB\"}, {\"cell\": \"Sheet1!R3C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R3C8\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R3C9\", \"status\": \"missing\"}]}"
+  },
+  "timings": {
+    "agent_s": 23.123,
+    "setup_s": 0.0,
+    "grade_s": 2.652
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1019",
+    "run1 exit=0 0.2s",
+    "run2 exit=0 0.24s",
+    "physics=0.0 cells=0/20 extra=0"
+  ]
+}

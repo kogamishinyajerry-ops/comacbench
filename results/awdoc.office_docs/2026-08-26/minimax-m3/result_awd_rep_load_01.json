@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_load_01",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\n\\n# Read the CSV file\\nwith open('load_01.csv', 'r', newline='') as f:\\n    reader = csv.reader(f)\\n    header = next(reader)\\n    rows = list(reader)\\n\\n# Identify column indices\\ncase_idx = header.index('case')\\nload_idx = header.index('load_factor')\\ncycles_idx = header.index('cycles')\\n\\n# Compute statistics from the data\\nloads = [float(row[load_idx]) for row in rows]\\ncycles_vals = [int(row[cycles_idx]) for row in rows]\\n\\nn_cases = len(rows)\\nload_max = max(loads)\\nload_mean = sum(loads) / n_cases\\ntotal_cycles = sum(cycles_vals)\\n\\n# Format rounded display values\\nload_max_str = f\\\"{round(load_max, 2):.2f}\\\"\\nload_mean_str = f\\\"{round(load_mean, 1):.1f}\\\"\\n\\n# Build the document\\ndoc = Document()\\n\\n# Title (as a heading)\\ndoc.add_heading('Engineering Test Report', level=0)\\n\\n# Overview\\ndoc.add_heading('Overview', level=1)\\ndoc.add_paragraph(\\n    f'This report presents the analysis of {n_cases} data records '\\n    f'from the engineering test data file load_01.csv.'\\n)\\n\\n# Results table\\ndoc.add_heading('Results table', level=1)\\ntable = doc.add_table(rows=1, cols=3)\\ntable.style = 'Table Grid'\\n\\n# Header row\\nhdr_cells = table.rows[0].cells\\nhdr_cells[0].text = 'case'\\nhdr_cells[1].text = 'load_factor'\\nhdr_cells[2].text = 'cycles'\\n\\n# Data rows, preserving source values/formats\\nfor row in rows:\\n    cells = table.add_row().cells\\n    cells[0].text = row[case_idx]\\n    cells[1].text = row[load_idx]\\n    cells[2].text = row[cycles_idx]\\n\\n# Summary\\ndoc.add_heading('Summary', level=1)\\ndoc.add_paragraph(f'N cases = {n_cases}')\\ndoc.add_paragraph(f'load max = {load_max_str}')\\ndoc.add_paragraph(f'load mean = {load_mean_str}')\\ndoc.add_paragraph(f'total cycles = {total_cycles}')\\n\\n# Conclusion\\ndoc.add_heading('Conclusion', level=1)\\ndoc.add_paragraph(\\n    'All data records from the source file have been tabulated and the key '\\n    'statistics have been computed and reported above. The summary values provide '\\n    'a concise overview of the load conditions and cycle counts observed across '\\n    'the full set of test cases.'\\n)\\n\\n# Save the document\\ndoc.save('report.docx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_q2pxjpen/model.py\\\", line 17, in <module>\\n    cycles_vals = [int(row[cycles_idx]) for row in rows]\\n                   ^^^^^^^^^^^^^^^^^^^^\\nValueError: invalid literal for int() with base 10: '4282.0'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 62.095,
+    "setup_s": 0.0,
+    "grade_s": 0.099
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2087",
+    "run1 exit=1 0.1s"
+  ]
+}

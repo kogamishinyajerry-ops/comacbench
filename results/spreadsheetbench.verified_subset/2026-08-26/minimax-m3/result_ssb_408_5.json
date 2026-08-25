@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_408_5",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\n\\n# Load the input workbook\\nwb = load_workbook('input.xlsx')\\nws = wb['Sheet1']\\n\\n# Step 1: Calculate the sum of values in Column D where Column E contains 0\\ntotal_sum = 0\\nfor row in ws.iter_rows(min_row=1, max_row=ws.max_row):\\n    e_val = row[4].value  # Column E (index 4)\\n    d_val = row[3].value  # Column D (index 3)\\n    if e_val == 0 and isinstance(d_val, (int, float)):\\n        total_sum += d_val\\n\\n# Step 2: Find the row containing 'BR1 Sales' in Column C and insert the sum into Column D\\nfor row in ws.iter_rows(min_row=1, max_row=ws.max_row):\\n    c_val = row[2].value  # Column C (index 2)\\n    if c_val and 'BR1 Sales' in str(c_val):\\n        # Insert the sum in Column D of the same row\\n        ws.cell(row=row[0].row, column=4, value=total_sum)\\n        break\\n\\n# Step 3: Delete rows where Column E contains 0, except for rows containing 'BR1 Sales'\\nrows_to_delete = []\\nfor row_idx in range(1, ws.max_row + 1):\\n    e_val = ws.cell(row=row_idx, column=5).value\\n    c_val = ws.cell(row=row_idx, column=3).value\\n    \\n    # Skip rows containing 'BR1 Sales' in Column C\\n    if c_val and 'BR1 Sales' in str(c_val):\\n        continue\\n    \\n    # Mark for deletion if E is 0\\n    if e_val == 0:\\n        rows_to_delete.append(row_idx)\\n\\n# Delete rows in reverse order to maintain correct indices\\nfor row_idx in reversed(rows_to_delete):\\n    ws.delete_rows(row_idx)\\n\\n# Step 4: Delete blank rows\\nblank_rows = []\\nfor row_idx in range(1, ws.max_row + 1):\\n    is_blank = True\\n    for col_idx in range(1, 6):  # Check columns A through E\\n        val = ws.cell(row=row_idx, column=col_idx).value\\n        if val is not None and val != '':\\n            is_blank = False\\n            break\\n    if is_blank:\\n        blank_rows.append(row_idx)\\n\\n# Delete blank rows in reverse order\\nfor row_idx in reversed(blank_rows):\\n    ws.delete_rows(row_idx)\\n\\n# Save the result to output.xlsx\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 65.121,
+    "setup_s": 0.0,
+    "grade_s": 0.373
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1932",
+    "run1 exit=1 0.37s"
+  ]
+}

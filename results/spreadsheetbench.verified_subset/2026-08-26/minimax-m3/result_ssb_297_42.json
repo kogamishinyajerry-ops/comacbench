@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_297_42",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\nimport os\\n\\n# Define input and output file paths\\ninput_file = 'input.xlsx'\\noutput_file = 'output.xlsx'\\n\\n# Check if input file exists\\nif not os.path.exists(input_file):\\n    # Try alternative names\\n    for alt_name in ['data.xlsx', 'workbook.xlsx', 'source.xlsx']:\\n        if os.path.exists(alt_name):\\n            input_file = alt_name\\n            output_file = alt_name.replace('.xlsx', '_output.xlsx')\\n            break\\n    else:\\n        # Look for any xlsx file\\n        import glob\\n        xlsx_files = glob.glob('*.xlsx')\\n        if xlsx_files:\\n            input_file = xlsx_files[0]\\n            output_file = xlsx_files[0].replace('.xlsx', '_output.xlsx')\\n        else:\\n            raise FileNotFoundError(\\\"No input xlsx file found\\\")\\n\\n# Make a copy of input as output\\nimport shutil\\nshutil.copy2(input_file, output_file)\\n\\n# Load the workbook\\nwb = load_workbook(output_file)\\n\\n# Get the combined sheet\\nif 'combined' not in wb.sheetnames:\\n    raise ValueError(\\\"'combined' sheet not found in workbook\\\")\\n\\ncombined_sheet = wb['combined']\\n\\n# Read headers from combined sheet (row 1)\\nheaders = []\\nfor col in range(1, combined_sheet.max_column + 1):\\n    header = combined_sheet.cell(row=1, column=col).value\\n    headers.append(header)\\n\\nprint(f\\\"Headers in combined sheet: {headers}\\\")\\nprint(f\\\"Number of header columns: {len(headers)}\\\")\\n\\n# Create a mapping of header name to column index in combined sheet\\nheader_to_col = {header: idx + 1 for idx, header in enumerate(headers) if header is not None}\\nprint(f\\\"Header to column mapping: {header_to_col}\\\")\\n\\n# Get all sheets except 'combined'\\nsource_sheets = [sheet for sheet in wb.sheetnames if sheet.lower() != 'combined']\\nprint(f\\\"Source sheets: {source_sheets}\\\")\\n\\n# Initialize row counter for combined sheet (start at row 2)\\ncombined_row = 2\\n\\n# Iterate through each source sheet\\nfor sheet_name in source_sheets:\\n    source_sheet = wb[sheet_name]\\n    print(f\\\"\\\\nProcessing sheet: {sheet_name}\\\")\\n    print(f\\\"Sheet dimensions: {source_sheet.dimensions}\\\")\\n    print(f\\\"Max row: {source_sheet.max_row}, Max col: {source_sheet.max_column}\\\")\\n    \\n    # Read headers from source sheet (row 1)\\n    source_headers = {}\\n    for col in range(1, source_sheet.max_column + 1):\\n        header = source_sheet.cell(row=1, column=col).value\\n        if header is not None:\\n            source_headers[header] = col\\n    \\n    print(f\\\"Source headers: {source_headers}\\\")\\n    \\n    # Iterate through data rows (starting from row 2)\\n    for row in range(2, source_sheet.max_row + 1):\\n        # Check if row has any data\\n        has_data = False\\n        for col in range(1, source_sheet.max_column + 1):\\n            if source_sheet.cell(row=row, column=col).value is not None:\\n                has_data = True\\n                break\\n        \\n        if not has_data:\\n            continue\\n        \\n        # Map data from source to combined based on header names\\n        for header_name, target_col in header_to_col.items():\\n            # Find the source column with matching header\\n            source_col = None\\n            for src_header, src_col in source_headers.items():\\n                if src_header is not None and str(src_header).strip() == str(header_name).strip():\\n                    source_col = src_col\\n                    break\\n            \\n            if source_col is not None:\\n                cell_value = source_sheet.cell(row=row, column=source_col).value\\n                combined_sheet.cell(row=combined_row, column=target_col, value=cell_value)\\n        \\n        combined_row += 1\\n\\nprint(f\\\"\\\\nTotal rows written to combined sheet: {combined_row - 2}\\\")\\n\\n# Save the workbook\\nwb.save(output_file)\\nprint(f\\\"\\\\nOutput saved to: {output_file}\\\")\\nprint(f\\\"Data written from row 2 to row {combined_row - 1}\\\")\\n\\n# Verify the output\\nwb_verify = load_workbook(output_file)\\ncombined_verify = wb_verify['combined']\\nprint(f\\\"\\\\nVerification:\\\")\\nprint(f\\\"Combined sheet max row: {combined_verify.max_row}\\\")\\nprint(f\\\"Combined sheet max col: {combined_v\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"missing\": \"output.xlsx\", \"dir_listing\": [\"model.py\", \"ssb_297_42_init.xlsx\", \"ssb_297_42_init_output.xlsx\"]}"
+  },
+  "timings": {
+    "agent_s": 13.371,
+    "setup_s": 0.0,
+    "grade_s": 0.624
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=4623",
+    "run1 exit=0 0.62s"
+  ]
+}

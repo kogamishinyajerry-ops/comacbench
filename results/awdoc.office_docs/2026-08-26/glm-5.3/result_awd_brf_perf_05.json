@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_05",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"Build a 4-slide engineering test briefing (report.pptx) from perf_05.csv.\\\"\\\"\\\"\\n\\nimport csv\\n\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\nCSV_PATH = \\\"perf_05.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\nCOLS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\n\\ndef norm(s):\\n    return \\\"\\\".join(ch for ch in str(s).strip().lower() if ch.isalnum())\\n\\n\\ndef load_records(path):\\n    \\\"\\\"\\\"Return records as lists of [config, cl_max, cd_cruise, ld_ratio] strings.\\\"\\\"\\\"\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        raw = [r for r in csv.reader(f) if r and any(str(c).strip() for c in r)]\\n    if not raw:\\n        raise SystemExit(f\\\"No usable rows found in {path}\\\")\\n\\n    target = {norm(c): c for c in COLS}\\n    idx = {}\\n    for j, h in enumerate(raw[0]):\\n        key = norm(h)\\n        if key in target and target[key] not in idx:\\n            idx[target[key]] = j\\n\\n    if len(idx) == len(COLS):\\n        body = raw[1:]\\n        records = [\\n            [str(r[idx[c]]).strip() for c in COLS]\\n            for r in body\\n            if len(r) >= 4\\n        ]\\n    else:\\n        # Positional fallback: assume the first four columns are in the required order.\\n        records = [\\n            [str(r[i]).strip() for i in range(4)]\\n            for r in raw\\n            if len(r) >= 4\\n        ]\\n\\n    if not records:\\n        raise SystemExit(\\\"No data records found in CSV.\\\")\\n    return records\\n\\n\\ndef to_f(value):\\n    try:\\n        return float(str(value).strip())\\n    except (TypeError, ValueError):\\n        return None\\n\\n\\ndef set_cell_text(cell, text, size_pt, bold=False):\\n    cell.text = str(text)\\n    for para in cell.text_frame.paragraphs:\\n        for run in para.runs:\\n            run.font.size = Pt(size_pt)\\n            run.font.bold = bold\\n\\n\\ndef fill_bullets(slide, lines, size_pt=20):\\n    body = slide.placeholders[1]\\n    tf = body.text_frame\\n    tf.clear()\\n    for i, line in enumerate(lines):\\n        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()\\n        p.text = line\\n        for run in p.runs:\\n            run.font.size = Pt(size_pt)\\n\\n\\ndef main():\\n    records = load_records(CSV_PATH)\\n\\n    cl_vals = [v for v in (to_f(r[1]) for r in records) if v is not None]\\n    cd_vals = [v for v in (to_f(r[2]) for r in records) if v is not None]\\n    ld_vals = [v for v in (to_f(r[3]) for r in records) if v is not None]\\n    if not (cl_vals and cd_vals and ld_vals):\\n        raise SystemExit(\\\"Could not parse numeric columns from CSV.\\\")\\n\\n    clmax_max = max(cl_vals)\\n    cd_mean = sum(cd_vals) / len(cd_vals)\\n    ld_mean = sum(ld_vals) / len(ld_vals)\\n    max_ld = max(ld_vals)\\n    best_cfg = next(r[0] for r in records if to_f(r[3]) == max_ld)\\n\\n    # Rounded display values exactly as specified.\\n    clmax_txt = f\\\"{clmax_max:.3f}\\\"\\n    cd_mean_txt = f\\\"{cd_mean:.4f}\\\"\\n    ld_mean_txt = f\\\"{ld_mean:.1f}\\\"\\n\\n    prs = Presentation()\\n    prs.slide_width = Inches(10)\\n    prs.slide_height = Inches(7.5)\\n\\n    # ---- Slide 1: Title -------------------------------------------------\\n    s1 = prs.slides.add_slide(prs.slide_layouts[0])\\n    s1.shapes.title.text = \\\"Engineering Test Briefing\\\"\\n    if len(s1.placeholders) > 1:\\n        s1.placeholders[1].text = \\\"Aerodynamic performance review (perf_05)\\\"\\n\\n    # ---- Slide 2: Data table --------------------------------------------\\n    s2 = prs.slides.add_slide(prs.slide_layouts[5])\\n    s2.shapes.title.text = \\\"Data\\\"\\n    n = len(records)\\n    font_pt = 14 if n <= 8 else (11 if n <= 18 else 9)\\n    gfx = s2.shapes.add_table(\\n        n + 1, 4, Inches(0.7), Inches(1.5), Inches(8.6), Inches(0.35 * (n + 1))\\n    )\\n    table = gfx.table\\n    for j, w in enumerate([Inches(2.2), Inches(2.2), Inches(2.2), Inches(2.0)]):\\n        table.columns[j].width = w\\n    for j, name in enumerate(COLS):\\n        set_cell_text(table.cell(0, j), name, font_pt, bold=True)\\n    for i, rec in enumerate(records, start=1):\\n        for j, val in enumerate(rec):\\n            set_cell_text(table.cell(i, j), val, font_pt)\\n\\n    # ---- Slide 3: Summary --------------------\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 126.878,
+    "setup_s": 0.0,
+    "grade_s": 0.29
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5083",
+    "run1 exit=0 0.15s",
+    "run2 exit=0 0.13s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

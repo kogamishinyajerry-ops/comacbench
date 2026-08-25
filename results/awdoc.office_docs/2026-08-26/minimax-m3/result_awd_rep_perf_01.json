@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_01",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\nfrom docx.shared import Inches\\n\\n# Read the CSV data\\ndata = []\\nwith open('perf_01.csv', 'r') as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        data.append(row)\\n\\nN = len(data)\\nprint(f\\\"Number of data rows: {N}\\\")\\nfor row in data:\\n    print(row)\\n\\n# Compute required statistics\\ncl_max_values = [float(r['cl_max']) for r in data]\\ncd_cruise_values = [float(r['cd_cruise']) for r in data]\\nld_ratio_values = [float(r['ld_ratio']) for r in data]\\n\\ncl_max_max = max(cl_max_values)\\ncd_cruise_mean = sum(cd_cruise_values) / len(cd_cruise_values)\\nld_ratio_mean = sum(ld_ratio_values) / len(ld_ratio_values)\\n\\nprint(f\\\"CLmax max = {cl_max_max}\\\")\\nprint(f\\\"CDcruise mean = {cd_cruise_mean:.4f}\\\")\\nprint(f\\\"L/D mean = {ld_ratio_mean:.4f}\\\")\\n\\n# Best config (max L/D)\\nbest_idx = ld_ratio_values.index(max(ld_ratio_values))\\nbest_config = data[best_idx]['config']\\nprint(f\\\"Best config = {best_config}\\\")\\n\\n# Determine rounding based on source\\n# Check the source values' format\\nprint(\\\"Source values:\\\")\\nfor r in data:\\n    print(f\\\"  config={r['config']}, cl_max={r['cl_max']}, cd_cruise={r['cd_cruise']}, ld_ratio={r['ld_ratio']}\\\")\\n\\n# Create document\\ndoc = Document()\\n\\n# Title\\ndoc.add_heading('Engineering Performance Test Report', level=0)\\n\\n# Overview\\ndoc.add_heading('Overview', level=1)\\ndoc.add_paragraph(f'This report summarizes the performance test data consisting of {N} data records extracted from the source CSV file.')\\n\\n# Results table\\ndoc.add_heading('Results table', level=1)\\ntable = doc.add_table(rows=1, cols=4)\\ntable.style = 'Table Grid'\\nhdr_cells = table.rows[0].cells\\nhdr_cells[0].text = 'config'\\nhdr_cells[1].text = 'cl_max'\\nhdr_cells[2].text = 'cd_cruise'\\nhdr_cells[3].text = 'ld_ratio'\\n\\nfor row in data:\\n    row_cells = table.add_row().cells\\n    row_cells[0].text = row['config']\\n    row_cells[1].text = row['cl_max']\\n    row_cells[2].text = row['cd_cruise']\\n    row_cells[3].text = row['ld_ratio']\\n\\n# Summary\\ndoc.add_heading('Summary', level=1)\\nsummary_text = (\\n    f'Key performance metrics from the test data: '\\n    f'CLmax max = {round(cl_max_max, 3)}, '\\n    f'CDcruise mean = {round(cd_cruise_mean, 4)}, '\\n    f'L/D mean = {round(ld_ratio_mean, 1)}. '\\n    f'The best configuration with the highest L/D ratio is {best_config}.'\\n)\\ndoc.add_paragraph(summary_text)\\n\\n# Conclusion\\ndoc.add_heading('Conclusion', level=1)\\ndoc.add_paragraph(\\n    f'The analysis of {N} test configurations identifies {best_config} as the top-performing '\\n    f'configuration in terms of lift-to-drag ratio, achieving an L/D of '\\n    f'{max(ld_ratio_values):.1f}. These results provide a clear baseline for selecting '\\n    f'optimal aerodynamic configurations in future test campaigns.'\\n)\\n\\ndoc.save('report.docx')\\nprint(\\\"Report saved successfully.\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 5.971,
+    "setup_s": 0.0,
+    "grade_s": 0.222
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2764",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.09s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

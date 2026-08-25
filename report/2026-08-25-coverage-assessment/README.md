@@ -12,17 +12,17 @@
 
 **评测系统已完成三层九维骨架的九维全景闭合：20/40 基准 integrated、2424 任务、九维全部有数（structures 以开源 CalculiX 自建解零）、五类 adapter 与 6 类执行环境 live、集成项双基线全覆盖；评测对象已翻转为「harness」（四臂 H0-H3 矩阵、蒸馏脚手架谱系化、臂自动路由）。「懂航空」与「会工程」的分界已量化；剩余最大空洞是商业求解器线（Fluent/StarCCM+/MAPDL）与 simjeb/engdesign 原计划的商业 FEA 复算层。**
 
-## 1. 总量盘点（registry 43 条目）
+## 1. 总量盘点（registry 46 条目）
 
 | 状态 | 数量 | 占比 | 较 08-24 上午变化 | 含义 |
 | --- | --- | --- | --- | --- |
-| **integrated** | 22 | 51% | 19→22（+calculix、+sketch_lite、+engtable.office_basic 08-25） | adapter 跑通 + 双基线落盘 |
+| **integrated** | 25 | 54% | 19→25（+calculix/sketch_lite/engtable 08-25；+awdoc/awext/ssb 08-26 办公第二板） | adapter 跑通 + 双基线落盘 |
 | proposed | 5 | 12% | 4→5（+cadbench_seldon.hard，08-24 收录镜像） | 探查/许可清点完成，集成 blocked |
 | paused-env | 2 | 5% | 不变 | dev/内网均无启动环境（openvsp、bscw） |
 | deferred | 8 | 20% | 不变 | 许可或价值存疑，暂缓 |
 | excluded | 6 | 15% | 不变 | 调研淘汰 |
 
-任务量：**integrated 22 项共 2458 个任务 YAML**（08-25 +sketch_lite 15、+engtable 19）（08-21 时点 2119 → +305），另有
+任务量：**integrated 25 项共 2513 个任务 YAML**（08-25 +15/+19；08-26 办公第二板 +55：awdoc 18/awext 12/ssb 25）（08-21 时点 2119 → +305），另有
 `tasks/.foam_tail` 20 题在制。锚点纪律：饱和锚 6/20（校准用，不参与模型排序）。
 
 ## 2. 已集成 19 项明细（评测能力主表）
@@ -52,7 +52,7 @@
 | 21 | cadbench_seldon.sketch_lite | design_artifact(sketch_2d) | python+OCP | 15 | 15/15 | **1.0000 饱和锚** / — / glm-5.3 **0.8667**（2D 草图子轴，08-25 窄路 A） | — |
 | 22 | engtable.office_basic | design_artifact(xlsx_table) | python+openpyxl | 19 | 19/19 | **0.9474** / — / glm-5.3 **0.9903**（office 维首批，08-25） | — |
 
-- 双基线覆盖 **22/22**；oracle 满分自检 **18/22**（qa 两项与 scicode/cfdcode 无 oracle 目录）（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
+- 双基线覆盖 **25/25**；oracle 满分自检 **21/25**（qa 两项与 scicode/cfdcode 无 oracle 目录）（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
 - 分数仅导航用（scoring/README §1）；gate 失败率与原因分布才是决策口径。
 - v0.3 起模型间排序不再是评测目标；双模型对照表转为历史档案，固定对 {minimax-m3, glm-5.3}。
 

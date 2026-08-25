@@ -197,6 +197,75 @@ def grade_vqa_free(ref_answer: str, answer_text: str,
 
 
 def grade_refusal(refusal_expected: bool, refused: bool) -> float:
+    """拒答层：应拒答时拒=1 未拒=0；不应拒答时答=1 拒=0（aeroengqa 口径）。"""
+    if refusal_expected:
+        return 1.0 if refused else 0.0
+    return 0.0 if refused else 1.0
+
+
+# ---------------- JSON 抽取层（awext 条款结构化抽取型，2026-08-25） ----------------
+
+def extract_json_object(text: str) -> dict | None:
+    """从模型输出抽首个 JSON 对象：优先 ```json 围栏，退首个 {..} 平衡块。"""
+    import re as _re
+    m = _re.search(r"```(?:json)?\s*\n(.*?)```", text, _re.S)
+    cand = m.group(1).strip() if m else text.strip()
+    if not cand.startswith("{"):
+        i = cand.find("{")
+        if i < 0:
+            return None
+        cand = cand[i:]
+    depth = 0
+    for j, ch in enumerate(cand):
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    obj = json.loads(cand[:j + 1])
+                    return obj if isinstance(obj, dict) else None
+                except Exception:  # noqa: BLE001
+                    return None
+    return None
+
+
+def _flatten_json(obj, prefix="") -> dict:
+    out: dict = {}
+    for k, v in obj.items():
+        key = f"{prefix}.{k}" if prefix else str(k)
+        if isinstance(v, dict):
+            out.update(_flatten_json(v, key))
+        elif isinstance(v, list):
+            out[key] = sorted(str(x).strip().casefold() for x in v)
+        else:
+            out[key] = v
+    return out
+
+
+def grade_json_extract(ref: dict, got: dict,
+                        numeric_rel_tol: float = 0.02) -> tuple[float, list[dict]]:
+    """字段级判分（ref/got 先 _flatten_json）：
+    数值→相对容差；字符串列表→排序 casefold 集合精确；其余→strip/casefold 精确。
+    返回 (命中比例, 逐字段明细)。"""
+    ref_f, got_f = _flatten_json(ref), _flatten_json(got)
+    hits, details = 0, []
+    for k, rv in ref_f.items():
+        gv = got_f.get(k)
+        if isinstance(rv, (int, float)) and not isinstance(rv, bool):
+            if isinstance(gv, (int, float)) and not isinstance(gv, bool):
+                ok = abs(float(gv) - float(rv)) / max(abs(float(rv)), 1e-9) <= numeric_rel_tol
+            else:
+                ok = False
+            details.append({"field": k, "ok": ok, "got": gv, "ref": rv})
+        elif isinstance(rv, list):
+            ok = isinstance(gv, list) and gv == rv
+            details.append({"field": k, "ok": ok, "got": gv, "ref": rv})
+        else:
+            ok = isinstance(gv, str) and gv == str(rv).strip().casefold()
+            details.append({"field": k, "ok": ok, "got": gv, "ref": rv})
+        hits += bool(details[-1]["ok"])
+    return round(hits / max(1, len(ref_f)), 4), details
     """拒答层：应拒答回答了=0，正确拒答=1；应回答拒答=0，正常回答=1。"""
     return 1.0 if refusal_expected == refused else 0.0
 
@@ -405,6 +474,8 @@ def run_task(
     applicability["robustness"] = f"samples={n_samples}" if n_samples > 1 else "N/A"
     applicability["requirements"] = ("math_numeric" if answer_format == "math_answer"
                                       else applicability["requirements"])
+    if answer_format == "json_extract":
+        applicability["requirements"] = "json_field_extract"
 
     # --- 模型调用（含采样一致性 robustness，未启用时 1 次） ---
     # 多模态任务：images 由 main() 预加载为 data URI（digest 已在资产校验过）；
@@ -489,6 +560,28 @@ def run_task(
                          "capability": task["reference"].get("capability"),
                          "difficulty": task["reference"].get("difficulty"),
                          "subcategory": task["reference"].get("subcategory")}
+
+    elif answer_format == "json_extract":
+        # ---------- JSON 抽取（awext 型）：条款卡 -> 结构化 JSON 字段级判分 ----------
+        raw = str(outs[0]["answer"])
+        got_obj = extract_json_object(raw)
+        if got_obj is None:
+            gate, gate_failures, failure_mode = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+            subscores = {"physics": None, "requirements": 0.0,
+                         "objective": None, "robustness": 0.0}
+            layer_details = {"kind": "json_extract", "parsed": None,
+                             "raw_tail": raw[-200:]}
+        else:
+            gate, gate_failures, failure_mode = 1, [], None
+            ref_obj = task["reference"]["reference_json"]
+            req_score, fields = grade_json_extract(
+                ref_obj, got_obj,
+                float(task["grader"].get("numeric_rel_tol", 0.02)))
+            subscores = {"physics": None, "requirements": req_score,
+                         "objective": None, "robustness": 0.0}
+            layer_details = {"kind": "json_extract", "fields": fields,
+                             "n_fields": len(fields),
+                             "n_hit": round(req_score * len(fields))}
 
     elif answer_format == "mcq":
         gate, gate_failures, failure_mode = validity_gate(task, outs[0])
@@ -610,6 +703,35 @@ def _write_math_summary(out_dir: Path, results: list[dict[str, Any]],
     p.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return p
 
+def _write_json_extract_summary(out_dir: Path, results: list[dict[str, Any]],
+                                provider: str, model_label: str,
+                                seed: int) -> Path:
+    """json_extract（awext 型）汇总：字段命中率 + 每任务明细。"""
+    import json as _json
+    lines = []
+    a = lines.append
+    a(f"# qa_grounded json_extract 汇总（provider={provider}, model={model_label}, seed={seed}）")
+    a("")
+    reqs = [r["subscores"]["requirements"] for r in results
+            if r["subscores"]["requirements"] is not None]
+    gate_n = sum(1 for r in results if r["validity_gate"] == 1)
+    a(f"- 任务: {len(results)} | gate 通过: {gate_n} | 字段命中均值: "
+      f"{sum(reqs)/max(1,len(reqs)):.4f}")
+    a("")
+    a("| task | gate | fields | hit | score | 失败字段（前 3） |")
+    a("| --- | --- | --- | --- | --- | --- |")
+    for r in results:
+        det = _json.loads(r["artifacts"].get("layer_details") or "{}")
+        fields = det.get("fields") or []
+        n_hit = sum(1 for f in fields if f.get("ok"))
+        bad = "; ".join(f["field"] for f in fields if not f.get("ok"))[:60] or "-"
+        a(f"| {r['task_id']} | {r['validity_gate']} | {len(fields)} | {n_hit} "
+          f"| {r['score']} | {bad} |")
+    p = out_dir / "summary.md"
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return p
+
+
 def _write_vqa_summary(out_dir: Path, results: list[dict[str, Any]],
                        provider: str, model_label: str, seed: int) -> Path:
     """mechvqa 型 VQA 报告：accuracy + F1 均值 + capability/difficulty 分层。"""
@@ -692,6 +814,10 @@ def write_summary(out_dir: Path, results: list[dict[str, Any]],
         if all(_json.loads(r["artifacts"]["layer_details"]).get("kind") == "vqa"
                for r in layered):
             return _write_vqa_summary(out_dir, results, provider, model_label, seed)
+        if all(_json.loads(r["artifacts"]["layer_details"]).get("kind")
+               == "json_extract" for r in layered):
+            return _write_json_extract_summary(out_dir, results, provider,
+                                               model_label, seed)
         det = [(r, _json.loads(r["artifacts"]["layer_details"])) for r in layered]
         ans_tasks = [(r, d) for r, d in det if r["subscores"]["requirements"] is not None]
         unans_tasks = [(r, d) for r, d in det if r["subscores"]["requirements"] is None]

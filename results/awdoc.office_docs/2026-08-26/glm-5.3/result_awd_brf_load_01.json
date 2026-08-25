@@ -1,0 +1,40 @@
+{
+  "task_id": "awd_brf_load_01",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\nimport csv\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\nINPUT_CSV = \\\"load_01.csv\\\"\\nOUTPUT_PPTX = \\\"report.pptx\\\"\\nEXPECTED_COLS = [\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"]\\n\\n\\ndef parse_csv(path):\\n    \\\"\\\"\\\"Read the CSV and return a list of records with raw strings and parsed numbers.\\\"\\\"\\\"\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        raw = [r for r in csv.reader(f) if any(c.strip() for c in r)]\\n    if not raw:\\n        raise ValueError(\\\"CSV file is empty: %s\\\" % path)\\n\\n    header = [h.strip().lower() for h in raw[0]]\\n    if all(c in header for c in EXPECTED_COLS):\\n        idx = {c: header.index(c) for c in EXPECTED_COLS}\\n        body = raw[1:]\\n        get = lambda r, c: r[idx[c]]\\n    else:\\n        # No recognizable header: assume columns are in the expected order.\\n        body = raw\\n        get = lambda r, c: r[EXPECTED_COLS.index(c)]\\n\\n    records = []\\n    for r in body:\\n        case_raw = get(r, \\\"case\\\").strip()\\n        lf_raw = get(r, \\\"load_factor\\\").strip()\\n        cyc_raw = get(r, \\\"cycles\\\").strip()\\n        records.append({\\n            \\\"case\\\": case_raw,\\n            \\\"load_factor_raw\\\": lf_raw,\\n            \\\"load_factor\\\": float(lf_raw),\\n            \\\"cycles\\\": int(float(cyc_raw)),\\n        })\\n    return records\\n\\n\\ndef fmt2(x):\\n    \\\"\\\"\\\"Round to 2 decimals and trim trailing zeros: 1.70 -> '1.7', 2.35 -> '2.35'.\\\"\\\"\\\"\\n    r = round(float(x), 2)\\n    if r == int(r):\\n        return str(int(r))\\n    return f\\\"{r:.2f}\\\".rstrip(\\\"0\\\").rstrip(\\\".\\\")\\n\\n\\ndef set_cell_font(cell, bold=False, size=Pt(11)):\\n    for p in cell.text_frame.paragraphs:\\n        for run in p.runs:\\n            run.font.bold = bold\\n            run.font.size = size\\n\\n\\ndef add_bullets(slide, lines, left, top, width, height, size=Pt(18)):\\n    box = slide.shapes.add_textbox(left, top, width, height)\\n    tf = box.text_frame\\n    tf.word_wrap = True\\n    for i, line in enumerate(lines):\\n        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()\\n        run = p.add_run()\\n        run.text = line\\n        run.font.size = size\\n    return box\\n\\n\\ndef main():\\n    records = parse_csv(INPUT_CSV)\\n\\n    # ---- Statistics computed from the input data ----\\n    n = len(records)\\n    loads = [rec[\\\"load_factor\\\"] for rec in records]\\n    load_min = min(loads)          # computed (not displayed)\\n    load_max = max(loads)\\n    load_mean = sum(loads) / n\\n    total_cycles = sum(rec[\\\"cycles\\\"] for rec in records)\\n\\n    summary_lines = [\\n        f\\\"N cases = {n}\\\",\\n        f\\\"load max = {fmt2(load_max)}\\\",\\n        f\\\"load mean = {fmt2(load_mean)}\\\",\\n        f\\\"total cycles = {total_cycles}\\\",\\n    ]\\n\\n    prs = Presentation()\\n\\n    # ---- Slide 1: Title ----\\n    slide1 = prs.slides.add_slide(prs.slide_layouts[0])\\n    slide1.shapes.title.text = \\\"Engineering Test Briefing\\\"\\n    for ph in slide1.placeholders:\\n        if ph.placeholder_format.idx == 1:\\n            ph.text = \\\"Load test data review\\\"\\n\\n    # ---- Slide 2: Data (one table: header + one row per record) ----\\n    slide2 = prs.slides.add_slide(prs.slide_layouts[5])\\n    slide2.shapes.title.text = \\\"Data\\\"\\n    n_rows = len(records) + 1\\n    tbl_shape = slide2.shapes.add_table(\\n        n_rows, 3, Inches(0.6), Inches(1.3), Inches(8.8), Inches(0.25 * n_rows)\\n    )\\n    table = tbl_shape.table\\n    for j, name in enumerate(EXPECTED_COLS):\\n        cell = table.cell(0, j)\\n        cell.text = name\\n        set_cell_font(cell, bold=True)\\n    for i, rec in enumerate(records, start=1):\\n        values = [rec[\\\"case\\\"], rec[\\\"load_factor_raw\\\"], str(rec[\\\"cycles\\\"])]\\n        for j, v in enumerate(values):\\n            cell = table.cell(i, j)\\n            cell.text = v\\n            set_cell_font(cell, bold=False, size=Pt(10))\\n\\n    # ---- Slide 3: Summary (exact computed numbers) ----\\n    slide3 = prs.slides.add_slide(prs.slide_layouts[5])\\n    slide3.shapes.title.text = \\\"Summary\\\"\\n    add_bullets(slide3, summary_lines, Inches(0.8), Inches(1.6), Inches(8.4), Inches(3.5))\\n\\n    # ---- Slide 4: Next steps ----\\n    slide4 = prs.slides.add_slide(prs.slide_layouts[5])\\n    slide4.shapes.t\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"syntax_error\": true}"
+  },
+  "timings": {
+    "agent_s": 68.032,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "provider=glm code_len=4449"
+  ]
+}

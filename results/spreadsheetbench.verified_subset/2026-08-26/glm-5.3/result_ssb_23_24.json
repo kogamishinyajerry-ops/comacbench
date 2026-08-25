@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_23_24",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nAutomatically remove entries from an Excel sheet where the word in column A\\nmatches any word in column I.\\n\\nMimics the manual action of selecting A:E on a row and pressing CTRL+MINUS\\nwith \\\"Shift cells up\\\": only the A:E block is compacted upward, all other\\ncolumns (F, G, H, I, ...) stay exactly where they are.\\n\\nReads : input.xlsx  (the provided workbook, sheet \\\"Sheet1\\\")\\nWrites: output.xlsx (a copy of the input with the matching A:E rows removed)\\n\\\"\\\"\\\"\\n\\nimport openpyxl\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Sheet1\\\"\\n\\n\\ndef normalize(value):\\n    \\\"\\\"\\\"Normalize a cell value for comparison (string, trimmed, lower-case).\\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    s = str(value).strip()\\n    return s.lower() if s else None\\n\\n\\ndef main():\\n    # Load the provided input workbook (it will be saved as output.xlsx)\\n    wb = openpyxl.load_workbook(INPUT_FILE)\\n    ws = wb[SHEET_NAME] if SHEET_NAME in wb.sheetnames else wb.active\\n\\n    max_row = ws.max_row\\n\\n    # ------------------------------------------------------------------\\n    # 1) Collect the reference words from column I (column index 9)\\n    # ------------------------------------------------------------------\\n    ref_words = set()\\n    for r in range(1, max_row + 1):\\n        key = normalize(ws.cell(row=r, column=9).value)\\n        if key:                       # ignore blank cells in column I\\n            ref_words.add(key)\\n\\n    # ------------------------------------------------------------------\\n    # 2) Read the whole A:E block into memory\\n    # ------------------------------------------------------------------\\n    block = []\\n    for r in range(1, max_row + 1):\\n        block.append([ws.cell(row=r, column=c).value for c in range(1, 6)])\\n\\n    # ------------------------------------------------------------------\\n    # 3) Keep only the rows whose column-A word is NOT found in column I\\n    # ------------------------------------------------------------------\\n    kept = []\\n    for row_vals in block:\\n        a_key = normalize(row_vals[0])\\n        if a_key and a_key in ref_words:\\n            continue                  # this row's A:E gets deleted\\n        kept.append(row_vals)\\n\\n    deleted_count = len(block) - len(kept)\\n\\n    # ------------------------------------------------------------------\\n    # 4) Clear the A:E region, then write the kept rows back compacted\\n    #    to the top — exactly the result of \\\"Delete cells -> Shift up\\\"\\n    # ------------------------------------------------------------------\\n    for r in range(1, max_row + 1):\\n        for c in range(1, 6):\\n            ws.cell(row=r, column=c).value = None\\n\\n    for i, row_vals in enumerate(kept, start=1):\\n        for c in range(1, 6):\\n            ws.cell(row=i, column=c).value = row_vals[c - 1]\\n\\n    # ------------------------------------------------------------------\\n    # 5) Save as output.xlsx\\n    # ------------------------------------------------------------------\\n    wb.save(OUTPUT_FILE)\\n    print(f\\\"Finished: {deleted_count} matching entries removed, \\\"\\n          f\\\"{len(kept)} rows written to A1:E{max(len(kept), 1)} \\\"\\n          f\\\"of '{OUTPUT_FILE}' (sheet '{ws.title}').\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 67.146,
+    "setup_s": 0.0,
+    "grade_s": 0.226
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3192",
+    "run1 exit=1 0.22s"
+  ]
+}

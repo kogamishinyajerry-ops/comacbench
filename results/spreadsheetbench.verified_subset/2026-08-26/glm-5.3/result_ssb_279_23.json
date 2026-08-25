@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_279_23",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nDelete everything outside of parentheses in column B of Sheet1.\\n\\nBehaviour (mirrors the classic worksheet formula\\n    =MID(B3, FIND(\\\"(\\\",B3)+1, FIND(\\\")\\\",B3)-FIND(\\\"(\\\",B3)-1)\\napplied via a loop over all cells of column B):\\n\\n* Iterates over all cells in column B (the used range, no gaps).\\n* Writes the results back into column B.\\n* Blank cells stay blank (nothing -- and especially not 0 -- is written into them).\\n* Cells without a (complete) pair of parentheses are left exactly as they are.\\n\\nThe processed workbook is saved as `output.xlsx` (a copy of the provided\\ninput workbook), with the answer in Sheet1, cells A3:B26\\n(column A is left untouched by the copy; column B holds the results).\\n\\\"\\\"\\\"\\n\\nimport shutil\\nfrom pathlib import Path\\n\\nfrom openpyxl import load_workbook\\n\\nINPUT_FILE = Path(\\\"input.xlsx\\\")\\nOUTPUT_FILE = Path(\\\"output.xlsx\\\")\\nSHEET_NAME = \\\"Sheet1\\\"\\nCOLUMN = 2          # column B\\nFIRST_ROW = 3\\nLAST_ROW = 26\\n\\n\\ndef keep_only_inside_parentheses(text: str):\\n    \\\"\\\"\\\"\\n    Delete everything outside of the first pair of parentheses.\\n\\n    Equivalent to the worksheet formula:\\n        =MID(B3, FIND(\\\"(\\\",B3)+1, FIND(\\\")\\\",B3)-FIND(\\\"(\\\",B3)-1)\\n\\n    Returns the text between the first \\\"(\\\" and the following \\\")\\\".\\n    Returns None if the text contains no complete pair of parentheses\\n    (in that case the caller leaves the cell as is).\\n    \\\"\\\"\\\"\\n    start = text.find(\\\"(\\\")\\n    if start == -1:                      # no \\\"(\\\" at all -> nothing to extract\\n        return None\\n    end = text.find(\\\")\\\", start)\\n    if end == -1:                        # \\\"(\\\" without \\\")\\\" -> nothing to extract\\n        return None\\n    return text[start + 1:end]\\n\\n\\ndef main():\\n    # ------------------------------------------------------------------\\n    # 1. Create output.xlsx as a copy of the provided input workbook.\\n    # ------------------------------------------------------------------\\n    source = INPUT_FILE if INPUT_FILE.exists() else Path(\\\"Input.xlsx\\\")\\n    if not source.exists():\\n        raise FileNotFoundError(\\n            f\\\"'{INPUT_FILE}' (or 'Input.xlsx') could not be found.\\\"\\n        )\\n    if OUTPUT_FILE.exists():\\n        OUTPUT_FILE.unlink()\\n    shutil.copyfile(source, OUTPUT_FILE)\\n\\n    # ------------------------------------------------------------------\\n    # 2. Open the copy and process Sheet1, column B.\\n    # ------------------------------------------------------------------\\n    wb = load_workbook(OUTPUT_FILE)\\n    ws = wb[SHEET_NAME]\\n\\n    # Walk down column B over the whole used range (data is gap-free);\\n    # make sure the answer region rows 3..26 are always covered.\\n    last_row = max(LAST_ROW, ws.max_row or 0)\\n\\n    for row in range(FIRST_ROW, last_row + 1):\\n        cell = ws.cell(row=row, column=COLUMN)\\n        value = cell.value\\n\\n        # ---- Rule 1: leave blank cells blank (never paste 0) ----------\\n        if value is None or (isinstance(value, str) and not value.strip()):\\n            continue\\n\\n        # ---- Rule 2: only transform plain text values -----------------\\n        # (numbers keep their value; formula cells are left untouched)\\n        if not isinstance(value, str) or value.startswith(\\\"=\\\"):\\n            continue\\n\\n        # ---- Rule 3: delete everything outside the parentheses --------\\n        result = keep_only_inside_parentheses(value)\\n        if result is not None:\\n            cell.value = result          # write the result back into column B\\n        # else: no parentheses -> leave the cell as is\\n\\n    wb.save(OUTPUT_FILE)\\n    print(f\\\"Done. Results written to '{OUTPUT_FILE}' -> Sheet1!B{FIRST_ROW}:B{last_row}.\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ziz3w7ly/model.py\\\", line 98, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_ziz3w7ly/model.py\\\", line 57, in main\\n    raise FileNotFoundError(\\nFileNotFoundError: 'input.xlsx' (or 'Input.xlsx') could not be found.\\n\"}"
+  },
+  "timings": {
+    "agent_s": 52.922,
+    "setup_s": 0.0,
+    "grade_s": 0.278
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3590",
+    "run1 exit=1 0.28s"
+  ]
+}

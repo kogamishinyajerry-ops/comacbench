@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_05",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\n\\n# Read CSV\\nrows = []\\nwith open('perf_05.csv', 'r') as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        rows.append(row)\\n\\nN = len(rows)\\n\\n# Parse numeric values for statistics\\ncl_max_values = [float(row['cl_max']) for row in rows]\\ncd_cruise_values = [float(row['cd_cruise']) for row in rows]\\nld_ratio_values = [float(row['ld_ratio']) for row in rows]\\n\\n# Compute stats\\ncl_max_max = max(cl_max_values)\\ncd_cruise_mean = sum(cd_cruise_values) / N\\nld_mean = sum(ld_ratio_values) / N\\n\\n# Find best config (max L/D)\\nbest_idx = max(range(N), key=lambda i: ld_ratio_values[i])\\nbest_config = rows[best_idx]['config']\\n\\n# Rounded display values (as specified)\\ncl_max_max_rounded = round(cl_max_max, 3)\\ncd_cruise_mean_rounded = round(cd_cruise_mean, 4)\\nld_mean_rounded = round(ld_mean, 1)\\n\\n# Create document\\ndoc = Document()\\n\\n# 1. Title as a Heading\\ndoc.add_heading('Engineering Test Report', 0)\\n\\n# 2. Overview\\ndoc.add_heading('Overview', 1)\\ndoc.add_paragraph(f'This report analyses {N} data rows recorded in the performance test dataset.')\\n\\n# 3. Results table\\ndoc.add_heading('Results table', 1)\\ntable = doc.add_table(rows=1, cols=4)\\ntable.style = 'Table Grid'\\nhdr = table.rows[0].cells\\nhdr[0].text = 'config'\\nhdr[1].text = 'cl_max'\\nhdr[2].text = 'cd_cruise'\\nhdr[3].text = 'ld_ratio'\\n\\nfor row in rows:\\n    cells = table.add_row().cells\\n    cells[0].text = row['config']\\n    cells[1].text = row['cl_max']\\n    cells[2].text = row['cd_cruise']\\n    cells[3].text = row['ld_ratio']\\n\\n# 4. Summary\\ndoc.add_heading('Summary', 1)\\ndoc.add_paragraph(f'CLmax max = {cl_max_max_rounded}')\\ndoc.add_paragraph(f'CDcruise mean = {cd_cruise_mean_rounded}')\\ndoc.add_paragraph(f'L/D mean = {ld_mean_rounded}')\\ndoc.add_paragraph(f'best config (max L/D) = {best_config}')\\n\\n# 5. Conclusion\\ndoc.add_heading('Conclusion', 1)\\ndoc.add_paragraph(\\n    f'Based on the {N} test records analysed, configuration {best_config} delivered the highest '\\n    f'lift-to-drag ratio, indicating the most favourable aerodynamic efficiency among the configurations tested.'\\n)\\n\\ndoc.save('report.docx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 11, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 16.69,
+    "setup_s": 0.0,
+    "grade_s": 0.22
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2096",
+    "run1 exit=0 0.1s",
+    "run2 exit=0 0.09s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_06",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# -*- coding: utf-8 -*-\\n\\\"\\\"\\\"\\nEngineering test report generator (data-anchored).\\n\\nReads perf_06.csv from the current directory, computes summary statistics\\ndirectly from the CSV values, and writes report.docx with:\\n\\n  1. A title heading.\\n  2. An \\\"Overview\\\" section (Heading 1) stating the number of data rows N.\\n  3. A \\\"Results table\\\" section (Heading 1) with one table: header row plus\\n     one row per data record, columns ['config','cl_max','cd_cruise','ld_ratio']\\n     with the source values verbatim (same rounding as the source file).\\n  4. A \\\"Summary\\\" section (Heading 1) with:\\n       CLmax max = 0.578, CDcruise mean = 0.0331, L/D mean = 16.6,\\n       best config (max L/D) = A2   <- all computed from the data\\n  5. A \\\"Conclusion\\\" heading (Heading 1) with one concluding paragraph.\\n\\nOnly the standard library and python-docx are used.\\n\\\"\\\"\\\"\\n\\nimport csv\\nimport os\\n\\nfrom docx import Document\\n\\nCSV_PATH = \\\"perf_06.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\n\\nTARGET_COLUMNS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\n# Header aliases (normalized: lowercased, spaces/hyphens -> underscore, slashes removed)\\nALIASES = {\\n    \\\"config\\\": {\\\"config\\\", \\\"configuration\\\", \\\"cfg\\\", \\\"case\\\", \\\"name\\\"},\\n    \\\"cl_max\\\": {\\\"cl_max\\\", \\\"clmax\\\", \\\"cl__max\\\", \\\"cl_max_\\\", \\\"max_cl\\\"},\\n    \\\"cd_cruise\\\": {\\\"cd_cruise\\\", \\\"cdcruise\\\", \\\"cd__cruise\\\", \\\"cd_cruise_\\\", \\\"cruise_cd\\\"},\\n    \\\"ld_ratio\\\": {\\\"ld_ratio\\\", \\\"ldratio\\\", \\\"ld__ratio\\\", \\\"ld_ratio_\\\", \\\"ld\\\", \\\"l_d\\\", \\\"ratio\\\"},\\n}\\n\\n\\ndef norm_header(h):\\n    \\\"\\\"\\\"Normalize a CSV header for matching.\\\"\\\"\\\"\\n    return (\\n        h.strip()\\n        .lower()\\n        .replace(\\\" \\\", \\\"_\\\")\\n        .replace(\\\"-\\\", \\\"_\\\")\\n        .replace(\\\"/\\\", \\\"\\\")\\n        .replace(\\\".\\\", \\\"_\\\")\\n    )\\n\\n\\ndef map_columns(header):\\n    \\\"\\\"\\\"Map each required logical column to an actual CSV header name.\\\"\\\"\\\"\\n    normed = {}\\n    for h in header:\\n        nk = norm_header(h)\\n        if nk not in normed:\\n            normed[nk] = h\\n\\n    mapping = {}\\n    for target in TARGET_COLUMNS:\\n        found = None\\n        for alias in ALIASES[target]:\\n            if alias in normed:\\n                found = normed[alias]\\n                break\\n        if found is None:  # substring fallback\\n            tkey = target.replace(\\\"_\\\", \\\"\\\")\\n            for nk, orig in normed.items():\\n                if tkey in nk.replace(\\\"_\\\", \\\"\\\"):\\n                    found = orig\\n                    break\\n        if found is None:\\n            raise KeyError(\\n                \\\"Could not locate column for '%s' in CSV headers: %r\\\" % (target, header)\\n            )\\n        mapping[target] = found\\n    return mapping\\n\\n\\ndef main():\\n    # ---- Load the data (keep raw strings so table values keep source rounding) ----\\n    with open(CSV_PATH, \\\"r\\\", newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        reader = csv.reader(f)\\n        header = next(reader)\\n        raw_rows = [row for row in reader if any(c.strip() for c in row)]\\n\\n    mapping = map_columns(header)\\n    idx = {t: header.index(mapping[t]) for t in TARGET_COLUMNS}\\n\\n    def cell(row, target):\\n        return row[idx[target]].strip()\\n\\n    n = len(raw_rows)\\n    if n == 0:\\n        raise ValueError(\\\"perf_06.csv contains no data rows.\\\")\\n\\n    configs = [cell(r, \\\"config\\\") for r in raw_rows]\\n    cl_vals = [float(cell(r, \\\"cl_max\\\")) for r in raw_rows]\\n    cd_vals = [float(cell(r, \\\"cd_cruise\\\")) for r in raw_rows]\\n    ld_vals = [float(cell(r, \\\"ld_ratio\\\")) for r in raw_rows]\\n\\n    # ---- Statistics computed from the data (rounded display values per spec) ----\\n    max_cl = max(cl_vals)\\n    mean_cd = sum(cd_vals) / len(cd_vals)\\n    mean_ld = sum(ld_vals) / len(ld_vals)\\n    best_i = max(range(len(ld_vals)), key=lambda i: ld_vals[i])\\n    best_cfg = configs[best_i]\\n\\n    max_cl_str = \\\"%.3f\\\" % max_cl      # e.g. 0.578\\n    mean_cd_str = \\\"%.4f\\\" % mean_cd    # e.g. 0.0331\\n    mean_ld_str = \\\"%.1f\\\" % mean_ld    # e.g. 16.6\\n\\n    # ---- Build the document ----\\n    doc = Document()\\n\\n    doc.add_heading(\\\"Engineering Performance Test Report\\\", level=1)\\n\\n    # Overview\\n    doc.add_heading(\\\"Overview\\\", level=1)\\n    doc.add_paragraph(\\n        \\\"This report \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 70.617,
+    "setup_s": 0.0,
+    "grade_s": 0.257
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=6007",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.12s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

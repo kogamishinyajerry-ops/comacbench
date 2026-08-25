@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_24_23",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nFast filter-and-delete of rows in a large Excel worksheet.\\n\\nQuestion:  Can rows whose column-A group label is '@9T', 'SAL' or 'T9A' be\\n           deleted quickly, even in a workbook with 13,000+ rows?\\n\\nAnswer:    YES -- provided you do NOT call ws.delete_rows() once per matched\\n           row.  Each delete_rows() call shifts every row underneath it, so a\\n           per-row deletion loop is O(n^2) and becomes painfully slow on a\\n           13k-row sheet.  The strategy below is strictly O(n):\\n\\n             1. Read all rows into memory once                       -> O(n)\\n             2. Filter the list in plain Python                      -> O(n)\\n             3. Rewrite the surviving rows top-down in one pass      -> O(n)\\n             4. Remove the single leftover tail block in ONE call    -> O(n)\\n\\n           This completes in a second or two even for 13,000+ rows.\\n\\nOutput:    output.xlsx (a copy of the input workbook), sheet 'Sheet1',\\n           header kept in row 1, surviving data in A2:D<last row>.\\n\\\"\\\"\\\"\\n\\nimport time\\nimport openpyxl\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Sheet1\\\"\\nTARGET_GROUPS = {\\\"@9T\\\", \\\"SAL\\\", \\\"T9A\\\"}   # group labels in column A to delete\\n\\n\\ndef is_target(value):\\n    \\\"\\\"\\\"True if a column-A cell holds one of the group labels to delete.\\\"\\\"\\\"\\n    return value is not None and str(value).strip() in TARGET_GROUPS\\n\\n\\ndef main():\\n    start = time.perf_counter()\\n\\n    # Load the workbook as-is so output.xlsx remains a faithful copy\\n    # (other sheets, formatting, etc. are preserved).\\n    wb = openpyxl.load_workbook(INPUT_FILE)\\n    ws = wb[SHEET_NAME]\\n\\n    n_rows = ws.max_row\\n    n_cols = ws.max_column or 1\\n\\n    # ---- Phase 1: read everything into memory in a single pass (fast) ----\\n    all_rows = [\\n        list(r)\\n        for r in ws.iter_rows(min_row=1, max_row=n_rows,\\n                              max_col=n_cols, values_only=True)\\n    ]\\n    if not all_rows:                       # empty sheet -> nothing to do\\n        wb.save(OUTPUT_FILE)\\n        print(\\\"Input sheet was empty; workbook copied unchanged.\\\")\\n        return\\n\\n    header, data = all_rows[0], all_rows[1:]\\n\\n    # ---- Phase 2: filter in memory (fast; no worksheet shifting yet) ----\\n    kept = [row for row in data if not is_target(row[0] if row else None)]\\n\\n    # ---- Phase 3: write the surviving rows back, top-down, one pass ----\\n    for i, row_vals in enumerate(kept, start=2):\\n        for j in range(n_cols):\\n            ws.cell(row=i, column=j + 1,\\n                    value=row_vals[j] if j < len(row_vals) else None)\\n\\n    # ---- Phase 4: delete the unused tail rows in ONE call (fast) -------\\n    new_last_row = len(kept) + 1           # header + kept rows\\n    if n_rows > new_last_row:\\n        ws.delete_rows(new_last_row + 1, n_rows - new_last_row)\\n\\n    wb.save(OUTPUT_FILE)\\n\\n    elapsed = time.perf_counter() - start\\n    deleted = len(data) - len(kept)\\n    print(f\\\"Rows scanned : {len(data)}\\\")\\n    print(f\\\"Rows deleted : {deleted}  (groups: {sorted(TARGET_GROUPS)})\\\")\\n    print(f\\\"Rows kept    : {len(kept)}\\\")\\n    print(f\\\"Saved to     : {OUTPUT_FILE} [{SHEET_NAME}!A2:D{new_last_row}]\\\")\\n    print(f\\\"Elapsed time : {elapsed:.2f} s\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 60.262,
+    "setup_s": 0.0,
+    "grade_s": 0.221
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3212",
+    "run1 exit=1 0.22s"
+  ]
+}

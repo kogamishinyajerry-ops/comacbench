@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_load_02",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\nfrom pptx.enum.text import PP_ALIGN\\n\\n# ---- 1. Read and parse the CSV ----\\nrows = []\\nwith open('load_02.csv', 'r', newline='') as f:\\n    reader = csv.DictReader(f)\\n    fieldnames = [fn.strip() for fn in reader.fieldnames]\\n    for raw in reader:\\n        rec = {fn.strip(): (raw[fn.strip()] if fn.strip() in raw else raw.get(fn, '')) for fn in fieldnames}\\n        rows.append(rec)\\n\\n# Helper to find a column by candidate names\\ndef find_col(candidates):\\n    for c in fieldnames:\\n        for cand in candidates:\\n            if c.lower() == cand.lower():\\n                return c\\n    return None\\n\\ncase_col    = find_col(['case', 'case_id', 'specimen', 'id', 'name'])\\nload_col    = find_col(['load_factor', 'load', 'load_factor_max', 'peak_load', 'stress'])\\ncycles_col  = find_col(['cycles', 'n_cycles', 'cycle_count', 'count'])\\n\\n# Extract numeric values\\ncases = []\\nloads = []\\ncycles = []\\nfor r in rows:\\n    cases.append(r[case_col])\\n    try:\\n        loads.append(float(r[load_col]))\\n    except Exception:\\n        # try stripped numeric\\n        loads.append(float(str(r[load_col]).strip()))\\n    try:\\n        cycles.append(int(float(r[cycles_col])))\\n    except Exception:\\n        cycles.append(int(float(str(r[cycles_col]).strip())))\\n\\n# ---- 2. Compute statistics ----\\nn_cases      = len(rows)\\nload_max     = max(loads)\\nload_mean    = sum(loads) / len(loads)\\ntotal_cycles = sum(cycles)\\n\\n# Rounded display values (per spec)\\nn_cases_disp      = n_cases                       # exact\\nload_max_disp     = round(load_max, 2)            # 2.39\\nload_mean_disp    = round(load_mean, 2)           # 1.69\\ntotal_cycles_disp = total_cycles                  # exact\\n\\n# ---- 3. Build the presentation ----\\nprs = Presentation()\\nprs.slide_width  = Inches(13.333)\\nprs.slide_height = Inches(7.5)\\nblank_layout = prs.slide_layouts[6]\\n\\ndef add_title(slide, text, size=36, top=Inches(0.5)):\\n    tb = slide.shapes.add_textbox(Inches(0.6), top, Inches(12), Inches(1.0))\\n    tf = tb.text_frame\\n    tf.word_wrap = True\\n    p = tf.paragraphs[0]\\n    p.alignment = PP_ALIGN.LEFT\\n    run = p.add_run()\\n    run.text = text\\n    run.font.size = Pt(size)\\n    run.font.bold = True\\n    return tb\\n\\ndef add_bullets(slide, lines, top=Inches(2.0), size=22):\\n    tb = slide.shapes.add_textbox(Inches(0.8), top, Inches(12), Inches(5.0))\\n    tf = tb.text_frame\\n    tf.word_wrap = True\\n    for i, line in enumerate(lines):\\n        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()\\n        run = p.add_run()\\n        run.text = f\\\"• {line}\\\"\\n        run.font.size = Pt(size)\\n    return tb\\n\\n# --- Slide 1: Title ---\\ns1 = prs.slides.add_slide(blank_layout)\\nadd_title(s1, \\\"Engineering Test Briefing — Load Factor & Cycles\\\", size=40, top=Inches(2.5))\\nsub = s1.shapes.add_textbox(Inches(0.6), Inches(3.8), Inches(12), Inches(1.2))\\np = sub.text_frame.paragraphs[0]\\nr = p.add_run()\\nr.text = \\\"Data-anchored summary of fatigue test cases\\\"\\nr.font.size = Pt(22)\\n\\n# --- Slide 2: Data (one table) ---\\ns2 = prs.slides.add_slide(blank_layout)\\nadd_title(s2, \\\"Data\\\", size=32, top=Inches(0.3))\\n\\nheader = ['case', 'load_factor', 'cycles']\\ndata_rows = [[str(c), f\\\"{loads[i]:g}\\\", str(cycles[i])] for i, c in enumerate(cases)]\\n\\nn_rows = len(data_rows) + 1\\nn_cols = len(header)\\nleft   = Inches(0.6)\\ntop    = Inches(1.4)\\nwidth  = Inches(6.0)\\nheight = Inches(5.6)\\ntable_shape = s2.shapes.add_table(n_rows, n_cols, left, top, width, height)\\ntable = table_shape.table\\n\\n# Header\\nfor j, h in enumerate(header):\\n    cell = table.cell(0, j)\\n    cell.text = h\\n    for para in cell.text_frame.paragraphs:\\n        for run in para.runs:\\n            run.font.bold = True\\n            run.font.size = Pt(14)\\n\\n# Body\\nfor i, row in enumerate(data_rows, start=1):\\n    for j, val in enumerate(row):\\n        cell = table.cell(i, j)\\n        cell.text = val\\n        for para in cell.text_frame.paragraphs:\\n            for run in para.runs:\\n                run.font.size = Pt(12)\\n\\n# --- Slide 3: Summary ---\\ns3 = prs.slide\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"4/4\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 10.123,
+    "setup_s": 0.0,
+    "grade_s": 0.379
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=4904",
+    "run1 exit=0 0.14s",
+    "run2 exit=0 0.17s",
+    "physics=1.0 requirements=1.0 anchors=4/4"
+  ]
+}

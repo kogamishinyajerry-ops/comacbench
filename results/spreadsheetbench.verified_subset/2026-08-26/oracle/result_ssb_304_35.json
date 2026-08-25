@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_304_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (3, 1, \\\"0002\\\"),\\n    (3, 2, \\\"xxx\\\"),\\n    (3, 3, \\\"xxx\\\"),\\n    (3, 4, \\\"xxx\\\"),\\n    (3, 5, \\\"text1\\\"),\\n    (3, 6, \\\"yyy\\\"),\\n    (4, 1, \\\"0002\\\"),\\n    (4, 5, \\\"text2\\\"),\\n    (4, 6, \\\"yyy\\\"),\\n    (5, 1, \\\"0002\\\"),\\n    (5, 5, \\\"text3\\\"),\\n    (5, 6, \\\"yyy\\\"),\\n    (7, 1, \\\"0004\\\"),\\n    (7, 2, \\\"xxx\\\"),\\n    (7, 3, \\\"xxx\\\"),\\n    (7, 4, \\\"xxx\\\"),\\n    (7, 5, \\\"text1\\\"),\\n    (7, 6, \\\"yyy\\\"),\\n    (8, 1, \\\"0004\\\"),\\n    (8, 5, \\\"text2\\\"),\\n    (8, 6, \\\"yyy\\\"),\\n    (10, 1, \\\"0005\\\"),\\n    (10, 2, \\\"xxx\\\"),\\n    (10, 3, \\\"xxx\\\"),\\n    (10, 4, \\\"xxx\\\"),\\n    (10, 5, \\\"text1\\\"),\\n    (10, 6, \\\"yyy\\\"),\\n    (11, 1, \\\"0005\\\"),\\n    (11, 5, \\\"text2\\\"),\\n    (11, 6, \\\"yyy\\\"),\\n    (12, 1, \\\"0005\\\"),\\n    (12, 5, \\\"text3\\\"),\\n    (12, 6, \\\"yyy\\\"),\\n    (13, 1, \\\"0005\\\"),\\n    (13, 5, \\\"text4\\\"),\\n    (13, 6, \\\"yyy\\\"),\\n    (14, 1, \\\"0005\\\"),\\n    (14, 5, \\\"text5\\\"),\\n    (14, 6, \\\"yyy\\\"),\\n    (17, 1, \\\"0007\\\"),\\n    (17, 2, \\\"xxx\\\"),\\n    (17, 3, \\\"xxx\\\"),\\n    (17, 4, \\\"xxx\\\"),\\n    (17, 5, \\\"text1\\\"),\\n    (17, 6, \\\"yyy\\\"),\\n    (18, 1, \\\"0007\\\"),\\n    (18, 5, \\\"text2\\\"),\\n    (18, 6, \\\"yyy\\\"),\\n    (19, 1, \\\"0007\\\"),\\n    (19, 5, \\\"text3\\\"),\\n    (19, 6, \\\"yyy\\\"),\\n    (21, 1, \\\"0008\\\"),\\n    (21, 2, \\\"xxx\\\"),\\n    (21, 3, \\\"xxx\\\"),\\n    (21, 4, \\\"xxx\\\"),\\n    (21, 5, \\\"text1\\\"),\\n    (21, 6, \\\"yyy\\\"),\\n    (22, 1, \\\"0008\\\"),\\n    (22, 5, \\\"text2\\\"),\\n    (22, 6, \\\"yyy\\\"),\\n    (23, 1, \\\"0009\\\"),\\n    (23, 2, \\\"xxx\\\"),\\n    (23, 3, \\\"xxx\\\"),\\n    (23, 4, \\\"xxx\\\"),\\n    (23, 5, \\\"text1\\\"),\\n    (23, 6, \\\"yyy\\\"),\\n    (24, 1, \\\"0009\\\"),\\n    (24, 5, \\\"text2\\\"),\\n    (24, 6, \\\"yyy\\\"),\\n    (26, 1, \\\"0010\\\"),\\n    (26, 2, \\\"xxx\\\"),\\n    (26, 3, \\\"xxx\\\"),\\n    (26, 4, \\\"xxx\\\"),\\n    (26, 5, \\\"text1\\\"),\\n    (26, 6, \\\"yyy\\\"),\\n    (27, 1, \\\"0010\\\"),\\n    (27, 5, \\\"text2\\\"),\\n    (27, 6, \\\"yyy\\\"),\\n    (29, 1, \\\"column1\\\"),\\n    (29, 2, \\\"column2\\\"),\\n    (29, 3, \\\"column3\\\"),\\n    (29, 4, \\\"column4\\\"),\\n    (29, 5, \\\"column5\\\"),\\n    (29, 6, \\\"column6\\\"),\\n    (31, 1, \\\"0020\\\"),\\n    (31, 2, \\\"xxx\\\"),\\n    (31, 3, \\\"xxx\\\"),\\n    (31, 4, \\\"xxx\\\"),\\n    (31, 5, \\\"text1\\\"),\\n    (31, 6, \\\"yyy\\\"),\\n    (32, 1, \\\"0020\\\"),\\n    (32, 5, \\\"text2\\\"),\\n    (32, 6, \\\"yyy\\\"),\\n    (34, 1, \\\"0033\\\"),\\n    (34, 2, \\\"xxx\\\"),\\n    (34, 3, \\\"xxx\\\"),\\n    (34, 4, \\\"xxx\\\"),\\n    (34, 5, \\\"text1\\\"),\\n    (34, 6, \\\"yyy\\\"),\\n    (35, 1, \\\"0033\\\"),\\n    (35, 5, \\\"text2\\\"),\\n    (35, 6, \\\"yyy\\\"),\\n    (36, 1, \\\"0033\\\"),\\n    (36, 5, \\\"text3\\\"),\\n    (36, 6, \\\"yyy\\\"),\\n]\\n\\n\\ndef _v(x):\\n    if isinstance(x, dict) and \\\"__date__\\\" in x:\\n        return _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d %H:%M:%S\\\") \\\\\\n            if len(x[\\\"__date__\\\"]) > 10 else _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d\\\")\\n    return x\\n\\n\\nwb = openpyxl.load_workbook(\\\"ssb_304_35_init.xlsx\\\")\\nws = wb[\\\"start\\\"] if \\\"start\\\" in wb.sheetnames else wb.worksheets[0]\\nfor row, col, v in VALUES:\\n    ws.cell(row=row, column=col).value = _v(v)\\nwb.save(\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"start\", \"region\": \"A3:F36\", \"match\": {\"n_gold\": 105, \"matched\": 105, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 4.947,
+    "setup_s": 0.0,
+    "grade_s": 4.946
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=2779",
+    "run1 exit=0 0.79s",
+    "run2 exit=0 0.78s",
+    "physics=1.0 cells=105/105 extra=0"
+  ]
+}

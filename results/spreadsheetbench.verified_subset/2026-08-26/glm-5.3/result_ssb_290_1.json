@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_290_1",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nAutomation of the manual transposition from columns K:V.\\n\\nThe source block occupies columns A:J (one record per row, starting at row 2).\\nThe transposed block goes into K2:V10 (first transposed row already done by\\nhand as an example - we reproduce/complete the remaining ones).\\n\\nOnly cell *values* are written; existing formatting is left untouched.\\n\\\"\\\"\\\"\\n\\nimport openpyxl\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\nSOURCE_SHEET = \\\"Sheet1\\\"\\nSOURCE_FIRST_COL = 1            # column A\\nSOURCE_LAST_COL = 10            # column J\\nSOURCE_FIRST_ROW = 2            # data starts under the header\\n\\nTARGET_FIRST_COL = 11           # column K\\nTARGET_LAST_COL = 22            # column V\\nTARGET_FIRST_ROW = 2            # transposed block starts here\\n\\n# Load workbook keeping formatting intact\\nwb = openpyxl.load_workbook(INPUT_FILE)\\nws = wb[SOURCE_SHEET]\\n\\n# Find the last used row in the source block (handles ~2000 rows dynamically)\\nlast_source_row = SOURCE_FIRST_ROW\\nfor r in range(SOURCE_FIRST_ROW, ws.max_row + 1):\\n    if any(ws.cell(row=r, column=c).value not in (None, \\\"\\\")\\n           for c in range(SOURCE_FIRST_COL, SOURCE_LAST_COL + 1)):\\n        last_source_row = r\\n\\n# Collect source values\\nsource_data = []\\nfor r in range(SOURCE_FIRST_ROW, last_source_row + 1):\\n    row_vals = [ws.cell(row=r, column=c).value\\n                for c in range(SOURCE_FIRST_COL, SOURCE_LAST_COL + 1)]\\n    source_data.append(row_vals)\\n\\n# Transpose: column i of the source becomes row i of the target block.\\n# Position correspondence: target row r (2..) <- source column r\\n#                          target column c (K..) <- source row c-1 offset\\nfor i, col_vals in enumerate(zip(*source_data)):\\n    target_row = TARGET_FIRST_ROW + i\\n    for j, val in enumerate(col_vals):\\n        target_col = TARGET_FIRST_COL + j\\n        if target_col > TARGET_LAST_COL:\\n            break\\n        ws.cell(row=target_row, column=target_col).value = val\\n\\nwb.save(OUTPUT_FILE)\\nprint(f\\\"Transposed {len(source_data)} source rows into columns K:V of \\\"\\n      f\\\"'{SOURCE_SHEET}' and saved as '{OUTPUT_FILE}'.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": true}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 497.824,
+    "setup_s": 0.0,
+    "grade_s": 0.319
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2076",
+    "run1 exit=1 0.32s"
+  ]
+}

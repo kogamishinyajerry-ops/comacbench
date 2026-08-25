@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_297_42",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import shutil\\n\\nimport pandas as pd\\nfrom openpyxl import load_workbook\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nCOMBINED_SHEET = \\\"combined\\\"\\nSTART_ROW = 2  # header lives in row 1; data must be written starting at A2\\n\\n\\ndef normalize(value):\\n    \\\"\\\"\\\"Normalize a header string for matching (case/whitespace-insensitive).\\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    return \\\" \\\".join(str(value).split()).lower()\\n\\n\\ndef clean(value):\\n    \\\"\\\"\\\"Convert pandas NaN/NaT values to None so openpyxl writes empty cells.\\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    try:\\n        if pd.isna(value):\\n            return None\\n    except (TypeError, ValueError):\\n        pass\\n    return value\\n\\n\\ndef main():\\n    # Work on a copy of the provided input workbook.\\n    shutil.copyfile(INPUT_FILE, OUTPUT_FILE)\\n\\n    wb = load_workbook(OUTPUT_FILE)\\n\\n    # Ensure the 'combined' sheet exists (create it if the macro only made an empty one).\\n    if COMBINED_SHEET in wb.sheetnames:\\n        ws = wb[COMBINED_SHEET]\\n    else:\\n        ws = wb.create_sheet(COMBINED_SHEET)\\n\\n    # Read the header row of the 'combined' sheet (row 1, columns A:O) and\\n    # build a lookup: header name -> column index in the combined sheet.\\n    header = [cell.value for cell in ws[1]]\\n    col_index = {}\\n    for i, name in enumerate(header, start=1):\\n        key = normalize(name)\\n        if key is not None and key not in col_index:\\n            col_index[key] = i\\n\\n    if not col_index:\\n        raise ValueError(\\\"The 'combined' sheet has no header row to map columns to.\\\")\\n\\n    # Remove any stale data below the header before writing new data.\\n    if ws.max_row >= START_ROW:\\n        ws.delete_rows(START_ROW, ws.max_row - START_ROW + 1)\\n\\n    # Load every sheet from the original workbook (first row of each = header).\\n    all_sheets = pd.read_excel(INPUT_FILE, sheet_name=None, header=0)\\n\\n    frames = []\\n    for name, df in all_sheets.items():\\n        if normalize(name) == COMBINED_SHEET:\\n            continue  # skip the destination sheet itself\\n        df = df.dropna(how=\\\"all\\\").dropna(axis=1, how=\\\"all\\\")\\n        if df.empty:\\n            continue\\n        frames.append(df)\\n\\n    if not frames:\\n        raise ValueError(\\\"No data found in the source sheets to combine.\\\")\\n\\n    # Stack all source sheets together, one below the other.\\n    combined = pd.concat(frames, ignore_index=True, sort=False)\\n\\n    # Write the data starting at A2, placing each value in the column whose\\n    # header name matches (position/mapping driven by the 'combined' header).\\n    for offset, (_, record) in enumerate(combined.iterrows()):\\n        row_num = START_ROW + offset\\n        for col_name, value in record.items():\\n            idx = col_index.get(normalize(col_name))\\n            if idx is None:\\n                continue  # not part of the expected output header\\n            ws.cell(row=row_num, column=idx, value=clean(value))\\n\\n    wb.save(OUTPUT_FILE)\\n    last_row = START_ROW + len(combined) - 1\\n    print(f\\\"Combined {len(frames)} sheet(s), {len(combined)} data rows -> \\\"\\n          f\\\"'{COMBINED_SHEET}'!A{START_ROW}:O{last_row} in {OUTPUT_FILE}\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_kagt3oe1/model.py\\\", line 3, in <module>\\n    import pandas as pd\\nModuleNotFoundError: No module named 'pandas'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 38.79,
+    "setup_s": 0.0,
+    "grade_s": 0.04
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3142",
+    "run1 exit=1 0.04s"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_280_17",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nRemove all rows from an Excel spreadsheet EXCEPT the rows that contain the\\nLAST occurrence of each (duplicated) value in a specific column.\\n\\nExample: if a number appears in rows 1, 2 and 3 of the column, only row 3\\nis kept; rows 1 and 2 are deleted.  This is exactly what pandas'\\n``drop_duplicates(keep=\\\"last\\\")`` does.\\n\\nThe deduplicated result is written into ``Sheet1!A1:B12`` of ``output.xlsx``,\\nwhich is first created as a copy of the provided input workbook.\\n(For the user's real 1100-row x 36-column file the same logic applies;\\nthe full deduplicated table is held in the ``kept`` DataFrame.)\\n\\\"\\\"\\\"\\n\\nimport shutil\\nfrom pathlib import Path\\n\\nimport numpy as np\\nimport openpyxl\\nimport pandas as pd\\n\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nANSWER_SHEET = \\\"Sheet1\\\"\\nANSWER_ROWS = 12          # answer region A1:B12  ->  12 rows ...\\nANSWER_COLS = 2           # ... x 2 columns\\n\\n\\ndef find_input_workbook() -> Path:\\n    \\\"\\\"\\\"Locate the provided input workbook in the current directory.\\\"\\\"\\\"\\n    for name in (\\\"input.xlsx\\\", \\\"Input.xlsx\\\", \\\"input.xls\\\", \\\"book.xlsx\\\", \\\"data.xlsx\\\"):\\n        p = Path(name)\\n        if p.exists():\\n            return p\\n    candidates = sorted(\\n        p for p in Path(\\\".\\\").glob(\\\"*.xls*\\\")\\n        if not p.name.startswith(\\\"~$\\\") and p.name != OUTPUT_FILE\\n    )\\n    if candidates:\\n        return candidates[0]\\n    raise FileNotFoundError(\\\"No input Excel workbook (.xlsx/.xls) found.\\\")\\n\\n\\ndef to_native(value):\\n    \\\"\\\"\\\"Convert pandas/numpy scalars to native Python types for openpyxl.\\\"\\\"\\\"\\n    try:\\n        if pd.isna(value):\\n            return None\\n    except (TypeError, ValueError):\\n        pass\\n    if isinstance(value, pd.Timestamp):\\n        return value.to_pydatetime()\\n    if isinstance(value, np.generic):\\n        return value.item()\\n    return value\\n\\n\\ndef main() -> None:\\n    in_path = find_input_workbook()\\n    out_path = Path(OUTPUT_FILE)\\n\\n    # ------------------------------------------------------------------\\n    # 1) Read the data (prefer the sheet named \\\"Sheet1\\\").\\n    # ------------------------------------------------------------------\\n    xl = pd.ExcelFile(in_path)\\n    sheet_name = ANSWER_SHEET if ANSWER_SHEET in xl.sheet_names else xl.sheet_names[0]\\n    df = xl.parse(sheet_name)\\n\\n    # ------------------------------------------------------------------\\n    # 2) Identify the column that contains the duplicated numbers.\\n    #    (Prefer a column whose number of unique values fits into the\\n    #     12-row answer region when a header row is included.)\\n    # ------------------------------------------------------------------\\n    dupe_columns = [c for c in df.columns if df[c].dropna().duplicated().any()]\\n    if not dupe_columns:\\n        raise ValueError(\\\"No column with duplicate values was found.\\\")\\n\\n    key_col = next(\\n        (c for c in dupe_columns if df[c].dropna().nunique() <= ANSWER_ROWS - 1),\\n        dupe_columns[0],\\n    )\\n\\n    # ------------------------------------------------------------------\\n    # 3) Keep only the LAST occurrence of every value in that column\\n    #    (e.g. rows 3, 6, 9, ... are the ones kept in the user's example).\\n    # ------------------------------------------------------------------\\n    kept = df.drop_duplicates(subset=[key_col], keep=\\\"last\\\").reset_index(drop=True)\\n\\n    # ------------------------------------------------------------------\\n    # 4) Build the block of values for Sheet1!A1:B12.\\n    # ------------------------------------------------------------------\\n    body = kept.iloc[:, :ANSWER_COLS]          # first two columns of the result\\n    n_kept = len(body)\\n\\n    lines = []\\n    if n_kept <= ANSWER_ROWS - 1:              # header + all data fits in 12 rows\\n        lines.append([to_native(c) for c in body.columns])\\n    lines += [[to_native(v) for v in row] for row in body.itertuples(index=False)]\\n    lines = [row[:ANSWER_COLS] for row in lines[:ANSWER_ROWS]]\\n\\n    # ------------------------------------------------------------------\\n    # 5) Create output.xlsx as a copy of the input workbook and write the\\n    #    a\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_opseu6s2/model.py\\\", line 20, in <module>\\n    import pandas as pd\\nModuleNotFoundError: No module named 'pandas'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 129.745,
+    "setup_s": 0.0,
+    "grade_s": 0.252
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5370",
+    "run1 exit=1 0.25s"
+  ]
+}

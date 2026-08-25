@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_469_9",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nSplit the signed amounts in Column C of the sample workbook into:\\n    Column H -> \\\"Debits\\\"  (absolute value of positive amounts)\\n    Column I -> \\\"Credits\\\" (absolute value of negative amounts)\\nCells are left empty when Column C holds no numeric value.\\nThe result is saved as output.xlsx (a copy of the input workbook).\\n\\\"\\\"\\\"\\n\\nimport os\\nimport re\\nfrom openpyxl import load_workbook\\n\\n\\ndef find_input_workbook():\\n    \\\"\\\"\\\"Locate the provided sample workbook (prefers 'input.xlsx').\\\"\\\"\\\"\\n    preferred = [\\\"input.xlsx\\\", \\\"sample.xlsx\\\", \\\"sample file.xlsx\\\", \\\"book1.xlsx\\\"]\\n    for name in preferred:\\n        if os.path.isfile(name):\\n            return name\\n    # Fallback: grab the first Excel file that isn't the output file.\\n    for name in sorted(os.listdir(\\\".\\\")):\\n        if (name.lower().endswith((\\\".xlsx\\\", \\\".xlsm\\\"))\\n                and name != \\\"output.xlsx\\\"\\n                and not name.startswith(\\\"~$\\\")):\\n            return name\\n    raise FileNotFoundError(\\\"No input Excel workbook found in the working directory.\\\")\\n\\n\\ndef parse_amount(value):\\n    \\\"\\\"\\\"Return a float from a cell value, or None if it isn't numeric.\\n\\n    Handles plain numbers, numeric strings with commas/currency symbols,\\n    and accounting-style negatives such as (1,234.56).\\n    \\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    if isinstance(value, (int, float)):\\n        return float(value)\\n    if isinstance(value, str):\\n        text = value.strip()\\n        if not text:\\n            return None\\n        negative = text.startswith(\\\"(\\\") and text.endswith(\\\")\\\")\\n        text = text.strip(\\\"()\\\")\\n        text = re.sub(r\\\"[^0-9.\\\\-]\\\", \\\"\\\", text)  # remove $, commas, spaces, etc.\\n        if not text or text in {\\\"-\\\", \\\".\\\", \\\"-.\\\"}:\\n            return None\\n        try:\\n            amount = float(text)\\n        except ValueError:\\n            return None\\n        return -amount if negative else amount\\n    return None\\n\\n\\ndef main():\\n    source = find_input_workbook()\\n    wb = load_workbook(source)\\n    ws = wb[\\\"Sheet1\\\"]\\n\\n    # Create the two new column headers.\\n    ws[\\\"H1\\\"] = \\\"Debits\\\"\\n    ws[\\\"I1\\\"] = \\\"Credits\\\"\\n\\n    last_row = ws.max_row\\n    for row in range(2, last_row + 1):\\n        amount = parse_amount(ws.cell(row=row, column=3).value)  # Column C\\n\\n        # Clear both target cells first (in case of stale data), then fill.\\n        ws.cell(row=row, column=8).value = None  # Column H - Debits\\n        ws.cell(row=row, column=9).value = None  # Column I - Credits\\n\\n        if amount is None or amount == 0:\\n            continue  # no value -> leave both cells empty\\n\\n        if amount > 0:                      # positive amounts are debits\\n            ws.cell(row=row, column=8).value = abs(amount)\\n        else:                               # negative amounts are credits\\n            ws.cell(row=row, column=9).value = abs(amount)\\n\\n    wb.save(\\\"output.xlsx\\\")\\n    print(f\\\"Done - 'Debits' (Column H) and 'Credits' (Column I) written to \\\"\\n          f\\\"output.xlsx (from {source}).\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"H1:I10\", \"match\": {\"n_gold\": 11, \"matched\": 11, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 36.623,
+    "setup_s": 0.0,
+    "grade_s": 2.759
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2976",
+    "run1 exit=0 0.26s",
+    "run2 exit=0 0.27s",
+    "physics=1.0 cells=11/11 extra=0"
+  ]
+}

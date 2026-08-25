@@ -45,22 +45,30 @@ BANNED_CALL_SUBSTRINGS = (
 )
 
 
-def static_check(code: str) -> tuple[list[str], bool]:
-    """AST 静态检查 -> (violations, syntax_ok)。violations 非空 => sandbox_escape_attempt。"""
+def static_check(code: str, allow_shutil: bool = False) -> tuple[list[str], bool]:
+    """AST 静态检查 -> (violations, syntax_ok)。violations 非空 => sandbox_escape_attempt。
+
+    allow_shutil：表格加工类任务（SSB 型「复制 init 工作簿再改」是标准做法，
+    openpyxl 加载-改-存会丢数据验证等格式）声明 allowed_tools 含
+    filesystem-copy 时放行 shutil——默认 False 沿用既有纪律（shutil 本属
+    「模型代码无需」假设，对该任务族不成立，2026-08-26 SSB 实测修正）。"""
     violations: list[str] = []
     try:
         tree = ast.parse(code)
     except SyntaxError as e:
         return [], False
+    banned = set(BANNED_IMPORTS)
+    if allow_shutil:
+        banned.discard("shutil")
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 root = alias.name.split(".")[0]
-                if alias.name in BANNED_IMPORTS or root in BANNED_IMPORTS:
+                if alias.name in banned or root in banned:
                     violations.append(f"banned_import:{alias.name}")
         elif isinstance(node, ast.ImportFrom):
             root = (node.module or "").split(".")[0]
-            if node.module in BANNED_IMPORTS or root in BANNED_IMPORTS:
+            if node.module in banned or root in banned:
                 violations.append(f"banned_import_from:{node.module}")
         elif isinstance(node, ast.Call):
             func = node.func

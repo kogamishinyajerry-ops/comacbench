@@ -1,0 +1,65 @@
+id: awd_rep_load_01
+registry_id: awdoc.office_docs
+domain: office_productivity
+task_type: design_artifact
+model_profile: plain_llm
+assets_revision: awdoc@selfbuilt-2026-08-26
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/awdoc.office_docs/awd_rep_load_01.md
+  prompt_sha256: c2306010c55500f4b099bff6cd8b4a7f90f89fcd6c4c8201e03427d4bd65bb7a
+  assets:
+  - path: data/awdoc/office_docs/inputs/load_01.csv
+    digest: f906f61f6438bf8b0af59321e74ebb9139af242216c840de04a6b072fab90ebe
+output_contract:
+- report.docx
+reference:
+  source: 自建（锚定数字=源数据派生统计；结构契约钉死）
+  revision: awdoc@selfbuilt-2026-08-26
+  values:
+    n_anchors: 4
+  rel_tol: 0.005
+  uncertainty_note: 锚定数字以数值级比对（0.5% 容差）；字符串锚（构型名）不判
+grader:
+  artifact_kind: doc_document
+  doc_format: docx
+  answer_format: code
+  validity_gate: true
+  anchored_numbers:
+  - 18
+  - 2.35
+  - 1.7
+  - 87563
+  structure_checks:
+  - check: n_tables
+    expect: 1
+  - check: n_images
+    expect: 0
+  - check: n_paragraphs_min
+    expect: 8
+  numeric_rel_tol: 0.005
+  oracle_source: data/awdoc/office_docs/gold/awd_rep_load_01.py
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=锚定数字命中；requirements=结构契约
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 300
+  attempts: 3
+license_provenance:
+  source: 自建（工程报告/汇报数据锚定族）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: awdoc@selfbuilt-2026-08-26

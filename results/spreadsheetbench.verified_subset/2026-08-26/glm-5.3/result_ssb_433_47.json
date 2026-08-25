@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_433_47",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nBalance residuals in `Sheet1` of the provided workbook.\\n\\nFor every data row:\\n  * If the residual (column I by default) is POSITIVE  -> ADD to the unit cells,\\n    going from unit 1 to unit 5, never exceeding the unit's MAXIMUM quantity.\\n  * If the residual is NEGATIVE  -> SUBTRACT from the unit cells,\\n    going from unit 5 back to unit 1, never dropping below the unit's MINIMUM\\n    quantity.\\n  * Unit cells that are zero (or empty) are never touched.\\n  * All values are written back into their ORIGINAL cells (nothing is moved).\\nAt the very end, every value in column I is set to 0.\\n\\nThe result is saved as `output.xlsx` (an in-place copy of the input workbook,\\nso all other sheets / formatting stay untouched).\\n\\\"\\\"\\\"\\n\\nimport os\\nimport shutil\\nfrom openpyxl import load_workbook\\n\\n# ----------------------------------------------------------------------\\n# Configuration\\n# ----------------------------------------------------------------------\\nINPUT_FILE = \\\"input.xlsx\\\"       # provided input workbook\\nOUTPUT_FILE = \\\"output.xlsx\\\"     # answer workbook (copy of the input)\\nSHEET_NAME = \\\"Sheet1\\\"\\n\\nHEADER_ROW = 1                  # row holding the column headers\\nFIRST_DATA_ROW = 2\\nLAST_ROW = 21                   # answer region: rows 1..21\\nLAST_COL = 9                    # answer region: columns A..I\\n\\n# Default layout used only if headers cannot be recognised:\\n#   A = label, B..F = Unit1..Unit5, G = Min, H = Max, I = Residual\\nDEFAULT_UNIT_COLS = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6}\\nDEFAULT_MIN_COL = 7\\nDEFAULT_MAX_COL = 8\\nDEFAULT_RESIDUAL_COL = 9\\n\\nEPS = 1e-9\\n\\nRESIDUAL_KEYS = (\\\"residual\\\", \\\"remainder\\\", \\\"surplus\\\", \\\"imbalance\\\",\\n                 \\\"variance\\\", \\\"difference\\\", \\\"diff\\\", \\\"gap\\\")\\nMIN_KEYS = (\\\"min\\\", \\\"minimum\\\", \\\"lower\\\")\\nMAX_KEYS = (\\\"max\\\", \\\"maximum\\\", \\\"upper\\\", \\\"cap\\\")\\n\\n\\n# ----------------------------------------------------------------------\\n# Helpers\\n# ----------------------------------------------------------------------\\ndef norm(v):\\n    return \\\"\\\" if v is None else str(v).strip().lower()\\n\\n\\ndef to_number(v, default=None):\\n    \\\"\\\"\\\"Best-effort conversion of a cell value to float.\\\"\\\"\\\"\\n    if v is None or isinstance(v, bool):\\n        return default\\n    if isinstance(v, (int, float)):\\n        return float(v)\\n    s = str(v).replace(\\\",\\\", \\\"\\\").strip()\\n    if not s or s.startswith(\\\"=\\\"):\\n        return default\\n    try:\\n        return float(s)\\n    except ValueError:\\n        return default\\n\\n\\ndef clean_num(x):\\n    \\\"\\\"\\\"Round away floating-point noise; return int when possible.\\\"\\\"\\\"\\n    x = round(float(x), 6)\\n    return int(round(x)) if abs(x - round(x)) < 1e-6 else x\\n\\n\\n# ----------------------------------------------------------------------\\n# Prepare the output workbook (exact copy of the input)\\n# ----------------------------------------------------------------------\\nsrc = INPUT_FILE if os.path.exists(INPUT_FILE) else OUTPUT_FILE\\nif not os.path.exists(src):\\n    raise FileNotFoundError(\\\"Neither input.xlsx nor output.xlsx was found.\\\")\\nif os.path.abspath(src) != os.path.abspath(OUTPUT_FILE):\\n    shutil.copyfile(src, OUTPUT_FILE)\\n\\nwb = load_workbook(OUTPUT_FILE)                        # keeps formulas/styles\\nwb_vals = load_workbook(OUTPUT_FILE, data_only=True)   # cached values (reading)\\n\\nws = wb[SHEET_NAME] if SHEET_NAME in wb.sheetnames else wb.active\\nws_vals = wb_vals[ws.title]\\n\\n# ----------------------------------------------------------------------\\n# Detect the layout from the header row\\n# ----------------------------------------------------------------------\\nunit_cols, min_col, max_col, residual_col = {}, None, None, None\\n\\nfor c in range(1, LAST_COL + 1):\\n    h = norm(ws.cell(row=HEADER_ROW, column=c).value)\\n    if not h:\\n        continue\\n    if residual_col is None and any(k in h for k in RESIDUAL_KEYS):\\n        residual_col = c\\n        continue\\n    if min_col is None and any(k in h for k in MIN_KEYS):\\n        min_col = c\\n        continue\\n    if max_col is None and any(k in h for k in MAX_KEYS):\\n        max_col = c\\n        continue\\n    digits = \\\"\\\".join(ch for ch in h if ch\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_db25gpox/model.py\\\", line 82, in <module>\\n    raise FileNotFoundError(\\\"Neither input.xlsx nor output.xlsx was found.\\\")\\nFileNotFoundError: Neither input.xlsx nor output.xlsx was found.\\n\"}"
+  },
+  "timings": {
+    "agent_s": 192.408,
+    "setup_s": 0.0,
+    "grade_s": 0.265
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=8522",
+    "run1 exit=1 0.26s"
+  ]
+}

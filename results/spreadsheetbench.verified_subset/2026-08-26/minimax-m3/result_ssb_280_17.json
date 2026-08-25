@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_280_17",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import pandas as pd\\nimport shutil\\nfrom openpyxl import load_workbook\\n\\n# Step 1: Copy input to output\\nshutil.copy('input.xlsx', 'output.xlsx')\\n\\n# Step 2: Read the Excel file\\ndf = pd.read_excel('input.xlsx')\\n\\n# Step 3: Find the column with duplicate values\\n# The user mentioned numeric duplicates in one column\\ntarget_col = None\\nfor col in df.columns:\\n    if df[col].duplicated().any():\\n        target_col = col\\n        break\\n\\n# Step 4: Keep the last occurrence of each unique value\\n# keep='last' retains the last unique entry and removes earlier duplicates\\ndf_clean = df.drop_duplicates(subset=[target_col], keep='last').reset_index(drop=True)\\n\\n# Step 5: Save deduplicated data to output.xlsx\\ndf_clean.to_excel('output.xlsx', index=False)\\n\\n# Step 6: Write answer/explanation to A1:B12 of Sheet1\\nwb = load_workbook('output.xlsx')\\nws = wb['Sheet1']\\n\\nanswer = [\\n    ('Question:', 'Remove duplicates, keep last unique entry'),\\n    ('Solution:', 'pandas drop_duplicates(keep=\\\"last\\\")'),\\n    ('Target Column:', str(target_col)),\\n    ('', ''),\\n    ('Code:', ''),\\n    ('1. Import:', 'import pandas as pd'),\\n    ('2. Read:', 'df = pd.read_excel(\\\"input.xlsx\\\")'),\\n    ('3. Dedupe:', f'df.drop_duplicates(subset=[\\\"{target_col}\\\"], keep=\\\"last\\\")'),\\n    ('4. Save:', 'df.to_excel(\\\"output.xlsx\\\", index=False)'),\\n    ('', ''),\\n    ('Original rows:', str(len(df))),\\n    ('Final rows:', str(len(df_clean)))\\n]\\n\\nfor i, (label, value) in enumerate(answer[:12]):\\n    ws.cell(row=i+1, column=1, value=label)\\n    ws.cell(row=i+1, column=2, value=value)\\n\\nwb.save('output.xlsx')\\nprint(f\\\"Done! Kept {len(df_clean)} out of {len(df)} rows.\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_4cm34_t8/model.py\\\", line 1, in <module>\\n    import pandas as pd\\nModuleNotFoundError: No module named 'pandas'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 46.463,
+    "setup_s": 0.0,
+    "grade_s": 0.037
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1608",
+    "run1 exit=1 0.03s"
+  ]
+}

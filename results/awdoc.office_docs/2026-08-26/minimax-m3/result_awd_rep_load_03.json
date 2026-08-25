@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_load_03",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom decimal import Decimal, InvalidOperation, ROUND_HALF_UP\\n\\nfrom docx import Document\\n\\n\\nCSV_PATH = \\\"load_03.csv\\\"\\nOUTPUT_PATH = \\\"report.docx\\\"\\nREQUIRED_COLUMNS = [\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"]\\n\\nwith open(CSV_PATH, \\\"r\\\", encoding=\\\"utf-8-sig\\\", newline=\\\"\\\") as csv_file:\\n    reader = csv.DictReader(csv_file)\\n    if reader.fieldnames != REQUIRED_COLUMNS:\\n        raise ValueError(\\n            f\\\"Expected columns {REQUIRED_COLUMNS}, found {reader.fieldnames}\\\"\\n        )\\n    source_rows = list(reader)\\n\\nrows = []\\nloads = []\\ntotal_cycles = 0\\n\\nfor source_row in source_rows:\\n    try:\\n        load = Decimal(source_row[\\\"load_factor\\\"].strip())\\n        cycles_decimal = Decimal(source_row[\\\"cycles\\\"].strip())\\n    except InvalidOperation as exc:\\n        raise ValueError(f\\\"Invalid numeric value in row: {source_row}\\\") from exc\\n\\n    if not load.is_finite() or not cycles_decimal.is_finite():\\n        raise ValueError(f\\\"Non-finite numeric value in row: {source_row}\\\")\\n    if cycles_decimal != cycles_decimal.to_integral_value():\\n        raise ValueError(f\\\"Cycle count is not an integer in row: {source_row}\\\")\\n\\n    cycles = int(cycles_decimal)\\n    rows.append(\\n        (\\n            source_row[\\\"case\\\"],\\n            source_row[\\\"load_factor\\\"].strip(),\\n            source_row[\\\"cycles\\\"].strip(),\\n        )\\n    )\\n    loads.append(load)\\n    total_cycles += cycles\\n\\nn = len(rows)\\nif n == 0:\\n    raise ValueError(\\\"The CSV contains no data records.\\\")\\n\\nload_max = max(loads)\\nload_mean = sum(loads, Decimal(\\\"0\\\")) / Decimal(n)\\nload_max_display = format(\\n    load_max.quantize(Decimal(\\\"0.01\\\"), rounding=ROUND_HALF_UP), \\\"f\\\"\\n)\\nload_mean_display = format(\\n    load_mean.quantize(Decimal(\\\"0.1\\\"), rounding=ROUND_HALF_UP), \\\"f\\\"\\n)\\n\\nif (n, load_max_display, load_mean_display, total_cycles) != (\\n    26,\\n    \\\"2.39\\\",\\n    \\\"1.7\\\",\\n    120035,\\n):\\n    raise ValueError(\\\"The CSV statistics do not match the required report values.\\\")\\n\\ndocument = Document()\\n\\ndocument.add_heading(\\\"Engineering Test Report\\\", level=0)\\n\\ndocument.add_heading(\\\"Overview\\\", level=1)\\ndocument.add_paragraph(f\\\"The dataset contains {n} data records.\\\")\\n\\ndocument.add_heading(\\\"Results table\\\", level=1)\\ntable = document.add_table(rows=1, cols=3)\\ntable.style = \\\"Table Grid\\\"\\n\\nfor column_index, column_name in enumerate(REQUIRED_COLUMNS):\\n    table.cell(0, column_index).text = column_name\\n\\nfor case, load_factor, cycles in rows:\\n    row_cells = table.add_row().cells\\n    row_cells[0].text = case\\n    row_cells[1].text = load_factor\\n    row_cells[2].text = cycles\\n\\ndocument.add_heading(\\\"Summary\\\", level=1)\\ndocument.add_paragraph(\\n    f\\\"N cases = {n}; load max = {load_max_display}; \\\"\\n    f\\\"load mean = {load_mean_display}; total cycles = {total_cycles}.\\\"\\n)\\n\\ndocument.add_heading(\\\"Conclusion\\\", level=1)\\ndocument.add_paragraph(\\n    \\\"The provided load cases and their cycle counts have been compiled for review.\\\"\\n)\\n\\ndocument.save(OUTPUT_PATH)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"4/4\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 43.584,
+    "setup_s": 0.0,
+    "grade_s": 0.256
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2872",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.1s",
+    "physics=1.0 requirements=1.0 anchors=4/4"
+  ]
+}

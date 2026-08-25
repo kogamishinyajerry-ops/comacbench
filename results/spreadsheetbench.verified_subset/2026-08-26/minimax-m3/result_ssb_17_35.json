@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_17_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom copy import copy\\nfrom datetime import datetime, date\\n\\n# Load the workbook\\nwb = openpyxl.load_workbook('input.xlsx')\\nws = wb['FILTER 5b']\\n\\n# Helper function to convert values to date objects\\ndef to_date(val):\\n    if val is None:\\n        return None\\n    if isinstance(val, datetime):\\n        return val.date()\\n    if isinstance(val, date):\\n        return val\\n    return None\\n\\n# Read criteria from I2 (start date) and J2 (end date)\\nstart_date = to_date(ws['I2'].value)\\nend_date = to_date(ws['J2'].value)\\n\\n# Collect rows that match the date criteria\\nmatching_rows = []\\n\\n# Iterate through data rows (A2:E315)\\nfor row_idx in range(2, 316):\\n    cell_a = ws.cell(row=row_idx, column=1)\\n    cell_date = to_date(cell_a.value)\\n    \\n    # Skip rows without dates\\n    if cell_date is None:\\n        continue\\n    \\n    # Check if the date is within the criteria range\\n    if start_date <= cell_date <= end_date:\\n        row_data = []\\n        for col_idx in range(1, 6):  # Columns A through E\\n            cell = ws.cell(row=row_idx, column=col_idx)\\n            row_data.append({\\n                'value': cell.value,\\n                'font': copy(cell.font),\\n                'border': copy(cell.border),\\n                'fill': copy(cell.fill),\\n                'number_format': cell.number_format,\\n                'alignment': copy(cell.alignment)\\n            })\\n        matching_rows.append(row_data)\\n\\n# Write filtered results starting at I6 (columns I through M)\\noutput_row = 6\\nfor row_data in matching_rows:\\n    for col_offset, cell_data in enumerate(row_data):\\n        target_col = 9 + col_offset  # I = 9, J = 10, K = 11, L = 12, M = 13\\n        target_cell = ws.cell(row=output_row, column=target_col)\\n        target_cell.value = cell_data['value']\\n        target_cell.font = cell_data['font']\\n        target_cell.border = cell_data['border']\\n        target_cell.fill = cell_data['fill']\\n        target_cell.number_format = cell_data['number_format']\\n        target_cell.alignment = cell_data['alignment']\\n    output_row += 1\\n\\n# Save the output workbook\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 24.643,
+    "setup_s": 0.0,
+    "grade_s": 0.24
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2084",
+    "run1 exit=1 0.24s"
+  ]
+}

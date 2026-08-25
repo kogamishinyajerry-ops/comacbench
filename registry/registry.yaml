@@ -553,6 +553,56 @@ entries:
     status: integrated
     integrated_note: 2026-08-25 office_productivity 维首批（调研 report/2026-08-25-office-benchmark-survey.md §5 首选项 2）——5 族 19 题（bom×4 重复件号合并排序/pivot×4 长表 mean-max 透视/si×4 lbf-in-°F 固定系数换算/flag×3 越限状态列+STATS 摘要/exceed×4 阈值过滤 top-K）。输入 CSV sha256 锁定注入沙箱；输出契约静态值禁公式（data_only 读取，公式=None 即失分）。自检：gold 全链 19/19 + stub 19/19 地板 + oracle 19/19 满分。工程记录：资产注入名统一真实文件名（首版 input.csv 别名致 oracle 0/19，已修）；OCP 改惰性加载（xlsx 模式跑 .venv）。详见 data/engtable/office_basic/PROVENANCE.md
 
+  - id: awdoc.office_docs
+    name: 数据锚定文档生成族（自建，office_productivity 维）
+    source: 自建参数化（性能汇总/载荷实测数据源→docx 报告/pptx 汇报）
+    tier: A
+    order: 15b
+    batch: batch-3
+    adapter: design_artifact
+    env_class: python_sandbox   # python-docx/python-pptx 判分（.venv）
+    license: self-built
+    license_status: confirmed-selfbuilt
+    self_built: true
+    content: CSV 数据源→结构化报告/汇报：锚定数字（min/max/mean/count 派生统计）+结构契约（表格/页帧/段落）
+    env: 判分 design_artifact doc_document 模式（锚定数字命中 0.5% 容差+结构契约+双跑一致性）
+    assets_revision: awdoc@selfbuilt-2026-08-26
+    status: integrated
+    integrated_note: 2026-08-26 办公第二板 A 线——18 题（docx×9/pptx×9，perf×6+load×3 双格式）。判分只锚「数字来自数据」+结构（文风不评——LLM judge 违纪律，如实声明）。oracle 18/18 满分（含双跑文本数字一致 gate）。详见 data/awdoc/office_docs/PROVENANCE.md
+
+  - id: awext.clause_extract
+    name: 条款结构化抽取族（自建风格卡，office_productivity 维）
+    source: 自建参数化条款风格卡（civair-kb 联动待锚定——本会话 KB 端点不返回内容，如实降级）
+    tier: A-
+    order: 15c
+    batch: batch-3
+    adapter: qa_grounded
+    env_class: qa
+    license: self-built
+    license_status: confirmed-selfbuilt
+    self_built: true
+    content: 条款卡→9 字段 JSON（family/clause_no/载荷限值/循环数/概率/适用件列表/符合方法列表/修订年）
+    env: 判分 qa_grounded json_extract 层（字段级：数值 2% 容差；列表排序 casefold 精确）
+    assets_revision: awext@selfbuilt-2026-08-26
+    status: integrated
+    integrated_note: 2026-08-26 办公第二板 B 线——12 题参数化合成条款卡（非真实规章原文，防误引；KB 恢复后按 doc_id 重锚）。providers 新增 json_extract oracle/stub。oracle 12/12 满分。详见 data/awext/clause_extract/PROVENANCE.md
+
+  - id: spreadsheetbench.verified_subset
+    name: SpreadsheetBench 精选子集（公式族）
+    source: https://huggingface.co/datasets/KAKA22/SpreadsheetBench （verified_400 tar，sha256 随镜像）
+    tier: A-
+    order: 15d
+    batch: batch-3
+    adapter: design_artifact
+    env_class: python_sandbox   # 判分依赖 LibreOffice headless 重算（dev 已备；内网需带 soffice，已标注）
+    license: CC-BY-SA-4.0（SA 衍生同许可——superwing 先例口径）
+    license_status: confirmed-dataset
+    content: 真实表格加工任务（Sheet-Level 25 题：init.xlsx→指令→output.xlsx，answer 区域比对 golden）
+    env: 判分 design_artifact formula_cell 模式（soffice --convert-to 重算落缓存→data_only 读 answer 区域→golden 同区域比对）
+    assets_revision: ssb400@adapted-2026-08-26
+    status: integrated
+    integrated_note: 2026-08-26 办公第二板 C 线——verified_400 中 Cell-Level 275 题全部无 answer 定位（上游判分靠其 LLM validator，不引入）出局；Sheet-Level 107 通过筛选取 25。判分器教训：answer 区域 init 既有数据不罚 extra（455_35 曾 9.3 万格误杀）；oracle 自包含 gold（golden 值 JSON 字面量内嵌+datetime 结构化往返）25/25 满分含 soffice 链。详见 data/spreadsheetbench/verified_400/PROVENANCE.md
+
   - id: afbench.airfoil
     name: AFBench
     source: https://github.com/hitcslj/AFBench

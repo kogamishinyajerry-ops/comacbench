@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_02",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\nfrom docx.shared import Pt\\n\\n# Read CSV data\\ndata = []\\nwith open('perf_02.csv', 'r') as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        data.append(row)\\n\\n# Compute statistics\\nn = len(data)\\n\\ncl_max_values = [float(row['cl_max']) for row in data]\\ncd_cruise_values = [float(row['cd_cruise']) for row in data]\\nld_ratio_values = [float(row['ld_ratio']) for row in data]\\n\\ncl_max_max = max(cl_max_values)\\ncd_cruise_mean = sum(cd_cruise_values) / len(cd_cruise_values)\\nld_ratio_mean = sum(ld_ratio_values) / len(ld_ratio_values)\\n\\n# Find best config (max L/D)\\nbest_idx = ld_ratio_values.index(max(ld_ratio_values))\\nbest_config = data[best_idx]['config']\\n\\n# Round values as specified\\ncl_max_display = round(cl_max_max, 3)\\ncd_cruise_mean_display = round(cd_cruise_mean, 4)\\nld_ratio_mean_display = round(ld_ratio_mean, 1)\\n\\n# Create document\\ndoc = Document()\\n\\n# Title\\ntitle = doc.add_heading('Engineering Performance Test Report', level=0)\\n\\n# Overview\\ndoc.add_heading('Overview', level=1)\\ndoc.add_paragraph(f'This report analyzes performance test data for {n} data rows from the perf_02 dataset.')\\n\\n# Results table\\ndoc.add_heading('Results table', level=1)\\ntable = doc.add_table(rows=1 + len(data), cols=4)\\ntable.style = 'Table Grid'\\n\\n# Header row\\nheaders = ['config', 'cl_max', 'cd_cruise', 'ld_ratio']\\nfor i, h in enumerate(headers):\\n    cell = table.rows[0].cells[i]\\n    cell.text = h\\n\\n# Data rows\\nfor i, row in enumerate(data):\\n    cells = table.rows[i + 1].cells\\n    cells[0].text = row['config']\\n    cells[1].text = row['cl_max']\\n    cells[2].text = row['cd_cruise']\\n    cells[3].text = row['ld_ratio']\\n\\n# Summary\\ndoc.add_heading('Summary', level=1)\\nsummary_text = (\\n    f'CLmax max = {cl_max_display}. '\\n    f'CDcruise mean = {cd_cruise_mean_display}. '\\n    f'L/D mean = {ld_ratio_mean_display}. '\\n    f'best config (max L/D) = {best_config} (state this config name).'\\n)\\ndoc.add_paragraph(summary_text)\\n\\n# Conclusion\\ndoc.add_heading('Conclusion', level=1)\\ndoc.add_paragraph(\\n    f'Based on the analysis of {n} data rows, configuration {best_config} demonstrated the best '\\n    f'lift-to-drag performance with a maximum L/D ratio. The dataset shows a CLmax peak of '\\n    f'{cl_max_display} and a mean CDcruise of {cd_cruise_mean_display}, providing a useful '\\n    f'baseline for aerodynamic performance evaluation.'\\n)\\n\\ndoc.save('report.docx')\\nprint(f'Document created. N={n}, CLmax_max={cl_max_display}, CDcruise_mean={cd_cruise_mean_display}, LD_mean={ld_ratio_mean_display}, best_config={best_config}')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 8.522,
+    "setup_s": 0.0,
+    "grade_s": 0.212
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2550",
+    "run1 exit=0 0.1s",
+    "run2 exit=0 0.09s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

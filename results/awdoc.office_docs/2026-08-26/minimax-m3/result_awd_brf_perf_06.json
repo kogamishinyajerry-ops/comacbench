@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_06",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport os\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\n# Read CSV\\ncsv_path = 'perf_06.csv'\\nrows = []\\nwith open(csv_path, 'r') as f:\\n    reader = csv.DictReader(f)\\n    for r in reader:\\n        rows.append(r)\\n\\n# Compute statistics\\ncl_max_vals = [float(r['cl_max']) for r in rows]\\ncd_cruise_vals = [float(r['cd_cruise']) for r in rows]\\nld_vals = [float(r['ld_ratio']) for r in rows]\\n\\ncl_max_max = max(cl_max_vals)\\ncd_cruise_mean = sum(cd_cruise_vals) / len(cd_cruise_vals)\\nld_mean = sum(ld_vals) / len(ld_vals)\\n\\n# Find best config (max L/D)\\nbest_idx = ld_vals.index(max(ld_vals))\\nbest_config = rows[best_idx]['config']\\n\\n# Round display values\\ncl_max_max_disp = round(cl_max_max, 3)\\ncd_cruise_mean_disp = round(cd_cruise_mean, 4)\\nld_mean_disp = round(ld_mean, 1)\\n\\n# Create presentation\\nprs = Presentation()\\n\\n# Slide 1: Title\\nslide1 = prs.slides.add_slide(prs.slide_layouts[0])\\ntitle = slide1.shapes.title\\nsubtitle = slide1.placeholders[1]\\ntitle.text = \\\"Performance Data Report\\\"\\nsubtitle.text = \\\"Aerodynamic Analysis Summary\\\"\\n\\n# Slide 2: Data\\nslide2 = prs.slides.add_slide(prs.slide_layouts[5])\\nslide2.shapes.title.text = \\\"Data\\\"\\n\\nheaders = ['config', 'cl_max', 'cd_cruise', 'ld_ratio']\\nn_rows = len(rows) + 1\\nn_cols = len(headers)\\n\\ntable_shape = slide2.shapes.add_table(n_rows, n_cols, Inches(0.5), Inches(1.5), Inches(9), Inches(5))\\ntable = table_shape.table\\n\\n# Header row\\nfor i, h in enumerate(headers):\\n    cell = table.cell(0, i)\\n    cell.text = h\\n\\n# Data rows\\nfor ri, row in enumerate(rows):\\n    for ci, h in enumerate(headers):\\n        cell = table.cell(ri + 1, ci)\\n        cell.text = str(row[h])\\n\\n# Slide 3: Summary\\nslide3 = prs.slides.add_slide(prs.slide_layouts[1])\\nslide3.shapes.title.text = \\\"Summary\\\"\\n\\nbody = slide3.shapes.placeholders[1]\\ntf = body.text_frame\\ntf.text = f\\\"CLmax max = {cl_max_max_disp}\\\"\\np = tf.add_paragraph()\\np.text = f\\\"CDcruise mean = {cd_cruise_mean_disp}\\\"\\np = tf.add_paragraph()\\np.text = f\\\"L/D mean = {ld_mean_disp}\\\"\\np = tf.add_paragraph()\\np.text = f\\\"best config (max L/D) = {best_config}\\\"\\n\\n# Slide 4: Next steps\\nslide4 = prs.slides.add_slide(prs.slide_layouts[1])\\nslide4.shapes.title.text = \\\"Next Steps\\\"\\nbody4 = slide4.shapes.placeholders[1]\\ntf4 = body4.text_frame\\ntf4.text = \\\"Review aerodynamic data, validate test points, and proceed with design refinement.\\\"\\n\\nprs.save('report.pptx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 7.657,
+    "setup_s": 0.0,
+    "grade_s": 0.251
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2343",
+    "run1 exit=0 0.12s",
+    "run2 exit=0 0.12s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

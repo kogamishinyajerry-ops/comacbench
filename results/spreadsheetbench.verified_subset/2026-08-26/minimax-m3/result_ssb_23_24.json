@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_23_24",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import os\\nimport openpyxl\\nfrom openpyxl import load_workbook\\n\\n# Determine the input file\\ninput_file = 'input.xlsx'\\nif not os.path.exists(input_file):\\n    # Try to find any .xlsx file in the current directory\\n    for f in os.listdir('.'):\\n        if f.lower().endswith('.xlsx') and 'output' not in f.lower():\\n            input_file = f\\n            break\\n\\n# Load the input workbook (values only, not formulas)\\nwb = load_workbook(input_file, data_only=True)\\nws = wb['Sheet1']\\n\\n# Read all data from the worksheet\\nmax_row = ws.max_row\\nmax_col = ws.max_column\\n\\nall_rows = []\\nfor row in ws.iter_rows(min_row=1, max_row=max_row, max_col=max_col, values_only=True):\\n    all_rows.append(list(row))\\n\\n# Build the set of words found in column I (index 8, the 9th column)\\nwords_in_I = set()\\nfor row in all_rows:\\n    if len(row) > 8:\\n        val = row[8]\\n        if val is not None:\\n            words_in_I.add(val)\\n\\n# Filter rows: keep rows where column A (index 0) is NOT in words_in_I\\nfiltered_rows = []\\nfor row in all_rows:\\n    if len(row) > 0:\\n        val_a = row[0]\\n        if val_a is not None and val_a in words_in_I:\\n            continue  # Skip this row - it will be deleted\\n    filtered_rows.append(row)\\n\\n# Create the output workbook\\nout_wb = openpyxl.Workbook()\\nout_ws = out_wb.active\\nout_ws.title = 'Sheet1'\\n\\n# Write the filtered data to columns A through E, up to row 1102\\noutput_max_row = min(len(filtered_rows), 1102)\\nfor i in range(output_max_row):\\n    row_data = filtered_rows[i]\\n    for j in range(5):  # Columns A, B, C, D, E\\n        if j < len(row_data):\\n            out_ws.cell(row=i + 1, column=j + 1, value=row_data[j])\\n        else:\\n            out_ws.cell(row=i + 1, column=j + 1, value=None)\\n\\n# Save the output workbook\\nout_wb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:E1102\", \"match\": {\"n_gold\": 1084, \"matched\": 1084, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 75.581,
+    "setup_s": 0.0,
+    "grade_s": 3.206
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1757",
+    "run1 exit=0 0.48s",
+    "run2 exit=0 0.38s",
+    "physics=1.0 cells=1084/1084 extra=0"
+  ]
+}

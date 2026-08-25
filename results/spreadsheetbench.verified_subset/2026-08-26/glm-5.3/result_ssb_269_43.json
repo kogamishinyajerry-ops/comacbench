@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_269_43",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import os\\nimport glob\\nimport shutil\\n\\nfrom openpyxl import Workbook, load_workbook\\n\\nOUTPUT = \\\"output.xlsx\\\"\\n\\n# =============================================================================\\n# THE VBA MACRO THAT ANSWERS THE QUESTION\\n# (shown for reference -- the identical logic is EXECUTED on the workbook\\n#  further below with Python, since a .xlsx file cannot host/run VBA itself):\\n#\\n#     Sub DeleteRowsIfHBlank()\\n#         Dim i As Long, lastRow As Long\\n#         lastRow = Cells(Rows.Count, \\\"I\\\").End(xlUp).Row\\n#         ' Loop BACKWARDS (bottom -> top, \\\"Step -1\\\").  This is the usual\\n#         ' reason a hand-written attempt \\\"doesn't work\\\": if you loop forwards,\\n#         ' every deleted row shifts the rows below it up, so the loop index\\n#         ' jumps over the row that moved into the deleted position.\\n#         For i = lastRow To 2 Step -1        ' use \\\"To 1\\\" if there is no header row\\n#             If Cells(i, \\\"I\\\").Value <> \\\"\\\" And Cells(i, \\\"H\\\").Value = \\\"\\\" Then\\n#                 Cells(i, \\\"I\\\").EntireRow.Delete\\n#             End If\\n#         Next i\\n#     End Sub\\n#\\n# Install/run: Alt+F11 -> Insert -> Module -> paste the code -> press F5\\n#              (or back in Excel: Alt+F8 -> DeleteRowsIfHBlank -> Run).\\n# =============================================================================\\n\\n\\ndef is_blank(value) -> bool:\\n    \\\"\\\"\\\"True for a truly empty cell or a cell containing only '' / whitespace.\\\"\\\"\\\"\\n    return value is None or (isinstance(value, str) and value.strip() == \\\"\\\")\\n\\n\\ndef delete_rows_with_I_value_and_H_blank(ws):\\n    \\\"\\\"\\\"\\n    Delete every row of the worksheet in which column I holds a value while\\n    the corresponding cell in column H is blank (e.g. I8 filled, H8 empty ->\\n    row 8 is deleted).  Rows are processed bottom-up for exactly the same\\n    reason the VBA macro uses 'Step -1'.\\n    \\\"\\\"\\\"\\n    removed = []\\n    for r in range(ws.max_row, 0, -1):          # bottom -> top, like Step -1\\n        i_val = ws.cell(row=r, column=9).value  # column I\\n        h_val = ws.cell(row=r, column=8).value  # column H\\n        if (not is_blank(i_val)) and is_blank(h_val):\\n            ws.delete_rows(r, 1)                # delete the ENTIRE row\\n            removed.append(r)\\n    return sorted(removed)\\n\\n\\ndef find_input_workbook():\\n    \\\"\\\"\\\"Locate the provided input workbook, if one is present.\\\"\\\"\\\"\\n    for name in (\\\"input.xlsx\\\", \\\"input.xlsm\\\", \\\"book.xlsx\\\", \\\"data.xlsx\\\", \\\"source.xlsx\\\"):\\n        if os.path.exists(name):\\n            return name\\n    candidates = [\\n        f for f in glob.glob(\\\"*.xlsx\\\")\\n        if os.path.abspath(f) != os.path.abspath(OUTPUT) and not f.startswith(\\\"~$\\\")\\n    ]\\n    return candidates[0] if len(candidates) == 1 else None\\n\\n\\ndef build_demo_workbook():\\n    \\\"\\\"\\\"\\n    Fallback used only if no input workbook is available: recreates a small\\n    table (header + 8 data rows, columns A..I) containing exactly the\\n    situation described in the question -- including the 'value in I8 but\\n    H8 empty -> delete row 8' example.\\n    \\\"\\\"\\\"\\n    wb = Workbook()\\n    ws = wb.active\\n    ws.title = \\\"Sheet1\\\"\\n    header = [\\\"ID\\\", \\\"First\\\", \\\"Last\\\", \\\"Qty\\\", \\\"Price\\\", \\\"Total\\\", \\\"Notes\\\", \\\"H\\\", \\\"I\\\"]\\n    data = [\\n        [\\\"A1\\\", \\\"Ann\\\", \\\"Lee\\\", 2, 10.0, 20, \\\"\\\", \\\"h2\\\", \\\"i2\\\"],  # H+I filled        -> keep\\n        [\\\"A2\\\", \\\"Bob\\\", \\\"Ray\\\", 1,  5.0,  5, \\\"\\\", \\\"\\\",   \\\"\\\"  ],  # H+I blank         -> keep\\n        [\\\"A3\\\", \\\"Cid\\\", \\\"Kim\\\", 3,  2.0,  6, \\\"\\\", \\\"h4\\\", \\\"\\\"  ],  # I blank           -> keep\\n        [\\\"A4\\\", \\\"Dee\\\", \\\"Fox\\\", 4,  7.0, 28, \\\"\\\", \\\"h5\\\", \\\"i5\\\"],  # H+I filled        -> keep\\n        [\\\"A5\\\", \\\"Eve\\\", \\\"Hay\\\", 5,  3.0, 15, \\\"\\\", \\\"\\\",   \\\"\\\"  ],  # H+I blank         -> keep\\n        [\\\"A6\\\", \\\"Fay\\\", \\\"Ito\\\", 6,  9.0, 54, \\\"\\\", \\\"h7\\\", \\\"i7\\\"],  # H+I filled        -> keep\\n        [\\\"A7\\\", \\\"Gus\\\", \\\"Jax\\\", 7,  4.0, 28, \\\"\\\", \\\"\\\",   \\\"i8\\\"],  # sheet row 8: I filled, H blank -> DELETE\\n        [\\\"A8\\\", \\\"Hal\\\", \\\"Low\\\", 8,  6.0, 48, \\\"\\\", \\\"\\\",   \\\"i9\\\"],  # sheet row 9: I filled, H blank -> DELETE\\n    ]\\n    ws.append(header)\\n    for row in data:\\n        ws.append(row)\\n    return wb, ws\\n\\n\\ndef main():\\n    # 1) Start from a copy of the pro\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:I7\", \"match\": {\"n_gold\": 20, \"matched\": 20, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 176.015,
+    "setup_s": 0.0,
+    "grade_s": 2.703
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=5179",
+    "run1 exit=0 0.25s",
+    "run2 exit=0 0.23s",
+    "physics=1.0 cells=20/20 extra=0"
+  ]
+}

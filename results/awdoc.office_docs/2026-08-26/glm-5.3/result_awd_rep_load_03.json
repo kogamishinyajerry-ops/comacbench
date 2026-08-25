@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_load_03",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom docx import Document\\n\\nCSV_PATH = \\\"load_03.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\nCOLUMNS = [\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"]\\n\\n\\ndef fmt_num(x, nd=2):\\n    \\\"\\\"\\\"Round to nd decimals and strip trailing zeros ('1.70' -> '1.7').\\\"\\\"\\\"\\n    s = f\\\"{round(x, nd):.{nd}f}\\\".rstrip(\\\"0\\\").rstrip(\\\".\\\")\\n    return s if s else \\\"0\\\"\\n\\n\\ndef main():\\n    # ---- Read CSV, preserving raw strings for exact source formatting ----\\n    with open(CSV_PATH, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        rows = [r for r in csv.reader(f) if any(c.strip() for c in r)]\\n\\n    header = [h.strip() for h in rows[0]]\\n    data_rows = rows[1:]\\n\\n    # Map required column names to CSV column indices (case-insensitive).\\n    lookup = {}\\n    for i, h in enumerate(header):\\n        lookup.setdefault(h.lower(), i)\\n    col_idx = [lookup.get(c.lower(), COLUMNS.index(c)) for c in COLUMNS]\\n\\n    n = len(data_rows)\\n    table_rows = [\\n        [(row[i].strip() if i < len(row) else \\\"\\\") for i in col_idx]\\n        for row in data_rows\\n    ]\\n\\n    # ---- Compute all numeric claims from the data ----\\n    loads = [float(r[1]) for r in table_rows]\\n    cycles = [int(float(r[2])) for r in table_rows]\\n\\n    n_disp = str(n)\\n    max_disp = fmt_num(max(loads), 2)\\n    mean_disp = fmt_num(sum(loads) / n, 2)\\n    total_disp = str(sum(cycles))\\n\\n    # ---- Build the document ----\\n    doc = Document()\\n    doc.add_heading(\\\"Engineering Test Report — Load Case 03\\\", 0)\\n\\n    # Overview\\n    doc.add_heading(\\\"Overview\\\", 1)\\n    doc.add_paragraph(\\n        f\\\"This report summarizes the cyclic load test data recorded in \\\"\\n        f\\\"load_03.csv. The dataset contains N = {n_disp} data rows \\\"\\n        f\\\"(data records excluding the header row).\\\"\\n    )\\n\\n    # Results table\\n    doc.add_heading(\\\"Results table\\\", 1)\\n    table = doc.add_table(rows=1 + n, cols=3)\\n    try:\\n        table.style = \\\"Table Grid\\\"\\n    except Exception:\\n        pass\\n    for j, name in enumerate(COLUMNS):\\n        cell = table.rows[0].cells[j]\\n        cell.text = name\\n        for p in cell.paragraphs:\\n            for run in p.runs:\\n                run.bold = True\\n    for i, row_vals in enumerate(table_rows, start=1):\\n        for j, val in enumerate(row_vals):\\n            table.rows[i].cells[j].text = val\\n\\n    # Summary (exact computed values)\\n    doc.add_heading(\\\"Summary\\\", 1)\\n    doc.add_paragraph(\\n        f\\\"N cases = {n_disp}. Load max = {max_disp}. \\\"\\n        f\\\"Load mean = {mean_disp}. Total cycles = {total_disp}.\\\"\\n    )\\n\\n    # Conclusion\\n    doc.add_heading(\\\"Conclusion\\\", 1)\\n    doc.add_paragraph(\\n        f\\\"All {n_disp} records from load_03.csv were tabulated without \\\"\\n        f\\\"modification, and every figure cited in this report was computed \\\"\\n        f\\\"directly from those values. The results table above reproduces the \\\"\\n        f\\\"source data with its original rounding, providing a traceable \\\"\\n        f\\\"record for the load case 03 engineering assessment.\\\"\\n    )\\n\\n    doc.save(OUT_PATH)\\n    print(f\\\"Wrote {OUT_PATH}: N={n_disp}, max={max_disp}, \\\"\\n          f\\\"mean={mean_disp}, total_cycles={total_disp}\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"4/4\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 69.045,
+    "setup_s": 0.0,
+    "grade_s": 0.242
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3064",
+    "run1 exit=0 0.12s",
+    "run2 exit=0 0.09s",
+    "physics=1.0 requirements=1.0 anchors=4/4"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_rep_perf_05",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport os\\n\\nfrom docx import Document\\n\\nCSV_PATH = \\\"perf_05.csv\\\"\\nOUT_PATH = \\\"report.docx\\\"\\n\\nREQUIRED_COLUMNS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\n\\ndef load_records(path):\\n    \\\"\\\"\\\"Read the CSV and return a list of [config, cl_max, cd_cruise, ld_ratio]\\n    rows as raw strings (preserving the source formatting/rounding).\\\"\\\"\\\"\\n    records = []\\n    with open(path, \\\"r\\\", newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        reader = csv.reader(f)\\n        header = next(reader)\\n        header = [h.strip() for h in header]\\n        idx = {name: i for i, name in enumerate(header)}\\n        for name in REQUIRED_COLUMNS:\\n            if name not in idx:\\n                raise ValueError(\\n                    f\\\"Missing column {name!r} in {path}; found header: {header}\\\"\\n                )\\n        for row in reader:\\n            if not row or all(cell.strip() == \\\"\\\" for cell in row):\\n                continue  # skip blank lines\\n            records.append([row[idx[name]].strip() for name in REQUIRED_COLUMNS])\\n    return records\\n\\n\\ndef main():\\n    records = load_records(CSV_PATH)\\n    n = len(records)\\n    if n == 0:\\n        raise ValueError(\\\"No data records found in the CSV.\\\")\\n\\n    # Numeric parsing for statistics (computed from the data, not hard-coded)\\n    cl_max_vals = [float(r[1]) for r in records]\\n    cd_vals = [float(r[2]) for r in records]\\n    ld_vals = [float(r[3]) for r in records]\\n\\n    max_cl = max(cl_max_vals)\\n    mean_cd = sum(cd_vals) / n\\n    mean_ld = sum(ld_vals) / n\\n    best_i = max(range(n), key=lambda i: ld_vals[i])\\n    best_config = records[best_i][0]\\n\\n    # Rounded display values, exactly as specified\\n    max_cl_str = f\\\"{max_cl:.3f}\\\"   # e.g. 0.556\\n    mean_cd_str = f\\\"{mean_cd:.4f}\\\" # e.g. 0.0357\\n    mean_ld_str = f\\\"{mean_ld:.1f}\\\" # e.g. 15.8\\n\\n    doc = Document()\\n\\n    # 1. Title as a Heading\\n    doc.add_heading(\\\"Engineering Performance Test Report\\\", 0)\\n\\n    # 2. Overview (Heading 1) with the data-row count\\n    doc.add_heading(\\\"Overview\\\", 1)\\n    doc.add_paragraph(\\n        f\\\"This report summarizes the aerodynamic performance measurements recorded in \\\"\\n        f\\\"perf_05.csv. The dataset contains {n} data rows (data records, excluding the \\\"\\n        f\\\"header), one per tested configuration.\\\"\\n    )\\n\\n    # 3. Results table (Heading 1) — one table, header + one row per record\\n    doc.add_heading(\\\"Results table\\\", 1)\\n    table = doc.add_table(rows=1 + n, cols=4)\\n    try:\\n        table.style = \\\"Table Grid\\\"\\n    except Exception:\\n        pass  # style is cosmetic; cell content is what matters\\n    for j, name in enumerate(REQUIRED_COLUMNS):\\n        table.rows[0].cells[j].text = name\\n    for i, rec in enumerate(records, start=1):\\n        cells = table.rows[i].cells\\n        for j, val in enumerate(rec):\\n            cells[j].text = val\\n\\n    # 4. Summary (Heading 1) with the exact computed numbers\\n    doc.add_heading(\\\"Summary\\\", 1)\\n    doc.add_paragraph(\\n        f\\\"Across the {n} configurations tested, the maximum CLmax recorded was \\\"\\n        f\\\"{max_cl_str}. The mean CDcruise was {mean_cd_str}, and the mean L/D ratio was \\\"\\n        f\\\"{mean_ld_str}. The best configuration, defined as the one achieving the maximum \\\"\\n        f\\\"L/D ratio, was {best_config}.\\\"\\n    )\\n\\n    # 5. Conclusion (Heading 1) with one concluding paragraph\\n    doc.add_heading(\\\"Conclusion\\\", 1)\\n    doc.add_paragraph(\\n        f\\\"The measurements, computed directly from the {n} records in perf_05.csv, show that \\\"\\n        f\\\"configuration {best_config} achieved the highest L/D ratio among the tested \\\"\\n        f\\\"configurations, with an overall maximum CLmax of {max_cl_str}, a mean CDcruise of \\\"\\n        f\\\"{mean_cd_str}, and a mean L/D of {mean_ld_str}. These data-anchored results provide \\\"\\n        f\\\"a baseline for follow-on aerodynamic design and trade-off decisions.\\\"\\n    )\\n\\n    doc.save(OUT_PATH)\\n    print(f\\\"Wrote {OUT_PATH}: {n} data rows, best config = {best_config}.\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"docx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"n_images\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"n_paragraphs_min\", \"min\": 8, \"got\": 8, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 73.943,
+    "setup_s": 0.0,
+    "grade_s": 0.229
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3922",
+    "run1 exit=0 0.11s",
+    "run2 exit=0 0.1s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

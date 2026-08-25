@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_22_47",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\nimport shutil\\n\\n# Copy input file to output\\nshutil.copy('input.xlsx', 'output.xlsx')\\n\\n# Load the workbook\\nwb = load_workbook('output.xlsx')\\nws = wb['sheet1']\\n\\nmax_row = ws.max_row\\n\\n# Read all data from columns A, B, C\\nall_rows = []\\nfor r in range(1, max_row + 1):\\n    a_val = ws.cell(row=r, column=1).value\\n    b_val = ws.cell(row=r, column=2).value\\n    c_val = ws.cell(row=r, column=3).value\\n    all_rows.append((r, a_val, b_val, c_val))\\n\\n# Read helper column J\\nhelper_names = []\\nfor r in range(1, max_row + 1):\\n    j_val = ws.cell(row=r, column=10).value\\n    if j_val is not None:\\n        j_str = str(j_val).strip()\\n        if j_str != '':\\n            helper_names.append(j_str)\\n\\n# Identify and skip header row (assume row 1 is header)\\n# Skip rows that look like headers (all strings) or are empty\\nheader_row_idx = None\\nfor i, (r, a, b, c) in enumerate(all_rows):\\n    if isinstance(a, str) and isinstance(b, str) and isinstance(c, str):\\n        header_row_idx = i\\n        break\\n\\n# Build data list, skipping header and empty rows\\ndata = []\\nfor i, (r, a, b, c) in enumerate(all_rows):\\n    # Skip header\\n    if header_row_idx is not None and i == header_row_idx:\\n        continue\\n    # Skip rows where all values are empty/None\\n    if (a is None or str(a).strip() == '') and \\\\\\n       (b is None or str(b).strip() == '') and \\\\\\n       (c is None or str(c).strip() == ''):\\n        continue\\n    data.append((r, a, b, c))\\n\\n# Remove duplicates based on B and C (both must match)\\nseen_keys = set()\\nunique_data = []\\nfor row_data in data:\\n    r, a, b, c = row_data\\n    b_key = str(b).strip().lower() if b is not None else ''\\n    c_key = str(c).strip().lower() if c is not None else ''\\n    key = (b_key, c_key)\\n    if key not in seen_keys:\\n        seen_keys.add(key)\\n        unique_data.append(row_data)\\n\\n# Apply sorting logic\\nif not helper_names:\\n    # If helper J is empty, sort alphabetically by column B (A-Z)\\n    unique_data.sort(key=lambda x: (str(x[2]).lower() if x[2] is not None else '', x[0]))\\nelse:\\n    # Sort by helper column J priority (first entries in J appear first)\\n    # Within each helper group, keep original order\\n    # Names not in helper come after, in original order\\n    priority_map = {name: idx for idx, name in enumerate(helper_names)}\\n    \\n    def sort_key(item):\\n        r, a, b, c = item\\n        b_str = str(b).strip() if b is not None else ''\\n        if b_str in priority_map:\\n            # In helper: sort by helper order, then by original row\\n            return (0, priority_map[b_str], r)\\n        else:\\n            # Not in helper: preserve original order\\n            return (1, 0, r)\\n    \\n    unique_data.sort(key=sort_key)\\n\\n# Final requirement: sort only column H (which is column C from source) lowest to highest\\n# Convert column C values to comparable numbers\\ndef get_h_sort_key(item):\\n    r, a, b, c = item\\n    if isinstance(c, (int, float)):\\n        return (c, r)\\n    elif c is None:\\n        return (float('inf'), r)\\n    else:\\n        # Try to convert string to number\\n        try:\\n            return (float(str(c).strip()), r)\\n        except (ValueError, TypeError):\\n            return (float('inf'), r)\\n\\nunique_data.sort(key=get_h_sort_key)\\n\\n# Write output to F2:H10 (9 rows available)\\noutput_rows = 9\\nfor i in range(output_rows):\\n    target_row = i + 2\\n    if i < len(unique_data):\\n        r, a, b, c = unique_data[i]\\n        ws.cell(row=target_row, column=6, value=a)  # F = Column A\\n        ws.cell(row=target_row, column=7, value=b)  # G = Column B\\n        ws.cell(row=target_row, column=8, value=c)  # H = Column C\\n    else:\\n        # Clear any existing values beyond data\\n        for col in [6, 7, 8]:\\n            ws.cell(row=target_row, column=col, value=None)\\n\\nwb.save('output.xlsx')\\nprint(\\\"Sorting completed. Output saved to output.xlsx\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_x59bcgxq/model.py\\\", line 6, in <module>\\n    shutil.copy('input.xlsx', 'output.xlsx')\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/shutil.py\\\", line 435, in copy\\n    copyfile(src, dst, follow_symlinks=follow_symlinks)\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/shutil.py\\\", line 260, in copyfile\\n    with open(src, 'rb') as fsrc:\\n         ^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 31.929,
+    "setup_s": 0.0,
+    "grade_s": 0.226
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=3828",
+    "run1 exit=1 0.22s"
+  ]
+}

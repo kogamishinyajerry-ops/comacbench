@@ -1,0 +1,40 @@
+{
+  "task_id": "ssb_13_1",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "volume+bbox 三边相对误差 vs gold 预计算参考（各 1/4，1% 容差）",
+    "requirements": "interface_checks 通过率（圆柱面数/半径匹配 ±1%、总面数精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(无扰动重算；可重复执行复现同一制品由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"```python\\n\\\"\\\"\\\"\\nCombine the data blocks (\\\"ranges\\\") of the RANGES sheet into the LISTS sheet.\\n\\nHow it works\\n------------\\n* Every range on RANGES is located dynamically: a range starts at a header row\\n  that contains \\\"DATE\\\" (column B) and \\\"REF\\\" (column C) - so newly added ranges\\n  are picked up automatically on every run.\\n* Inside each range, duplicates are matched on the DATE + REF pair (columns B\\n  and C) and their amounts are summed.\\n* The LISTS sheet is wiped in the answer region first (this deletes all the old\\n  ranges/sections) and is then repopulated section by section.  The layout of\\n  the already finished \\\"STAGE\\\" table (title row, header row, data rows, TOTAL\\n  row) is detected and used as the format reference for every section.\\n* Every section is sorted by DATE (lowest -> highest) with a secondary\\n  alphabetical (A -> Z) sort on column C (REF), and ends with a TOTAL row that\\n  sums the amounts.\\n* The result is saved to output.xlsx (a copy of input.xlsx), answer region\\n  A3:D32 of the LISTS sheet.\\n\\\"\\\"\\\"\\n\\nimport shutil\\nfrom collections import OrderedDict\\nfrom copy import copy\\nfrom datetime import date, datetime, timedelta\\n\\nfrom openpyxl import load_workbook\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSOURCE_SHEET = \\\"RANGES\\\"\\nTARGET_SHEET = \\\"LISTS\\\"\\n\\nANSWER_START_ROW = 3      # answer region is A3:D32 on the LISTS sheet\\nANSWER_END_ROW = 32\\nANSWER_MAX_COL = 4        # column D\\n\\nEXCEL_EPOCH = datetime(1899, 12, 30)\\n\\nDATE_FORMATS = (\\n    \\\"%Y-%m-%d\\\", \\\"%m/%d/%Y\\\", \\\"%d/%m/%Y\\\", \\\"%m/%d/%y\\\", \\\"%d/%m/%y\\\",\\n    \\\"%d-%m-%Y\\\", \\\"%d-%b-%Y\\\", \\\"%d-%b-%y\\\", \\\"%b %d, %Y\\\", \\\"%B %d, %Y\\\",\\n    \\\"%Y/%m/%d\\\", \\\"%d.%m.%Y\\\",\\n)\\n\\nAMOUNT_KEYWORDS = (\\\"AMOUNT\\\", \\\"AMT\\\", \\\"VALUE\\\", \\\"QTY\\\", \\\"QUANTITY\\\",\\n                   \\\"PRICE\\\", \\\"COST\\\", \\\"SUM\\\", \\\"TOTAL\\\", \\\"SALES\\\")\\n\\n\\n# ----------------------------------------------------------------- helpers --\\ndef text(value):\\n    \\\"\\\"\\\"Cell value as a trimmed string.\\\"\\\"\\\"\\n    return \\\"\\\" if value is None else str(value).strip()\\n\\n\\ndef is_blank(value):\\n    return value is None or (isinstance(value, str) and not value.strip())\\n\\n\\ndef as_number(value, default=0.0):\\n    if isinstance(value, bool):\\n        return float(value)\\n    if isinstance(value, (int, float)):\\n        return float(value)\\n    s = text(value).replace(\\\",\\\", \\\"\\\").replace(\\\"$\\\", \\\"\\\").replace(\\\" \\\", \\\"\\\")\\n    if not s:\\n        return default\\n    try:\\n        return float(s)\\n    except ValueError:\\n        return default\\n\\n\\ndef to_datetime(value):\\n    if isinstance(value, datetime):\\n        return value\\n    if isinstance(value, date):\\n        return datetime(value.year, value.month, value.day)\\n    if isinstance(value, (int, float)) and not isinstance(value, bool):\\n        return EXCEL_EPOCH + timedelta(days=float(value))\\n    s = text(value)\\n    if not s:\\n        return None\\n    for fmt in DATE_FORMATS:\\n        try:\\n            return datetime.strptime(s, fmt)\\n        except ValueError:\\n            continue\\n    try:\\n        return EXCEL_EPOCH + timedelta(days=float(s))\\n    except ValueError:\\n        return None\\n\\n\\ndef date_key(value):\\n    \\\"\\\"\\\"Sort key: real dates chronologically, anything else last.\\\"\\\"\\\"\\n    dt = to_datetime(value)\\n    if dt is not None:\\n        return (0, dt.timestamp(), \\\"\\\")\\n    return (1, 0.0, text(value).upper())\\n\\n\\ndef ref_key(value):\\n    return text(value).upper()\\n\\n\\ndef get_sheet(wb, name):\\n    for ws in wb.worksheets:\\n        if ws.title.strip().upper() == name.strip().upper():\\n            return ws\\n    raise KeyError(\\\"Sheet not found: %s\\\" % name)\\n\\n\\n# ------------------------------------------------- read the RANGES sheet ----\\ndef parse_ranges(ws):\\n    \\\"\\\"\\\"Find every range (its own header row + data rows) on the RANGES sheet.\\\"\\\"\\\"\\n    max_row = ws.max_row\\n    max_col = max(ws.max_column, 6)\\n\\n    blocks = []\\n    current = None\\n    pending_title = None\\n\\n    for r in range(1, max_row + 1):\\n        values = [ws.cell(row=r, column=c).value for c in range(1, max_col + 1)]\\n        filled = [i for i, v in enumerate(values, start=1) if not is_blank(v)]\\n        if not filled:\\n            con\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"length\", \"escalated\": false}",
+    "grade_details": "{\"syntax_error\": true}"
+  },
+  "timings": {
+    "agent_s": 440.949,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=False",
+    "provider=glm code_len=12543"
+  ]
+}

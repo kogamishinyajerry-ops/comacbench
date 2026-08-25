@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_290_27",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nExcel 2016 macro equivalent: delete the leading uppercase letter-codes from the\\nalphanumeric values in column B (e.g. 'PID1' -> 1, 'PID2' -> 2, 'GG 1' -> 1),\\nleaving every other value in the column (dates, headers, numbers, blanks) untouched.\\n\\nThe equivalent VBA macro would be:\\n\\n    Sub RemoveAlphaCodes()\\n        Dim c As Range, re As Object, m As Object\\n        Set re = CreateObject(\\\"VBScript.RegExp\\\")\\n        re.Pattern = \\\"^[A-Za-z]{2,3}\\\\s*(\\\\d+)$\\\"\\n        For Each c In ActiveSheet.Columns(\\\"B\\\").Cells\\n            If VarType(c.Value) = vbString And Not IsDate(c.Value) Then\\n                If re.Test(Trim(c.Value)) Then\\n                    c.Value = CLng(re.Replace(Trim(c.Value), \\\"$1\\\"))\\n                End If\\n            End If\\n        Next c\\n    End Sub\\n\\nSince a macro is not executed here, this script \\\"just executes\\\" the same logic:\\nit copies the provided input workbook to output.xlsx, rewrites column B in place\\non Sheet1, and saves, so the answer appears in Sheet1!A14:I137 of output.xlsx.\\n\\\"\\\"\\\"\\n\\nimport os\\nimport re\\nimport shutil\\nfrom datetime import datetime\\n\\nfrom openpyxl import load_workbook\\n\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Sheet1\\\"\\nCOLUMN_B = 2  # column B\\n\\n# A code (2-3 letters, usually uppercase) optionally followed by a space,\\n# directly followed by a number, nothing else.\\nCODE_NUMBER_RE = re.compile(r\\\"^[A-Za-z]{2,3}\\\\s*(\\\\d+)$\\\")\\n\\n# Common textual date layouts that must never be touched.\\nDATE_FORMATS = [\\n    \\\"%m/%d/%Y\\\", \\\"%m/%d/%y\\\", \\\"%d/%m/%Y\\\", \\\"%d/%m/%y\\\", \\\"%Y-%m-%d\\\",\\n    \\\"%m-%d-%Y\\\", \\\"%Y/%m/%d\\\", \\\"%d.%m.%Y\\\", \\\"%d-%b-%Y\\\", \\\"%b %d, %Y\\\",\\n    \\\"%B %d, %Y\\\", \\\"%m/%d/%Y %H:%M\\\", \\\"%m/%d/%Y %H:%M:%S\\\",\\n]\\n\\n\\ndef looks_like_date(text: str) -> bool:\\n    \\\"\\\"\\\"Return True if the string parses as a date (must be left unchanged).\\\"\\\"\\\"\\n    text = text.strip()\\n    return any(_try_parse(text, fmt) for fmt in DATE_FORMATS)\\n\\n\\ndef _try_parse(text: str, fmt: str):\\n    try:\\n        datetime.strptime(text, fmt)\\n        return True\\n    except ValueError:\\n        return False\\n\\n\\ndef find_input_workbook() -> str:\\n    \\\"\\\"\\\"Locate the workbook to process.\\\"\\\"\\\"\\n    if os.path.exists(INPUT_FILE):\\n        return INPUT_FILE\\n    if os.path.exists(OUTPUT_FILE):          # output may already be the copy\\n        return OUTPUT_FILE\\n    candidates = sorted(\\n        f for f in os.listdir(\\\".\\\")\\n        if f.lower().endswith((\\\".xlsx\\\", \\\".xlsm\\\"))\\n        and not f.startswith(\\\"~$\\\")\\n    )\\n    if candidates:\\n        return candidates[0]\\n    raise FileNotFoundError(\\n        \\\"No input workbook found (expected input.xlsx or output.xlsx in the \\\"\\n        \\\"working directory).\\\"\\n    )\\n\\n\\ndef main() -> None:\\n    # 1) output.xlsx = a copy of the provided input workbook\\n    src = find_input_workbook()\\n    if src != OUTPUT_FILE:\\n        shutil.copyfile(src, OUTPUT_FILE)\\n\\n    # 2) Open the copy (keep everything else exactly as it is)\\n    wb = load_workbook(OUTPUT_FILE)\\n    ws = wb[SHEET_NAME] if SHEET_NAME in wb.sheetnames else wb.worksheets[0]\\n\\n    # 3) Process column B: strip letter codes, keep numbers; never touch dates\\n    changed = 0\\n    for row in range(1, ws.max_row + 1):\\n        cell = ws.cell(row=row, column=COLUMN_B)\\n        value = cell.value\\n\\n        if not isinstance(value, str):        # numbers, real dates, blanks: skip\\n            continue\\n\\n        text = value.strip()\\n        match = CODE_NUMBER_RE.match(text)\\n        if not match:\\n            continue                          # anything else in column B: skip\\n        if looks_like_date(text):\\n            continue                          # the date value: leave unchanged\\n\\n        cell.value = int(match.group(1))      # 'PID1' -> 1, 'GG 1' -> 1\\n        changed += 1\\n\\n    # 4) Save; the processed table remains in Sheet1!A14:I137\\n    wb.save(OUTPUT_FILE)\\n    print(f\\\"Done. {changed} cell(s) in column B updated; \\\"\\n          f\\\"answer written to {SHEET_NAME}!A14:I137 of {OUTPUT_FILE}.\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A14:I137\", \"match\": {\"n_gold\": 460, \"matched\": 460, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 66.839,
+    "setup_s": 0.0,
+    "grade_s": 2.862
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3917",
+    "run1 exit=0 0.32s",
+    "run2 exit=0 0.27s",
+    "physics=1.0 cells=460/460 extra=0"
+  ]
+}

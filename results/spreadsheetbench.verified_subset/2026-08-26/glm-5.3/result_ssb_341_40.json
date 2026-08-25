@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_341_40",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nTask:\\n    For every data row in 'Sheet1' of the provided input workbook, check three\\n    conditions:\\n        - Column A contains the text 'Government'\\n        - Column B contains the text 'Germany'\\n        - Column C contains the text 'Carretera'\\n    When all three conditions are true, write the text 'Volkswagen' into\\n    column Q of that row.\\n\\n    The result is saved to 'output.xlsx' (a copy of the input workbook with the\\n    new column Q filled in), covering cells A1:Q701 of 'Sheet1'.\\n\\n    This Python script performs exactly what the requested VBA macro would do.\\n    The equivalent VBA (for reference) is:\\n\\n        Sub InsertVolkswagen()\\n            Dim lastRow As Long, r As Long\\n            lastRow = Cells(Rows.Count, \\\"A\\\").End(xlUp).Row\\n            For r = 2 To lastRow\\n                If Cells(r, \\\"A\\\").Value = \\\"Government\\\" And _\\n                   Cells(r, \\\"B\\\").Value = \\\"Germany\\\" And _\\n                   Cells(r, \\\"C\\\").Value = \\\"Carretera\\\" Then\\n                    Cells(r, \\\"Q\\\").Value = \\\"Volkswagen\\\"\\n                End If\\n            Next r\\n        End Sub\\n\\n    (For very large sheets, an even faster VBA approach is to read the columns\\n    into a variant array, process it, and write column Q back in one shot.)\\n\\\"\\\"\\\"\\n\\nimport os\\nfrom openpyxl import load_workbook\\n\\n# --- Configuration -----------------------------------------------------------\\nINPUT_CANDIDATES = [\\\"input.xlsx\\\", \\\"source.xlsx\\\", \\\"data.xlsx\\\", \\\"workbook.xlsx\\\"]\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Sheet1\\\"\\nTARGET_TEXT = \\\"Volkswagen\\\"\\nCONDITIONS = (\\\"government\\\", \\\"germany\\\", \\\"carretera\\\")  # A, B, C (case-insensitive)\\nLAST_ROW = 701  # answer region is A1:Q701\\n# ------------------------------------------------------------------------------\\n\\n\\ndef find_input_file():\\n    \\\"\\\"\\\"Locate the provided input workbook.\\\"\\\"\\\"\\n    for name in INPUT_CANDIDATES:\\n        if os.path.exists(name):\\n            return name\\n    raise FileNotFoundError(\\n        \\\"Input workbook not found. Expected one of: \\\" + \\\", \\\".join(INPUT_CANDIDATES)\\n    )\\n\\n\\ndef norm(value):\\n    \\\"\\\"\\\"Normalize a cell value for robust, case-insensitive text comparison.\\\"\\\"\\\"\\n    if value is None:\\n        return \\\"\\\"\\n    return str(value).strip().lower()\\n\\n\\ndef main():\\n    input_path = find_input_file()\\n\\n    # Load the provided input workbook (preserving all existing content/values)\\n    wb = load_workbook(input_path, data_only=False)\\n\\n    # Use 'Sheet1' if present, otherwise fall back to the active sheet\\n    ws = wb[SHEET_NAME] if SHEET_NAME in wb.sheetnames else wb.active\\n\\n    matched = 0\\n\\n    # Iterate over the data rows (row 1 is the header row)\\n    last_row = min(ws.max_row, LAST_ROW) if ws.max_row else 1\\n    for row in range(2, last_row + 1):\\n        a = norm(ws.cell(row=row, column=1).value)   # Column A\\n        b = norm(ws.cell(row=row, column=2).value)   # Column B\\n        c = norm(ws.cell(row=row, column=3).value)   # Column C\\n\\n        if (a, b, c) == CONDITIONS:\\n            # Column Q is column index 17\\n            ws.cell(row=row, column=17).value = TARGET_TEXT\\n            matched += 1\\n\\n    # Save the result as output.xlsx (a copy of the input workbook, modified)\\n    wb.save(OUTPUT_FILE)\\n\\n    print(f\\\"Done. {matched} row(s) matched all three conditions \\\"\\n          f\\\"and had '{TARGET_TEXT}' written to column Q.\\\")\\n    print(f\\\"Result saved to '{OUTPUT_FILE}' (sheet '{ws.title}', range A1:Q{last_row}).\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vv3eg5cj/model.py\\\", line 95, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vv3eg5cj/model.py\\\", line 64, in main\\n    input_path = find_input_file()\\n                 ^^^^^^^^^^^^^^^^^\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_vv3eg5cj/model.py\\\", line 51, in find_input_file\\n    raise FileNotFoundError(\\nFileNotFoundError: Input workbook not found. Expected one of: input.xlsx, source.xlsx, data.xlsx, workbook.xlsx\\n\"}"
+  },
+  "timings": {
+    "agent_s": 28.06,
+    "setup_s": 0.0,
+    "grade_s": 0.236
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3397",
+    "run1 exit=1 0.23s"
+  ]
+}

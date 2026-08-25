@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_262_17",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nDynamic multi-column (Task, then Responsibility) ascending sort.\\n\\nThe Python script below reproduces exactly what the requested VBA macro does:\\n\\n  * it locates the 'Task' and 'Responsibility' headers dynamically (no\\n    hard-coded ranges / addresses),\\n  * it builds the sort range from the real data extent of the first worksheet,\\n  * it applies a two-level ascending sort (Tasks small->large, then\\n    Responsibilities small->large),\\n  * and it writes the result into 'Sheet1' and 'Sheet2' of output.xlsx,\\n    region A1:F14.\\n\\nEquivalent VBA (for reference):\\n\\n    Sub SortByTaskAndResponsibility()\\n        Dim ws As Worksheet: Set ws = ThisWorkbook.Worksheets(1)\\n        Dim lastRow As Long, lastCol As Long, c As Long\\n        Dim taskCol As Long, respCol As Long, headerRow As Long\\n        headerRow = 1\\n        lastCol = ws.Cells(headerRow, ws.Columns.Count).End(xlToLeft).Column\\n        For c = 1 To lastCol                              'dynamic header lookup\\n            Select Case LCase$(Trim$(CStr(ws.Cells(headerRow, c).Value)))\\n                Case \\\"task\\\", \\\"tasks\\\":                 taskCol = c\\n                Case \\\"responsibility\\\", \\\"responsibilities\\\": respCol = c\\n            End Select\\n        Next c\\n        lastRow = ws.Cells(ws.Rows.Count, taskCol).End(xlUp).Row   'dynamic extent\\n        With ws.Sort\\n            .SortFields.Clear\\n            .SortFields.Add Key:=ws.Range(ws.Cells(headerRow + 1, taskCol), _\\n                                          ws.Cells(lastRow, taskCol)), _\\n                            Order:=xlAscending, DataOption:=xlSortNormal\\n            .SortFields.Add Key:=ws.Range(ws.Cells(headerRow + 1, respCol), _\\n                                          ws.Cells(lastRow, respCol)), _\\n                            Order:=xlAscending, DataOption:=xlSortNormal\\n            .SetRange ws.Range(ws.Cells(headerRow, 1), ws.Cells(lastRow, lastCol))\\n            .Header = xlYes\\n            .MatchCase = False\\n            .Orientation = xlTopToBottom\\n            .Apply\\n        End With\\n    End Sub\\n\\\"\\\"\\\"\\n\\nimport os\\nimport re\\nimport shutil\\nfrom pathlib import Path\\n\\nfrom openpyxl import load_workbook\\n\\n# ----------------------------------------------------------------------\\n# configuration\\n# ----------------------------------------------------------------------\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nANSWER_SHEETS = (\\\"Sheet1\\\", \\\"Sheet2\\\")\\nANSWER_FIRST_ROW, ANSWER_LAST_ROW = 1, 14      # rows 1..14\\nANSWER_FIRST_COL, ANSWER_LAST_COL = 1, 6       # columns A..F\\n\\nHEADER_ALIASES = {\\n    \\\"task\\\": (\\\"task\\\", \\\"tasks\\\"),\\n    \\\"responsibility\\\": (\\\"responsibility\\\", \\\"responsibilities\\\"),\\n}\\nMAX_HEADER_SCAN_ROWS = 50\\n\\n\\n# ----------------------------------------------------------------------\\n# helpers\\n# ----------------------------------------------------------------------\\ndef norm(value):\\n    \\\"\\\"\\\"Normalise a cell value for header matching.\\\"\\\"\\\"\\n    if value is None:\\n        return \\\"\\\"\\n    return re.sub(r\\\"\\\\s+\\\", \\\" \\\", str(value).strip().lower())\\n\\n\\ndef natural_key(value):\\n    \\\"\\\"\\\"\\n    Ascending (\\\"small to large\\\") sort key that behaves sensibly for numbers,\\n    for text with embedded numbers ('Task 2' < 'Task 10') and for blanks.\\n    \\\"\\\"\\\"\\n    if value is None:\\n        return ((-1, \\\"\\\"),)\\n    if isinstance(value, bool):\\n        return ((1, str(value).lower()),)\\n    if isinstance(value, (int, float)):\\n        return ((0, float(value)),)\\n    text = str(value)\\n    if text.strip() == \\\"\\\":\\n        return ((-1, \\\"\\\"),)\\n    tokens = re.split(r\\\"(\\\\d+)\\\", text)\\n    return tuple(\\n        (0, float(tok)) if tok.isdigit() else (1, tok.lower())\\n        for tok in tokens\\n        if tok != \\\"\\\"\\n    )\\n\\n\\ndef locate_input_workbook():\\n    \\\"\\\"\\\"Find the provided input workbook (no hard-coded file name).\\\"\\\"\\\"\\n    for name in (\\\"input.xlsx\\\", \\\"Input.xlsx\\\", \\\"source.xlsx\\\", \\\"workbook.xlsx\\\", \\\"data.xlsx\\\"):\\n        if os.path.isfile(name):\\n            return name\\n    for path in sorted(Path(\\\".\\\").glob(\\\"*.xlsx\\\")) + sorted(Path(\\\".\\\").glob(\\\"*.xlsm\\\")):\\n        if path.name.startswith(\\\"~$\\\") or path.name.lower() == OUTPUT_FILE.lowe\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"Sheet1'!A1:F14\", \"match\": {\"n_gold\": 84, \"matched\": 84, \"n_extra\": 0}, \"misses\": []}"
+  },
+  "timings": {
+    "agent_s": 149.168,
+    "setup_s": 0.0,
+    "grade_s": 2.95
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=8014",
+    "run1 exit=0 0.3s",
+    "run2 exit=0 0.23s",
+    "physics=1.0 cells=84/84 extra=0"
+  ]
+}

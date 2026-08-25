@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_load_02",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\n\\nfrom pptx import Presentation\\nfrom pptx.oxml.ns import qn\\nfrom pptx.util import Inches, Pt\\n\\nCSV_PATH = \\\"load_02.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\n\\n\\ndef read_rows(path):\\n    \\\"\\\"\\\"Read the CSV and return a list of dict rows with stripped strings.\\\"\\\"\\\"\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as fh:\\n        reader = csv.DictReader(fh)\\n        if reader.fieldnames:\\n            reader.fieldnames = [fn.strip() for fn in reader.fieldnames]\\n        rows = []\\n        for raw in reader:\\n            row = {(k or \\\"\\\").strip(): (v or \\\"\\\").strip() for k, v in raw.items() if k}\\n            if not any(row.values()):\\n                continue  # skip blank lines\\n            rows.append(row)\\n    required = {\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"}\\n    if rows:\\n        missing = required - set(rows[0].keys())\\n        if missing:\\n            raise ValueError(\\\"CSV missing required columns: {}\\\".format(sorted(missing)))\\n    return rows\\n\\n\\ndef style_run(run, size, bold=False):\\n    run.font.size = Pt(size)\\n    run.font.bold = bold\\n    run.font.name = \\\"Calibri\\\"\\n\\n\\ndef fill_cell(cell, text, size, bold=False):\\n    cell.text = str(text)\\n    cell.margin_top = Inches(0.01)\\n    cell.margin_bottom = Inches(0.01)\\n    cell.margin_left = Inches(0.06)\\n    cell.margin_right = Inches(0.06)\\n    for p in cell.text_frame.paragraphs:\\n        for r in p.runs:\\n            style_run(r, size, bold)\\n\\n\\ndef add_bullet(paragraph, char=\\\"\\\\u2022\\\"):\\n    \\\"\\\"\\\"Apply a bullet glyph via XML so extracted text stays clean.\\\"\\\"\\\"\\n    pPr = paragraph._p.get_or_add_pPr()\\n    for tag in (\\\"a:buNone\\\", \\\"a:buChar\\\", \\\"a:buAutoNum\\\"):\\n        for el in pPr.findall(qn(tag)):\\n            pPr.remove(el)\\n    bu = pPr.makeelement(qn(\\\"a:buChar\\\"), {\\\"char\\\": char})\\n    pPr.append(bu)\\n\\n\\ndef add_bulleted_box(slide, lines, left, top, width, height, size=20):\\n    box = slide.shapes.add_textbox(Inches(left), Inches(top), Inches(width), Inches(height))\\n    tf = box.text_frame\\n    tf.word_wrap = True\\n    for i, line in enumerate(lines):\\n        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()\\n        run = p.add_run()\\n        run.text = line\\n        style_run(run, size)\\n        p.space_after = Pt(10)\\n        add_bullet(p)\\n    return box\\n\\n\\ndef main():\\n    rows = read_rows(CSV_PATH)\\n\\n    # ---- compute all numeric claims from the input data ----\\n    loads = [float(r[\\\"load_factor\\\"]) for r in rows]\\n    cycles = [int(float(r[\\\"cycles\\\"])) for r in rows]\\n\\n    n = len(rows)\\n    load_max = max(loads)\\n    load_mean = sum(loads) / n\\n    total_cycles = sum(cycles)\\n\\n    summary_lines = [\\n        \\\"N cases = {}\\\".format(n),\\n        \\\"load max = {:.2f}\\\".format(load_max),\\n        \\\"load mean = {:.2f}\\\".format(load_mean),\\n        \\\"total cycles = {}\\\".format(total_cycles),\\n    ]\\n\\n    prs = Presentation()\\n    prs.slide_width = Inches(13.333)\\n    prs.slide_height = Inches(7.5)\\n\\n    # ---- Slide 1: Title ----\\n    s1 = prs.slides.add_slide(prs.slide_layouts[0])\\n    s1.shapes.title.text = \\\"Engineering Test Briefing\\\"\\n    s1.placeholders[1].text = \\\"Load case data review \\\\u2014 load_02.csv\\\"\\n\\n    # ---- Slide 2: Data table (header row + one row per record) ----\\n    s2 = prs.slides.add_slide(prs.slide_layouts[5])\\n    s2.shapes.title.text = \\\"Data\\\"\\n    headers = [\\\"case\\\", \\\"load_factor\\\", \\\"cycles\\\"]\\n    n_rows = len(rows) + 1\\n    row_h = 0.24 if n_rows <= 26 else 0.18\\n    gfx = s2.shapes.add_table(\\n        n_rows, 3, Inches(0.8), Inches(1.35), Inches(6.6), Inches(row_h * n_rows)\\n    )\\n    table = gfx.table\\n    for j, w in enumerate((Inches(2.0), Inches(2.4), Inches(2.2))):\\n        table.columns[j].width = w\\n    for i in range(n_rows):\\n        table.rows[i].height = Inches(row_h)\\n    for j, h in enumerate(headers):\\n        fill_cell(table.cell(0, j), h, 10, bold=True)\\n    for i, r in enumerate(rows, start=1):\\n        fill_cell(table.cell(i, 0), r[\\\"case\\\"], 9)\\n        fill_cell(table.cell(i, 1), r[\\\"load_factor\\\"], 9)\\n        fill_cell(table.cell(i, 2), r[\\\"cycles\\\"], 9)\\n\\n    # ---- Slide 3: Summary (exact computed numbers) ----\\n    s3 = prs.slides.add_sli\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"4/4\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 102.731,
+    "setup_s": 0.0,
+    "grade_s": 0.306
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=4682",
+    "run1 exit=0 0.12s",
+    "run2 exit=0 0.12s",
+    "physics=1.0 requirements=1.0 anchors=4/4"
+  ]
+}

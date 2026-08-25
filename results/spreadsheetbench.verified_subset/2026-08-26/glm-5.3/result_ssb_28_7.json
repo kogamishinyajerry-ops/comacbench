@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_28_7",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import re\\nimport shutil\\nfrom pathlib import Path\\n\\nfrom openpyxl import load_workbook\\n\\n# ---------------------------------------------------------------------------\\n# Configuration\\n# ---------------------------------------------------------------------------\\nINPUT_FILE = Path(\\\"input.xlsx\\\")\\nOUTPUT_FILE = Path(\\\"output.xlsx\\\")\\n\\n# Part number that starts the deletion range (inclusive):\\n#   starts with '400-', followed by any characters, and ends with '-A'\\nSTART_PATTERN = re.compile(r\\\"^400-.*-A$\\\")\\n\\n# Part number that ends the deletion range (exclusive):\\n#   any part number sharing the same leading '400-' pattern\\nNEXT_PATTERN = re.compile(r\\\"^400-\\\")\\n\\n\\ndef find_part_number_column(ws):\\n    \\\"\\\"\\\"Return the column index that contains the part numbers.\\n\\n    The part-number column is identified as the column containing the\\n    largest number of values that start with '400-'.\\n    \\\"\\\"\\\"\\n    best_col, best_hits = None, 0\\n    for col in range(1, ws.max_column + 1):\\n        hits = 0\\n        for row in range(1, ws.max_row + 1):\\n            value = ws.cell(row=row, column=col).value\\n            if isinstance(value, str) and NEXT_PATTERN.match(value.strip()):\\n                hits += 1\\n        if hits > best_hits:\\n            best_col, best_hits = col, hits\\n    return best_col, best_hits\\n\\n\\ndef main():\\n    # output.xlsx starts as a copy of the provided input workbook\\n    shutil.copyfile(INPUT_FILE, OUTPUT_FILE)\\n\\n    wb = load_workbook(OUTPUT_FILE)\\n    ws = wb[\\\"Sheet1\\\"] if \\\"Sheet1\\\" in wb.sheetnames else wb.active\\n\\n    part_col, hits = find_part_number_column(ws)\\n\\n    if part_col is not None and hits > 0:\\n        # Locate the first part number matching '400-...-A'\\n        start_row = None\\n        for row in range(1, ws.max_row + 1):\\n            value = ws.cell(row=row, column=part_col).value\\n            if isinstance(value, str) and START_PATTERN.match(value.strip()):\\n                start_row = row\\n                break\\n\\n        if start_row is not None:\\n            # Locate the next part number starting with '400-'\\n            # (any number of blank cells may separate the two part numbers)\\n            end_row = None\\n            for row in range(start_row + 1, ws.max_row + 1):\\n                value = ws.cell(row=row, column=part_col).value\\n                if isinstance(value, str) and NEXT_PATTERN.match(value.strip()):\\n                    end_row = row\\n                    break\\n\\n            # Delete from the '400-...-A' row (inclusive) up to the next\\n            # '400-' part number (exclusive).  If no following '400-' part\\n            # exists, delete through the last row of the sheet.\\n            last_row_to_delete = (end_row - 1) if end_row is not None else ws.max_row\\n            num_rows = last_row_to_delete - start_row + 1\\n\\n            if num_rows > 0:\\n                ws.delete_rows(start_row, num_rows)\\n                print(f\\\"Deleted rows {start_row}-{last_row_to_delete} of Sheet1.\\\")\\n            else:\\n                print(\\\"No rows needed to be deleted.\\\")\\n        else:\\n            # The part number ending in '-A' does not exist -> delete nothing\\n            print(\\\"No '400-...-A' part number found; nothing deleted.\\\")\\n    else:\\n        print(\\\"No part-number column found; nothing deleted.\\\")\\n\\n    wb.save(OUTPUT_FILE)\\n    print(f\\\"Result saved to {OUTPUT_FILE} (Sheet1!A1:C26).\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_gxo56ey0/model.py\\\", line 90, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_gxo56ey0/model.py\\\", line 42, in main\\n    shutil.copyfile(INPUT_FILE, OUTPUT_FILE)\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/shutil.py\\\", line 260, in copyfile\\n    with open(src, 'rb') as fsrc:\\n         ^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 93.5,
+    "setup_s": 0.0,
+    "grade_s": 0.207
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=3349",
+    "run1 exit=1 0.2s"
+  ]
+}

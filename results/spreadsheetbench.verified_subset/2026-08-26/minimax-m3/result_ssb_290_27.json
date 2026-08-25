@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_290_27",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl.styles import Font\\n\\n# Create a new workbook (Sheet1)\\nwb = openpyxl.Workbook()\\nws = wb.active\\nws.title = \\\"Sheet1\\\"\\n\\n# Title above the answer region\\nws['A13'] = \\\"VBA Macro for Excel 2016 - Remove Alphabetic Characters from Column B\\\"\\nws['A13'].font = Font(bold=True, size=12)\\n\\n# VBA Macro Code - the answer to be placed in A14:I137\\nmacro_code = \\\"\\\"\\\"Sub RemoveAlphaCharacters()\\n' Purpose: Removes alphabetic characters from cell values in column B,\\n'          keeping only numeric digits. Preserves date values.\\n'\\n' Handles patterns like:\\n'   \\\"PID1\\\"   -> \\\"1\\\"\\n'   \\\"PID2\\\"   -> \\\"2\\\"\\n'   \\\"GG 1\\\"   -> \\\"1\\\"\\n'   \\\"AB12\\\"   -> \\\"12\\\"\\n'   \\\"XYZ 5\\\"  -> \\\"5\\\"\\n'\\n' Date values in the column are left unchanged.\\n\\n    Dim ws As Worksheet\\n    Dim cell As Range\\n    Dim lastRow As Long\\n    Dim cellValue As Variant\\n    Dim numericPart As String\\n    \\n    Set ws = ActiveSheet\\n    lastRow = ws.Cells(ws.Rows.Count, \\\"B\\\").End(xlUp).Row\\n    \\n    Application.ScreenUpdating = False\\n    \\n    For Each cell In ws.Range(\\\"B1:B\\\" & lastRow)\\n        cellValue = cell.Value\\n        \\n        ' Skip empty cells\\n        If IsEmpty(cell) Or Len(Trim(CStr(cellValue))) = 0 Then\\n            GoTo NextCell\\n        End If\\n        \\n        ' Skip date values - preserve them as-is\\n        If IsDate(cellValue) Then\\n            GoTo NextCell\\n        End If\\n        \\n        ' Only process text strings (alphanumeric codes)\\n        If VarType(cellValue) = vbString Then\\n            numericPart = ExtractDigits(cellValue)\\n            If numericPart <> \\\"\\\" Then\\n                cell.Value = numericPart\\n            End If\\n        End If\\n        \\nNextCell:\\n    Next cell\\n    \\n    Application.ScreenUpdating = True\\n    \\n    MsgBox \\\"Macro complete. Processed \\\" & lastRow & \\\" rows in column B.\\\", vbInformation\\nEnd Sub\\n\\nFunction ExtractDigits(inputStr As String) As String\\n' Helper function: removes all alphabetic characters and whitespace\\n' from inputStr, returning only the numeric digits.\\n'\\n    Dim regex As Object\\n    Set regex = CreateObject(\\\"VBScript.RegExp\\\")\\n    \\n    regex.Pattern = \\\"[A-Za-z\\\\s]+\\\"\\n    regex.Global = True\\n    \\n    ExtractDigits = regex.Replace(inputStr, \\\"\\\")\\nEnd Function\\n\\n' HOW TO USE:\\n' 1. Open your workbook in Excel 2016.\\n' 2. Press ALT+F11 to open the Visual Basic Editor (VBE).\\n' 3. Insert > Module, then paste the code above into the module.\\n' 4. Close the VBE (ALT+Q).\\n' 5. On the worksheet, press ALT+F8, select \\\"RemoveAlphaCharacters\\\",\\n'    and click \\\"Run\\\".\\n'\\n' Notes:\\n' - The macro only modifies cells in column B that contain text strings.\\n' - Empty cells are ignored.\\n' - Any cell whose value is recognised by IsDate() (true date or a\\n'   date-like string) is left untouched.\\n' - For alphanumeric strings such as \\\"PID1\\\", \\\"GG 1\\\", \\\"AB12\\\" the macro\\n'   replaces the cell content with just the digits (\\\"1\\\", \\\"1\\\", \\\"12\\\").\\n' - A reference to \\\"Microsoft VBScript Regular Expressions 5.5\\\" is\\n'   required; it is included with Excel 2016 by default, so no extra\\n'   setup is needed.\\n\\\"\\\"\\\"\\n\\n# Write each line of the macro into column A starting at row 14\\nfor i, line in enumerate(macro_code.split('\\\\n')):\\n    row = 14 + i\\n    if row > 137:\\n        break\\n    ws.cell(row=row, column=1, value=line)\\n\\n# Save the workbook as output.xlsx\\nwb.save('output.xlsx')\\nprint(\\\"output.xlsx created successfully with the VBA macro in A14:I137\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A14:I137\", \"match\": {\"n_gold\": 460, \"matched\": 0, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R14C1\", \"status\": \"mismatch\", \"got\": \"Sub RemoveAlphaCharacters()\", \"ref\": \"NAME\"}, {\"cell\": \"Sheet1!R14C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R14C3\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R14C4\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R14C5\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R16C1\", \"status\": \"mismatch\", \"got\": \"'          keeping only numeric digits. \", \"ref\": \"PID\"}, {\"cell\": \"Sheet1!R16C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R16C3\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R16C4\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R16C5\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R18C1\", \"status\": \"mismatch\", \"got\": \"' Handles patterns like:\", \"ref\": \"CAILIN ALAINN\"}, {\"cell\": \"Sheet1!R18C7\", \"status\": \"missing\"}]}"
+  },
+  "timings": {
+    "agent_s": 77.829,
+    "setup_s": 0.0,
+    "grade_s": 2.651
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=3318",
+    "run1 exit=0 0.19s",
+    "run2 exit=0 0.22s",
+    "physics=0.0 cells=0/460 extra=0"
+  ]
+}

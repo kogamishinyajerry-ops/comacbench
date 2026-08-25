@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_17_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1952,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5976,
+  "artifacts": {
+    "code": "\"import os\\nfrom copy import copy\\nfrom datetime import datetime, date, timedelta\\n\\nimport openpyxl\\nfrom openpyxl.utils import get_column_letter\\n\\n# ---------------------------------------------------------------------------\\n# Configuration\\n# ---------------------------------------------------------------------------\\nINPUT_FILE = \\\"input.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"FILTER 5b\\\"\\n\\nDATA_HEADER_ROW = 1\\nDATA_FIRST_ROW = 2          # first data row\\nDATA_LAST_ROW = 315         # last data row\\nDATA_FIRST_COL = 1          # column A\\nDATA_LAST_COL = 5           # column E\\n\\nOUT_FIRST_ROW = 6           # results start at I6\\nOUT_FIRST_COL = 9           # column I\\nOUT_LAST_ROW = 295          # answer region ends at row 295\\nOUT_LAST_COL = 13           # column M\\n\\n\\ndef find_input_file():\\n    if os.path.exists(INPUT_FILE):\\n        return INPUT_FILE\\n    candidates = [f for f in os.listdir(\\\".\\\") if f.endswith(\\\".xlsx\\\")\\n                  and not f.startswith(\\\"~$\\\") and f != OUTPUT_FILE]\\n    if candidates:\\n        return sorted(candidates)[0]\\n    raise FileNotFoundError(\\\"No input workbook found.\\\")\\n\\n\\ndef get_sheet(wb, preferred):\\n    if preferred in wb.sheetnames:\\n        return wb[preferred]\\n    for name in wb.sheetnames:\\n        if preferred.lower() in name.lower():\\n            return wb[name]\\n    return wb.active\\n\\n\\ndef parse_datetime(v, allow_serial=True):\\n    \\\"\\\"\\\"Coerce a cell value (datetime, date, string, Excel serial) to datetime.\\\"\\\"\\\"\\n    if v is None:\\n        return None\\n    if isinstance(v, datetime):\\n        return v\\n    if isinstance(v, date):\\n        return datetime(v.year, v.month, v.day)\\n    if isinstance(v, str):\\n        s = v.strip()\\n        if not s:\\n            return None\\n        fmts = (\\\"%m/%d/%Y\\\", \\\"%m/%d/%y\\\", \\\"%d/%m/%Y\\\", \\\"%d/%m/%y\\\",\\n                \\\"%Y-%m-%d\\\", \\\"%Y/%m/%d\\\", \\\"%d-%m-%Y\\\", \\\"%d.%m.%Y\\\",\\n                \\\"%d %b %Y\\\", \\\"%d-%b-%Y\\\", \\\"%b %d, %Y\\\", \\\"%B %d, %Y\\\",\\n                \\\"%m/%d/%Y %H:%M:%S\\\", \\\"%d/%m/%Y %H:%M:%S\\\")\\n        for f in fmts:\\n            try:\\n                return datetime.strptime(s, f)\\n            except ValueError:\\n                continue\\n        try:\\n            return datetime.fromisoformat(s)\\n        except ValueError:\\n            return None\\n    if allow_serial and isinstance(v, (int, float)):\\n        try:\\n            return datetime(1899, 12, 30) + timedelta(days=float(v))\\n        except (OverflowError, ValueError):\\n            return None\\n    return None\\n\\n\\ndef looks_like_date(v):\\n    \\\"\\\"\\\"Used to locate the date column (real date cells or textual dates only).\\\"\\\"\\\"\\n    if isinstance(v, (datetime, date)):\\n        return True\\n    if isinstance(v, str):\\n        return parse_datetime(v, allow_serial=False) is not None\\n    return False\\n\\n\\ndef copy_formatting(src, dst):\\n    \\\"\\\"\\\"Copy the full cell formatting from src to dst.\\\"\\\"\\\"\\n    if src.has_style:\\n        dst.font = copy(src.font)\\n        dst.border = copy(src.border)\\n        dst.fill = copy(src.fill)\\n        dst.alignment = copy(src.alignment)\\n        dst.protection = copy(src.protection)\\n        dst.number_format = src.number_format\\n\\n\\ndef main():\\n    in_file = find_input_file()\\n    wb = openpyxl.load_workbook(in_file)                       # keeps styles/formulas\\n    wb_vals = openpyxl.load_workbook(in_file, data_only=True)  # cached values\\n\\n    ws = get_sheet(wb, SHEET_NAME)\\n    ws_vals = get_sheet(wb_vals, SHEET_NAME)\\n\\n    # ---- 1. read the start / end date criteria (I2 and J2) ---------------\\n    start_dt = parse_datetime(ws_vals.cell(row=2, column=9).value)   # I2\\n    end_dt = parse_datetime(ws_vals.cell(row=2, column=10).value)    # J2\\n\\n    # ---- 2. locate the column that contains the dates --------------------\\n    date_col = None\\n    for c in range(DATA_FIRST_COL, DATA_LAST_COL + 1):\\n        h = ws_vals.cell(row=DATA_HEADER_ROW, column=c).value\\n        if isinstance(h, str) and \\\"date\\\" in h.lower():\\n            date_col = c\\n            break\\n    if date_col is None:\\n        counts = {c: sum(1 for r in range(DATA_FIRST_ROW, DATA_LAST_ROW + 1)\\n       \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"FILTER 5b\", \"region\": \"I6:M295\", \"match\": {\"n_gold\": 1445, \"matched\": 282, \"n_extra\": 0}, \"misses\": [{\"cell\": \"FILTER 5b!R6C9\", \"status\": \"mismatch\", \"got\": \"ΦΙΛΤΡΟ ΜΕ ΗΜΕΡΟΜΗΝΙΑ\", \"ref\": \"2023-03-24 00:00:00\"}, {\"cell\": \"FILTER 5b!R6C10\", \"status\": \"missing\"}, {\"cell\": \"FILTER 5b!R6C11\", \"status\": \"missing\"}, {\"cell\": \"FILTER 5b!R6C12\", \"status\": \"missing\"}, {\"cell\": \"FILTER 5b!R6C13\", \"status\": \"missing\"}, {\"cell\": \"FILTER 5b!R7C9\", \"status\": \"mismatch\", \"got\": \"2023-03-24 00:00:00\", \"ref\": \"2023-04-04 00:00:00\"}, {\"cell\": \"FILTER 5b!R7C10\", \"status\": \"mismatch\", \"got\": \"ΓΙΑΝΝΙΟΥ\", \"ref\": \"ΠΟΤΑΜΙΤΗΣ\"}, {\"cell\": \"FILTER 5b!R7C11\", \"status\": \"mismatch\", \"got\": \"800436319\", \"ref\": \"28876081\"}, {\"cell\": \"FILTER 5b!R7C12\", \"status\": \"mismatch\", \"got\": \"3959\", \"ref\": \"186\"}, {\"cell\": \"FILTER 5b!R7C13\", \"status\": \"mismatch\", \"got\": \"4667.98\", \"ref\": \"285.7\"}, {\"cell\": \"FILTER 5b!R8C9\", \"status\": \"mismatch\", \"got\": \"2023-04-04 00:00:00\", \"ref\": \"2023-04-05 00:00:00\"}, {\"cell\": \"FILTER 5b!R8C10\", \"status\": \"mismatch\", \"got\": \"ΠΟΤΑΜΙΤΗΣ\", \"ref\": \"ΓΙΑΝΝΙΟΥ\"}]}"
+  },
+  "timings": {
+    "agent_s": 183.532,
+    "setup_s": 0.0,
+    "grade_s": 3.778
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=7252",
+    "run1 exit=0 0.58s",
+    "run2 exit=0 0.6s",
+    "physics=0.1952 cells=282/1445 extra=0"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "awd_brf_perf_06",
+  "registry_id": "awdoc.office_docs",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "锚定数字命中（源数据数字在文档正文中出现，数值级）+ 缺失惩罚",
+    "requirements": "结构契约（标题层级/表格数/页帧数/图注占位精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一文档由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"Build report.pptx (4 slides) from perf_06.csv — data-anchored engineering test briefing.\\\"\\\"\\\"\\n\\nimport csv\\nimport os\\n\\nfrom pptx import Presentation\\nfrom pptx.util import Inches, Pt\\n\\nCSV_PATH = \\\"perf_06.csv\\\"\\nOUT_PATH = \\\"report.pptx\\\"\\n\\nCOLUMNS = [\\\"config\\\", \\\"cl_max\\\", \\\"cd_cruise\\\", \\\"ld_ratio\\\"]\\n\\n\\ndef read_data(path):\\n    \\\"\\\"\\\"Read CSV, return (records, raw_rows). raw_rows preserve original strings for the table.\\\"\\\"\\\"\\n    with open(path, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        rows = [r for r in csv.reader(f) if any(c.strip() for c in r)]\\n    header = [h.strip().lower() for h in rows[0]]\\n    idx = {name: header.index(name) for name in COLUMNS}\\n\\n    records = []\\n    raw_rows = []\\n    for r in rows[1:]:\\n        rec = {\\n            \\\"config\\\": r[idx[\\\"config\\\"]].strip(),\\n            \\\"cl_max\\\": float(r[idx[\\\"cl_max\\\"]]),\\n            \\\"cd_cruise\\\": float(r[idx[\\\"cd_cruise\\\"]]),\\n            \\\"ld_ratio\\\": float(r[idx[\\\"ld_ratio\\\"]]),\\n        }\\n        records.append(rec)\\n        raw_rows.append([r[idx[c]].strip() for c in COLUMNS])\\n    return records, raw_rows\\n\\n\\ndef compute_summary(records):\\n    n = len(records)\\n    clmax_max = max(r[\\\"cl_max\\\"] for r in records)\\n    cd_mean = sum(r[\\\"cd_cruise\\\"] for r in records) / n\\n    ld_mean = sum(r[\\\"ld_ratio\\\"] for r in records) / n\\n    best = max(records, key=lambda r: r[\\\"ld_ratio\\\"])[\\\"config\\\"]\\n    return clmax_max, cd_mean, ld_mean, best\\n\\n\\ndef build_deck(records, raw_rows, clmax_max, cd_mean, ld_mean, best):\\n    prs = Presentation()\\n\\n    clmax_max_s = f\\\"{clmax_max:.3f}\\\"   # 0.578\\n    cd_mean_s = f\\\"{cd_mean:.4f}\\\"       # 0.0331\\n    ld_mean_s = f\\\"{ld_mean:.1f}\\\"       # 16.6\\n\\n    # ---------- Slide 1: Title ----------\\n    slide = prs.slides.add_slide(prs.slide_layouts[0])\\n    slide.shapes.title.text = \\\"Engineering Test Briefing\\\"\\n    slide.placeholders[1].text = \\\"Aerodynamic performance summary (perf_06)\\\"\\n\\n    # ---------- Slide 2: Data table ----------\\n    slide = prs.slides.add_slide(prs.slide_layouts[5])  # Title Only\\n    slide.shapes.title.text = \\\"Data\\\"\\n\\n    n_rows = 1 + len(records)\\n    tbl_shape = slide.shapes.add_table(n_rows, 4, Inches(0.8), Inches(1.6),\\n                                       Inches(8.4), Inches(0.4 * n_rows))\\n    table = tbl_shape.table\\n\\n    for j, name in enumerate(COLUMNS):\\n        cell = table.cell(0, j)\\n        cell.text = name\\n        for p in cell.text_frame.paragraphs:\\n            for run in p.runs:\\n                run.font.bold = True\\n                run.font.size = Pt(14)\\n\\n    for i, row_vals in enumerate(raw_rows, start=1):\\n        for j, val in enumerate(row_vals):\\n            cell = table.cell(i, j)\\n            cell.text = val\\n            for p in cell.text_frame.paragraphs:\\n                for run in p.runs:\\n                    run.font.size = Pt(12)\\n\\n    # ---------- Slide 3: Summary ----------\\n    slide = prs.slides.add_slide(prs.slide_layouts[5])\\n    slide.shapes.title.text = \\\"Summary\\\"\\n\\n    body = slide.shapes.add_textbox(Inches(0.8), Inches(1.7), Inches(8.4), Inches(4.0))\\n    tf = body.text_frame\\n    tf.word_wrap = True\\n\\n    lines = [\\n        f\\\"CLmax max = {clmax_max_s}\\\",\\n        f\\\"CDcruise mean = {cd_mean_s}\\\",\\n        f\\\"L/D mean = {ld_mean_s}\\\",\\n        f\\\"Best config (max L/D) = {best}\\\",\\n    ]\\n    for k, line in enumerate(lines):\\n        p = tf.paragraphs[0] if k == 0 else tf.add_paragraph()\\n        p.text = line\\n        p.level = 0\\n        for run in p.runs:\\n            run.font.size = Pt(20)\\n\\n    # ---------- Slide 4: Next steps ----------\\n    slide = prs.slides.add_slide(prs.slide_layouts[5])\\n    slide.shapes.title.text = \\\"Next steps\\\"\\n\\n    body = slide.shapes.add_textbox(Inches(0.8), Inches(1.7), Inches(8.4), Inches(4.0))\\n    tf = body.text_frame\\n    tf.word_wrap = True\\n    steps = [\\n        \\\"Review best configuration results with the design team\\\",\\n        \\\"Plan repeat runs to confirm the observed trends\\\",\\n        \\\"Extend testing to additional conditions and configurations\\\",\\n    ]\\n    for k, line in enumerate(steps):\\n        p = tf.paragraphs[0] if k =\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"doc_document\", \"doc_format\": \"pptx\", \"anchors_hit\": \"3/3\", \"anchor_misses\": [], \"structure_checks\": [{\"check\": \"n_slides\", \"expect\": 4, \"got\": 4, \"ok\": true}, {\"check\": \"n_tables\", \"expect\": 1, \"got\": 1, \"ok\": true}], \"requirements_score\": 1.0, \"physics_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 46.406,
+    "setup_s": 0.0,
+    "grade_s": 0.263
+  },
+  "environment_digest": "sha256:9ee916b04d40af9679e1a19dee7a2d09ca4ce7b69c54294278767c2cc245b030",
+  "assets_revision": "awdoc@selfbuilt-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=4685",
+    "run1 exit=0 0.14s",
+    "run2 exit=0 0.11s",
+    "physics=1.0 requirements=1.0 anchors=3/3"
+  ]
+}

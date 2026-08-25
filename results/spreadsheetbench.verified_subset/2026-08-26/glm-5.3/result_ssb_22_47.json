@@ -1,0 +1,41 @@
+{
+  "task_id": "ssb_22_47",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1481,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.57405,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nSort the data of columns A:C in `input.xlsx` (sheet1) using the helper list in\\ncolumn J, and write the result into F2:H10 of `output.xlsx` (a copy of the\\ninput workbook).\\n\\nRules implemented\\n------------------\\n1. Rows whose column-B name is listed in column J come first, in the order the\\n   names appear in J. Within such a group the rows keep their original source\\n   order (no sorting inside a group).\\n2. Names NOT listed in J follow afterwards, in their original source order.\\n3. Empty cells, header rows and duplicates are skipped.  A duplicate is a row\\n   with identical entries in BOTH column B and column C.\\n4. If column J is completely empty, everything is sorted alphabetically A-Z by\\n   column B; ties (same name, different column-C value) are broken by column C\\n   lowest -> highest (i.e. the value that ends up in output column H ascends).\\n5. Everything is read dynamically from the workbook, so new/longer ranges in\\n   A:C, headers contained in them, and changes to the names in column J are\\n   handled automatically.\\n\\\"\\\"\\\"\\n\\nimport shutil\\nfrom pathlib import Path\\n\\nfrom openpyxl import load_workbook\\n\\nSRC_NAME = \\\"input.xlsx\\\"\\nDST_NAME = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"sheet1\\\"\\n\\nCOL_A, COL_B, COL_C, COL_J = 1, 2, 3, 10          # A, B, C, J\\nCOL_F, COL_G, COL_H = 6, 7, 8                     # F, G, H\\nOUT_FIRST_ROW, OUT_LAST_ROW = 2, 10               # F2:H10\\n\\n\\ndef clean(value):\\n    \\\"\\\"\\\"Normalised value used for comparisons (original kept for output).\\\"\\\"\\\"\\n    if value is None:\\n        return \\\"\\\"\\n    if isinstance(value, str):\\n        return value.strip()\\n    return value\\n\\n\\ndef ascending_key(value):\\n    \\\"\\\"\\\"Sort key: numbers lowest->highest first, then text A-Z.\\\"\\\"\\\"\\n    if isinstance(value, bool):\\n        return (1, 0, str(value).casefold())\\n    if isinstance(value, (int, float)):\\n        return (0, value, \\\"\\\")\\n    return (1, 0, str(value).casefold())\\n\\n\\ndef find_source_file():\\n    if Path(SRC_NAME).exists():\\n        return Path(SRC_NAME)\\n    others = [p for p in Path(\\\".\\\").glob(\\\"*.xlsx\\\") if p.name != DST_NAME]\\n    if others:\\n        return sorted(others)[0]\\n    raise FileNotFoundError(\\\"No input workbook (*.xlsx) found in working dir.\\\")\\n\\n\\ndef get_sheet(wb):\\n    for name in wb.sheetnames:\\n        if name.strip().lower() == SHEET_NAME:\\n            return wb[name]\\n    return wb[wb.sheetnames[0]]\\n\\n\\ndef main():\\n    src = find_source_file()\\n    dst = Path(DST_NAME)\\n    shutil.copyfile(src, dst)                      # output.xlsx = copy of input\\n\\n    wb_vals = load_workbook(src, data_only=True)   # read cached values\\n    ws = get_sheet(wb_vals)\\n    max_row = ws.max_row or 1\\n\\n    header_b = clean(ws.cell(1, COL_B).value)\\n\\n    # ---------- read data rows (skip header, empties, duplicates) ----------\\n    rows, seen = [], set()\\n    for r in range(2, max_row + 1):\\n        a = ws.cell(r, COL_A).value\\n        b = ws.cell(r, COL_B).value\\n        c = ws.cell(r, COL_C).value\\n        b_key = clean(b)\\n        if b_key == \\\"\\\":\\n            continue                               # skip empty cells\\n        if header_b != \\\"\\\" and b_key == header_b:\\n            continue                               # skip (repeated) header rows\\n        fingerprint = (b_key, clean(c))\\n        if fingerprint in seen:\\n            continue                               # duplicate: B and C identical\\n        seen.add(fingerprint)\\n        rows.append({\\\"a\\\": a, \\\"b\\\": b, \\\"c\\\": c,\\n                     \\\"b_key\\\": b_key, \\\"gkey\\\": str(b_key).casefold(), \\\"r\\\": r})\\n\\n    # ---------- read helper names from column J (dynamic) ------------------\\n    known_names = {row[\\\"gkey\\\"] for row in rows}\\n    j_names, j_seen = [], set()\\n    for r in range(1, max_row + 1):\\n        v = clean(ws.cell(r, COL_J).value)\\n        if v == \\\"\\\":\\n            continue                               # skip empty helper cells\\n        if r == 1 and str(v).casefold() not in known_names:\\n            continue                               # J1 holds a header, not a name\\n        k = str(v).casefold()\\n        if k not in j_se\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"sheet1\", \"region\": \"F2:H10\", \"match\": {\"n_gold\": 27, \"matched\": 4, \"n_extra\": 0}, \"misses\": [{\"cell\": \"sheet1!R2C6\", \"status\": \"mismatch\", \"got\": \"5\", \"ref\": \"1\"}, {\"cell\": \"sheet1!R2C7\", \"status\": \"mismatch\", \"got\": \"HASSAN\", \"ref\": \"HASSONA\"}, {\"cell\": \"sheet1!R2C8\", \"status\": \"mismatch\", \"got\": \"133444422\", \"ref\": \"123344555\"}, {\"cell\": \"sheet1!R3C6\", \"status\": \"mismatch\", \"got\": \"1\", \"ref\": \"2\"}, {\"cell\": \"sheet1!R3C7\", \"status\": \"mismatch\", \"got\": \"HASSAN\", \"ref\": \"HAMMED\"}, {\"cell\": \"sheet1!R4C6\", \"status\": \"mismatch\", \"got\": \"4\", \"ref\": \"3\"}, {\"cell\": \"sheet1!R4C7\", \"status\": \"mismatch\", \"got\": \"HAMAN\", \"ref\": \"HASSAN\"}, {\"cell\": \"sheet1!R4C8\", \"status\": \"mismatch\", \"got\": \"133444424\", \"ref\": \"123444441\"}, {\"cell\": \"sheet1!R5C6\", \"status\": \"mismatch\", \"got\": \"2\", \"ref\": \"4\"}, {\"cell\": \"sheet1!R5C7\", \"status\": \"mismatch\", \"got\": \"HAMMED\", \"ref\": \"HUSSNI\"}, {\"cell\": \"sheet1!R6C6\", \"status\": \"mismatch\", \"got\": \"1\", \"ref\": \"5\"}, {\"cell\": \"sheet1!R6C7\", \"status\": \"mismatch\", \"got\": \"HASSONA\", \"ref\": \"HASSAN\"}]}"
+  },
+  "timings": {
+    "agent_s": 176.539,
+    "setup_s": 0.0,
+    "grade_s": 2.841
+  },
+  "environment_digest": "sha256:ffaf799586f770334e699cca134674aaac42f7e5109414597c075850ee140df8",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=6257",
+    "run1 exit=0 0.37s",
+    "run2 exit=0 0.22s",
+    "physics=0.1481 cells=4/27 extra=0"
+  ]
+}
