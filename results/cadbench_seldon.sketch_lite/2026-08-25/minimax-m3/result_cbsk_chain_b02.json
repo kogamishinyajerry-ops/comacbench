@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_chain_b02",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Establish the YZ plane for the 2D sketch\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Convert local sketch (u, v) coordinates to world (x, y, z) = (0, u, v)\\np1 = P.toWorldCoords((6, 3))\\np2 = P.toWorldCoords((6, 25))\\np3 = P.toWorldCoords((-13, 25))\\np4 = P.toWorldCoords((-13, 41))\\np5 = P.toWorldCoords((28, 41))\\np6 = P.toWorldCoords((28, 53))\\n\\n# Build the 5 line segments of the orthogonal open chain\\nedges = [\\n    cq.Edge.makeLine(p1, p2),\\n    cq.Edge.makeLine(p2, p3),\\n    cq.Edge.makeLine(p3, p4),\\n    cq.Edge.makeLine(p4, p5),\\n    cq.Edge.makeLine(p5, p6),\\n]\\n\\n# Export the open chain of edges as a compound\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 5, \"matched\": 5, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 6, 3]->[0.0, 6, 25]\", \"ok\": true}, {\"gt\": \"line [0.0, 6, 25]->[0.0, -13, 25]\", \"ok\": true}, {\"gt\": \"line [0.0, -13, 25]->[0.0, -13, 41]\", \"ok\": true}, {\"gt\": \"line [0.0, -13, 41]->[0.0, 28, 41]\", \"ok\": true}, {\"gt\": \"line [0.0, 28, 41]->[0.0, 28, 53]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 5, \"got\": 5, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 5}"
+  },
+  "timings": {
+    "agent_s": 25.777,
+    "setup_s": 0.0,
+    "grade_s": 5.292
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=685",
+    "run1 exit=0 2.7s",
+    "run2 exit=0 2.59s",
+    "physics=1.0 requirements=1.0 matched=5/5 extra=0"
+  ]
+}

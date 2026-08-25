@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_spline_s03",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---------------------------------------------------------------------------\\n# Closed profile with fitted spline — 2D sketch on the XZ plane (mm)\\n#\\n# LOCAL sketch coordinates (u, v) map to GLOBAL (x, y, z) = (u, 0, v):\\n#   local u -> global +X\\n#   local v -> global +Z\\n# ---------------------------------------------------------------------------\\n\\nP = cq.Plane.named(\\\"XZ\\\")\\n\\n# ----- Entity 1: Line from (30, 0) to (-6, -19) -----------------------------\\na_start = P.toWorldCoords((30, 0))\\na_end = P.toWorldCoords((-6, -19))\\nline_1 = cq.Edge.makeLine(a_start, a_end)\\n\\n# ----- Entity 2: Line from (-6, -19) to (-30, 0) ----------------------------\\nb_start = a_end                      # (-6, -19) — shared junction\\nb_end = P.toWorldCoords((-30, 0))\\nline_2 = cq.Edge.makeLine(b_start, b_end)\\n\\n# ----- Entity 3: Fitted spline through the fit points (in order) ------------\\nfit_points_uv = [\\n    (-30, 0),   # start (shared with line 2)\\n    (-18, 30),\\n    (-6, 23),\\n    (6, 31),\\n    (18, 15),\\n    (30, 0),    # end (shared with line 1)\\n]\\nfit_points = [P.toWorldCoords(uv) for uv in fit_points_uv]\\nspline = cq.Edge.makeSpline(fit_points)  # smooth interpolation, no kinks\\n\\nedges = [line_1, line_2, spline]\\n\\n# ----- Deterministic closure verification (coincident junctions) ------------\\nTOL = 1e-6\\ndef _coincident(v1, v2):\\n    return (v1.sub(v2)).Length < TOL\\n\\nassert _coincident(line_1.endPoint(), line_2.startPoint()), \\\"junction 1 not coincident\\\"\\nassert _coincident(line_2.endPoint(), spline.startPoint()), \\\"junction 2 not coincident\\\"\\nassert _coincident(spline.endPoint(), line_1.startPoint()), \\\"junction 3 not coincident\\\"\\n\\n# All entities must lie on the XZ plane (y == 0)\\nfor e in edges:\\n    for v in e.Vertices():\\n        assert abs(v.Center().y) < 1e-7, \\\"entity not on XZ plane\\\"\\n\\nassert len(edges) == 3, \\\"must be exactly 3 curve entities\\\"\\n\\n# ----- Export: compound of edges -> sketch.step ------------------------------\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 3, \"matched\": 3, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [30, 0.0, 0]->[-6, 0.0, -19]\", \"ok\": true}, {\"gt\": \"line [-6, 0.0, -19]->[-30, 0.0, 0]\", \"ok\": true}, {\"gt\": \"spline 6pts\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 3, \"got\": 3, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 3}"
+  },
+  "timings": {
+    "agent_s": 26.575,
+    "setup_s": 0.0,
+    "grade_s": 5.102
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2008",
+    "run1 exit=0 2.59s",
+    "run2 exit=0 2.51s",
+    "physics=1.0 requirements=1.0 matched=3/3 extra=0"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_chain_b02",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Sketch plane: local (u, v) maps to global (x, y, z) = (0, u, v)\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Local sketch coordinates (mm) defining the open orthogonal chain\\npts = [\\n    (6, 3),      # start of segment 1\\n    (6, 25),     # end 1 / start 2\\n    (-13, 25),   # end 2 / start 3\\n    (-13, 41),   # end 3 / start 4\\n    (28, 41),    # end 4 / start 5\\n    (28, 53),    # end of segment 5\\n]\\n\\n# Convert to world coordinates exactly (no grid snapping)\\nworld = [P.toWorldCoords((u, v)) for (u, v) in pts]\\n\\n# Build exactly 5 line edges; consecutive edges share coincident endpoints\\nedges = [cq.Edge.makeLine(world[i], world[i + 1]) for i in range(len(world) - 1)]\\nassert len(edges) == 5\\n\\n# Sanity check: all vertices lie on the YZ plane (global x = 0)\\nfor e in edges:\\n    for v in e.Vertices():\\n        assert abs(v.X) < 1e-9, \\\"vertex off YZ plane\\\"\\n\\n# Export the open chain as a compound of 5 edges\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 5, \"matched\": 5, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 6, 3]->[0.0, 6, 25]\", \"ok\": true}, {\"gt\": \"line [0.0, 6, 25]->[0.0, -13, 25]\", \"ok\": true}, {\"gt\": \"line [0.0, -13, 25]->[0.0, -13, 41]\", \"ok\": true}, {\"gt\": \"line [0.0, -13, 41]->[0.0, 28, 41]\", \"ok\": true}, {\"gt\": \"line [0.0, 28, 41]->[0.0, 28, 53]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 5, \"got\": 5, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 5}"
+  },
+  "timings": {
+    "agent_s": 18.058,
+    "setup_s": 0.0,
+    "grade_s": 5.989
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=977",
+    "run1 exit=0 3.19s",
+    "run2 exit=0 2.79s",
+    "physics=1.0 requirements=1.0 matched=5/5 extra=0"
+  ]
+}

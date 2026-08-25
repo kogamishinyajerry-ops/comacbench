@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_spline_s02",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Establish the XZ sketch plane\\nplane = cq.Plane.named(\\\"XZ\\\")\\n\\n# Helper: convert local sketch (u, v) -> world (u, 0, v)\\ndef w(u, v):\\n    return plane.toWorldCoords((u, v))\\n\\n# Key junction points for the closed profile\\np_a = w(34, 0)        # Start of first line / end of spline\\np_b = w(6, -20)       # Junction of the two lines\\np_c = w(-34, 0)       # End of second line / start of spline\\n\\n# Spline fit points (in order)\\nspline_pts = [\\n    w(-34, 0),\\n    w(-11.333333, 17),\\n    w(11.333333, 32),\\n    w(34, 0),\\n]\\n\\n# Create exactly 3 curve entities: two lines and one fitted spline\\nline1 = cq.Edge.makeLine(p_a, p_b)\\nline2 = cq.Edge.makeLine(p_b, p_c)\\nspline = cq.Edge.makeSpline(spline_pts)\\n\\nedges = [line1, line2, spline]\\n\\n# Export the compound of edges to sketch.step\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 3, \"matched\": 3, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [34, 0.0, 0]->[6, 0.0, -20]\", \"ok\": true}, {\"gt\": \"line [6, 0.0, -20]->[-34, 0.0, 0]\", \"ok\": true}, {\"gt\": \"spline 4pts\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 3, \"got\": 3, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 3}"
+  },
+  "timings": {
+    "agent_s": 26.58,
+    "setup_s": 0.0,
+    "grade_s": 5.264
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=858",
+    "run1 exit=0 2.77s",
+    "run2 exit=0 2.49s",
+    "physics=1.0 requirements=1.0 matched=3/3 extra=0"
+  ]
+}

@@ -512,12 +512,29 @@ entries:
     tier: B+
     batch: conditional
     adapter: computer_use       # 第六类，未实现：Fusion GUI/computer-use 操作（题面明令禁用脚本/API）
-    env_class: missing          # Autodesk Fusion dev/intranet 均无；Seldon 沙箱需私下联系
+    env_class: missing          # Seldon 沙箱需私下联系；种子文档/verifier 私有
     license: CC BY 4.0（题面/元数据/参考工件 answer.f3d；Fusion 商标归 Autodesk）
     license_status: confirmed-dataset
-    condition: 窄路 A——proc 5 题（空文档草图题）自建改编可评估（2026-08-25 Fusion 装机后）；窄路 B——Seldon 公开种子/verifier/沙箱，或 computer_use adapter 立项
+    condition: 窄路 B——Seldon 公开种子/verifier/沙箱，或 computer_use adapter 立项（窄路 A 已由 cadbench_seldon.sketch_lite 落地，2026-08-25）
     status: proposed
-    mirror_note: 2026-08-24 镜像公开子集 43/105 题（hard 35/expert 8：jaw 分章装配 26+j4/j5 多阶段 7+proc 草图 5+jaw_se 轴系 5）至 data/cadbench-seldon/hard/（task.md+answer.f3d+manifest，answer sha256 与官方 43/43 一致）。与 cadbench.cadquery（anniedoris）仅同名不同源。2026-08-25 Fusion 装机后阻塞重评：环境阻塞解除、f3d→开放格式 GT 通道已备（tools/fusion_export_gt.py，判分方用 API 不受题面禁令约束）；仍阻塞——computer_use adapter 未立项 + 38/43 题种子文档私有（5 道 proc 草图题空文档起步坐标全给，可跑）。详见 data/cadbench-seldon/hard/PROVENANCE.md
+    mirror_note: 2026-08-24 镜像公开子集 43/105 题（hard 35/expert 8：jaw 分章装配 26+j4/j5 多阶段 7+proc 草图 5+jaw_se 轴系 5）至 data/cadbench-seldon/hard/（task.md+answer.f3d+manifest，answer sha256 与官方 43/43 一致）。与 cadbench.cadquery（anniedoris）仅同名不同源。2026-08-25 Fusion 装机后阻塞重评：环境阻塞解除、f3d→开放格式 GT 通道已备（tools/fusion_export_gt.py，判分方用 API 不受题面禁令约束）；仍阻塞——computer_use adapter 未立项 + 38/43 题种子文档私有（5 道 proc 草图题空文档起步坐标全给——窄路 A 已改编落地为 cadbench_seldon.sketch_lite）。详见 data/cadbench-seldon/hard/PROVENANCE.md
+
+  - id: cadbench_seldon.sketch_lite
+    name: CADBench-Hard proc 草图改编包（窄路 A，自建协议）
+    source: 改编自 Seldon CADBench-Hard 5 道 proc 草图题（CC-BY-4.0）+ 自建同族变体 10 题
+    tier: B+
+    order: 14c
+    batch: batch-3
+    adapter: design_artifact
+    env_class: python_sandbox   # cadquery 构造 2D 草图导出 sketch.step（.venv-cad，OCP wheel）
+    license: 改编 5 题 CC-BY-4.0（Seldon Technologies 署名衍生，协议由 GUI 改为脚本制如实标注）/ 自建 10 题 self-built
+    license_status: confirmed-adapted-ccby4+confirmed-selfbuilt
+    self_built: true
+    content: 2D 草图：正交开链/正多边形（5-12 边）/样条闭合轮廓（4-7 拟合点）——cad_geometry 维 2D 草图子轴首批
+    env: 判分 design_artifact sketch_2d 模式（实体级匹配+闭合环计数+平面规格；oracle/gold 与判分共用算子）
+    assets_revision: cbsk@adapted-2026-08-25
+    status: integrated
+    integrated_note: 2026-08-25 窄路 A 落地——GUI 任务改编为本仓库脚本协议（模型写 cadquery 构造题面规定曲线，导出 sketch.step）：GT 一手源=题面几何规格（题面明示拟合点/顶点为 authoritative，answer.f3d 不可解析仅后续交叉核验）。15 题=改编 5（chain/polygon/spline×s01-03）+自建 10（chain×3/polygon×3/spline×3）。判分管线双向自检：gold 全链 15/15 PASS + stub 15/15 地板 + oracle 15/15 满分（mean 1.0000 含双跑确定性）；cadgen solid 路径回归无恙。工程记录：闭合环计数两阶段实现（端点聚类→图分量全 2 度判环）。详见 data/cadbench-seldon/sketch_lite/PROVENANCE.md
 
   - id: afbench.airfoil
     name: AFBench

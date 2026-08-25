@@ -1,0 +1,63 @@
+id: cbsk_spline_b02
+registry_id: cadbench_seldon.sketch_lite
+domain: cad_geometry
+task_type: design_artifact
+model_profile: plain_llm
+assets_revision: cbsk@adapted-2026-08-25+ccx-side-none
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/cadbench_seldon.sketch_lite/cbsk_spline_b02.md
+  prompt_sha256: 50aad41287b979b8e41c9398ffe5a6616fbe1b27418bbec3632e3696f3621e70
+  assets: []
+output_contract:
+- sketch.step
+reference:
+  source: 自建（同族参数化变体）；GT=题面几何规格解析计算（3D 化映射 XZ）
+  revision: cbsk@adapted-2026-08-25+ccx-side-none
+  values:
+    n_entities: 3
+    n_closed_profiles: 1
+  rel_tol: 0.05
+  uncertainty_note: 实体级匹配（端点容差 0.01mm/样条拟合点在曲线上）；无连续场误差
+grader:
+  artifact_kind: sketch_2d
+  answer_format: code
+  validity_gate: true
+  plane_normal: [0.0, -1.0, 0.0]
+  sketch_gt:
+    lines: [[[32, 0.0, 0], [2, 0.0, -17]], [[2, 0.0, -17], [-32, 0.0, 0]]]
+    splines: [[[-32, 0.0, 0], [-19, 0.0, 24], [-4, 0.0, 31], [12, 0.0, 26], [24, 0.0, 12], [32, 0.0, 0]]]
+    circles: []
+  sketch_checks:
+  - check: n_entities
+    expect: 3
+  - check: n_closed_profiles
+    expect: 1
+  - check: plane
+    expect: true
+  oracle_source: data/cadbench-seldon/sketch_lite/gold/cbsk_spline_b02.py
+  numeric_rel_tol: 0.05
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=GT 实体命中-多余实体惩罚；requirements=实体数/闭合环数/平面精确
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 240
+  attempts: 3
+license_provenance:
+  source: 自建（同族参数化变体）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: cbsk@adapted-2026-08-25+ccx-side-none

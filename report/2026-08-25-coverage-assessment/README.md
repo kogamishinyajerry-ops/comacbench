@@ -12,17 +12,17 @@
 
 **评测系统已完成三层九维骨架的九维全景闭合：20/40 基准 integrated、2424 任务、九维全部有数（structures 以开源 CalculiX 自建解零）、五类 adapter 与 6 类执行环境 live、集成项双基线全覆盖；评测对象已翻转为「harness」（四臂 H0-H3 矩阵、蒸馏脚手架谱系化、臂自动路由）。「懂航空」与「会工程」的分界已量化；剩余最大空洞是商业求解器线（Fluent/StarCCM+/MAPDL）与 simjeb/engdesign 原计划的商业 FEA 复算层。**
 
-## 1. 总量盘点（registry 41 条目）
+## 1. 总量盘点（registry 42 条目）
 
 | 状态 | 数量 | 占比 | 较 08-24 上午变化 | 含义 |
 | --- | --- | --- | --- | --- |
-| **integrated** | 20 | 49% | 19→20（+calculix.fea_basic） | adapter 跑通 + 双基线落盘 |
+| **integrated** | 21 | 50% | 19→21（+calculix.fea_basic、+cadbench_seldon.sketch_lite 08-25） | adapter 跑通 + 双基线落盘 |
 | proposed | 5 | 12% | 4→5（+cadbench_seldon.hard，08-24 收录镜像） | 探查/许可清点完成，集成 blocked |
 | paused-env | 2 | 5% | 不变 | dev/内网均无启动环境（openvsp、bscw） |
 | deferred | 8 | 20% | 不变 | 许可或价值存疑，暂缓 |
 | excluded | 6 | 15% | 不变 | 调研淘汰 |
 
-任务量：**integrated 20 项共 2424 个任务 YAML**（08-21 时点 2119 → +305），另有
+任务量：**integrated 21 项共 2439 个任务 YAML**（08-25 +sketch_lite 15）（08-21 时点 2119 → +305），另有
 `tasks/.foam_tail` 20 题在制。锚点纪律：饱和锚 6/20（校准用，不参与模型排序）。
 
 ## 2. 已集成 19 项明细（评测能力主表）
@@ -49,9 +49,9 @@
 | 18 | hilift_aeroml.lite | field_prediction | data_only | 100 | 100/100 | 0.4855 / 0.4885 | ML 参照 0.904（RF 正例） |
 | 19 | cadgen.local_validity | design_artifact | python+OCP | 22 | 22/22 | 0.7083 / 0.6515 / glm-5.3 0.8636 | 全量：M3→**0.9792**(H3)；5.3→**1.0000**(H2) |
 | 20 | calculix.fea_basic | simulation_agent(ccx_fea) | calculix_native | 21 | 21/21 | **0.2381** / — / glm-5.3 **0.3810**（structures 维，08-24 解零） | —（H2 脚手架为下一个高价值臂） |
+| 21 | cadbench_seldon.sketch_lite | design_artifact(sketch_2d) | python+OCP | 15 | 15/15 | **1.0000 饱和锚** / — / glm-5.3 **0.8667**（2D 草图子轴，08-25 窄路 A） | — |
 
-- 双基线覆盖 **20/20**（mechvqa 为双 VLM；gtm_hard/ccx 为固定对 {minimax-m3, glm-5.3}）；
-  oracle 满分自检 **16/20**（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
+- 双基线覆盖 **21/21**（mechvqa 为双 VLM；gtm_hard/ccx/sketch_lite 为固定对 {minimax-m3, glm-5.3}；sketch_lite 的 M3 满分按锚点纪律记饱和锚）；oracle 满分自检 **17/21**（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
 - 分数仅导航用（scoring/README §1）；gate 失败率与原因分布才是决策口径。
 - v0.3 起模型间排序不再是评测目标；双模型对照表转为历史档案，固定对 {minimax-m3, glm-5.3}。
 
@@ -72,7 +72,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | knowledge | cfdquery、aeroengqa、mechvqa、camb(deferred) | 3/4 | 0.75 | ✅ | 文本 0.85+；VLM 0.35-0.40「看得见、判不稳」；单厂商 VLM |
 | 2 | coding | scicode、cfdcode（+6 通识锚） | 2/2 | **1.00** | ✅ | 领域科学代码 0.47-0.67 vs 通识 0.82-0.98 分水岭成立；+变体压泄漏 |
-| 3 | cad_geometry | cadgen、openvsp(paused)、cadbench_seldon(proposed) | 1/3 | 0.33 | ✅ | cadgen 22 题+H3 后 M3 0.98/5.3 1.0；openvsp 卡环境；seldon 为 GUI 形态新增在册（08-24 镜像，不解阻不计覆盖） |
+| 3 | cad_geometry | cadgen、cadbench_seldon.sketch_lite、openvsp(paused)、cadbench_seldon.hard(proposed) | 2/4 | 0.50 | ✅ | 3D 参数化（cadgen）+2D 草图（sketch_lite 08-25 落地，M3 饱和锚/GLM 0.87 API 幻觉）；openvsp 卡环境；seldon.hard GUI 形态待窄路 B |
 | 4 | cfd | superwing、hilift、foam_basic、nasa_tmr、crm | 3/5 | 0.60 | ✅+ML 正例 | LLM 系数回归差 ML 4.7-19×；foam 0/110 双败（H2 后结构层开、physics 0） |
 | 5 | structures | calculix.fea_basic、simjeb、engdesign | 1/3 | **0.33** | ✅ | 08-24 解零（CalculiX 自建 21 题，双基线 0.24/0.38 正落区分带）；simjeb/engdesign 仍卡商业栈/官方判分 |
 | 6 | propulsion | pycycle | 1/1 | **1.00** | ✅(厚) | 28 题；H0 双模型全灭 → H2 脚手架 M3 1.0（「知识注入=0→1」核心证据） |

@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_polygon_s01",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold — cbsk_polygon_s01：在 YZ 平面构造题面规定的 2D 草图并导出 sketch.step。\\\"\\\"\\\"\\nimport cadquery as cq\\n\\nPLANE = cq.Plane.named(\\\"YZ\\\")\\n\\n\\ndef w(u, v):\\n    return PLANE.toWorldCoords((u, v))\\n\\n\\nedges = []\\nLINES = [\\n    ((3.520908, -10.571057), (15.692446, 3.186364)),\\n    ((15.692446, 3.186364), (14.571057, 21.520908)),\\n    ((14.571057, 21.520908), (0.813636, 33.692446)),\\n    ((0.813636, 33.692446), (-17.520908, 32.571057)),\\n    ((-17.520908, 32.571057), (-29.692446, 18.813636)),\\n    ((-29.692446, 18.813636), (-28.571057, 0.479092)),\\n    ((-28.571057, 0.479092), (-14.813636, -11.692446)),\\n    ((-14.813636, -11.692446), (3.520908, -10.571057)),\\n]\\nfor a, b in LINES:\\n    edges.append(cq.Edge.makeLine(w(*a), w(*b)))\\n\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 8, \"matched\": 8, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 3.520908, -10.571057]->[0.0, 15.692446, 3.186364]\", \"ok\": true}, {\"gt\": \"line [0.0, 15.692446, 3.186364]->[0.0, 14.571057, 21.520908]\", \"ok\": true}, {\"gt\": \"line [0.0, 14.571057, 21.520908]->[0.0, 0.813636, 33.692446]\", \"ok\": true}, {\"gt\": \"line [0.0, 0.813636, 33.692446]->[0.0, -17.520908, 32.571057]\", \"ok\": true}, {\"gt\": \"line [0.0, -17.520908, 32.571057]->[0.0, -29.692446, 18.813636]\", \"ok\": true}, {\"gt\": \"line [0.0, -29.692446, 18.813636]->[0.0, -28.571057, 0.479092]\", \"ok\": true}, {\"gt\": \"line [0.0, -28.571057, 0.479092]->[0.0, -14.813636, -11.692446]\", \"ok\": true}, {\"gt\": \"line [0.0, -14.813636, -11.692446]->[0.0, 3.520908, -10.571057]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 8, \"got\": 8, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 8}"
+  },
+  "timings": {
+    "agent_s": 5.575,
+    "setup_s": 0.0,
+    "grade_s": 5.575
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=771",
+    "run1 exit=0 2.61s",
+    "run2 exit=0 2.96s",
+    "physics=1.0 requirements=1.0 matched=8/8 extra=0"
+  ]
+}

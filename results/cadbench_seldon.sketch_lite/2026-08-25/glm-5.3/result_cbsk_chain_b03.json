@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_chain_b03",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ------------------------------------------------------------------\\n# Open orthogonal line chain on the YZ plane (local sketch coords, mm)\\n# Local (u, v) -> global (x, y, z) = (0, u, v)\\n# ------------------------------------------------------------------\\n\\n# Named YZ sketch plane used to map local sketch coordinates to world\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Exact local sketch coordinates of the chain vertices (mm)\\nlocal_pts = [\\n    (0, 0),      # start of segment 1\\n    (19, 0),     # end seg 1 / start seg 2\\n    (19, 14),    # end seg 2 / start seg 3\\n    (7, 14),     # end seg 3 / start seg 4\\n    (7, 32),     # end seg 4 / start seg 5\\n    (-15, 32),   # end seg 5 / start seg 6\\n    (-15, -9),   # end seg 6 (chain left open)\\n]\\n\\n# Map local sketch coordinates to world coordinates on the YZ plane\\nworld_pts = [P.toWorldCoords((u, v)) for (u, v) in local_pts]\\n\\n# Build exactly the 6 required line edges (shared endpoints -> open chain)\\nedges = [\\n    cq.Edge.makeLine(world_pts[i], world_pts[i + 1])\\n    for i in range(len(world_pts) - 1)\\n]\\n\\n# ------------------------------------------------------------------\\n# Verification\\n# ------------------------------------------------------------------\\n# Exactly 6 curve entities\\nassert len(edges) == 6, f\\\"Expected 6 edges, got {len(edges)}\\\"\\n\\n# Consecutive segments share truly coincident endpoints (by construction);\\n# verify start/end points match numerically\\nfor i in range(len(edges) - 1):\\n    end_i = edges[i].endPoint()\\n    start_j = edges[i + 1].startPoint()\\n    assert end_i.toTuple() == start_j.toTuple(), (\\n        f\\\"Non-coincident junction between edge {i} and edge {i + 1}\\\"\\n    )\\n\\n# Open chain: first point != last point => no closed profile\\nassert world_pts[0].toTuple() != world_pts[-1].toTuple(), \\\"Chain must be open\\\"\\n\\n# All entities coplanar on x = 0 (YZ plane)\\nfor e in edges:\\n    for v in (e.startPoint(), e.endPoint()):\\n        assert abs(v.x) < 1e-9, \\\"All geometry must lie on the YZ plane\\\"\\n\\n# ------------------------------------------------------------------\\n# Export as a compound of edges to sketch.step\\n# ------------------------------------------------------------------\\ncompound = cq.Compound.makeCompound(edges)\\ncq.exporters.export(compound, \\\"sketch.step\\\")\\n\\nprint(\\\"Exported sketch.step: 6 coplanar line edges, open chain (0 closed profiles).\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 6, \"matched\": 6, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 0, 0]->[0.0, 19, 0]\", \"ok\": true}, {\"gt\": \"line [0.0, 19, 0]->[0.0, 19, 14]\", \"ok\": true}, {\"gt\": \"line [0.0, 19, 14]->[0.0, 7, 14]\", \"ok\": true}, {\"gt\": \"line [0.0, 7, 14]->[0.0, 7, 32]\", \"ok\": true}, {\"gt\": \"line [0.0, 7, 32]->[0.0, -15, 32]\", \"ok\": true}, {\"gt\": \"line [0.0, -15, 32]->[0.0, -15, -9]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 6, \"got\": 6, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 6}"
+  },
+  "timings": {
+    "agent_s": 23.816,
+    "setup_s": 0.0,
+    "grade_s": 5.355
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2335",
+    "run1 exit=0 2.71s",
+    "run2 exit=0 2.64s",
+    "physics=1.0 requirements=1.0 matched=6/6 extra=0"
+  ]
+}

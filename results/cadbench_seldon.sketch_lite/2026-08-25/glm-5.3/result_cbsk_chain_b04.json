@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_chain_b04",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---------------------------------------------------------------------------\\n# Open orthogonal line chain — 2D sketch on the YZ plane (mm)\\n# Local sketch coords (u, v) map to global (x, y, z) = (0, u, v)\\n# ---------------------------------------------------------------------------\\n\\n# Named YZ plane: origin (0,0,0), xDir = +Y, normal = +X  =>  local v -> +Z\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Chain vertices in LOCAL sketch coordinates (mm), in order:\\npts_local = [\\n    (-8, -12),   # start of segment 1 (open end)\\n    (21, -12),   # end 1 / start 2\\n    (21, 5),     # end 2 / start 3\\n    (9, 5),      # end 3 / start 4\\n    (9, 26),     # end 4 / start 5\\n    (31, 26),    # end 5 / start 6\\n    (31, 44),    # end 6 / start 7\\n    (-3, 44),    # end of segment 7 (open end)\\n]\\n\\n# Convert all sketch points to world coordinates exactly\\npts_world = [P.toWorldCoords((u, v)) for (u, v) in pts_local]\\n\\n# Build exactly the 7 required line entities (consecutive, coincident endpoints)\\nedges = [\\n    cq.Edge.makeLine(pts_world[i], pts_world[i + 1])\\n    for i in range(7)\\n]\\n\\n# --- Deterministic sanity checks (no randomness) ---\\nassert len(edges) == 7, \\\"Must be exactly 7 curve entities\\\"\\n\\n# All entities coplanar on YZ plane (global X == 0 for both endpoints of every edge)\\nfor e in edges:\\n    for pt in (e.startPoint(), e.endPoint()):\\n        assert abs(pt.x) < 1e-9, f\\\"Point off YZ plane: {pt.toTuple()}\\\"\\n\\n# Consecutive segments share truly coincident endpoints\\nfor i in range(6):\\n    d = (edges[i].endPoint() - edges[i + 1].startPoint()).Length\\n    assert d < 1e-9, f\\\"Segments {i+1} and {i+2} not coincident (gap {d})\\\"\\n\\n# Chain is open: start of first segment != end of last segment\\ngap = (edges[0].startPoint() - edges[-1].endPoint()).Length\\nassert gap > 1e-6, f\\\"Chain unexpectedly closed (gap {gap})\\\"\\n\\n# Export exactly the 7 edges as a compound to sketch.step in the current directory\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 7, \"matched\": 7, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, -8, -12]->[0.0, 21, -12]\", \"ok\": true}, {\"gt\": \"line [0.0, 21, -12]->[0.0, 21, 5]\", \"ok\": true}, {\"gt\": \"line [0.0, 21, 5]->[0.0, 9, 5]\", \"ok\": true}, {\"gt\": \"line [0.0, 9, 5]->[0.0, 9, 26]\", \"ok\": true}, {\"gt\": \"line [0.0, 9, 26]->[0.0, 31, 26]\", \"ok\": true}, {\"gt\": \"line [0.0, 31, 26]->[0.0, 31, 44]\", \"ok\": true}, {\"gt\": \"line [0.0, 31, 44]->[0.0, -3, 44]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 7, \"got\": 7, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 7}"
+  },
+  "timings": {
+    "agent_s": 37.497,
+    "setup_s": 0.0,
+    "grade_s": 5.306
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1964",
+    "run1 exit=0 2.62s",
+    "run2 exit=0 2.68s",
+    "physics=1.0 requirements=1.0 matched=7/7 extra=0"
+  ]
+}

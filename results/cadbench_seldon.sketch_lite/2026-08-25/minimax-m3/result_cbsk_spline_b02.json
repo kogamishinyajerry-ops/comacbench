@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_spline_b02",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Establish the XZ plane: local (u, v) maps to global (u, 0, v)\\nP = cq.Plane.named(\\\"XZ\\\")\\n\\n# Line 1: from (32, 0) to (2, -17)\\np_a = P.toWorldCoords((32, 0))\\np_b = P.toWorldCoords((2, -17))\\n\\n# Line 2: from (2, -17) to (-32, 0)\\np_c = P.toWorldCoords((-32, 0))\\n\\n# Spline fit points through (-32,0), (-19,24), (-4,31), (12,26), (24,12), (32,0)\\nspline_pts = [(-32, 0), (-19, 24), (-4, 31), (12, 26), (24, 12), (32, 0)]\\nspline_world = [P.toWorldCoords(pt) for pt in spline_pts]\\n\\n# Build the 3 curve entities\\nedge1 = cq.Edge.makeLine(p_a, p_b)      # Line (32,0) -> (2,-17)\\nedge2 = cq.Edge.makeLine(p_b, p_c)      # Line (2,-17) -> (-32,0)\\nedge3 = cq.Edge.makeSpline(spline_world)  # Smooth spline (-32,0) -> ... -> (32,0)\\n\\nedges = [edge1, edge2, edge3]\\n\\n# Export exactly 3 edges as a single compound to sketch.step\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 3, \"matched\": 3, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [32, 0.0, 0]->[2, 0.0, -17]\", \"ok\": true}, {\"gt\": \"line [2, 0.0, -17]->[-32, 0.0, 0]\", \"ok\": true}, {\"gt\": \"spline 6pts\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 3, \"got\": 3, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 3}"
+  },
+  "timings": {
+    "agent_s": 41.034,
+    "setup_s": 0.0,
+    "grade_s": 5.249
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=898",
+    "run1 exit=0 2.73s",
+    "run2 exit=0 2.51s",
+    "physics=1.0 requirements=1.0 matched=3/3 extra=0"
+  ]
+}

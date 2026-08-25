@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_spline_s03",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold — cbsk_spline_s03：在 XZ 平面构造题面规定的 2D 草图并导出 sketch.step。\\\"\\\"\\\"\\nimport cadquery as cq\\n\\nPLANE = cq.Plane.named(\\\"XZ\\\")\\n\\n\\ndef w(u, v):\\n    return PLANE.toWorldCoords((u, v))\\n\\n\\nedges = []\\nLINES = [\\n    ((30, 0), (-6, -19)),\\n    ((-6, -19), (-30, 0)),\\n]\\nfor a, b in LINES:\\n    edges.append(cq.Edge.makeLine(w(*a), w(*b)))\\n\\nSPLINES = [\\n    [(-30, 0), (-18, 30), (-6, 23), (6, 31), (18, 15), (30, 0)],\\n]\\nfor fit in SPLINES:\\n    edges.append(cq.Edge.makeSpline([w(u, v) for u, v in fit]))\\n\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 3, \"matched\": 3, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [30, 0.0, 0]->[-6, 0.0, -19]\", \"ok\": true}, {\"gt\": \"line [-6, 0.0, -19]->[-30, 0.0, 0]\", \"ok\": true}, {\"gt\": \"spline 6pts\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 3, \"got\": 3, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 3}"
+  },
+  "timings": {
+    "agent_s": 5.566,
+    "setup_s": 0.0,
+    "grade_s": 5.566
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=551",
+    "run1 exit=0 2.88s",
+    "run2 exit=0 2.67s",
+    "physics=1.0 requirements=1.0 matched=3/3 extra=0"
+  ]
+}

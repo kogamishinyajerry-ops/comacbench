@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_chain_b03",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Define the YZ plane\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Define local coordinates for the chain\\nlocal_points = [\\n    (0, 0),\\n    (19, 0),\\n    (19, 14),\\n    (7, 14),\\n    (7, 32),\\n    (-15, 32),\\n    (-15, -9)\\n]\\n\\n# Convert local coordinates to global coordinates (x, y, z) = (0, u, v)\\nworld_points = [P.toWorldCoords((u, v)) for u, v in local_points]\\n\\n# Create the 6 line segments as edges\\nedges = [\\n    cq.Edge.makeLine(world_points[i], world_points[i + 1])\\n    for i in range(len(world_points) - 1)\\n]\\n\\n# Create a compound of edges and export to STEP file\\ncompound = cq.Compound.makeCompound(edges)\\ncq.exporters.export(compound, \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 6, \"matched\": 6, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 0, 0]->[0.0, 19, 0]\", \"ok\": true}, {\"gt\": \"line [0.0, 19, 0]->[0.0, 19, 14]\", \"ok\": true}, {\"gt\": \"line [0.0, 19, 14]->[0.0, 7, 14]\", \"ok\": true}, {\"gt\": \"line [0.0, 7, 14]->[0.0, 7, 32]\", \"ok\": true}, {\"gt\": \"line [0.0, 7, 32]->[0.0, -15, 32]\", \"ok\": true}, {\"gt\": \"line [0.0, -15, 32]->[0.0, -15, -9]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 6, \"got\": 6, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 6}"
+  },
+  "timings": {
+    "agent_s": 40.854,
+    "setup_s": 0.0,
+    "grade_s": 5.794
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=657",
+    "run1 exit=0 3.13s",
+    "run2 exit=0 2.66s",
+    "physics=1.0 requirements=1.0 matched=6/6 extra=0"
+  ]
+}

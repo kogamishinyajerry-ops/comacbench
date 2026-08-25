@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_spline_b02",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---------------------------------------------------------------------------\\n# Sketch plane \\\"XZ\\\": local (u, v) maps to global (x, y, z) = (u, 0, v)\\n# (local u -> global +X, local v -> global +Z), units = millimetres.\\n# ---------------------------------------------------------------------------\\nP = cq.Plane.named(\\\"XZ\\\")\\n\\n\\ndef pt(u, v):\\n    \\\"\\\"\\\"Map LOCAL sketch coordinates (mm) to world coordinates on plane XZ.\\\"\\\"\\\"\\n    return P.toWorldCoords((u, v))\\n\\n\\n# --- Entity 1: Line from (32, 0) to (2, -17) --------------------------------\\nedge1 = cq.Edge.makeLine(pt(32, 0), pt(2, -17))\\n\\n# --- Entity 2: Line from (2, -17) to (-32, 0) -------------------------------\\nedge2 = cq.Edge.makeLine(pt(2, -17), pt(-32, 0))\\n\\n# --- Entity 3: Fitted spline through the fit points (smooth, no kinks) -----\\nfit_points = [(-32, 0), (-19, 24), (-4, 31), (12, 26), (24, 12), (32, 0)]\\nedge3 = cq.Edge.makeSpline([pt(u, v) for u, v in fit_points])\\n\\nedges = [edge1, edge2, edge3]\\n\\n# ---------------------------------------------------------------------------\\n# Verification: exactly 3 entities, junctions coincident -> exactly 1 closed\\n# coplanar loop on the XZ plane.\\n# ---------------------------------------------------------------------------\\ntol = 1e-6\\nassert len(edges) == 3, \\\"Must be exactly 3 curve entities\\\"\\n\\n# Junction coincidence (loop closes exactly once)\\nassert edge1.endPoint().distance(edge2.startPoint()) < tol   # shared (2, -17)\\nassert edge2.endPoint().distance(edge3.startPoint()) < tol   # shared (-32, 0)\\nassert edge3.endPoint().distance(edge1.startPoint()) < tol   # shared (32, 0)\\n\\n# Coplanarity on XZ plane (all global y == 0)\\nfor e in edges:\\n    for v in (e.startPoint(), e.endPoint()):\\n        assert abs(v.toTuple()[1]) < tol, \\\"All geometry must lie on the XZ plane\\\"\\n\\n# ---------------------------------------------------------------------------\\n# Export the sketch curves as a compound of edges -> sketch.step\\n# ---------------------------------------------------------------------------\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_lm7d2v32/model.py\\\", line 35, in <module>\\n    assert edge1.endPoint().distance(edge2.startPoint()) < tol   # shared (2, -17)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: 'Vector' object has no attribute 'distance'\\n\"}"
+  },
+  "timings": {
+    "agent_s": 40.317,
+    "setup_s": 0.0,
+    "grade_s": 2.734
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2080",
+    "run1 exit=1 2.73s"
+  ]
+}

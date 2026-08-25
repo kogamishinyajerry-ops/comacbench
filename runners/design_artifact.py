@@ -72,6 +72,13 @@ _SCRIPT_FAIL = "code_not_executable"
 _GEOM_FAIL = "invalid_geometry"
 _NONDET_FAIL = "nondeterministic_artifact"
 
+# ---- 草图模式（cadbench_seldon.sketch_lite：2D 曲线制品，零实体） ----
+SKETCH_KIND = "sketch_2d"          # grader.artifact_kind 取值，缺省 solid（cadgen）
+SKETCH_OUTPUT = "sketch.step"
+SKETCH_PT_TOL = 0.01               # mm；端点/拟合点匹配绝对容差（题面坐标 1e-6 精度）
+SKETCH_PLANE_TOL = 0.01            # mm；共面性最大偏差
+SKETCH_N_SAMPLE = 240              # 边采样点数（样条包含性/共面性检查用）
+
 _ZERO_SUBS = {"physics": 0.0, "requirements": 0.0, "objective": None, "robustness": None}
 
 APPLICABILITY = {
@@ -150,6 +157,357 @@ def _rel(a: float, b: float) -> float:
     return abs(a - b) / max(abs(b), 1e-12)
 
 
+# ---------------------------------------------------------------- 草图测量算子
+# （gen_tasks_cbsk 预计算与判分共用；表示无关：STEP 往返可能线↔B样条，比对按几何等价）
+
+def _edge_entities(path: Path) -> list[dict[str, Any]]:
+    """读 STEP → 草图实体列表（line/bspline/circle；含采样点）。
+
+    每实体：{kind, p0, p1（端点 3 元组）, pts（采样点，非 line 亦填充）,
+    center/radius（仅 circle）}。无可读边 → ValueError（gate: invalid_geometry）。
+    """
+    from OCP.BRepAdaptor import BRepAdaptor_Curve
+    from OCP.GeomAbs import GeomAbs_CurveType
+    from OCP.TopAbs import TopAbs_EDGE
+
+    shape = load_step(path)
+    ents: list[dict[str, Any]] = []
+    exp = TopExp_Explorer(shape, TopAbs_EDGE)
+    while exp.More():
+        edge = TopoDS.Edge_s(exp.Current())
+        exp.Next()
+        try:
+            ad = BRepAdaptor_Curve(edge)
+            t = ad.GetType()
+            f, l = ad.FirstParameter(), ad.LastParameter()
+            p0 = ad.Value(f); p1 = ad.Value(l)
+            ent: dict[str, Any] = {
+                "kind": {GeomAbs_CurveType.GeomAbs_Line: "line",
+                         GeomAbs_CurveType.GeomAbs_Circle: "circle",
+                         GeomAbs_CurveType.GeomAbs_BSplineCurve: "bspline"}.get(t, "other"),
+                "p0": (p0.X(), p0.Y(), p0.Z()),
+                "p1": (p1.X(), p1.Y(), p1.Z()),
+                "pts": []}
+            if ent["kind"] == "circle":
+                circ = ad.Circle()
+                c = circ.Location()
+                ent["center"] = (c.X(), c.Y(), c.Z())
+                ent["radius"] = float(circ.Radius())
+                ent["full"] = abs((l - f) - 2 * 3.141592653589793) < 1e-6
+            if ent["kind"] != "line":
+                n = SKETCH_N_SAMPLE if ent["kind"] == "bspline" else 64
+                ent["pts"] = []
+                for i in range(n):
+                    u = f + (l - f) * i / (n - 1)
+                    q = ad.Value(u)
+                    ent["pts"].append((q.X(), q.Y(), q.Z()))
+            ents.append(ent)
+        except Exception:  # noqa: BLE001 — 单边读取失败跳过（计数仍反映实体总数）
+            ents.append({"kind": "unreadable", "p0": None, "p1": None, "pts": []})
+    if not ents:
+        raise ValueError("STEP 无可读边（非草图制品？）")
+    return ents
+
+
+def _d_pt_seg(p, a, b) -> float:
+    """点 p 到线段 ab 的距离（共线偏差检查用）。"""
+    ax, ay, az = a; bx, by, bz = b; px, py, pz = p
+    abx, aby, abz = bx - ax, by - ay, bz - az
+    apx, apy, apz = px - ax, py - ay, pz - az
+    ab2 = abx * abx + aby * aby + abz * abz
+    t = 0.0 if ab2 < 1e-18 else max(0.0, min(1.0, (apx * abx + apy * aby + apz * abz) / ab2))
+    qx, qy, qz = ax + t * abx, ay + t * aby, az + t * abz
+    return ((px - qx) ** 2 + (py - qy) ** 2 + (pz - qz) ** 2) ** 0.5
+
+
+def _d_pt_polyline(p, pts) -> float:
+    return min(_d_pt_seg(p, pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def _ep_match(a0, a1, b0, b1, tol) -> bool:
+    """两线段端点无序匹配。"""
+    def d(x, y):
+        return max(abs(x[i] - y[i]) for i in range(3))
+    return ((d(a0, b0) <= tol and d(a1, b1) <= tol)
+            or (d(a0, b1) <= tol and d(a1, b0) <= tol))
+
+
+def match_sketch(gt: dict[str, Any], ents: list[dict[str, Any]],
+                 tol: float = SKETCH_PT_TOL) -> dict[str, Any]:
+    """GT 实体集 vs 模型实体集（贪心一对一；多余实体计数惩罚）。
+
+    gt: {lines: [[p0,p1],...], splines: [[fit_pts...],...], circles: [[c3,r],...]}
+    line 匹配表示无关：端点对齐即可，若模型侧为非 line 表示则另验共线偏差。
+    """
+    used = [False] * len(ents)
+    hits: list[dict[str, Any]] = []
+    n_gt = 0
+
+    for g in gt.get("lines") or []:
+        n_gt += 1
+        hit = None
+        for i, e in enumerate(ents):
+            if used[i] or e["kind"] == "unreadable" or e.get("full"):
+                continue
+            if not _ep_match(g[0], g[1], e["p0"], e["p1"], tol):
+                continue
+            if e["kind"] != "line":   # B 样条表示的直线：共线偏差
+                dev = max(_d_pt_seg(p, e["p0"], e["p1"]) for p in e["pts"])
+                if dev > tol:
+                    continue
+            hit = i; break
+        if hit is not None:
+            used[hit] = True
+            hits.append({"gt": f"line {g[0]}->{g[1]}", "ok": True})
+        else:
+            hits.append({"gt": f"line {g[0]}->{g[1]}", "ok": False, "status": "missing"})
+
+    for fit in gt.get("splines") or []:
+        n_gt += 1
+        hit = None
+        for i, e in enumerate(ents):
+            if used[i] or e["kind"] == "unreadable" or e["kind"] == "circle":
+                continue
+            if not _ep_match(fit[0], fit[-1], e["p0"], e["p1"], tol):
+                continue
+            if all(_d_pt_polyline(p, e["pts"]) <= tol for p in fit):
+                hit = i; break
+        if hit is not None:
+            used[hit] = True
+            hits.append({"gt": f"spline {len(fit)}pts", "ok": True})
+        else:
+            hits.append({"gt": f"spline {len(fit)}pts", "ok": False, "status": "missing"})
+
+    for spec in gt.get("circles") or []:
+        n_gt += 1
+        c, r = spec[0], float(spec[1])
+        hit = None
+        for i, e in enumerate(ents):
+            if used[i] or e["kind"] != "circle" or not e.get("full"):
+                continue
+            dc = max(abs(e["center"][k] - c[k]) for k in range(3))
+            if dc <= tol and abs(e["radius"] - r) <= max(tol, 1e-3 * r):
+                hit = i; break
+        if hit is not None:
+            used[hit] = True
+            hits.append({"gt": f"circle r={r}", "ok": True})
+        else:
+            hits.append({"gt": f"circle r={r}", "ok": False, "status": "missing"})
+
+    n_extra = sum(1 for i, e in enumerate(ents) if not used[i]
+                  and e["kind"] != "unreadable")
+    matched = sum(1 for h in hits if h["ok"])
+    return {"n_gt": n_gt, "matched": matched, "n_extra": n_extra, "hits": hits,
+            "physics": round(max(0, matched - n_extra) / max(1, n_gt), 4)}
+
+
+def closed_profiles(ents: list[dict[str, Any]],
+                    tol: float = SKETCH_PT_TOL) -> int:
+    """闭合环计数（两阶段）：
+    1) 端点按 tol 聚类成几何顶点（并查集只 union 重合端点）；
+    2) 边把顶点连成图分量；分量内全部顶点度恰为 2 ⇔ 简单闭合环。"""
+    def d(x, y):
+        return max(abs(x[i] - y[i]) for i in range(3))
+    eps = [e for e in ents if e["kind"] != "unreadable"]
+    ends = []
+    for e in eps:
+        ends.append(tuple(e["p0"])); ends.append(tuple(e["p1"]))
+    n = len(ends)
+    parent = list(range(n))
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]; a = parent[a]
+        return a
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if d(ends[i], ends[j]) <= tol:
+                ra, rb = find(i), find(j)
+                if ra != rb:
+                    parent[ra] = rb
+
+    # 阶段 1 完成后簇根稳定：顶点 = 去重后的根集合；边 → (r0, r1)
+    verts = {}
+    for i in range(n):
+        verts.setdefault(find(i), len(verts))
+    deg = [0] * len(verts)
+    gp = list(range(len(verts)))
+
+    def gfind(a):
+        while gp[a] != a:
+            gp[a] = gp[gp[a]]; a = gp[a]
+        return a
+
+    for k in range(len(eps)):
+        a, b = verts[find(2 * k)], verts[find(2 * k + 1)]
+        deg[a] += 1; deg[b] += 1
+        ra, rb = gfind(a), gfind(b)
+        if ra != rb:
+            gp[ra] = rb
+
+    closed = 0
+    comp_all2 = {}
+    for v in range(len(verts)):
+        r = gfind(v)
+        comp_all2[r] = comp_all2.get(r, True) and deg[v] == 2
+    return sum(1 for ok in comp_all2.values() if ok)
+
+
+def plane_check(ents: list[dict[str, Any]], normal_spec,
+                tol_plane: float = SKETCH_PLANE_TOL) -> dict[str, Any]:
+    """全部实体共面 + 法向与规格对齐（± 号不敏感）。"""
+    import numpy as np
+    pts = []
+    for e in ents:
+        if e["kind"] == "unreadable":
+            continue
+        pts.append(e["p0"]); pts.append(e["p1"])
+        pts.extend(e.get("pts") or [])
+    if len(pts) < 3:
+        return {"ok": False, "reason": "points<3"}
+    a = np.array(pts, dtype=float)
+    c = a.mean(axis=0)
+    _, _, vh = np.linalg.svd(a - c, full_matrices=False)
+    normal = vh[-1]
+    dev = float(np.abs((a - c) @ normal).max())
+    ns = np.array(normal_spec, dtype=float)
+    ns = ns / np.linalg.norm(ns)
+    align = float(abs(normal @ ns))
+    return {"ok": bool(dev <= tol_plane and align >= 0.999),
+            "max_dev": round(dev, 6), "normal_align": round(align, 6)}
+
+
+def sketch_canonical(ents: list[dict[str, Any]]) -> str:
+    """实体集规范化串（确定性双跑比对用；1e-6 舍入吸收 STEP 文本往返噪声）。"""
+    def r(p):
+        return tuple(round(v, 6) for v in p) if p else None
+    items = []
+    for e in ents:
+        if e["kind"] == "line":
+            items.append(("l", r(e["p0"]), r(e["p1"])))
+        elif e["kind"] == "circle":
+            items.append(("c", r(e["center"]), round(e["radius"], 6)))
+        elif e["kind"] == "bspline":
+            items.append(("s", r(e["p0"]), r(e["p1"]),
+                          tuple(r(p) for p in e["pts"][::12])))
+        else:
+            items.append(("u",))
+    return repr(sorted(items, key=repr))
+
+
+# ---------------------------------------------------------------- 草图判分管线
+
+_SKETCH_APPLICABILITY = {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)",
+}
+
+
+def _run_sketch_task(
+    task: TaskSpec, code: str, meta: dict,
+    t0: float, env_digest: str, logs: list[str],
+) -> dict[str, Any]:
+    """sketch_2d：模型 cadquery 脚本构造题面规定的 2D 曲线（零实体），导出 sketch.step。
+
+    gate（顺序短路）：静态检查 → 双跑可执行 → sketch.step 存在 → STEP 可解析出边
+    且共面 → 双跑实体集一致（nondeterministic_artifact）。
+    physics = match_sketch（GT 实体命中 - 多余实体）/ GT 总数；
+    requirements = grader.sketch_checks（n_entities/n_closed_profiles/plane）。
+    """
+    g = task["grader"]
+    timeout = float(task["limits"]["wall_clock_s"])
+    gt = g["sketch_gt"]
+
+    def _ret(gate: int, gf: list[str], fm: str | None,
+             subs: dict[str, Any], details: dict[str, Any]):
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subs.items()}, weights, gate)
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=gf, subscores=subs, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": round(time.time() - grade_t0, 3)},
+            env_digest=env_digest, logs=logs, failure_mode=fm,
+            applicability=_SKETCH_APPLICABILITY)
+
+    grade_t0 = time.time()
+    ents_by_run: list[list[dict[str, Any]]] = []
+    for run_no in (1, 2):
+        iso = IsolatedRun()
+        r = iso.run(iso.write("model.py", code), timeout)
+        logs.append(f"run{run_no} exit={r['exit']} {r['duration_s']}s")
+        if r["timeout"]:
+            return _ret(0, ["timeout"], "timeout", _ZERO_SUBS,
+                        {"run": run_no, "stderr_tail": r["stderr"][-800:]})
+        if r["exit"] != 0:
+            return _ret(0, [_SCRIPT_FAIL], _SCRIPT_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "exit": r["exit"],
+                         "stderr_tail": r["stderr"][-800:]})
+        step = iso.dir / SKETCH_OUTPUT
+        if not step.exists():
+            return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, _ZERO_SUBS,
+                        {"run": run_no, "missing": SKETCH_OUTPUT,
+                         "dir_listing": sorted(p.name for p in iso.dir.iterdir())[:20]})
+        try:
+            ents = _edge_entities(step)
+        except Exception as e:  # noqa: BLE001
+            return _ret(0, [_GEOM_FAIL], _GEOM_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "parse_error": str(e)[:300]})
+        pc = plane_check(ents, g["plane_normal"])
+        if not pc["ok"]:
+            return _ret(0, [_GEOM_FAIL], _GEOM_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "plane": pc,
+                         "reason": "非共面或法向不符（实体非平面草图？）"})
+        ents_by_run.append(ents)
+
+    # ---- gate 5：确定性（实体集规范化串一致） ----
+    c1, c2 = sketch_canonical(ents_by_run[0]), sketch_canonical(ents_by_run[1])
+    if c1 != c2:
+        return _ret(0, [_NONDET_FAIL], _NONDET_FAIL, _ZERO_SUBS,
+                    {"determinism": {"run1": c1[:400], "run2": c2[:400]}})
+
+    ents = ents_by_run[0]
+    m = match_sketch(gt, ents)
+    physics = float(m["physics"])
+
+    checks_out: list[dict[str, Any]] = []
+    for chk in g.get("sketch_checks") or []:
+        kind = chk.get("check")
+        if kind == "n_entities":
+            got = len(ents); exp = int(chk["expect"])
+            checks_out.append({"check": kind, "expect": exp, "got": got,
+                               "ok": got == exp})
+        elif kind == "n_closed_profiles":
+            got = closed_profiles(ents); exp = int(chk["expect"])
+            checks_out.append({"check": kind, "expect": exp, "got": got,
+                               "ok": got == exp})
+        elif kind == "plane":
+            checks_out.append({"check": kind, "expect": True,
+                               "got": pc["ok"], "ok": bool(pc["ok"])})
+        else:
+            checks_out.append({"check": str(kind), "error": "unknown check kind"})
+    requirements = round(
+        sum(1 for c in checks_out if c.get("ok")) / len(checks_out), 4) \
+        if checks_out else 0.0
+
+    details = {"kind": "sketch_2d", "match": {k: m[k] for k in
+                                              ("n_gt", "matched", "n_extra")},
+               "hits": m["hits"], "physics_score": physics,
+               "sketch_checks": checks_out, "requirements_score": requirements,
+               "n_model_entities": len(ents)}
+    subs = {"physics": physics, "requirements": requirements,
+            "objective": None, "robustness": None}
+    logs.append(f"physics={physics} requirements={requirements} "
+                f"matched={m['matched']}/{m['n_gt']} extra={m['n_extra']}")
+    return _ret(1, [], None, subs, details)
+
+
 # ---------------------------------------------------------------- 判分
 
 def _eval_interface_checks(checks: list[dict], m: dict[str, Any]) -> list[dict]:
@@ -220,6 +578,10 @@ def run_task(
     if not syntax_ok:
         return _ret(0, [_SCRIPT_FAIL], _SCRIPT_FAIL,
                     _ZERO_SUBS, {"syntax_error": True})
+
+    # ---- 草图模式分发（cadbench_seldon.sketch_lite；静态检查已共用） ----
+    if g.get("artifact_kind") == SKETCH_KIND:
+        return _run_sketch_task(task, code, meta, t0, env_digest, logs)
 
     # ---- gate 1-2：沙箱执行（sys.executable 即 .venv-cad，cadquery 可导入）----
     iso1 = IsolatedRun()

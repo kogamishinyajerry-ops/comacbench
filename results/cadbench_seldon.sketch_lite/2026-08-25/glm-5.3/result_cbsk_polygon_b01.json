@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_polygon_b01",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Sketch plane: YZ (local u -> global +Y, local v -> global +Z)\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Regular polygon vertices in LOCAL sketch coordinates (mm)\\nlocal_pts = [\\n    (22.213486, -3.737309),\\n    (5.314143, 8.997259),\\n    (-12.019334, -3.139773),\\n    (-5.83267, -23.375439),\\n    (15.324376, -23.744737),\\n]\\n\\n# Map local (u, v) to world coordinates on the YZ plane\\nworld_pts = [P.toWorldCoords((u, v)) for (u, v) in local_pts]\\n\\n# Build exactly 5 line edges forming the closed polygon loop\\nedges = []\\nn = len(world_pts)\\nfor i in range(n):\\n    j = (i + 1) % n\\n    edges.append(cq.Edge.makeLine(world_pts[i], world_pts[j]))\\n\\nassert len(edges) == 5, \\\"Expected exactly 5 curve entities\\\"\\n\\n# Export as a compound of edges\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 5, \"matched\": 5, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 22.213486, -3.737309]->[0.0, 5.314143, 8.997259]\", \"ok\": true}, {\"gt\": \"line [0.0, 5.314143, 8.997259]->[0.0, -12.019334, -3.139773]\", \"ok\": true}, {\"gt\": \"line [0.0, -12.019334, -3.139773]->[0.0, -5.83267, -23.375439]\", \"ok\": true}, {\"gt\": \"line [0.0, -5.83267, -23.375439]->[0.0, 15.324376, -23.744737]\", \"ok\": true}, {\"gt\": \"line [0.0, 15.324376, -23.744737]->[0.0, 22.213486, -3.737309]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 5, \"got\": 5, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 5}"
+  },
+  "timings": {
+    "agent_s": 19.297,
+    "setup_s": 0.0,
+    "grade_s": 5.461
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=803",
+    "run1 exit=0 2.82s",
+    "run2 exit=0 2.64s",
+    "physics=1.0 requirements=1.0 matched=5/5 extra=0"
+  ]
+}

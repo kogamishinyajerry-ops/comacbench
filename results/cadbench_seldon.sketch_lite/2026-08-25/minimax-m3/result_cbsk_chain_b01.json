@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_chain_b01",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# Define the sketch plane\\n# Local (u, v) -> Global (x, y, z) = (0, u, v)\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Local sketch coordinates for the four endpoints of the open chain\\nlocal_points = [\\n    (-5, 8),    # Line 1 start\\n    (14, 8),    # Line 1 end / Line 2 start (coincident)\\n    (14, 22),   # Line 2 end / Line 3 start (coincident)\\n    (-2, 22)    # Line 3 end\\n]\\n\\n# Convert local coordinates to global (world) coordinates on the YZ plane\\nworld_points = [P.toWorldCoords(p) for p in local_points]\\n\\n# Create exactly three line edges (open orthogonal chain)\\nedges = [\\n    cq.Edge.makeLine(world_points[0], world_points[1]),  # Line 1: (-5, 8) -> (14, 8)\\n    cq.Edge.makeLine(world_points[1], world_points[2]),  # Line 2: (14, 8) -> (14, 22)\\n    cq.Edge.makeLine(world_points[2], world_points[3])   # Line 3: (14, 22) -> (-2, 22)\\n]\\n\\n# Export the three edges as a STEP file (no solids, no bodies, no extra geometry)\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 3, \"matched\": 3, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, -5, 8]->[0.0, 14, 8]\", \"ok\": true}, {\"gt\": \"line [0.0, 14, 8]->[0.0, 14, 22]\", \"ok\": true}, {\"gt\": \"line [0.0, 14, 22]->[0.0, -2, 22]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 3, \"got\": 3, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 0, \"got\": 0, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 3}"
+  },
+  "timings": {
+    "agent_s": 47.027,
+    "setup_s": 0.0,
+    "grade_s": 5.718
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=998",
+    "run1 exit=0 2.87s",
+    "run2 exit=0 2.8s",
+    "physics=1.0 requirements=1.0 matched=3/3 extra=0"
+  ]
+}

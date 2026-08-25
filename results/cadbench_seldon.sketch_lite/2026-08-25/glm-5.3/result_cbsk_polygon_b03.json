@@ -1,0 +1,41 @@
+{
+  "task_id": "cbsk_polygon_b03",
+  "registry_id": "cadbench_seldon.sketch_lite",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "实体级匹配 vs 题面 GT（线段端点无序/样条拟合点在曲线上；多余实体惩罚）",
+    "requirements": "实体数精确/闭合环数精确/共面与法向规格",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一草图由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import cadquery as cq\\n\\n# ---------------------------------------------------------------------------\\n# Regular 12-sided polygon (dodecagon) in the YZ plane, given in LOCAL sketch\\n# coordinates (u, v) [mm].\\n#\\n# Authoritative parameters (for reference):\\n#   center            = (8.0, 6.0)\\n#   circumradius      = 15.0\\n#   side count        = 12\\n#   first vertex      = -49 deg (CCW from local +X)\\n#\\n# The explicit vertex values below are used verbatim (no grid snapping).\\n# ---------------------------------------------------------------------------\\nvertices = [\\n    (17.840885, -5.320644),\\n    (22.182779, 1.116478),\\n    (22.724408, 8.862135),\\n    (19.320644, 15.840885),\\n    (12.883522, 20.182779),\\n    (5.137865, 20.724408),\\n    (-1.840885, 17.320644),\\n    (-6.182779, 10.883522),\\n    (-6.724408, 3.137865),\\n    (-3.320644, -3.840885),\\n    (3.116478, -8.182779),\\n    (10.862135, -8.724408),\\n]\\n\\n# YZ plane: local u -> global +Y, local v -> global +Z\\nP = cq.Plane.named(\\\"YZ\\\")\\n\\n# Map local sketch coordinates to world coordinates\\nworld_pts = [P.toWorldCoords((u, v)) for (u, v) in vertices]\\n\\n# Build exactly 12 line edges forming one closed profile\\n# (V1->V2, V2->V3, ..., V12->V1)\\nedges = []\\nfor i in range(len(world_pts)):\\n    p1 = world_pts[i]\\n    p2 = world_pts[(i + 1) % len(world_pts)]\\n    edges.append(cq.Edge.makeLine(p1, p2))\\n\\n# Sanity checks: exactly 12 entities, single closed loop, all coplanar (x = 0)\\nassert len(edges) == 12, \\\"Expected exactly 12 curve entities\\\"\\nfor i in range(len(edges)):\\n    end_pt = edges[i].endPoint()\\n    start_next = edges[(i + 1) % len(edges)].startPoint()\\n    assert (end_pt - start_next).Length < 1e-6, \\\"Loop is not closed at edge %d\\\" % i\\nfor e in edges:\\n    for v in e.Vertices():\\n        assert abs(v.X) < 1e-9, \\\"Entity not on the YZ plane (x != 0)\\\"\\n\\n# Export the curves as a compound of edges\\ncq.exporters.export(cq.Compound.makeCompound(edges), \\\"sketch.step\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"sketch_2d\", \"match\": {\"n_gt\": 12, \"matched\": 12, \"n_extra\": 0}, \"hits\": [{\"gt\": \"line [0.0, 17.840885, -5.320644]->[0.0, 22.182779, 1.116478]\", \"ok\": true}, {\"gt\": \"line [0.0, 22.182779, 1.116478]->[0.0, 22.724408, 8.862135]\", \"ok\": true}, {\"gt\": \"line [0.0, 22.724408, 8.862135]->[0.0, 19.320644, 15.840885]\", \"ok\": true}, {\"gt\": \"line [0.0, 19.320644, 15.840885]->[0.0, 12.883522, 20.182779]\", \"ok\": true}, {\"gt\": \"line [0.0, 12.883522, 20.182779]->[0.0, 5.137865, 20.724408]\", \"ok\": true}, {\"gt\": \"line [0.0, 5.137865, 20.724408]->[0.0, -1.840885, 17.320644]\", \"ok\": true}, {\"gt\": \"line [0.0, -1.840885, 17.320644]->[0.0, -6.182779, 10.883522]\", \"ok\": true}, {\"gt\": \"line [0.0, -6.182779, 10.883522]->[0.0, -6.724408, 3.137865]\", \"ok\": true}, {\"gt\": \"line [0.0, -6.724408, 3.137865]->[0.0, -3.320644, -3.840885]\", \"ok\": true}, {\"gt\": \"line [0.0, -3.320644, -3.840885]->[0.0, 3.116478, -8.182779]\", \"ok\": true}, {\"gt\": \"line [0.0, 3.116478, -8.182779]->[0.0, 10.862135, -8.724408]\", \"ok\": true}, {\"gt\": \"line [0.0, 10.862135, -8.724408]->[0.0, 17.840885, -5.320644]\", \"ok\": true}], \"physics_score\": 1.0, \"sketch_checks\": [{\"check\": \"n_entities\", \"expect\": 12, \"got\": 12, \"ok\": true}, {\"check\": \"n_closed_profiles\", \"expect\": 1, \"got\": 1, \"ok\": true}, {\"check\": \"plane\", \"expect\": true, \"got\": true, \"ok\": true}], \"requirements_score\": 1.0, \"n_model_entities\": 12}"
+  },
+  "timings": {
+    "agent_s": 54.048,
+    "setup_s": 0.0,
+    "grade_s": 6.036
+  },
+  "environment_digest": "sha256:9cff80aeafa7a79c84c104064255f107047288440cc4c5197909498c85bb2a2c",
+  "assets_revision": "cbsk@adapted-2026-08-25+ccx-side-none",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1902",
+    "run1 exit=0 3.32s",
+    "run2 exit=0 2.7s",
+    "physics=1.0 requirements=1.0 matched=12/12 extra=0"
+  ]
+}
