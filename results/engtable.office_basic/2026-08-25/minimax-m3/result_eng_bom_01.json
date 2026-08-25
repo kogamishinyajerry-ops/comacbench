@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_bom_01",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom collections import defaultdict\\nfrom openpyxl import Workbook\\n\\ninput_path = \\\"eng_bom_01.csv\\\"\\noutput_path = \\\"output.xlsx\\\"\\n\\n# Aggregate by part_no\\nparts = {}\\nwith open(input_path, \\\"r\\\", newline=\\\"\\\", encoding=\\\"utf-8\\\") as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        part_no = row[\\\"part_no\\\"]\\n        qty = float(row[\\\"qty\\\"]) if row[\\\"qty\\\"] not in (None, \\\"\\\") else 0.0\\n        if part_no in parts:\\n            parts[part_no][\\\"qty_total\\\"] += qty\\n        else:\\n            parts[part_no] = {\\n                \\\"desc\\\": row[\\\"desc\\\"],\\n                \\\"qty_total\\\": qty,\\n                \\\"unit\\\": row[\\\"unit\\\"],\\n            }\\n\\n# Sort by part_no ascending (string sort)\\nsorted_parts = sorted(parts.items(), key=lambda kv: kv[0])\\n\\n# Write workbook\\nwb = Workbook()\\nws = wb.active\\nws.title = \\\"BOM\\\"\\n\\nheader = [\\\"part_no\\\", \\\"desc\\\", \\\"qty_total\\\", \\\"unit\\\"]\\nws.append(header)\\n\\nfor part_no, info in sorted_parts:\\n    ws.append([\\n        part_no,\\n        info[\\\"desc\\\"],\\n        round(info[\\\"qty_total\\\"]),\\n        info[\\\"unit\\\"],\\n    ])\\n\\nwb.save(output_path)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 20, \"matched\": 20, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"BOM\"], \"got\": [\"BOM\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"BOM\", \"expect\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"got\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 5.886,
+    "setup_s": 0.0,
+    "grade_s": 0.76
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1049",
+    "run1 exit=0 0.25s",
+    "run2 exit=0 0.32s",
+    "physics=1.0 requirements=1.0 cells=20/20 extra=0"
+  ]
+}

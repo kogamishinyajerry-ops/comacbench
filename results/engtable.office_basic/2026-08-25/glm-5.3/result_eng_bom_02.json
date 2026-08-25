@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_bom_02",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom collections import defaultdict\\nfrom openpyxl import Workbook\\n\\n\\ndef main():\\n    src_file = \\\"eng_bom_02.csv\\\"\\n    out_file = \\\"output.xlsx\\\"\\n\\n    qty_totals = defaultdict(float)\\n    desc_map = {}\\n    unit_map = {}\\n\\n    with open(src_file, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        reader = csv.DictReader(f)\\n        # Normalize header names (strip whitespace)\\n        reader.fieldnames = [(fn.strip() if fn else fn) for fn in reader.fieldnames]\\n\\n        for raw_row in reader:\\n            row = {}\\n            for k, v in raw_row.items():\\n                if k is not None:\\n                    row[k.strip()] = (v.strip() if isinstance(v, str) else v)\\n\\n            pn = row.get(\\\"part_no\\\")\\n            if pn is None or pn == \\\"\\\":\\n                continue\\n\\n            # desc and unit taken from the source rows\\n            if pn not in desc_map:\\n                desc_map[pn] = row.get(\\\"desc\\\") or \\\"\\\"\\n                unit_map[pn] = row.get(\\\"unit\\\") or \\\"\\\"\\n\\n            # accumulate qty\\n            qv = row.get(\\\"qty\\\")\\n            try:\\n                q = float(str(qv).strip()) if (qv is not None and str(qv).strip() != \\\"\\\") else 0.0\\n            except (TypeError, ValueError):\\n                q = 0.0\\n            qty_totals[pn] += q\\n\\n    # Build workbook: single sheet \\\"BOM\\\" with exact header\\n    wb = Workbook()\\n    ws = wb.active\\n    ws.title = \\\"BOM\\\"\\n    ws.append([\\\"part_no\\\", \\\"desc\\\", \\\"qty_total\\\", \\\"unit\\\"])\\n\\n    for pn in sorted(desc_map.keys()):  # string sort ascending\\n        ws.append([\\n            pn,\\n            desc_map[pn],\\n            round(qty_totals[pn], 0),\\n            unit_map[pn],\\n        ])\\n\\n    wb.save(out_file)\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 24, \"matched\": 24, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"BOM\"], \"got\": [\"BOM\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"BOM\", \"expect\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"got\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 23.444,
+    "setup_s": 0.0,
+    "grade_s": 0.636
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1683",
+    "run1 exit=0 0.32s",
+    "run2 exit=0 0.3s",
+    "physics=1.0 requirements=1.0 cells=24/24 extra=0"
+  ]
+}

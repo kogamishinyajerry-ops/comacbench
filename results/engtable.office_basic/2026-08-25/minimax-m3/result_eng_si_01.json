@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_si_01",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport os\\nfrom openpyxl import Workbook\\n\\nINPUT_FILE = \\\"eng_si_01.csv\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"SI\\\"\\nHEADER = [\\\"run\\\", \\\"force_n\\\", \\\"length_mm\\\", \\\"temp_c\\\"]\\n\\nFORCE_FACTOR = 4.4482216152605\\nLENGTH_FACTOR = 25.4\\n\\ndef to_float(s):\\n    try:\\n        return float(s)\\n    except (ValueError, TypeError):\\n        return None\\n\\ndef main():\\n    rows_out = []\\n    with open(INPUT_FILE, \\\"r\\\", newline=\\\"\\\") as f:\\n        reader = csv.DictReader(f)\\n        for row in reader:\\n            run_id = row[\\\"run\\\"]\\n            force_lbf = to_float(row.get(\\\"force_lbf\\\"))\\n            length_in = to_float(row.get(\\\"length_in\\\"))\\n            temp_f = to_float(row.get(\\\"temp_f\\\"))\\n\\n            force_n = round(force_lbf * FORCE_FACTOR, 3) if force_lbf is not None else None\\n            length_mm = round(length_in * LENGTH_FACTOR, 3) if length_in is not None else None\\n            temp_c = round((temp_f - 32.0) * 5.0 / 9.0, 3) if temp_f is not None else None\\n\\n            rows_out.append([run_id, force_n, length_mm, temp_c])\\n\\n    wb = Workbook()\\n    ws = wb.active\\n    ws.title = SHEET_NAME\\n    ws.append(HEADER)\\n    for r in rows_out:\\n        ws.append(r)\\n    wb.save(OUTPUT_FILE)\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 36, \"matched\": 36, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"SI\"], \"got\": [\"SI\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"SI\", \"expect\": [\"run\", \"force_n\", \"length_mm\", \"temp_c\"], \"got\": [\"run\", \"force_n\", \"length_mm\", \"temp_c\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 4.131,
+    "setup_s": 0.0,
+    "grade_s": 0.551
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=1212",
+    "run1 exit=0 0.27s",
+    "run2 exit=0 0.27s",
+    "physics=1.0 requirements=1.0 cells=36/36 extra=0"
+  ]
+}

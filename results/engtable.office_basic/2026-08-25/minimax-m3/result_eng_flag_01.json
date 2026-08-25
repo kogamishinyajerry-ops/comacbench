@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_flag_01",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom openpyxl import Workbook\\n\\nINPUT_FILE = \\\"eng_flag_01.csv\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\nLIMITS = {\\n    \\\"alt_ft\\\": (9000.0, 18000.0),\\n    \\\"ias_kt\\\": (135.0, 210.0),\\n    \\\"load_g\\\": (1.0, 2.2),\\n}\\n\\nDATA_HEADER = [\\\"time\\\", \\\"alt_ft\\\", \\\"ias_kt\\\", \\\"load_g\\\", \\\"status_alt\\\", \\\"status_ias\\\", \\\"status_load\\\"]\\nSTATS_HEADER = [\\\"channel\\\", \\\"min\\\", \\\"max\\\", \\\"mean\\\"]\\nSTAT_CHANNELS = [\\\"alt_ft\\\", \\\"ias_kt\\\", \\\"load_g\\\"]\\n\\n\\ndef parse_float(s):\\n    \\\"\\\"\\\"Return float or None if s is empty/blank.\\\"\\\"\\\"\\n    if s is None:\\n        return None\\n    s = s.strip()\\n    if s == \\\"\\\":\\n        return None\\n    return float(s)\\n\\n\\ndef read_csv(path):\\n    rows = []\\n    with open(path, \\\"r\\\", newline=\\\"\\\") as f:\\n        reader = csv.reader(f)\\n        header = next(reader)\\n        # Map header -> index\\n        idx = {name: i for i, name in enumerate(header)}\\n        for raw in reader:\\n            time_v = raw[idx[\\\"time\\\"]] if \\\"time\\\" in idx else \\\"\\\"\\n            alt_v = parse_float(raw[idx[\\\"alt_ft\\\"]])\\n            ias_v = parse_float(raw[idx[\\\"ias_kt\\\"]])\\n            load_v = parse_float(raw[idx[\\\"load_g\\\"]])\\n            rows.append((time_v, alt_v, ias_v, load_v))\\n    return rows\\n\\n\\ndef status_for(value, lo, hi):\\n    if value is None:\\n        return \\\"MISSING\\\"\\n    if value < lo or value > hi:\\n        return \\\"OVER\\\"\\n    return \\\"OK\\\"\\n\\n\\ndef main():\\n    rows = read_csv(INPUT_FILE)\\n\\n    wb = Workbook()\\n\\n    # DATA sheet\\n    ws_data = wb.active\\n    ws_data.title = \\\"DATA\\\"\\n    ws_data.append(DATA_HEADER)\\n\\n    for time_v, alt_v, ias_v, load_v in rows:\\n        # time copied as string (whatever it is in CSV). Do NOT write anything for empty cells.\\n        # time column: keep as-is (string). The spec only says empty stays empty for the four source columns.\\n        # If time_v is empty string, write nothing.\\n        time_cell = time_v if time_v != \\\"\\\" else None\\n\\n        alt_cell = alt_v  # float or None (None means empty -> write nothing)\\n        ias_cell = ias_v\\n        load_cell = load_v\\n\\n        status_alt = status_for(alt_v, *LIMITS[\\\"alt_ft\\\"])\\n        status_ias = status_for(ias_v, *LIMITS[\\\"ias_kt\\\"])\\n        status_load = status_for(load_v, *LIMITS[\\\"load_g\\\"])\\n\\n        ws_data.append([time_cell, alt_cell, ias_cell, load_cell,\\n                        status_alt, status_ias, status_load])\\n\\n    # STATS sheet\\n    ws_stats = wb.create_sheet(\\\"STATS\\\")\\n    ws_stats.append(STATS_HEADER)\\n\\n    for ch in STAT_CHANNELS:\\n        lo, hi = LIMITS[ch]\\n        values = [r[STAT_CHANNELS.index(ch)] for r in rows]\\n        non_empty = [v for v in values if v is not None]\\n        if non_empty:\\n            vmin = round(min(non_empty), 3)\\n            vmax = round(max(non_empty), 3)\\n            vmean = round(sum(non_empty) / len(non_empty), 3)\\n        else:\\n            # No values: leave as None (empty cell). Spec doesn't cover this but safe.\\n            vmin = None\\n            vmax = None\\n            vmean = None\\n        ws_stats.append([ch, vmin, vmax, vmean])\\n\\n    wb.save(OUTPUT_FILE)\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_bwp4c2wj/model.py\\\", line 102, in <module>\\n    main()\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_bwp4c2wj/model.py\\\", line 88, in main\\n    vmin = round(min(non_empty), 3)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^\\nTypeError: type str doesn't define __round__ method\\n\"}"
+  },
+  "timings": {
+    "agent_s": 7.98,
+    "setup_s": 0.0,
+    "grade_s": 0.28
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2971",
+    "run1 exit=1 0.28s"
+  ]
+}

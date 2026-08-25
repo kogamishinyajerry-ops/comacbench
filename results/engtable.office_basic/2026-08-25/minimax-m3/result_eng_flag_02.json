@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_flag_02",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom openpyxl import Workbook\\n\\n# Read CSV\\nrows = []\\nwith open('eng_flag_02.csv', 'r') as f:\\n    reader = csv.reader(f)\\n    header = next(reader)\\n    for row in reader:\\n        rows.append(row)\\n\\n# Parse rows into structured records\\ndata = []\\nfor row in rows:\\n    time_val = row[0] if len(row) > 0 else ''\\n    alt_str = row[1] if len(row) > 1 else ''\\n    ias_str = row[2] if len(row) > 2 else ''\\n    load_str = row[3] if len(row) > 3 else ''\\n\\n    alt_val = float(alt_str) if alt_str else None\\n    ias_val = float(ias_str) if ias_str else None\\n    load_val = float(load_str) if load_str else None\\n\\n    data.append({\\n        'time': time_val,\\n        'alt_ft': alt_val,\\n        'ias_kt': ias_val,\\n        'load_g': load_val,\\n    })\\n\\n# Limits (inclusive [lo, hi])\\nlimits = {\\n    'alt_ft': (9000.0, 18000.0),\\n    'ias_kt': (135.0, 210.0),\\n    'load_g': (1.05, 2.2),\\n}\\n\\n\\ndef get_status(val, lo, hi):\\n    if val is None:\\n        return 'MISSING'\\n    if val < lo or val > hi:\\n        return 'OVER'\\n    return 'OK'\\n\\n\\n# Create workbook\\nwb = Workbook()\\nws_data = wb.active\\nws_data.title = 'DATA'\\n\\n# DATA header\\ndata_header = [\\\"time\\\", \\\"alt_ft\\\", \\\"ias_kt\\\", \\\"load_g\\\",\\n               \\\"status_alt\\\", \\\"status_ias\\\", \\\"status_load\\\"]\\nws_data.append(data_header)\\n\\n# DATA rows\\nfor d in data:\\n    row = [d['time'], d['alt_ft'], d['ias_kt'], d['load_g']]\\n\\n    lo, hi = limits['alt_ft']\\n    row.append(get_status(d['alt_ft'], lo, hi))\\n    lo, hi = limits['ias_kt']\\n    row.append(get_status(d['ias_kt'], lo, hi))\\n    lo, hi = limits['load_g']\\n    row.append(get_status(d['load_g'], lo, hi))\\n\\n    ws_data.append(row)\\n\\n# STATS sheet\\nws_stats = wb.create_sheet('STATS')\\nstats_header = [\\\"channel\\\", \\\"min\\\", \\\"max\\\", \\\"mean\\\"]\\nws_stats.append(stats_header)\\n\\nchannels = ['alt_ft', 'ias_kt', 'load_g']\\nfor ch in channels:\\n    vals = [d[ch] for d in data if d[ch] is not None]\\n    if vals:\\n        mn = min(vals)\\n        mx = max(vals)\\n        mean = sum(vals) / len(vals)\\n        ws_stats.append([ch, round(mn, 3), round(mx, 3), round(mean, 3)])\\n    else:\\n        ws_stats.append([ch, None, None, None])\\n\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 141, \"matched\": 141, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"DATA\", \"STATS\"], \"got\": [\"DATA\", \"STATS\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"DATA\", \"expect\": [\"time\", \"alt_ft\", \"ias_kt\", \"load_g\", \"status_alt\", \"status_ias\", \"status_load\"], \"got\": [\"time\", \"alt_ft\", \"ias_kt\", \"load_g\", \"status_alt\", \"status_ias\", \"status_load\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"STATS\", \"expect\": [\"channel\", \"min\", \"max\", \"mean\"], \"got\": [\"channel\", \"min\", \"max\", \"mean\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 16.659,
+    "setup_s": 0.0,
+    "grade_s": 0.467
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=2096",
+    "run1 exit=0 0.23s",
+    "run2 exit=0 0.22s",
+    "physics=1.0 requirements=1.0 cells=141/141 extra=0"
+  ]
+}

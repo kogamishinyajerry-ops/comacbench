@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_bom_04",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nimport os\\n\\nfrom openpyxl import Workbook\\n\\nINPUT_FILE = \\\"eng_bom_04.csv\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\n# part_no -> {\\\"desc\\\":..., \\\"unit\\\":..., \\\"qty_total\\\": float}\\naggregated = {}\\norder_seen = []\\n\\nwith open(INPUT_FILE, \\\"r\\\", newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        # Normalize keys (strip whitespace, lowercase) for robustness\\n        row = { (k.strip().lower() if k else k): v for k, v in row.items() }\\n\\n        part_no = (row.get(\\\"part_no\\\") or \\\"\\\").strip()\\n        if part_no == \\\"\\\":\\n            continue\\n\\n        desc = row.get(\\\"desc\\\") or \\\"\\\"\\n        unit = row.get(\\\"unit\\\") or \\\"\\\"\\n\\n        qty_raw = (row.get(\\\"qty\\\") or \\\"\\\").strip()\\n        qty_val = 0.0\\n        if qty_raw != \\\"\\\":\\n            try:\\n                qty_val = float(qty_raw)\\n            except ValueError:\\n                qty_val = 0.0\\n\\n        if part_no in aggregated:\\n            aggregated[part_no][\\\"qty_total\\\"] += qty_val\\n        else:\\n            aggregated[part_no] = {\\n                \\\"desc\\\": desc,\\n                \\\"unit\\\": unit,\\n                \\\"qty_total\\\": qty_val,\\n            }\\n\\n# Sort by part_no ascending (string sort)\\nsorted_parts = sorted(aggregated.keys())\\n\\nwb = Workbook()\\nws = wb.active\\nws.title = \\\"BOM\\\"\\n\\n# Header row exactly as specified\\nheader = [\\\"part_no\\\", \\\"desc\\\", \\\"qty_total\\\", \\\"unit\\\"]\\nws.append(header)\\n\\n# Data rows\\nfor part_no in sorted_parts:\\n    info = aggregated[part_no]\\n    qty_total = round(info[\\\"qty_total\\\"], 0)\\n    # Keep as int when whole number for clean value output\\n    if isinstance(qty_total, float) and qty_total.is_integer():\\n        qty_total = int(qty_total)\\n    ws.append([part_no, info[\\\"desc\\\"], qty_total, info[\\\"unit\\\"]])\\n\\nwb.save(OUTPUT_FILE)\\nprint(f\\\"Wrote {OUTPUT_FILE} with {len(sorted_parts)} unique parts.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 32, \"matched\": 32, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"BOM\"], \"got\": [\"BOM\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"BOM\", \"expect\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"got\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 9.944,
+    "setup_s": 0.0,
+    "grade_s": 0.375
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1782",
+    "run1 exit=0 0.18s",
+    "run2 exit=0 0.18s",
+    "physics=1.0 requirements=1.0 cells=32/32 extra=0"
+  ]
+}

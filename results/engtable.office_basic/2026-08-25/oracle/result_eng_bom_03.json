@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_bom_03",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold — write the required normalized workbook (STATIC values, no formulas).\\\"\\\"\\\"\\nimport csv\\nimport openpyxl\\n\\nwith open(\\\"eng_bom_03.csv\\\", newline=\\\"\\\", encoding=\\\"utf-8\\\") as f:\\n    rows = list(csv.reader(f))\\n\\nwb = openpyxl.Workbook()\\nwb.remove(wb.active)\\nws = wb.create_sheet(\\\"BOM\\\")\\nws.append(['part_no', 'desc', 'qty_total', 'unit'])\\nws.append(['P-1001', 'bracket', 15, 'pcs'])\\nws.append(['P-1002', 'fastener', 6, 'pcs'])\\nws.append(['P-1003', 'gusset', 11, 'pcs'])\\nws.append(['P-1004', 'spacer', 15, 'pcs'])\\nws.append(['P-1005', 'rib', 6, 'pcs'])\\nws.append(['P-1006', 'clip', 11, 'pcs'])\\nwb.save(\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 28, \"matched\": 28, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"BOM\"], \"got\": [\"BOM\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"BOM\", \"expect\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"got\": [\"part_no\", \"desc\", \"qty_total\", \"unit\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 0.426,
+    "setup_s": 0.0,
+    "grade_s": 0.425
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=609",
+    "run1 exit=0 0.23s",
+    "run2 exit=0 0.19s",
+    "physics=1.0 requirements=1.0 cells=28/28 extra=0"
+  ]
+}

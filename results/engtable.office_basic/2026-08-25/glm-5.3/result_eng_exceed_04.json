@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_exceed_04",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom openpyxl import Workbook\\n\\n\\ndef main():\\n    input_file = \\\"eng_exceed_04.csv\\\"\\n    output_file = \\\"output.xlsx\\\"\\n\\n    # 1. Read the CSV\\n    selected = []\\n    with open(input_file, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        reader = csv.DictReader(f)\\n        for row in reader:\\n            event = row[\\\"event\\\"]\\n            t_s = row[\\\"t_s\\\"]\\n            load_factor = float(row[\\\"load_factor\\\"])\\n            # 2. Keep rows with load_factor >= 1.60\\n            if load_factor >= 1.60:\\n                selected.append((event, t_s, load_factor))\\n\\n    # 3. Stable sort by load_factor DESCENDING (ties keep source order)\\n    selected_sorted = sorted(selected, key=lambda r: r[2], reverse=True)\\n\\n    # 4. First 7 rows of the sorted selection\\n    top7 = selected_sorted[:7]\\n\\n    # Write workbook with a single sheet named EXCEED\\n    wb = Workbook()\\n    ws = wb.active\\n    ws.title = \\\"EXCEED\\\"\\n    ws.append([\\\"event\\\", \\\"t_s\\\", \\\"load_factor\\\"])\\n\\n    # 5. Copy event/t_s as strings unchanged; load_factor as original number\\n    for event, t_s, load_factor in top7:\\n        ws.append([event, t_s, load_factor])\\n\\n    wb.save(output_file)\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 24, \"matched\": 24, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"EXCEED\"], \"got\": [\"EXCEED\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"EXCEED\", \"expect\": [\"event\", \"t_s\", \"load_factor\"], \"got\": [\"event\", \"t_s\", \"load_factor\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 15.336,
+    "setup_s": 0.0,
+    "grade_s": 0.677
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1172",
+    "run1 exit=0 0.34s",
+    "run2 exit=0 0.33s",
+    "physics=1.0 requirements=1.0 cells=24/24 extra=0"
+  ]
+}

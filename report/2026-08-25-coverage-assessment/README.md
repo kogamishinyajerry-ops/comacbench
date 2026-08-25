@@ -12,17 +12,17 @@
 
 **评测系统已完成三层九维骨架的九维全景闭合：20/40 基准 integrated、2424 任务、九维全部有数（structures 以开源 CalculiX 自建解零）、五类 adapter 与 6 类执行环境 live、集成项双基线全覆盖；评测对象已翻转为「harness」（四臂 H0-H3 矩阵、蒸馏脚手架谱系化、臂自动路由）。「懂航空」与「会工程」的分界已量化；剩余最大空洞是商业求解器线（Fluent/StarCCM+/MAPDL）与 simjeb/engdesign 原计划的商业 FEA 复算层。**
 
-## 1. 总量盘点（registry 42 条目）
+## 1. 总量盘点（registry 43 条目）
 
 | 状态 | 数量 | 占比 | 较 08-24 上午变化 | 含义 |
 | --- | --- | --- | --- | --- |
-| **integrated** | 21 | 50% | 19→21（+calculix.fea_basic、+cadbench_seldon.sketch_lite 08-25） | adapter 跑通 + 双基线落盘 |
+| **integrated** | 22 | 51% | 19→22（+calculix、+sketch_lite、+engtable.office_basic 08-25） | adapter 跑通 + 双基线落盘 |
 | proposed | 5 | 12% | 4→5（+cadbench_seldon.hard，08-24 收录镜像） | 探查/许可清点完成，集成 blocked |
 | paused-env | 2 | 5% | 不变 | dev/内网均无启动环境（openvsp、bscw） |
 | deferred | 8 | 20% | 不变 | 许可或价值存疑，暂缓 |
 | excluded | 6 | 15% | 不变 | 调研淘汰 |
 
-任务量：**integrated 21 项共 2439 个任务 YAML**（08-25 +sketch_lite 15）（08-21 时点 2119 → +305），另有
+任务量：**integrated 22 项共 2458 个任务 YAML**（08-25 +sketch_lite 15、+engtable 19）（08-21 时点 2119 → +305），另有
 `tasks/.foam_tail` 20 题在制。锚点纪律：饱和锚 6/20（校准用，不参与模型排序）。
 
 ## 2. 已集成 19 项明细（评测能力主表）
@@ -50,8 +50,9 @@
 | 19 | cadgen.local_validity | design_artifact | python+OCP | 22 | 22/22 | 0.7083 / 0.6515 / glm-5.3 0.8636 | 全量：M3→**0.9792**(H3)；5.3→**1.0000**(H2) |
 | 20 | calculix.fea_basic | simulation_agent(ccx_fea) | calculix_native | 21 | 21/21 | **0.2381** / — / glm-5.3 **0.3810**（structures 维，08-24 解零） | —（H2 脚手架为下一个高价值臂） |
 | 21 | cadbench_seldon.sketch_lite | design_artifact(sketch_2d) | python+OCP | 15 | 15/15 | **1.0000 饱和锚** / — / glm-5.3 **0.8667**（2D 草图子轴，08-25 窄路 A） | — |
+| 22 | engtable.office_basic | design_artifact(xlsx_table) | python+openpyxl | 19 | 19/19 | **0.9474** / — / glm-5.3 **0.9903**（office 维首批，08-25） | — |
 
-- 双基线覆盖 **21/21**（mechvqa 为双 VLM；gtm_hard/ccx/sketch_lite 为固定对 {minimax-m3, glm-5.3}；sketch_lite 的 M3 满分按锚点纪律记饱和锚）；oracle 满分自检 **17/21**（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
+- 双基线覆盖 **22/22**；oracle 满分自检 **18/22**（qa 两项与 scicode/cfdcode 无 oracle 目录）（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
 - 分数仅导航用（scoring/README §1）；gate 失败率与原因分布才是决策口径。
 - v0.3 起模型间排序不再是评测目标；双模型对照表转为历史档案，固定对 {minimax-m3, glm-5.3}。
 
@@ -80,7 +81,7 @@
 | 8 | mdo_design | aviary、engdesign、crm | 1/3 | 0.33 | ✅(厚) | 27 题；过 gate 即满分（门槛在可执行脚本）；crm 待商业 CFD |
 | 9 | robustness_audit | 横切全部 | 部分 | 0.60 | 部分 | 确定性双跑仅过 gate 子集；沙箱越界曾有 15 例信号；manifest 审计达标 |
 
-**读图**：形状从「偏科五角」→「八维有数、独缺结构」→ **九维全景闭合（08-24 晚）**——structures 轴以开源 CalculiX 自建解零（0→0.33，基线可得 0→1.00）；有数各轴基线可得性全部拉满（红线外包蓝线），唯 robustness_audit 仍靠横切证据支撑、无独立承载。
+**读图**：形状从「偏科五角」→「九维全景闭合（08-24）」→ **十维（08-25 办公维落地，office_productivity 1.0）**——structures 轴以开源 CalculiX 自建解零（0→0.33，基线可得 0→1.00）；有数各轴基线可得性全部拉满（红线外包蓝线），唯 robustness_audit 仍靠横切证据支撑、无独立承载。
 
 ## 4. 评测体系能力（雷达图 2：`radar_harness.png`，9 轴）
 

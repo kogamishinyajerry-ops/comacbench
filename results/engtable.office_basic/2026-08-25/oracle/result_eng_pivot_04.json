@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_pivot_04",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"gold — write the required normalized workbook (STATIC values, no formulas).\\\"\\\"\\\"\\nimport csv\\nimport openpyxl\\n\\nwith open(\\\"eng_pivot_04.csv\\\", newline=\\\"\\\", encoding=\\\"utf-8\\\") as f:\\n    rows = list(csv.reader(f))\\n\\nwb = openpyxl.Workbook()\\nwb.remove(wb.active)\\nws = wb.create_sheet(\\\"SUMMARY\\\")\\nws.append(['config', 'drag', 'lift', 'moment'])\\nws.append(['CFG-A', 26.5, 122.5, -6.0])\\nws.append(['CFG-B', 31.75, 127.75, -0.75])\\nws.append(['CFG-C', 39.5, 135.5, 7.0])\\nwb.save(\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 16, \"matched\": 16, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"SUMMARY\"], \"got\": [\"SUMMARY\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"SUMMARY\", \"expect\": [\"config\", \"drag\", \"lift\", \"moment\"], \"got\": [\"config\", \"drag\", \"lift\", \"moment\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 0.499,
+    "setup_s": 0.0,
+    "grade_s": 0.499
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=479",
+    "run1 exit=0 0.2s",
+    "run2 exit=0 0.29s",
+    "physics=1.0 requirements=1.0 cells=16/16 extra=0"
+  ]
+}

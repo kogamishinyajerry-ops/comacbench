@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_flag_01",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.6333,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 0.81665,
+  "artifacts": {
+    "code": "\"import csv\\nfrom openpyxl import Workbook\\n\\nINPUT_FILE = \\\"eng_flag_01.csv\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\nLIMITS = {\\n    \\\"alt_ft\\\": (9000.0, 18000.0),\\n    \\\"ias_kt\\\": (135.0, 210.0),\\n    \\\"load_g\\\": (1.0, 2.2),\\n}\\n\\nCHANNELS = [\\\"alt_ft\\\", \\\"ias_kt\\\", \\\"load_g\\\"]\\n\\n\\ndef main():\\n    # Read the source CSV\\n    with open(INPUT_FILE, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n        reader = csv.reader(f)\\n        rows = [r for r in reader if r and any(str(c).strip() != \\\"\\\" for c in r)]\\n\\n    header = rows[0]\\n    idx = {name: header.index(name) for name in [\\\"time\\\", \\\"alt_ft\\\", \\\"ias_kt\\\", \\\"load_g\\\"]}\\n    data_rows = rows[1:]\\n\\n    wb = Workbook()\\n\\n    # ---------- Sheet DATA ----------\\n    ws = wb.active\\n    ws.title = \\\"DATA\\\"\\n    ws.append([\\\"time\\\", \\\"alt_ft\\\", \\\"ias_kt\\\", \\\"load_g\\\",\\n               \\\"status_alt\\\", \\\"status_ias\\\", \\\"status_load\\\"])\\n\\n    values_by_channel = {ch: [] for ch in CHANNELS}\\n\\n    for r in data_rows:\\n        r = list(r) + [\\\"\\\"] * (len(header) - len(r))  # pad short rows\\n\\n        time_val = r[idx[\\\"time\\\"]].strip()\\n        out_row = [time_val]\\n\\n        for ch in CHANNELS:\\n            raw = r[idx[ch]].strip()\\n            if raw == \\\"\\\":\\n                out_row.append(None)      # keep cell truly empty\\n                out_row.append(\\\"MISSING\\\")\\n            else:\\n                val = float(raw)\\n                out_row.append(val)\\n                values_by_channel[ch].append(val)\\n                lo, hi = LIMITS[ch]\\n                out_row.append(\\\"OVER\\\" if (val < lo or val > hi) else \\\"OK\\\")\\n\\n        ws.append(out_row)\\n\\n    # ---------- Sheet STATS ----------\\n    ws2 = wb.create_sheet(\\\"STATS\\\")\\n    ws2.append([\\\"channel\\\", \\\"min\\\", \\\"max\\\", \\\"mean\\\"])\\n    for ch in sorted(CHANNELS):\\n        vals = values_by_channel[ch]\\n        if vals:\\n            ws2.append([ch,\\n                        round(min(vals), 3),\\n                        round(max(vals), 3),\\n                        round(sum(vals) / len(vals), 3)])\\n        else:\\n            ws2.append([ch, None, None, None])\\n\\n    wb.save(OUTPUT_FILE)\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 120, \"matched\": 77, \"n_extra\": 1}, \"misses\": [{\"cell\": \"DATA!C2\", \"status\": \"mismatch\", \"got\": \"OK\", \"ref\": \"140.0\"}, {\"cell\": \"DATA!D2\", \"status\": \"mismatch\", \"got\": \"140\", \"ref\": \"1.1\"}, {\"cell\": \"DATA!F2\", \"status\": \"mismatch\", \"got\": \"1.1\", \"ref\": \"OK\"}, {\"cell\": \"DATA!C3\", \"status\": \"mismatch\", \"got\": \"OK\", \"ref\": \"149.0\"}, {\"cell\": \"DATA!D3\", \"status\": \"mismatch\", \"got\": \"149\", \"ref\": \"1.45\"}, {\"cell\": \"DATA!F3\", \"status\": \"mismatch\", \"got\": \"1.45\", \"ref\": \"OK\"}, {\"cell\": \"DATA!C4\", \"status\": \"mismatch\", \"got\": \"OK\", \"ref\": \"158.0\"}, {\"cell\": \"DATA!D4\", \"status\": \"mismatch\", \"got\": \"158\", \"ref\": \"1.8\"}, {\"cell\": \"DATA!F4\", \"status\": \"mismatch\", \"got\": \"1.8\", \"ref\": \"OK\"}, {\"cell\": \"DATA!C5\", \"status\": \"mismatch\", \"got\": \"OK\", \"ref\": \"167.0\"}, {\"cell\": \"DATA!D5\", \"status\": \"mismatch\", \"got\": \"167\", \"ref\": \"2.15\"}, {\"cell\": \"DATA!F5\", \"status\": \"mismatch\", \"got\": \"2.15\", \"ref\": \"OK\"}], \"physics_score\": 0.6333, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"DATA\", \"STATS\"], \"got\": [\"DATA\", \"STATS\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"DATA\", \"expect\": [\"time\", \"alt_ft\", \"ias_kt\", \"load_g\", \"status_alt\", \"status_ias\", \"status_load\"], \"got\": [\"time\", \"alt_ft\", \"ias_kt\", \"load_g\", \"status_alt\", \"status_ias\", \"status_load\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"STATS\", \"expect\": [\"channel\", \"min\", \"max\", \"mean\"], \"got\": [\"channel\", \"min\", \"max\", \"mean\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 32.241,
+    "setup_s": 0.0,
+    "grade_s": 0.839
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=2024",
+    "run1 exit=0 0.46s",
+    "run2 exit=0 0.36s",
+    "physics=0.6333 requirements=1.0 cells=77/120 extra=1"
+  ]
+}

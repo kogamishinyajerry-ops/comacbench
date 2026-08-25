@@ -1,0 +1,41 @@
+{
+  "task_id": "eng_si_03",
+  "registry_id": "engtable.office_basic",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import csv\\nfrom openpyxl import Workbook\\n\\nSRC_FILE = \\\"eng_si_03.csv\\\"\\nOUT_FILE = \\\"output.xlsx\\\"\\n\\n# Create workbook with a single sheet named \\\"SI\\\"\\nwb = Workbook()\\nws = wb.active\\nws.title = \\\"SI\\\"\\n\\n# Write the exact header row\\nws.append([\\\"run\\\", \\\"force_n\\\", \\\"length_mm\\\", \\\"temp_c\\\"])\\n\\n# Read source CSV and convert row by row, preserving order\\nwith open(SRC_FILE, newline=\\\"\\\", encoding=\\\"utf-8-sig\\\") as f:\\n    reader = csv.DictReader(f)\\n    for row in reader:\\n        run_id = row[\\\"run\\\"]                     # keep unchanged\\n        force_lbf = float(row[\\\"force_lbf\\\"])\\n        length_in = float(row[\\\"length_in\\\"])\\n        temp_f = float(row[\\\"temp_f\\\"])\\n\\n        force_n = round(force_lbf * 4.4482216152605, 3)\\n        length_mm = round(length_in * 25.4, 3)\\n        temp_c = round((temp_f - 32.0) * 5.0 / 9.0, 3)\\n\\n        ws.append([run_id, force_n, length_mm, temp_c])\\n\\nwb.save(OUT_FILE)\\nprint(\\\"Wrote {} with {} data rows on sheet 'SI'\\\".format(OUT_FILE, ws.max_row - 1))\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"xlsx_table\", \"match\": {\"n_gold\": 44, \"matched\": 44, \"n_extra\": 0}, \"misses\": [], \"physics_score\": 1.0, \"structure_checks\": [{\"check\": \"sheet_names\", \"expect\": [\"SI\"], \"got\": [\"SI\"], \"ok\": true}, {\"check\": \"header_row\", \"sheet\": \"SI\", \"expect\": [\"run\", \"force_n\", \"length_mm\", \"temp_c\"], \"got\": [\"run\", \"force_n\", \"length_mm\", \"temp_c\"], \"ok\": true}], \"requirements_score\": 1.0}"
+  },
+  "timings": {
+    "agent_s": 12.909,
+    "setup_s": 0.0,
+    "grade_s": 0.67
+  },
+  "environment_digest": "sha256:ea22b91653677d330c5aa099de934678c2d956676e9c715d8be93ad455992e18",
+  "assets_revision": "engtable@selfbuilt-2026-08-25",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=956",
+    "run1 exit=0 0.33s",
+    "run2 exit=0 0.32s",
+    "physics=1.0 requirements=1.0 cells=44/44 extra=0"
+  ]
+}

@@ -1,0 +1,59 @@
+id: eng_si_03
+registry_id: engtable.office_basic
+domain: office_productivity
+task_type: design_artifact
+model_profile: plain_llm
+assets_revision: engtable@selfbuilt-2026-08-25
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/engtable.office_basic/eng_si_03.md
+  prompt_sha256: 0a7fa2ceac6e8947ff9f006c62f5178e331dea9e5d7c3651d12aab5840500a3b
+  assets:
+  - path: data/engtable/office_basic/inputs/eng_si_03.csv
+    digest: 527d73eaaa1d4616bde2b490fb0dcb8c0064740a0bf8f678bacf59e5dc73694f
+output_contract:
+- output.xlsx
+reference:
+  source: gold 脚本实跑产出（openpyxl 静态值；自建任务，确定性变换）
+  revision: engtable@selfbuilt-2026-08-25
+  values:
+    n_sheets: 1
+  rel_tol: 0.005
+  uncertainty_note: 单元格级比对（数值 0.5% 相对容差+3 位小数契约；字符串精确）
+grader:
+  artifact_kind: xlsx_table
+  answer_format: code
+  validity_gate: true
+  gold_workbook: data/engtable/office_basic/gold_output/eng_si_03.xlsx
+  structure_checks:
+  - check: sheet_names
+    expect: ['SI']
+  - check: header_row
+    expect: ['run', 'force_n', 'length_mm', 'temp_c']
+    sheet: SI
+  numeric_rel_tol: 0.005
+  oracle_source: data/engtable/office_basic/gold/eng_si_03.py
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=gold 非空单元格命中−多余惩罚；requirements=结构契约（sheet/表头）
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 240
+  attempts: 3
+license_provenance:
+  source: 自建（工程表格加工族；航空试验数据风格，无外部数据）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: engtable@selfbuilt-2026-08-25

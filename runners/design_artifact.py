@@ -37,22 +37,29 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
-from OCP.BRepAdaptor import BRepAdaptor_Surface
-from OCP.BRepBndLib import BRepBndLib
-from OCP.BRepCheck import BRepCheck_Analyzer
-from OCP.BRepGProp import BRepGProp
-from OCP.Bnd import Bnd_Box
-from OCP.GProp import GProp_GProps
-from OCP.GeomAbs import GeomAbs_SurfaceType
-from OCP.IFSelect import IFSelect_ReturnStatus
-from OCP.STEPControl import STEPControl_Reader
-from OCP.TopAbs import TopAbs_FACE, TopAbs_SOLID
-from OCP.TopExp import TopExp_Explorer
-from OCP.TopoDS import TopoDS
+# OCP（cadquery 内核）按需加载：xlsx_table 模式只依赖 openpyxl（.venv），
+# solid/sketch 模式才需要 OCP（.venv-cad）。缺 OCP 时 solid/sketch 路径显式报错。
+try:
+    from OCP.BRepAdaptor import BRepAdaptor_Surface
+    from OCP.BRepBndLib import BRepBndLib
+    from OCP.BRepCheck import BRepCheck_Analyzer
+    from OCP.BRepGProp import BRepGProp
+    from OCP.Bnd import Bnd_Box
+    from OCP.GProp import GProp_GProps
+    from OCP.GeomAbs import GeomAbs_SurfaceType
+    from OCP.IFSelect import IFSelect_ReturnStatus
+    from OCP.STEPControl import STEPControl_Reader
+    from OCP.TopAbs import TopAbs_FACE, TopAbs_SOLID
+    from OCP.TopExp import TopExp_Explorer
+    from OCP.TopoDS import TopoDS
+    _OCP_OK = True
+except ImportError:  # noqa: BLE001 — .venv（无 OCP）跑 xlsx_table 模式
+    _OCP_OK = False
 
 from . import common
 from .common import (FM_MISSING_OUTPUT, TaskSpec, aggregate_score, build_result,
@@ -78,6 +85,10 @@ SKETCH_OUTPUT = "sketch.step"
 SKETCH_PT_TOL = 0.01               # mm；端点/拟合点匹配绝对容差（题面坐标 1e-6 精度）
 SKETCH_PLANE_TOL = 0.01            # mm；共面性最大偏差
 SKETCH_N_SAMPLE = 240              # 边采样点数（样条包含性/共面性检查用）
+
+# ---- 表格模式（engtable.office_basic：xlsx 制品，office_productivity 维） ----
+XLSX_KIND = "xlsx_table"
+XLSX_OUTPUT = "output.xlsx"
 
 _ZERO_SUBS = {"physics": 0.0, "requirements": 0.0, "objective": None, "robustness": None}
 
@@ -508,6 +519,200 @@ def _run_sketch_task(
     return _ret(1, [], None, subs, details)
 
 
+# ---------------------------------------------------------------- xlsx 判分管线
+
+_XLSX_APPLICABILITY = {
+    "physics": "gold 非空单元格命中（数值 rel_tol/字符串精确；多余单元格惩罚）",
+    "requirements": "结构契约（sheet 名集/表头行精确）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(可重复执行复现同一工作簿由 gate 第 5 级覆盖)",
+}
+
+
+def _xlsx_cells(path: Path) -> dict[tuple[str, str], Any]:
+    """读工作簿非空单元格 {(sheet, coord): value}（data_only：契约要求静态值）。"""
+    import openpyxl
+    wb = openpyxl.load_workbook(path, data_only=True)
+    cells: dict[tuple[str, str], Any] = {}
+    for ws in wb.worksheets:
+        for row in ws.iter_rows():
+            for c in row:
+                if c.value is not None:
+                    cells[(ws.title, c.coordinate)] = c.value
+    wb.close()
+    return cells
+
+
+def _xlsx_canonical(cells: dict[tuple[str, str], Any]) -> str:
+    """确定性双跑比对串（数值 1e-9 舍入吸收浮点噪声）。"""
+    items = []
+    for (sh, coord), v in cells.items():
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            items.append((sh, coord, round(float(v), 9)))
+        else:
+            items.append((sh, coord, str(v)))
+    return repr(sorted(items, key=repr))
+
+
+def _xlsx_numlike(v: Any) -> float | None:
+    """数值外观强转：int/float 直取；数字字符串（"10000"/"1.5"）转 float。
+    存储类型（文本数字 vs 数值）不判失分——题面契约只约束值内容（2026-08-25
+    glm-5.3 flag 族实测暴露：CSV 串原样写入为文本数字，值等价判 mismatch 过苛）。"""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, str):
+        try:
+            return float(v.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _xlsx_match(gold: dict, got: dict, rel_tol: float) -> dict[str, Any]:
+    """单元格级比对：数值（rel_tol 相对容差，近零绝对 1e-9；数字文本强转）/
+    字符串精确；分数 = (命中 − 多余) / gold 非空数，下限 0。"""
+    n_gold = len(gold)
+    matched = 0
+    misses: list[dict] = []
+    for key, gv in gold.items():
+        if key not in got:
+            misses.append({"cell": f"{key[0]}!{key[1]}", "status": "missing"})
+            continue
+        mv = got[key]
+        gnum, mnum = _xlsx_numlike(gv), _xlsx_numlike(mv)
+        if gnum is not None and mnum is not None:
+            denom = max(abs(gnum), 1e-9)
+            ok = abs(mnum - gnum) / denom <= rel_tol
+        else:
+            ok = str(mv) == str(gv)
+        if ok:
+            matched += 1
+        else:
+            misses.append({"cell": f"{key[0]}!{key[1]}", "status": "mismatch",
+                           "got": str(mv)[:40], "ref": str(gv)[:40]})
+    n_extra = len([k for k in got if k not in gold])
+    return {"n_gold": n_gold, "matched": matched, "n_extra": n_extra,
+            "misses": misses[:12],
+            "physics": round(max(0, matched - n_extra) / max(1, n_gold), 4)}
+
+
+def _xlsx_structure_checks(checks: list[dict],
+                           out_path: Path) -> list[dict[str, Any]]:
+    import openpyxl
+    wb = openpyxl.load_workbook(out_path, data_only=True)
+    out: list[dict[str, Any]] = []
+    for chk in checks:
+        kind = chk.get("check")
+        if kind == "sheet_names":
+            got = list(wb.sheetnames)
+            out.append({"check": kind, "expect": chk["expect"], "got": got,
+                        "ok": got == list(chk["expect"])})
+        elif kind == "header_row":
+            ws = wb[chk["sheet"]]
+            got = [ws.cell(row=1, column=i + 1).value
+                   for i in range(len(chk["expect"]))]
+            out.append({"check": kind, "sheet": chk["sheet"],
+                        "expect": chk["expect"], "got": got,
+                        "ok": got == list(chk["expect"])})
+        else:
+            out.append({"check": str(kind), "error": "unknown check kind"})
+    wb.close()
+    return out
+
+
+def _run_xlsx_task(
+    task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
+    logs: list[str], assets_root: Path,
+) -> dict[str, Any]:
+    """xlsx_table：模型 python 脚本读 cwd 输入文件，产出规范 xlsx（静态值）。
+
+    gate：静态检查 → 双跑可执行（输入资产每次注入隔离目录）→ output.xlsx 存在
+    → 可解析 → 双跑单元格集一致。physics/requirements 见 _XLSX_APPLICABILITY。
+    """
+    g = task["grader"]
+    timeout = float(task["limits"]["wall_clock_s"])
+    rel_tol = float(g.get("numeric_rel_tol", 0.005))
+
+    def _ret(gate: int, gf: list[str], fm: str | None,
+             subs: dict[str, Any], details: dict[str, Any]):
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subs.items()}, weights, gate)
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=gf, subscores=subs, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": round(time.time() - grade_t0, 3)},
+            env_digest=env_digest, logs=logs, failure_mode=fm,
+            applicability=_XLSX_APPLICABILITY)
+
+    grade_t0 = time.time()
+    assets = [(Path(a["path"]) if Path(a["path"]).is_absolute()
+               else (assets_root / a["path"]).resolve(), a["digest"])
+              for a in (task["input"].get("assets") or [])]
+
+    cells_by_run = []
+    out_paths = []
+    for run_no in (1, 2):
+        iso = IsolatedRun()
+        for ap, dgst in assets:
+            data = ap.read_bytes()
+            import hashlib
+            if hashlib.sha256(data).hexdigest() != dgst:
+                return _ret(0, ["asset_digest_mismatch"], "asset_digest_mismatch",
+                            _ZERO_SUBS, {"asset": str(ap)})
+            iso.write(ap.name, data.decode("utf-8"))
+        r = iso.run(iso.write("model.py", code), timeout)
+        logs.append(f"run{run_no} exit={r['exit']} {r['duration_s']}s")
+        if r["timeout"]:
+            return _ret(0, ["timeout"], "timeout", _ZERO_SUBS,
+                        {"run": run_no, "stderr_tail": r["stderr"][-800:]})
+        if r["exit"] != 0:
+            return _ret(0, [_SCRIPT_FAIL], _SCRIPT_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "exit": r["exit"],
+                         "stderr_tail": r["stderr"][-800:]})
+        out = iso.dir / XLSX_OUTPUT
+        if not out.exists():
+            return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, _ZERO_SUBS,
+                        {"run": run_no, "missing": XLSX_OUTPUT,
+                         "dir_listing": sorted(p.name for p in iso.dir.iterdir())[:20]})
+        try:
+            cells = _xlsx_cells(out)
+        except Exception as e:  # noqa: BLE001
+            return _ret(0, [_GEOM_FAIL], _GEOM_FAIL, _ZERO_SUBS,
+                        {"run": run_no, "parse_error": str(e)[:300]})
+        cells_by_run.append(cells)
+        out_paths.append(out)
+
+    if _xlsx_canonical(cells_by_run[0]) != _xlsx_canonical(cells_by_run[1]):
+        return _ret(0, [_NONDET_FAIL], _NONDET_FAIL, _ZERO_SUBS,
+                    {"determinism": "run1/run2 单元格集不一致"})
+
+    gold_path = Path(g["gold_workbook"])
+    if not gold_path.is_absolute():
+        gold_path = assets_root / gold_path
+    gold = _xlsx_cells(gold_path)
+    m = _xlsx_match(gold, cells_by_run[0], rel_tol)
+    physics = float(m["physics"])
+
+    sc = _xlsx_structure_checks(list(g.get("structure_checks") or []), out_paths[0])
+    requirements = round(sum(1 for c in sc if c.get("ok")) / len(sc), 4) if sc else 0.0
+
+    details = {"kind": "xlsx_table",
+               "match": {k: m[k] for k in ("n_gold", "matched", "n_extra")},
+               "misses": m["misses"], "physics_score": physics,
+               "structure_checks": sc, "requirements_score": requirements}
+    subs = {"physics": physics, "requirements": requirements,
+            "objective": None, "robustness": None}
+    logs.append(f"physics={physics} requirements={requirements} "
+                f"cells={m['matched']}/{m['n_gold']} extra={m['n_extra']}")
+    return _ret(1, [], None, subs, details)
+
+
 # ---------------------------------------------------------------- 判分
 
 def _eval_interface_checks(checks: list[dict], m: dict[str, Any]) -> list[dict]:
@@ -581,7 +786,14 @@ def run_task(
 
     # ---- 草图模式分发（cadbench_seldon.sketch_lite；静态检查已共用） ----
     if g.get("artifact_kind") == SKETCH_KIND:
+        if not _OCP_OK:
+            raise RuntimeError("sketch_2d 模式需 OCP/cadquery（用 .venv-cad 运行）")
         return _run_sketch_task(task, code, meta, t0, env_digest, logs)
+
+    # ---- 表格模式分发（engtable.office_basic；仅需 openpyxl） ----
+    if g.get("artifact_kind") == XLSX_KIND:
+        return _run_xlsx_task(task, code, meta, t0, env_digest, logs,
+                              assets_root)
 
     # ---- gate 1-2：沙箱执行（sys.executable 即 .venv-cad，cadquery 可导入）----
     iso1 = IsolatedRun()
@@ -884,7 +1096,7 @@ def main() -> int:
     model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get(
         "model_default", "n/a")
 
-    rerun = (f"cd {common.BENCH_ROOT} && .venv-cad/bin/python -m runners.design_artifact "
+    rerun = (f"cd {common.BENCH_ROOT} && {sys.executable} -m runners.design_artifact "
              f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
              f"--provider {args.provider}"
              + (f" --model {args.model}" if args.model else "")

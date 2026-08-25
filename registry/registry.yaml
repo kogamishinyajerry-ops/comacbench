@@ -536,6 +536,23 @@ entries:
     status: integrated
     integrated_note: 2026-08-25 窄路 A 落地——GUI 任务改编为本仓库脚本协议（模型写 cadquery 构造题面规定曲线，导出 sketch.step）：GT 一手源=题面几何规格（题面明示拟合点/顶点为 authoritative，answer.f3d 不可解析仅后续交叉核验）。15 题=改编 5（chain/polygon/spline×s01-03）+自建 10（chain×3/polygon×3/spline×3）。判分管线双向自检：gold 全链 15/15 PASS + stub 15/15 地板 + oracle 15/15 满分（mean 1.0000 含双跑确定性）；cadgen solid 路径回归无恙。工程记录：闭合环计数两阶段实现（端点聚类→图分量全 2 度判环）。详见 data/cadbench-seldon/sketch_lite/PROVENANCE.md
 
+  - id: engtable.office_basic
+    name: 工程表格加工族（自建，office_productivity 维）
+    source: 自建参数化（航空试验数据风格；无外部数据）
+    tier: A
+    order: 15a
+    batch: batch-3
+    adapter: design_artifact
+    env_class: python_sandbox   # openpyxl 单元格级判分（.venv；内网可移植）
+    license: self-built
+    license_status: confirmed-selfbuilt
+    self_built: true
+    content: BOM 合并/长表透视汇总/单位换算 SI 化/越限状态标记+统计摘要/超差 top-K 清单
+    env: 判分 design_artifact xlsx_table 模式（gold 非空单元格命中−多余惩罚；结构契约 sheet/表头精确；双跑确定性 gate）
+    assets_revision: engtable@selfbuilt-2026-08-25
+    status: integrated
+    integrated_note: 2026-08-25 office_productivity 维首批（调研 report/2026-08-25-office-benchmark-survey.md §5 首选项 2）——5 族 19 题（bom×4 重复件号合并排序/pivot×4 长表 mean-max 透视/si×4 lbf-in-°F 固定系数换算/flag×3 越限状态列+STATS 摘要/exceed×4 阈值过滤 top-K）。输入 CSV sha256 锁定注入沙箱；输出契约静态值禁公式（data_only 读取，公式=None 即失分）。自检：gold 全链 19/19 + stub 19/19 地板 + oracle 19/19 满分。工程记录：资产注入名统一真实文件名（首版 input.csv 别名致 oracle 0/19，已修）；OCP 改惰性加载（xlsx 模式跑 .venv）。详见 data/engtable/office_basic/PROVENANCE.md
+
   - id: afbench.airfoil
     name: AFBench
     source: https://github.com/hitcslj/AFBench
