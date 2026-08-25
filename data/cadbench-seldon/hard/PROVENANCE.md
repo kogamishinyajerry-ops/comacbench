@@ -20,30 +20,39 @@
   许可干净，镜像与改编（含 attribution）均允许； Autodesk Fusion 商标归 Autodesk。
 - license-notes.md 已记录。
 
-## 3. 为何不能集成（三重阻塞，2026-08-24 核验）
+## 3. 为何不能集成（阻塞重评：2026-08-25 Fusion 装机后）
 
-1. **任务形态与 adapter 不匹配**：题面明令 *"Using only Autodesk Fusion's visible
-   user interface... Do not use scripts, add-ins, the Fusion API, a terminal, or
-   another CAD program"*——纯 GUI/computer-use 操作基准（tags: gui-agents /
-   computer-use / autodesk-fusion）。我们五类 adapter（qa_grounded/code_exec/
-   simulation_agent/design_artifact/field_prediction）无一匹配；「写 CadQuery 脚本」
-   恰是它禁止测的能力。
-2. **环境缺失**：Autodesk Fusion 不在 dev 层（未安装）也不在 intranet 层（内网 CAD
-   栈为 CATIA）；Seldon 沙箱环境需私下联系（"please reach out"）。
-3. **判分与输入态均不可本地复现**：官方 verifier 未随数据集发布；任务「starting
-   from the supplied body」——**种子文档也不在数据集内**（属沙箱）；answer.f3d 为
-   Fusion 私有格式，无 Fusion 无法导出/解析，连 cadgen 式自建几何判分（体积/包围盒）
-   都被格式挡死。
+> 2026-08-25 更新：dev 终端装 Autodesk Fusion（webdeploy 生产通道，进程核验）——
+> 环境阻塞解除一项，GT 私有格式阻塞有了解法；种子文档阻塞经题面审计精确量化。
 
-结论：与 engdesign.open 同为「官方判分不可本地复现」模式且更严（输入态亦缺）——
-**直接集成不可行**，收录为 proposed（blocked）。
+1. **任务形态与 adapter 不匹配**（仍阻塞）：题面明令 *"Using only Autodesk Fusion's
+   visible user interface... Do not use scripts, add-ins, the Fusion API"*——纯
+   GUI/computer-use 操作基准。computer_use 第六类 adapter 未立项。
+2. **种子文档缺失**（仍阻塞，已量化）：**38/43 题**（jaw×26 / j4×5 / j5×3 / se×5 中
+   的实体建模题）题面为 "Starting from the supplied tapered housing" 等——种子文档
+   属 Seldon 沙箱，不随数据集发布。**但 5 道 proc 草图题（connected_lines×1 /
+   polygon×1 / spline_profile×3）明确空文档起步**（"contains only the root
+   component and Origin"），题面给出全部坐标——**该 5 题不依赖种子，完全可跑**。
+3. ~~环境缺失~~ → **已解除**（2026-08-25 Fusion dev 层就位）。
+4. ~~f3d 不可解析~~ → **有解法**：判分方不受题面「禁脚本」约束（那约束被测
+   agent）；`tools/fusion_export_gt.py`（Fusion 批处理脚本，人在 Fusion 里运行一次）
+   把 answer.f3d 去重导出为 step_gt/*.step（实体）+ sketch_gt/*.json（草图几何），
+   转为本地可判分 GT——CC-BY-4.0 允许带署名衍生。verifier 仍私有，但几何级自建
+   判分（体积/包围盒/草图线段比对，cadgen 同款）从此可行。
 
-## 4. 解阻条件（任一满足后重审）
+**当前状态**：仍为 proposed（computer_use adapter 未立项 + 38/43 题种子私有），
+但存在两条可走的窄路（见 §4）。
 
-1. Seldon 公开 verifier + 种子文档 + 沙箱（或可本地部署的 Fusion 批处理通道）；
-2. 出现合法的 f3d→STEP 转换通道（Fusion 导出或官方 API），使自建几何判分可行——
-   仍需第六类 computer_use adapter 与 GUI agent runner（重大 scope 扩张，需立项）；
-3. 上游发布脚本/API 版任务变体（若发生则与现有 design_artifact 协议直接兼容）。
+## 4. 可走的窄路（2026-08-25 重评）
+
+1. **GT 转换（前置，无条件做）**：`tools/fusion_export_gt.py` 在 Fusion 里跑一次，
+   得到 43 题 step_gt/sketch_gt——无论走哪条路，开放格式 GT 都是地基；
+2. **窄路 A（proc 5 题自建改编，推荐可评估）**：5 道草图题空文档起步且坐标全给——
+   按本仓库协议改编（模型输出几何构造，我们草图线段级判分 vs sketch_gt），成为
+   cad_geometry 维 2D 草图子轴首批任务（同 cadgen 对 CADGenBench 的改编 DNA，
+   CC-BY-4.0 带署名衍生）；
+3. **窄路 B（38 题等上游）**：Seldon 公开种子+verifier+沙箱；或上游出脚本/API 版
+   变体；或 computer_use adapter 立项（GUI agent 整条链，周级 scope）。
 
 ## 5. 与既有条目的关系
 
