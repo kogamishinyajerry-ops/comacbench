@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -560,8 +561,8 @@ def run_task_iterate(
     r["artifacts"]["iteration"] = json.dumps(
         {"rounds_used": rounds_used, "iterate_max": iterate,
          "converged": r["validity_gate"] == 1}, ensure_ascii=False)
-    if "applicability" in r:
-        r["applicability"]["iteration"] = f"rounds {rounds_used}/{iterate}"
+    if "subscore_applicability" in r:
+        r["subscore_applicability"]["iteration"] = f"rounds {rounds_used}/{iterate}"
     return r
 
 
@@ -728,7 +729,7 @@ def main() -> int:
     from .providers import PROVIDER_PRESETS
     model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get("model_default", "n/a")
 
-    rerun = (f"cd {common.BENCH_ROOT} && .venv/bin/python -m runners.simulation_agent "
+    rerun = (f"cd {common.BENCH_ROOT} && {sys.executable} -m runners.simulation_agent "
              f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
              f"--provider {args.provider}"
              + (f" --model {args.model}" if args.model else "")

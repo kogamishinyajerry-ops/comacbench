@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""生成 benchmark 覆盖评估雷达图（数据时点 2026-08-25，接 2026-08-21-coverage-assessment）。
+"""生成 benchmark 覆盖评估雷达图（2026-08-26 深审口径：46 条目/25 integrated/2513 任务/oracle 21/25）。
 
 数据来源：
-- registry/registry.yaml（39 条目）+ comac_registry 实时状态
-- tasks/*/ 任务 YAML 实数（19 integrated = 2403；tasks/.foam_tail 20 题在制未转正）
-- results/*/ provider 落盘实数（oracle 15/19；双基线 19/19）
+- registry/registry.yaml（46 条目）/ tasks 实数 2513（25 integrated）/ oracle 落盘 21/25、双基线 25/25（2026-08-26 深审核验）
 - results/nine-dim-{baseline,increment}*.md、harness-eval-2026-08-24.md、harness-lineage-2026-08-25.md
 
 变更（vs 2026-08-21 版）：
@@ -65,7 +63,7 @@ labels1 = ["航空知识\nknowledge\n(cfdquery/aeroengqa/mechvqa)", "科学编�
 # 2026-08-25 窄路 A 落地：cadbench_seldon.sketch_lite integrated（2D 草图子轴首批 15 题）
 # —— cad_geometry 在册 4（cadgen+sketch_lite integrated / openvsp paused / seldon.hard proposed）覆盖度 0.33→0.50
 coverage = [0.75, 1.00, 0.50, 0.60, 0.33, 1.00, 1.00, 0.33, 0.60, 1.00]
-coverage_prev = [0.75, 1.00, 0.50, 0.60, 0.00, 1.00, 1.00, 0.33, 0.60, 0.00]  # 08-24 上午时点（办公维尚不存在）
+coverage_prev = [0.75, 1.00, 0.33, 0.60, 0.00, 1.00, 1.00, 0.33, 0.60, 0.00]  # 08-24 上午时点（cad 0.33：sketch_lite 尚未落地；办公维尚不存在）
 # 基线可得 = 维度内 integrated 基准双基线落盘（M3+GLM 系；mechvqa=双 VLM；ccx=固定对 5.3+M3）
 baseline = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.60, 1.00]
 
@@ -86,8 +84,8 @@ labels2 = ["公共可比层\n(11 基准·双基线·加强测试)", "工程可�
            "Harness 臂评测\n(H0-H3·谱系4/5·路由)"]
 # 2026-08-24 晚更新：工程可执行 8→9 基准（+calculix.fea_basic）→0.80→0.82；
 # 环境 5→6 类 live（+calculix_native）→0.56→0.62；判分自检 15/19→16/20→0.79→0.80
-harness = [0.95, 0.82, 0.30, 0.55, 1.00, 0.62, 0.80, 0.92, 0.75]
-harness_prev = [0.95, 0.80, 0.30, 0.55, 1.00, 0.56, 0.79, 0.92, 0.75]  # 08-24 上午时点
+harness = [0.95, 0.87, 0.25, 0.55, 1.00, 0.67, 0.84, 0.90, 0.75]
+harness_prev = [0.95, 0.80, 0.30, 0.55, 1.00, 0.56, 0.79, 0.92, 0.75]  # 08-24 上午时点（环境=6/9=0.67、自检=21/25=0.84、可执行=13/15 候选=0.87、隐藏层=0 运营→0.25、复现=0819 断链→0.90）
 
 fig2, ax2 = plt.subplots(figsize=(9.6, 9.0), subplot_kw=dict(polar=True))
 radar(ax2, labels2, [

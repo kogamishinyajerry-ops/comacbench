@@ -8,6 +8,8 @@
 | `confirmed-repo` | 仓库 LICENSE 文件已核实 | 是 |
 | `confirmed-dataset` | 数据集发布页/记录许可证已核实 | 是 |
 | `confirmed-split` | 代码与数据许可不同，已分别核实并拆分标注 | 是（按标注范围） |
+| `confirmed-selfbuilt` | 自建参数化任务（无外部数据镜像；外部工具仅作执行后端且不随仓库分发） | 是 |
+| `confirmed-adapted-<lic>` | 外部题面按本仓库协议改编（署名衍生，协议变更如实标注） | 是（按上游许可义务） |
 | `needs-verification` | 许可证存在但条款/适用范围未核实 | 否 |
 | `needs-per-task-audit` | 聚合仓库，组成数据许可不一，需逐任务清点 | 否（清点完成前） |
 | `needs-legal-review` | 特殊许可（如 NOSA）需法务确认企业适用性 | 否（法务放行前） |
@@ -15,7 +17,7 @@
 | `blocked-license-ambiguity` | 许可表述冲突或含 NC 等限制性条款待澄清 | 否 |
 | `blocked-no-license` | 未见任何许可证声明 | 否 |
 
-## 当前状态（2026-08-19）
+## 当前状态（2026-08-26，深审回填 5 条）
 
 > 注：`excluded.*` 条目（ALUE/Pre-Flight、RepoSpace、CFDBench、BlendedNet、HiLiftAeroML 全量体数据、运行常识类）已明确排除，永不镜像，故不进入本矩阵追踪。
 
@@ -54,6 +56,11 @@
 | humaneval.python_plus | Apache-2.0（官方 GitHub release v0.1.10 NoExtreme，工具链权威源）/ MIT（复用的原版 prompt） | confirmed-split | —（2026-08-21 镜像；HF 卡片版实证有断言转换缺陷已弃用并留档；换源裁定见 data/humaneval/python_plus/PROVENANCE.md） |
 | mbpp.sanitized_plus | Apache-2.0（官方 GitHub release v0.2.0 NoExtreme）/ CC BY 4.0（上游 MBPP 本体） | confirmed-dataset | —（2026-08-21 镜像；官方 release 权威源；2 题输入-GT 不兼容缺陷排除 + 1 题 GT 覆写原版，处置见 data/mbpp/sanitized_plus/PROVENANCE.md） |
 | cadbench_seldon.hard | CC BY 4.0（HF Seldon-Technologies/CADBench-Hard 卡片明示：题面/元数据/Seldon 自建参考工件） | confirmed-dataset | —（2026-08-24 镜像公开子集 43 题 task.md+answer.f3d+manifest，answer sha256 与官方 manifest 43/43 逐字节一致；BY 归属义务：再分发须署名 Seldon Technologies；Fusion 商标归 Autodesk；verifier/沙箱/种子文档不随数据集发布，集成三重阻塞，PROVENANCE 见 data/cadbench-seldon/hard/） |
+| calculix.fea_basic | 自建参数化任务；CalculiX ccx GPL-2.0 仅作执行后端、不随仓库分发 | confirmed-selfbuilt | —（2026-08-24 集成；PROVENANCE 见 data/calculix/fea_basic/） |
+| gtm.transport_control_hard | 自建加硬版任务（GTM 定位启发，未镜像上游） | confirmed-selfbuilt | —（2026-08-23 集成；PROVENANCE 见 data/gtm/transport_control_hard/） |
+| awdoc.office_docs | self-built（数据锚定文档族，无外部数据） | confirmed-selfbuilt | —（2026-08-26 集成；PROVENANCE 见 data/awdoc/office_docs/） |
+| awext.clause_extract | self-built（参数化合成条款风格卡，非真实规章原文；KB 恢复后重锚） | confirmed-selfbuilt | —（2026-08-26 集成；PROVENANCE 见 data/awext/clause_extract/） |
+| spreadsheetbench.verified_subset | CC BY-SA 4.0（HF KAKA22/SpreadsheetBench 卡片 license 字段，2026-08-26 核验；tar.sha256 随镜像） | confirmed-dataset | —（2026-08-26 镜像 verified_400 子集 25 题 + init/golden 副本；BY 署名 SpreadsheetBench 作者；SA：派生任务集同许可发布；详见 data/spreadsheetbench/verified_400/PROVENANCE.md） |
 | engtable.office_basic | self-built | confirmed-selfbuilt | —（2026-08-25 首批：5 族 19 题全部自建参数化，无外部数据；PROVENANCE 见 data/engtable/office_basic/） |
 | cadbench_seldon.sketch_lite | 改编 5 题：CC BY 4.0（上游同上；BY 署名衍生，协议由 Fusion GUI 改为 cadquery 脚本制，改编边界在 PROVENANCE §1 如实标注）/ 自建 10 题：self-built | confirmed-adapted-ccby4 + confirmed-selfbuilt | —（2026-08-25 窄路 A 落地；GT 一手源=题面几何规格而非 answer.f3d；改编题 license_provenance 逐题标注来源 task_id） |
 

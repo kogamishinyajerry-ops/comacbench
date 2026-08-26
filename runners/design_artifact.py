@@ -78,6 +78,7 @@ IFACE_RADIUS_REL_TOL = 0.01  # 接口圆柱面半径匹配 ±1%
 _SCRIPT_FAIL = "code_not_executable"
 _GEOM_FAIL = "invalid_geometry"
 _NONDET_FAIL = "nondeterministic_artifact"
+_SIM_FAIL = "simulation_failed"   # 2026-08-26 深审：此前 formula_cell 分支引用未定义名，触发即 NameError→crash 误归类
 
 # ---- 草图模式（cadbench_seldon.sketch_lite：2D 曲线制品，零实体） ----
 SKETCH_KIND = "sketch_2d"          # grader.artifact_kind 取值，缺省 solid（cadgen）
@@ -1335,8 +1336,8 @@ def run_task_iterate(
     r["artifacts"]["iteration"] = json.dumps(
         {"rounds_used": rounds_used, "iterate_max": iterate,
          "converged": r["validity_gate"] == 1}, ensure_ascii=False)
-    if "applicability" in r:
-        r["applicability"]["iteration"] = f"rounds {rounds_used}/{iterate}"
+    if "subscore_applicability" in r:
+        r["subscore_applicability"]["iteration"] = f"rounds {rounds_used}/{iterate}"
     return r
 
 

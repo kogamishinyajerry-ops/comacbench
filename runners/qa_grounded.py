@@ -266,8 +266,6 @@ def grade_json_extract(ref: dict, got: dict,
             details.append({"field": k, "ok": ok, "got": gv, "ref": rv})
         hits += bool(details[-1]["ok"])
     return round(hits / max(1, len(ref_f)), 4), details
-    """拒答层：应拒答回答了=0，正确拒答=1；应回答拒答=0，正常回答=1。"""
-    return 1.0 if refusal_expected == refused else 0.0
 
 
 def grade_evidence(citations: list[int], n_contexts: int,

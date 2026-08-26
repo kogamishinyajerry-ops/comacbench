@@ -491,7 +491,7 @@ entries:
     assets_revision: mbppplus@release_v0.2.0-noextreme_20260821   # 2026-08-21 官方 release 镜像（缺陷处置见 PROVENANCE），sha256 见 data/mbpp/sanitized_plus/PROVENANCE.md
     risks: [同提示测试升级口径——分差为测试敏感度信号；222 题交集非全量 MBPP+（保持与既有基准可比）；124/252 上游缺陷排除如实标注]
     status: integrated
-    integrated_note: 2026-08-21 code_exec 活体 GT 判分跑通（官方 release NoExtreme 源）；oracle 164/164；stub 0 / GLM-4.6 0.9207 / M3 0.9268（原版 -5.5pp 测试敏感度），见 results/humaneval.python_plus/2026-08-21/
+    integrated_note: 2026-08-21 接入；2026-08-26 深审核验修正——oracle 222/222=1.0000 / stub 0/222 / minimax-m3 0.8198（182/222）/ glm-4.6 0.8447（185/219 计分，gate 219/222：3 code_not_executable），见 results/mbpp.sanitized_plus/2026-08-21/。（此前 note 误复制 humaneval.python_plus 数字，已勘误）
 
   # ---------- 条件纳入（不进入排期，满足条件后重审） ----------
   - id: cadbench.cadquery
@@ -549,6 +549,7 @@ entries:
     self_built: true
     content: BOM 合并/长表透视汇总/单位换算 SI 化/越限状态标记+统计摘要/超差 top-K 清单
     env: 判分 design_artifact xlsx_table 模式（gold 非空单元格命中−多余惩罚；结构契约 sheet/表头精确；双跑确定性 gate）
+    anchor_note: 2026-08-26 深审补标——M3 0.9474 ≥0.93 锚点口径（不参与模型排序；flag 族为区分带，专属报告已声明）
     assets_revision: engtable@selfbuilt-2026-08-25
     status: integrated
     integrated_note: 2026-08-25 office_productivity 维首批（调研 report/2026-08-25-office-benchmark-survey.md §5 首选项 2）——5 族 19 题（bom×4 重复件号合并排序/pivot×4 长表 mean-max 透视/si×4 lbf-in-°F 固定系数换算/flag×3 越限状态列+STATS 摘要/exceed×4 阈值过滤 top-K）。输入 CSV sha256 锁定注入沙箱；输出契约静态值禁公式（data_only 读取，公式=None 即失分）。自检：gold 全链 19/19 + stub 19/19 地板 + oracle 19/19 满分。工程记录：资产注入名统一真实文件名（首版 input.csv 别名致 oracle 0/19，已修）；OCP 改惰性加载（xlsx 模式跑 .venv）。详见 data/engtable/office_basic/PROVENANCE.md
@@ -566,6 +567,7 @@ entries:
     self_built: true
     content: CSV 数据源→结构化报告/汇报：锚定数字（min/max/mean/count 派生统计）+结构契约（表格/页帧/段落）
     env: 判分 design_artifact doc_document 模式（锚定数字命中 0.5% 容差+结构契约+双跑一致性）
+    anchor_note: 2026-08-26 深审补标——GLM 0.9444 ≥0.93 锚点口径（不参与模型排序；M3 0.67 侧 pptx 构造为区分信号）
     assets_revision: awdoc@selfbuilt-2026-08-26
     status: integrated
     integrated_note: 2026-08-26 办公第二板 A 线——18 题（docx×9/pptx×9，perf×6+load×3 双格式）。判分只锚「数字来自数据」+结构（文风不评——LLM judge 违纪律，如实声明）。oracle 18/18 满分（含双跑文本数字一致 gate）。详见 data/awdoc/office_docs/PROVENANCE.md

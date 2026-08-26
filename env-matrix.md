@@ -17,8 +17,8 @@
 
 | env_class | 依赖 | 可用性 | 需要你做的一次性动作 | 覆盖的 registry 条目 |
 | --- | --- | --- | --- | --- |
-| `qa` | 仅模型调用 + 文本/图文判分 | ✅ 现成 | 无 | cfdquery、aeroengqa、mechvqa、camb、designqa |
-| `python_sandbox` | 纯 Python 包（无原生依赖） | ✅ 可用（手工导入） | 按下方分阶段清单在外网机下载 wheel，批量导入一次 | scicode、cfdcode、engdesign、aviary、pycycle、cadgen、cadbench、afbench、openconcept |
+| `qa` | 仅模型调用 + 文本/图文判分 | ✅ 现成 | 无 | cfdquery、aeroengqa、mechvqa、gsm8k、math500、awext.clause_extract（camb/designqa 仍未集成） |
+| `python_sandbox` | 纯 Python 包（无原生依赖） | ✅ 可用（手工导入） | 按下方分阶段清单在外网机下载 wheel，批量导入一次 | scicode、cfdcode、engdesign、aviary、pycycle、cadgen、cadbench、afbench、openconcept、humaneval×2、mbpp×2、cadbench_seldon.sketch_lite、engtable、awdoc、awext、spreadsheetbench.verified_subset（**注意**：ssb 判分链需 soffice 二进制——LibreOffice headless，见 §2 末尾专条；内网移植必须携带） |
 | `data_only` | 参考数据 + 数值比对 | ✅ 可用 | 外网机下载数据子集后导入 | superwing、hilift_aeroml.lite、airfrans、pdebench-NS、aircraftverse |
 | `openfoam_dev` | OpenFOAM + FoamAgent（开发终端） | ✅ 可用（dev 层） | FoamAgent/OpenFOAM 已装则无动作 | foam_basic（已恢复 v0.1 核心）、nasa_tmr/crm_dpw_hlpw 的开发期原型 |
 
@@ -29,9 +29,9 @@
 > 判分侧经 `runners/solvers/openfoam.py` 调 docker；本条不改变求解器无关原则（grader 只认产物+判据+场结果）。
 | `commercial_cfd` | Fluent / StarCCM+ 无界面批处理 | ✅ 已许可（仅内网层） | 与 IT 确认批处理许可座席调度窗口 + 版本锁定 | nasa_tmr、crm_dpw_hlpw（内网移植目标态） |
 | `commercial_fea` | ANSYS Mechanical APDL（PyMAPDL gRPC） | ✅ 已许可 | 同上（APDL 座席） | simjeb |
-| `matlab` | MATLAB（batch 子进程；matlabengine 不用——版本配对脆弱，`matlab -batch` 更稳且与沙箱隔离子进程语义一致） | ✅ **dev 已就绪**（2026-08-22 装 R2026a U3，Sponsored License，CST/Aerospace TB 齐备，batch 启动 ~28s/次，执行后端 `runners/solvers/matlab.py`，MATLAB_BIN 可覆写） | 内网层移植时版本锁定 | gtm（JSBSim 侧归 python_sandbox） |
+| `matlab` | MATLAB（batch 子进程；~~matlabengine（已废弃：改用 matlab -batch 子进程，见 §1 matlab 行）~~ 不用——版本配对脆弱，`matlab -batch` 更稳且与沙箱隔离子进程语义一致） | ✅ **dev 已就绪**（2026-08-22 装 R2026a U3，Sponsored License，CST/Aerospace TB 齐备，batch 启动 ~28s/次，执行后端 `runners/solvers/matlab.py`，MATLAB_BIN 可覆写） | 内网层移植时版本锁定 | gtm.transport_control、gtm.transport_control_hard（JSBSim 侧归 python_sandbox） |
 | `calculix_native` | CalculiX ccx（`ccx -i` 子进程 + 进程组超时杀；GPL-2.0，执行后端 `runners/solvers/calculix.py`，CCX_BIN 可覆写） | ✅ **dev 已就绪**（2026-08-24 brew calculix-ccx 实测 2.23；烟测与解析互证：悬臂静力 0.06%/模态 0.5%/屈曲 0.5%） | 内网层移植：源码编译或离线二进制导入 + 版本锁定 | calculix.fea_basic（structures 维自建，simjeb 商业 FEA 线之外的 dev 层落地） |
-| `missing` | 内网不存在且不部署的工具 | ❌ | 见第 4 节恢复条件 | foam_basic(OpenFOAM)、openvsp、bscw(气弹链)、cadbench_seldon(2026-08-25 起仅剩部分阻塞：dev 层 Fusion 已装可读 f3d，但 38/43 题种子文档与 verifier 仍在 Seldon 手中；computer_use adapter 未立项) |
+| `missing` | 内网不存在且不部署的工具 | ❌ | 见第 4 节恢复条件 | openvsp、bscw(气弹链)、cadbench_seldon.hard(38/43 题种子文档与 verifier 仍在 Seldon 手中；computer_use adapter 未立项；窄路 A 已由 sketch_lite 落地)。~~foam_basic(OpenFOAM)~~ 已恢复为 openfoam_dev（2026-08-19） |
 
 ## 2. Python 离线导入清单（分阶段，每阶段一次批量导入）
 
@@ -108,3 +108,9 @@ matlabengine                # 对应内网 MATLAB 版本（gtm 层）
 4. **数据拷贝**：SuperWing 系数层、HiLift Lite、各基准仓库快照（镜像前查 license-notes.md 放行状态）；
 5. **Phase-D 一批 wheel**（batch-2 启动前）：cadquery / jsbsim / ansys-mapdl-core / matlabengine。
 6. 不需要做：安装 OpenFOAM / OpenVSP / 任何气弹工具链（已明确暂缓）。
+
+### Phase-E（office 判分链原生依赖，2026-08-26 补记）
+
+- **LibreOffice headless（soffice）**：spreadsheetbench.verified_subset 的公式重算判分依赖
+  `soffice --headless --convert-to xlsx`（dev 实测 /opt/homebrew/bin/soffice，LibreOffice 26.2.3.2）。
+  内网移植必须携带 soffice 二进制或等价 headless 通道——此前登记缺失系深审发现（2026-08-26）。
