@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_rev_05",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.5556,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 0.5556,
+  "artifacts": {
+    "answer": "\"{\\n  \\\"changed_params\\\": {\\n    \\\"limit load factor\\\": {\\\"old\\\": 2.8, \\\"new\\\": 2.6},\\n    \\\"fuel tank inerting O2\\\": {\\\"old\\\": 9.8, \\\"new\\\": 10.1}\\n  },\\n  \\\"changed_param_count\\\": 2,\\n  \\\"added_applicability\\\": [],\\n  \\\"removed_applicability\\\": [\\\"fuselage\\\"],\\n  \\\"severity\\\": \\\"major\\\",\\n  \\\"compliance_recheck\\\": true\\n}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"changed_params.fuel_tank_inerting_o2_pct.old\", \"ok\": false, \"got\": null, \"ref\": 9.8, \"exact\": true}, {\"field\": \"changed_params.fuel_tank_inerting_o2_pct.new\", \"ok\": false, \"got\": null, \"ref\": 10.1, \"exact\": true}, {\"field\": \"changed_params.limit_load_factor.old\", \"ok\": false, \"got\": null, \"ref\": 2.8, \"exact\": true}, {\"field\": \"changed_params.limit_load_factor.new\", \"ok\": false, \"got\": null, \"ref\": 2.6, \"exact\": true}, {\"field\": \"changed_param_count\", \"ok\": true, \"got\": 2, \"ref\": 2, \"exact\": true}, {\"field\": \"added_applicability\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"removed_applicability\", \"ok\": true, \"got\": [\"fuselage\"], \"ref\": [\"fuselage\"]}, {\"field\": \"severity\", \"ok\": true, \"got\": \"major\", \"ref\": \"major\", \"exact\": true}, {\"field\": \"compliance_recheck\", \"ok\": true, \"got\": true, \"ref\": true, \"exact\": true}], \"n_fields\": 9, \"n_hit\": 5}"
+  },
+  "timings": {
+    "agent_s": 8.747,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:04bf6e3f9681b98a99acdb5dadd758dc7136de6302855dfda958bfd19e11b85a",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\\n  \"changed_params\": {\\n    \"limit load factor\": {\"old\": 2.8, \"new\": 2.6},\\n    \"fuel tank inerting O2\": {\"old\": 9.8, \"ne' attempts=1"
+  ]
+}

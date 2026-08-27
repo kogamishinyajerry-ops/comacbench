@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_rev_03",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.5556,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 0.5556,
+  "artifacts": {
+    "answer": "\"{\\n  \\\"changed_params\\\": {\\n    \\\"flap limit speed\\\": {\\\"old\\\": 185.5, \\\"new\\\": 183.0},\\n    \\\"fuel tank inerting O2\\\": {\\\"old\\\": 10.1, \\\"new\\\": 10.3}\\n  },\\n  \\\"changed_param_count\\\": 2,\\n  \\\"added_applicability\\\": [\\\"landing-gear\\\"],\\n  \\\"removed_applicability\\\": [],\\n  \\\"severity\\\": \\\"major\\\",\\n  \\\"compliance_recheck\\\": true\\n}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"changed_params.fuel_tank_inerting_o2_pct.old\", \"ok\": false, \"got\": null, \"ref\": 10.1, \"exact\": true}, {\"field\": \"changed_params.fuel_tank_inerting_o2_pct.new\", \"ok\": false, \"got\": null, \"ref\": 10.3, \"exact\": true}, {\"field\": \"changed_params.flap_limit_speed_ktas.old\", \"ok\": false, \"got\": null, \"ref\": 185.5, \"exact\": true}, {\"field\": \"changed_params.flap_limit_speed_ktas.new\", \"ok\": false, \"got\": null, \"ref\": 183.0, \"exact\": true}, {\"field\": \"changed_param_count\", \"ok\": true, \"got\": 2, \"ref\": 2, \"exact\": true}, {\"field\": \"added_applicability\", \"ok\": true, \"got\": [\"landing-gear\"], \"ref\": [\"landing-gear\"]}, {\"field\": \"removed_applicability\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"severity\", \"ok\": true, \"got\": \"major\", \"ref\": \"major\", \"exact\": true}, {\"field\": \"compliance_recheck\", \"ok\": true, \"got\": true, \"ref\": true, \"exact\": true}], \"n_fields\": 9, \"n_hit\": 5}"
+  },
+  "timings": {
+    "agent_s": 5.027,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:04bf6e3f9681b98a99acdb5dadd758dc7136de6302855dfda958bfd19e11b85a",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\\n  \"changed_params\": {\\n    \"flap limit speed\": {\"old\": 185.5, \"new\": 183.0},\\n    \"fuel tank inerting O2\": {\"old\": 10.1,' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_trc_03",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"{\\n  \\\"requirement_id\\\": \\\"SPEC-12\\\",\\n  \\\"clause_ref\\\": \\\"§25.455\\\",\\n  \\\"evidence_ids\\\": [\\\"AN-8\\\", \\\"TR-91\\\"],\\n  \\\"verified_params\\\": [\\\"PARAM_A3\\\"],\\n  \\\"test_only_params\\\": [],\\n  \\\"coverage_complete\\\": false\\n}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"requirement_id\", \"ok\": true, \"got\": \"SPEC-12\", \"ref\": \"SPEC-12\", \"exact\": true}, {\"field\": \"clause_ref\", \"ok\": true, \"got\": \"§25.455\", \"ref\": \"§25.455\", \"exact\": true}, {\"field\": \"evidence_ids\", \"ok\": true, \"got\": [\"an-8\", \"tr-91\"], \"ref\": [\"an-8\", \"tr-91\"]}, {\"field\": \"verified_params\", \"ok\": true, \"got\": [\"param_a3\"], \"ref\": [\"param_a3\"]}, {\"field\": \"test_only_params\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"coverage_complete\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 6, \"n_hit\": 6}"
+  },
+  "timings": {
+    "agent_s": 5.019,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:04bf6e3f9681b98a99acdb5dadd758dc7136de6302855dfda958bfd19e11b85a",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\\n  \"requirement_id\": \"SPEC-12\",\\n  \"clause_ref\": \"§25.455\",\\n  \"evidence_ids\": [\"AN-8\", \"TR-91\"],\\n  \"verified_params\": [\"' attempts=1"
+  ]
+}

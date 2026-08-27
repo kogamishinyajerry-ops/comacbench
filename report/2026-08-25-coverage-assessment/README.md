@@ -12,17 +12,17 @@
 
 **评测系统已完成三层九维骨架的九维全景闭合：20/40 基准 integrated、2424 任务、九维全部有数（structures 以开源 CalculiX 自建解零）、五类 adapter 与 6 类执行环境 live、集成项双基线全覆盖；评测对象已翻转为「harness」（四臂 H0-H3 矩阵、蒸馏脚手架谱系化、臂自动路由）。「懂航空」与「会工程」的分界已量化；剩余最大空洞是商业求解器线（Fluent/StarCCM+/MAPDL）与 simjeb/engdesign 原计划的商业 FEA 复算层。**
 
-## 1. 总量盘点（registry 46 条目）
+## 1. 总量盘点（registry 47 条目）
 
 | 状态 | 数量 | 占比 | 较 08-24 上午变化 | 含义 |
 | --- | --- | --- | --- | --- |
-| **integrated** | 25 | 54.3% | 19→25（+calculix/sketch_lite/engtable 08-25；+awdoc/awext/ssb 08-26 办公第二板） | adapter 跑通 + 双基线落盘 |
+| **integrated** | 26 | 55.3% | 19→26（08-25 三项、08-26 办公三项、08-26 awcom P1） | adapter 跑通 + 双基线落盘 |
 | proposed | 5 | 10.9% | 4→5（+cadbench_seldon.hard，08-24 收录镜像） | 探查/许可清点完成，集成 blocked |
 | paused-env | 2 | 4.3% | 不变 | dev/内网均无启动环境（openvsp、bscw） |
 | deferred | 8 | 17.4% | 不变 | 许可或价值存疑，暂缓 |
 | excluded | 6 | 13.0% | 不变 | 调研淘汰 |
 
-任务量：**integrated 25 项共 2513 个任务 YAML**（08-25 +15/+19；08-26 办公第二板 +55：awdoc 18/awext 12/ssb 25）（08-21 时点 2119 → +305），另有
+任务量：**integrated 26 项共 2528 个任务 YAML**（+awcom 公开 15；另有 hidden 池 45 动态运营）（08-25 +15/+19；08-26 办公第二板 +55：awdoc 18/awext 12/ssb 25）（08-21 时点 2119 → +305），另有
 `tasks/.foam_tail` 20 题在制。锚点纪律：饱和锚 6/20（校准用，不参与模型排序）。
 
 ## 2. 已集成 25 项明细（评测能力主表）
@@ -54,8 +54,9 @@
 | 23 | awdoc.office_docs | design_artifact(doc_document) | python+docx/pptx | 18 | 18/18（08-26 深审补落盘） | 0.6667 / — / glm-5.3 **0.9444 锚点**（docx/pptx 数据锚定，08-26） | — |
 | 24 | awext.clause_extract | qa_grounded(json_extract) | qa | 12 | 12/12 | 0.8704 / — / glm-5.3 **0.9074**（条款结构化抽取，08-26） | — |
 | 25 | spreadsheetbench.verified_subset | design_artifact(formula_cell) | python+soffice | 25 | 25/25 | 0.1600 / — / glm-5.3 **0.3069**（真实表格深水区，08-26） | — |
+| 26 | awcom.compliance | qa_grounded(json_extract) | qa+hidden层 | 15（+池45） | 15/15 | 0.8651 / — / glm-5.3 **0.8836**；hidden 0.9286/0.9286（gap +0.06/+0.05，rev 池配比校准项）（P1，08-26） | — |
 
-- 双基线覆盖 **25/25**；oracle 满分自检 **21/25**（qa 两项与 scicode/cfdcode 无 oracle 目录）（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
+- 双基线覆盖 **26/26**；oracle 满分自检 **22/26**（qa 两项与 scicode/cfdcode 无 oracle 目录）（qa_grounded 两项与 scicode/cfdcode 无 oracle 目录，判分依赖规则与 stub 地板）。
 - 分数仅导航用（scoring/README §1）；gate 失败率与原因分布才是决策口径。
 - v0.3 起模型间排序不再是评测目标；双模型对照表转为历史档案，固定对 {minimax-m3, glm-5.3}。
 
@@ -92,7 +93,7 @@
 | --- | --- | --- | --- |
 | 公共可比层 | 0.95 | 0.95 | 11 基准（qa 5 含双 VLM + code_exec 6 含 +变体）双基线；HE+/MBPP+ 抗泄漏纯测试升级，排序反转可测 |
 | 工程可执行层 | 0.80 | **0.87** | **13 基准**端到端 live（+sketch_lite/engtable/awdoc/ssb，08-25/26）；口径=13/15 候选（非 qa/code 基准），扣分项=商业 CFD/FEA 后端缺失（定性） |
-| 受控隐藏层 | 0.30 | **0.25** | 深审修正：hidden_dynamic 声明 4 条但 **0 个 hidden 任务在运营**（运行时未接线）；几何划分纪律真实落地 |
+| 受控隐藏层 | 0.30 | **0.55** | M10 首期接线（08-26 P1）：qa_grounded --hidden 全链 + awcom 运营（池 45 分层轮换 + hidden-public 分差监控上线）；simulation 族接线与 rev 池配比校准为后续 |
 | 多模态评测 | 0.55 | 0.55 | VLM 通道+free_vqa 判分+双 VLM 基线；单厂商（GLM 系），无第二来源 |
 | Adapter 类型 | 1.00 | 1.00 | 5/5：qa_grounded×5 / code_exec×6 / simulation_agent×5 / field_prediction×2 / design_artifact×1 |
 | 环境覆盖 | 0.56 | **0.67** | 口径=6/9 env_class live（qa/python_sandbox/openfoam_dev/data_only/matlab/calculix_native）；缺 commercial_cfd/fea/missing 三类；ssb 的 soffice 判分依赖已补入 env-matrix Phase-E（08-26） |

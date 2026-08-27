@@ -56,23 +56,23 @@ def radar(ax, labels, series, title):
 labels1 = ["航空知识\nknowledge\n(cfdquery/aeroengqa/mechvqa)", "科学编程\ncoding\n(scicode/cfdcode)", "CAD/几何\ncad_geometry\n(cadgen/openvsp)",
            "CFD\ncfd\n(superwing/hilift/foam)", "结构\nstructures\n(calculix/simjeb)", "动力\npropulsion\n(pycycle 28题)",
            "飞控\nflight_control\n(gtm v1+hard)", "总体/MDO\nmdo_design\n(aviary 27题)", "鲁棒审计\nrobustness_audit\n(横切)",
-           "工程办公\noffice_productivity\n(4基准 74题)"]
+           "工程办公\noffice_productivity\n(4基准 74题)", "适航审定\nairworthiness\n(awcom+hidden层)"]
 # 覆盖度 = 维度内 integrated 基准数 / registry 在册基准数（integrated+proposed+paused-env+deferred）
 # 2026-08-24 structures 解零更新：calculix.fea_basic integrated（simjeb/engdesign 仍 proposed）
 # —— structures 0.00→0.33，九维全部有数（全景闭合）
 # 2026-08-25 窄路 A 落地：cadbench_seldon.sketch_lite integrated（2D 草图子轴首批 15 题）
 # —— cad_geometry 在册 4（cadgen+sketch_lite integrated / openvsp paused / seldon.hard proposed）覆盖度 0.33→0.50
-coverage = [0.75, 1.00, 0.50, 0.60, 0.33, 1.00, 1.00, 0.33, 0.60, 1.00]
-coverage_prev = [0.75, 1.00, 0.33, 0.60, 0.00, 1.00, 1.00, 0.33, 0.60, 0.00]  # 08-24 上午时点（cad 0.33：sketch_lite 尚未落地；办公维尚不存在）
+coverage = [0.75, 1.00, 0.50, 0.60, 0.33, 1.00, 1.00, 0.33, 0.60, 1.00, 1.00]
+coverage_prev = [0.75, 1.00, 0.33, 0.60, 0.00, 1.00, 1.00, 0.33, 0.60, 0.00, 0.00]  # 08-24 上午时点（cad 0.33：sketch_lite 尚未落地；办公维尚不存在）
 # 基线可得 = 维度内 integrated 基准双基线落盘（M3+GLM 系；mechvqa=双 VLM；ccx=固定对 5.3+M3）
-baseline = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.60, 1.00]
+baseline = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.60, 1.00, 1.00]
 
 fig1, ax1 = plt.subplots(figsize=(10.0, 9.0), subplot_kw=dict(polar=True))
 radar(ax1, labels1, [
     ("覆盖度 2026-08-24（已集成/在册）", coverage, "#1f77b4", True, ""),
     ("双基线可得性（M3+GLM 系落盘）", baseline, "#d62728", True, ""),
     ("覆盖度 08-24 上午时点（参照）", coverage_prev, "#999999", False, "--"),
-], "评测能力雷达·十维（v0.4，2026-08-25 办公维落地）\n25/46 基准 integrated · 2513 任务 · 集成项双基线全覆盖 · 10/10 维有数")
+], "评测能力雷达·十维（v0.4，2026-08-25 办公维落地）\n26/47 基准 integrated · 2528 任务 · 集成项双基线全覆盖 · 10/10 维有数")
 fig1.tight_layout()
 fig1.savefig(os.path.join(OUT, "radar_nine_dim.png"), dpi=160, bbox_inches="tight")
 plt.close(fig1)
@@ -84,8 +84,8 @@ labels2 = ["公共可比层\n(11 基准·双基线·加强测试)", "工程可�
            "Harness 臂评测\n(H0-H3·谱系4/5·路由)"]
 # 2026-08-24 晚更新：工程可执行 8→9 基准（+calculix.fea_basic）→0.80→0.82；
 # 环境 5→6 类 live（+calculix_native）→0.56→0.62；判分自检 15/19→16/20→0.79→0.80
-harness = [0.95, 0.87, 0.25, 0.55, 1.00, 0.67, 0.84, 0.90, 0.75]
-harness_prev = [0.95, 0.80, 0.30, 0.55, 1.00, 0.56, 0.79, 0.92, 0.75]  # 08-24 上午时点（环境=6/9=0.67、自检=21/25=0.84、可执行=13/15 候选=0.87、隐藏层=0 运营→0.25、复现=0819 断链→0.90）
+harness = [0.95, 0.87, 0.55, 0.55, 1.00, 0.67, 0.84, 0.90, 0.75]
+harness_prev = [0.95, 0.80, 0.25, 0.55, 1.00, 0.56, 0.79, 0.92, 0.75]  # 08-24 上午时点（环境=6/9=0.67、自检=21/25=0.84、可执行=13/15 候选=0.87、隐藏层=0 运营→0.25、复现=0819 断链→0.90）
 
 fig2, ax2 = plt.subplots(figsize=(9.6, 9.0), subplot_kw=dict(polar=True))
 radar(ax2, labels2, [

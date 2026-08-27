@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_trc_03",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"```json\\n{\\n  \\\"requirement_id\\\": \\\"SPEC-12\\\",\\n  \\\"clause_ref\\\": \\\"§25.455\\\",\\n  \\\"evidence_ids\\\": [\\n    \\\"AN-8\\\",\\n    \\\"TR-91\\\"\\n  ],\\n  \\\"verified_params\\\": [\\n    \\\"PARAM_A3\\\"\\n  ],\\n  \\\"test_only_params\\\": [],\\n  \\\"coverage_complete\\\": false\\n}\\n```\"",
+    "model_meta": "{\"provider\": \"oracle\"}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"requirement_id\", \"ok\": true, \"got\": \"SPEC-12\", \"ref\": \"SPEC-12\", \"exact\": true}, {\"field\": \"clause_ref\", \"ok\": true, \"got\": \"§25.455\", \"ref\": \"§25.455\", \"exact\": true}, {\"field\": \"evidence_ids\", \"ok\": true, \"got\": [\"an-8\", \"tr-91\"], \"ref\": [\"an-8\", \"tr-91\"]}, {\"field\": \"verified_params\", \"ok\": true, \"got\": [\"param_a3\"], \"ref\": [\"param_a3\"]}, {\"field\": \"test_only_params\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"coverage_complete\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 6, \"n_hit\": 6}"
+  },
+  "timings": {
+    "agent_s": 0.0,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:f33dd500f80a33b549d386c590d5607e4cb32f4d08c07d8c92071f611b8539d9",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='```json\\n{\\n  \"requirement_id\": \"SPEC-12\",\\n  \"clause_ref\": \"§25.455\",\\n  \"evidence_ids\": [\\n    \"AN-8\",\\n    \"TR-91\"\\n  ],\\n  \"' attempts=1"
+  ]
+}

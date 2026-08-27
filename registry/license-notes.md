@@ -60,6 +60,7 @@
 | gtm.transport_control_hard | 自建加硬版任务（GTM 定位启发，未镜像上游） | confirmed-selfbuilt | —（2026-08-23 集成；PROVENANCE 见 data/gtm/transport_control_hard/） |
 | awdoc.office_docs | self-built（数据锚定文档族，无外部数据） | confirmed-selfbuilt | —（2026-08-26 集成；PROVENANCE 见 data/awdoc/office_docs/） |
 | awext.clause_extract | self-built（参数化合成条款风格卡，非真实规章原文；KB 恢复后重锚） | confirmed-selfbuilt | —（2026-08-26 集成；PROVENANCE 见 data/awext/clause_extract/） |
+| awcom.compliance | self-built（ACX 虚构规章参数化；hidden 池同协议） | confirmed-selfbuilt | —（2026-08-26 P1；PROVENANCE 见 data/awcom/compliance/） |
 | spreadsheetbench.verified_subset | CC BY-SA 4.0（HF KAKA22/SpreadsheetBench 卡片 license 字段，2026-08-26 核验；tar.sha256 随镜像） | confirmed-dataset | —（2026-08-26 镜像 verified_400 子集 25 题 + init/golden 副本；BY 署名 SpreadsheetBench 作者；SA：派生任务集同许可发布；详见 data/spreadsheetbench/verified_400/PROVENANCE.md） |
 | engtable.office_basic | self-built | confirmed-selfbuilt | —（2026-08-25 首批：5 族 19 题全部自建参数化，无外部数据；PROVENANCE 见 data/engtable/office_basic/） |
 | cadbench_seldon.sketch_lite | 改编 5 题：CC BY 4.0（上游同上；BY 署名衍生，协议由 Fusion GUI 改为 cadquery 脚本制，改编边界在 PROVENANCE §1 如实标注）/ 自建 10 题：self-built | confirmed-adapted-ccby4 + confirmed-selfbuilt | —（2026-08-25 窄路 A 落地；GT 一手源=题面几何规格而非 answer.f3d；改编题 license_provenance 逐题标注来源 task_id） |

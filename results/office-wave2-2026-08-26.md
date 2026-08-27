@@ -17,7 +17,8 @@
 | 基准 | minimax-m3 | glm-5.3 | 读数 |
 | --- | --- | --- | --- |
 | awdoc | 0.6667（gate 12/18：6 code_not_executable） | **0.9444**（17/18 满分，1 脚本崩） | docx/pptx 构造是高可达域；M3 的 pptx API 使用弱（6 题脚本级失败） |
-| awext | 0.8704（1/12 满分） | **0.9074**（2/12 满分） | 字段级区分带：clause_no（§1.23 格式）/family 是主要失分——verbatim 复制纪律 |
+| awext | 0.8704（1/12 满分） | **0.9074**（2/12 满分） |
+  > 勘误（2026-08-26 P1 期间）：M1 exact_keys 修复后同口径重跑——M3 **0.8889**（2/12）/ GLM **0.9074**（2/12），见 results/awext.clause_extract/2026-08-26/ | 字段级区分带：clause_no（§1.23 格式）/family 是主要失分——verbatim 复制纪律 |
 | ssb | **0.1600**（1/25 满分，gate 7/25：17 code_not_executable） | **0.3069**（5/25 满分，gate 10/25：14 code_not_executable） | 深水区确认：真实表格加工远难于自建 engtable（0.95/0.99）——sheet 级重构非公式书写是瓶颈 |
 
 ## 3. C 线筛选事实（如实）

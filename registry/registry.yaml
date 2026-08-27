@@ -131,7 +131,7 @@ entries:
     content: 总体设计与航程任务包：尺寸设计/约束优化/权衡分析/模型修复/方案对比
     scoring: 可执行模型 + 约束满足 + 目标函数阈值 + 单位与审计记录
     env: Python + OpenMDAO/Aviary 固定版本（Phase-B 导入清单，见 env-matrix.md；手工导入离线 wheel）
-    hidden_dynamic: true     # 隐藏商载-航程-跑道组合动态出题
+    hidden_dynamic: hidden-artifacts   # 试点工件在（README+answers.b64）；运行时接线仅 qa_grounded（2026-08-26），simulation 族 backlog
     assets_revision: aviary-mission@selfbuilt-2026-08-19+aviary1.0.1   # 2026-08-19 自建 8 静态任务 + 隐藏生成器试点 3 例（base64 隔离）；2026-08-21 扩题至 27（见 PROVENANCE 扩题节）
     risks: [参考答案需预计算并锁版本（已做：references/ 锁定，rel_tol 1%）]
     status: integrated
@@ -191,7 +191,7 @@ entries:
     env: 依赖 OpenVSP 原生二进制 + VSPAERO —— 内网无此工具
     paused_env_reason: 原生非 Python 工具，无许可亦无部署
     resume_condition: 验收人愿意手工导入 OpenVSP 发行包 且 NOSA 法务放行；CAD/几何能力在此期间由 cadgen.local_validity（pythonocc）承接
-    hidden_dynamic: true
+    hidden_dynamic: false   # 2026-08-26 深审清理：无 hidden 工件，虚标清除
     status: paused-env
 
   - id: bscw.aeroelastic
@@ -226,7 +226,7 @@ entries:
     content: 设计点/非设计点匹配、最小耗油率、模型修复、喘振裕度等约束判断、与 Aviary 回传联算
     env: Python + OpenMDAO/pyCycle 固定版本（Phase-B 导入清单，见 env-matrix.md）
     assets_revision: pycycle-pack@selfbuilt-2026-08-19+ompycycle_src   # 2026-08-19 自建 7 任务（SL 设计点收敛域）+ vendored 官方 turbojet 引擎 + 隐藏试点 1 例；2026-08-21 扩题至 28（见 PROVENANCE 扩题节）
-    hidden_dynamic: true
+    hidden_dynamic: hidden-artifacts   # hidden/ 仅 README+answers.b64（缺 generator.py，深审在案）；接线 backlog
     status: integrated
     integrated_note: 2026-08-19 simulation_agent（pycycle_cycle 分支）跑通（dev venv om-pycycle 源码装）；oracle 7/7；stub + M3 基线（0/7：5 code_not_executable + 2 missing_output——M3 幻觉 pycycle API，真实能力边界）；沙箱裸 system( 子串误封 add_subsystem 已修。2026-08-21 扩题 7→28（设计点网格/扫描敏感性/油耗比/修复题 +21），gold 全量重算锁定；存量 gold 内嵌旧仓库绝对路径修复（__file__ 锚定）+ 等效验证 7/7（max rel 1.5e-10）；stub 28/28 地板 + oracle 28/28 满分回归（.venv 钉子栈不变）
 
@@ -293,7 +293,7 @@ entries:
     self_built: true
     content: 配平线性化/静稳定与模态/控制器设计/发动机失效与舵面故障/包线鲁棒性/错误气动表修复
     env: "GTM 层: MATLAB + matlabengine-for-python（内网已有 MATLAB 许可）；JSBSim 快层: 纯 Python wheel"
-    hidden_dynamic: true
+    hidden_dynamic: false   # 2026-08-26 深审修正：无 hidden 工件交付，虚标清除（区分度由 hard 版承接）
     paused_env_note: dev 终端无 MATLAB（matlabengine 不可用）——GTM 层 blocked；JSBSim 快层（python_sandbox）可先行，许可 needs-verification 未核。（2026-08-22 已解除：dev 装 MATLAB R2026a U3）
     status: integrated
     integrated_note: 2026-08-22 MATLAB R2026a U3 到位（Sponsored License，CST/Aerospace TB 齐备，batch ~8-28s/次）——gtm_matlab 分支落地（runners/solvers/matlab.py 执行后端 + simulation_agent 分支 + providers expect=matlab + 正则级 MATLAB 逃逸检查含注释/字符串剥离）。任务集：自建 8 族 25 题（纵向模态×5/配平×3/静稳定×2/控制律极点配置×4/时域指标×3/修复×2/包线鲁棒×3/横航向×3；未镜像 GTM_DesignSim——Simulink 工程依赖+许可未核；稳定性导数量级取公开运输机文献典型值；F5 钉死精确离散口径 dt=0.01s）。判分 100% 本地数值可复现（result_keys 1% 容差 + exact_keys）。基线：stub 25/25 地板 / oracle 25/25 满分自检 / minimax-m3 0.9800（24/25 满分，1 部分分）/ glm-4.6 0.8900（21/25，gate 23/25：2 code_not_executable）——飞控维两家模型均高可达（与 pycycle 全灭互证维度区分度有效）。规格偏离记录于 PROVENANCE（phugoid ωn 可达包络 [0.025,0.06]、F8 Lβ 量级、F6 自检口径）。JSBSim 快层仍为后续可选项（python_sandbox）
@@ -312,7 +312,7 @@ entries:
     self_built: true
     content: 含噪系统辨识/鲁棒裕度(含级联回路)/增益调度/非线性配平/蒙特卡洛鲁棒筛选
     env: 同 gtm.transport_control（MATLAB R2026a U3 batch；gtm_matlab 分支）
-    hidden_dynamic: true
+    hidden_dynamic: hidden-artifacts   # 评审件已交付（generator+answers.b64），运行时接线仅 qa_grounded（2026-08-26）；simulation 族接线为 backlog
     assets_revision: gtm-hard@selfbuilt-2026-08-23+matlabR2026a
     status: integrated
     integrated_note: 2026-08-23 v2 加硬版——v1 双模型饱和（0.98/0.89）归因=题面给 A 矩阵教科书化；v2 五族 17 题（含噪辨识×4[PRBS 数据 LS 辨识+离散→连续映射]/鲁棒裕度×4[margin 含内环+外环级联]/增益调度×3[三 FC 并行各异目标]/非线性配平×3[推力-阻力-升力-安装角互锁]/蒙特卡洛×3[200 点 seeded 盒采样统计]）+ hidden/ 评审件（seeded 生成器+answers.b64）。基线：stub 17/17 地板 / oracle 17/17 满分 / minimax-m3 0.7059（gate 13/17：4 code_not_executable）——精准落入 ≤0.7 目标区分带（v1 同模型 0.98）；族级梯度：辨识 0.25 < 蒙特卡洛 0.50 < 裕度 0.875 < 调度/非线性配平 1.0。偏差如实：噪声级 2e-4~4e-4（为 SP 可辨识性校准，加硬点转辨识管线结构）、phugoid 结构性不可辨识（离散极点贴单位圆）仅判 SP、H4 gold 解析式与任何正确数值解同解——详见 data/gtm/transport_control_hard/PROVENANCE.md
@@ -361,7 +361,7 @@ entries:
     self_built: true
     content: L1 构型识别 -> L6 约束下重求解 六层任务；日常 CI 用粗网格+预计算结果，中高精度进 HPC 周期评测
     env: Fluent/StarCCM 无界面批处理（journal/macro），网格 CGNS 导入；替代原 OpenFOAM/SU2 方案
-    hidden_dynamic: true
+    hidden_dynamic: false   # 2026-08-26 深审清理：无 hidden 工件（proposed 条目）
     risks: [不得使用已归档/废弃的旧 DPW 几何充当最新标准；批处理自动化与许可座席需 IT 配合]
     paused_env_note: dev 终端无 Fluent/StarCCM+（commercial 类）——batch-2 会话核验，intranet 层可启动后接入；许可亦未完成（needs-verification/version-lock）
     status: proposed
@@ -588,6 +588,24 @@ entries:
     assets_revision: awext@selfbuilt-2026-08-26
     status: integrated
     integrated_note: 2026-08-26 办公第二板 B 线——12 题参数化合成条款卡（非真实规章原文，防误引；KB 恢复后按 doc_id 重锚）。providers 新增 json_extract oracle/stub。oracle 12/12 满分。详见 data/awext/clause_extract/PROVENANCE.md
+
+  - id: awcom.compliance
+    name: 适航审定工程族（P1 主攻，自建 ACX 框架）
+    source: 自建参数化（ACX 虚构规章；civair-kb 恢复后按 doc_id 重锚真实条款）
+    tier: A
+    order: 15e
+    batch: batch-4
+    adapter: qa_grounded
+    env_class: qa
+    license: self-built
+    license_status: confirmed-selfbuilt
+    self_built: true
+    content: ACAM 符合性方法矩阵（决策表在题面）/条款修订影响分析/审定文档链追溯
+    env: 判分 qa_grounded json_extract（exact_keys：MC 码/计数/old-new/severity 精确——M1 修复口径）；受控隐藏层接线（runners/hidden_runtime + --hidden N）
+    hidden_dynamic: true
+    assets_revision: awcom@selfbuilt-2026-08-26
+    status: integrated
+    integrated_note: 2026-08-26 P1 立项落地——公开 15 题（acam/rev/trc 各 5）+ hidden 池 45 题（generator.py+answers.b64 单一事实源，公开/隐藏零重题）。M10 隐藏层接线首发：qa_grounded --hidden N 动态物化（题面/答案值/字段 got-ref 零落盘，仅 sha256+ok 标志+聚合），summary 附 hidden-public 分差（scoring §5 首兑）。自检：公开 oracle 15/15；hidden oracle 3 题端到端+防泄漏残留检查通过。
 
   - id: spreadsheetbench.verified_subset
     name: SpreadsheetBench 精选子集（公式族）

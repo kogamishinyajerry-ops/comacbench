@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_rev_04",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"```json\\n{\\n  \\\"changed_params\\\": {\\n    \\\"flap_limit_speed_ktas\\\": {\\n      \\\"old\\\": 170.9,\\n      \\\"new\\\": 175.9\\n    }\\n  },\\n  \\\"changed_param_count\\\": 1,\\n  \\\"added_applicability\\\": [],\\n  \\\"removed_applicability\\\": [],\\n  \\\"severity\\\": \\\"major\\\",\\n  \\\"compliance_recheck\\\": true\\n}\\n```\"",
+    "model_meta": "{\"provider\": \"oracle\"}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"changed_params.flap_limit_speed_ktas.old\", \"ok\": true, \"got\": 170.9, \"ref\": 170.9, \"exact\": true}, {\"field\": \"changed_params.flap_limit_speed_ktas.new\", \"ok\": true, \"got\": 175.9, \"ref\": 175.9, \"exact\": true}, {\"field\": \"changed_param_count\", \"ok\": true, \"got\": 1, \"ref\": 1, \"exact\": true}, {\"field\": \"added_applicability\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"removed_applicability\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"severity\", \"ok\": true, \"got\": \"major\", \"ref\": \"major\", \"exact\": true}, {\"field\": \"compliance_recheck\", \"ok\": true, \"got\": true, \"ref\": true, \"exact\": true}], \"n_fields\": 7, \"n_hit\": 7}"
+  },
+  "timings": {
+    "agent_s": 0.0,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:f33dd500f80a33b549d386c590d5607e4cb32f4d08c07d8c92071f611b8539d9",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='```json\\n{\\n  \"changed_params\": {\\n    \"flap_limit_speed_ktas\": {\\n      \"old\": 170.9,\\n      \"new\": 175.9\\n    }\\n  },\\n  \"chan' attempts=1"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_acam_03",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"```json\\n{\\n  \\\"clause_id\\\": \\\"ACX-FUEL-243\\\",\\n  \\\"primary_method\\\": \\\"MC8\\\",\\n  \\\"secondary_methods\\\": [\\n    \\\"MC1\\\",\\n    \\\"MC9\\\"\\n  ],\\n  \\\"witnesses_required\\\": false,\\n  \\\"documented_only\\\": false\\n}\\n```\"",
+    "model_meta": "{\"provider\": \"oracle\"}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"clause_id\", \"ok\": true, \"got\": \"ACX-FUEL-243\", \"ref\": \"ACX-FUEL-243\", \"exact\": true}, {\"field\": \"primary_method\", \"ok\": true, \"got\": \"MC8\", \"ref\": \"MC8\", \"exact\": true}, {\"field\": \"secondary_methods\", \"ok\": true, \"got\": [\"mc1\", \"mc9\"], \"ref\": [\"mc1\", \"mc9\"]}, {\"field\": \"witnesses_required\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}, {\"field\": \"documented_only\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 5, \"n_hit\": 5}"
+  },
+  "timings": {
+    "agent_s": 0.0,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:f33dd500f80a33b549d386c590d5607e4cb32f4d08c07d8c92071f611b8539d9",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='```json\\n{\\n  \"clause_id\": \"ACX-FUEL-243\",\\n  \"primary_method\": \"MC8\",\\n  \"secondary_methods\": [\\n    \"MC1\",\\n    \"MC9\"\\n  ],\\n ' attempts=1"
+  ]
+}

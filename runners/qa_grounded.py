@@ -243,16 +243,43 @@ def _flatten_json(obj, prefix="") -> dict:
     return out
 
 
+def _json_num(v) -> float | None:
+    """数值外观（含 bool）→ float；不可转 → None。"""
+    if isinstance(v, bool):
+        return float(v)
+    if isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, str):
+        try:
+            return float(v.strip())
+        except ValueError:
+            return None
+    return None
+
+
 def grade_json_extract(ref: dict, got: dict,
-                        numeric_rel_tol: float = 0.02) -> tuple[float, list[dict]]:
+                        numeric_rel_tol: float = 0.02,
+                        exact_keys: tuple | list = ()) -> tuple[float, list[dict]]:
     """字段级判分（ref/got 先 _flatten_json）：
     数值→相对容差；字符串列表→排序 casefold 集合精确；其余→strip/casefold 精确。
+    exact_keys（2026-08-26 深审 M1 修复）：命中键（全路径或末段名）走精确匹配
+    ——年份/次数/方法码等离散语义字段不受容差放行；bool 一律精确。
     返回 (命中比例, 逐字段明细)。"""
     ref_f, got_f = _flatten_json(ref), _flatten_json(got)
+    exact = set(exact_keys)
     hits, details = 0, []
     for k, rv in ref_f.items():
         gv = got_f.get(k)
-        if isinstance(rv, (int, float)) and not isinstance(rv, bool):
+        if k in exact or k.split(".")[-1] in exact or isinstance(rv, bool):
+            gnum, rnum = _json_num(gv), _json_num(rv)
+            if gnum is not None and rnum is not None:
+                ok = gnum == rnum
+            else:
+                ok = isinstance(gv, (str, int, float, bool)) and not isinstance(gv, list) \
+                    and str(gv).strip().casefold() == str(rv).strip().casefold()
+            details.append({"field": k, "ok": ok, "got": gv, "ref": rv,
+                            "exact": True})
+        elif isinstance(rv, (int, float)) and not isinstance(rv, bool):
             if isinstance(gv, (int, float)) and not isinstance(gv, bool):
                 ok = abs(float(gv) - float(rv)) / max(abs(float(rv)), 1e-9) <= numeric_rel_tol
             else:
@@ -574,7 +601,8 @@ def run_task(
             ref_obj = task["reference"]["reference_json"]
             req_score, fields = grade_json_extract(
                 ref_obj, got_obj,
-                float(task["grader"].get("numeric_rel_tol", 0.02)))
+                float(task["grader"].get("numeric_rel_tol", 0.02)),
+                task["grader"].get("exact_keys") or ())
             subscores = {"physics": None, "requirements": req_score,
                          "objective": None, "robustness": 0.0}
             layer_details = {"kind": "json_extract", "fields": fields,
@@ -905,6 +933,11 @@ def main() -> int:
     ap.add_argument("--resume", action="store_true",
                     help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
                          "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
+    ap.add_argument("--hidden", type=int, default=0,
+                    help="受控隐藏层（2026-08-26 M10 接线）：从 data/<rid>/hidden/ "
+                         "池按 seed 抽 N 题动态运行——题面不落盘（result 仅存 "
+                         "sha256），summary 附 hidden-public 分差。"
+                         "out 目录约定 <provider>-hidden")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -959,6 +992,36 @@ def main() -> int:
                         + _b64.b64encode(p.read_bytes()).decode())
         image_cache[t.id] = uris
 
+    # ---- 受控隐藏层：动态物化 N 题（替换公开任务集；题面不落盘） ----
+    hidden_mode = args.hidden > 0
+    if hidden_mode:
+        from .hidden_runtime import (hidden_public_gap, load_hidden_pool,
+                                     strip_prompt_for_record)
+        htasks, hprompts, hrev = load_hidden_pool(
+            tasks_dir.parent.parent, registry_id)
+        import random as _rnd
+        from collections import defaultdict as _dd
+        _rng = _rnd.Random(20260826 ^ args.seed)
+        if args.hidden > len(htasks):
+            raise SystemExit(f"[hidden] 请求 {args.hidden} > 池 {len(htasks)}")
+        # 分层抽样（2026-08-26 实测教训：裸 sample 可致族失衡——8 题仅 1 rev 且
+        # 恰为零变更题，hidden=1.0 成抽样伪影）：按族前缀轮转均衡抽取
+        by_fam = _dd(list)
+        for t in htasks:
+            by_fam[t.id.rsplit("_", 1)[0]].append(t.id)
+        for fam in by_fam:
+            _rng.shuffle(by_fam[fam])
+        picked, fams = [], sorted(by_fam)
+        while len(picked) < args.hidden:
+            for fam in fams:
+                if by_fam[fam] and len(picked) < args.hidden:
+                    picked.append(by_fam[fam].pop())
+        idset = set(picked)
+        tasks = sorted([t for t in htasks if t.id in idset], key=lambda t: t.id)
+        prompt_cache = dict(hprompts)
+        prompt_cache = {t.id: prompt_cache[t.id] for t in tasks}
+        image_cache = {t.id: [] for t in tasks}
+
     model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get(
         "model_default", "n/a")
 
@@ -996,6 +1059,9 @@ def main() -> int:
                 score=0.0, artifacts={}, timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
                 env_digest=env_digest, logs=[f"runner exception: {e!r}"],
                 failure_mode=common.FM_CRASH)
+        if hidden_mode:
+            from .hidden_runtime import strip_prompt_for_record
+            r = strip_prompt_for_record(r)
         results.append(r)
         (out_dir / f"result_{t.id}.json").write_text(
             json.dumps(r, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -1004,8 +1070,21 @@ def main() -> int:
         out_dir, registry_id=registry_id, adapter=ADAPTER,
         provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
         env_digest=env_digest, assets=asset_hashes, rerun_command=rerun,
-        extra={"crash_tasks": crash, "model": model_label, "resumed_tasks": resumed})
+        extra={"crash_tasks": crash, "model": model_label, "resumed_tasks": resumed,
+               **({"hidden_mode": True, "hidden_n": args.hidden,
+                   "hidden_pool_rev": hrev} if hidden_mode else {})})
     sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
+
+    # hidden-public 分差（scoring §5）：同级 <provider> 公开目录存在时附加报告
+    if hidden_mode:
+        from .hidden_runtime import hidden_public_gap
+        gap = hidden_public_gap(results, out_dir.parent / out_dir.name[:-len("-hidden")])
+        if gap is not None:
+            gp = out_dir / "hidden_public_gap.json"
+            gp.write_text(json.dumps(gap, ensure_ascii=False, indent=2) + "\n",
+                          encoding="utf-8")
+            print(f"       [hidden-public gap] overall {gap['overall']['gap']:+.4f} "
+                  f"(h={gap['overall']['hidden']} p={gap['overall']['public']}) -> {gp}")
 
     dist = gate_distribution(results)
     print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "

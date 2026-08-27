@@ -1,0 +1,36 @@
+{
+  "task_id": "awc_trc_05",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"{\\n  \\\"requirement_id\\\": \\\"SPEC-34\\\",\\n  \\\"clause_ref\\\": \\\"§25.444\\\",\\n  \\\"evidence_ids\\\": [\\\"AN-9\\\", \\\"TR-67\\\"],\\n  \\\"verified_params\\\": [\\\"PARAM_B1\\\"],\\n  \\\"test_only_params\\\": [\\\"PARAM_A2\\\"],\\n  \\\"coverage_complete\\\": false\\n}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"requirement_id\", \"ok\": true, \"got\": \"SPEC-34\", \"ref\": \"SPEC-34\", \"exact\": true}, {\"field\": \"clause_ref\", \"ok\": true, \"got\": \"§25.444\", \"ref\": \"§25.444\", \"exact\": true}, {\"field\": \"evidence_ids\", \"ok\": true, \"got\": [\"an-9\", \"tr-67\"], \"ref\": [\"an-9\", \"tr-67\"]}, {\"field\": \"verified_params\", \"ok\": true, \"got\": [\"param_b1\"], \"ref\": [\"param_b1\"]}, {\"field\": \"test_only_params\", \"ok\": true, \"got\": [\"param_a2\"], \"ref\": [\"param_a2\"]}, {\"field\": \"coverage_complete\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 6, \"n_hit\": 6}"
+  },
+  "timings": {
+    "agent_s": 3.859,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:04bf6e3f9681b98a99acdb5dadd758dc7136de6302855dfda958bfd19e11b85a",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\\n  \"requirement_id\": \"SPEC-34\",\\n  \"clause_ref\": \"§25.444\",\\n  \"evidence_ids\": [\"AN-9\", \"TR-67\"],\\n  \"verified_params\": [\"' attempts=1"
+  ]
+}
