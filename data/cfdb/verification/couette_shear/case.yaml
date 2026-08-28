@@ -1,0 +1,69 @@
+id: couette_shear
+name: Planar Couette Shear Flow (icoFoam)
+category: verification
+description: "Planar Couette flow between a stationary no-slip bottom wall and a top lid moving at U_lid=0.1 m/s (H=0.01 m, nu=5e-5 m^2/s, Re_H=20), OpenFOAM icoFoam, 4x40x1 channel mesh (streamwise cyclic, one cell in z with empty -> flow uniform in x, exactly 1D profile in y). Analytical steady state: u(y)=U_lid*y/H (linear), |tau_wall|=nu*U_lid/H=5e-4 m^2/s^2 on both walls. Reference CSV is generated point-by-point by reference/generate.py (anchored, deterministic; no hand-typed digits). QoI bottom_wall_shear_normalized = |tau_bottom|/(nu*U_lid/H) = 1.0 analytically, extracted from the sampled profile slope at the bottom wall. The 1% tolerance is a documented generous bound: the linear profile is exactly representable on ANY mesh, so mesh resolution is not the error source here — the tolerance absorbs transient time-integration residue and sampling/interpolation error only (documented domain decision, not a hidden fudge)."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  # Re_H = U_lid * H / nu = 0.1 * 0.01 / 5e-5 = 20 (deeply laminar, consistent
+  # with turbulence: none). The normalized solution u/U_lid = y/H is
+  # parameter-independent, but the absolute shear tau scales with nu*U_lid/H.
+  reynolds: 20.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "icoFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "icoFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 0.00005
+      u_lid: 0.1
+      H: 0.01
+      end_time: 10.0
+      delta_t: 0.005
+      write_interval: 2000
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - bottom_wall_shear_normalized
+  qoi_script: post/compute_qoi.py
+reference:
+  type: analytical
+  files:
+    velocity_profile: reference/couette_profile.csv
+  qoi_values:
+    bottom_wall_shear_normalized: 1.0
+  # Held-out reference wires the agent-eval scoring path to a copy kept out of
+  # the public case surface (held_out/, not reference/, so it stays out of the
+  # provenance audit's stray-file scan tree; it is frozen and anchored via the
+  # scoring contract's held_out: namespace, not provenance.yaml). As with the
+  # lid_driven_cavity pilot, the held-out value here is deliberately the SAME
+  # as the public qoi_values above (both produced by reference/generate.py) —
+  # this proves the mechanism, it does NOT yet add anti-copy value from an
+  # independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    bottom_wall_shear_normalized: 0.01
+budget:
+  max_runtime_sec: 600
+  max_cells: null

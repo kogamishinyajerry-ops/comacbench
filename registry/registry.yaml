@@ -707,6 +707,209 @@ entries:
     condition: 作为代理模型 Harness 验证层，不作民机气动主分
     status: deferred
 
+  # ---------- 批次 v0.3: CFD 论文调研转化（2026-08-28，36 篇 arXiv 核验 + 10 篇 V&V，见 report/2026-08-28-cfd-agent-survey.md） ----------
+  # 证据基线：36 篇 arXiv 逐篇核验摘要（data/cfdagent/litbench/papers.json，sha256 锁定）
+  # + 10 篇 V&V 研讨会论文（Crossref/NTRS 核验）+ cfdb(GLM-CFD-Benchmark) MIT 镜像（b26799e）。
+  # DPW-VII / HLPW-4/5 / HFCVW-QCR2000 / Juncture Flow 的具体化结论见调研报告 §5（指向既有
+  # nasa_tmr.verification 与 crm_dpw_hlpw.coarse 条目，不重复立条）。
+
+  - id: cfdagent.litbench
+    name: Agent-CFD 文献基准（litbench，自建）
+    source: arXiv 摘要锚定自建题库；语料 data/cfdagent/litbench/papers.json（36 篇，arXiv API 逐篇核验）
+    tier: B
+    order: 61
+    batch: v0.3-cfd-agent
+    adapter: qa_grounded
+    env_class: qa
+    license: self-built questions; arXiv abstract metadata（公开 API，逐题署名）
+    license_status: confirmed-selfbuilt
+    content: 60 道 agent-CFD 文献 MCQ（20 篇 agent-CFD 核心 + 数据集/基准/湍流建模论文；单篇锚定题 48 + 跨论文对比题 12）
+    scoring: 客观判分（选项精确匹配），无 LLM judge；每题 evidence 为摘要逐字子串（生成器强校验防幻觉）
+    env: 无执行环境要求
+    assets_revision: cfdagent-litbench@2026-08-28
+    license_evidence: 题面原创（confirmed-selfbuilt 先例 awext/awcom）；arXiv 摘要经 export.arxiv.org 公开 API 获取，署名义务见 data/cfdagent/litbench/PROVENANCE.md §C；许可证核验明细 research/cfd_paper_code_licenses.json
+    assets_revision_note: 摘要 sha256 逐篇锁定（papers.json abstract_sha256）；生成器 runners/gen_tasks_cfdagent.py --check 防漂移
+    risks: [摘要级量化声明只反映论文自述; 闭卷文献题可能进入未来训练语料 -> 仅作可比基线]
+    status: integrated
+    integrated_note: 2026-08-28 qa_grounded 跑通（dev 终端，60 任务全过引文锚定校验）；oracle 自检 60/60（1.0000）；stub 0.2500（精确随机线）；MiniMax-M3 真实基线 0.8667（52/60，细粒度文献事实失分）；glm-5.3 基线 resume 续跑中（幂等，完成后更新 results/cfdagent.litbench/2026-08-28/）；gate 全 60/60
+
+  - id: cfdb.case_setup
+    name: cfdb Case Setup（GLM-CFD-Benchmark 任务书域）
+    source: https://github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark （本地克隆 ~/projects/cfd/runtimes/cfdb）
+    tier: S
+    order: 62
+    batch: v0.3-cfd-agent
+    adapter: simulation_agent
+    env_class: openfoam_dev
+    license: MIT
+    license_status: confirmed-repo
+    content: 17 个 solver-agnostic 工程任务书任务（Poiseuille/Couette/Blasius/Sod/斜激波/Taylor-Couette/Taylor-Green/NACA0012/自然对流/湍流槽道/湍流平板/后台阶/圆柱绘图/热传导等；managed 11 + evidence 6）
+    scoring: 上游冻结 QoI 脚本对账 held_out（容差 2%-15% 文档化）；LLM-judge 永不进判分（与本项目纪律同构）
+    env: dev=OpenFOAM v2312 docker（managed 模式真实运行提交案例）；evidence 模式判分不跑求解器，内网 Fluent/StarCCM+ 兼容（agent 自驱求解提交证据包）
+    assets_revision: cfdb@b26799e
+    license_evidence: 上游 LICENSE=MIT 已核验；镜像逐字复制无改写（data/cfdb/PROVENANCE.md）
+    assets_revision_note: 整目录镜像 17 案例（task.md/drawing.png/case.yaml/compute_qoi.py/held_out），sha256 入任务 YAML
+    risks: [判分依赖 simulation_agent 新增 exec_kind=cfdb_case_setup 分支（staged 解阻项）; evidence 模式反作弊强度弱于 managed（上游文档已声明）]
+    status: staged
+    staged_note: 2026-08-28 镜像+42 任务生成完毕（case_setup/verification/validation 三域）；exec_kind 分支实现后升 integrated
+
+  - id: cfdb.verification
+    name: cfdb Verification（经典 V&V 案例，解析/程序化参考）
+    source: 同 cfdb.case_setup
+    tier: S
+    order: 63
+    batch: v0.3-cfd-agent
+    adapter: simulation_agent
+    env_class: openfoam_dev
+    license: MIT
+    license_status: confirmed-repo
+    content: 10 个经典验证案例（Poiseuille/Couette/Blasius(SU2+OF)/热传导/斜激波/Sod 激波管/Taylor-Couette/Taylor-Green 等，解析解或冻结脚本生成参考）
+    scoring: QoI 对账（如 Sod 激波位置 0.85043115 @2%、Taylor-Green 衰减律），参考与容差上游 sha256 锚定
+    env: OpenFOAM v2312 docker
+    assets_revision: cfdb@b26799e
+    license_evidence: 同 cfdb.case_setup
+    risks: [同 cfdb.case_setup 的 exec_kind 解阻项]
+    status: staged
+    staged_note: 2026-08-28 镜像+任务生成完毕
+
+  - id: cfdb.validation
+    name: cfdb Validation（实验/跨代码参考验证案例）
+    source: 同 cfdb.case_setup
+    tier: A
+    order: 64
+    batch: v0.3-cfd-agent
+    adapter: simulation_agent
+    env_class: openfoam_dev
+    license: MIT
+    license_status: confirmed-repo
+    content: 15 个验证案例（NACA0012 α=0/5/10/15 + SA-TMR 远场阻力、圆柱 Re40/100、空腔 Re400/1000、后台阶、dambreak、自然对流、湍流槽道 Re_tau180、湍流平板）
+    scoring: QoI 对账（St/Cd/Cl_rms/分离点等；NACA0012 SA-TMR 用 CFL3D 数值参考 0.00819，25% 容差为上游文档化决策）
+    env: OpenFOAM v2312 docker
+    assets_revision: cfdb@b26799e
+    license_evidence: 同 cfdb.case_setup
+    risks: [同 cfdb.case_setup 的 exec_kind 解阻项]
+    status: staged
+    staged_note: 2026-08-28 镜像+任务生成完毕
+
+  - id: pinnacle.suite
+    name: PINNacle（PINN 综合基准）
+    source: https://arxiv.org/abs/2306.08827 + https://github.com/i207M/PINNacle
+    tier: B
+    order: 65
+    batch: v0.3-cfd-agent
+    adapter: code_exec
+    env_class: python_sandbox
+    license: MIT
+    license_status: confirmed-repo
+    content: 20+ PDE（含流体域）× 约 10 种 PINN 方法变体的统一评测；数据由代码内置生成（无需镜像大数据）
+    scoring: 相对 L2 误差（上游协议）
+    env: Python 沙箱（Phase-A 导入清单）
+    license_evidence: 仓库 LICENSE=MIT（LICENSE 文件 + 页面 spdxId 双核验，2026-08-28）；论文 NeurIPS 2024
+    risks: [PINN 训练算力成本需按题限额; 选题需划定流体+热传导子集]
+    status: proposed
+
+  - id: unifoil.airfoil
+    name: UniFoil（50 万翼型 RANS 数据集，含转捩/跨音速）
+    source: https://arxiv.org/abs/2505.21124 + https://huggingface.co/datasets/rkanchi/UniFoil
+    tier: A
+    order: 66
+    batch: v0.3-cfd-agent
+    adapter: field_prediction
+    env_class: data_only
+    license: CC BY-SA 4.0（数据）
+    license_status: confirmed-dataset
+    content: 500,000+ 翼型 RANS 样本（4,800 NLF + 30,000 FT 翼型 × 宽 Re/Ma，SA + e^N 转捩），比 AirfRANS 更贴近民机翼型工况
+    scoring: 场误差 + 力系数（上游协议）；仅取系数层做 Lite（同 superwing.coeff_lite 模式）
+    env: 无执行环境（数据判分；ML 基线 torch 可选导入）
+    license_evidence: HF 数据集卡片 license=cc-by-sa-4.0（2026-08-28 核验）；SA 传染性注意同 superwing
+    risks: [全量下载体量大 -> 仅 Lite; SA 许可的派生子集发布策略]
+    status: proposed
+
+  - id: thewell.fluiddyn
+    name: The Well 流体子集（15TB/16 数据集集合）
+    source: https://arxiv.org/abs/2412.00568 + https://github.com/PolymathicAI/the_well
+    tier: B
+    order: 67
+    batch: v0.3-cfd-agent
+    adapter: field_prediction
+    env_class: data_only
+    license: 代码 BSD-3-Clause / 数据以 CC BY 4.0 为主（逐子集有差异）
+    license_status: confirmed-split
+    content: 16 个数据集中取流体动力学子集做 Lite（单集 6.9GB 起，统一 PyTorch 接口 + 官方基线 checkpoint）
+    scoring: rollout 误差（上游协议）
+    env: 数据判分（体量按子集控制）
+    license_evidence: 仓库 LICENSE=BSD-3（2026-08-28 核验）；数据许可逐子集核对后再镜像
+    risks: [子集数据许可不一 -> 逐子集清点; 与 excluded.pdebench 定位区分（The Well 为其 2024 后继）]
+    status: proposed
+
+  - id: cfdagent.metaopenfoam8
+    name: MetaOpenFOAM 8 任务 NL->CFD 基准
+    source: https://arxiv.org/abs/2407.21320 + https://github.com/Terry-cyx/MetaOpenFOAM
+    tier: B
+    order: 68
+    batch: v0.3-cfd-agent
+    adapter: simulation_agent
+    env_class: openfoam_dev
+    license: GPL-3.0（仓库声明）
+    license_status: confirmed-repo
+    content: 8 个自然语言->CFD 仿真任务（可压/不可压多物理过程；上游 85% 通过率为自报基线）
+    scoring: 上游 pass/fail 管线（案例可运行 + 结果判据）
+    env: OpenFOAM dev 环境
+    license_evidence: 子代理核验仓库 LICENSE=GPL-3.0（2026-08-28）；GPL 对内部评测使用无障碍，注意再分发义务
+    risks: [上游仓库标注 deprecated（能力并入 svd-ai-lab/sim-cli）-> 需锁 revision; 8 任务规模小, 仅作 agent 执行层补充]
+    status: proposed
+
+  - id: tudaglr.openstage
+    name: TUDa-GLR-OpenStage 跨声速压气机标模
+    source: https://doi.org/10.33737/jgpps/158034 + https://doi.org/10.33737/jgpps/156120
+    tier: B
+    order: 69
+    batch: v0.3-cfd-agent
+    adapter: simulation_agent
+    env_class: commercial_cfd
+    license: 论文 CC BY 4.0 / 标模数据申请制
+    license_status: needs-verification
+    content: 轴流压气机级 RANS 复现（特性线 + ME21/ME30 剖面对账；双商业求解器基准解矩阵），叶轮机械方向唯一标模候选
+    scoring: 压比/温比/效率特性线容差判分（参考 Ansys CFX 与 Numeca FineTurbo 基准）
+    env: 内网商业 CFD（Fluent/StarCCM+/CFX）
+    license_evidence: 论文开放获取 CC BY 4.0（2026-08-28 核验）；标模数据需向 TU Darmstadt 申请，许可未核
+    risks: [数据获取靠申请; 商业求解器判分环境仅内网可启动 -> paused-env 风险]
+    status: proposed
+
+  - id: drivanetpp.coeff
+    name: DrivAerNet++ 系数层 Lite
+    source: https://arxiv.org/abs/2406.09624 + https://github.com/Mohamedelrefaie/DrivAerNet
+    tier: C
+    order: 70
+    batch: v0.3-cfd-agent
+    adapter: field_prediction
+    env_class: data_only
+    license: 数据 CC BY-NC 4.0（Harvard Dataverse）/ 仓库 NOASSERTION
+    license_status: blocked-license-ambiguity
+    content: 8,000 车型 CFD（39TB 全量不镜像；仅取 Cd/Cl 系数层做代理评测）—— 汽车气动与民机相关性有限，故 tier C
+    scoring: Cd 预测 MAE/R2（上游基线协议）
+    env: 数据判分
+    license_evidence: Dataverse 记录 license=CC BY-NC 4.0（2026-08-28 子代理核验）；NC 条款同 camb 待法务澄清
+    condition: 法务确认 NC 内部评测边界后才可镜像；澄清前仅调研记录
+    status: deferred
+
+  - id: flowbench.lite
+    name: FlowBench 复杂几何绕流 Lite
+    source: https://arxiv.org/abs/2409.18032 + https://huggingface.co/datasets/BGLab/FlowBench
+    tier: C
+    order: 71
+    batch: v0.3-cfd-agent
+    adapter: field_prediction
+    env_class: data_only
+    license: 数据 CC BY-NC 4.0（HF 数据集卡片）
+    license_status: blocked-license-ambiguity
+    content: 10K+ DNS 样本（FPO/LDC 族，2D/3D，速度/压力/温度三分辨率 + Cl/Cd/Nu）—— 与民机相关性有限，tier C
+    scoring: 场误差 + 力系数（上游 FNO/CNO/WNO/DeepONet 基线协议）
+    env: 数据判分
+    license_evidence: HF 数据集卡片 license=cc-by-nc-4.0（2026-08-28 核验）；无官方代码仓库
+    condition: 法务确认 NC 内部评测边界后才可镜像
+    status: deferred
+
   # ---------- 明确排除 ----------
   - id: excluded.alue_preflight
     name: ALUE / Pre-Flight

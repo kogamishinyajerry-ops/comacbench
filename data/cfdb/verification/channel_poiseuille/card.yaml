@@ -1,0 +1,19 @@
+# Gallery card copy for channel_poiseuille (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 平板通道 Poiseuille 层流 (Re_H=20)
+capability: 搭建并跑通二维平板通道 Poiseuille 层流验证（OpenFOAM icoFoam，H=0.01 m、L=12H、U0=0.1 m/s、nu=5e-5，240×20×1=4800
+  cells 均匀六面体 demo 网格），从 x/H=10 采样线提取 centerline_umax（采样线上 |Ux| 最大值，m/s）并逼近解析解 u_max=1.5·U0=0.15。
+expected: 交 qoi.json={"centerline_umax":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 0.15（held_out/qoi.json，与公开
+  qoi_values 同源，均为解析式精确值）；参考剖面 reference/poiseuille_profile.csv 由 reference/generate_profile.py 按
+  u(y)=6·U0·(y/H)(1−y/H) 逐点机器生成（41 点，锚定 sha256），无人手编数字。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的 key（在即过，不看数值对错）；② within_budget——manifest 自报 wall_time_sec
+  ≤ 600s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ 与 lid_driven_cavity 同构：QoI 准确度本身在 agent-eval 里是
+  ungated 的连续指标，case.yaml 的 5% 容差只服务另一条 cfdb run 的 V&V 路径，算得再离谱只要 key 在、时间够仍判 valid、仍被排名，只是分数难看。
+what_makes_it_bite: 三个显式残差：(1) 采样线位置是物理陷阱——均匀入口需要入口段发展（L_e/Dh≈0.05·Re_Dh≈2，即 ~4H），把探针放在 x/H=10
+  之外的近入口区会系统性偏离抛物线，案文把该关联式和余量写明，挪动采样位置即自爆；(2) 2026-08-11 一次完整 docker 实跑（v2312，t=5 s）测得
+  centerline_umax=0.149254（低 0.50%，逐点最大误差 2.05%），远在 5% 容差内——但该数字未经工程师签署，只作可复算锚点记录于 provenance；
+  (3) 与模板案相同，agent-eval 只验「贴近 reference」、不验「数字真是跑 CFD 算的」，手写 qoi.json=0.15 两门照过——held_out 值刻意等于公开参考，
+  尚未提供独立重算的 anti-copy 价值。

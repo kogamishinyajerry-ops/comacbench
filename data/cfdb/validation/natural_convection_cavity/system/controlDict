@@ -1,0 +1,61 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Steady SIMPLE run: "time" = iteration counter. Buoyancy-driven flow
+// converges slowly, so the budget is generous (3000 iterations) with
+// residualControl in fvSolution cutting the run short on convergence.
+
+application     buoyantSimpleFoam;
+
+startFrom       startTime;
+startTime       0;
+
+stopAt          endTime;
+endTime         3000;
+
+deltaT          1;
+
+writeControl    timeStep;
+writeInterval   500;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+
+timeFormat      general;
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    // Wall heat flux on the hot wall. The QoI hot_wall_nu_avg is the
+    // area-average of this field normalised as
+    //   Nu_avg = |q''|_avg * H / (k * (T_hot - T_cold))
+    // with H=1 m, k = mu*Cp/Pr = 6.437 W/(m K), dT = 10 K, i.e.
+    //   Nu_avg = |q''|_avg / 64.37.
+    wallHeatFluxHot
+    {
+        type            wallHeatFlux;
+        libs            ("fieldFunctionObjects");
+        patches         (hotWall);
+        writeControl    writeTime;
+    }
+}
+
+// ************************************************************************* //

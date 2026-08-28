@@ -1,0 +1,85 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Plane channel: H = 0.01 m (y), L = 12H = 0.12 m (x), one cell in z.
+// 240 x 20 x 1 = 4800 cells, uniform dx = dy = 5e-4 m.
+
+scale   1;
+
+vertices
+(
+    (0     0     0)       // 0
+    (0.12  0     0)       // 1
+    (0.12  0.01  0)       // 2
+    (0     0.01  0)       // 3
+    (0     0     0.001)   // 4
+    (0.12  0     0.001)   // 5
+    (0.12  0.01  0.001)   // 6
+    (0     0.01  0.001)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (240 20 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    walls
+    {
+        type wall;
+        faces
+        (
+            (1 5 4 0)
+            (3 7 6 2)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (4 5 6 7)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

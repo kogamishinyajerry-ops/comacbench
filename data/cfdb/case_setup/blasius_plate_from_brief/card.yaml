@@ -1,0 +1,26 @@
+# Gallery card copy for blasius_plate_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建层流平板 Blasius 边界层算例（evidence 模式）
+capability: case_setup 域 evidence 模式（可压缩/边界层族）：agent 只拿到求解器无关的自然语言工程任务书（visible/task.md）和带尺寸标注的
+  平板绕流示意图（visible/drawing.png），需在自己的环境里驱动任意 CFD 求解器从零搭建并求解二维层流平板边界层——U_inf=1 m/s、ν=1e-5
+  m²/s（Re_x=1e5·x[m]）、板前 0.2 m 滑移发展段、域高 0.2 m（约 12δ），提取壁面 Cf(x) 分布并提交证据包。judge 不运行任何求解器：它校验
+  证据包（required 文件齐全非空、manifest 含 solver 字段、CSV 可解析且数值有限），再由冻结 QoI 脚本（reference/compute_qoi.py，
+  stdlib-only，宿主机执行）从 cf_distribution.csv 线性插值归约出四站位 cf_x020/050/080/100。
+expected: 交证据包 submission/（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/samples/cf_distribution.csv，
+  表头 x,cf）。held_out 参考为 Blasius 关联式 Cf=0.664/√Re_x 在四站位的逐点值（0.00469519/0.0029695/0.00234759/0.00209975，沿用素材
+  案例 cases/verification/flat_plate_blasius_of 已锚定的 held_out 数字，案面无公开 qoi_values）。黄金 E2E 已实证（2026-08-11，ruler
+  ea7c27a0，真实 docker 运行产物转证据包）：golden 证据归约出四站位 Cf 与素材案例 metrics.json 钉值逐位一致（偏差 4.0%/7.2%/9.4%/
+  10.6%，系统性偏高——对称面顶边界下位移厚度挤占使来流加速），valid=true，score=-0.0782533（四站位相对误差均值）。
+criteria: 冻结两门 AND：① qoi_complete——证据包四步校验全过且冻结脚本归约出的 QoI 含全部四个声明 key（缺文件、manifest 无 solver、
+  CSV 含 NaN/Inf、采样范围不覆盖任一站位、脚本非零退出均 fail-closed invalid）；② within_budget——预算 3600s 门基于 manifest 自报
+  timing.wall_time_sec（evidence 模式 judge 不跑求解器，门语义较 managed 模式减弱，card 明写）；未自报则退化为只门宿主机归约时钟。
+  两门过才给连续分 score=−qoi_error，QoI 准确度是 ungated 连续指标，case.yaml 的 15% 容差仅作文档。
+what_makes_it_bite: 三个显式考点：(1) 层流边界层算例搭建是真功夫——前缘奇点处理（滑移发展段或等效措施）、壁面法向加密（首格
+  ~1e-4 m 量级）、定常层流收敛缺一不可，壁面剪切对网格分辨率敏感；(2) Cf 定义与采样合同考察工程严谨性——Cf=τw/(0.5ρU_inf²) 的
+  归一化必须与任务书一致，采样须覆盖全部四个站位，只报站位点值或范围不足都 fail-closed；(3) 负控实证（2026-08-11，ruler ea7c27a0）：
+  cf 列乘 0.8（典型欠预测）后仍 valid 但 score 从 -0.0782533 恶化到 -0.137397——连续分对物理扰动敏感成立。残差：judge 无法证明
+  求解器真的跑过（evidence 模式固有立场），真实性由生产 harness 锚定；参考值是解析关联式本身而非实测标定，anti-copy 依赖证据
+  归约机制而非数字保密。

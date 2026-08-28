@@ -1,0 +1,24 @@
+# Gallery card copy for turbulent_channel_retau180 (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Turbulent Channel Flow Re_tau=180 (MKM1999 DNS Validation)
+capability: 搭建并跑通全发展湍流槽道流 Re_tau=180 的稳态 RANS 验证（OpenFOAM simpleFoam + kOmegaSST 低 Re 壁面处理，
+  首格心 y+≈1；全槽道 2048 格 demo 网格，x/z 向 cyclic，meanVelocityForce 恒流量驱动 Ubar=1 m/s 固定 Re_b=2800），
+  从壁面剪应力提取 Cf=tau_w/(0.5·rho·U_b²) 并逼近 Moser, Kim & Mansour (1999) DNS 已发表参考值。
+expected: 交 qoi.json={"cf_bulk":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 8.18e-3（held_out/qoi.json，
+  公开文献公认值；generate_reference.py 对官方 DNS 剖面 chan180.means 做梯形积分得 8.136e-3，差 0.5% 归因于 65 站位
+  列表积分的求积误差）。2026-08-11 开发期 Docker 冒烟（v2312，全量 4000 迭代，23s 收敛）实测 Cf=7.842e-3
+  （两壁面对称到 7 位有效数字），误差 4.13%，达成 Re_tau=175.3、壁面 y+≈0.98——这是观察记录，不是人工签署的
+  baseline。另有一条独立提取路径：meanVelocityForce 日志的驱动压力梯度 3.9211e-3 与 tau_w 精确力平衡一致。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的 key（在即过，不看数值对错）；② within_budget——manifest 自报
+  wall_time_sec ≤ 600s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ QoI 准确度本身在 agent-eval 里是 ungated
+  的连续指标：case.yaml 的 10% 容差只服务另一条 cfdb run 的 V&V 路径；10% 覆盖 demo 网格分辨率 + 低 Re_tau 下 SST 模型
+  形式误差（实测 4.13%，文档化的领域决定，非暗箱 fudge）。u+ vs y+ 曲线（reference/uplus_yplus.csv，65 站位，
+  由 generate_reference.py 从官方 DNS 文件机械转换）只声明不设曲线容差——按 ungated_curves 披露，待签署 baseline 后再钉容差。
+what_makes_it_bite: 三个显式残差：(1) 全 cyclic 域压力纯 Neumann，fvSolution 漏 pRefCell/pRefValue 会直接 FOAM FATAL——开发期
+  冒烟真抓到过并修复，是配置纪律的实证；(2) 粗网格上均匀计数平均 U 得 0.878 看似"流量没守住"，实为分级网格未按体积加权的
+  读数伪影（体积加权恒为 1.0，meanVelocityForce 日志可证），提取脚本写错加权方式会得到错误 Cf 背景条件；(3) 与 lid_driven_cavity
+  相同：agent-eval 只验"贴近 reference"、不验"数字真是跑 CFD 算的"，手写 qoi.json=8.18e-3 两门照过——held_out 值当前刻意
+  等于公开 reference（Wave D2 pilot 机制证明），尚无独立重算的 anti-copy 价值。

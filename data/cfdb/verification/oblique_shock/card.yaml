@@ -1,0 +1,22 @@
+# Gallery card copy for oblique_shock (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Oblique Shock over a 10° Wedge (M1=2)
+capability: 搭建并跑通超声速楔形绕流斜激波验证（M1=2、楔半角 10°、无粘 Euler，OpenFOAM rhoCentralFoam
+  密度基瞬态求解器跑到长时间稳态极限，约 4 倍流过时间；25×100+100×100=12500 cells 粗网格 demo），从波后探针
+  (0.6, 0.15) 提取 post_shock_mach=|U|/sqrt(γRT) 并逼近 θ-β-M 弱解解析参考 1.640526（β=39.31384°）。
+expected: 交 qoi.json={"post_shock_mach":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 1.640526
+  （held_out/qoi.json，与公开 qoi_values 同值——照 lid_driven_cavity v5.0 Wave D2 pilot 机制，只证明冻结锚定通路，
+  尚不提供独立重算的 anti-copy 价值）；解析解由案例内 gen_reference.py 逐点求解 θ-β-M 方程生成，零手抄数字。
+  2026-08-11 一次完整 Docker 运行（v2312，endTime 2.0）在 12500 细胞粗网格上跑出 M2=1.63848（误差 0.125%）、
+  p2=1.70716（误差 0.034%），5% 容差对该网格是保守的（尚未被工程师人工签署为 baseline）。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的 key（在即过，不看数值对错）；② within_budget——manifest 自报 wall_time_sec
+  ≤ 900s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ QoI 准确度本身在 agent-eval 里是 ungated 的连续指标：case.yaml
+  的 5% 容差只服务另一条 cfdb run 的 V&V 路径，算得再离谱只要 key 在、时间够仍判 valid、仍被排名，只是分数难看。
+what_makes_it_bite: 三个显式残差：(1) θ-β-M 方程双解——数值求β若不做分支界定（先在 [μ, β_peak] 上升支上二分）会收敛到强解
+  β=83.7°/M2=0.60，gen_reference.py 用峰值扫描显式锁定弱支；(2) 激波被粗网格抹开数个单元，波后马赫依赖探针位置
+  避开激波过渡区——(0.6, 0.15) 选在楔面 y=0.0705 与解析激波 y=0.3276 之间，5% 容差如实来自网格分辨率；(3) 与全库共性：
+  README 明说 agent-eval 只验「贴近 reference」、不验「数字真是跑 CFD 算的」，手写 qoi.json=1.640526 两门照过——held_out
+  机制本该堵此洞，但当前 held-out 值刻意等于公开 reference，尚未提供独立重算的 anti-copy 价值。

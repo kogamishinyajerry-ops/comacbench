@@ -1,0 +1,62 @@
+id: cfdagent_q013
+registry_id: cfdagent.litbench
+domain: cfd
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: cfdagent-litbench@2026-08-28
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/cfdagent.litbench/cfdagent_q013.md
+  prompt_sha256: 6e60eaa22eec7a3e930daadbf032fa3ca31fce301c49aabf85464f9aa3639587
+  assets:
+  - path: data/cfdagent/litbench/questions.json
+    digest: a53a88548aeeaa8c89409d4a741d6a509890f400dd3fa102febfce2990ace3b8
+  - path: data/cfdagent/litbench/papers.json
+    digest: cb644b2c285f57b71a8b2a06b81efd45e6b5af0c25a50ae52137a24d9234940a
+output_contract:
+- answer
+reference:
+  source: arXiv 摘要锚定自建题（corpus papers.json abstract_sha256 锁定；主引论文 2507.23693）
+  revision: cfdagent-litbench@2026-08-28
+  question_index: 13
+  qtype: single_arch
+  paper_ids:
+  - '2507.23693'
+  paper_published: '2025-07-31'
+  evidence:
+  - the Preprocessing Agent that generates 3D geometries from textual or visual inputs
+    using a hybrid text-to-3D diffusion model (Point-E) and automatically meshes the
+    geometries
+  correct_option_index: 1
+  n_options: 4
+  refusal_expected: false
+  uncertainty_note: 客观题唯一答案，引文锚定摘要原文；无不确定度
+grader:
+  validity_gate: true
+  objective_layer: exact_match
+  parse_rule: strict_then_tolerant_first_digit_1_to_4
+  evidence_layer: false
+  refusal_layer: false
+  distinction_layer: false
+  robustness_samples: 1
+scoring:
+  weights:
+    physics: 0.0
+    requirements: 1.0
+    objective: 0.0
+    robustness: 0.0
+  note: 纯 MCQ 无证据语料/拒答/区分层：physics/objective 不适用（result.json 标注 N/A），权重经 YAML 覆写塌缩到
+    requirements（adapter 契约的覆写机制，非静默改分）；题目为 agent-CFD 文献知识客观题，答案锚定摘要逐字引文（见 data/cfdagent/litbench/questions.json）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: 题面为自建（confirmed-selfbuilt）；引文为 arXiv 摘要（API 公开元数据，逐题署名 arXiv id）
+  license: self-built questions; arXiv abstract metadata via public API
+  status: confirmed-selfbuilt
+  revision: cfdagent-litbench@2026-08-28
+  mirror_allowed: true

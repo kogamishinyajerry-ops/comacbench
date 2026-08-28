@@ -1,0 +1,95 @@
+id: turbulent_channel_retau180
+name: Turbulent Channel Flow Re_tau=180 (MKM1999 DNS Validation)
+category: validation
+description: >
+  Fully developed turbulent plane channel flow at Re_tau = 180, steady RANS
+  with OpenFOAM simpleFoam + kOmegaSST (low-Re wall treatment, first cell
+  center y+ ~ 1). Full channel (half-height h = 1 m), cyclic in streamwise
+  (x, Lx = 2*pi*h) and spanwise (z, Lz = pi*h), no-slip walls at y = 0 and
+  y = 2h. Constant-flow-rate forcing (meanVelocityForce, Ubar = 1 m/s) fixes
+  Re_b = U_b*h/nu = 2800, the bulk Reynolds number of the Moser, Kim &
+  Mansour (1999) DNS (Phys. Fluids 11(4), 943-945; the DNS file header
+  reports the exact Re_tau = 178.12). Reference: official MKM DNS statistics
+  (turbulence.oden.utexas.edu, file chan180.means), frozen as
+  reference/chan180.means and machine-transformed into
+  reference/uplus_yplus.csv by generate_reference.py (no hand-edited digits).
+  QoI cf_bulk = tau_w/(0.5*rho*U_b^2); published DNS value Cf = 8.18e-3
+  (consistent with Re_b = 2800 and Re_tau = 180 via Cf = 2*(u_tau/U_b)^2;
+  trapezoidal integration of the frozen DNS profile by generate_reference.py
+  gives 8.136e-3, 0.5% lower, difference attributed to quadrature on the
+  65-station tabulated profile). Demo mesh 8 x 64 x 4 = 2048 cells; the 10%
+  QoI tolerance reflects this demo mesh resolution plus RANS model-form error
+  at low Re_tau (documented domain decision, not a hidden fudge).
+physics:
+  flow: rans
+  turbulence: rans_kwsst
+  dimensionality: 3d
+  steady: true
+conditions:
+  # Friction Reynolds number Re_tau = u_tau*h/nu (h = half-height).
+  # Bulk Reynolds number Re_b = U_b*h/nu = 2800 is the imposed quantity
+  # (Ubar = 1 m/s, nu = 3.571429e-4 m^2/s).
+  reynolds: 180.0
+geometry:
+  type: periodic
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: 1.0
+solvers:
+  - name: openfoam
+    command: "simpleFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "simpleFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 3.571429e-4
+      u_bulk: 1.0
+      half_height: 1.0
+      re_bulk: 2800.0
+      end_time: 4000
+      delta_t: 1
+      write_interval: 2000
+outputs:
+  fields: ["U", "p", "k", "omega", "nut"]
+  # uplus_yplus declared but deliberately ungated (no curve_l2_tolerance):
+  # the u+ vs y+ comparison against reference/uplus_yplus.csv is reported
+  # (ungated_curves disclosure) until a signed baseline anchors a tolerance.
+  curves: ["uplus_yplus"]
+  qoi:
+    - cf_bulk
+  qoi_script: post/compute_qoi.py
+reference:
+  type: dns
+  files:
+    uplus_yplus: reference/uplus_yplus.csv
+    dns_raw: reference/chan180.means
+  qoi_values:
+    cf_bulk: 0.00818
+  # Same held-out mechanism as the lid_driven_cavity v5.0 Wave D2 pilot:
+  # held_out/qoi.json wires the agent-eval scoring path to a copy of the
+  # reference kept out of the public case surface (held_out/, not
+  # reference/, so it stays out of the provenance audit's public
+  # declared-reference tree). As in the pilot, the held-out value is
+  # deliberately the SAME as the public qoi_values above (the published
+  # MKM1999 Cf = 8.18e-3) — this proves the mechanism (frozen anchoring +
+  # scoring-time redirection), it does NOT yet add anti-copy value from an
+  # independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    # 10% covers demo-mesh resolution (2048 cells) plus kOmegaSST model-form
+    # error at Re_tau = 180 — documented domain decision, not a hidden fudge.
+    cf_bulk: 0.10
+budget:
+  max_runtime_sec: 600
+  max_cells: 4096

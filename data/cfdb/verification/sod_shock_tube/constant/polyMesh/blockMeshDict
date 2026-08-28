@@ -1,0 +1,72 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// 1D shock tube x in [0, 1] m, diaphragm at x = 0.5 (system/setFieldsDict).
+// 1000 uniform cells (dx = 1e-3 m); 1 cell across y/z with empty patches.
+
+scale   1;
+
+vertices
+(
+    (0    0     0)      // 0
+    (1    0     0)      // 1
+    (1    0.01  0)      // 2
+    (0    0.01  0)      // 3
+    (0    0     0.01)   // 4
+    (1    0     0.01)   // 5
+    (1    0.01  0.01)   // 6
+    (0    0.01  0.01)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (1000 1 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    sides
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)   // x = 0 tube end
+            (1 2 6 5)   // x = 1 tube end
+        );
+    }
+    empty
+    {
+        type empty;
+        faces
+        (
+            (0 1 5 4)
+            (5 6 7 4)
+            (3 7 6 2)
+            (0 3 2 1)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //

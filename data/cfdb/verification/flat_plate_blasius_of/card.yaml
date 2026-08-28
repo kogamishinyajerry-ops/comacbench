@@ -1,0 +1,24 @@
+# Gallery card copy for flat_plate_blasius_of (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Flat Plate Blasius (OpenFOAM Verification)
+capability: 用纯 OpenFOAM（simpleFoam + simulationType laminar）复现层流平板 Blasius 边界层的局部表面摩擦系数——对解析关联式
+  Cf(x)=0.664/√Re_x 做 code verification。blockMesh 两区块结构网格：前缘前留 0.2 m 滑移发展段（symmetryPlane），x 向朝前缘加密
+  （首格 ~2 mm），y 向朝壁面加密（60 层、ratio 200、首格 ~8.6e-5 m，x=0.1 处 BL 内 ~20 格）；U_inf=1 m/s、nu=1e-5 → Re_x=1e5·x[m]，
+  测量站位 x=0.1..1.0 m 覆盖 Re_x=1e4..1e5，远低于转捩（~5e5）。与 verification/flat_plate_su2（SU2 网格版）互补。
+expected: blockMesh + simpleFoam 在 ESI v2312（opencfd/openfoam-default:2312）跑通并收敛——2026-08-11 实测 shipped 配置（endTime 2000）
+  SIMPLE 于第 645 步 residualControl 收敛，controlDict 内置 wallShearStress functionObject 输出 plate 面 τw；四站位实测 Cf 对 Blasius
+  偏差 4.6%/7.4%/9.8%/10.6%（x=0.2/0.5/0.8/1.0 m），全部进入 15% 容差。QoI 参考值由 generate_reference.py 按 0.664/√Re_x 逐点生成
+  （reference/blasius_cf.csv sha256 锚定；held_out/qoi.json 同源同值，复刻 lid_driven_cavity 的 held-out 试点机制）。
+criteria: category=verification（对解析解），无 agent-eval 契约，走 cfdb run → MetricsEngine：四站位 Cf 相对误差
+  |computed−ref|/ref ≤ 0.15 才 qoi_pass；NaN/Inf→fail、缺失→incomplete。15% 容差来自 demo 网格分辨率（10500 cells）与前缘奇异/
+  有限域截断对壁面剪切的离散误差——文档化的领域决定（同 lid_driven_cavity 32×32 网格 10% 容差的纪律），非暗箱 fudge；
+  实测偏差 4.6–10.6% 证明容差真实可达。
+what_makes_it_bite: 三个诚实残差：(1) 本 case 的 QoI 提取链路未在 cfdb run 内闭环——openfoam adapter 目前只特例化
+  lid_driven_cavity（probes）与 naca0012（forces），非这两类的 OpenFOAM case 会被 prepare 路由到 LDC 模板，0/U 里的
+  movingWall/fixedWalls patch 名与本网格（inlet/plate/...）不匹配会 FATAL；本案例的可用性证据是直接 docker 运行
+  （blockMesh+simpleFoam 全配置收敛，四站位 Cf 实测偏差 4.6–10.6%），adapter 通用化是后续工作（2026-08-11 已完成：案例自带配置路径 + post/compute_qoi.py 作为 outputs.qoi_script，QoI 提取在 cfdb run 内闭环）。(2) QoI 参考值是解析关联式本身、
+  非实测标定——实测仅用于确认容差可达，没有把参考值换成 solver 输出。(3) 实测偏差系统性为正（symmetryPlane 顶边界下位移厚度
+  挤占使局部来流加速、Cf 偏高），且沿 x 增大（x=1.0 处 10.6% 最接近容差），换更细网格或更高域可收窄。

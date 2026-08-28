@@ -1,0 +1,24 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+transportModel  Newtonian;
+
+// Re = U_inf * c / nu = 1.0 * 1.0 / 1.66667e-7 = 6.0e6 (TMR condition).
+// Incompressible equivalent of the TMR "essentially incompressible" M = 0.15
+// recommendation; compressibility influence at M = 0.15 is negligible per TMR.
+nu              [0 2 -1 0 0 0 0] 1.66667e-7;
+
+// ************************************************************************* //

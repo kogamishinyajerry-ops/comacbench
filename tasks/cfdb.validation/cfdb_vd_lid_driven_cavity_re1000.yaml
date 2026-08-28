@@ -1,0 +1,59 @@
+id: cfdb_vd_lid_driven_cavity_re1000
+registry_id: cfdb.validation
+domain: cfd
+task_type: simulation_agent
+model_profile: code_tool_agent
+assets_revision: cfdb@b26799e
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- shell
+- openfoam
+- python
+input:
+  prompt_file: tasks/cfdb.validation/cfdb_vd_lid_driven_cavity_re1000.md
+  prompt_sha256: ff0e1cee94dd3a1cf1027aea7729ed2f8e56f2ec6972d120ac1172410fcc6af8
+  assets:
+  - path: data/cfdb/validation/lid_driven_cavity_re1000/case.yaml
+    digest: 88c2eac573bca9c89b58bbb9e38917de73730862edd17f75821bc4da1ab12fe2
+output_contract:
+- result.json
+reference:
+  type: dns
+  qoi_values_public:
+    centerline_umax: 0.462
+  held_out_note: held_out/qoi.json 为判分对账源；上游注明与公开值同源（机制演示）
+  held_out:
+    path: data/cfdb/validation/lid_driven_cavity_re1000/held_out/qoi.json
+    digest: fe0ce0ba915db451d5404ab2fa9063d40a17cab66cbc5d812ed4aab7593d5b05
+  qoi_script: post/compute_qoi.py
+  tolerances:
+    centerline_umax: 0.1
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+grader:
+  validity_gate: true
+  exec_kind: cfdb_cfd_qoi
+  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  mode: managed
+  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  qoi_script: post/compute_qoi.py
+  upstream_note: 上游 managed 模式：判分侧真实运行提交案例（blockMesh → application）
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
+    N/A（上游基准无目标函数/扰动重算）
+limits:
+  cpu: 2
+  memory_gb: 4
+  wall_clock_s: 3600
+  attempts: 3
+license_provenance:
+  source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark
+  license: MIT
+  status: confirmed-repo
+  revision: cfdb@b26799e
+  mirror_allowed: true

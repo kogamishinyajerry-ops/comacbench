@@ -1,0 +1,57 @@
+id: heat_conduction_1d
+name: 1D Steady Heat Conduction with Uniform Heat Source (laplacianFoam)
+category: verification
+description: "Lightest-weight verification case: 1D steady heat conduction in a plane wall (L=1 m, 100x1x1 cells), OpenFOAM laplacianFoam, both faces fixedValue T=300 K, uniform volumetric source S=100 K/s (fvOptions scalarSemiImplicitSource, volumeMode specific), DT=alpha=0.1 m^2/s. Reference: closed-form parabola T(x)=300+500*x*(1-x) K (q/k=S/alpha=1000 K/m^2; Incropera & DeWitt plane wall with generation), evaluated point-by-point by reference/generate.py into reference/t_profile.csv. QoI midplane_T = T(L/2) = 425.0 K. Tolerance 1% is a documented domain decision: a v2312 smoke run of this exact case (2026-08-11, opencfd/openfoam-default:2312) showed max profile deviation 0.0125 K and interpolated midplane error 2.7e-7 relative (limited by the transient tail), so 1% is deliberately loose to absorb coarser meshes and shorter endTime variants — not a hidden fudge."
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "laplacianFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "laplacianFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      DT: 0.1
+      source_su: 100.0
+      q_over_k: 1000.0
+      end_time: 40.0
+      delta_t: 0.1
+      write_interval: 400
+outputs:
+  fields: ["T"]
+  curves: []
+  qoi:
+    - midplane_T
+  qoi_script: post/compute_qoi.py
+reference:
+  type: analytical
+  files:
+    profile: reference/t_profile.csv
+  qoi_values:
+    midplane_T: 425.0
+  # Held-out reference wires the agent-eval scoring path to a copy kept out
+  # of the public case surface (same mechanism as lid_driven_cavity Wave D2).
+  # As in that pilot, the held-out value is deliberately the SAME analytic
+  # number as the public qoi_values above (T(L/2)=425 K from the closed-form
+  # solution) — it proves the frozen-anchoring mechanism, it does NOT add
+  # anti-copy value from an independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    midplane_T: 0.01
+budget:
+  max_runtime_sec: 600
+  max_cells: null

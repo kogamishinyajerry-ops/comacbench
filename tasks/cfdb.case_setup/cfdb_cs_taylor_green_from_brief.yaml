@@ -1,0 +1,59 @@
+id: cfdb_cs_taylor_green_from_brief
+registry_id: cfdb.case_setup
+domain: cfd
+task_type: simulation_agent
+model_profile: code_tool_agent
+assets_revision: cfdb@b26799e
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- shell
+- openfoam
+- python
+input:
+  prompt_file: tasks/cfdb.case_setup/cfdb_cs_taylor_green_from_brief.md
+  prompt_sha256: 362b4882e1d01caa8cddcc15c98dcb68abb5c19a85291e12c3f2d2f8f3fc1bce
+  assets:
+  - path: data/cfdb/case_setup/taylor_green_from_brief/case.yaml
+    digest: 7ee24fe397b07aaba4008b32d9ae9fa53da31c6bae083b056bf4b25606912879
+  - path: data/cfdb/case_setup/taylor_green_from_brief/visible/drawing.png
+    digest: b0fa180e6f5967751b2be25b913f1217a7974f68b0702e9e6bf8b35ba6434b41
+output_contract:
+- case_directory
+- result.json
+reference:
+  type: analytical
+  held_out:
+    path: data/cfdb/case_setup/taylor_green_from_brief/held_out/qoi.json
+    digest: fa052ebef143d241b6fd0df16d6dfcb7e9460ae676a4647f3580cbce999e2738
+  qoi_script: reference/compute_qoi.py
+  tolerances:
+    ke_ratio_end: 0.05
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+grader:
+  validity_gate: true
+  exec_kind: cfdb_case_setup
+  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  mode: evidence
+  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  qoi_script: reference/compute_qoi.py
+  upstream_note: 上游 evidence 模式：判分验证证据包并由冻结脚本降算 QoI（内网商业 CFD 兼容）
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
+    N/A（上游基准无目标函数/扰动重算）
+limits:
+  cpu: 2
+  memory_gb: 4
+  wall_clock_s: 3600
+  attempts: 3
+license_provenance:
+  source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark
+  license: MIT
+  status: confirmed-repo
+  revision: cfdb@b26799e
+  mirror_allowed: true

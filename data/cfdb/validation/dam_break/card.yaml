@@ -1,0 +1,22 @@
+# Gallery card copy for dam_break (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Dam Break (Martin & Moyce 1952, interFoam VOF)
+capability: 搭建并跑通经典二维溃坝两相流验证（Martin & Moyce 1952 n²=2 构型：水柱宽 a=0.146 m、高 2a，平底干床
+  4a×4a 方槽，OpenFOAM interFoam VOF，96×96×1=9216 cells 适中网格 demo，interface 压缩按 ESI v2312 damBreak 教程：
+  vanLeer + interfaceCompression、cAlpha=1、MULES），追踪无量纲涌浪前锋 Z/a（从水柱后壁沿底床量取）并逼近实验曲线。
+expected: 交 qoi.json 含 5 个 key（front_z_tau_{1_0,1_5,2_0,2_5,2_8}，即 τ=t√(2g/a)=1.0/1.5/2.0/2.5/2.8 时刻的 Z/a；
+  提取口径：取离目标时刻最近的写出场，Z=max{x | alpha.water≥0.5}，无量纲化 τ=t√(2g/a)、Z/a——本案例明用
+  √(2g/a) 约定并在 description 里写明，区别于部分文献的 τ=t√(g/a)）。冻结参考由 reference/interpolate_qoi.py
+  对冻结数字化 CSV 线性插值生成（1.316/1.7512/2.3565/3.0036/3.4147），脚本入库，禁手编数字。
+criteria: 两门 AND 结构同 lid_driven_cavity 试点（qoi_complete 只看 key 在不在 + within_budget 看 manifest 自报
+  wall_time_sec ≤ 1800s）；case.yaml 里 15% 相对容差只服务 cfdb run 的 V&V 路径。容差是文档化的领域决定、不是暗箱
+  fudge：它覆盖 ① 适中 demo 网格（a/24，文献 VOF 研究用 a/32..a/128）② 本案例刻意不加 +0.175 闸门释放时间平移
+  （Martin & Moyce 原文明说无法记录运动起始时刻，部分研究会平移仿真时间去迁就实验）③ 数字化散差。
+what_makes_it_bite: 三个显式残差：(1) 前锋提取口径敏感——alpha 阈值、是否贴底取点都会移动 Z，案例把口径写死在
+  description，换口径数值照样能交但偏离参考；(2) 无量纲约定陷阱——τ 用 √(2g/a) 还是 √(g/a) 两种文献定义并存，
+  混用直接把曲线拉偏 √2 倍，案例强制写明所用约定；(3) 实验本身的 t=0 不确定（闸门有限开启时间），早期 τ≈1 处
+  仿真（瞬时释放）系统性偏快，不加时间平移就要靠 15% 容差吸收，容差再收紧是不诚实的。held_out 机制同 LDC 试点：
+  值刻意等于公开 reference，只证明冻结锚定+打分重定向机制，尚不提供独立重算的 anti-copy 价值。

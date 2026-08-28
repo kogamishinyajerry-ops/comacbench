@@ -1,0 +1,63 @@
+id: backward_facing_step_laminar
+name: Backward-Facing Step (Laminar, Re=100)
+category: validation
+description: "Classic laminar backward-facing step benchmark (expansion ratio ER=2), OpenFOAM simpleFoam laminar (steady SIMPLE). Step height h=0.01 m, mean inlet velocity Um=1 m/s with a fully developed parabolic inlet profile, nu=2e-4 -> Re = Um*D_h/nu = 100 (D_h = 2*inlet channel height, the Armaly et al. 1983 / Erturk 2008 convention). Demo mesh 6100 cells (3 conformal hex blocks, inlet channel 5h, downstream 30h). QoI reattachment_x_over_h = primary reattachment length x_r/h, located by the Ux sign change on a near-bottom sample line (first-cell-centre height). Reference: Erturk (2008) Comput. Fluids 37:633-655, x_r/h = 2.922 at Re=100. A real run of the shipped case on opencfd/openfoam-default:2312 (2026-08-11, SIMPLE converged in 459 iterations) gave x_r/h = 2.8715 (1.73% error). Tolerance 10% reflects the coarse demo mesh (documented domain decision, not a hidden fudge)."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 100.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "simpleFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "simpleFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 0.0002
+      end_time: 2000
+      delta_t: 1.0
+      write_interval: 1000
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - reattachment_x_over_h
+  qoi_script: qoi/compute_xr.py
+reference:
+  # High-resolution 2-D numerical benchmark (Erturk 2008), typed 'dns'
+  # following the repo precedent for published high-fidelity numerical
+  # references (lid_driven_cavity uses 'dns' for Ghia et al. 1982).
+  type: dns
+  files:
+    reattachment: reference/erturk2008_reattachment.csv
+  qoi_values:
+    reattachment_x_over_h: 2.922
+  # Same mechanism as lid_driven_cavity (v5.0 Wave D2 pilot): the held-out
+  # copy is deliberately the SAME value as the public qoi_values above — it
+  # proves the frozen-anchoring/scoring-redirection mechanism; an
+  # independently recomputed held-out value is explicitly not claimed here.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    reattachment_x_over_h: 0.10
+budget:
+  max_runtime_sec: 600
+  max_cells: null

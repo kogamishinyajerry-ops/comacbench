@@ -1,0 +1,52 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Perfect gas, inviscid (mu = 0): compressible Euler equations.
+// W = 28.96 kg/kmol -> R = RR/W = 8314.47007/28.96 = 287.10187 J/kg/K.
+// Cp = 3.5*R so that Cv = Cp - R = 2.5*R and gamma = Cp/Cv = 1.4 EXACTLY,
+// matching the Sod (1978) analytic reference (gamma = 1.4).
+
+thermoType
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight       28.96;
+    }
+    thermodynamics
+    {
+        Cp              1004.8565343;   // = 3.5 * 287.1018669
+        Hf              0;
+    }
+    transport
+    {
+        mu              0;
+        Pr              1;
+    }
+}
+
+
+// ************************************************************************* //

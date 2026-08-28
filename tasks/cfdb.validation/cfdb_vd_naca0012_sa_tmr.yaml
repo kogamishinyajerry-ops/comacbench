@@ -1,0 +1,59 @@
+id: cfdb_vd_naca0012_sa_tmr
+registry_id: cfdb.validation
+domain: cfd
+task_type: simulation_agent
+model_profile: code_tool_agent
+assets_revision: cfdb@b26799e
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- shell
+- openfoam
+- python
+input:
+  prompt_file: tasks/cfdb.validation/cfdb_vd_naca0012_sa_tmr.md
+  prompt_sha256: 0540c32d94eac4c89b8863f4242242e1b2c8eed0ad409c87fc7ece501f4e8586
+  assets:
+  - path: data/cfdb/validation/naca0012_sa_tmr/case.yaml
+    digest: 22d109dac56a09b0eea2449876c5ea603d7f741cab03b703ab2adefbcd51f9d2
+output_contract:
+- result.json
+reference:
+  type: dns
+  qoi_values_public:
+    cd: 0.00819
+  held_out_note: held_out/qoi.json 为判分对账源；上游注明与公开值同源（机制演示）
+  held_out:
+    path: data/cfdb/validation/naca0012_sa_tmr/held_out/qoi.json
+    digest: 37458e7489b2e0d6ff3318c5c952c0f2fd4a51a6edf0d8009e894f8362e4fd9d
+  qoi_script: reference/compute_qoi.py
+  tolerances:
+    cd: 1.0
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+grader:
+  validity_gate: true
+  exec_kind: cfdb_cfd_qoi
+  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  mode: managed
+  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  qoi_script: reference/compute_qoi.py
+  upstream_note: 上游 managed 模式：判分侧真实运行提交案例（blockMesh → application）
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
+    N/A（上游基准无目标函数/扰动重算）
+limits:
+  cpu: 2
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 3
+license_provenance:
+  source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark
+  license: MIT
+  status: confirmed-repo
+  revision: cfdb@b26799e
+  mirror_allowed: true

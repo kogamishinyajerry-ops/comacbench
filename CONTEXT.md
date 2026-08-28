@@ -9,6 +9,8 @@
 - **gate（ValidityGate）**：评分底线检查器，先于子分执行；gate 失败分布是结果分析的核心维度。
 - **九维度**：结果报告的评分维度体系（见 `scoring/README.md`）。
 - **run_manifest**：每次运行的可复现性档案（seed / environment_digest / assets sha256 / 重跑命令）。
+- **litbench**（2026-08-28 定名）：论文摘要锚定的文献知识型基准——每题 evidence 必须是语料库摘要（sha256 锁定）的逐字子串，生成器强校验防幻觉；首例 `cfdagent.litbench`。
+- **cfdb 镜像**（2026-08-28）：GLM-CFD-Benchmark（MIT，b26799e）三 case 域逐字镜像；evidence 模式 = 判分侧不跑求解器、由冻结 QoI 脚本降算证据包，内网商业 CFD 兼容。
 
 ## 工作台 UI（2026-08-22 wayfinder 地图命名）
 

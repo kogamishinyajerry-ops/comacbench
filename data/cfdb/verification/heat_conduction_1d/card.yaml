@@ -1,0 +1,22 @@
+# Gallery card copy for heat_conduction_1d (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 1D Steady Heat Conduction with Uniform Heat Source (laplacianFoam)
+capability: 仓库里最轻量的 verification 案例：一维平板稳态导热，OpenFOAM laplacianFoam，100×1×1 网格（y/z 两向 empty
+  patch 严格一维），两侧壁面 fixedValue T=300 K（Dirichlet），均布内热源经 system/fvOptions scalarSemiImplicitSource
+  （volumeMode specific，S=100 K/s）注入，DT=α=0.1 m²/s。考求解器能否把边界条件类型写实、把 fvOptions 源项真正吃进方程，
+  复现解析抛物线 T(x)=300+500·x·(1−x) K。
+expected: 交 qoi.json={"midplane_T":值}。冻结参考 425.0 K（held_out/qoi.json，闭式解 T(L/2)=T_s+(q/k)L²/8=300+1000/8）；
+  剖面参考 reference/t_profile.csv 由 reference/generate.py 用公式逐点生成（sha256 锚定，脚本一并锚定入库）。本案例在
+  opencfd/openfoam-default:2312 里真实冒烟跑通：blockMesh+laplacianFoam 全程 <1 s，插值中面温度 424.999885 K（相对误差
+  2.7e-7），全剖面最大偏差 0.0125 K。
+criteria: category=verification（对解析解），无 agent-eval 契约，走 cfdb run → MetricsEngine：midplane_T 相对误差
+  |computed−425|/425 ≤ 0.01 才 qoi_pass；NaN/Inf→fail、缺失→incomplete。1% 容差是文档化的领域决定：冒烟实测中面误差仅
+  2.7e-7、剖面最大偏差 0.0125 K（受瞬态拖尾限制），1% 刻意放宽以吸收更粗网格/更短 endTime 的变体，不是暗箱 fudge。
+  预算 600s（实际秒级）。
+what_makes_it_bite: 这个案例咬人的不是物理而是「源项是否真的生效」：①fvOptions 的 volumeMode 写错就静默错解——absolute 模式下
+  Su=100 会被摊到整个 1e-4 m³ 计算域、等效源放大 1e4 倍，中面温度飙到 ~1.25e6 K（开发时实测踩中），写 specific 才对；
+  ②若求解器版本不支持 fvOptions，源项被静默忽略，解退化为 300 K 直线——所以冒烟必须看中面温度而非只看 exit code；
+  ③瞬态求解器逼近稳态需要足够 endTime，扩散时间尺度 L²/α=10 s，本案例跑 4 个时间尺度把拖尾压到 ~1e-4 K 以下。

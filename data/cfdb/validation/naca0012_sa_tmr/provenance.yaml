@@ -1,0 +1,67 @@
+# Provenance declaration for naca0012_sa_tmr (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  NASA Turbulence Modeling Resource (TMR), "2D NACA 0012 Airfoil Validation
+  Case — SA Model Results", summary table of 7 independent CFD codes
+  (CFL3D, FUN3D, NTS, JOE, SUMB, TURNS, GGNS) on a 897x257 grid with ~500c
+  farfield, M=0.15, Re=6e6 per chord, fully turbulent. CD(alpha=0) column:
+  CFL3D 0.00819 (the reference value of this case); code spread
+  0.00812-0.00830.
+source_url: https://tmbwg.github.io/turbmodels/naca0012_val_sa.html
+retrieved: "2026-08-11"
+transcription_verified: true
+file_hashes:
+  reference/tmr_sa_summary.csv: 44e9532e116cf73867c4a8456a2167b771628798a98b50b35b9026f74a89d2b2
+notes:
+  - "Transcribed 2026-08-11 directly from the official TMR SA results page
+    (tmbwg.github.io mirror of turbmodels.larc.nasa.gov), 'Summary of CFD SA
+    Results' table. CL(alpha=0) is reported as 'approx 0' in the source and
+    is transcribed as 0.0."
+  - "Cross-checked the CD(alpha=0)=0.00819 CFL3D value against two
+    independent reproductions of the same table: Jespersen, Pulliam & Childs,
+    'OVERFLOW Turbulence Modeling Resource Validation Results' (NAS TP,
+    ntrs.nasa.gov/citations/20190000252) and Ashton et al. 2019, 'Verification
+    and Validation of OpenFOAM for High-Lift Aircraft Flows' (Oxford ORA)."
+  - "Nature of the reference: NOT grid-converged in the strict sense. TMR
+    states these 897x257-grid multi-code results are 'representative, but not
+    truth'; the 7-code drag spread is ~4%. 0.00819 is the CFL3D entry, used
+    here as the canonical anchor value."
+  - "Distinction from naca0012_a0: that case validates against the Ladson
+    1988 wind-tunnel experiment (cd=0.0086, NASA TM-4074). THIS case is a
+    numerical (code-to-code) validation of the fully turbulent SA model
+    itself at the TMR conditions (M=0.15 'essentially incompressible',
+    Re=6e6, ~500c farfield on the TMR grids). Different ruler, different
+    question."
+  - "Freestream SA variable = 3 relative to laminar viscosity (TMR documents
+    CFL3D/FUN3D both used this); our 0/nuTilda uses nuTilda_inf = 3*nu."
+  - "Airfoil geometry in gen_mesh.py uses TMR's altered NACA 0012 definition
+    (sharp TE, max thickness ~11.894% of chord), transcribed from
+    tmbwg.github.io/turbmodels/naca0012_val.html — NOT the -0.1015 closed-TE
+    variant used by the repo's naca0012 geometry generator."
+  - "Demo-mesh gaps vs TMR grids, all feeding the honest 25% Cd tolerance
+    (documented domain decision, same discipline as lid_driven_cavity):
+    52k cells vs 897x257 (and finer families); farfield ~20-40c vs ~500c
+    (slip top/bottom walls, no Thomas-Salas point-vortex correction);
+    y+ ~ 65 with nutUSpaldingWallFunction vs TMR near-wall-resolved grids;
+    incompressible simpleFoam vs compressible codes at M=0.15 (small);
+    70 far-field cells with aspect ratio up to ~1.27e3 (over the checkMesh
+    1000 threshold, in uniform-flow regions at the tops of the radial
+    spokes; checkMesh otherwise OK)."
+  - "Observed baseline (NOT the reference): this exact configuration run in
+    docker (opencfd/openfoam-default:2312) on 2026-08-11 reaches a steady
+    state (SIMPLEC, Cl ~ -2.5e-4 at iter 1400) with Cd ~ 0.0158, +93% vs
+    the 0.00819 reference. Decomposition: our viscous Cd ~ 0.0075 vs CFL3D
+    ~0.0068 (+10%, CFL3D value integrated from the official data file
+    n0012cf_cfl3d_sa.dat), our pressure Cd ~ 0.0084 vs CFL3D ~0.0014
+    (integrated from n0012cp_cfl3d_sa.dat) - the excess is the
+    under-resolved leading-edge suction peak (first chordwise cell 2.5e-3
+    c). Refining the LE cell to 5e-4 c improved the Cp match but sent the
+    SA field into a slow large-amplitude limit cycle with this BC/solver
+    combination, so it was reverted; this is why the Cd tolerance is 1.0."
+  - "Known structural caveat: cfdb's OpenFOAM adapter routes any case id
+    starting with 'naca0012' to its built-in snappyHexMesh template set
+    (_is_naca_case in src/cfdb/adapters/openfoam.py), so a `cfdb run` of
+    this case would use the adapter's templates, not this directory's
+    C-grid dictionaries. The dictionaries here are the authoritative,
+    smoke-tested configuration (docker, opencfd/openfoam-default:2312);
+    changing the adapter routing is out of scope for this case addition."

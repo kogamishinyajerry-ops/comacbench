@@ -1,0 +1,86 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     pimpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+// Shedding period ~ D/(St*U) ~ 1/(0.164*1) ~ 6.1 s. endTime 300 s gives
+// ~49 shedding cycles; the first 60 s (~10 cycles) are startup transient
+// and are discarded before the QoI statistics/FFT (see post/compute_qoi.py).
+endTime         300;
+
+deltaT          0.005;
+
+writeControl    adjustableRunTime;
+
+writeInterval   30;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep  yes;
+
+maxCo           1.5;
+
+maxDeltaT       0.01;
+
+functions
+{
+    // Cl/Cd time series, written EVERY timestep — this is the QoI source.
+    // Output: postProcessing/forceCoeffs1/0/coefficient.dat
+    // (columns: Time, Cm, Cd, Cs, Cl, Cl(f), Cl(r) for v2312 forceCoeffs).
+    // Aref = D * span_depth = 1 * 0.1 = 0.1 m^2 (2D sectional coefficients);
+    // lRef = D = 1 m; rhoInf = 1 (pimpleFoam solves for kinematic p).
+    forceCoeffs1
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        writeControl    timeStep;
+        writeInterval   1;
+        log             no;
+
+        patches         (cylinder);
+        rho             rhoInf;
+        rhoInf          1;
+
+        liftDir         (0 1 0);
+        dragDir         (1 0 0);
+        CofR            (0 0 0);
+        pitchAxis       (0 0 1);
+
+        magUInf         1;
+        lRef            1;
+        Aref            0.1;
+    }
+}
+
+// ************************************************************************* //

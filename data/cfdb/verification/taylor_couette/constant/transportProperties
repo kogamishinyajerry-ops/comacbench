@@ -1,0 +1,26 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Kinematic viscosity. With R_i=0.05 m, R_o=0.10 m, omega=1 rad/s:
+//   Re = omega * R_i * (R_o - R_i) / nu = 1 * 0.05 * 0.05 / 1e-3 = 2.5
+// Deeply subcritical for Taylor vortices -> stable laminar circular Couette.
+// NOTE: the steady analytical profile u_theta(r) = A*r + B/r is independent
+// of nu; nu only sets the transient relaxation time (~(R_o-R_i)^2/nu = 2.5 s).
+
+nu              [0 2 -1 0 0 0 0] 0.001;
+
+// ************************************************************************* //

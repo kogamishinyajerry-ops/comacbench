@@ -1,0 +1,19 @@
+# Gallery card copy for lid_driven_cavity_re400 (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Lid-Driven Cavity (Re=400)
+capability: 搭建并跑通经典 lid-driven cavity 层流验证（Re=400，OpenFOAM icoFoam，64×64×1=4096 cells 网格），从流场提取
+  centerline_umax（竖直中心线 |U|/U_lid 的最大值，probe line 顶端 y/H=0.95）并逼近 Ghia, Ghia & Shin (1982) JCP 48 Table I
+  的 Re=400 列参考解。案例自带完整 0/、constant/、system/ 字典（nu=2.5e-4，endTime=10s，deltaT=0.001s），可直接进容器跑。
+expected: 交 qoi.json={"centerline_umax":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 0.551（held_out/qoi.json，由
+  reference/ghia1982_re400_centerline.csv 在 y/H=0.95 线性插值：0.9531 站 0.55892 与 0.8516 站 0.29093 之间得 0.5507）。
+  CSV 为 Ghia Table I 原版 17 站 Re=400 列，2026-08-11 逐点对照≥2 个独立转载源核实（provenance.yaml 记 transcription_verified=true）。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的 key（在即过，不看数值对错）；② within_budget——manifest 自报 wall_time_sec
+  ≤ 600s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ QoI 准确度本身在 agent-eval 里是 ungated 的连续指标：case.yaml
+  的 10% 容差只服务另一条 cfdb run 的 V&V 路径，算得再离谱只要 key 在、时间够仍判 valid、仍被排名，只是分数难看。
+what_makes_it_bite: 三个显式残差：(1) Re=400 对流更强，64×64 网格 + Euler 时间格式 + 中心线插值跨越 0.8516–0.9531 宽站距（剖面弯曲区，
+  线性插值自带 ~1% 偏差），误差预算比 Re=100 姊妹案例更紧，10% 容差是文档化的领域决定而非暗箱 fudge；(2) 与 Re=100 案例相同的
+  probe 解析陷阱——只抓每行第一个向量会把值算到数量级错误，V&V 路径判 fail，但 agent-eval 连续排名只会压分不会二元拒绝；(3) held-out
+  值刻意等于公开 reference（同 Re=100 pilot），尚未提供独立重算的 anti-copy 价值，手写 qoi.json=0.551 两门照过。

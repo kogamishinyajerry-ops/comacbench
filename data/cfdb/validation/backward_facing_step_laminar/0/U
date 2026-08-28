@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    inlet
+    {
+        // Fully developed parabolic profile in the inlet channel
+        // (y in [h, 2h], h = 0.01 m), mean velocity Um = 1 m/s:
+        //   u(y) = 6 * Um * eta * (1 - eta),  eta = (y - h)/h
+        // U_max = 1.5 m/s. Re = Um * 2h / nu = 100 with nu = 2e-4.
+        type            codedFixedValue;
+        value           uniform (0 0 0);
+        name            parabolicInlet;
+        code
+        #{
+            const vectorField& Cf = this->patch().Cf();
+            vectorField& f = *this;
+            const scalar h  = 0.01;   // inlet channel height (= step height)
+            const scalar y0 = 0.01;   // inlet channel floor elevation
+            const scalar Um = 1.0;    // mean inlet velocity [m/s]
+            forAll(Cf, i)
+            {
+                const scalar eta = (Cf[i].y() - y0)/h;
+                f[i] = vector(6.0*Um*eta*(1.0 - eta), 0.0, 0.0);
+            }
+        #};
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    lowerWall
+    {
+        type            noSlip;
+    }
+    upperWall
+    {
+        type            noSlip;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

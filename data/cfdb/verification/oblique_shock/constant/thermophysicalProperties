@@ -1,0 +1,53 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Normalised inviscid gas from the rhoCentralFoam wedge15Ma5 tutorial:
+// R = RR/molWeight ~ 0.7143, Cp = 2.5  ->  gamma = 1.4 exactly, and with
+// T1 = 1 the speed of sound is a1 = sqrt(gamma R T1) ~ 1, so U1 = 2 is M1 ~ 2.
+// mu = 0: inviscid (Euler), matching the analytical theta-beta-M reference.
+
+thermoType
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+mixture
+{
+    // normalised gas
+    specie
+    {
+        molWeight       11640.3;
+    }
+    thermodynamics
+    {
+        Cp              2.5;
+        Hf              0;
+    }
+    transport
+    {
+        mu              0;
+        Pr              1;
+    }
+}
+
+
+// ************************************************************************* //

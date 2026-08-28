@@ -1,0 +1,27 @@
+# Gallery card copy for backward_facing_step_laminar (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Backward-Facing Step (Laminar, Re=100)
+capability: 搭建并跑通经典层流后台阶验证（膨胀比 ER=2，Re=100，OpenFOAM simpleFoam 层流稳态，3 块保角六面体网格
+  6100 cells demo 规模，入口 5h 抛物线充分发展 profile，下游 30h），从近底壁采样线提取主涡再附长度
+  reattachment_x_over_h 并逼近 Erturk (2008) 已发表高分辨率数值基准。
+expected: 交 qoi.json={"reattachment_x_over_h":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 2.922
+  （held_out/qoi.json，取自 Erturk 2008 的 x1/h 表 Re=100 行，该值经原始论文表格与至少两个独立转载源逐点交叉核实，
+  见 provenance.yaml）；Armaly et al. (1983) 实验值 3.08 仅作背景对照（单一二手来源，未用作判据）。本案例随附字典
+  在 opencfd/openfoam-default:2312 上真实跑过一次完整算例（2026-08-11，SIMPLE 459 步收敛，wall clock ~7 s），
+  实测 x_r/h=2.8715（误差 1.73%）；该数字尚未被工程师人工签署进 baselines，仅作预期量级参考。
+criteria: 冻结两门 AND（同 lid_driven_cavity 模板）：① qoi_complete——只查 qoi.json 有没有声明的 key；②
+  within_budget——manifest 自报 wall_time_sec ≤ 600s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ QoI
+  准确度本身在 agent-eval 里是 ungated 连续指标：case.yaml 的 10% 容差只服务另一条 cfdb run 的 V&V 路径，且该容差来自
+  demo 网格分辨率（文档化的领域决定，非暗箱 fudge——文献中各 2D 求解器在 Re=100 的散布本身就有 ±7%：Erturk 2.922、
+  Biswas 2.71、Armaly 实验 3.08；随附网格实测误差 1.73%）。
+what_makes_it_bite: 三个显式残差：(1) cfdb OpenFOAM adapter 目前把所有非 naca0012* 案例都走 lid-driven-cavity 的
+  prepare/collect 路径（硬编码 movingWall/fixedWalls 初始场、只提取 centerline_umax），因此 cfdb run 尚不能端到端评判
+  本案例——随案例自带的 0/ constant/ system/ 字典是完整可独立运行的（Docker 冒烟 + 完整算例均已验证，
+  SIMPLE 459 步收敛、实测 x_r/h=2.8715 对冻结参考 2.922 误差 1.73%），
+  QoI 由案例内 qoi/compute_xr.py 从近底壁 Ux 变号点线性插值提取；adapter 通用化是 src/ 侧改动，超出本案例范围（2026-08-11 已完成：compute_xr.py 末行输出 QoI JSON 并声明为 outputs.qoi_script，case.yaml 的临时 qoi_extract step 已随 adapter 接线移除）；(2)
+  held-out 值刻意等于公开 reference（同 LDC pilot 机制），尚不提供独立重算的 anti-copy 价值；(3) Armaly 实验在
+  Re≈400 以上出现三维效应（其 ER=1:1.94 也非精确 2），故本案例刻意锚定 Re=100 的 2D 数值基准而非实验值——把
+  x_r 判给实验值会让一个正确的 2D 层流求解器在错误的标尺上被判 fail。

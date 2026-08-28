@@ -1,0 +1,17 @@
+# Gallery card copy for natural_convection_cavity (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Natural Convection Cavity (Ra=1e4, de Vahl Davis)
+capability: 搭建并跑通 de Vahl Davis (1983) 方腔自然对流验证（OpenFOAM buoyantSimpleFoam + Boussinesq 状态方程，层流稳态，Ra=1e4，Pr=0.71，64×64×1=4096
+  cells 演示网格），从热壁 wallHeatFlux 提取 hot_wall_nu_avg 并逼近已发表基准解 2.238。考浮力驱动流的热-流耦合与壁面梯度分辨率，不是代码正确性。
+expected: 热壁平均 Nusselt 数 ≈ 2.238（de Vahl Davis 1983 原文热壁平均值，多源交叉核实见 provenance.yaml）。冻结参考存 reference/devahldavis1983_ra1e4.csv（另含
+  nu_max/min 与中线速度极值），held_out/qoi.json 刻意同值。本机 docker（opencfd/openfoam-default:2312）直跑该案例 1169 步 SIMPLE 收敛，integ(hotWall)=1.4387
+  W/m ÷ 0.01 m² 得 q''=143.87 W/m²，Nu=143.87/64.37=2.235（误差 0.1%）。
+criteria: 无 agent-eval 契约，走 cfdb run → MetricsEngine 逐门重算：单门 hot_wall_nu_avg 相对容差 10%（容差覆盖粗网格与格式耗散，文档化决定）。⚠
+  现状诚实注：OpenFOAM adapter 的 prepare() 只有 LDC/NACA 两套模板路由（case.id 前缀判断），本案例的 buoyantSimpleFoam 字典（0/T、0/p_rgh、constant/g、thermophysicalProperties
+  等）无法由模板生成——完整 0//constant//system/ 随案例入库、经 docker 直跑全量验证；cfdb run 集成路径与 QoI 自动提取（wallHeatFlux→Nu）需 adapter 扩展后才会真跑（2026-08-11 已解决：adapter 案例自带配置路径 + post/compute_qoi.py qoi_script，均匀网格上面均值即算术平均）。
+what_makes_it_bite: 三处真残差：(1) 浮力驱动 SIMPLE 收敛慢且对松弛因子/格式敏感——纯中心格式在 div(phi,U) 上会振荡，upwind 又把壁面温度梯度抹平直接毁掉
+  Nu；(2) Nu 定义陷阱——Ra=1e5 时文献热壁平均是 4.509，流传的 4.519 其实是中面 Nu_1/2，本案例 Ra=1e4 的同对数字是 2.238/2.243，QoI 取壁面平均并已在 provenance
+  notes 记录该分歧；(3) 无量纲化链条长（Ra=g·β·ΔT·H³/(ν·α)，Nu=q''·H/(k·ΔT)），thermophysicalProperties 里 mu/Pr/beta 任一处填错都会静默改变 Ra 而案例照跑不误。

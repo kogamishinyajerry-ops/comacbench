@@ -1,0 +1,66 @@
+id: poiseuille_from_brief
+name: "Case Setup: Plane Channel Poiseuille from Engineering Brief"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain pilot: the agent receives only a natural-language
+  engineering brief (visible/task.md) and an annotated dimensioned drawing
+  (visible/drawing.png) and must build a complete runnable OpenFOAM case
+  directory (0/, constant/, system/). The judge REALLY RUNS the submission
+  in a network-less sandbox (blockMesh -> solver parsed from controlDict's
+  application entry, opencfd/openfoam-default:2312), then the frozen QoI
+  script reference/compute_qoi.py extracts centerline_umax (max |Ux| on the
+  x/H=10 probe line at the final time) from the solver output on the host.
+  Task physics: plane channel H=0.01 m, L=0.12 m, nu=5e-5 m^2/s, uniform
+  inlet U0=0.1 m/s, Re_H=20, transient laminar solver to fully developed
+  flow. Held-out reference QoI = analytical u_max = 1.5*U0 = 0.15 m/s
+  (White, Viscous Fluid Flow, 3rd ed., §3-2). Golden configuration and
+  docker-verified measurement (u_max=0.149254, 0.50% error) inherited from
+  cases/verification/channel_poiseuille; see provenance.yaml.
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 20.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: case_setup scoring does NOT consume case.yaml solver
+  # steps — the protocol runs blockMesh (when system/blockMeshDict exists)
+  # then the solver named by the submission's own system/controlDict
+  # `application` entry, each with timeout = budget.max_runtime_sec.
+  - name: generic
+    command: "true"
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - centerline_umax
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: analytical
+  # No public qoi_values: the ONLY scoring reference is the held-out copy.
+  # The analytical value (u_max = 1.5*U0) is textbook knowledge the brief
+  # does not state; even an agent that knows it must still submit a case
+  # whose real sandbox run reproduces it — the scored number comes out of
+  # the solver execution, never out of the submission's hands.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 5% mirrors
+  # the verified channel_poiseuille V&V tolerance for the same physics.
+  qoi_relative_tolerance:
+    centerline_umax: 0.05
+budget:
+  # Golden run (blockMesh + icoFoam to t=5 s, 4800 cells, docker v2312)
+  # measured ~2 min wall on 2026-08-11; 360 s is a 3x margin.
+  max_runtime_sec: 360
+  max_cells: null

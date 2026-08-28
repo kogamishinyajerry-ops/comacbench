@@ -1,0 +1,27 @@
+# Gallery card copy for turbulent_plate_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建湍流平板 RANS 算例（k-ω SST，evidence 模式）
+capability: case_setup 域 evidence 模式（可压缩/边界层族）：agent 只拿到求解器无关的自然语言工程任务书（visible/task.md）和带尺寸标注的
+  平板绕流示意图（visible/drawing.png），需在自己的环境里驱动任意 CFD 求解器从零搭建并求解二维零压梯度湍流平板——U_inf=10 m/s、
+  ν=1e-5 m²/s（Re_x=1e6·x[m]，板长 2 m 覆盖 0..2e6）、入口即前缘全湍流，提取壁面 Cf(x) 分布并提交证据包。核心考点是湍流建模设置：
+  任务书显式要求 k-ω SST 类两方程模型、入口湍流强度 5% + 特征长度 0.01 m、壁面函数路线 y+≈30，并要求在 manifest notes 中声明实际
+  设置。judge 不运行任何求解器：校验证据包后由冻结 QoI 脚本（reference/compute_qoi.py，stdlib-only，宿主机执行）从 cf_distribution.csv
+  线性插值归约出 cf_rex_5e5 / cf_rex_1e6。
+expected: 交证据包 submission/（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/samples/cf_distribution.csv，
+  表头 x,cf）。held_out 参考为 1/7 幂律工程关联式 Cf=0.0592·Re_x^(−1/5) 在两站位的逐点值（0.004291/0.003735，沿用素材案例
+  cases/validation/turbulent_flat_plate 已锚定的 held_out 数字，案面无公开 qoi_values）。黄金 E2E 已实证（2026-08-11，ruler
+  2f5ce1c4，真实 docker 运行产物转证据包）：golden 证据归约出两站位 Cf 与素材案例 metrics.json 钉值逐位一致（偏差 5.9%/3.0%，
+  系统性偏低），valid=true，score=-0.0445365（两站位相对误差均值）。
+criteria: 冻结两门 AND：① qoi_complete——证据包四步校验全过且冻结脚本归约出的 QoI 含两个声明 key（缺文件、manifest 无 solver、
+  CSV 含 NaN/Inf、采样范围不覆盖 0.5..1.0 m、脚本非零退出均 fail-closed invalid）；② within_budget——预算 3600s 门基于 manifest
+  自报 timing.wall_time_sec（evidence 模式 judge 不跑求解器，门语义较 managed 模式减弱，card 明写）；未自报则退化为只门宿主机
+  归约时钟。两门过才给连续分 score=−qoi_error，QoI 准确度是 ungated 连续指标，case.yaml 的 15% 容差仅作文档。
+what_makes_it_bite: 三个显式考点：(1) 湍流建模设置是真功夫——模型选择、入口湍流条件（I 与 L 的换算与一致性）、近壁 y+ 与壁面函数
+  的匹配任一处做错，站位 Cf 立刻偏离关联式；前缘发展段 Cf 受入口湍流影响，站位取得离前缘太近会测出发展段而非平衡边界层（本任务
+  站位 0.5/1.0 m 已在充分发展区）；(2) Cf 归一化与采样覆盖合同同层流姊妹任务；(3) 负控实证（2026-08-11，ruler 2f5ce1c4）：cf 列乘
+  0.8（典型欠预测）后仍 valid 但 score 从 -0.0445365 恶化到 -0.235629——连续分对物理扰动敏感成立。残差：参考是工程关联式（对历史
+  实验的拟合）而非实验原始数据，provenance 明写；k-ω SST 对该关联式本身有数个百分点系统偏差，容差内的「过」不等于物理正确；
+  judge 无法证明求解器真的跑过（evidence 模式固有立场），真实性由生产 harness 锚定。

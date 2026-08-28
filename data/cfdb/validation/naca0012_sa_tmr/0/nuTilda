@@ -1,0 +1,56 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      nuTilda;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -1 0 0 0 0];
+
+// Freestream nuTilda = 3 * nu (chi = 3), matching the TMR SA convention:
+// CFL3D and FUN3D both used freestream SA working variable = 3 relative to
+// the laminar value for this validation case.
+internalField   uniform 5.00001e-7;
+
+boundaryField
+{
+    airfoil
+    {
+        // nuTilda = 0 at the wall (the physical SA wall condition), paired
+        // with nutUSpaldingWallFunction for nut — the standard SA
+        // wall-function combination. zeroGradient nuTilda here overproduces
+        // eddy viscosity near the wall and thickens the boundary layer.
+        type            fixedValue;
+        value           uniform 0;
+    }
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 5.00001e-7;
+    }
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 5.00001e-7;
+        value           uniform 5.00001e-7;
+    }
+    topAndBottom
+    {
+        type            zeroGradient;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

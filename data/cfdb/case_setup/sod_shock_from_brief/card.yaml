@@ -1,0 +1,27 @@
+# Gallery card copy for sod_shock_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建 Sod 激波管算例（evidence 模式）
+capability: case_setup 域 evidence 模式任务：agent 只拿到自然语言工程任务书（visible/task.md）和带尺寸标注的激波管示意图
+  （visible/drawing.png），用自己环境中的任意求解器（judge 不预装任何求解器）求解 Sod (1978) 激波管——无粘可压缩 Euler、
+  理想气体 γ=1.4 精确、1D 管 x∈[0,1] m、膜片 x=0.5、左 (p,ρ)=(1 Pa, 1 kg/m³)、右 (0.1 Pa, 0.125 kg/m³)、两侧静止，非定常积分到
+  t=0.2 s 并输出密度剖面，按证据包合同提交。judge 不跑求解器，只校验证据包并用冻结 QoI 脚本（reference/compute_qoi.py，
+  stdlib-only，宿主机执行）从原始剖面重算 shock_x_t02 与 rho_plateau_t02。
+expected: 交一个证据包（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/samples/density_profile.csv，
+  表头 x,rho 逐列文档化在任务书里）。shock_x_t02 取密度跳变最大的相邻采样点对中点（max-gradient 定位惯例，与素材案例冻结的
+  提取方式一致），rho_plateau_t02 取最接近探针 x=0.6 的采样点密度（星区平台）。held_out 参考 0.8504311464060357 与
+  0.4263194281784952（Sod 精确 Riemann 解 t=0.2，素材案例冻结脚本逐点算出并与公认表值交叉核实），案面无公开 qoi_values。
+  黄金 E2E 已实证（2026-08-11，ruler d02d6d37）：素材案例真实 docker 运行产物转换的黄金证据包归约出 shock_x=0.85（误差
+  0.051%）、ρ 平台=0.42631711（误差 0.0005%），与素材钉值完全一致，valid=true，score=-0.000256206。
+criteria: 冻结两门 AND：① qoi_complete——必需文件齐全非空、manifest 含非空 solver、CSV 过通用一致性校验、QoI 脚本归约出两个
+  声明 key（剖面至少 200 点、x 严格递增、覆盖全管）；② within_budget——自报 timing.wall_time_sec ≤ 3600s（evidence 模式
+  预算门基于 manifest 自报墙钟，语义较 managed 减弱——门自报数而非后端实测，缺省时降级为只门宿主机归约耗时并大声记录）。
+  两门过才给连续分 score=−qoi_error（两个 QoI 相对误差均值）；2%/5% 容差仅作文档，沿用素材案例对激波捕捉抹平的领域决定。
+what_makes_it_bite: 三个显式考点：(1) 波系结构真的算对才过关——激波位置考 Riemann 求解器/格式的激波速度与抹平控制，星区密度
+  平台考三波结构的幅值精度，初始密度比填错（如把 p/(Rρ) 换算搞错）激波整体漂移、双 QoI 立刻咬人；(2) γ 必须精确 1.4——素材
+  案例已实证照抄教程 Cp=1004.5 会得 γ≈1.40019，虽在容差内但偏离解析锚点；(3) 负控实证（2026-08-11，ruler d02d6d37）：剖面
+  密度整体扰动 15% 评分恶化到 score=-0.0752504（黄金 −0.000256 的约 294 倍——均匀缩放不改变 max-gradient 定位，恶化全部由
+  平台密度承担，连续分灵敏度实证成立）；删掉 density_profile.csv 则 fail-closed 判 invalid、score=None。残差：held_out 值是
+  可独立重算的精确解（非秘密数字），运行真实性由生产 harness 锚定而非 judge 证明（evidence 模式设计即如此）。

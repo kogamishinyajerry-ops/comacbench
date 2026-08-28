@@ -1,0 +1,39 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -2 0 0 0 0];
+
+// Initialisation only (solution evolves to the SST equilibrium):
+// k = 1.5*(U_b*I)^2 with I = 5% turbulence intensity -> 3.75e-3 m^2/s^2.
+internalField   uniform 3.75e-3;
+
+boundaryField
+{
+    // Low-Re wall treatment (first cell center y+ ~ 1): k = 0 at the wall,
+    // same idiom as the v2312 verificationAndValidation/planeChannel tutorial.
+    "(bottom|top)"
+    {
+        type            fixedValue;
+        value           uniform 1e-10;
+    }
+
+    "(inlet|outlet|front|back)"
+    {
+        type            cyclic;
+    }
+}
+
+// ************************************************************************* //

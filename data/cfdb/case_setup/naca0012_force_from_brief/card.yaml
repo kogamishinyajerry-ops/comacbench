@@ -1,0 +1,32 @@
+# Gallery card copy for naca0012_force_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建 NACA0012 零攻角定常气动力算例（evidence 模式）
+capability: case_setup 域 evidence 模式任务：agent 只拿到自然语言工程任务书（visible/task.md）和带尺寸标注的翼型示意图
+  （visible/drawing.png），在自己的环境里驱动任意求解器（Fluent/STAR-CCM+/自研/OpenFOAM 均可，judge 上没有求解器）搭建并计算
+  NACA0012 对称翼型 α=0°、Re=6×10⁶、M=0.3 低马赫定常 RANS 绕流——弦长 c=1 m、U_inf=100 m/s、ν=1.6667e-5 m²/s、远场 ≥15c，
+  湍流模型 SA 或同级并强制声明近壁处理方式。交付物是证据包（manifest+solver 日志+网格报告+升阻力收敛历史），judge 校验
+  证据包后用冻结脚本 reference/compute_qoi.py 对 force_history.csv 末段（最后 20% 至少 5 行）取平均归约 cl/cd。这是本批
+  最贴近 Fluent/STAR-CCM+ 生产场景的任务（定常气动力+收敛历史证据）。
+expected: 交证据包 submission/（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/force_history.csv，
+  逐文件逐列合同见 task.md）。held_out 参考 cl=0.0、cd=0.0086（Ladson 1988 / NASA TM-4074 实验值，沿用素材案例锚定值，
+  案面无公开 qoi_values——唯一评分参考即留出副本）。素材案例 cases/validation/naca0012（id naca0012_a0）此前从未真跑过
+  α=0°（其 card 自承），本任务的黄金证据来自 2026-08-11 首次真实 docker 运行
+  （runs/20260811T093058Z_naca0012_a0_openfoam_6ae74883，v2312 simpleFoam+SA，10800 格，2000 迭代，414 s 墙钟）：
+  末迭代 cl=-0.0107、cd=0.04994——粗 demo 网格下 cd 相对实验值偏差约 4.8 倍，黄金 E2E 的 qoi_error 即该真实物理差距，
+  不是及格线声明（QoI 准确度 ungated，见 criteria）。
+criteria: 证据包通用检查全 fail-closed：required 文件缺失/为空、manifest 不可解析或缺 solver 字段、CSV 不可解析/数值格 NaN/Inf，
+  任一失败即 invalid 且不归约 QoI；iter 列受通用时间列约束（全数值+单调非降），归约脚本再查表头恰为 iter,cl,cd、≥10 行数据、
+  末段平均。冻结两门 AND：① qoi_complete——归约出声明的 cl 与 cd；② within_budget——⚠ evidence 模式语义减弱：judge 不跑
+  求解器，该门只门控 manifest 自报的 timing.wall_time_sec（3600s 宽松界，黄金真跑 414 s），未自报时降级为只门控评分端
+  归约时钟。两门过才给连续分 score=−qoi_error（cl 参考值为 0 按绝对误差计，与 cd 相对误差取平均）。
+what_makes_it_bite: 三个显式考点：(1) 证据合同是真功夫——force_history.csv 表头恰为 iter,cl,cd、iter 单调非降、≥10 行收敛
+  序列，自报最终 cl/cd 无用，被评分的数字只能从原始收敛历史末段重算；(2) 湍流建模声明强制——manifest.notes 必须声明湍流模型
+  与近壁处理（及可压/不可压缩处理），生产场景对口；(3) 黄金与负控均已实证（2026-08-11，ruler 02ae2b2f）：黄金证据包
+  valid=true、score=-2.40823（末段平均 cl=-0.010640/cd=0.049930，与运行钉值末迭代 cl=-0.01066079/cd=0.04993885 偏差 <0.3%）；
+  Cd 证据 ×1.5（典型湍流模型误用阻力虚高）→ score=-3.85968 显著变差；交换两行破坏 iter 单调性 → 通用 CSV 时间列检查
+  fail-closed 判 invalid。残差：within_budget 门基于自报墙钟，语义天然弱于 managed 模式的后端实测；anti-copy 不靠数字保密
+  （Ladson 值是文献公认值、任务书点名了出处），靠「伪造一整套求解器原生证据
+  （残差史+网格报告+自洽收敛历史）」的成本，运行真实性由生产 harness 现场驱动锚定。

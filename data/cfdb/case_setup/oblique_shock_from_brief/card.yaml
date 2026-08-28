@@ -1,0 +1,26 @@
+# Gallery card copy for oblique_shock_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建 10° 楔形斜激波算例（M1=2，evidence 模式）
+capability: case_setup 域 evidence 模式（可压缩/边界层族）：agent 只拿到求解器无关的自然语言工程任务书（visible/task.md）和带尺寸标注的
+  楔形通道示意图（visible/drawing.png），需在自己的环境里驱动任意 CFD 求解器（Fluent、STAR-CCM+、自研、OpenFOAM 均可）从零搭建并求解
+  二维无粘超声速楔形体绕流——γ=1.4、来流 M1=2、楔半角 θ=10°、弱解附体斜激波（β≈39.3°），沿 x=0.6 m 竖直采样线提取马赫分布并提交证据包。
+  judge 不运行任何求解器：它校验证据包（required 文件齐全非空、manifest 含 solver 字段、CSV 可解析且数值有限、时间列单调），再由冻结 QoI
+  脚本（reference/compute_qoi.py，stdlib-only，宿主机执行）从 mach_profile.csv 在 y=0.15 m 处线性插值归约出 post_shock_mach。
+expected: 交证据包 submission/（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/samples/mach_profile.csv，
+  表头 y,mach）。held_out 参考 1.640526（θ-β-M 弱解解析值，Anderson Ch.4，沿用素材案例 cases/verification/oblique_shock 已锚定的
+  held_out 数字，案面无公开 qoi_values——唯一评分参考即留出副本）。黄金 E2E 已实证（2026-08-11，ruler ade55077，真实 docker 运行
+  产物转证据包）：golden 证据归约出 post_shock_mach=1.638527（低 0.122%，与素材案例实测钉值 1.638477/0.125% 一致到网格插值精度
+  ——探针点值与 x=0.6 网格列线性插值的固有差别），valid=true，score=-0.00121837。
+criteria: 冻结两门 AND：① qoi_complete——证据包四步校验全过且冻结脚本归约出的 QoI 含声明 key（缺文件、manifest 无 solver、CSV 含
+  NaN/Inf、采样范围不覆盖 y=0.15、脚本非零退出均 fail-closed invalid）；② within_budget——预算 3600s 门基于 manifest 自报
+  timing.wall_time_sec（evidence 模式 judge 不跑求解器，无法实测 agent 侧墙钟，门语义较 managed 模式减弱，card 明写）；未自报则退化为
+  只门宿主机归约时钟。两门过才给连续分 score=−qoi_error，QoI 准确度是 ungated 连续指标，case.yaml 的 5% 容差仅作文档。
+what_makes_it_bite: 三个显式考点：(1) 无粘超声速算例搭建是真功夫——激波捕捉格式、滑移壁面与超声速出流边界的正确处理、跑到稳态
+  （建议 ≥4 倍流过时间）缺一不可，激波角或波后状态错了 QoI 立刻偏；(2) 采样合同考察工程严谨性——采样线必须从楔面穿过波后均匀区
+  进入来流区并覆盖 y=0.15 m，只报单点或不覆盖探针高度都 fail-closed；(3) 负控实证（2026-08-11，ruler ade55077）：mach 列乘 0.8
+  （波后马赫系统性欠预测 20%）后仍 valid 但 score 从 -0.00121837 恶化到 -0.200975——连续分对物理扰动敏感成立。残差：judge 无法证明
+  求解器真的跑过（evidence 模式固有立场，scorer docstring 明写），真实性由生产 harness 驱动 agent 的过程锚定；伪造成本被抬高到伪造
+  整套求解器原生artifact（日志、网格报告、剖面），且每个被评数字都由冻结脚本从原始证据重算。

@@ -1,0 +1,18 @@
+# Gallery card copy for naca0012_a5 (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: NACA0012 Airfoil α=5° (Ladson 1988)
+capability: 复现 NACA0012 α=5°、Re=6×10⁶、M=0.3 的风洞实验气动力（OpenFOAM simpleFoam+SA，n_iter=3000；或 SU2 RANS-SA），命中中等迎角、附着流下的升/阻系数。考
+  CFD 求解器的物理保真度。
+expected: 管线跑通，cl≈0.456、cd≈0.0095（Ladson 1988 / NASA TM-4074 实测），各在 10% 相对容差带内。Cp 曲线应贴合 ladson1988_a5.csv（吸力峰
+  x/c=0.025 处 Cp=-1.521）。是 α 扫描（0/5/10/15°）里唯一 runs/ 有真实执行记录的一档（3 次 OpenFOAM 跑）——但这 3 次都如实 FAIL（见「怎么咬中」）。
+criteria: 无 agent-eval 契约，走 cfdb run → MetricsEngine。真正的门：cl、cd 各自 |computed−ref|/|ref| ≤ 0.10（10%），两个都在带内才
+  qoi_pass；出 NaN/Inf 直接 fail、缺失判 incomplete。曲线门未配 curve_l2_tolerance 且 adapter 恒不产 curves，双重不参与判分；预算/max_cells
+  声明但不咬人。
+what_makes_it_bite: 「欠分辨网格如实 FAIL」在这里是**已发生的实测事实**，不是假设——3 次真实 OpenFOAM 跑（最新 20260712，656s 跑到 iter 3000、forceCoeffs
+  真出了 coefficient.dat）算出 cl≈0.094、cd≈0.0575，对实测 cl=0.456 / cd=0.0095 分别偏 79% / 505%，两门都冲出 ±10% 带，overall_status=fail。诊断已从 run 产物
+  坐实根因=**纯网格欠分辨，非配置 bug**：freestream U=(99.6, 8.7, 0) 即 α=5° 正确施加、forceCoeffs 归一化正确（Aref=0.1=弦长×展长，展长实测 z∈[-0.05,0.05]）、
+  解也收敛良好（p 残差~1e-7）——48584 cells 在 Re=6e6 下近壁远达不到 y+~1，边界层解不开→cl 偏低 cd 偏高（欠分辨经典特征）。要让它 pass 需真正的 y+~1
+  边界层网格细化/收敛研究（compute-heavy），非放松尺子、也没有一处配置能一改就好。

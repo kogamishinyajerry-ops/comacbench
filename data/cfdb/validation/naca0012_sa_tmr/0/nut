@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      nut;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -1 0 0 0 0];
+
+// nut from SA with chi = 3: nut = nuTilda * chi^3/(chi^3 + Cv1^3),
+// Cv1 = 7.1 -> nut = 0.0701 * nuTilda = 0.2104 * nu.
+internalField   uniform 3.506e-8;
+
+boundaryField
+{
+    airfoil
+    {
+        type            nutUSpaldingWallFunction;
+        value           uniform 0;
+    }
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 3.506e-8;
+    }
+    outlet
+    {
+        type            calculated;
+        value           uniform 3.506e-8;
+    }
+    topAndBottom
+    {
+        type            calculated;
+        value           uniform 3.506e-8;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

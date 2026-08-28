@@ -1,0 +1,546 @@
+{
+  "revision": "cfdagent-litbench@2026-08-28",
+  "note": "每题 evidence 为对应 arXiv 摘要的逐字子串（生成器强校验）；answer 为 0 起始选项下标；跨题引文用 field:published:<id> 引用语料库发布日期。",
+  "questions": [
+    {
+      "qid": "cfdagent_q001",
+      "papers": ["2407.21320"],
+      "qtype": "single_numeric",
+      "evidence": ["MetaOpenFOAM achieved a high pass rate per test (85%), with each test case costing only $0.22 on average"],
+      "question": "MetaOpenFOAM 论文中，在 8 个 CFD 仿真任务基准上报告的单任务通过率（pass rate per test）是多少？",
+      "options": ["62.5%", "85%", "88.2%", "86.9%"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q002",
+      "papers": ["2407.21320"],
+      "qtype": "single_arch",
+      "evidence": ["MetaOpenFOAM harnesses the power of MetaGPT's assembly line paradigm, which assigns diverse roles to various agents, efficiently breaking down complex CFD tasks into manageable subtasks."],
+      "question": "MetaOpenFOAM 采用哪种范式为不同 agent 分配角色、拆解 CFD 任务？",
+      "options": ["MetaGPT 的流水线（assembly line）范式", "AutoGen 的自由对话范式", "单体 RAG 管线，无角色分工", "强化学习分层规划范式"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q003",
+      "papers": ["2502.00498"],
+      "qtype": "single_numeric",
+      "evidence": ["MetaOpenFOAM 2.0 achieved an Executability score of 6.3/7 and a pass rate of 86.9%, significantly outperforming MetaOpenFOAM 1.0 (2.1/7, 0%)"],
+      "question": "MetaOpenFOAM 2.0 在其新基准（仿真+后处理）上的 Executability 得分与通过率是多少？",
+      "options": ["2.1/7 与 0%", "6.3/7 与 86.9%", "6.3/7 与 55.5%", "7/7 与 100%"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q004",
+      "papers": ["2503.01273"],
+      "qtype": "single_numeric",
+      "evidence": ["The test dataset comprises 11 distinct CFD analysis or optimization tasks"],
+      "question": "OptMetaOpenFOAM 的测试数据集包含多少个不同的 CFD 分析或优化任务？",
+      "options": ["8", "11", "21", "28"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q005",
+      "papers": ["2505.04997"],
+      "qtype": "single_arch",
+      "evidence": ["a multi-index retrieval scheme organizes domain knowledge along four complementary structural dimensions and selects indices by workflow stage, sharpening retrieval precision over conventional single-index retrieval-augmented generation."],
+      "question": "Foam-Agent 的领域知识检索机制的特点是什么？",
+      "options": ["使用单一扁平索引的常规 RAG", "沿四个互补结构维度组织知识，并按工作流阶段选择索引", "完全不使用检索增强", "仅用关键词倒排索引，无向量检索"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q006",
+      "papers": ["2505.04997"],
+      "qtype": "single_arch",
+      "evidence": ["six specialist agents span planning, meshing, file writing, execution, review, and visualization"],
+      "question": "Foam-Agent 的六个专职 agent 覆盖哪些环节？",
+      "options": ["规划、网格、文件生成、执行、审查、可视化", "预处理、求解、后处理、评估、部署、监控", "提问、生成、翻译、校对、提交、归档", "几何、网格、求解、优化、文档、报告"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q007",
+      "papers": ["2505.04997"],
+      "qtype": "single_numeric",
+      "evidence": ["On FoamBench, Foam-Agent achieves an 88.2% execution success rate on the 110 Basic-tier tasks and 62.5% on the out-of-distribution Advanced tier, all without expert intervention."],
+      "question": "在 FoamBench 上，Foam-Agent 于 110 个 Basic-tier 任务与分布外 Advanced-tier 的执行成功率分别是多少？",
+      "options": ["62.5% 与 88.2%", "88.2% 与 62.5%", "88.2% 与 55.5%", "82.1% 与 68.12%"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q008",
+      "papers": ["2509.18178"],
+      "qtype": "single_capability",
+      "evidence": ["including advanced pre-processing with a versatile Meshing Agent capable of handling external mesh files and generating new geometries via Gmsh, automatic generation of HPC submission scripts, and post-simulation visualization via ParaView."],
+      "question": "以下哪项是 Foam-Agent 端到端仿真管线包含的组成部分？",
+      "options": ["Meshing Agent（处理外部网格并经 Gmsh 生成几何）、HPC 提交脚本自动生成、ParaView 后处理可视化", "基于 Point-E 的文本转 3D 几何与浸入边界求解器", "强化学习调参与风洞数据同化模块", "湍流模型符号回归与发现模块"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q009",
+      "papers": ["2509.18178"],
+      "qtype": "single_numeric",
+      "evidence": ["Evaluated on a benchmark of 110 simulation tasks, Foam-Agent achieves an 88.2% success rate with Claude 3.5 Sonnet, significantly outperforming existing frameworks (55.5% for MetaOpenFOAM)."],
+      "question": "在 110 个仿真任务基准上，Foam-Agent（Claude 3.5 Sonnet）与 MetaOpenFOAM 的成功率对比是？",
+      "options": ["82.1% 对 6.2%", "88.2% 对 55.5%", "55.5% 对 88.2%", "84% 对 80%"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q010",
+      "papers": ["2501.06327"],
+      "qtype": "single_numeric",
+      "evidence": ["While the price of token with o1 model is six times as that of GPT-4o, it consistently exhibits superior performance in handling complex tasks"],
+      "question": "OpenFOAMGPT 论文中提到 o1 模型的 token 单价是 GPT-4o 的多少倍？",
+      "options": ["2 倍", "3 倍", "6 倍", "10 倍"],
+      "answer": 2
+    },
+    {
+      "qid": "cfdagent_q011",
+      "papers": ["2506.02019"],
+      "qtype": "single_metric",
+      "evidence": ["68.12% physical fidelity - a novel metric assessing scientific meaningfulness beyond mere runnability"],
+      "question": "ChatCFD 提出的 physical fidelity（物理保真度）指标衡量的是什么？",
+      "options": ["代码能否编译通过", "超越\"能跑通\"层面的科学合理性", "网格单元数量是否达标", "API 调用成本的高低"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q012",
+      "papers": ["2506.02019"],
+      "qtype": "single_ablation",
+      "evidence": ["Ablation studies identify the Error Locator and Solver Template DB as critical, with the latter's removal collapsing accuracy to 48%."],
+      "question": "ChatCFD 的消融实验中，移除哪个组件会使准确率坍缩到 48%？",
+      "options": ["Physics Interpreter", "Error Locator", "Solver Template DB", "MCP 兼容接口"],
+      "answer": 2
+    },
+    {
+      "qid": "cfdagent_q013",
+      "papers": ["2507.23693"],
+      "qtype": "single_arch",
+      "evidence": ["the Preprocessing Agent that generates 3D geometries from textual or visual inputs using a hybrid text-to-3D diffusion model (Point-E) and automatically meshes the geometries"],
+      "question": "CFDagent 的 Preprocessing Agent 使用哪个模型从文本/视觉输入生成 3D 几何？",
+      "options": ["Point-E", "Shap-E", "Gmsh", "LLaMA-Mesh"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q014",
+      "papers": ["2512.07917"],
+      "qtype": "single_bench",
+      "evidence": ["The framework was evaluated on benchmarks including the NACA~0012 airfoil and the three-element 30P-30N airfoil."],
+      "question": "CFD-copilot 的评测基准包含哪些算例？",
+      "options": ["圆柱绕流与后台阶", "NACA 0012 翼型与三段翼 30P-30N", "圆球绕流与 Taylor-Green 涡", "Sod 激波管与斜激波反射"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q015",
+      "papers": ["2508.00645"],
+      "qtype": "single_case",
+      "evidence": ["multi-agent wall-model learning for large-eddy simulation with the finite-difference solver CaLES"],
+      "question": "SmartFlow 的三个案例研究中，用于大涡模拟壁面模型学习的求解器是哪个？",
+      "options": ["FLEXI", "SOD2D", "CaLES", "simpleFoam"],
+      "answer": 2
+    },
+    {
+      "qid": "cfdagent_q016",
+      "papers": ["2601.07252"],
+      "qtype": "single_numeric",
+      "evidence": ["The overall pass rate for 25 test cases was 84%, with natural language and multi-modal input cases achieving pass rates of 80% and 86.7%, respectively."],
+      "question": "SwarmFoam 在 25 个测试用例上的总体通过率，以及多模态输入用例的通过率分别是？",
+      "options": ["84% 与 86.7%", "80% 与 84%", "88.2% 与 62.5%", "90% 与 88%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q017",
+      "papers": ["2608.00003"],
+      "qtype": "single_arch",
+      "evidence": ["Our model is pre-trained on the Qwen-coder 2.5-14B, which is then fine-tuned on 252 text prompts targeting 7 OpenFOAM solvers, 13 parametrized mesh templates, and a y plus-aware numerical policy."],
+      "question": "AutoFOAM 的基座模型与微调数据是什么？",
+      "options": ["Qwen-coder 2.5-14B，252 条面向 7 个求解器与 13 个参数化网格模板的文本提示", "Qwen2.5-72B，28,716 对配置数据", "DeepSeek-R1，252 条案例", "Qwen2.5-7B-Instruct，13 条模板"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q018",
+      "papers": ["2608.00003"],
+      "qtype": "single_ablation",
+      "evidence": ["the agent employs three complementary anti-collapse streams: RAG-augmented retry context, surgical dictionary-level patching, and prompt-diversity paraphrasing"],
+      "question": "AutoFOAM 防止自训练退化的三条反坍缩流不包括以下哪项？",
+      "options": ["RAG 增强的重试上下文", "外科级字典层级补丁", "提示多样性改写", "人类专家逐例审核"],
+      "answer": 3
+    },
+    {
+      "qid": "cfdagent_q019",
+      "papers": ["2607.20346"],
+      "qtype": "single_arch",
+      "evidence": ["generation is split across an Architect, an InputWriter and a Reviewer agent, backed by a static canonical-knowledge layer covering solver selection, turbulence closures, boundary conditions and finite-volume defaults."],
+      "question": "IteraSim RAG 的生成阶段由哪三个 agent 分工？",
+      "options": ["Planner / Meshing / Writer", "Architect / InputWriter / Reviewer", "Preprocessing / Solver / Postprocessing", "Coder / Executor / Analyzer"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q020",
+      "papers": ["2607.20346"],
+      "qtype": "single_numeric",
+      "evidence": ["On an openly released 28-case benchmark spanning zero-shot setup, few-shot generalisation, single-parameter modifications and turbulence-model swaps, the pipeline attains a mean retrieval coverage of 77.9% (median 79.1%)"],
+      "question": "IteraSim RAG 在公开的 28 案例基准上达到的平均检索覆盖率（mean retrieval coverage）是多少？",
+      "options": ["77.9%", "88.2%", "90% 以上", "79.1%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q021",
+      "papers": ["2410.10657"],
+      "qtype": "single_case",
+      "evidence": ["The proposed method is performed for separated flow over periodic hills at Re = 10,595."],
+      "question": "AutoTurb 的湍流封闭模型发现在哪个演示工况上进行？",
+      "options": ["Re = 10,595 的周期性山丘（periodic hills）分离流", "Reh = 5600 的周期性山丘", "Re = 6e6 的 NACA0012 翼型", "Re_tau = 180 的槽道流"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q022",
+      "papers": ["2505.01681"],
+      "qtype": "single_method",
+      "evidence": ["By treating a large language model (LLM), DeepSeek-R1, as an equal partner, we establish a closed-loop, iterative workflow in which the LLM proposes, refines, and reasons about near-wall turbulence models under adverse pressure gradients (APGs), system rotation, and surface roughness."],
+      "question": "该湍流建模工作把哪个 LLM 作为\"平等合作伙伴\"来迭代开发近壁湍流模型？",
+      "options": ["GPT-4o", "DeepSeek-R1", "Claude 3.5 Sonnet", "Qwen2.5-7B"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q023",
+      "papers": ["2601.01357"],
+      "qtype": "single_numeric",
+      "evidence": ["Validation on a public benchmark shows FlamePilot achieved a perfect 1.0 executability score and a 0.438 success rate, surpassing the prior best reported agent scores of 0.625 and 0.250, respectively."],
+      "question": "FlamePilot 在公开基准上的可执行率与成功率，以及此前最好 agent 的成绩分别是？",
+      "options": ["0.625 与 0.250；1.0 与 0.438", "1.0 与 0.438；此前最好为 0.625 与 0.250", "1.0 与 0.438；此前最好为 0.882 与 0.250", "0.882 与 0.438；此前最好为 0.625 与 0.250"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q024",
+      "papers": ["2601.01357"],
+      "qtype": "single_stack",
+      "evidence": ["leverages atomic tools to ensure the robust setup and execution of complex simulations in both OpenFOAM and extended frameworks such as DeepFlame"],
+      "question": "FlamePilot 通过原子工具确保哪些求解器框架中复杂仿真的稳健建立与执行？",
+      "options": ["仅 OpenFOAM", "OpenFOAM 与 DeepFlame 等扩展框架", "Fluent 与 StarCCM+", "FireFOAM 与 FDS"],
+      "answer": 1
+    },
+    {
+      "qid": "cfdagent_q025",
+      "papers": ["2605.06607"],
+      "qtype": "single_numeric",
+      "evidence": ["a controlled planted-failure ablation shows that the vision-language gate detects 14 of 16 silent failures missed by solver-level checks."],
+      "question": "AI CFD Scientist 的视觉-语言物理验证门在植入失效消融实验中，检出了多少个求解器级检查漏掉的静默失效？",
+      "options": ["16 个中的 14 个", "16 个中的 10 个", "16 个中的 16 个", "7.89% 的失效"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q026",
+      "papers": ["2605.06607"],
+      "qtype": "single_result",
+      "evidence": ["AI CFD Scientist autonomously discovers a Spalart-Allmaras runtime correction that reduces lower-wall Cf RMSE against DNS by 7.89% on the periodic hill at Reh=5600"],
+      "question": "AI CFD Scientist 自主发现的修正及其效果是什么？",
+      "options": ["Spalart-Allmaras 运行时修正，使周期山丘 Reh=5600 下壁面 Cf 对 DNS 的 RMSE 降低 7.89%", "k-omega SST 修正，使阻力预测降低 22%", "SA 修正使 Cf RMSE 升高 7.89%", "湍流模型替换使收敛加速 14%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q027",
+      "papers": ["2603.04756"],
+      "qtype": "single_numeric",
+      "evidence": ["On a 125-prompt benchmark spanning diffusion, transient heat conduction, solid mechanics, porous flow, incompressible Navier--Stokes, phase field and plasticity, MOOSEnger achieves a 0.90 execution pass rate versus 0.06 for an LLM-only baseline."],
+      "question": "MOOSEnger 在 125 提示基准上的执行通过率与 LLM-only 基线的通过率分别是？",
+      "options": ["0.90 与 0.06", "0.84 与 0.80", "0.88 与 0.62", "0.90 与 0.62"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q028",
+      "papers": ["2412.17146"],
+      "qtype": "single_capability",
+      "evidence": ["FoamPilot provides three core functionalities: code insight, case configuration and simulation evaluation."],
+      "question": "FoamPilot（FireFOAM 的 LLM agent）的三大核心功能不包括以下哪项？",
+      "options": ["代码洞察（RAG 导航源码）", "案例配置（自然语言修改仿真设置）", "仿真评估（HPC 作业执行与初步结果分析）", "从零训练新的湍流模型"],
+      "answer": 3
+    },
+    {
+      "qid": "cfdagent_q029",
+      "papers": ["2504.09602"],
+      "qtype": "single_data",
+      "evidence": ["By fine-tuning Qwen2.5-7B-Instruct on NL2FOAM, our custom dataset of 28716 natural language-to-OpenFOAM configuration pairs with chain-of-thought (CoT) annotations"],
+      "question": "AutoCFD 构建的 NL2FOAM 数据集规模与标注形式是？",
+      "options": ["28,716 对自然语言到 OpenFOAM 配置，含思维链标注", "252 对，无标注", "2,871 对，含网格标注", "28,716 对，仅最终答案无推理链"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q030",
+      "papers": ["2504.09602"],
+      "qtype": "single_numeric",
+      "evidence": ["Evaluation on a benchmark of 21 diverse flow cases demonstrates state-of-the-art performance, achieving 88.7% solution accuracy and 82.6% first-attempt success rate."],
+      "question": "AutoCFD 在 21 个多样流动案例基准上的解精度与一次尝试成功率是？",
+      "options": ["88.7% 与 82.6%", "86.9% 与 82.1%", "88.2% 与 62.5%", "90% 与 88%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q031",
+      "papers": ["2504.19338"],
+      "qtype": "single_arch",
+      "evidence": ["The approach integrates four specialized agents Pre processing, Prompt Generation, OpenFOAMGPT (simulator), and Post processing decomposing complex computational fluid dynamics workflows into collaborative components powered by large language models."],
+      "question": "OpenFOAMGPT 2.0 集成的四个专职 agent 是？",
+      "options": ["预处理、提示生成、OpenFOAMGPT（仿真器）、后处理", "规划、网格、文件生成、执行", "Architect、InputWriter、Reviewer、Judge", "几何、网格、求解、优化"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q032",
+      "papers": ["2504.19338"],
+      "qtype": "single_numeric",
+      "evidence": ["demonstrates 100% success and reproducibility rates across over 450 simulations"],
+      "question": "OpenFOAMGPT 2.0 在多少次仿真上展示了 100% 的成功率与可复现率？",
+      "options": ["110 次", "315 次", "超过 450 次", "28 次"],
+      "answer": 2
+    },
+    {
+      "qid": "cfdagent_q033",
+      "papers": ["2602.11666"],
+      "qtype": "single_arch",
+      "evidence": ["It employs a Symbolic Knowledge Engine that treats simulation setup as a Constraint Satisfaction Problem, rigidly enforcing physical constraints via a Deterministic RAG Engine"],
+      "question": "PhyNiKCE 的符号知识引擎把仿真设置当作什么问题来刚性执行物理约束？",
+      "options": ["约束满足问题（Constraint Satisfaction Problem）", "马尔可夫决策过程", "整数线性规划", "贝叶斯优化问题"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q034",
+      "papers": ["2604.06747"],
+      "qtype": "single_result",
+      "evidence": ["The coefficients of determination for mass flow rate, total pressure ratio, and isentropic efficiency all exceed 0.91, with normalized RMSE values below 8%."],
+      "question": "TurboAgent 验证中，质量流量、总压比与等熵效率的决定系数（R²）与归一化 RMSE 的水平是？",
+      "options": ["R² 均 >0.91，RMSE <8%", "R² 均 >0.80，RMSE <15%", "R² 均 >0.95，RMSE <3%", "R² 均 >0.70，RMSE <10%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q035",
+      "papers": ["2504.02888"],
+      "qtype": "single_finding",
+      "evidence": ["Locally deployed smaller models like QwQ-32B struggled with generating valid solver files for complex processes."],
+      "question": "OpenFOAMGPT 多模型横评研究中，哪个本地部署的小模型在复杂流程中难以生成有效求解器文件？",
+      "options": ["QwQ-32B", "Llama3.3-70B", "Qwen2.5-72B", "DeepSeek-R1"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q036",
+      "papers": ["2507.23693"],
+      "qtype": "single_case",
+      "evidence": ["We validate CFDagent by reproducing canonical sphere flows at Reynolds numbers of 100 and 300 using three distinct inputs"],
+      "question": "CFDagent 用什么工况与输入方式验证系统？",
+      "options": ["Re=100 与 300 的圆球绕流，分别用文本提示、图像与标准模型三种输入", "NACA0012 五个迎角系列，仅文本输入", "30P-30N 三段翼，仅图像输入", "MILD 燃烧，仅文本输入"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q037",
+      "papers": ["2508.00645"],
+      "qtype": "single_arch",
+      "evidence": ["SmartFlow uses the SmartSim infrastructure library and our newly developed SmartRedis-MPI library to enable asynchronous, low-latency, in-memory communication between CFD solvers and Python-based DRL algorithms."],
+      "question": "SmartFlow 依靠哪套基础设施实现 CFD 求解器与 Python DRL 算法间的异步低延迟内存通信？",
+      "options": ["SmartSim 基础设施库 + 自研 SmartRedis-MPI", "Ray + Redis", "Kafka 消息队列", "ZeroMQ 直连"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q038",
+      "papers": ["2506.02019"],
+      "qtype": "single_numeric",
+      "evidence": ["The system exhibits robust flexibility, achieving 95.23% success in autonomous solver selection and 100% in turbulence modeling"],
+      "question": "ChatCFD 在自主求解器选择与湍流建模任务上的成功率分别是？",
+      "options": ["95.23% 与 100%", "100% 与 95.23%", "82.1% 与 68.12%", "97.4% 与 100%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q039",
+      "papers": ["2412.00568"],
+      "qtype": "single_data",
+      "evidence": ["The Well draws from domain experts and numerical software developers to provide 15TB of data across 16 datasets covering diverse domains such as biological systems, fluid dynamics, acoustic scattering"],
+      "question": "The Well 数据集合集的规模是？",
+      "options": ["15TB、16 个数据集", "39TB、16 个数据集", "15TB、8000 个数据集", "2.2TB、34 个数据集"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q040",
+      "papers": ["2403.08055"],
+      "qtype": "single_method",
+      "evidence": ["RegDGCNN leverages this large-scale dataset to provide high-precision drag estimates directly from 3D meshes"],
+      "question": "与 DrivAerNet 配套、直接从 3D 网格高精度估计气动阻力的模型是？",
+      "options": ["RegDGCNN（动态图卷积网络）", "FNO", "Transolver", "CNO"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q041",
+      "papers": ["2406.09624"],
+      "qtype": "single_data",
+      "evidence": ["DrivAerNet++ comprises 8,000 diverse car designs modeled with high-fidelity computational fluid dynamics (CFD) simulations."],
+      "question": "DrivAerNet++ 数据集包含多少个高保真 CFD 仿真汽车设计，公开工程数据总量约多少？",
+      "options": ["8,000 个设计、39TB 以上", "4,000 个设计、15TB", "8,000 个设计、15TB", "400 个设计、3.49TB"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q042",
+      "papers": ["2306.08827"],
+      "qtype": "single_bench",
+      "evidence": ["PINNacle provides a diverse dataset, comprising over 20 distinct PDEs from various domains"],
+      "question": "PINNacle 基准覆盖多少个不同的 PDE，并集成了约多少种 PINN 方法？",
+      "options": ["20 多个 PDE、约 10 种方法", "10 个 PDE、20 种方法", "16 个 PDE、8 种方法", "28 个 PDE、5 种方法"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q043",
+      "papers": ["2402.02366"],
+      "qtype": "single_method",
+      "evidence": ["we propose a new Physics-Attention to adaptively split the discretized domain into a series of learnable slices of flexible shapes"],
+      "question": "Transolver 提出的核心机制 Physics-Attention 的做法是？",
+      "options": ["将离散域自适应切分为形状灵活的可学习切片，物理状态相近的网格点归入同一切片", "在傅里叶空间参数化积分核", "用图神经网络传递网格消息", "分支-主干结构拟合算子"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q044",
+      "papers": ["2409.18032"],
+      "qtype": "single_data",
+      "evidence": ["We introduce FlowBench, a dataset for neural simulators with over 10K samples, which is currently larger than any publicly available flow physics dataset."],
+      "question": "FlowBench 数据集的规模与定位是？",
+      "options": ["10K+ 样本，发布时为最大的公开流动物理数据集", "8,000 样本，汽车气动数据集", "15TB 通用 PDE 集合", "110 个 OpenFOAM 任务"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q045",
+      "papers": ["2601.22541"],
+      "qtype": "single_method",
+      "evidence": ["we present conserved quantity correction, a model-agnostic technique for incorporation physical conservation criteria within deep learning models"],
+      "question": "针对自回归神经算子长时程预测误差累积问题，该工作提出的模型无关技术是？",
+      "options": ["守恒量修正（conserved quantity correction）", "谱域低通滤波", "扩大训练集规模", "混合精度训练"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q046",
+      "papers": ["2309.13457"],
+      "qtype": "single_data",
+      "evidence": ["we present BLASTNet 2.0, a 2.2 TB network-of-datasets containing 744 full-domain samples from 34 high-fidelity direct numerical simulations"],
+      "question": "BLASTNet 2.0 的规模是？",
+      "options": ["2.2TB、来自 34 个高保真 DNS 的 744 个全域样本", "15TB、16 个数据集", "39TB、8000 个设计", "500,000 个样本"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q047",
+      "papers": ["2505.21124"],
+      "qtype": "single_data",
+      "evidence": ["The dataset includes a comprehensive geometry set comprising over 4,800 natural laminar flow (NLF) airfoils and 30,000 fully turbulent (FT) airfoils"],
+      "question": "UniFoil 数据集的几何构成是？",
+      "options": ["4,800 多个自然层流（NLF）翼型 + 30,000 个全湍流（FT）翼型", "仅 4,800 个层流翼型", "30,000 个参数化汽车外形", "110 个 OpenFOAM 算例"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q048",
+      "papers": ["2010.08895"],
+      "qtype": "single_method",
+      "evidence": ["The Fourier neural operator is the first ML-based method to successfully model turbulent flows with zero-shot super-resolution. It is up to three orders of magnitude faster compared to traditional PDE solvers."],
+      "question": "关于傅里叶神经算子（FNO），以下哪项是其论文的声明？",
+      "options": ["首个成功以零样本超分辨率建模湍流的 ML 方法，比传统 PDE 求解器快最多三个数量级", "首个用图神经网络学习网格模拟的方法", "比传统求解器慢但精度更高", "仅适用于一维 Burgers 方程"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q049",
+      "papers": ["2407.21320", "2501.06327", "2505.04997", "2506.02019"],
+      "qtype": "cross_chronology",
+      "evidence": ["field:published:2407.21320", "field:published:2501.06327", "field:published:2505.04997", "field:published:2506.02019"],
+      "question": "以下 OpenFOAM LLM 多智能体框架中，按 arXiv 首发时间最早的是？",
+      "options": ["MetaOpenFOAM（2024-07）", "OpenFOAMGPT（2025-01）", "Foam-Agent（2025-05）", "ChatCFD（2025-06）"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q050",
+      "papers": ["2410.10657", "2605.06607"],
+      "qtype": "cross_case",
+      "evidence": ["The proposed method is performed for separated flow over periodic hills at Re = 10,595.", "on the periodic hill at Reh=5600"],
+      "question": "以下哪两项工作都以周期性山丘（periodic hills）作为核心验证工况？",
+      "options": ["AutoTurb 与 AI CFD Scientist", "MetaOpenFOAM 与 Foam-Agent", "SmartFlow 与 SwarmFoam", "OpenFOAMGPT 与 CFDLLMBench"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q051",
+      "papers": ["2506.02019"],
+      "qtype": "cross_baseline",
+      "evidence": ["On 315 benchmark cases, ChatCFD achieves 82.1% execution success (vs. 6.2% for MetaOpenFOAM and 42.3% for Foam-Agent)"],
+      "question": "在 ChatCFD 的 315 案例基准上，MetaOpenFOAM 与 Foam-Agent 的执行成功率分别是？",
+      "options": ["6.2% 与 42.3%", "55.5% 与 88.2%", "42.3% 与 6.2%", "0% 与 6.2%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q052",
+      "papers": ["2509.18178"],
+      "qtype": "cross_capability",
+      "evidence": ["the framework uses Model Context Protocol (MCP) to expose its core functions as discrete, callable tools. This allows for flexible integration and use by other agentic systems, such as Claude-code, for more exploratory workflows."],
+      "question": "哪个框架将核心功能经 Model Context Protocol（MCP）暴露为离散可调用工具，供 Claude-code 等外部 agent 系统组合调用？",
+      "options": ["Foam-Agent", "MetaOpenFOAM", "PINNacle", "AutoTurb"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q053",
+      "papers": ["2406.09624", "2412.00568", "2309.13457"],
+      "qtype": "cross_data",
+      "evidence": ["With more than 39 TB of publicly available engineering data", "to provide 15TB of data across 16 datasets", "we present BLASTNet 2.0, a 2.2 TB network-of-datasets"],
+      "question": "以下数据集中，公开数据总量最大（超过 39TB）的是？",
+      "options": ["DrivAerNet++", "The Well", "BLASTNet 2.0", "FlowBench"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q054",
+      "papers": ["2504.09602", "2512.07917"],
+      "qtype": "cross_route",
+      "evidence": ["By fine-tuning Qwen2.5-7B-Instruct on NL2FOAM", "The framework employs a fine-tuned LLM to directly translate user descriptions into executable CFD setups."],
+      "question": "以下哪两项工作采用\"领域微调 LLM\"（而非纯提示工程）路线实现自然语言到 CFD 配置的翻译？",
+      "options": ["AutoCFD（NL2FOAM 微调）与 CFD-copilot（微调 LLM）", "MetaOpenFOAM 与 Foam-Agent", "PINNacle 与 The Well", "AutoTurb 与 MOOSEnger"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q055",
+      "papers": ["2605.06607", "2601.07252"],
+      "qtype": "cross_capability",
+      "evidence": ["At the center of the framework is a vision-language physics-verification gate that inspects rendered flow fields before any result is accepted, rerun, or written into a manuscript.", "SwarmFoam integrates functionalities such as Multi-modal perception"],
+      "question": "在结果被接受、重跑或写入论文之前，用视觉-语言模型检查渲染流场的\"物理验证门\"属于哪个框架？",
+      "options": ["AI CFD Scientist", "SwarmFoam（其多模态感知用于输入解析）", "CFDagent（其多模态用于几何输入）", "OpenFOAMGPT"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q056",
+      "papers": ["2604.06747"],
+      "qtype": "cross_domain",
+      "evidence": ["this study proposes TurboAgent, a large language model (LLM)-driven autonomous multi-agent framework for turbomachinery aerodynamic design and optimization."],
+      "question": "以下哪个框架面向叶轮机械（turbomachinery）气动设计的端到端自动化？",
+      "options": ["TurboAgent", "FoamPilot", "MOOSEnger", "SmartFlow"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q057",
+      "papers": ["2509.20374"],
+      "qtype": "single_bench",
+      "evidence": ["We introduce CFDLLMBench, a benchmark suite comprising three complementary components -- CFDQuery, CFDCodeBench, and FoamBench"],
+      "question": "CFDLLMBench 由哪三个互补组件构成？",
+      "options": ["CFDQuery、CFDCodeBench、FoamBench", "CFDQA、CFDCode、FoamTask", "CFDQuery、MeshBench、FoamBench", "CFDExam、CFDCodeBench、OpenFOAMBench"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q058",
+      "papers": ["2602.11666"],
+      "qtype": "single_numeric",
+      "evidence": ["PhyNiKCE demonstrates a 96% relative improvement over state-of-the-art baselines. Furthermore, by replacing trial-and-error with knowledge-driven initialization, the framework reduced autonomous self-correction loops by 59% while simultaneously lowering LLM token consumption by 17%."],
+      "question": "PhyNiKCE 相对 SOTA 基线的相对改进幅度，以及自纠错循环与 token 消耗的下降幅度分别是？",
+      "options": ["96%；自纠错循环降 59%、token 降 17%", "59%；自纠错循环降 96%、token 降 17%", "96%；自纠错循环升 59%、token 升 17%", "17%；自纠错循环降 59%、token 降 96%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q059",
+      "papers": ["2604.06747"],
+      "qtype": "single_result",
+      "evidence": ["The optimization agent further improves isentropic efficiency by 1.61% and total pressure ratio by 3.02%."],
+      "question": "TurboAgent 的优化 agent 将等熵效率与总压比进一步提升了多少？",
+      "options": ["等熵效率 +1.61%，总压比 +3.02%", "等熵效率 +3.02%，总压比 +1.61%", "等熵效率 +16.1%，总压比 +30.2%", "等熵效率 +0.161%，总压比 +0.302%"],
+      "answer": 0
+    },
+    {
+      "qid": "cfdagent_q060",
+      "papers": ["2501.06327"],
+      "qtype": "single_task",
+      "evidence": ["from zero-shot case setup to boundary condition modifications, turbulence model adjustments, and code translation"],
+      "question": "OpenFOAMGPT 演示的任务范围不包括以下哪项？",
+      "options": ["零样本案例建立", "边界条件修改", "湍流模型调整与代码翻译", "风洞实验设计"],
+      "answer": 3
+    }
+  ]
+}

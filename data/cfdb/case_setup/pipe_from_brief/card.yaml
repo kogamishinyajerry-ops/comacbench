@@ -1,0 +1,29 @@
+# Gallery card copy for pipe_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建圆管 Hagen-Poiseuille 层流算例(evidence 模式)
+capability: case_setup 域 evidence 模式任务:agent 只拿到自然语言工程任务书(visible/task.md)和带尺寸标注的示意图
+  (visible/drawing.png),在自己的环境里驱动任意求解器(Fluent、STAR-CCM+、自研、OpenFOAM 均可——judge 不运行任何求解器),
+  提交证据包(manifest.json + 求解器原生日志 + 网格报告 + x=0.1 m 站位径向剖面 CSV)。物理:圆管 R=0.005 m、L=0.12 m,
+  均匀入口 U_mean=0.1 m/s,ν=5e-5 m²/s(Re_D=20),从静止瞬态积分到充分发展抛物线剖面。judge 校验证据包
+  (required 文件齐备非空、manifest 可解析含 solver 字段、CSV 通用一致性),再由冻结脚本 reference/compute_qoi.py
+  从原始剖面归约 u_max 与 wall_u_avg 打分。
+expected: 交一个证据包 submission/(布局 v1:manifest.json、evidence/solver.log、evidence/mesh_report.txt、
+  evidence/samples/profile.csv,表头 r,u,末行 r=R 锚定壁面边界值)。held_out 参考 u_max=0.2 m/s(=2·U_mean)、
+  wall_u_avg=0(无滑移锚),案面无公开 qoi_values。黄金 E2E 已实证(2026-08-11,ruler 号 5f448677):golden 证据包由
+  素材案例 pipe_poiseuille 的真实 docker 运行产物(run 20260811T080645Z)转换而来,归约 u_max=0.19933806、
+  wall_u_avg=0,qoi_error=0.00165,与素材案例钉值(u_max 实测 0.199338061、相对误差 0.33%)一致,valid=true、
+  score=-0.00165。
+criteria: 冻结两门 AND:① qoi_complete——从证据归约出的 QoI 含声明 key(证据缺失、CSV 畸形、QoI 脚本失败均 fail-closed
+  invalid);② within_budget——消费 manifest 自报的 timing.wall_time_sec ≤ 3600s(evidence 模式 budget 门基于自报墙钟,
+  语义减弱、靠诚信与生产 harness 锚定,3600s 是宽松上限,缺失时退化为只管 judge 侧归约时钟并大声记录)。两门过才给连续分
+  score=−qoi_error(多 QoI 取平均:u_max 相对误差,零参考 wall_u_avg 走绝对误差)。每个被评分的数字都由冻结代码从原始
+  证据重算,自报 QoI 不进入裁决。
+what_makes_it_bite: 三个显式考点:(1) 素材案例的管壁滑移采样坑直接写进证据合同——剖面末行必须是 r=R 的壁面边界值,
+  粗网格下用内部线采样外插到壁面会得到虚假滑移速度(素材粗网格最近壁单元值 0.0099 m/s,约 10% U_mean),凡外插冒充者
+  wall_u_avg 立即破零参考锚;(2) 任务书求解器无关,Fluent 用户同样可读,轴对称/三维建模任选但须在 manifest 说明;
+  (3) 负控实证(2026-08-11,ruler 号 5f448677):golden 剖面 u 列整体乘 1.2 后 valid=true 但 score=−0.0980
+  (qoi_error 0.098,约为 golden 的 59 倍),显著变差。残差:judge 无法证明求解器真跑过(证据模式固有,真实性由生产
+  harness 锚定);held_out 值是教科书可推的解析值,anti-copy 依赖证据归约机制而非秘密数字。

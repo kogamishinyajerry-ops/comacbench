@@ -1,0 +1,47 @@
+# Provenance declaration for channel_poiseuille (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  White, F. M., "Viscous Fluid Flow", 3rd ed., McGraw-Hill, 2006, §3-2
+  (plane Poiseuille flow: u(y) = 6*U_mean*(y/H)*(1-y/H), u_max = 1.5*U_mean);
+  entrance-length correlation per Shah, R. K., London, A. L., "Laminar Flow
+  Forced Convection in Ducts", Academic Press, 1978 (L_e/Dh ~ 0.05*Re_Dh at
+  low Re)
+source_url: https://en.wikipedia.org/wiki/Hagen%E2%80%93Poiseuille_flow_from_the_Navier%E2%80%93Stokes_equations
+retrieved: null
+transcription_verified: false
+file_hashes:
+  reference/poiseuille_profile.csv: fed85d3bf35a93c868064dc0bd035b39acb5ea6bf981d90ae2d8da1b17212b72
+  reference/generate_profile.py: dde660e10ceb0e787457eaa6ba1eb9e66b3de4ed308d836fffd0490c445d2ccf
+notes:
+  - "reference/poiseuille_profile.csv is MACHINE-GENERATED pointwise from the
+    closed-form solution by reference/generate_profile.py (stdlib only, kept
+    in-tree and anchored above); no hand-typed numbers. The formula itself
+    was cross-checked on 2026-08-11 against independent public sources
+    (u(y)=4*U_max*y*(H-y)/H^2 and u_max=1.5*U_mean, e.g. arXiv:2512.00564
+    Appendix B and ScienceDirect field-flow-fractionation overviews).
+    transcription_verified stays false: that flag means 'checked against
+    published tables', which does not apply to a generated analytical curve."
+  - "QoI centerline_umax=0.15 m/s is the exact analytical 1.5*U0; the probe
+    line sits at x/H=10, >2x past the entrance length (L_e/Dh~0.05*Re_Dh,
+    Re_Dh=40 -> L_e~2Dh=4H), and endTime=5 s > 2 viscous times (H^2/nu=2 s),
+    so the sampled profile is fully developed and steady by construction of
+    the run parameters."
+  - "The 5% QoI tolerance is a documented domain decision, not a fudge: it
+    absorbs the 240x20 demo-mesh discretisation error (2nd-order, dy/H=0.05)
+    plus residual entrance/transient effects. EMPIRICALLY PINNED 2026-08-11:
+    a full docker run of the shipped case (opencfd/openfoam-default:2312,
+    blockMesh + icoFoam to t=5 s, 5000 steps, ~2 min wall) measured
+    centerline_umax = 0.149254 m/s on the x/H=10 probe line -- 0.50% below
+    the analytical 0.15; max pointwise error against the reference CSV over
+    the 20 probes is 2.05%. Both sit comfortably inside the 5% gate. Unlike
+    lid_driven_cavity this number is NOT engineer-signed; it is recorded
+    here as a reproducibility anchor, re-derivable by re-running the case."
+  - "Platform limitation at authoring time (inherited, not introduced here):
+    the cfdb openfoam adapter rendered lid-driven-cavity templates (0/U, 0/p,
+    controlDict with cavity probes) for every non-NACA case, so `cfdb run`
+    real execution would NOT reproduce this channel setup. Resolved
+    2026-08-11: the adapter's case-provided config path stages this case's
+    own 0/, constant/, system/ verbatim (constant/polyMesh/blockMeshDict is
+    additionally staged to system/ where v2312 blockMesh looks for it) and
+    post/compute_qoi.py is wired as outputs.qoi_script. The docker-run
+    measurements above stand as the reproducibility anchor."

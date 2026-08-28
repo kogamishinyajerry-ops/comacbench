@@ -1,0 +1,28 @@
+# Gallery card copy for poiseuille_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建平板通道 Poiseuille 层流算例
+capability: case_setup 域试点：agent 只拿到自然语言工程任务书（visible/task.md）和带尺寸标注的通道示意图（visible/drawing.png），
+  需从零搭建完整可运行的 OpenFOAM 案例目录（0/、constant/、system/）——平板通道 H=0.01 m、L=0.12 m、ν=5e-5 m²/s、均匀入口
+  U0=0.1 m/s、Re_H=20，二维层流非定常求解到充分发展，并在 x/H=10 处布置采样线。评分时在 --network none 沙箱（opencfd/openfoam-default:2312）
+  里真实执行 blockMesh → controlDict application 声明的求解器，再由冻结 QoI 脚本从求解器输出提取 centerline_umax。
+expected: 交一个完整 OpenFOAM 案例目录。冻结 QoI 脚本（reference/compute_qoi.py，stdlib-only，宿主机执行，末行 stdout 为
+  JSON）读取 postProcessing/probes/<time>/U 最终时刻数据，取采样线上 |Ux| 最大值。held_out 参考 0.15 m/s（解析值
+  u_max=1.5·U0，White §3-2），案面无公开 qoi_values——唯一评分参考即留出副本。黄金 E2E 已实证（2026-08-11，ruler
+  19804d0d，真实 docker 沙箱）：golden submission 跑出 centerline_umax=0.149254（低 0.50%，与素材案例已知实测一致），
+  valid=true，score=-0.00497，求解墙钟 15.4 s。
+criteria: 冻结两门 AND：① qoi_complete——沙箱真实跑出的 QoI 含声明 key（blockMesh/求解器/QoI 脚本任一步失败即 fail-closed
+  invalid）；② within_budget——后端实测墙钟 ≤ 360s（golden 实测 ~2 min，3 倍余量）。两门过才给连续分 score=−qoi_error。
+  与 cfd 域同构：QoI 准确度是 ungated 连续指标，case.yaml 的 5% 容差仅作文档；且 case_setup 堵死了 cfd 域手写 qoi.json
+  的洞——每个被评分的数字都必须出自一次真实求解器执行，submission 无法只靠写字面量过关。
+what_makes_it_bite: 三个显式考点：(1) 完整案例搭建是真功夫——网格（blockMeshDict 须放 system/，v2312 在此查找）、五组边界条件、
+  求解器控制（endTime 须 > 粘性时间 H²/ν=2 s 保证充分发展，Co<1）、probes functionObject 缺一不可，任何一步沙箱内失败都
+  fail-closed；(2) 物理陷阱沿素材案例继承——均匀入口有入口段发展（L_e≈4H），采样线放在近入口区会系统性偏离抛物线，任务书明示
+  x/H=10；(3) 负控实证（2026-08-11，ruler 19804d0d）：把 ν 改成 5e-4（Re 错 10 倍）评分与 golden 完全相同（score=-0.00497）
+  ——充分发展 Poiseuille 的 u_max=1.5·U_mean 与 ν 无关，ν 只改压降与瞬态，而 endTime=5 s 远大于错误粘度下的 H²/ν=0.2 s，
+  该扰动对本 QoI 物理上不区分（已实测记录，勿再用作本案例负控）；删掉 0/U 的 inlet patchField 则 icoFoam 启动即 exit 1，
+  fail-closed 判 invalid、score=None——「真跑」机制对结构性破坏的区分能力实证成立。残差：held_out 值是教科书可推的解析值，
+  anti-copy 依赖「真跑」机制本身而非秘密数字；judge 镜像无 python3，QoI 脚本在宿主机跑，submission 里塞恶意代码不会被执行
+  （只有 OpenFOAM 二进制在沙箱内运行）。

@@ -1,0 +1,83 @@
+id: natural_convection_from_brief
+name: "Case Setup: Natural Convection Cavity Ra=1e4 from Engineering Brief (evidence)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain, EVIDENCE mode: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  dimensioned drawing (visible/drawing.png), drives ANY solver in its own
+  environment (Fluent/STAR-CCM+/in-house/OpenFOAM — the judge has no
+  solver), and submits an evidence bundle (manifest.json + solver-native
+  log + mesh report + hot-wall heat flux distribution CSV). The judge
+  validates the bundle and recomputes the QoI from the raw evidence with
+  the frozen script reference/compute_qoi.py on the host — a
+  self-reported QoI never enters the verdict. Task physics inherited from
+  the VALIDATED case cases/validation/natural_convection_cavity: de Vahl
+  Davis (1983) differentially-heated square cavity, Boussinesq
+  incompressible flow, laminar steady, unit square H=1 m, hot wall x=0 at
+  293 K, cold wall x=1 at 283 K, adiabatic top/bottom; g=9.81 m/s^2,
+  beta=3e-3 1/K, rho0=1 kg/m^3, mu=4.571e-3 Pa s, Pr=0.71 -> Ra=1.0e4.
+  QoI hot_wall_nu_avg = |q''|_avg * H / (k*dT) with k = mu*Cp/Pr = 6.437
+  W/(m K), i.e. Nu = |q''|_avg / 64.37, reduced from the wall heat flux
+  distribution. Held-out reference 2.238 (de Vahl Davis 1983 hot-wall
+  average Nu at Ra=1e4) inherited verbatim from the source case.
+  Docker-verified measurement on the golden configuration: 2.2351 (0.13%
+  error, 64x64 demo mesh); see provenance.yaml.
+physics:
+  flow: low_mach
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: case_setup scoring does NOT consume case.yaml solver
+  # steps. Evidence mode runs nothing at all on the judge — the agent's
+  # own solver run happens off-judge and only the evidence bundle is
+  # judged (see execution.evidence).
+  - name: generic
+    command: "true"
+outputs:
+  fields: ["U", "T", "p"]
+  curves: []
+  qoi:
+    - hot_wall_nu_avg
+  qoi_script: reference/compute_qoi.py
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/hot_wall_flux.csv
+    notes: >-
+      Evidence bundle layout v1; every file and column is documented in
+      visible/task.md (the agent-readable contract).
+reference:
+  type: dns
+  # No public qoi_values: the ONLY scoring reference is the held-out copy
+  # (value inherited from the source validation case's held_out/qoi.json,
+  # itself the de Vahl Davis 1983 hot-wall average Nu at Ra=1e4,
+  # multi-source verified).
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 10%
+  # mirrors the source validation case's tolerance for the same physics.
+  qoi_relative_tolerance:
+    hot_wall_nu_avg: 0.10
+budget:
+  # Evidence mode: the within_budget gate consumes the SELF-REPORTED
+  # manifest timing.wall_time_sec (weakened semantics — the judge never
+  # clocks the solver run); 3600 s is a deliberately generous envelope
+  # (buoyancy-driven SIMPLE converges slowly; the golden docker run
+  # converged in ~11 s wall).
+  max_runtime_sec: 3600
+  max_cells: null

@@ -1,0 +1,29 @@
+# Gallery card copy for turbulent_channel_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建全发展湍流槽道流算例（evidence 模式，Re_tau=180）
+capability: case_setup 域 evidence 模式任务：agent 只拿到自然语言工程任务书（visible/task.md）和带尺寸标注的槽道示意图
+  （visible/drawing.png），在自己的环境里驱动任意求解器（Fluent/STAR-CCM+/自研/OpenFOAM 均可，judge 上没有求解器）搭建并计算
+  全发展湍流槽道流 Re_tau=180——半高 h=1 m、体速度 U_b=1 m/s 恒定流量驱动、ν=3.571429e-4 m²/s 固定 Re_b=2800，流向/展向周期，
+  稳态 RANS 并强制声明湍流模型与近壁处理方式。交付物是证据包（manifest+solver 日志+网格报告+壁面剪应力采样），judge 校验
+  证据包后用冻结脚本 reference/compute_qoi.py 从原始采样归约 Cf=tau_w/(0.5·rho·U_b²)。
+expected: 交证据包 submission/（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/samples/wall_shear.csv，
+  逐文件逐列合同见 task.md）。held_out 参考 8.18e-3（MKM1999 DNS 已发表值，案面无公开 qoi_values——唯一评分参考即留出副本）。
+  素材案例 cases/validation/turbulent_channel_retau180 的 docker 实测（v2312，kOmegaSST，2048 格 demo 网格，4000 迭代收敛）
+  Cf=7.842e-3、误差 4.13%——黄金证据包由该真实运行产物（runs/20260811T080830Z_turbulent_channel_retau180_openfoam_155d6d60）
+  机械转换而来。黄金 E2E 已实证（2026-08-11，ruler db76bc89）：valid=true，score=-0.0412936，qoi_error 与素材钉值
+  逐位一致；负控实证：壁面剪应力 ×1.5 → score=-0.43806（显著变差），删 upper 壁面采样 → 归约脚本 exit 1 fail-closed 判 invalid。
+criteria: 证据包通用检查全 fail-closed：required 文件缺失/为空、manifest 不可解析或缺 solver 字段、CSV 不可解析/数值格 NaN/Inf/
+  时间列非单调，任一失败即 invalid 且不归约 QoI。冻结两门 AND：① qoi_complete——归约脚本从壁面剪应力采样算出声明的 cf_bulk；
+  ② within_budget——⚠ evidence 模式语义减弱：judge 不跑求解器，该门只门控 manifest 自报的 timing.wall_time_sec（3600s 宽松界），
+  未自报时降级为只门控评分端归约时钟（scorer notes 会大声标注）。两门过才给连续分 score=−qoi_error；QoI 准确度是 ungated
+  连续指标，case.yaml 的 10% 容差仅作文档（沿用素材案例：demo 网格分辨率+低 Re_tau SST 模型形式误差）。
+what_makes_it_bite: 三个显式考点：(1) 证据合同是真功夫——wall_shear.csv 表头恰为 surface,tau_w_x_pa、两侧壁面 lower/upper 都必须
+  有采样、数值格不得 NaN/Inf，归约脚本对格式违反一律 exit 非零 fail-closed；自报最终 Cf 无用，被评分的数字只能从原始采样重算。
+  (2) 湍流建模声明强制——manifest.notes 必须声明湍流模型与近壁处理（低 Re 积分 y+≤1 或壁面函数 y+≈30–300），这是本任务相对
+  managed 层流试点新增的工程能力维度。(3) 与 cfd 域手写 qoi.json 的洞不同构：evidence 模式的 anti-copy 不靠数字保密（8.18e-3
+  是文献公认值，任务书也点名了 MKM1999），而靠「伪造一整套求解器原生证据（日志残差史+网格报告+自洽的壁面采样）」的成本，
+  运行真实性由生产 harness 现场驱动锚定（scorer 模块 docstring 明示此信任姿态）。残差：within_budget 门基于自报墙钟，
+  语义天然弱于 managed 模式的后端实测。

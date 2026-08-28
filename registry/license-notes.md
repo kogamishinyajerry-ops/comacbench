@@ -48,6 +48,20 @@
 | openconcept.hybrid_electric | 待核对 | needs-verification | 核对 mdolab 许可 |
 | pdebench.compressive_ns | 待核对 | needs-verification | 核对仓库许可 |
 | camb.selective | 数据 CC BY-NC-SA 4.0（表述有差异） | blocked-license-ambiguity | 法务确认 NC 条款公司内部边界 + 澄清仓库表述差异 |
+
+## 批次 v0.3 追加（2026-08-28，CFD 论文调研转化）
+
+| Registry ID | 许可证 | status | 镜像放行前必须完成的事 |
+| --- | --- | --- | --- |
+| cfdagent.litbench | 题面自建；arXiv 摘要经公开 API（逐题署名 arXiv id） | confirmed-selfbuilt | —（署名义务见 data/cfdagent/litbench/PROVENANCE.md §C；若未来镜像论文全文 PDF 需按各论文自身许可另行清点） |
+| cfdb.case_setup / cfdb.verification / cfdb.validation | MIT（上游 LICENSE 已核验） | confirmed-repo | —（2026-08-28 已镜像，revision cfdb@b26799e；再分发保留上游版权声明） |
+| pinnacle.suite | MIT（LICENSE 文件 + 页面 spdxId 双核验） | confirmed-repo | 镜像前复核最新 revision |
+| unifoil.airfoil | CC BY-SA 4.0（HF 数据集卡片核验） | confirmed-dataset | 注意 SA 传染性（同 superwing 策略）；仅 Lite 子集 |
+| thewell.fluiddyn | 代码 BSD-3-Clause / 数据以 CC BY 4.0 为主、逐子集有差异 | confirmed-split | 镜像前逐子集核对数据许可 |
+| cfdagent.metaopenfoam8 | GPL-3.0（仓库 LICENSE 核验；上游已标 deprecated） | confirmed-repo | GPL 再分发义务；锁定 revision 后使用 |
+| tudaglr.openstage | 论文 CC BY 4.0 / 标模数据申请制 | needs-verification | 数据获取与许可经 TU Darmstadt 确认 |
+| drivanetpp.coeff | 数据 CC BY-NC 4.0 / 仓库 NOASSERTION | blocked-license-ambiguity | 法务确认 NC 内部评测边界（同 camb） |
+| flowbench.lite | 数据 CC BY-NC 4.0（HF 卡片核验；无官方代码仓库） | blocked-license-ambiguity | 法务确认 NC 内部评测边界（同 camb） |
 | airfrans.level1 | ODbL-1.0 | confirmed-dataset | 注意 ODbL 共享要求 |
 | gsm8k.math_reasoning | MIT（GitHub openai/grade-school-math 根 LICENSE） | confirmed-repo | —（2026-08-21 已镜像；test.jsonl 1319 题全量 + LICENSE.MIT 随镜像，证据链见 data/gsm8k/math_reasoning/PROVENANCE.md） |
 | humaneval.python | MIT（GitHub openai/human-eval 根 LICENSE + HF 数据集卡 license=mit 双证） | confirmed-repo | —（2026-08-21 已镜像；HumanEval.jsonl 164 题全量，PROVENANCE 见 data/humaneval/python/） |

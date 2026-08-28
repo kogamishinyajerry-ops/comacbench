@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Constant-flow-rate forcing: adjusts the streamwise pressure gradient so
+// the domain-averaged velocity stays at Ubar = (1 0 0) m/s. This fixes
+// Re_b = U_b*h/nu = 2800; the wall shear stress (and hence Re_tau and Cf)
+// is the predicted quantity compared against the MKM1999 DNS.
+momentumSource
+{
+    type            meanVelocityForce;
+
+    selectionMode   all;
+
+    fields          (U);
+    Ubar            (1 0 0);
+}
+
+// ************************************************************************* //

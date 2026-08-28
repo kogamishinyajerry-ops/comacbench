@@ -1,0 +1,15 @@
+# Provenance declaration for lid_driven_cavity_re400 (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Ghia, U., Ghia, K. N., Shin, C. T., "High-Re Solutions for Incompressible
+  Flow Using the Navier-Stokes Equations and a Multigrid Method",
+  J. Comput. Phys. 48, pp. 387-411, 1982 (Table I, Re=400 column)
+source_url: https://doi.org/10.1016/0021-9991(82)90058-4
+retrieved: null
+transcription_verified: true
+file_hashes:
+  reference/ghia1982_re400_centerline.csv: 75ca3fc2ac9e6e9e4a1eae650b74ece54dfca2c4051951e1dfc2c8a81262e275
+notes:
+  - "All 17 stations of the Table I Re=400 column cross-checked point-by-point on 2026-08-11 against independent reproductions: the ivan-pi transcription gist (github.com/ivan-pi/3e9326d18a366ffe6a8e5bfda6353219), the CTTC-UPC course notes 'Part 5: Numerical solution of the Navier-Stokes Equations' (upcommons.upc.edu), the UPC bachelor thesis by Montilla Rodriguez (upcommons.upc.edu, Table 8.1), Roache's 'Verification and Validation' book (2009), Wei et al. DSC paper (users.math.msu.edu/users/wei/PAPER/p79.pdf), a Comput. Phys. Commun. micropolar paper (osaka-u.ac.jp), Marchi et al. 2009 (scielo.br), Zhang 1990 (ESAIM M2AN) and the EAFIT thesis (repository.eafit.edu.co). Every station value was confirmed by at least two independent sources."
+  - "Inline qoi centerline_umax=0.551 is linearly interpolated from this CSV at y/H=0.95 (probe-line top): between stations 0.9531 (u=0.55892) and 0.8516 (u=0.29093) it evaluates to 0.5507. The interpolation spans a wide, curved region of the profile, so the anchor carries ~1% interpolation bias in addition to the mesh-resolution error; both are covered by the documented 10% tolerance."
+  - "Unlike the Re=100 sibling case, this CSV keeps exactly the 17 stations published in Ghia Table I (no inserted interpolation points)."

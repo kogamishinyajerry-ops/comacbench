@@ -1,0 +1,131 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// O-type grid for flow past a circular cylinder, D = 1 m (radius 0.5 m).
+// Far-field circle radius 50 m => domain diameter 100D (>= 50D requirement).
+// 4 annular quadrant blocks, 45 (circumferential) x 55 (radial) x 1 cells
+// each = 9900 cells. Radial simpleGrading 333 => first cell ~0.015D at the
+// wall, last cell ~5D at the far field (demo-grade resolution).
+// Unit depth in z (1 m) so that Aref = D * depth = 1.0 in forceCoeffs.
+
+scale   1;
+
+vertices
+(
+    // inner ring: cylinder surface r = 0.5, z = -0.5 (vertices 0-3)
+    (  0.353553390593  0.353553390593 -0.5)   // 0  ( 45 deg)
+    ( -0.353553390593  0.353553390593 -0.5)   // 1  (135 deg)
+    ( -0.353553390593 -0.353553390593 -0.5)   // 2  (225 deg)
+    (  0.353553390593 -0.353553390593 -0.5)   // 3  (315 deg)
+    // outer ring: far field r = 50, z = -0.5 (vertices 4-7)
+    ( 35.355339059327  35.355339059327 -0.5)  // 4
+    (-35.355339059327  35.355339059327 -0.5)  // 5
+    (-35.355339059327 -35.355339059327 -0.5)  // 6
+    ( 35.355339059327 -35.355339059327 -0.5)  // 7
+    // inner ring, z = +0.5 (vertices 8-11)
+    (  0.353553390593  0.353553390593  0.5)   // 8
+    ( -0.353553390593  0.353553390593  0.5)   // 9
+    ( -0.353553390593 -0.353553390593  0.5)   // 10
+    (  0.353553390593 -0.353553390593  0.5)   // 11
+    // outer ring, z = +0.5 (vertices 12-15)
+    ( 35.355339059327  35.355339059327  0.5)  // 12
+    (-35.355339059327  35.355339059327  0.5)  // 13
+    (-35.355339059327 -35.355339059327  0.5)  // 14
+    ( 35.355339059327 -35.355339059327  0.5)  // 15
+);
+
+// Local axes per block: i = radial (outward), j = circumferential (CCW,
+// viewed from +z), k = +z, so that i x j = +k (right-handed blocks).
+blocks
+(
+    hex (0 4 5 1 8 12 13 9)   (55 45 1) simpleGrading (333 1 1)  // top quadrant
+    hex (1 5 6 2 9 13 14 10)  (55 45 1) simpleGrading (333 1 1)  // left quadrant
+    hex (2 6 7 3 10 14 15 11) (55 45 1) simpleGrading (333 1 1)  // bottom quadrant
+    hex (3 7 4 0 11 15 12 8)  (55 45 1) simpleGrading (333 1 1)  // right quadrant
+);
+
+edges
+(
+    // cylinder surface arcs (r = 0.5), z = -0.5
+    arc 0  1  (  0.0   0.5 -0.5)
+    arc 1  2  ( -0.5   0.0 -0.5)
+    arc 2  3  (  0.0  -0.5 -0.5)
+    arc 3  0  (  0.5   0.0 -0.5)
+    // cylinder surface arcs, z = +0.5
+    arc 8  9  (  0.0   0.5  0.5)
+    arc 9  10 ( -0.5   0.0  0.5)
+    arc 10 11 (  0.0  -0.5  0.5)
+    arc 11 8  (  0.5   0.0  0.5)
+    // far-field arcs (r = 50), z = -0.5
+    arc 4  5  (  0.0  50.0 -0.5)
+    arc 5  6  (-50.0   0.0 -0.5)
+    arc 6  7  (  0.0 -50.0 -0.5)
+    arc 7  4  ( 50.0   0.0 -0.5)
+    // far-field arcs, z = +0.5
+    arc 12 13 (  0.0  50.0  0.5)
+    arc 13 14 (-50.0   0.0  0.5)
+    arc 14 15 (  0.0 -50.0  0.5)
+    arc 15 12 ( 50.0   0.0  0.5)
+);
+
+boundary
+(
+    cylinder
+    {
+        type wall;
+        faces
+        (
+            (0 8 9 1)
+            (1 9 10 2)
+            (2 10 11 3)
+            (3 11 8 0)
+        );
+    }
+    farfield
+    {
+        type patch;
+        faces
+        (
+            (4 5 13 12)
+            (5 6 14 13)
+            (6 7 15 14)
+            (7 4 12 15)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            // back (z = -0.5)
+            (0 1 5 4)
+            (1 2 6 5)
+            (2 3 7 6)
+            (3 0 4 7)
+            // front (z = +0.5)
+            (8 12 13 9)
+            (9 13 14 10)
+            (10 14 15 11)
+            (11 15 12 8)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

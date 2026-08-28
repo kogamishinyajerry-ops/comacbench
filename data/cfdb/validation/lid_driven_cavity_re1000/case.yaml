@@ -1,0 +1,64 @@
+id: lid_driven_cavity_re1000
+name: Lid-Driven Cavity (Re=1000)
+category: validation
+description: "Classic lid-driven cavity benchmark, OpenFOAM icoFoam, laminar Re=1000 (L=0.1 m, U_lid=1 m/s, nu=1e-4). Reference: Ghia, Ghia & Shin (1982), J. Comput. Phys. 48, Table I Re=1000 column. QoI centerline_umax = max |U|/U_lid on the vertical centerline probe line (y/H up to 0.95): linear interpolation of the Ghia table between y/H=0.8516 (0.33304) and y/H=0.9531 (0.46604) gives 0.462 at y/H=0.95. Tolerance 10% is a documented domain decision, not a hidden fudge: it covers (a) the reference being a linear interpolation at the probe-line top rather than a tabulated point, (b) the QoI measuring |U|=sqrt(u^2+v^2) while the reference tabulates u only, (c) the uniform 128x128 mesh vs Ghia's 129x129 multigrid solution, and (d) the finite integration time t=30 s (300 lid turnovers) vs the true steady state."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 1000.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "icoFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: true
+      - name: solve
+        command: "icoFoam -case {{ run_dir }}/case"
+        # 60000 steps at dt=5e-4 on 16384 cells. Smoke-measured on
+        # opencfd/openfoam-default:2312 (Apple Silicon): ~32 ms/step
+        # -> ~1900 s total, so 3600 s gives ~1.9x headroom.
+        timeout_sec: 3600
+        critical: true
+    parameters:
+      nu: 0.0001
+      end_time: 30.0
+      delta_t: 0.0005
+      write_interval: 2000
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - centerline_umax
+  qoi_script: post/compute_qoi.py
+reference:
+  type: dns
+  files:
+    centerline: reference/ghia1982_centerline.csv
+  qoi_values:
+    centerline_umax: 0.462
+  # Same held-out wiring as the lid_driven_cavity (Re=100) pilot: the value
+  # below is deliberately the SAME as the public qoi_values above (both are
+  # the interpolation of Ghia 1982 Table I at y/H=0.95) — it proves the
+  # frozen-anchoring mechanism, it does NOT yet add anti-copy value from an
+  # independently recomputed number. See Architecture v5.0 §5.2 and §8.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    centerline_umax: 0.10
+budget:
+  max_runtime_sec: 3600
+  max_cells: null

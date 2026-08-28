@@ -1,0 +1,29 @@
+# Gallery card copy for taylor_couette_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建同心圆筒 Taylor-Couette 层流算例(evidence 模式)
+capability: case_setup 域 evidence 模式任务:agent 只拿到自然语言工程任务书(visible/task.md)和带尺寸标注的环形几何示意图
+  (visible/drawing.png),在自己的环境里驱动任意求解器(Fluent、STAR-CCM+、自研、OpenFOAM 均可——judge 不运行任何求解器),
+  提交证据包(manifest.json + 求解器原生日志 + 网格报告 + 径向切向速度剖面 CSV)。物理:内筒 R_i=0.05 m 以 ω=1 rad/s
+  旋转、外筒 R_o=0.10 m 静止,ν=1e-3 m²/s(Re=2.5,远低于 Taylor 失稳临界),从静止瞬态积分到定常剖面
+  u_θ=A·r+B/r。judge 校验证据包(required 文件齐备非空、manifest 可解析含 solver 字段、CSV 通用一致性),再由冻结脚本
+  reference/compute_qoi.py 从原始剖面归约 utheta_midgap(中隙 r=0.075 m 处切向速度)打分。
+expected: 交一个证据包 submission/(布局 v1:manifest.json、evidence/solver.log、evidence/mesh_report.txt、
+  evidence/samples/profile.csv,表头 r,u_theta,必须含 r=0.075 m 站位点)。held_out 参考 0.01944444444444445 m/s
+  (闭式解析值,与素材案例锚定同值),案面无公开 qoi_values。黄金 E2E 已实证(2026-08-11,ruler 号 744fee86):golden
+  证据包由素材案例 taylor_couette 的真实 docker 运行产物(run 20260811T081140Z)转换而来,归约 utheta_midgap=
+  0.01941113,qoi_error=0.00171,与素材案例钉值(实测 0.01941113、相对误差 0.17%)逐位一致,valid=true、
+  score=-0.00171。
+criteria: 冻结两门 AND:① qoi_complete——从证据归约出的 QoI 含声明 key(证据缺失、CSV 畸形、QoI 脚本失败均 fail-closed
+  invalid);② within_budget——消费 manifest 自报的 timing.wall_time_sec ≤ 3600s(evidence 模式 budget 门基于自报墙钟,
+  语义减弱、靠诚信与生产 harness 锚定,3600s 是宽松上限,缺失时退化为只管 judge 侧归约时钟并大声记录)。两门过才给连续分
+  score=−qoi_error。每个被评分的数字都由冻结代码从原始证据重算,自报 QoI 不进入裁决。
+what_makes_it_bite: 三个显式考点:(1) 采样线合同锚在 +x 射线(θ=0)上,此处切向即 +y 笛卡尔方向,任何求解器无需
+  柱坐标后处理即可导出,但符号约定(沿内筒旋转方向为正)必须遵守,反向旋转或符号弄反立即使 QoI 偏离参考值;
+  (2) 中隙站位 r=0.075 m 必须是真实采样点(容差 1e-6),任务书给出 1 mm 均布 49 点建议;任务书同时提示脉冲起动
+  瞬态的时间步稳定性(素材案例实测 deltaT 过大在 t≈0.6 s 发散);(3) 负控实证(2026-08-11,ruler 号 744fee86):golden
+  剖面 u_theta 列整体乘 1.2 后 valid=true 但 score=−0.198(qoi_error 0.198,约为 golden 的 116 倍),显著变差。
+  残差:judge 无法证明求解器真跑过(证据模式固有,真实性由生产 harness 锚定);held_out 值是教科书可推的解析值,
+  anti-copy 依赖证据归约机制而非秘密数字。

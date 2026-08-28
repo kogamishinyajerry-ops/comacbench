@@ -1,0 +1,24 @@
+# Gallery card copy for sod_shock_tube (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Sod Shock Tube (rhoCentralFoam)
+capability: 用 OpenFOAM rhoCentralFoam（ESI v2312）跑 Sod (1978) 激波管 verification case，考可压缩 Euler 求解器能否复现
+  Riemann 精确解——无粘（mu=0）、无湍流模型的纯激波/接触间断/稀疏波三波结构，对解析基准做 code-verification，是可压缩求解器的关键入门验证。
+  1D 管 x∈[0,1] m（1000×1×1 网格、empty 面），膜片在 x=0.5，左 (p,ρ)=(1 Pa, 1 kg/m³)、右 (0.1 Pa, 0.125 kg/m³)，γ=1.4 精确（Cp=3.5R）。
+expected: blockMesh → setFields → rhoCentralFoam 跑通到 t=0.2 s（adjustTimeStep, maxCo=0.2）。交 qoi shock_x_t02≈0.85043115
+  （激波位置，2% 容差）与 rho_plateau_t02≈0.42631943（x=0.6 处星区密度平台，5% 容差）。参考值由冻结脚本 generate_reference.py
+  按 Sod 精确 Riemann 解逐点算出（Newton 迭代 p*，无手编数字），并与公认表值 p*=0.30313、u*=0.92745、ρ*_L=0.42632 交叉核实
+  （脚本内置 assert 防回归）；reference/sod1978_exact_t0.2.csv 与 generate_reference.py 均 sha256 锚定在 provenance.yaml。
+  2026-08-11 在 opencfd/openfoam-default:2312 实测全算例：求解器 exit 0、0.39s 跑完，shock_x=0.850（误差 0.051%）、
+  ρ 平台=0.42631711（误差 0.0005%），远场 ρ=1/0.125 精确钉住，容差余量约 40×。
+criteria: category=verification（对解析解），无 agent-eval 契约，走 cfdb run → MetricsEngine：两个 QoI 各自相对误差
+  |computed−ref|/|ref| ≤ 容差（0.02 / 0.05）才 qoi_pass；NaN/Inf→fail、缺失→incomplete。outputs.curves 为空，预算 600s 超时只警告不翻判定、
+  max_cells=null。容差来自 1000 网格 + vanLeer 激波捕获抹平（约 4–8 cells），是文档化的领域决定，不是暗箱 fudge。
+what_makes_it_bite: 三个显式残差/坑：(1) 热力学必须让 γ 精确等于 1.4——OpenFOAM 的 R=RR/W 由 molWeight 推出（RR=1e3·NA·k=8314.47007，
+  W=28.96 → R=287.10187），若照抄 v2312 shockTube 教程的 Cp=1004.5 则 γ≈1.40019、ρ_L≈0.99975，偏差 ~1e-4 虽远小于容差，但本案选择
+  Cp=3.5R、T=p/(Rρ) 把解析解与求解器热力学严格对齐；(2) 初场经 setFields 按 T 间接给密度，0/T 里的 T_L=1/R=0.0034843 K 数值上反直觉，
+  手滑填错（如直接用教程的 348.432 K）会把密度比从 8 改飞，激波速度整体漂移——QoI 门立刻咬人；(3) 激波位置的提取方式未随案例冻结
+  （max|∇ρ| 定位是惯例但非契约），2% 容差就是给提取/网格不确定性留的明账。held_out 值刻意等于公开 reference（同 ldc pilot 的诚实声明），
+  不提供独立重算的 anti-copy 价值。

@@ -1,0 +1,25 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+transportModel  Newtonian;
+
+// Bulk-velocity forcing Ubar = 1 m/s (system/fvOptions meanVelocityForce).
+// nu chosen so that Re_b = U_b*h/nu = 2800 (h = 1 m half-height), the bulk
+// Reynolds number of the Moser, Kim & Mansour (1999) Re_tau = 180 DNS.
+// The resulting Re_tau (and hence Cf) is a prediction, not an input.
+nu              3.571429e-04;
+
+// ************************************************************************* //

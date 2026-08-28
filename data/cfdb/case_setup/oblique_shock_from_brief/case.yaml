@@ -1,0 +1,81 @@
+id: oblique_shock_from_brief
+name: "Case Setup: Oblique Shock over a 10° Wedge (M1=2) from Engineering Brief"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain, EVIDENCE mode (compressible/BL family): the agent
+  receives only a solver-agnostic engineering brief (visible/task.md) and an
+  annotated dimensioned drawing (visible/drawing.png), drives ANY CFD solver
+  in its own environment (Fluent, STAR-CCM+, in-house, OpenFOAM, ...), and
+  submits an evidence bundle (manifest.json + solver log + mesh report +
+  Mach profile CSV). The judge runs NO solver: it validates the bundle and
+  reduces post_shock_mach from the raw evidence with the frozen QoI script
+  reference/compute_qoi.py on the host. Task physics: 2D inviscid
+  calorically perfect gas (gamma=1.4), freestream M1=2, 10° wedge,
+  weak-solution oblique shock (beta=39.31384°). QoI post_shock_mach = local
+  Mach at (0.6, 0.15), interpolated from the submitted vertical Mach profile
+  at x=0.6; held-out reference 1.640526 (theta-beta-M weak solution,
+  Anderson Ch. 4). Task physics and golden measurement inherited from the
+  VERIFIED case cases/verification/oblique_shock (docker run 2026-08-11:
+  M2=1.638477, 0.125% low); see provenance.yaml.
+physics:
+  flow: compressible
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+conditions:
+  mach: 2.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: evidence-mode scoring NEVER runs a solver — the agent
+  # drives its own; the judge validates the evidence bundle and reduces the
+  # QoI with the frozen script on the host (see execution.setup_mode).
+  - name: generic
+    command: "true"
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/mach_profile.csv
+    notes: >-
+      Evidence-bundle format is documented file-by-file and column-by-column
+      in visible/task.md (uniform evidence layout v1: manifest.json +
+      evidence/solver.log + evidence/mesh_report.txt + the task-specific
+      data file under evidence/samples/).
+outputs:
+  fields: ["U", "p", "T"]
+  curves: []
+  qoi:
+    - post_shock_mach
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: analytical
+  # No public qoi_values: the ONLY scoring reference is the held-out copy.
+  # The analytical value (theta-beta-M weak solution) is textbook-derivable,
+  # so anti-copy rests on the evidence mechanism itself — the scored number
+  # is recomputed from raw solver evidence by the frozen script, never taken
+  # from a self-reported QoI.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 5% mirrors
+  # the verified oblique_shock V&V tolerance for the same physics.
+  qoi_relative_tolerance:
+    post_shock_mach: 0.05
+budget:
+  # Evidence mode: this budget gates only the host-side QoI reduction clock,
+  # or the SELF-REPORTED solver wall time when the bundle declares
+  # timing.wall_time_sec — it cannot bound the agent-side solver run (the
+  # judge runs nothing). 3600 s is deliberately loose; see card.yaml.
+  max_runtime_sec: 3600
+  max_cells: null

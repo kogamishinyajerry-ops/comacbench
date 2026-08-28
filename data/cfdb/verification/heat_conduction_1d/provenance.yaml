@@ -1,0 +1,42 @@
+# Provenance declaration for heat_conduction_1d (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Incropera, F. P., DeWitt, D. P., Bergman, T. L., Lavine, A. S.,
+  "Fundamentals of Heat and Mass Transfer", 7th ed., Wiley, 2011
+  (steady 1D conduction in a plane wall with uniform heat generation,
+  both surfaces at T_s: T(x) = T_s + (q/2k) * x * (L - x))
+source_url: null
+retrieved: null
+# The CSV is not transcribed from any publication: every value is evaluated
+# from the closed-form solution by reference/generate.py (anchored below),
+# so manual transcription errors are impossible by construction. The formula
+# itself was cross-checked against an independent numerical solve: a full
+# blockMesh + laplacianFoam run of this exact case in the
+# opencfd/openfoam-default:2312 container (2026-08-11) reproduced the profile
+# with max deviation 0.0125 K and interpolated midplane error 2.7e-7 relative
+# (T_mid = 424.999885 K vs analytic 425.0 K).
+transcription_verified: true
+file_hashes:
+  reference/t_profile.csv: e7db9ab4327eefdb42b93f2b3a5610eb74be4b0b656abaef1af6b049c2ee6699
+  reference/generate.py: d74d43e0cbaa145544c5634a9694846b3deb9577e58b4dbe503fd74f1cd4f027
+notes:
+  - "reference/t_profile.csv is generated, never hand-typed: reference/generate.py
+    (pure Python stdlib) evaluates T(x)=300+500*x*(1-x) at the 100 blockMesh cell
+    centres. Regenerate with 'python3 reference/generate.py'; any edit to the
+    script or CSV drifts the sha256 anchors above and the audit downgrades."
+  - "Parameters pinned by the OpenFOAM dictionaries: L=1 m (blockMeshDict),
+    T_s=300 K both walls fixedValue (0/T), DT=alpha=0.1 m^2/s
+    (constant/transportProperties), S=100 K/s per unit volume
+    (system/fvOptions, scalarSemiImplicitSource, volumeMode specific).
+    Only the ratio q/k = S/alpha = 1000 K/m^2 enters the steady solution."
+  - "volumeMode pitfall verified empirically (2026-08-11, v2312 container,
+    50-cell dev variant of this case): with volumeMode absolute the same
+    Su=100 is spread over the 1e-4 m^3 domain, amplifying the source 1e4x
+    and giving T_mid ~ 1.25e6 K; volumeMode specific yields the intended
+    parabola. Numbers for the shipped 100-cell case are in the header
+    comment above (transient tail after endTime = 4 diffusion time scales
+    L^2/alpha = 40 s)."
+  - "qoi midplane_T = 425.0 K is the closed-form value at x = L/2; with
+    100 cells the nearest cell centres are x=0.495/0.505 (T=424.9875 K in
+    the CSV), so a cell-sampled or linearly interpolated probe reads
+    ~424.99 K — far inside the documented 1% tolerance."

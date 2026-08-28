@@ -1,0 +1,72 @@
+id: cylinder_from_drawing
+name: "Case-Setup: Cylinder From Drawing (Re=40, Steady)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain pilot (任务3, reading-the-drawing variant): the agent
+  receives visible/task.md (natural-language flow conditions: U_inf, D, nu
+  imply Re=40, steady laminar, drag coefficient requested) plus
+  visible/drawing.png (annotated schematic: cylinder D at the domain centre,
+  far-field radius, boundary types, unit depth) and must submit a COMPLETE
+  OpenFOAM case directory (0/, constant/, system/). Geometry is fully
+  specified only on the drawing — task.md deliberately does not repeat the
+  domain dimensions. Scoring really runs the submission in a --network none
+  sandbox (opencfd/openfoam-default:2312): blockMesh -> solver parsed from
+  controlDict's application entry -> frozen host-side QoI script ->
+  reconciliation against the held-out reference (score = -qoi_error, gates
+  qoi_complete + within_budget). Golden configuration and held-out value are
+  inherited from cases/validation/cylinder_re40 (Gautier, Biau & Lamballais
+  2013 reference solution Cd=1.49; A-round measured Cd 1.513, 1.6% error,
+  passed gates).
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 40.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder: case_setup submissions are executed generically by the
+  # scorer (blockMesh + controlDict application), not via solver adapters.
+  - name: generic
+    command: "true"
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - drag_coeff_cd
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: dns
+  qoi_values:
+    # Gautier, Biau & Lamballais (2013) pseudo-spectral reference solution
+    # (Comput. Fluids 75, Table 1) — same value as cases/validation/cylinder_re40.
+    drag_coeff_cd: 1.49
+  # Held-out scoring reference (agent never sees it at scoring time). Same
+  # mechanism and same deliberate value-identity as the cylinder_re40 pilot:
+  # proves frozen anchoring + scoring-time redirection, does not yet claim
+  # anti-copy value from an independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    # Inherited from cylinder_re40: covers published literature scatter
+    # (~5-8%) plus coarse demo-mesh discretization error. Serves the V&V
+    # path only; agent-eval scoring uses the ungated continuous qoi_error.
+    drag_coeff_cd: 0.10
+budget:
+  # Golden E2E measured 2026-08-11 in the judge image
+  # (opencfd/openfoam-default:2312, --network none), backend-measured step
+  # wall clocks: copy 0.23 s + blockMesh 0.34 s + simpleFoam 7.52 s
+  # (converged in 682 SIMPLE iterations) + host QoI script 0.02 s
+  # = 8.1 s total protocol wall. 20 s is ~2.5x that total and ~2.7x the
+  # solver step (each protocol step's timeout equals this budget).
+  max_runtime_sec: 20
+  max_cells: null

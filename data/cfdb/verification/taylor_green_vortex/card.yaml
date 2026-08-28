@@ -1,0 +1,28 @@
+# Gallery card copy for taylor_green_vortex (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Taylor-Green Decaying Vortex (Re=100, icoFoam)
+capability: 搭建并跑通 2D Taylor-Green 衰减涡 code-verification（Re=100，OpenFOAM icoFoam，双周期 [0,2π]²，64×64×1=4096 cells
+  demo 网格）：0/U、0/p 用#codeStream 内联解析式初始化（funkySetFields 在 ESI v2312 镜像不可用；codeStream 首次读取时编译
+  动态库，OpenFOAM 拒绝 root 执行，容器必须 --user 非 root + 可写案例目录），t=5s 后从流场提取 ke_ratio_end=KE(5)/KE(0)
+  与采样线（网格第 5 行 64 个 cell centre，system/controlDict 的 sets functionObject，cellPoint 插值）相对 L2 误差
+  u_line_l2_rel_end，逼近 Taylor & Green (1937) 解析解。参考 CSV 由 reference/generate.py 按公式逐点算出（纯标准库，脚本入库）。
+expected: 交 qoi.json={"ke_ratio_end":值, "u_line_l2_rel_end":值}。冻结参考 ke_ratio_end=exp(−0.2)=0.8187307530779818、
+  u_line_l2_rel_end=0.0（零参考 QoI，走 qoi_absolute_tolerance 绝对容差门）。2026-08-11 在本案例原配置上实测
+  （opencfd/openfoam-default:2312，blockMesh+icoFoam 全程跑通，ExecutionTime≈7.4s）：ke_ratio_end=0.81199（误差 0.82%）、
+  u_line_l2_rel_end=0.00434（0.43%），由案例自带 compare.py 从 5/U 与 postProcessing/sampleLine/5/line_p_U.xy 提取。
+criteria: category=verification（对解析解），无 agent-eval 契约，走 cfdb run → MetricsEngine：ke_ratio_end 相对误差 ≤ 5%
+  且 u_line_l2_rel_end 绝对误差 ≤ 0.05 才 qoi_pass；NaN/Inf→fail、缺失→incomplete。5% 容差来自 64×64 demo 粗网格的离散误差
+  （文档化的领域决定，同 lid_driven_cavity 的 10% 先例），不是暗箱 fudge——实测误差（0.82%/0.43%）离门限有约 6×/12× 余量，
+  门吸收的是求解器间差异而非我们自己的网格误差。⚠ 诚实残差：cfdb 的 OpenFOAMAdapter 目前对非 NACA 案例硬编码渲染 LDC 模板
+  0/U、0/p（src/cfdb/adapters/openfoam.py _prepare_ldc），会覆盖本案例的 codeStream 初始化，因此 cfdb run 路径尚不能驱动本
+  案例；上述实测值来自 docker 直跑（Allrun 等价命令），QoI 提取脚本 compare.py 随案例入库但未接入 adapter——同
+  flat_plate_su2「未真跑」残差同类但已收窄一半（真跑了，只是没走 adapter）。（2026-08-11 已解决：adapter 案例自带配置路径不再渲染 LDC 模板，post/compute_qoi.py（compare.py 的 qoi_script 自包含版，解析式参考内置）已接入 outputs.qoi_script。）
+what_makes_it_bite: 三个真实咬合点：(1) 数值粘性——32×32 网格实测 ke_ratio 误差 3.9%、逼近 5% 门限，正是它促使网格升到
+  64×64（误差降到 0.82%）；一门一课程：div(phi,U) 若被换成一阶 upwind，衰减会被人为加速到直接 FAIL，这个案例对「求解器
+  离散格式偷工」敏感。(2) 初始化机制坑——v2312 不支持 `#{...#}` 表达式字段（被当 verbatim 字符串读入直接 FATAL），
+  而#codeStream 则撞 root 安全检查（"should not be executed by someone with administrator rights"），不以非 root 跑容器连
+  起步都做不到。(3) 采样列序——setFormat raw 输出列按字段名字母序排（line_p_U.xy 列序为 x p ux uy uz），按 (x,u,v) 直觉解析会把
+  p 当 u，误差立刻爆表——compare.py 按真实列序解析并固定了这一点。

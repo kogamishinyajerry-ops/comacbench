@@ -1,0 +1,18 @@
+# Gallery card copy for cavity_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+title: "Case Setup: 顶盖驱动方腔（Re=100）从任务书建案"
+capability: agent 仅凭 visible/ 的自然语言任务书（task.md）与标注图纸（drawing.png），从零搭建完整 OpenFOAM
+  案例目录（0/ constant/ system/）；cfdb 在无网沙箱（opencfd/openfoam-default:2312）里真实执行 blockMesh →
+  按 controlDict 的 application 跑 icoFoam 到 5s，冻结 QoI 脚本在宿主机从竖直中心线探针提取 centerline_umax。
+expected: 提交整个案例目录（含 system/blockMeshDict、application 为 icoFoam 的 system/controlDict、竖直中心线
+  probes functionObject）。QoI centerline_umax 对账 held_out 参考 0.665（Ghia et al. 1982 在 y/H=0.95 插值）；
+  golden 配置（32×32 网格，素材源自 validation/lid_driven_cavity）仓库实测 0.6765（1.73% 误差）。
+criteria: 两门 AND：① qoi_complete——冻结 QoI 脚本必须算出声明的 key，沙箱协议任一步（copy/blockMesh/solve/qoi）
+  失败即 fail-closed 无 QoI；② within_budget——沙箱实测墙钟（各步之和，非提交自报）≤ budget.max_runtime_sec=10s
+  （golden 实测约 3.5s，留约 3 倍余量）。两门过才给连续分 score=−qoi_error，QoI 准确度本身 ungated。
+what_makes_it_bite: 与 cfd 域手写 qoi.json 不同，这里每个被评分的数字都必须真的从沙箱求解器跑出来——堵住了
+  「抄公开参考」的洞。三个显式残差：(1) blockMesh 只在 system/blockMeshDict 存在时运行，按现代惯例放
+  constant/polyMesh/ 会静默无网格 fail-closed，任务书必须显式声明该接口；(2) 通用执行只认 controlDict 的
+  application 条目，不支持 snappyHexMesh/MPI/Allrun；(3) held_out 值仍等于公开文献插值（与素材案例同一已知残差），
+  anti-copy 靠的是「必须真跑」而非独立重算的参考值。

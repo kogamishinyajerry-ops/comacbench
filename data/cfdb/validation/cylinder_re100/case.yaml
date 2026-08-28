@@ -1,0 +1,81 @@
+id: cylinder_re100
+name: Circular Cylinder (Re=100, Unsteady Vortex Shedding)
+category: validation
+description: "Unsteady laminar flow past a circular cylinder at Re=100 (Karman vortex shedding), OpenFOAM pimpleFoam, ESI v2312. Setup: D=1 m, U_inf=1 m/s, nu=0.01 -> Re=100; O-grid blockMesh (constant/polyMesh/blockMeshDict), 120 circumferential x 50 radial x 1 = 6000 cells, cylinder at origin, circular freestream boundary at R=20 (20D), freestream BCs. The forceCoeffs function object (system/controlDict) writes the Cl/Cd time series EVERY timestep to postProcessing/forceCoeffs1/0/coefficient.dat (Aref = D x span = 1 x 0.1 = 0.1 m2, lRef = D = 1 m, rhoInf = 1). endTime = 300 s = ~49 shedding cycles (period ~6.1 s at St~0.164); the first 150 s (~25 cycles) are startup transient and must be discarded before statistics — the first full 300 s run (2026-08-11, runs/20260811T115926Z_cylinder_re100_openfoam_c45efbd2, 489 s wall, docker v2312) measured the impulsively started wake still saturating until t~150 s (cl_rms 0.181 for t>=60 vs 0.212 for t>=150, then flat), so the original 60 s discard under-predicted cl_rms by ~15% and was raised to 150 s on that evidence. QoIs derived from that series (post/compute_qoi.py): strouhal = f_peak*D/U from the Goertzel power scan of Cl over t>=150 s (search band 0.05-0.35 Hz); cd_mean = time-mean Cd; cl_rms = std of Cl (mean Cl ~ 0 by symmetry). Full-run verified values (t>=150 s): St = 0.1620 (1.2% err), Cd_mean = 1.3174 (1.0% err), cl_rms = 0.2120 (7.8% err) — all within tolerance, overall_status pass. Reference: literature consensus for 2-D laminar shedding at Re=100 — St = 0.164 (Williamson 1988 St-Re relation gives 0.1643 at Re=100; 2-D simulations 0.1644-0.166), Cd_mean = 1.33 (Park, Kwon & Choi 1998; consensus band 1.32-1.36), Cl_rms = 0.23 (consensus band 0.226-0.235: Park 1998, Mittal 2005, Stalberg 2006, Posdziech & Grundmann 2007). Cross-verified 2026-08-11 against multiple independent secondary sources, see provenance.yaml notes. Tolerances (St 3%, Cd 6%, Cl_rms 15%) reflect the 6000-cell demo mesh and single-core adjustable-Co run — a documented domain decision (coarse demo grid + literature band width), not a hidden fudge."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 100.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "pimpleFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: true
+      - name: solve
+        command: "pimpleFoam -case {{ run_dir }}/case"
+        timeout_sec: 7000
+        critical: true
+    parameters:
+      nu: 0.01
+      u_inf: 1.0
+      diameter: 1.0
+      end_time: 300.0
+      delta_t: 0.005
+      max_co: 1.5
+      transient_discard: 150.0
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - strouhal
+    - cd_mean
+    - cl_rms
+  qoi_script: post/compute_qoi.py
+reference:
+  # Literature consensus (experimental St anchor + 2-D computational
+  # consensus for Cd/Cl_rms). Inline scalars only — no reference/ data
+  # files; the QoI values are single published numbers, not digitized
+  # curves. See provenance.yaml for citations and cross-check notes.
+  type: experimental
+  qoi_values:
+    strouhal: 0.164
+    cd_mean: 1.33
+    cl_rms: 0.23
+  # Held-out copy for the agent-eval scoring path (same mechanism as
+  # lid_driven_cavity's v5.0 Wave D2 pilot). Lives under held_out/ so it
+  # stays out of the public reference/ tree scanned by the provenance
+  # audit. As with the pilot, the held-out values are deliberately the
+  # SAME as the public qoi_values above (copied from the literature
+  # consensus) — this proves the frozen-anchoring + scoring-redirection
+  # mechanism; it does NOT yet add anti-copy value from an independently
+  # recomputed number (e.g. a rerun at finer mesh). That residual is
+  # explicitly not solved here; see Architecture v5.0 §5.2 and §8.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    # Tolerance rationale (documented domain decision, not a fudge):
+    # demo mesh is 6000 cells O-grid, R=20D outer boundary; St is the
+    # most robust QoI (3%), Cd_mean moderately mesh-sensitive (6%),
+    # Cl_rms is the most mesh/timestep-sensitive (15%) — see the
+    # literature scatter quoted in the description and provenance notes.
+    strouhal: 0.03
+    cd_mean: 0.06
+    cl_rms: 0.15
+budget:
+  max_runtime_sec: 7200
+  max_cells: null

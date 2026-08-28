@@ -1,0 +1,39 @@
+# Provenance declaration for turbulent_flat_plate (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  White, F. M., "Viscous Fluid Flow", 3rd ed., McGraw-Hill, 2006 (turbulent
+  flat-plate local skin friction, 1/7-power-law correlation
+  Cf = 0.0592 * Re_x^(-1/5), valid 5e5 < Re_x < 1e7); same form also in
+  Anderson, J. D., "Introduction to Flight", 8th ed., Eq. (4.100)
+source_url: https://www.cfd-online.com/Wiki/Skin_friction_coefficient
+retrieved: null
+transcription_verified: false
+file_hashes:
+  reference/powerlaw_cf.csv: b01ee9c8a658045bc46e9633484798206cc1bb075639fe3d11c779245ecb2a6d
+  reference/generate.py: 0d4e03bd8f70ab1050039b68be2127ccb4a590371d23a0498bc815ee2b8e404d
+notes:
+  - "HONESTY: this reference is an ENGINEERING CORRELATION, not raw
+    experimental data. It is an empirical curve fit to historical smooth
+    flat-plate measurements; we anchor the correlation output, not the
+    underlying experiments. case.yaml declares type 'analytical' only
+    because that is the closest schema category for a closed-form formula."
+  - "Not a transcription case: every number in powerlaw_cf.csv is computed
+    pointwise by reference/generate.py (pure stdlib) from
+    Cf = 0.0592 * Re_x^(-1/5); nothing is hand-typed. generate.py itself is
+    anchored above so a silent generator swap also trips the audit.
+    transcription_verified=false is therefore the honest flag: there is no
+    published table to transcribe against."
+  - "Correlation form cross-checked 2026-08-11 against two independent
+    published sources: (1) Anderson, Introduction to Flight 8th ed.,
+    Eq. (4.100): Cf_x = 0.0592 / Re_x^0.2 (turbulent); (2) University of
+    Iowa fluids course notes (Turbulent_BL), same power law with stated
+    validity Re_L = 5e5..1e7 for smooth flat plates. CFD-Wiki 'Skin
+    friction coefficient' (source_url) lists the same 1/7-power-law form."
+  - "The correlation assumes FULLY TURBULENT flow from the leading edge,
+    matching the case setup: kOmegaSST without a transition model, inlet
+    turbulence intensity 5% / mixing length 0.01 m, plate starts at the
+    inlet (x=0)."
+  - "Inline qoi cf_rex_5e5=0.004291 and cf_rex_1e6=0.003735 are read off
+    the generated CSV rows x=0.5 m and x=1.0 m (Re_x = 1e6 * x[m] for
+    U_inf=10 m/s, nu=1e-5). held_out/qoi.json deliberately mirrors the
+    public qoi_values (same mechanism caveat as lid_driven_cavity pilot)."

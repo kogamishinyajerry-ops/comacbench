@@ -1,0 +1,23 @@
+# Gallery card copy for couette_shear (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Planar Couette Shear Flow (icoFoam)
+capability: 用 OpenFOAM icoFoam 跑平面 Couette 剪切流的 code-verification：下壁静止 no-slip、上盖板 U_lid=0.1 m/s、H=0.01 m、
+  ν=5e-5（Re_H=20），4×40×1 流向周期（cyclic）通道网格，流场在 x 向均匀、退化为 y 向一维问题。考求解器能否复现教科书级解析解
+  u(y)=U_lid·y/H（直线剖面）与壁面剪应力 |τ|=ν·U_lid/H=5e-4 m²/s²。参考 CSV 由 reference/generate.py 逐点公式生成（纯标准库、
+  确定性、sha256 锚定），无任何手编数字。
+expected: 交 qoi.json={"bottom_wall_shear_normalized":值}。冻结参考 1.0（held_out/qoi.json，同一脚本生成，=|τ_底壁|/(ν·U_lid/H)
+  的解析值）。本机实测（opencfd/openfoam-default:2312，完整跑完 t=10 s）：归一化底壁剪应力 1.00000000（相对误差 0）、剖面
+  L2 误差 5.7e-17、max|Uy|=4.8e-17——机器精度级吻合，因为线性剖面在任意网格上都可精确表示，误差只剩时间积分残差。
+criteria: category=verification（对解析解），无 agent-eval 契约，走 cfdb run → MetricsEngine：|computed−1.0|/1.0 ≤ 0.01 才
+  qoi_pass；NaN/Inf→fail、缺失→incomplete。1% 容差是文档化的宽松上界——线性解无网格误差，容差只吸收瞬态残差与采样插值
+  （不是暗箱 fudge）。诚实披露：当前 openfoam adapter 的自动 QoI 提取只认 LDC 的 centerline_umax probes 路径，本案例的
+  bottom_wall_shear_normalized 需由外部工具从采样剖面斜率计算（同 flat_plate_su2 先例）；且 adapter 生成的 0/U 只覆盖
+  movingWall/fixedWalls/frontAndBack 三个 patch，与本案例的 cyclic left/right 不兼容——本案例以随库字典直接执行为准。（2026-08-11 已解决：adapter 支持案例自带 0//constant//system/ 配置 + outputs.qoi_script，post/compute_qoi.py 从 profileSample 剖面底壁斜率提取 QoI，cfdb run 端到端闭环。）
+what_makes_it_bite: 特征提取的铁律：**只有静止壁（fixedWalls）的滑移才算异常**——运动壁 fixedValue 由边界条件强制永远
+  "正确"，只查上壁等于白查。典型 bug 都能被本案例钉死：① 把盖板速度错贴到两面墙 → 全场 u=U_lid 均匀、剖面斜率与 τ 归零，
+  QoI 直接 fail；② 下壁误用 zeroGradient/slip → 同样 τ→0；③ v2312 冒烟实测出的两个配置地雷（已修复并写入文件注释）：
+  流向不能用 empty patch（empty 平面法向的动量分量根本不被求解，Ux 恒 0，静默错误物理）；PISO 必须 nCorrectors=3
+  （沿用 cavity 的 2 会在黏性前锋抵达底壁 t≈0.25-0.5 s 后指数发散，Co_max 突破物理上界 0.2）。

@@ -1,0 +1,89 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+// Analytic initial condition (t = 0), evaluated per cell centre:
+//   u =  U0 sin(k x) cos(k y),  v = -U0 cos(k x) sin(k y),  U0 = 1, k = 1.
+// Inline #codeStream is used because funkySetFields is not part of the
+// ESI v2312 image. Note: codeStream compiles a small shared library at
+// first read, so the case must run as a NON-root user (OpenFOAM refuses
+// dynamic code as root) with a writable case directory.
+internalField   #codeStream
+{
+    codeInclude
+    #{
+        #include "volFields.H"
+    #};
+
+    codeOptions
+    #{
+        -I$(LIB_SRC)/finiteVolume/lnInclude \
+        -I$(LIB_SRC)/meshTools/lnInclude
+    #};
+
+    codeLibs
+    #{
+        -lfiniteVolume
+    #};
+
+    code
+    #{
+        const IOdictionary& d = static_cast<const IOdictionary&>(dict);
+        const fvMesh& mesh = refCast<const fvMesh>(d.db());
+
+        vectorField f(mesh.nCells());
+        const vectorField& C = mesh.C();
+        forAll(f, i)
+        {
+            const scalar x = C[i].x();
+            const scalar y = C[i].y();
+            f[i] = vector
+            (
+                 Foam::sin(x)*Foam::cos(y),
+                -Foam::cos(x)*Foam::sin(y),
+                0.0
+            );
+        }
+        f.writeEntry("", os);
+    #};
+};
+
+boundaryField
+{
+    left
+    {
+        type            cyclic;
+    }
+    right
+    {
+        type            cyclic;
+    }
+    bottom
+    {
+        type            cyclic;
+    }
+    top
+    {
+        type            cyclic;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

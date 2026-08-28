@@ -1,0 +1,25 @@
+# Gallery card copy for pipe_poiseuille (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Pipe Hagen-Poiseuille (Re_D=20)
+capability: 搭建并跑通圆管 Hagen-Poiseuille 层流 code-verification（Re_D=20，OpenFOAM icoFoam，轴对称 5° 楔形网格
+  120×20×1=2400 cells 粗网格 demo，轴线塌缩边写法照 ESI v2312 官方 movingCone 教程：mergeType points + 重复轴点标签 + type empty 的
+  degenerate axis patch），入口只给均匀 plug 速度（U_mean=0.1 m/s），让求解器自己长出抛物线剖面，再对闭式解析解
+  u(r)=2·U_mean·(1−(r/R)²) 提取 u_max 与 wall_u_avg 两个 QoI。
+expected: 交 qoi.json={"u_max":值,"wall_u_avg":值}。冻结参考：u_max=0.2 m/s（=2·U_mean，held_out/qoi.json 同值锚定）、
+  wall_u_avg=0 m/s（noSlip 壁面面积平均，精确为 0）。v2312 docker 冒烟实跑（blockMesh+icoFoam 全程到 t=1.0 s，7.5 s 墙钟）测得
+  u_max=0.199338 m/s（低 0.33%，t=0.95→1.0 已收敛到 7 位有效数字）、wallU 面积平均精确 (0 0 0)。参考剖面
+  reference/radial_profile.csv 由 reference/generate.py 逐点按公式
+  机器生成（sha256 双锚定，脚本自检面积平均回收到 U_mean，相对误差 1.25e-9），无任何手编数字。
+criteria: category=verification（对解析解），走 cfdb run → MetricsEngine：u_max 相对误差 ≤10% 才过 qoi 相对门；wall_u_avg
+  参考值为 0、相对误差无定义，走 P4-G 绝对容差门 |computed|≤2e-3 m/s（=2% U_mean）。两个容差都明说是粗 demo 网格分辨率的
+  文档化领域决定（照 lid_driven_cavity 模板措辞），不是暗箱 fudge。预算 600s 超时只警告不翻判定、max_cells=null。
+what_makes_it_bite: ① 采样坑被写进 QoI 设计：粗网格下沿内部线 sample 到管壁会外插出虚假滑移速度，本案例把 wall_u_avg
+  定义成 surfaceFieldValue 在 wall patch 面上的 areaAverage(U)（v2312 实测 mag(U) 场表达式不被该 FO 处理，已改用矢量场）——真壁面值对 noSlip 恒为 0，一旦采样方法偷换或
+  壁面 BC 写错立刻破绝对容差门；② wedge 网格三个官方细节缺一即挂：mergeType points、hex 内重复轴点标签、degenerate axis
+  patch（type empty），写错 blockMesh 直接 FATAL；③ 诚实残差：本案例是自带 0//constant//system/ 的完整 OpenFOAM case
+  目录（blockMesh+icoFoam 直跑，v2312 docker 冒烟通过），但 cfdb 的 OpenFOAM adapter 目前只路由 LDC/NACA 模板
+  （_prepare_ldc 会写死 movingWall/fixedWalls 边界），cfdb run -s openfoam 对本案例尚未接通，QoI 提取需走直跑+
+  postProcessing/uMax、wallU 函数对象的路径，这是文档化的待办而非暗坑（2026-08-11 已解决：adapter 案例自带配置路径 + post/compute_qoi.py qoi_script，cfdb run 闭环）。

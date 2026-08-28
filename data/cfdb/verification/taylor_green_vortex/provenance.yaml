@@ -1,0 +1,46 @@
+# Provenance declaration for taylor_green_vortex (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit
+# (reference.type=analytical -> ANALYTIC).
+citation: >-
+  Taylor, G. I., Green, A. E., "Mechanism of the Production of Small Eddies
+  from Large Ones", Proc. R. Soc. Lond. A 158, pp. 499-521, 1937
+  (2D decaying vortex closed-form solution:
+  u = U0 sin(kx) cos(ky) exp(-2 nu k^2 t),
+  v = -U0 cos(kx) sin(ky) exp(-2 nu k^2 t),
+  p = -(U0^2/4)(cos 2kx + cos 2ky) exp(-4 nu k^2 t), rho = 1)
+source_url: https://doi.org/10.1098/rspa.1937.0036
+retrieved: null
+transcription_verified: false
+file_hashes:
+  reference/tgv_sample_line_t5.csv: 8ba661aa264ee0e0dc52b068680da291297b4f743eba5a97935d7fbbdf4cd74c
+  reference/tgv_ke_decay.csv: 39073d3e0a91e003bd545292b8319205698fb8828be5e0c9e5e7059d038fd4e5
+  reference/generate.py: 1adccca2e8c04ffcf11df3ee7e463fd5bf5dcd0eb6b37d426831cefaf2a72421
+notes:
+  - "Reference CSVs are GENERATED, not transcribed: reference/generate.py
+    (pure stdlib Python, kept in the case and sha256-anchored) evaluates the
+    Taylor-Green closed-form solution point-by-point — 64 sample-line points
+    at t=5 (u, v, p) and the KE decay curve at every write time 0..5 s. No
+    hand-typed numbers anywhere. Regenerate with `python3 generate.py`;
+    regeneration is byte-stable (fixed 17-sig-fig formatting)."
+  - "transcription_verified stays false by construction: there is no external
+    table to transcribe from, so the flag's semantics (checked against the
+    published source) do not apply; the analytic formulas themselves are the
+    source and are stated in the citation for audit."
+  - "Empirical pin (2026-08-11, opencfd/openfoam-default:2312, this exact case
+    directory): blockMesh + icoFoam to t=5 s (1000 steps, ExecutionTime 7.4 s,
+    healthy residuals, continuity ~1e-13). compare.py extraction:
+    ke_ratio_end = 0.81199 vs analytic 0.81873 (0.82% error);
+    u_line_l2_rel_end = 0.00434. Both far inside the documented 5% coarse-mesh
+    tolerances. A 32x32 precursor mesh measured 3.9% on ke_ratio_end — too
+    close to a 5% gate, which is why the shipped mesh is 64x64."
+  - "cfdb run path was NOT wired at authoring time:
+    OpenFOAMAdapter._prepare_ldc rendered LDC templates for any non-NACA
+    case and would have overwritten this case's codeStream 0/U. Resolved
+    2026-08-11: the adapter's case-provided config path stages the case's
+    own 0//constant//system/ verbatim (no templates), and
+    post/compute_qoi.py — a self-contained qoi_script variant of compare.py
+    with the analytic line reference evaluated in-script — is declared as
+    outputs.qoi_script."
+  - "held_out/qoi.json deliberately duplicates the public analytic qoi_values
+    (mechanism pilot, same as lid_driven_cavity): it proves frozen anchoring
+    and scoring redirection, not independent recomputation."

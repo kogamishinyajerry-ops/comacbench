@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Martin & Moyce (1952) tank, plain (no obstacle): square tank 4a x 4a with
+// a = 0.146 m (column base width; column height 2a = 0.292 m, the n^2=2
+// configuration). Single uniform hex block, 96 x 96 cells -> cell size
+// a/24 = 6.08 mm, a documented moderate demo resolution (the reference
+// digitizations and published VOF studies use a/32..a/128).
+// 2D: one cell in z, frontAndBack empty.
+
+scale   1;
+
+L       0.584;   // tank width/height = 4a, a = 0.146 m column base width
+
+vertices
+(
+    (0      0      0)      // 0
+    ($L     0      0)      // 1
+    ($L     $L     0)      // 2
+    (0      $L     0)      // 3
+    (0      0      0.05)   // 4
+    ($L     0      0.05)   // 5
+    ($L     $L     0.05)   // 6
+    (0      $L     0.05)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (96 96 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    leftWall
+    {
+        type wall;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    rightWall
+    {
+        type wall;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    lowerWall
+    {
+        type wall;
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+    atmosphere
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (4 5 6 7)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

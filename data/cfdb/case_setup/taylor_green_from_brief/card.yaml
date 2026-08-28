@@ -1,0 +1,29 @@
+# Gallery card copy for taylor_green_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建 Taylor-Green 衰减涡算例（evidence 模式）
+capability: case_setup 域 evidence 模式任务：agent 只拿到自然语言工程任务书（visible/task.md）和带尺寸标注的计算域示意图
+  （visible/drawing.png），用自己环境中的任意求解器（judge 不预装任何求解器）求解二维 Taylor-Green 衰减涡——双方周期域
+  [0,2π]²、解析初场 u=U0·sin(kx)·cos(ky)、v=−U0·cos(kx)·sin(ky)（U0=1、k=1）、ν=0.01 m²/s（Re=100）、无外力自由衰减到
+  t=5 s，记录全域动能历史并沿 y=11π/64 采样线输出末态 (u,v)，按证据包合同提交。judge 不跑求解器，只校验证据包并用冻结
+  QoI 脚本（reference/compute_qoi.py，stdlib-only，宿主机执行）从原始证据重算 ke_ratio_end 与 u_line_l2_rel_end。
+expected: 交一个证据包（manifest.json + evidence/solver.log + evidence/mesh_report.txt + evidence/samples/ke_history.csv
+  （表头 time,ke）+ evidence/samples/line_end.csv（表头 x,u,v），逐列文档化在任务书里）。ke_ratio_end=KE(5)/KE(0) 两个端点都
+  出自提交的动能历史（自归一），u_line_l2_rel_end 由脚本内冻结的解析场（y0=11π/64 与素材案例 controlDict 采样线一致）在提交
+  采样点上逐点评估后算相对 L2。held_out 参考 exp(−0.2)=0.8187307530779818 与 0.0（Taylor & Green 1937），案面无公开
+  qoi_values。黄金 E2E 已实证（2026-08-11，ruler 05599b0a）：素材案例真实 docker 运行产物转换的黄金证据包归约出
+  ke_ratio_end=0.8119855（误差 0.824%）、u_line_l2_rel_end=0.0043402，与素材钉值完全一致，valid=true，score=-0.00628947。
+criteria: 冻结两门 AND：① qoi_complete——必需文件齐全非空、manifest 含非空 solver、CSV 过通用校验（time 列单调非降等）、
+  QoI 脚本归约出两个声明 key（ke_history 首行必须 t=0、末行 t=5±0.01 s；line_end 至少 16 点）；② within_budget——自报
+  timing.wall_time_sec ≤ 3600s（evidence 模式预算门基于 manifest 自报墙钟，语义较 managed 减弱——门自报数而非后端实测，
+  缺省时降级为只门宿主机归约耗时并大声记录）。两门过才给连续分 score=−qoi_error（两个 QoI 误差均值）；5% 容差仅作文档，
+  沿用素材案例的粗网格领域决定。
+what_makes_it_bite: 三个显式考点：(1) 双 QoI 双证据的协同——动能历史自归一比值考衰减率是否算对（粘性 ν 或格式耗散错了
+  ke_ratio 立刻偏），采样线 L2 考空间结构是否保相（相位/波数错了 L2 爆），两者共同锁死「衰减涡真的算对」；(2) 证据纪律——
+  time 列被 judge 通用校验强制单调非降，写出乱序时间序列直接 fail-closed；末行时刻必须落在 t=5±0.01 s，采样线 y 坐标必须
+  精确取 11π/64（任务书给足小数位），取整到 0.54 m 会让 L2 误差系统性增大；(3) 负控实证（2026-08-11，ruler 05599b0a）：
+  证据数值整体扰动 15%（ke 列与 u,v 列同乘 1.15）评分恶化到 score=-0.0767895（黄金 −0.0063 的 12 倍——ke 比值因两端同乘
+  不变，恶化全部由采样线 L2 承担，连续分灵敏度实证成立）；删掉 line_end.csv 则 fail-closed 判 invalid、score=None。
+  残差：held_out 值是教科书可推的解析值，运行真实性由生产 harness 锚定而非 judge 证明（evidence 模式设计即如此）。

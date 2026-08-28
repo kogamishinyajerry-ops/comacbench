@@ -1,0 +1,84 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// 1D plane wall: x in [0, L], L = 1 m; single cell in y and z (empty
+// patches) so the problem is exactly one-dimensional along x.
+scale   1;
+
+vertices
+(
+    (0    0     0)      // 0
+    (1    0     0)      // 1
+    (1    0.01  0)      // 2
+    (0    0.01  0)      // 3
+    (0    0     0.01)   // 4
+    (1    0     0.01)   // 5
+    (1    0.01  0.01)   // 6
+    (0    0.01  0.01)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (100 1 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    left
+    {
+        type wall;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    right
+    {
+        type wall;
+        faces
+        (
+            (1 5 6 2)
+        );
+    }
+    topAndBottom
+    {
+        type empty;
+        faces
+        (
+            (3 7 6 2)
+            (0 1 5 4)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (4 5 6 7)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

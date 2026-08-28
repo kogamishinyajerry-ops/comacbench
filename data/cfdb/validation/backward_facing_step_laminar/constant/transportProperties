@@ -1,0 +1,23 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Re = Um * D_h / nu = Um * 2h / nu = 100
+// with Um = 1 m/s (mean inlet velocity), h = 0.01 m  ->  nu = 2e-4 m^2/s.
+transportModel  Newtonian;
+
+nu              [0 2 -1 0 0 0 0] 2e-4;
+
+// ************************************************************************* //

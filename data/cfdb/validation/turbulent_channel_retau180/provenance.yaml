@@ -1,0 +1,19 @@
+# Provenance declaration for turbulent_channel_retau180 (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Moser, R. D., Kim, J., Mansour, N. N., "Direct numerical simulation of
+  turbulent channel flow up to Re_tau=590", Physics of Fluids 11(4),
+  pp. 943-945, 1999 (Re_tau=180 case; data file chan180.means from the
+  authors' official turbulence fileserver, UT Austin)
+source_url: https://turbulence.oden.utexas.edu/data/MKM/chan180/profiles/chan180.means
+retrieved: "2026-08-11"
+transcription_verified: true
+file_hashes:
+  reference/chan180.means: f54c86e30a869798f140aa004c1e167cd13a6280e988d2794d72ca2be8b5fc82
+  reference/uplus_yplus.csv: 6dc7acf8362eb0d727485c9027725433c5e48ed9df058c77650f3511a8ca33de
+notes:
+  - "reference/chan180.means is the verbatim download (2026-08-11) of the official MKM DNS statistics file; its header states Re_tau = 178.12 (the case universally cited as Re_tau = 180) and normalization u_tau, h."
+  - "reference/uplus_yplus.csv is produced by generate_reference.py (kept at the case root) as a pure machine transformation of chan180.means (columns y/h, y+, U+); no digits are hand-edited, hence transcription_verified: true."
+  - "QoI cf_bulk reference 8.18e-3 is the widely published value (cross-checked 2026-08-11 against two independent routes: (1) cfd-vv-suite validation suite README quoting Cf = 0.00818 at Re_b = 2800 for MKM1999 Re_tau = 180, github.com/vvp-cfd/cfd-vv-suite; (2) consistency with Cf = 2*(Re_tau/Re_b)^2 = 2*(180/2800)^2 to within 1%). generate_reference.py additionally derives Cf = 8.136e-3 by trapezoidal integration of the frozen DNS profile (U_b/u_tau = 15.679, Re_b = 2793); the 0.5% gap to 8.18e-3 is trapezoid quadrature error on the 65-station tabulated profile, not a data discrepancy."
+  - "Spot checks from the frozen DNS file: u+(y+=30.02) = 13.87 (buffer layer), u+(y+=98.04) = 17.09, centerline U_cl/u_tau = 18.30 at y+ = 178.12."
+  - "Development smoke run (2026-08-11, Docker opencfd/openfoam-default:2312, full 4000-iteration simpleFoam solve on the shipped 2048-cell mesh, converged in ~23 s): Cf = 7.842e-3 from area-averaged wallShearStress (bottom and top agree to 7 significant digits), 4.13% below the 8.18e-3 reference; achieved Re_tau = 175.3, wall y+ = 0.98, volume-averaged bulk velocity held at 1.0 by meanVelocityForce. This is an observed smoke result, NOT a human-signed baseline."

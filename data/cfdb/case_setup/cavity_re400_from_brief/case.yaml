@@ -1,0 +1,80 @@
+id: cavity_re400_from_brief
+name: "Case Setup: Lid-Driven Cavity Re=400 from Engineering Brief (evidence)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain, EVIDENCE mode: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  dimensioned drawing (visible/drawing.png), drives ANY solver in its own
+  environment (Fluent/STAR-CCM+/in-house/OpenFOAM — the judge has no
+  solver), and submits an evidence bundle (manifest.json + solver-native
+  log + mesh report + centerline sample CSV). The judge validates the
+  bundle and recomputes the QoI from the raw evidence with the frozen
+  script reference/compute_qoi.py on the host — a self-reported QoI never
+  enters the verdict. Task physics inherited from the VALIDATED case
+  cases/validation/lid_driven_cavity_re400: square cavity H=0.1 m, lid
+  velocity U_lid=1 m/s, nu=2.5e-4 m^2/s (Re=400), 2D laminar to steady
+  state; QoI centerline_umax = max |U|/U_lid on the vertical centerline
+  (x=H/2) up to y/H=0.95. Held-out reference 0.551 (Ghia, Ghia & Shin
+  1982, JCP 48 Table I Re=400, interpolated at y/H=0.95) inherited
+  verbatim from the source case. Docker-verified measurement on the
+  golden configuration: 0.49778 (9.66% error, 64x64 demo mesh); see
+  provenance.yaml.
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 400.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: case_setup scoring does NOT consume case.yaml solver
+  # steps. Evidence mode runs nothing at all on the judge — the agent's
+  # own solver run happens off-judge and only the evidence bundle is
+  # judged (see execution.evidence).
+  - name: generic
+    command: "true"
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - centerline_umax
+  qoi_script: reference/compute_qoi.py
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/centerline.csv
+    notes: >-
+      Evidence bundle layout v1; every file and column is documented in
+      visible/task.md (the agent-readable contract).
+reference:
+  type: dns
+  # No public qoi_values: the ONLY scoring reference is the held-out copy
+  # (value inherited from the source validation case's held_out/qoi.json,
+  # itself the Ghia 1982 Table I Re=400 interpolation at y/H=0.95).
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 10%
+  # mirrors the source validation case's tolerance for the same physics.
+  qoi_relative_tolerance:
+    centerline_umax: 0.10
+budget:
+  # Evidence mode: the within_budget gate consumes the SELF-REPORTED
+  # manifest timing.wall_time_sec (weakened semantics — the judge never
+  # clocks the solver run); 3600 s is a deliberately generous envelope
+  # for this laminar demo-scale case (golden docker run measured ~27 s).
+  max_runtime_sec: 3600
+  max_cells: null

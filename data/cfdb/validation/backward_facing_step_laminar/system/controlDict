@@ -1,0 +1,66 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         2000;           // SIMPLE iterations (steady-state pseudo-time)
+deltaT          1;
+
+writeControl    timeStep;
+writeInterval   1000;
+purgeWrite      0;
+
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+
+timeFormat      general;
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    // Sample U along a line at the height of the first bottom-wall cell
+    // centre (y = 1e-4 m; first cell of block B1 spans y in [0, ~2.3e-4]).
+    // The primary reattachment point is where Ux on this line changes sign
+    // from negative (recirculation) to positive; see qoi/compute_xr.py.
+    nearBottomU
+    {
+        type                sets;
+        libs                (sampling);
+        writeControl        writeTime;
+        interpolationScheme cellPoint;
+        setFormat           raw;
+        fields              (U);
+        sets
+        (
+            bottomLine
+            {
+                type        uniform;
+                axis        x;
+                start       (0.0005 0.0001 0.005);
+                end         (0.2995 0.0001 0.005);
+                nPoints     300;
+            }
+        );
+    }
+}
+
+// ************************************************************************* //

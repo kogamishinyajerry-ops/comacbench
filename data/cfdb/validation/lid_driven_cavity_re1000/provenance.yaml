@@ -1,0 +1,15 @@
+# Provenance declaration for lid_driven_cavity_re1000 (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Ghia, U., Ghia, K. N., Shin, C. T., "High-Re Solutions for Incompressible
+  Flow Using the Navier-Stokes Equations and a Multigrid Method",
+  J. Comput. Phys. 48, pp. 387-411, 1982 (Table I, Re=1000 column)
+source_url: https://doi.org/10.1016/0021-9991(82)90058-4
+retrieved: null
+transcription_verified: false
+file_hashes:
+  reference/ghia1982_centerline.csv: 814100fa744df31407416941c63d8d98945a224dc4dd3e02092827b8eabd11f3
+notes:
+  - "Status: spot-checked, not full-table verified. 11 of 17 points cross-verified on 2026-08-11 against >=2 independent reproductions of Table I: y/H=0.9766/0.9688/0.9609/0.9531/0.8516/0.7344/0.6172 (arXiv:1807.04896 Table A-1 and UPC CTTC material), 0.2813=-0.27805 and 0.0547=-0.18109 (Kumar et al. 2009, Numer. Heat Transfer B 56, Table 2), 0.1719=-0.38289 (Ghia u_min confirmed by ESAIM M2AN 1990, 24, Table 3). Both wall points are definitionally fixed."
+  - "Single-source points (only the widely mirrored standard transcription, e.g. gist ivan-pi/3e9326d18a366ffe6a8e5bfda6353219): y/H=0.5000 (-0.06080), 0.4531 (-0.10648), 0.1016 (-0.29730), 0.0703 (-0.22220), 0.0625 (-0.20196). The QoI does not depend on them."
+  - "Inline qoi centerline_umax=0.462 is a linear interpolation of this CSV at y/H=0.95 (probe-line top) between y/H=0.8516 (0.33304) and y/H=0.9531 (0.46604): 0.33304 + (0.0984/0.1015)*0.13300 = 0.46198. Both bracketing points are triple-verified, so the QoI anchor is not affected by the single-source points above."

@@ -1,0 +1,22 @@
+# Gallery card copy for lid_driven_cavity_re1000 (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Lid-Driven Cavity (Re=1000)
+capability: 搭建并跑通经典 lid-driven cavity 层流验证（Re=1000，OpenFOAM icoFoam，128×128×1=16384 cells，t=30 s
+  = 300 倍盖速 turnover、60000 步瞬态积分），从竖直中心线 probes 提取 centerline_umax（|U|/U_lid 的最大值）并逼近
+  Ghia, Ghia & Shin (1982) Table I Re=1000 列已发表参考解。
+expected: 交 qoi.json={"centerline_umax":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 0.462（held_out/qoi.json，由
+  Ghia 表 y/H=0.8516→0.33304 与 y/H=0.9531→0.46604 线性插值到 probe 线顶端 y/H=0.95）。本案例尚无仓库内真实
+  baseline 签名运行，expected 只承诺参考来源，不虚报精度。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的 key（在即过，不看数值对错）；② within_budget——manifest 自报
+  wall_time_sec ≤ 3600s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ 与 Re=100 案例相同：QoI 准确度在
+  agent-eval 里是 ungated 连续指标，case.yaml 的 10% 容差只服务 cfdb run 的 V&V 路径。budget 较 Re=100 案例（600s）放宽到
+  3600s：网格 16 倍、步数 24 倍，量级相符。
+what_makes_it_bite: 三个显式残差：(1) Re=1000 近盖剪切层速度梯度陡，粗网格或积分时间不足会系统性压低 umax——10% 容差是文档化的
+  领域决定（覆盖：参考是 y/H=0.95 处线性插值而非表列点、QoI 测 |U|=√(u²+v²) 而参考只 tabulate u、128² 均匀网格 vs Ghia 129²
+  multigrid、t=30s 有限积分 vs 真实稳态），不容许暗箱 fudge；(2) 参考 CSV 全表 17 点中 11 点经 ≥2 个独立来源交叉核实
+  （arXiv:1807.04896 Table A-1、Kumar et al. 2009 Table 2、UPC CTTC 讲义、ESAIM M2AN 1990 Table 3 等），0.5000/0.4531/0.1016/
+  0.0703/0.0625 五点只有被广泛转载的单一转录佐证，provenance 如实写 spot-checked 而非冒充全表核实；(3) held-out 值刻意等于公开
+  reference（同 Re=100 pilot），自承尚无独立重算的 anti-copy 价值。

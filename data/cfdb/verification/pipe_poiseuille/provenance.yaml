@@ -1,0 +1,54 @@
+# Provenance declaration for pipe_poiseuille (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Hagen-Poiseuille closed-form solution for fully developed laminar pipe flow,
+  u(r) = 2*U_mean*(1-(r/R)^2) with u_max = 2*U_mean (Hagen 1839; Poiseuille
+  1840). Textbook statement: White, F. M., "Viscous Fluid Flow", 3rd ed.,
+  McGraw-Hill, 2006, Ch. 3 (Newtonian viscous-flow solutions, laminar pipe
+  flow). Formula independently cross-checked 2026-08-11 against multiple
+  public sources (pipe-turbulence literature using u_HP=(1-r^2) with
+  u_max=2*U_bulk normalisation, and standard fluid-mechanics textbooks).
+source_url: https://en.wikipedia.org/wiki/Hagen%E2%80%93Poiseuille_equation
+retrieved: "2026-08-11"
+transcription_verified: false
+file_hashes:
+  reference/radial_profile.csv: 0c06a07a09d4a6bf7c9d806c5967219cb5e8a4e7caebb46d0ac99c54b948719e
+  reference/generate.py: e637928735995c9075d1b5c99e7728e03dcfc3c834f2cdc75ac7f48e59941772
+notes:
+  - "Nothing was transcribed by hand: radial_profile.csv is machine-generated
+    point-by-point from the closed-form solution by reference/generate.py
+    (pure stdlib, deterministic), which is kept in-tree and sha256-anchored
+    alongside the CSV. transcription_verified stays false on principle — its
+    semantics (hand-transcribed values checked against source tables) do not
+    apply to a generated analytical reference; the formula itself is the
+    citation-level claim and was cross-checked as noted above."
+  - "generate.py self-checks on every run: u(0)==2*U_mean exactly, u(R)==0
+    exactly (no-slip wall anchor), and a 20000-point midpoint area average of
+    the profile recovers U_mean to 1.25e-9 relative error — the mass
+    consistency behind u_max = 2*U_mean."
+  - "Reference QoIs: u_max = 0.2 m/s (= 2*U_mean, closed-form); wall_u_avg =
+    0 m/s (exact for a noSlip patch). Both are analytical values, not
+    run-calibrated; the 10% / 2e-3 m/s tolerances absorb the coarse 120x20
+    demo-mesh discretisation error (documented domain decision, mirroring
+    lid_driven_cavity)."
+  - "held_out/qoi.json deliberately duplicates the public qoi_values (same
+    Wave D2 pilot mechanism as lid_driven_cavity): it proves frozen anchoring
+    and scoring-time redirection, not independent recomputation."
+  - "Run status 2026-08-11: case dictionaries smoke-tested in docker image
+    opencfd/openfoam-default:2312 — blockMesh (2400 cells, checkMesh OK,
+    non-orthogonality 0) + full icoFoam run to t=1.0 s (exit 0, 7.5 s
+    wall). Measured at t=1.0: u_max = 0.199338 m/s (0.33% below the 0.2
+    reference, converged to 7 digits between t=0.95 and 1.0) and wallU
+    areaAverage exactly (0 0 0). The measured error is FAR inside the 10%
+    tolerance; the margin is kept as documented headroom for coarser or
+    differently graded meshes, not as a fudge for this run."
+  - "v2312 caveat found by the smoke run: surfaceFieldValue does not process
+    the field expression mag(U) ('Requested field mag(U) not found in
+    database'), so the wallU functionObject averages the vector U instead —
+    identical anchor semantics, since every component is 0 on a correct
+    noSlip wall."
+  - "The cfdb OpenFOAM adapter did NOT route this case at authoring time
+    (LDC/NACA templates only); resolved 2026-08-11: the adapter's
+    case-provided config path stages this case's own 0//constant//system/
+    verbatim and post/compute_qoi.py is wired as outputs.qoi_script, so
+    cfdb run -s openfoam now reproduces the direct-run path."

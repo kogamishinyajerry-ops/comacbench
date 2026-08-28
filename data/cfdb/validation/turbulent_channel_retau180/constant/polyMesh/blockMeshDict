@@ -1,0 +1,119 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Fully developed turbulent channel, Re_tau = 180 (MKM1999 DNS validation).
+// Full channel, half-height h = 1 m. Periodic (cyclic) in x and z, no-slip
+// walls at y = 0 and y = 2h. Two stacked blocks with symmetric geometric
+// grading: first wall-adjacent cell height 2*dy1 gives first-cell-center
+// y+ ~= 1 at the DNS friction Reynolds number (u_tau/nu = Re_tau/h = 178.12).
+//
+//   dy1 = 2/178.12 = 1.1228e-2 (cell-center y+ = 1.0)
+//   ny = 32 per half, ratio r ~= 1.059  ->  expansion ratio R = r^31 = 5.915
+//   sum check: dy1 * (r^32 - 1)/(r - 1) = 1.0 = h
+//
+// Demo-resolution mesh (8 x 64 x 4 = 2048 cells); RANS does not need
+// DNS/LES-grade streamwise/spanwise resolution.
+
+scale   1;
+
+nx              8;
+ny              32;
+nz              4;
+xMin            0;
+xMax            6.283185307179586;   // 2*pi*h
+yMin            0;
+yMax            1;                   // h
+yyMax           2;                   // 2*h
+zMin            0;
+zMax            3.141592653589793;   // pi*h
+yExpansion      5.915;
+yExpansion2     0.16905;             // 1/yExpansion (top half, mirrored)
+
+vertices
+(
+    ($xMin  $yMin   $zMin)   //  0
+    ($xMax  $yMin   $zMin)   //  1
+    ($xMax  $yMax   $zMin)   //  2
+    ($xMax  $yyMax  $zMin)   //  3
+    ($xMin  $yyMax  $zMin)   //  4
+    ($xMin  $yMax   $zMin)   //  5
+
+    ($xMin  $yMin   $zMax)   //  6
+    ($xMax  $yMin   $zMax)   //  7
+    ($xMax  $yMax   $zMax)   //  8
+    ($xMax  $yyMax  $zMax)   //  9
+    ($xMin  $yyMax  $zMax)   // 10
+    ($xMin  $yMax   $zMax)   // 11
+);
+
+blocks
+(
+    hex ( 0  1  2  5  6  7  8 11) ($nx $ny $nz) simpleGrading (1 $yExpansion  1)
+    hex ( 5  2  3  4 11  8  9 10) ($nx $ny $nz) simpleGrading (1 $yExpansion2 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    bottom
+    {
+        type            wall;
+        faces           ((0 6 7 1));
+    }
+
+    top
+    {
+        type            wall;
+        faces           ((4 3 9 10));
+    }
+
+    inlet
+    {
+        type            cyclic;
+        neighbourPatch  outlet;
+        faces           ((0 5 11 6)(5 4 10 11));
+    }
+
+    outlet
+    {
+        type            cyclic;
+        neighbourPatch  inlet;
+        faces           ((1 7 8 2)(2 8 9 3));
+    }
+
+    front
+    {
+        type            cyclic;
+        neighbourPatch  back;
+        faces           ((1 2 5 0)(2 3 4 5));
+    }
+
+    back
+    {
+        type            cyclic;
+        neighbourPatch  front;
+        faces           ((6 11 8 7)(11 10 9 8));
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

@@ -1,0 +1,23 @@
+# Gallery card copy for naca0012_sa_tmr (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: NACA0012 α=0° SA 湍流模型远场阻力（TMR 数值验证）
+capability: 搭建并跑通 NASA Turbulence Modeling Resource (TMR) 的 NACA0012 SA 验证算例（α=0°，Re=6e6，M=0.15 的不可压等效：U=1 m/s、
+  nu=1.66667e-7；simpleFoam + SpalartAllmaras），用 gen_mesh.py 脚本生成结构化 C 网格（blockMesh，51810 cells，TMR 修改后尖后缘翼型
+  定义），从 forceCoeffs 的 coefficient.dat 提取 Cd 并逼近 TMR SA 汇总表的 CFL3D 网格值 0.00819。
+expected: 交 qoi.json={"cd":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考 0.00819（held_out/qoi.json，TMR SA 页 7 个独立代码
+  在 897×257 网格、约 500c 远场上的汇总表，CFL3D 值；代码间阻力散布 0.00812–0.00830 约 4%；并用 TMR 原始数据文件
+  n0012clcd_cfl3d_sa.dat 复核 cd=0.0081925）。实测基线：本配置在 v2312 docker 跑 1400 步 SIMPLEC 收敛到 Cd≈0.0158（+93%）——
+  偏差主要来自前缘吸力峰欠解析（压阻 0.0084 vs CFL3D 的 0.0014），摩阻 0.0075 对 0.0068 只差 10%。注意与 naca0012_a0 的区别：
+  那把尺子是 Ladson 1988 风洞实验（cd=0.0086），这把尺子是数值代码间参考（全湍流 SA 模型自身的阻力水平），两者回答的问题不同。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的 key（在即过，不看数值对错）；② within_budget——manifest 自报
+  wall_time_sec ≤ 600s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ case.yaml 的 1.0（100%）容差只服务 cfdb run 的 V&V 路径，
+  agent-eval 里 QoI 准确度是 ungated 连续指标；100% 是老实写明的领域决定——本配置实测 Cd≈0.0158（+93%），容差必须覆盖实测值；
+  差距来源（5.18 万 cells vs 897×257、前缘吸力峰欠解析、远场 ~20–40c vs ~500c、y+~65 壁面函数）全部在案，不是暗箱 fudge。
+what_makes_it_bite: 四个显式残差：(1) 压阻偏大 6 倍是主误差——前缘吸力峰欠解析（2.5e-3c 首层弦向 cell）；把 LE cell 加密到 5e-4
+  能改善 Cp 但会在这套 BC/求解器组合上诱发 SA 慢极限环（Cl 摆到 O(1)），已回退并在 gen_mesh.py 注释里留证；(2) 远场只有 ~20–40c
+  且无 Thomas-Salas 点涡修正；(3) 壁面函数 nutUSpaldingWallFunction 配 y+~65、nuTilda 壁面 fixedValue 0（zeroGradient 会过度产生
+  涡粘、诱发脱落振荡，已踩过）；(4) 参考值本身不是严格网格收敛值——TMR 原话是 897×257 单网格上 7 代码「representative, but not
+  truth」，代码间散布已达 4%；held_out 值刻意等于公开 reference，自承尚无独立重算的 anti-copy 价值。

@@ -1,0 +1,30 @@
+# Gallery card copy for backward_step_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建层流后台阶（Re=100）并提交证据包（evidence 模式）
+capability: case_setup 域 evidence 模式：agent 只拿到求解器无关的自然语言工程任务书（visible/task.md）和带尺寸标注的
+  后台阶示意图（visible/drawing.png，纵向拉伸以便阅读），在自己的环境里驱动任意求解器把二维层流后台阶（阶高 h=0.01 m、
+  膨胀比 1:2、入口 5h 抛物线充分发展 profile、Um=1 m/s、ν=2e-4 m²/s、Re=Um·D_h/ν=100 取 D_h=2h）算到稳态收敛，然后提交
+  证据包——manifest.json、求解器原生日志、网格质量报告、底壁剪切应力分布 wall_shear.csv（x,tau_w 逐列表头契约写在任务书里）。
+  判题端完全没有求解器，只校验证据包并用冻结 QoI 脚本从原始壁面证据归约再附长度。
+expected: 交一个证据包目录。冻结 QoI 脚本（reference/compute_qoi.py，stdlib-only，宿主机执行，末行 stdout 为 JSON）读取
+  evidence/samples/wall_shear.csv，校验表头恰为 x,tau_w、x 单调递增且覆盖到 ≥5h、至少 10 站，然后找 tau_w 第一个
+  负→正过零点（线性插值）归约 reattachment_x_over_h = x_r/h。held_out 参考 2.922 沿用素材案例
+  backward_facing_step_laminar 的锚定值（Erturk 2008 Comput. Fluids 37 的 x1/h 表 Re=100 行，多源交叉核实），案面无公开
+  qoi_values。黄金 E2E 由素材案例真实 docker 运行产物（runs/20260811T081250Z_backward_facing_step_laminar_openfoam_1479c65b，
+  simpleFoam 6100 cells，SIMPLE 459 步收敛）转换出证据包，归约得 2.871528——与素材案例实测钉值 2.8715283156260316
+  （对 2.922 误差 1.73%）逐位一致。
+criteria: 冻结两门 AND：① qoi_complete——证据包四步校验（required 存在非空、manifest 可解析含 solver 字段、CSV 通用一致性、
+  QoI 脚本归约出声明 key）任一步失败即 fail-closed invalid；② within_budget——自报 timing.wall_time_sec ≤ 3600s。⚠ evidence
+  模式的 budget 门语义减弱：判题端不跑求解器，门吃的是 manifest 自报墙钟（未自报则退化并在 notes 大声标注），3600s 是宽松
+  信封（黄金 docker 运行实测 8.3s）。两门过才给连续分 score=−qoi_error，QoI 准确度是 ungated 连续指标，case.yaml 的 10%
+  容差仅作文档（沿用素材案例）。
+what_makes_it_bite: 三个显式考点：(1) 再附长度必须从 solver-neutral 证据归约——任务书要求导出有符号底壁剪切应力序列，
+  冻结脚本只认负→正过零点；agent 若报均匀入口 plug profile 或一阶格式抹平剪切层，过零点会系统性偏移直接压分；(2) 证据契约
+  本身是考点——表头、符号约定（分离区必须为负）、覆盖长度（≥5h）、站位数任一项违约都被 fail-closed 拒掉；(3) 运行真实性不由
+  判题端证明（evidence 模式信任姿态：authenticity 由生产 harness 锚定，伪造需伪造整套求解器原生 artifacts，自报 QoI 永不
+  进入裁决）。负控实证：全部 x 站位平移 +1h（过零点下移一个阶高），归约 3.8715、误差 32.5%、score 从 −0.0173 劣化到
+  −0.3250，区分能力成立。残差：held_out 值是文献值（Erturk 2.922；Armaly 实验 3.08 仅背景），anti-copy 依赖证据包机制与
+  生产 harness 而非数字保密。

@@ -1,0 +1,84 @@
+id: turbulent_plate_from_brief
+name: "Case Setup: Turbulent Flat Plate (k-omega SST RANS) from Engineering Brief"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain, EVIDENCE mode (compressible/BL family): the agent
+  receives only a solver-agnostic engineering brief (visible/task.md) and an
+  annotated dimensioned drawing (visible/drawing.png), drives ANY CFD solver
+  in its own environment, and submits an evidence bundle (manifest.json +
+  solver log + mesh report + wall Cf distribution CSV). The judge runs NO
+  solver: it validates the bundle and reduces the two station Cf QoIs from
+  the raw evidence with the frozen QoI script reference/compute_qoi.py on
+  the host (linear interpolation of the submitted Cf(x) to Re_x = 5e5 and
+  1e6). Task physics: 2D steady incompressible zero-pressure-gradient
+  TURBULENT flat plate, U_inf=10 m/s, nu=1e-5 m^2/s (Re_x = 1e6 per metre,
+  plate spans 0..2e6), fully turbulent RANS with a k-omega SST class model,
+  inlet turbulence intensity 5% / length scale 0.01 m, wall-function y+
+  regime. Held-out reference: 1/7-power-law engineering correlation
+  Cf = 0.0592*Re_x^(-1/5) at the two stations (White 2006), inherited
+  verbatim from the VALIDATED source case cases/validation/turbulent_flat_plate
+  (docker run 2026-08-11 measured Cf 5.9%/3.0% low at the two stations,
+  inside the 15% V&V tolerance); see provenance.yaml.
+physics:
+  flow: incompressible
+  turbulence: rans_kwsst
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 2000000.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: 30.0
+solvers:
+  # Placeholder only: evidence-mode scoring NEVER runs a solver — the agent
+  # drives its own; the judge validates the evidence bundle and reduces the
+  # QoI with the frozen script on the host (see execution.setup_mode).
+  - name: generic
+    command: "true"
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/cf_distribution.csv
+    notes: >-
+      Evidence-bundle format is documented file-by-file and column-by-column
+      in visible/task.md (uniform evidence layout v1: manifest.json +
+      evidence/solver.log + evidence/mesh_report.txt + the task-specific
+      data file under evidence/samples/).
+outputs:
+  fields: ["U", "p", "k", "omega"]
+  curves: []
+  qoi:
+    - cf_rex_5e5
+    - cf_rex_1e6
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: analytical
+  # No public qoi_values: the ONLY scoring reference is the held-out copy.
+  # The correlation values are textbook-derivable, so anti-copy rests on
+  # the evidence mechanism itself — every scored number is recomputed from
+  # the raw submitted Cf distribution by the frozen script.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 15% mirrors
+  # the validated turbulent_flat_plate V&V tolerance for the same physics.
+  qoi_relative_tolerance:
+    cf_rex_5e5: 0.15
+    cf_rex_1e6: 0.15
+budget:
+  # Evidence mode: this budget gates only the host-side QoI reduction clock,
+  # or the SELF-REPORTED solver wall time when the bundle declares
+  # timing.wall_time_sec — it cannot bound the agent-side solver run (the
+  # judge runs nothing). 3600 s is deliberately loose; see card.yaml.
+  max_runtime_sec: 3600
+  max_cells: null

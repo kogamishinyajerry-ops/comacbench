@@ -1,0 +1,43 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Sod (1978) initial states, diaphragm at x = 0.5:
+//   left  (x <  0.5): p = 1 Pa,   rho = 1 kg/m3     -> T = 1/R   K
+//   right (x >= 0.5): p = 0.1 Pa, rho = 0.125 kg/m3 -> T = 0.8/R K
+// with R = 287.1018669 J/kg/K (constant/thermophysicalProperties).
+
+defaultFieldValues
+(
+    volVectorFieldValue U (0 0 0)
+    volScalarFieldValue T 0.0034830843
+    volScalarFieldValue p 1
+);
+
+regions
+(
+    boxToCell
+    {
+        box (0.5 -1 -1) (1 1 1);
+        fieldValues
+        (
+            volScalarFieldValue T 0.0027864674
+            volScalarFieldValue p 0.1
+        );
+    }
+);
+
+
+// ************************************************************************* //

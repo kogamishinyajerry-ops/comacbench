@@ -1,0 +1,74 @@
+# Provenance declaration for backward_facing_step_laminar (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Erturk, E., "Numerical solutions of 2-D steady incompressible flow over a
+  backward-facing step, Part I: High Reynolds number solutions",
+  Computers & Fluids 37(6), pp. 633-655, 2008 (primary reattachment length
+  table, x1/h vs Re). Experimental context: Armaly, B. F., Durst, F.,
+  Pereira, J. C. F., Schonung, B., "Experimental and theoretical
+  investigation of backward-facing step flow", J. Fluid Mech. 127,
+  pp. 473-496, 1983.
+source_url: https://doi.org/10.1016/j.compfluid.2007.09.003
+retrieved: "2026-08-11"
+transcription_verified: true
+file_hashes:
+  reference/erturk2008_reattachment.csv: be2186c5d3748e9e66aeccd4903c7a565e4d9ef67aea6f5e913c984dab7cfa0a
+notes:
+  - "Verification method (2026-08-11): each CSV point cross-checked against the
+    original paper's table as republished on the publisher/author pages AND at
+    least two independent secondary publications. Re=100: 2.922 — original
+    table snippet (ResearchGate copy of the paper), an Emerald/HFF meshless
+    paper's comparison list ('2.922, 4.982, 6.751, 8.237, ...'), an MDPI
+    Comput. 2020 LBM paper (quoting Erturk in parentheses), and a Wiley/IJNMF
+    2021 comparison table ('Erturk 2.92'). Re=200: 4.982 — original table
+    snippet and the Emerald list; NOTE the MDPI LBM paper misquotes it as
+    4.921 (single dissenting transcription, treated as their typo since the
+    original-table snippet and the independent list both read 4.982). Re=300:
+    6.751 and Re=400: 8.237 — original table snippet + Emerald list + MDPI
+    paper, no conflicts."
+  - "Re convention: Re = U_mean * D_h / nu with D_h = 2 x inlet channel
+    height; confirmed identical between Armaly et al. 1983 (paper text: 'V is
+    two-thirds of the measured maximum inlet velocity, which corresponds in
+    the laminar case to the average inlet velocity, D ... twice its height')
+    and Erturk 2008 (figure caption: Re based on inlet mean velocity and
+    hydraulic diameter). The case ships Um=1 m/s, h=0.01 m, nu=2e-4 -> Re=100."
+  - "QoI extraction definition (this case, documented not hidden): x_r = Ux
+    sign change (negative to positive) on a sample line at the first
+    bottom-cell-centre height y=1e-4 m, linear interpolation between the
+    bracketing points (dx = 0.1h); see qoi/compute_xr.py. This is the standard
+    near-wall proxy for zero wall shear stress used throughout the BFS
+    literature."
+  - "Armaly et al. (1983) experimental value at Re=100: x1/h = 3.08, taken
+    from a Wiley/IJNMF 2021 comparison table (single secondary source — NOT
+    used as the gated reference). Armaly's own paper states the flow stayed
+    two-dimensional only for Re < 400 (and Re > 6000); their expansion ratio
+    was 1:1.94, not exactly 2. Later work (e.g. Barkley et al. 2002) places
+    the 3-D instability onset for ER=2 nearer Re ~ 750, so the 400-750 band is
+    genuinely contested; at Re=100 both experiment and 2-D numerics agree the
+    flow is two-dimensional, which is why Re=100 was chosen for this case."
+  - "reference.type 'dns' follows the repo convention for published
+    high-resolution numerical benchmark data (lid_driven_cavity uses 'dns'
+    for Ghia et al. 1982); Erturk 2008 is a fourth-order finite-difference
+    benchmark solution, not a literal DNS — the enum has no closer value."
+  - "Verification run of the shipped dictionaries (2026-08-11,
+    opencfd/openfoam-default:2312, linuxARM64): blockMesh 6100 cells,
+    checkMesh OK, simpleFoam converged per residualControl (p<1e-5, U<1e-6)
+    in 459 SIMPLE iterations, ~7 s wall clock (3.1 s CPU). Measured reattachment_x_over_h =
+    2.8715 via qoi/compute_xr.py -> 1.73% below the 2.922 reference, well
+    inside the 10% tolerance (which is deliberately kept loose as a
+    documented mesh-resolution decision, matching the lid_driven_cavity
+    template's discipline). Two config facts future runners must know: (a)
+    the codedFixedValue parabolic inlet requires OpenFOAM's dynamicCode,
+    which REFUSES to run as root (dynamicCode::checkSecurity) — run the
+    container with a non-root --user; (b) python3 is not installed in the
+    opencfd/openfoam-default image, so the qoi_extract step must run where
+    python3 exists (it is declared critical: false in case.yaml for that
+    reason)."
+  - "Known harness gap (NOT hidden): the cfdb OpenFOAM adapter routes every
+    non-'naca0012*' case through the lid-driven-cavity prepare/collect path
+    (hardcoded movingWall/fixedWalls fields, centerline_umax extraction), so
+    'cfdb run' does not yet execute/judge this case end-to-end; the shipped
+    dictionaries are complete and runnable standalone (verified by Docker
+    smoke on opencfd/openfoam-default:2312), and qoi/compute_xr.py performs
+    the QoI extraction. Adapter generalization is a src/ change outside this
+    case's scope."

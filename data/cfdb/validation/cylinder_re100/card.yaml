@@ -1,0 +1,22 @@
+# Gallery card copy for cylinder_re100 (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Circular Cylinder Re=100（非定常涡脱落）
+capability: 搭建并跑通经典圆柱绕流 Re=100 非定常涡脱落验证（OpenFOAM pimpleFoam，ESI v2312）：blockMesh O 型网格
+  120×50×1=6000 cells（圆柱 D=1、外边界 R=20D、freestream 边界），forceCoeffs 函数对象每时间步写 Cl/Cd
+  时间序列，endTime=300 s 覆盖约 49 个脱落周期，丢掉前 150 s 启动瞬态后做统计/Goertzel 扫频（post/compute_qoi.py）。
+expected: 交 qoi.json={"strouhal":值, "cd_mean":值, "cl_rms":值}。冻结参考（held_out/qoi.json，与公开 qoi_values
+  同值）：St=0.164（Williamson 1988 St–Re 关系在 Re=100 给 0.1643，2D 模拟共识 0.1644–0.166）、Cd_mean=1.33
+  （Park, Kwon & Choi 1998，共识带 1.32–1.36）、Cl_rms=0.23（共识带 0.226–0.235）。
+criteria: 本案例当前无 agent-eval 契约，走 cfdb run → MetricsEngine 逐门重算：三个 QoI 各一道相对容差门——St ±3%、
+  Cd_mean ±6%、Cl_rms ±15%（|computed−ref|/|ref|，ref≠0 全走相对门）；预算门 wall_time_sec ≤ 7200 s 仅警告不翻转
+  pass/fail。容差宽是有意的领域决定：demo 网格只有 6000 cells，Cl_rms 对网格/时间步最敏感所以最松，case.yaml 与
+  provenance notes 均如实声明，非暗箱 fudge。
+what_makes_it_bite: 三个显式残差：(1) 采样纪律是硬约束——2026-08-11 首次全量 300 s 实证（run 20260811T115926Z，docker v2312，489 s
+  墙钟）实测涡脱落幅值到 t≈150 s 才饱和：60 s 丢弃窗给 cl_rms=0.181（误判 fail 21%），150 s 窗给 0.212（7.8% pass），案例据此把
+  丢弃窗从 60 s 提到 150 s（约 25 周期）并写死在描述和脚本里，但 MetricsEngine 只收最终标量、无法审计采样窗是否正确执行；
+  (2) 全量实证后本案例三个 QoI 全过：St=0.1620（1.2%）、Cd_mean=1.3174（1.0%）、cl_rms=0.2120（7.8%），参考值的文献共识性质
+  与仓库实测互相印证，残差收窄为「单次运行、未做网格无关性」；(3) 参考是 2D 模拟共识——若有人拿 Norberg 2003 的 3D 实验
+  Cl_rms（≈0.1）当尺子会误判所有正确 2D 解 fail，provenance notes 已钉死这一点。

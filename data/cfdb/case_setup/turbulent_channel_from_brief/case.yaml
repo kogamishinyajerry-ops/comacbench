@@ -1,0 +1,91 @@
+id: turbulent_channel_from_brief
+name: "Case Setup: Turbulent Channel Re_tau=180 from Engineering Brief (evidence mode)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain EVIDENCE-mode task: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  dimensioned drawing (visible/drawing.png), drives ANY CFD solver in its
+  own environment (Fluent, STAR-CCM+, in-house, OpenFOAM — the judge has
+  NO solver), and submits an evidence bundle (manifest.json + solver log +
+  mesh report + wall-shear samples). The judge validates the bundle and
+  recomputes the QoI from the raw evidence with the frozen script
+  reference/compute_qoi.py on the host. Task physics: fully developed
+  turbulent plane channel at Re_tau = 180 (half-height h = 1 m, bulk
+  velocity U_b = 1 m/s imposed, nu = 3.571429e-4 m^2/s so Re_b = 2800),
+  steady RANS with declared turbulence model and near-wall treatment.
+  QoI cf_bulk = tau_w/(0.5*rho*U_b^2); held-out reference = published
+  Moser, Kim & Mansour (1999) DNS value Cf = 8.18e-3. Task physics and
+  golden measurement (Cf = 7.842e-3, 4.13% low, docker OpenFOAM v2312
+  kOmegaSST on the 2048-cell demo mesh) inherited from
+  cases/validation/turbulent_channel_retau180; see provenance.yaml.
+physics:
+  flow: rans
+  turbulence: rans_kwsst
+  dimensionality: 3d
+  steady: true
+conditions:
+  # Friction Reynolds number Re_tau = u_tau*h/nu (h = half-height).
+  # Bulk Reynolds number Re_b = U_b*h/nu = 2800 is the imposed quantity.
+  reynolds: 180.0
+geometry:
+  type: periodic
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: 1.0
+solvers:
+  # Placeholder only: evidence-mode scoring runs NO solver — the judge
+  # validates the evidence bundle and executes only the frozen QoI script
+  # (reference/compute_qoi.py) on the host with timeout
+  # budget.max_runtime_sec.
+  - name: generic
+    command: "true"
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/wall_shear.csv
+    notes: >-
+      Evidence bundle layout v1 (per-file, per-column format contract is
+      documented in visible/task.md): manifest.json carries the solver
+      identity (traceability anchor) and optional self-reported timing;
+      evidence/solver.log is the solver-native log with residual history;
+      evidence/mesh_report.txt is the mesh cell-count/quality summary;
+      evidence/samples/wall_shear.csv holds the wall-shear samples the
+      frozen QoI script reduces to cf_bulk.
+outputs:
+  fields: ["U", "p", "k", "omega", "nut"]
+  curves: []
+  qoi:
+    - cf_bulk
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: dns
+  # No public qoi_values: the ONLY scoring reference is the held-out copy.
+  # The published MKM1999 value (Cf = 8.18e-3) is literature knowledge the
+  # brief does not state; even an agent that knows it must still submit
+  # evidence whose frozen-script reduction reproduces it — the scored
+  # number comes out of the raw evidence, never out of the submission's
+  # hands.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 10% mirrors
+  # the source case's V&V tolerance: demo-mesh resolution plus RANS
+  # model-form error at low Re_tau (documented domain decision).
+  qoi_relative_tolerance:
+    cf_bulk: 0.10
+budget:
+  # Evidence mode: the judge runs no solver, so this budget gates only the
+  # host-side QoI reduction clock plus the submission's SELF-REPORTED
+  # manifest timing.wall_time_sec (within_budget semantics degraded by
+  # design — see card.yaml). 3600 s is a deliberately loose bound for the
+  # agent's own solver run on any hardware.
+  max_runtime_sec: 3600
+  max_cells: null

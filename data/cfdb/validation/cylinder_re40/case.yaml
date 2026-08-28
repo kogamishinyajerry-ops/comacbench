@@ -1,0 +1,96 @@
+id: cylinder_re40
+name: Flow Past a Circular Cylinder (Re=40, Steady)
+category: validation
+description: "Classic external-flow validation: steady laminar flow past a circular
+  cylinder at Re=40 (D=1 m, U_inf=1 m/s, nu=0.025 m^2/s), OpenFOAM simpleFoam
+  (laminar, SIMPLEC) on an O-type blockMesh grid, far-field radius 50D (100D
+  diameter). Reference: Gautier, Biau & Lamballais (2013), Comput. Fluids 75,
+  pseudo-spectral reference solution Cd=1.49, Lw/D=2.24; corroborated by
+  Posdziech & Grundmann (Cd=1.4942) and the published literature envelope
+  1.48<=Cd<=1.62, 2.13<=Lw/D<=2.35 (see reference/literature_re40.csv).
+  QoI drag_coeff_cd = total drag coefficient from the forceCoeffs functionObject
+  (Aref = D x unit depth = 1.0); QoI wake_length_lw_over_d = streamwise extent of
+  the recirculation bubble on the wake centerline measured from the rear
+  stagnation point, normalised by D. Tolerance 10% on both QoIs reflects the
+  coarse ~10k-cell demo mesh and the ~5-8% published literature scatter
+  (documented domain decision, not a hidden fudge)."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 40.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "simpleFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: true
+      - name: solve
+        command: "simpleFoam -case {{ run_dir }}/case"
+        timeout_sec: 1800
+        critical: true
+      - name: sample_wake
+        # Wake-centerline sample for the wake_length_lw_over_d QoI (see
+        # system/sampleDict); consumed by post/compute_qoi.py (qoi_script).
+        # Non-critical: drag_coeff_cd comes from forceCoeffs regardless.
+        command: "postProcess -func sampleDict -latestTime -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: false
+    parameters:
+      # Re = U_inf * D / nu = 1.0 * 1.0 / 0.025 = 40, matching the Gautier et
+      # al. (2013) reference-solution conditions. n_iter=5000 SIMPLEC iterations
+      # is enough for the residualControl (p 1e-5, U 1e-6) to engage at Re=40
+      # on this ~10k-cell O-grid.
+      nu: 0.025
+      u_inf: 1.0
+      d_ref: 1.0
+      n_iter: 5000
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - drag_coeff_cd
+    - wake_length_lw_over_d
+  qoi_script: post/compute_qoi.py
+reference:
+  type: dns
+  files:
+    literature: reference/literature_re40.csv
+  qoi_values:
+    # Gautier, Biau & Lamballais (2013) pseudo-spectral reference solution
+    # (Comput. Fluids 75, Table 1), as quoted in Giannenas et al. (2021)
+    # ("Gautier et al. ... CD = 1.49 and Lw/D = 2.24") and consistent with
+    # Posdziech & Grundmann Cd=1.4942 quoted inside Gautier et al. itself.
+    drag_coeff_cd: 1.49
+    wake_length_lw_over_d: 2.24
+  # held-out reference wires the agent-eval scoring path to a copy of the
+  # reference kept out of the public case surface (same mechanism as
+  # lid_driven_cavity). The held-out values are deliberately the SAME as the
+  # public qoi_values above (both are the Gautier et al. 2013 numbers) — this
+  # proves the frozen-anchoring mechanism; it does NOT yet add anti-copy value
+  # from an independently recomputed number (an independent digitization/rerun
+  # is explicitly not solved here).
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    # 10% covers the published literature scatter (Cd 1.48-1.62, Lw/D 2.13-2.35
+    # across 17 references tabulated by Gautier et al. 2013) plus the coarse
+    # demo-mesh discretization error. Documented domain decision, not a fudge.
+    drag_coeff_cd: 0.10
+    wake_length_lw_over_d: 0.10
+budget:
+  max_runtime_sec: 1800
+  max_cells: null

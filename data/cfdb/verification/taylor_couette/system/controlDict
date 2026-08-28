@@ -1,0 +1,55 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     icoFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+// Slowest viscous mode decays like exp(-pi^2 nu t / (R_o-R_i)^2); at
+// nu = 1e-3 and gap = 0.05 m the e-folding time is ~0.25 s, so endTime 10 s
+// leaves a residual transient far below the QoI tolerance.
+endTime         10;
+
+// Co = u_wall * deltaT / dx_theta ~ 0.05 * 0.005 / 0.0022 ~ 0.11.
+// NOTE: deltaT = 0.01 (Co ~ 0.23) was tried first and the impulsively-started
+// transient went unstable around t ~ 0.6 s; 0.005 runs cleanly to steady state
+// (verified on the shipped mesh, OpenFOAM v2312, 2026-08-11).
+deltaT          0.005;
+
+writeControl    timeStep;
+
+writeInterval   400;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+// ************************************************************************* //

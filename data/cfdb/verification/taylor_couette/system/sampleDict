@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      sampleDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Radial sample line at theta = 0 (positive x axis), z = mid-plane.
+// There the tangential direction is +y, so u_theta = U.y exactly.
+// Run with: postProcess -func sampleDict -latestTime
+
+type            sets;
+libs            (sampling);
+
+writeControl    writeTime;
+
+interpolationScheme cellPoint;
+
+setFormat       csv;
+
+fields          ( U );
+
+sets
+(
+    radial
+    {
+        type    uniform;
+        axis    distance;
+        start   (0.051 0.0 0.005);
+        end     (0.099 0.0 0.005);
+        nPoints 49;
+    }
+);
+
+// ************************************************************************* //

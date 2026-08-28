@@ -1,0 +1,46 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Both wall temperatures fixed at 300 K (Dirichlet / fixedValue on both
+// sides). With the uniform volumetric heat source in system/fvOptions the
+// steady-state profile is the parabola T(x) = 300 + 500*x*(1-x) [K].
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 300;
+
+boundaryField
+{
+    left
+    {
+        type            fixedValue;
+        value           uniform 300;
+    }
+    right
+    {
+        type            fixedValue;
+        value           uniform 300;
+    }
+    topAndBottom
+    {
+        type            empty;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

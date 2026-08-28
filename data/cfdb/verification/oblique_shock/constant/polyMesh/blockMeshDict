@@ -1,0 +1,116 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// 10-degree wedge channel, two hex blocks (pre-wedge + wedge region).
+// Wedge corner at (0.2, 0); wedge surface y = (x - 0.2)*tan(10 deg), so the
+// wedge reaches y = 0.8*tan(10 deg) = 0.141062 at the outlet x = 1.
+// Weak-solution shock (beta = 39.314 deg from gen_reference.py) leaves the
+// domain through the outlet at y = 0.655 < 0.8: the top boundary stays pure
+// freestream, so symmetryPlane there is exact for this inviscid setup.
+// 25x100 + 100x100 = 12500 cells: deliberately coarse demo mesh (documented
+// domain decision; the case.yaml QoI tolerance absorbs the resulting shock
+// smearing).
+
+scale   1;
+
+vertices
+(
+    (0    0         -0.005)   // 0
+    (0.2  0         -0.005)   // 1
+    (0.2  0.8       -0.005)   // 2
+    (0    0.8       -0.005)   // 3
+    (0    0          0.005)   // 4
+    (0.2  0          0.005)   // 5
+    (0.2  0.8        0.005)   // 6
+    (0    0.8        0.005)   // 7
+    (1    0.141062  -0.005)   // 8  (0.8*tan(10deg))
+    (1    0.8       -0.005)   // 9
+    (1    0.141062   0.005)   // 10
+    (1    0.8        0.005)   // 11
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7)    (25 100 1) simpleGrading (1 1 1)
+    hex (1 8 9 2 5 10 11 6)  (100 100 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (9 11 10 8)
+        );
+    }
+    bottom
+    {
+        type symmetryPlane;
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+    top
+    {
+        type symmetryPlane;
+        faces
+        (
+            (3 7 6 2)
+            (2 6 11 9)
+        );
+    }
+    wedge
+    {
+        type patch;
+        faces
+        (
+            (8 10 5 1)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (1 2 9 8)
+            (4 5 6 7)
+            (5 10 11 6)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //

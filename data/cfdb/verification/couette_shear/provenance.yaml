@@ -1,0 +1,43 @@
+# Provenance declaration for couette_shear (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Couette, M., "Études sur le frottement des liquides",
+  Annales de Chimie et de Physique, série VI, vol. 21, pp. 433-510, 1890
+  (planar Couette flow; steady laminar solution u(y) = U_lid * y / H —
+  standard textbook result, e.g. White, "Viscous Fluid Flow";
+  Schlichting, "Boundary-Layer Theory")
+source_url: https://en.wikipedia.org/wiki/Couette_flow
+retrieved: "2026-08-11"
+transcription_verified: false
+file_hashes:
+  reference/couette_profile.csv: dfc6bceffd1565dee95597f791e8afe58c3b4400073160d956194a3e45b6fca5
+  reference/generate.py: 3f328352b4cfdfc567530217494b69e4f1b82d17c12c23b50eed2331b6465e5b
+notes:
+  - "reference/couette_profile.csv is generated point-by-point by reference/generate.py
+    (pure stdlib Python, deterministic, anchored above) from u/U_lid = y/H at 21
+    stations; no hand-typed digits anywhere. held_out/qoi.json is produced by the same
+    script (bottom_wall_shear_normalized = |tau_bottom|/(nu*U_lid/H) = 1.0 exactly)."
+  - "transcription_verified stays false: no literature table is transcribed (the
+    reference is analytical, verified by construction via the anchored generator
+    script, not by table cross-check). The Couette 1890 citation itself was
+    cross-checked 2026-08-11 against three independent reference lists: Trinh 2010
+    (arXiv:1009.0969), Piau & Piau 1994 (Journal of Rheology, NTU mirror), and a
+    PPPL thesis bibliography — all give Ann. Chim. Phys. 21, 433-510, 1890."
+  - "Empirical anchor 2026-08-11 (NOT part of the frozen ruler, information only):
+    full shipped-configuration run on opencfd/openfoam-default:2312 (blockMesh +
+    icoFoam, 4x40x1 = 160 cells, t=10 s, 2000 steps, ~1.5 s wall) matched the
+    analytical reference to machine precision: profile L2(u/U_lid vs y/H) =
+    5.7e-17, bottom_wall_shear_normalized = 1.00000000 (rel err 0.0), max |Uy| =
+    4.8e-17. The 1% QoI tolerance therefore absorbs only time-integration residue
+    and sampling interpolation on future solver variants, not mesh error — the
+    linear profile is exactly representable on any mesh."
+  - "Two configuration landmines were found and fixed via the v2312 smoke, and are
+    documented in-file: (1) the streamwise direction must NOT be an empty patch —
+    OpenFOAM drops the momentum component normal to an empty plane, so Ux is never
+    solved (silent wrong physics); the mesh uses cyclic left/right instead.
+    (2) PISO needs nCorrectors 3 here: with the cavity-stock 2, the run diverges
+    once the viscous front reaches the bottom wall (t ~ 0.25-0.5 s, Courant max
+    grows past the physical bound 0.2); nCorrectors 3 stays at Co_max = 0.2 for
+    the full run. Also: the wallShearStress functionObject aborts on laminar
+    icoFoam runs in v2312 ('Unable to find turbulence model in the database'), so
+    the QoI is extracted from the sampled profile slope instead."

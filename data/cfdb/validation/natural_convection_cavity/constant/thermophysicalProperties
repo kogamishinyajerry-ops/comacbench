@@ -1,0 +1,58 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Boussinesq fluid: rho = rho0*(1 - beta*(T - T0)), all other properties
+// constant. Numbers chosen so that, with H=1 m, dT=10 K, g=9.81 m/s^2:
+//   nu    = mu/rho0          = 4.571e-3 m^2/s
+//   alpha = k/(rho0*Cp)      = mu/(rho0*Pr) = 6.437e-3 m^2/s
+//   Ra    = g*beta*dT*H^3/(nu*alpha) = 1.0e4   (Pr = 0.71, air)
+
+thermoType
+{
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState Boussinesq;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight       28.9;
+    }
+    equationOfState
+    {
+        rho0            1.0;
+        T0              283;
+        beta            3e-3;
+    }
+    thermodynamics
+    {
+        Cp              1000;
+        Hf              0;
+    }
+    transport
+    {
+        mu              4.571e-3;
+        Pr              0.71;
+    }
+}
+
+// ************************************************************************* //

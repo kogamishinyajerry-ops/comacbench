@@ -1,0 +1,78 @@
+id: sod_shock_tube
+name: Sod Shock Tube (rhoCentralFoam)
+category: verification
+description: "Sod (1978) shock tube, inviscid compressible Euler equations, OpenFOAM rhoCentralFoam (ESI v2312). Effectively 1D tube x in [0,1] m (mesh 1000x1x1, empty patches), diaphragm at x=0.5, gamma=1.4 exactly (Cp=3.5*R, R=RR/28.96=287.10187 J/kg/K). Left state (p,rho)=(1 Pa, 1 kg/m3), right state (0.1 Pa, 0.125 kg/m3) imposed via T=p/(R*rho) in setFields. Reference: exact Riemann solution generated pointwise by the frozen script generate_reference.py (Newton iteration for p*, no hand-typed numbers); cross-checked against the universally tabulated Sod values (p*=0.30313, u*=0.92745, rho*_L=0.42632). QoI at t=0.2 s: shock_x_t02 (exact 0.85043115) and rho_plateau_t02 (exact star-region density 0.42631943 at probe x=0.6). Tolerances 2%/5% reflect the 1000-cell demo mesh and vanLeer shock-capturing smearing (documented domain decision, not a hidden fudge)."
+physics:
+  flow: compressible
+  turbulence: none
+  # Schema has no '1d'; the (1000 1 1) mesh with empty patches is
+  # effectively 1D — declared 2d like the lid_driven_cavity template.
+  dimensionality: 2d
+  steady: false
+conditions:
+  # Inviscid Euler: no Reynolds number. Mach is not a free parameter
+  # (u_L = u_R = 0; the wave speeds follow from the pressure ratio).
+  reynolds: null
+  mach: null
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "rhoCentralFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: set_fields
+        command: "setFields -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "rhoCentralFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      gamma: 1.4
+      end_time: 0.2
+      max_co: 0.2
+outputs:
+  fields: ["rho", "U", "p", "T"]
+  curves: []
+  qoi:
+    - shock_x_t02
+    - rho_plateau_t02
+  qoi_script: post/compute_qoi.py
+reference:
+  type: analytical
+  files:
+    density_profile: reference/sod1978_exact_t0.2.csv
+  qoi_values:
+    # Script-computed exact values (generate_reference.py output, Sod 1978
+    # exact Riemann solution at t=0.2, gamma=1.4):
+    shock_x_t02: 0.85043115
+    rho_plateau_t02: 0.42631943
+  # held-out copy (same mechanism as lid_driven_cavity v5.0 Wave D2 pilot):
+  # deliberately the SAME script-computed values as the public qoi_values —
+  # it proves the frozen-anchoring/scoring-redirection mechanism, it does NOT
+  # yet add anti-copy value from an independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    # 2% on the shock position: vanLeer smears the shock over ~4-8 cells
+    # (dx=1e-3), so a max-gradient extraction is good to well under 1%;
+    # 2% absorbs coarser re-meshes. Documented domain decision, not a fudge.
+    shock_x_t02: 0.02
+    # 5% on the plateau density: the star-region plateau is smooth, so a
+    # correct run sits within ~1%; the looser gate absorbs mesh coarsening.
+    rho_plateau_t02: 0.05
+budget:
+  max_runtime_sec: 600
+  max_cells: null

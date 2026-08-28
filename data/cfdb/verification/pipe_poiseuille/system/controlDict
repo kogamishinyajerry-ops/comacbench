@@ -1,0 +1,80 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     icoFoam;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+
+// Momentum-diffusion time scale R^2/nu = 0.5 s; endTime 1.0 s gives ~2
+// diffusion times -> developed steady profile. Fixed deltaT: Co = 0.1.
+endTime         1.0;
+deltaT          5e-4;
+
+writeControl    timeStep;
+writeInterval   2000;   // final state only (t = 1.0 s)
+
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable true;
+
+functions
+{
+    // QoI u_max: component-wise max of U over the volume. Flow is axial and
+    // Ux > 0 everywhere at developed state, so the x-component of the max
+    // vector is the centerline velocity (reference: 2*U_mean = 0.2 m/s).
+    uMax
+    {
+        type            volFieldValue;
+        libs            (fieldFunctionObjects);
+        log             true;
+        writeControl    timeStep;
+        writeInterval   100;
+        writeFields     false;
+        regionType      all;
+        operation       max;
+        fields          (U);
+    }
+    // QoI wall_u_avg: TRUE wall velocity measured on the patch faces
+    // (areaAverage of U), not an interpolated interior line sample.
+    // A coarse line sample near the wall extrapolates a spurious slip
+    // velocity; the patch-face average is exactly (0 0 0) for noSlip and
+    // anchors the wall end of the radial profile (reference: 0 m/s).
+    // NOTE: fields (U), not mag(U) — v2312 surfaceFieldValue does not
+    // process field expressions here ("Requested field mag(U) not found"),
+    // verified by smoke run; areaAverage of the vector serves the same
+    // anchor since every component is 0 on a correct noSlip wall.
+    wallU
+    {
+        type            surfaceFieldValue;
+        libs            (fieldFunctionObjects);
+        log             true;
+        writeControl    timeStep;
+        writeInterval   100;
+        writeFields     false;
+        regionType      patch;
+        name            wall;
+        operation       areaAverage;
+        fields          (U);
+    }
+}
+
+// ************************************************************************* //

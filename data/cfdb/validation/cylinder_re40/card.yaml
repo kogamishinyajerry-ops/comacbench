@@ -1,0 +1,23 @@
+# Gallery card copy for cylinder_re40 (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Flow Past a Circular Cylinder (Re=40, Steady)
+capability: 搭建并跑通经典圆柱绕流定常层流验证（Re=40，OpenFOAM simpleFoam 层流 + SIMPLEC，O 型 blockMesh 网格
+  45×55×4=9900 cells，远场半径 50D、即域直径 100D），从 forceCoeffs 函数对象提取阻力系数 drag_coeff_cd、
+  从尾流中心线 Ux=0 区间量出分离泡长度 wake_length_lw_over_d，并逼近 Gautier, Biau & Lamballais (2013,
+  Comput. Fluids 75) 伪谱参考解 Cd=1.49、Lw/D=2.24。
+expected: 交 qoi.json={"drag_coeff_cd":值, "wake_length_lw_over_d":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考
+  1.49 / 2.24（held_out/qoi.json），数值与 case.yaml 公开 qoi_values 刻意相同——held_out 机制只证明冻结锚定通路，不宣称
+  独立重算的 anti-copy 价值（与 lid_driven_cavity pilot 同一纪律，案文自承）。参考值核实方式：Gautier et al. 2013
+  Table 1 经 Giannenas et al. 2021 明引（"CD = 1.49 and Lw/D = 2.24"），并与 Gautier 正文所引 Posdziech & Grundmann
+  Cd=1.4942（4000D 超大域）互洽；文献包络 Cd∈[1.48,1.62]、Lw/D∈[2.13,2.35] 见 reference/literature_re40.csv。
+criteria: 冻结两门 AND：① qoi_complete——只查 qoi.json 有没有声明的两个 key（在即过，不看数值对错）；② within_budget——manifest
+  自报 wall_time_sec ≤ 1800s，没报则 fail-closed。两门过才给连续分 score=−qoi_error。⚠ QoI 准确度本身在 agent-eval 里是
+  ungated 的连续指标：case.yaml 的两个 10% 容差只服务另一条 cfdb run 的 V&V 路径，算得再离谱只要 key 在、时间够仍判
+  valid、仍被排名，只是分数难看。容差依据是文档化的领域决定：demo 粗网格离散误差 + 已发表文献约 5–8% 的离散度，不是暗箱 fudge。
+what_makes_it_bite: 三个显式残差：(1) 分离泡长度 Lw/D 不是求解器直出量，需要从尾流中心线 Ux 变号区间后处理提取——提取脚本若把
+  泡长从圆柱前缘算起（而非后驻点）会系统性偏大 1.0，直接顶穿 10% 容差；(2) Re=40 虽物理定常，SIMPLE 欠松弛太强会停在假收敛，
+  Cd 随迭代缓慢爬升，提前读出 1.3 量级的未收敛值；(3) 远场 freestream 边界若误用成全场 fixedValue 会把出流侧尾迹钉死，
+  Cd 偏高——案例用 50D 半径 + freestream/freestreamPressure 组合正是为了压住这类 blockage 误差。

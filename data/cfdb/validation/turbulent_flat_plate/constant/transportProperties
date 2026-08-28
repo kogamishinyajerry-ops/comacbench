@@ -1,0 +1,25 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// nu = 1e-5 m^2/s with U_inf = 10 m/s gives Re_x = 1e6 per metre of plate,
+// so the 2 m plate spans Re_x = 0 .. 2e6 and all reference stations
+// (x >= 0.5 m) sit inside the correlation validity range 5e5..1e7.
+
+transportModel  Newtonian;
+
+nu              1e-5;
+
+// ************************************************************************* //

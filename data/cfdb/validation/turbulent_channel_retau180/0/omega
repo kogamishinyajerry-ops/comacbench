@@ -1,0 +1,37 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 -1 0 0 0 0];
+
+// Initialisation only: omega = epsilon/(betaStar*k) with
+// epsilon = Cmu^0.75 * k^1.5 / L, turbulent length scale L = 0.07*h.
+internalField   uniform 1.6;
+
+boundaryField
+{
+    "(bottom|top)"
+    {
+        type            omegaWallFunction;
+        value           $internalField;
+    }
+
+    "(inlet|outlet|front|back)"
+    {
+        type            cyclic;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,140 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Laminar backward-facing step, expansion ratio ER = 2 (Armaly/Erturk layout).
+// h = step height = inlet channel height = 0.01 m; downstream height = 2h.
+// Inlet channel:  x in [-5h, 0],   y in [h, 2h]   (block A)
+// Step level:     x in [0, 30h],   y in [0, h]    (block B1)
+// Upper channel:  x in [0, 30h],   y in [h, 2h]   (block B2)
+// B1/B2 x-node distributions are identical (conformal internal face at y=h);
+// B2/A share the same 20 uniform y-nodes (conformal internal face at x=0).
+
+scale   1;
+
+vertices
+(
+    (-0.05 0.01 0)      // 0
+    ( 0    0.01 0)      // 1
+    ( 0    0.02 0)      // 2
+    (-0.05 0.02 0)      // 3
+    ( 0    0    0)      // 4
+    ( 0.30 0    0)      // 5
+    ( 0.30 0.02 0)      // 6
+    (-0.05 0.01 0.01)   // 7
+    ( 0    0.01 0.01)   // 8
+    ( 0    0.02 0.01)   // 9
+    (-0.05 0.02 0.01)   // 10
+    ( 0    0    0.01)   // 11
+    ( 0.30 0    0.01)   // 12
+    ( 0.30 0.02 0.01)   // 13
+    ( 0.30 0.01 0)      // 14
+    ( 0.30 0.01 0.01)   // 15
+);
+
+blocks
+(
+    // A: inlet channel, dx = 0.2h, dy = 0.05h uniform
+    hex (0 1 2 3 7 8 9 10) (25 20 1) simpleGrading (1 1 1)
+
+    // B1: step level. x: 100 cells uniform (dx = 0.1h) over [0, 10h], then
+    // 40 cells expanding (ratio 4) over [10h, 30h]. y: graded 4 (fine at the
+    // bottom wall, first cell ~0.023h) for the reattachment zone.
+    hex (4 5 14 1 11 12 15 8) (140 20 1)
+    multiGrading
+    (
+        (
+            (0.333333 0.714286 1)    // 10h length, 100 cells, uniform
+            (0.666667 0.285714 4)    // 20h length, 40 cells, expanding
+        )
+        ( (1 1 4) )                  // fine at bottom wall
+        ( (1 1 1) )
+    )
+
+    // B2: upper channel; x grading must match B1, y must match A (uniform).
+    hex (1 14 6 2 8 15 13 9) (140 20 1)
+    multiGrading
+    (
+        (
+            (0.333333 0.714286 1)
+            (0.666667 0.285714 4)
+        )
+        ( (1 1 1) )
+        ( (1 1 1) )
+    )
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 7 10 3)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (5 14 15 12)
+            (14 6 13 15)
+        );
+    }
+    lowerWall
+    {
+        type wall;
+        faces
+        (
+            (0 1 8 7)       // inlet channel floor
+            (4 11 8 1)      // step face
+            (4 5 12 11)     // downstream bottom wall
+        );
+    }
+    upperWall
+    {
+        type wall;
+        faces
+        (
+            (3 10 9 2)
+            (2 9 13 6)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (7 8 9 10)
+            (4 1 14 5)
+            (11 12 15 8)
+            (1 2 6 14)
+            (8 15 13 9)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

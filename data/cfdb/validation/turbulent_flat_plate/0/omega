@@ -1,0 +1,55 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Inlet turbulence length scale: mixingLength L = 0.01 m (order of the
+// trailing-edge boundary-layer thickness scale, delta_TE ~ 0.04 m; a
+// modest freestream length scale keeps freestream nut/nu ~ 9, low enough
+// not to contaminate the developing boundary layer).
+//   omega_inlet = k^0.5 / (Cmu^0.25 * L) = sqrt(0.375) / (0.09^0.25 * 0.01)
+//               ~ 111.8 1/s
+
+dimensions      [0 0 -1 0 0 0 0];
+
+internalField   uniform 111.8;
+
+boundaryField
+{
+    inlet
+    {
+        type            turbulentMixingLengthFrequencyInlet;
+        mixingLength    0.01;
+        value           uniform 111.8;
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    plate
+    {
+        type            omegaWallFunction;
+        value           uniform 111.8;
+    }
+    top
+    {
+        type            symmetryPlane;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

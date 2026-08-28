@@ -1,0 +1,93 @@
+id: taylor_green_vortex
+name: Taylor-Green Decaying Vortex (Re=100, icoFoam)
+category: verification
+description: >-
+  2D Taylor-Green decaying vortex, OpenFOAM icoFoam, doubly periodic domain
+  [0, 2*pi]^2, 64x64x1 demo mesh. Analytic reference (Taylor & Green 1937):
+  u = U0 sin(kx) cos(ky) exp(-2 nu k^2 t), v = -U0 cos(kx) sin(ky)
+  exp(-2 nu k^2 t), with U0 = 1 m/s, k = 1 1/m, nu = 0.01 m^2/s
+  (Re = U0/(k nu) = 100), endTime t = 5 s. Reference CSVs are computed
+  point-by-point from these formulas by reference/generate.py (kept in the
+  case; no hand-typed numbers). QoIs: ke_ratio_end = KE(5)/KE(0) (analytic
+  exp(-0.2) = 0.8187307530779818) and u_line_l2_rel_end = relative L2 error
+  of (u, v) along the t = 5 sample line (mesh row j = 5) vs the analytic
+  field (zero-reference QoI gated by absolute tolerance). Tolerances (5%)
+  reflect the coarse 64x64 demo mesh — a documented domain decision in the
+  same spirit as lid_driven_cavity, not a hidden fudge. Measured on this
+  exact setup with ESI v2312 (2026-08-11, see provenance.yaml):
+  ke_ratio_end = 0.81199 (0.82% error), u_line_l2_rel_end = 0.0043.
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 100.0
+geometry:
+  type: periodic
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "icoFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -dict constant/polyMesh/blockMeshDict -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "icoFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 0.01
+      u0: 1.0
+      wave_number: 1
+      end_time: 5.0
+      delta_t: 0.005
+      write_interval: 0.5
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - ke_ratio_end
+    - u_line_l2_rel_end
+  qoi_script: post/compute_qoi.py
+reference:
+  type: analytical
+  files:
+    sample_line: reference/tgv_sample_line_t5.csv
+    ke_decay: reference/tgv_ke_decay.csv
+  qoi_values:
+    # exp(-4 nu k^2 t) at nu = 0.01, k = 1, t = 5 — see reference/generate.py.
+    ke_ratio_end: 0.8187307530779818
+    # Zero-reference QoI: the reference IS the analytic solution, so the
+    # measured relative L2 error targets 0; gated via qoi_absolute_tolerance.
+    u_line_l2_rel_end: 0.0
+  # held_out/ copy anchors the agent-eval scoring path (same mechanism as the
+  # lid_driven_cavity Wave D2 pilot): the held-out values are deliberately the
+  # SAME analytic numbers as the public qoi_values — this proves the frozen
+  # anchoring/redirection mechanism; it does not yet add independent-recompute
+  # anti-copy value. Since the reference is analytic and regenerable by
+  # reference/generate.py, "independent" here would mean a separate solver's
+  # converged run, which is explicitly not claimed.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    # 5%: coarse 64x64 demo mesh (documented domain decision, cf. the
+    # lid_driven_cavity 10% precedent). A v2312 run on this exact mesh
+    # measured 0.82% (see description / provenance.yaml notes), so the gate
+    # absorbs solver-to-solver variation, not our own discretisation error.
+    ke_ratio_end: 0.05
+  qoi_absolute_tolerance:
+    # Zero-reference QoI: |computed - 0| <= 0.05, i.e. 5% of the signal
+    # energy norm. Same coarse-mesh rationale; v2312 measured 0.0043.
+    u_line_l2_rel_end: 0.05
+budget:
+  max_runtime_sec: 600
+  max_cells: null

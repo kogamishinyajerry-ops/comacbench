@@ -1,0 +1,38 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// T = p/(R*rho) with R = RR/W = 8314.47007/28.96 = 287.10187 J/kg/K:
+// left state (p=1 Pa, rho=1 kg/m3)   -> T = 1/R     = 0.0034830843 K
+// right state (p=0.1 Pa, rho=0.125)  -> T = 0.8/R   = 0.0027864674 K (setFields)
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 0.0034830843;
+
+boundaryField
+{
+    sides
+    {
+        type            zeroGradient;
+    }
+
+    empty
+    {
+        type            empty;
+    }
+}
+
+
+// ************************************************************************* //

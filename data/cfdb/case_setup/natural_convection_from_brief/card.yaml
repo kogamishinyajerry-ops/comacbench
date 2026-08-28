@@ -1,0 +1,31 @@
+# Gallery card copy for natural_convection_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建方腔自然对流（Ra=1e4）并提交证据包（evidence 模式）
+capability: case_setup 域 evidence 模式：agent 只拿到求解器无关的自然语言工程任务书（visible/task.md）和带尺寸标注的
+  差分加热方腔示意图（visible/drawing.png），在自己的环境里驱动任意求解器把二维 Boussinesq 自然对流（单位方腔 H=1 m、
+  热壁 293 K/冷壁 283 K、上下绝热、g=9.81、β=3e-3、μ=4.571e-3 Pa·s、Pr=0.71、Ra=1e4）算到稳态收敛，然后提交证据包——
+  manifest.json、求解器原生日志、网格质量报告、热壁热流分布 hot_wall_flux.csv（y,q 逐列表头契约写在任务书里）。判题端
+  完全没有求解器，只校验证据包并用冻结 QoI 脚本从原始壁面证据积分平均归约 Nu。
+expected: 交一个证据包目录。冻结 QoI 脚本（reference/compute_qoi.py，stdlib-only，宿主机执行，末行 stdout 为 JSON）读取
+  evidence/samples/hot_wall_flux.csv，校验表头恰为 y,q、y 单调递增、均匀站距（各站距偏差不超均值 5%，等高条带使算术平均
+  即面积平均）、全壁高覆盖（首站 ≤0.02 m、末站 ≥0.98 m）、至少 16 站，然后归约 hot_wall_nu_avg = mean(|q|)·H/(k·ΔT)
+  = mean(|q|)/64.37。held_out 参考 2.238 沿用素材案例 natural_convection_cavity 的锚定值（de Vahl Davis 1983 热壁平均
+  Nu，Ra=1e4，多源交叉核实），案面无公开 qoi_values。黄金 E2E 由素材案例真实 docker 运行产物
+  （runs/20260811T080807Z_natural_convection_cavity_openfoam_41a6985f，buoyantSimpleFoam 4096 cells，SIMPLE 1169 步收敛）
+  转换出证据包，归约得 2.235050——与素材案例实测钉值 2.2350502934693957（对 2.238 误差 0.13%）逐位一致；站位极值位置
+  也与文献吻合（max 在 y/H≈0.148 vs 文献 0.143，min 在壁顶）。
+criteria: 冻结两门 AND：① qoi_complete——证据包四步校验（required 存在非空、manifest 可解析含 solver 字段、CSV 通用一致性、
+  QoI 脚本归约出声明 key）任一步失败即 fail-closed invalid；② within_budget——自报 timing.wall_time_sec ≤ 3600s。⚠ evidence
+  模式的 budget 门语义减弱：判题端不跑求解器，门吃的是 manifest 自报墙钟（未自报则退化并在 notes 大声标注），3600s 是宽松
+  信封（浮力 SIMPLE 收敛慢，黄金 docker 运行实测 10.9s）。两门过才给连续分 score=−qoi_error，QoI 准确度是 ungated 连续
+  指标，case.yaml 的 10% 容差仅作文档（沿用素材案例）。
+what_makes_it_bite: 三个显式考点：(1) 无量纲化链条沿素材继承——Ra=g·β·ΔT·H³/(ν·α) 里 μ/Pr/β 任一处填错都静默改变 Ra 而
+  算例照跑不误，Nu 的归约（k=μ·Cp/Pr、ΔT=10 K）也由冻结脚本固定，agent 无法靠自定义 Nu 定义凑数；(2) 物理收敛是
+  真功夫——浮力驱动 SIMPLE 对松弛因子/格式敏感，一阶格式抹平壁面温度梯度直接毁掉热流分布（素材文档化残差），而本任务把
+  整个 q(y) 分布都当证据交出，壁上梯度分辨率不足立刻暴露在归约值上；(3) 证据契约本身是考点——均匀站距/全壁高覆盖/
+  表头任一违约 fail-closed。负控实证：q 整体乘 1.3，归约 2.9056、误差 29.8%、score 从 −0.00132 劣化到 −0.298，
+  区分能力成立。残差：held_out 值是文献值（注意定义陷阱——Ra=1e4 热壁平均 2.238 vs 中面 2.243，本案例锚定壁面平均），
+  anti-copy 依赖证据包机制与生产 harness 而非数字保密。

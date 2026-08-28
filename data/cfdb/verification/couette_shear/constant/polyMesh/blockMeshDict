@@ -1,0 +1,99 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Planar Couette channel: 4 x 40 x 1 cells, streamwise periodic (cyclic
+// left/right), one cell in z with empty front/back. The flow is uniform in
+// x and z, so the problem is exactly 1D in y: bottom wall (y=0) stationary
+// no-slip, top wall (y=H=0.01 m) moving at U_lid = 0.1 m/s in +x.
+// NOTE: the streamwise direction must NOT be an empty patch — OpenFOAM
+// drops the momentum component normal to an empty plane, so Ux would never
+// be solved (verified empirically 2026-08-11).
+
+scale   1;
+
+vertices
+(
+    (0     0     0)       // 0
+    (0.01  0     0)       // 1
+    (0.01  0.01  0)       // 2
+    (0     0.01  0)       // 3
+    (0     0     0.001)   // 4
+    (0.01  0     0.001)   // 5
+    (0.01  0.01  0.001)   // 6
+    (0     0.01  0.001)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (4 40 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    movingWall
+    {
+        type wall;
+        faces
+        (
+            (3 7 6 2)       // top, y = H
+        );
+    }
+    fixedWalls
+    {
+        type wall;
+        faces
+        (
+            (1 5 4 0)       // bottom, y = 0 (stationary, no-slip)
+        );
+    }
+    left
+    {
+        type cyclic;
+        neighbourPatch right;
+        faces
+        (
+            (0 4 7 3)       // x = 0
+        );
+    }
+    right
+    {
+        type cyclic;
+        neighbourPatch left;
+        faces
+        (
+            (2 6 5 1)       // x = 0.01
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)       // z = 0
+            (4 5 6 7)       // z = 0.001
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

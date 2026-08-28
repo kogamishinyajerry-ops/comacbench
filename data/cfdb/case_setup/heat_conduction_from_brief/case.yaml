@@ -1,0 +1,71 @@
+id: heat_conduction_from_brief
+name: "Case Setup: 1D Solid Conduction with Heat Source from Engineering Brief (evidence mode)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain EVIDENCE-mode task: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  dimensioned drawing (visible/drawing.png), drives an ARBITRARY solver in
+  its own environment (Fluent / STAR-CCM+ / in-house / OpenFOAM — the judge
+  has NO solver), and submits an evidence bundle (manifest.json + raw
+  solver log + mesh report + steady-state temperature profile CSV). The
+  judge validates the bundle and the frozen QoI script
+  reference/compute_qoi.py reduces midplane_T (T at x = L/2, linearly
+  interpolated from the submitted profile) on the host. Task physics:
+  plane solid wall L = 1 m, both faces held at T = 300 K, uniform
+  volumetric heat source with q'''/k = 1000 K/m^2, thermal diffusivity
+  alpha = 0.1 m^2/s, transient to steady state. Held-out reference QoI =
+  analytical midplane T(L/2) = 425.0 K (Incropera & DeWitt plane wall
+  with generation). Golden measurement inherited from the VERIFIED case
+  cases/verification/heat_conduction_1d (2026-08-11 docker run measured
+  midplane_T = 424.9998849 K, 2.7e-7 relative); see provenance.yaml.
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: evidence mode runs NO solver on the judge — the
+  # scored numbers are reduced from the submitted evidence bundle by the
+  # frozen QoI script on the host.
+  - name: generic
+    command: "true"
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/profile.csv
+    notes: >-
+      Evidence bundle layout v1; per-file per-column formats are
+      documented in visible/task.md (the agent-readable surface).
+outputs:
+  fields: ["T"]
+  curves: []
+  qoi:
+    - midplane_T
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: analytical
+  # No public qoi_values: the ONLY scoring reference is the held-out copy.
+  # The analytical value (T(L/2) = T_s + (q/k)*L^2/8) is textbook knowledge
+  # the brief does not state; the scored number is always recomputed from
+  # the submitted raw profile by the frozen script, never self-reported.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 1% mirrors
+  # the verified heat_conduction_1d tolerance for the same physics.
+  qoi_relative_tolerance:
+    midplane_T: 0.01
+budget:
+  # Evidence mode: the judge never runs the solver, so this budget gates
+  # (a) the host-side QoI reduction timeout and (b) the within_budget gate
+  # on the SELF-REPORTED manifest timing.wall_time_sec — degraded gate
+  # semantics by design (see card.yaml). 3600 s is a deliberately loose
+  # ceiling for an arbitrary external solver on this 1D problem (the
+  # golden OpenFOAM run solves in < 1 s).
+  max_runtime_sec: 3600
+  max_cells: null

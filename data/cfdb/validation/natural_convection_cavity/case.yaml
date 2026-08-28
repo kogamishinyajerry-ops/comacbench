@@ -1,0 +1,70 @@
+id: natural_convection_cavity
+name: Natural Convection Cavity (Ra=1e4)
+category: validation
+description: "Classic de Vahl Davis (1983) differentially-heated square cavity benchmark, OpenFOAM buoyantSimpleFoam with Boussinesq equation of state (rho = rho0*(1-beta*(T-T0))), laminar, steady, Ra=1e4, Pr=0.71. Unit square H=1 m: hot wall x=0 at 293 K, cold wall x=1 at 283 K, adiabatic top/bottom; g=9.81 m/s2, beta=3e-3 1/K, rho0=1 kg/m3, mu=4.571e-3 Pa s => nu=4.571e-3, alpha=nu/Pr=6.437e-3, Ra=g*beta*dT*H^3/(nu*alpha)=1.0e4. Reference: de Vahl Davis (1983), Int. J. Numer. Methods Fluids 3:249-264, hot-wall average Nu=2.238 at Ra=1e4 (cross-checked against multiple independent published reproductions). QoI hot_wall_nu_avg = |q''|_avg * H / (k * dT), k=mu*Cp/Pr=6.437 W/(m K) => Nu = |q''|_avg / 64.37, from the wallHeatFlux functionObject on hotWall. Tolerance 10% reflects the coarse 64x64 demo mesh (documented domain decision, not a hidden fudge)."
+physics:
+  flow: low_mach
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "buoyantSimpleFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: true
+      - name: solve
+        command: "buoyantSimpleFoam -case {{ run_dir }}/case"
+        # Buoyancy-driven SIMPLE converges slowly; budget is generous on
+        # purpose. fvSolution residualControl stops the run early once
+        # p_rgh/U/h residuals fall below 1e-4/1e-5/1e-5.
+        timeout_sec: 3600
+        critical: true
+    parameters:
+      rayleigh: 10000.0
+      prandtl: 0.71
+      gravity: 9.81
+      beta: 0.003
+      t_hot: 293.0
+      t_cold: 283.0
+      mu: 0.004571
+      rho0: 1.0
+      cp: 1000.0
+      n_iter: 3000
+outputs:
+  fields: ["U", "T", "p_rgh", "p"]
+  curves: []
+  qoi:
+    - hot_wall_nu_avg
+  qoi_script: post/compute_qoi.py
+reference:
+  # Numerical benchmark solution (community-accepted reference, same
+  # convention as the Ghia et al. anchor used by lid_driven_cavity).
+  type: dns
+  files:
+    benchmark_table: reference/devahldavis1983_ra1e4.csv
+  qoi_values:
+    hot_wall_nu_avg: 2.238
+  # Held-out copy of the QoI anchor for the agent-eval scoring path,
+  # mirroring the lid_driven_cavity pilot: deliberately the SAME value as
+  # the public qoi_values above — it proves the frozen-anchoring mechanism,
+  # it does not yet add anti-copy value from an independently recomputed
+  # number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    hot_wall_nu_avg: 0.10
+budget:
+  max_runtime_sec: 3600
+  max_cells: null

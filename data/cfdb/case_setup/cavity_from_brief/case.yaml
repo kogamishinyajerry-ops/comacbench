@@ -1,0 +1,60 @@
+id: cavity_from_brief
+name: "Case Setup: Lid-Driven Cavity from Brief (Re=100)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain pilot task 2 (v5.0 Wave B): the agent receives only the
+  natural-language case brief (visible/task.md) and the annotated drawing
+  (visible/drawing.png), and must submit a complete OpenFOAM case directory
+  (0/ constant/ system/). cfdb executes it generically in a --network none
+  sandbox (opencfd/openfoam-default:2312, no python3 inside): blockMesh when
+  system/blockMeshDict exists, then the solver named by system/controlDict's
+  application entry (step timeout = budget.max_runtime_sec). The frozen QoI
+  script runs on the host (stdlib-only, last stdout line = JSON object) and
+  extracts centerline_umax from the vertical-centerline probes; scoring
+  reconciles against the held-out reference (Ghia et al. 1982, 0.665) with
+  score = -qoi_error and gates = qoi_complete + within_budget. Source
+  material: validation/lid_driven_cavity (golden 32x32 icoFoam config
+  measured 0.6765 / 1.73% on 2026-07-08; docker step walls re-measured
+  2026-08-11: blockMesh ~0.3s, icoFoam ~2.8s incl. container startup, so the
+  10s budget is ~3x the ~3.5s golden total).
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 100.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only (same discipline as the agentic tasks): case_setup
+  # submissions are executed by the generic sandbox protocol in
+  # casesetup_scorer.py, never through a solver adapter.
+  - name: generic
+    command: "true"
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - centerline_umax
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: dns
+  # Scoring reconciles against the held-out copy only; no public reference
+  # tree carries the answer (visible/ holds the task surface, not data).
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentation only (cfdb run V&V path); agent-eval scoring is the
+  # ungated continuous score = -qoi_error, same as the cfd domain.
+  qoi_relative_tolerance:
+    centerline_umax: 0.10
+budget:
+  max_runtime_sec: 10
+  max_cells: null

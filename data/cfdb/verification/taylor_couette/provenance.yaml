@@ -1,0 +1,45 @@
+# Provenance declaration for taylor_couette (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Taylor, G. I., "Stability of a Viscous Liquid Contained between Two
+  Rotating Cylinders", Phil. Trans. R. Soc. Lond. A 223, pp. 289-343, 1923
+  (pre-instability laminar circular Couette profile u_theta = A*r + B/r;
+  also any viscous-flow textbook, e.g. White, "Viscous Fluid Flow")
+source_url: https://doi.org/10.1098/rsta.1923.0008
+retrieved: null
+transcription_verified: true
+file_hashes:
+  reference/couette_profile.csv: 5577744613f16356422c6c224cd1ecabee46f58966470ab78888d64f987e5ca5
+  reference/generate.py: f226d70f23e8526e098b5ac0687cda7daf3b045f55899bc6661eba43d872e114
+notes:
+  - "Analytical case: nothing was transcribed from a paper table. Every number
+    in couette_profile.csv and held_out/qoi.json is computed by
+    reference/generate.py (pure Python stdlib) from u_theta = A*r + B/r with
+    A=-omega*R_i^2/(R_o^2-R_i^2), B=omega*R_i^2*R_o^2/(R_o^2-R_i^2); the script
+    asserts u_theta(R_i)=omega*R_i and u_theta(R_o)=0 to <1e-15 before writing.
+    Re-running the script regenerates both files byte-identically; hand-editing
+    them is the one forbidden path. generate.py itself is sha256-anchored above
+    so the generator is frozen together with its output."
+  - "transcription_verified: true means the DATASET was verified end-to-end,
+    not merely the formula: a full run of the shipped case (blockMesh +
+    icoFoam to endTime=10 s, docker opencfd/openfoam-default:2312, linux/arm64,
+    2026-08-11) sampled on the radial line theta=0 (system/sampleDict)
+    reproduced the reference profile with max pointwise relative error 0.18%
+    and utheta_midgap = 0.01941113 vs reference 0.01944444 (0.17%). The 2% QoI
+    tolerance in case.yaml is set against this measurement."
+  - "Config caveat found during smoke (documented in system/controlDict):
+    deltaT=0.01 (max Co ~ 0.23 from wall speed) goes numerically unstable
+    around t ~ 0.6 s on this impulsively-started transient; deltaT=0.005 is
+    stable and converges to the analytical profile. The shipped controlDict
+    carries the stable value."
+  - "Known residual (not solved here): the cfdb OpenFOAM adapter routes any
+    non-naca0012 case through the lid-driven-cavity template set
+    (src/cfdb/adapters/openfoam.py _prepare_ldc), which renders 0/U with
+    movingWall/fixedWalls patches and overwrites system/ dictionaries. A
+    `cfdb run` of this case would therefore NOT exercise the shipped
+    innerCylinder/outerCylinder setup (icoFoam would FATAL on patch
+    mismatch), and collect_outputs has no utheta_midgap extractor. The case
+    ships complete 0/ constant/ system/ dictionaries and is verified by
+    direct OpenFOAM execution in docker; wiring the adapter to case-provided
+    dictionaries is shared-code work deliberately left out of this case
+    contribution."

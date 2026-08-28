@@ -1,0 +1,101 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Zero-pressure-gradient turbulent flat plate, 2D.
+// Plate: y=0, x = 0..2 m (inlet at the leading edge, fully turbulent).
+// Freestream height H = 0.5 m >> delta_TE ~ 0.04 m (1/7-power estimate at
+// Re_x = 2e6), so the top symmetry boundary stays out of the boundary layer.
+//
+// y+ control: y-grading ratio 18 over Ny=60 gives a first cell height of
+// ~1.4e-3 m, i.e. first-cell-centre y+ ~ 28-33 along the plate (estimated
+// with u_tau from the reference correlation) — wall-function regime, used
+// together with nutkWallFunction / omegaWallFunction / kqRWallFunction.
+// This puts ~18 cells inside the trailing-edge boundary layer: coarse, it
+// is a documented demo-mesh decision (see case.yaml tolerance note).
+
+scale   1;
+
+vertices
+(
+    (0    0    0)      // 0
+    (2    0    0)      // 1
+    (2    0.5  0)      // 2
+    (0    0.5  0)      // 3
+    (0    0    0.01)   // 4
+    (2    0    0.01)   // 5
+    (2    0.5  0.01)   // 6
+    (0    0.5  0.01)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (100 60 1) simpleGrading (1 18 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    plate
+    {
+        type wall;
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    top
+    {
+        type symmetryPlane;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (4 5 6 7)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

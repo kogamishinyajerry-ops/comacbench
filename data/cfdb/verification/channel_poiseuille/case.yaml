@@ -1,0 +1,65 @@
+id: channel_poiseuille
+name: Plane Channel Poiseuille Flow (Re_H=20)
+category: verification
+description: "Plane Poiseuille laminar channel flow verification, OpenFOAM icoFoam. Mean velocity U0=0.1 m/s, channel height H=0.01 m, length L=12H, nu=5e-5 m^2/s, Re_H=U0*H/nu=20. Uniform-velocity inlet; the probe line sits at x/H=10, well past the laminar hydrodynamic entrance length (L_e/Dh~0.05*Re_Dh, Re_Dh=40 -> L_e~2Dh=4H). Reference: closed-form fully developed profile u(y)=6*U0*(y/H)*(1-y/H) (u_max=1.5*U0), machine-generated pointwise by reference/generate_profile.py. QoI centerline_umax = max |Ux| (m/s) on the x/H=10 probe line; analytical value 0.15. Tolerance 5% covers the 240x20 demo mesh resolution plus residual entrance/transient effects (documented domain decision, not a hidden fudge); a full docker run (ESI v2312, t=5 s, 2026-08-11) measured u_max=0.149254 m/s (0.50% low), max pointwise profile error 2.05%."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 20.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "icoFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "icoFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 5.0e-5
+      end_time: 5.0
+      delta_t: 0.001
+      write_interval: 1000
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - centerline_umax
+  qoi_script: post/compute_qoi.py
+reference:
+  type: analytical
+  files:
+    profile: reference/poiseuille_profile.csv
+  qoi_values:
+    centerline_umax: 0.15
+  # held-out reference wires the agent-eval scoring path to a copy of the
+  # reference kept out of the public case surface (same mechanism as the
+  # lid_driven_cavity v5.0 Wave D2 pilot). Lives under held_out/ so it stays
+  # out of the reference/ tree that the provenance audit's stray-file scan
+  # treats as the public declared-reference tree. As in the pilot, the
+  # held-out value is deliberately the SAME as the public qoi_values above:
+  # both equal the closed-form u_max = 1.5*U0 = 0.15 m/s. This proves the
+  # frozen-anchoring mechanism; it does NOT yet add anti-copy value from an
+  # independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    centerline_umax: 0.05
+budget:
+  max_runtime_sec: 600
+  max_cells: null

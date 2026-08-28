@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p
+    {
+        solver          GAMG;
+        tolerance       1e-06;
+        relTol          0.01;
+        smoother        GaussSeidel;
+    }
+
+    pFinal
+    {
+        $p;
+        relTol          0;
+    }
+
+    U
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    UFinal
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PISO
+{
+    momentumPredictor yes;
+    nOuterCorrectors  1;
+    // nCorrectors 3 (not the cavity-stock 2): with streamwise-cyclic patches
+    // 2 pressure correctors per step go unstable once the viscous front
+    // reaches the bottom wall (t ~ H^2/(4*nu) ~ 0.25 s; Courant max grows
+    // past the physical lid bound 0.2 and blows up by t ~ 0.5 s). Verified
+    // empirically on v2312, 2026-08-11: nCorrectors 3 stays at
+    // Co_max = U_lid*dt/dx = 0.2 for the whole run.
+    nCorrectors       3;
+    nNonOrthogonalCorrectors 0;
+    pRefCell          0;
+    pRefValue         0;
+}
+
+// ************************************************************************* //

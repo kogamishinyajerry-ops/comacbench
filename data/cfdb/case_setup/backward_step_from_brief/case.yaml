@@ -1,0 +1,83 @@
+id: backward_step_from_brief
+name: "Case Setup: Laminar Backward-Facing Step Re=100 from Engineering Brief (evidence)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain, EVIDENCE mode: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  dimensioned drawing (visible/drawing.png), drives ANY solver in its own
+  environment (Fluent/STAR-CCM+/in-house/OpenFOAM — the judge has no
+  solver), and submits an evidence bundle (manifest.json + solver-native
+  log + mesh report + bottom-wall shear stress distribution CSV). The
+  judge validates the bundle and recomputes the QoI from the raw evidence
+  with the frozen script reference/compute_qoi.py on the host — a
+  self-reported QoI never enters the verdict. Task physics inherited from
+  the VALIDATED case cases/validation/backward_facing_step_laminar:
+  expansion ratio ER=2, step height h=0.01 m, fully developed parabolic
+  inlet (mean Um=1 m/s), nu=2e-4 m^2/s -> Re = Um*D_h/nu = 100 (D_h =
+  2*inlet channel height, the Armaly et al. 1983 / Erturk 2008
+  convention); QoI reattachment_x_over_h = primary reattachment length
+  x_r/h located by the negative->positive zero crossing of the
+  bottom-wall shear stress. Held-out reference 2.922 (Erturk 2008,
+  Comput. Fluids 37:633-655, Re=100 row) inherited verbatim from the
+  source case. Docker-verified measurement on the golden configuration:
+  2.8715 (1.73% error, 6100-cell demo mesh); see provenance.yaml.
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 100.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: case_setup scoring does NOT consume case.yaml solver
+  # steps. Evidence mode runs nothing at all on the judge — the agent's
+  # own solver run happens off-judge and only the evidence bundle is
+  # judged (see execution.evidence).
+  - name: generic
+    command: "true"
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - reattachment_x_over_h
+  qoi_script: reference/compute_qoi.py
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/wall_shear.csv
+    notes: >-
+      Evidence bundle layout v1; every file and column is documented in
+      visible/task.md (the agent-readable contract).
+reference:
+  type: dns
+  # No public qoi_values: the ONLY scoring reference is the held-out copy
+  # (value inherited from the source validation case's held_out/qoi.json,
+  # itself the Erturk 2008 x1/h table Re=100 row, multi-source verified).
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 10%
+  # mirrors the source validation case's tolerance for the same physics.
+  qoi_relative_tolerance:
+    reattachment_x_over_h: 0.10
+budget:
+  # Evidence mode: the within_budget gate consumes the SELF-REPORTED
+  # manifest timing.wall_time_sec (weakened semantics — the judge never
+  # clocks the solver run); 3600 s is a deliberately generous envelope
+  # for this laminar steady demo-scale case (golden docker run converged
+  # in ~7 s wall).
+  max_runtime_sec: 3600
+  max_cells: null

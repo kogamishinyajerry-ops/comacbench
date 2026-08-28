@@ -1,0 +1,59 @@
+id: cfdb_cs_oblique_shock_from_brief
+registry_id: cfdb.case_setup
+domain: cfd
+task_type: simulation_agent
+model_profile: code_tool_agent
+assets_revision: cfdb@b26799e
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- shell
+- openfoam
+- python
+input:
+  prompt_file: tasks/cfdb.case_setup/cfdb_cs_oblique_shock_from_brief.md
+  prompt_sha256: 4c7229f2a42076d7801e75317cd021c78f0e38a7d300cbd4a08b03d9b10d388d
+  assets:
+  - path: data/cfdb/case_setup/oblique_shock_from_brief/case.yaml
+    digest: c059b07f085d9c8e3fe47872e54075f37ae5380925631a6a39029ac860785006
+  - path: data/cfdb/case_setup/oblique_shock_from_brief/visible/drawing.png
+    digest: da9504a161730e39f20f4d7618ee6462c839126c04fab1d393a9adff6041258c
+output_contract:
+- case_directory
+- result.json
+reference:
+  type: analytical
+  held_out:
+    path: data/cfdb/case_setup/oblique_shock_from_brief/held_out/qoi.json
+    digest: 43294b0b4fe601d2dd586aef1dc1b4d7f2e1f45279178ed0f917a1584bcd3148
+  qoi_script: reference/compute_qoi.py
+  tolerances:
+    post_shock_mach: 0.05
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+grader:
+  validity_gate: true
+  exec_kind: cfdb_case_setup
+  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  mode: evidence
+  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  qoi_script: reference/compute_qoi.py
+  upstream_note: 上游 evidence 模式：判分验证证据包并由冻结脚本降算 QoI（内网商业 CFD 兼容）
+scoring:
+  weights:
+    physics: 0.6
+    requirements: 0.4
+    objective: 0.0
+    robustness: 0.0
+  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
+    N/A（上游基准无目标函数/扰动重算）
+limits:
+  cpu: 2
+  memory_gb: 4
+  wall_clock_s: 3600
+  attempts: 3
+license_provenance:
+  source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark
+  license: MIT
+  status: confirmed-repo
+  revision: cfdb@b26799e
+  mirror_allowed: true

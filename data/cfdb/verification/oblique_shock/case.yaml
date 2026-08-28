@@ -1,0 +1,72 @@
+id: oblique_shock
+name: Oblique Shock over a 10° Wedge (M1=2)
+category: verification
+description: "Supersonic inviscid flow over a 10° wedge, M1=2, OpenFOAM rhoCentralFoam
+  (transient density-based solver run to its steady long-time limit, ~4 flow-throughs).
+  Reference: exact theta-beta-M weak solution computed by gen_reference.py
+  (beta=39.31384°, M2=1.640526, p2/p1=1.706580; no hand-copied numbers).
+  Gas is the normalised gamma=1.4 gas of the rhoCentralFoam wedge15Ma5 tutorial
+  (T1=1, p1=1, U1=2 => a1≈1). QoI post_shock_mach = |U|/sqrt(gamma*R*T) at the
+  post-shock probe (0.6, 0.15), which sits between the wedge surface (y=0.0705)
+  and the analytical shock (y=0.3276) at x=0.6. Tolerance 5% reflects the coarse
+  12500-cell demo mesh (shock smeared over a few cells; documented domain
+  decision, not a hidden fudge)."
+physics:
+  flow: compressible
+  turbulence: none
+  dimensionality: 2d
+  steady: true
+conditions:
+  mach: 2.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "rhoCentralFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "rhoCentralFoam -case {{ run_dir }}/case"
+        timeout_sec: 840
+        critical: true
+    parameters:
+      mach: 2.0
+      wedge_angle_deg: 10.0
+      end_time: 2.0
+      delta_t: 0.0002
+      write_interval: 0.5
+outputs:
+  fields: ["U", "p", "T"]
+  curves: []
+  qoi:
+    - post_shock_mach
+  qoi_script: post/compute_qoi.py
+reference:
+  type: analytical
+  files:
+    probe_profile: reference/oblique_shock_x06_profile.csv
+  qoi_values:
+    # Written by gen_reference.py (weak-solution theta-beta-M + Rankine-Hugoniot);
+    # the same script emits the identical value into held_out/qoi.json.
+    post_shock_mach: 1.640526
+  # held-out copy mirrors the lid_driven_cavity v5.0 Wave D2 pilot mechanism:
+  # same value as the public qoi_values, anchored via the agentbench scoring
+  # contract's held_out: namespace. It proves the frozen-anchoring mechanism;
+  # it does NOT yet provide an independently recomputed anti-copy number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    post_shock_mach: 0.05
+budget:
+  max_runtime_sec: 900
+  max_cells: null

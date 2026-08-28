@@ -1,0 +1,79 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     icoFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5;
+
+deltaT          0.005;
+
+writeControl    runTime;
+
+writeInterval   0.5;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    // Sample the velocity/pressure along mesh row j = 5 (y = 11*pi/64) at
+    // every write time. The 64 sample points coincide with the cell centres
+    // of that row (start = dx/2, end = 2*pi - dx/2), matching the abscissae
+    // of reference/tgv_sample_line_t5.csv one-to-one (see reference/generate.py).
+    sampleLine
+    {
+        type            sets;
+        libs            (sampling);
+
+        writeControl    writeTime;
+
+        interpolationScheme cellPoint;
+        setFormat       raw;
+
+        sets
+        (
+            line
+            {
+                type    uniform;
+                axis    x;
+                start   (0.04908738521234052 0.5399612373357456 0.05);
+                end     (6.234097921967246   0.5399612373357456 0.05);
+                nPoints 64;
+            }
+        );
+
+        fields          (U p);
+    }
+}
+
+// ************************************************************************* //

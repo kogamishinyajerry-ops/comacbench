@@ -1,0 +1,105 @@
+id: dam_break
+name: Dam Break (Martin & Moyce 1952, interFoam VOF)
+category: validation
+description: >-
+  Classic 2D dam-break multiphase benchmark, OpenFOAM interFoam (VOF).
+  A water column of base width a = 0.146 m and height 2a = 0.292 m (the
+  Martin & Moyce n^2 = 2 configuration) collapses under gravity in a plain
+  4a x 4a tank with a dry bed. Reference: Martin & Moyce (1952), Phil. Trans.
+  R. Soc. Lond. A 244(882), 312-324, digitized surge-front curve (a = 2.25 in
+  series) cross-checked point-by-point between two independent digitizations
+  (OpenMPS benchmark CSV and the Lethe dam-break example; max deviation
+  0.013 in Z/a). Dimensionless convention used here (stated explicitly
+  because both appear in the literature): tau = t*sqrt(2*g/a) and Z/a,
+  where Z is the surge-front position along the floor measured from the
+  column back wall — i.e. Z/a = 1 at tau = 0. QoIs are Z/a at
+  tau = 1.0, 1.5, 2.0, 2.5, 2.8, obtained by linear interpolation of the
+  frozen CSV (see reference/interpolate_qoi.py). Simulation-side extraction:
+  at the write time nearest to t = tau/sqrt(2*g/a), Z = max{x :
+  alpha.water >= 0.5}. NO gate-release time shift is applied to the
+  simulation (Martin & Moyce could not record the exact onset of motion;
+  some studies shift simulation time by +0.175 in tau — we deliberately do
+  not, and the tolerance absorbs it). Uniform 15% relative tolerance is a
+  documented domain decision: it covers the moderate 96x96 demo mesh
+  (cell size a/24; published VOF studies use a/32..a/128), the un-shifted
+  early-time gate-release effect, and digitization scatter. Mesh, interface
+  compression (vanLeer + interfaceCompression, cAlpha = 1, MULES) and BCs
+  follow the ESI v2312 interFoam/laminar/damBreak tutorial, with the
+  tutorial's downstream obstacle removed to match the plain Martin & Moyce
+  tank.
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "interFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: true
+      - name: set_fields
+        command: "setFields -case {{ run_dir }}/case"
+        timeout_sec: 120
+        critical: true
+      - name: solve
+        command: "interFoam -case {{ run_dir }}/case"
+        timeout_sec: 3600
+        critical: true
+    parameters:
+      column_width_a: 0.146
+      gravity: 9.81
+      end_time: 0.25
+      max_co: 0.5
+      cAlpha: 1
+outputs:
+  fields: ["U", "p_rgh", "alpha.water"]
+  curves: []
+  qoi:
+    - front_z_tau_1_0
+    - front_z_tau_1_5
+    - front_z_tau_2_0
+    - front_z_tau_2_5
+    - front_z_tau_2_8
+  qoi_script: post/compute_qoi.py
+reference:
+  type: experimental
+  files:
+    surge_front: reference/martin_moyce_1952_front.csv
+  qoi_values:
+    front_z_tau_1_0: 1.316
+    front_z_tau_1_5: 1.7512
+    front_z_tau_2_0: 2.3565
+    front_z_tau_2_5: 3.0036
+    front_z_tau_2_8: 3.4147
+  # Held-out copy for the agent-eval scoring path (same mechanism as the
+  # lid_driven_cavity v5.0 Wave D2 pilot): kept under held_out/ so it stays
+  # out of the reference/ tree that the provenance stray-file scan treats as
+  # the public declared-reference surface. As in the pilot, the held-out
+  # values are deliberately the SAME as the public qoi_values above
+  # (both produced by reference/interpolate_qoi.py from the frozen CSV);
+  # this proves the frozen-anchoring + scoring-redirection mechanism, it
+  # does NOT yet add anti-copy value from an independently recomputed
+  # number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    front_z_tau_1_0: 0.15
+    front_z_tau_1_5: 0.15
+    front_z_tau_2_0: 0.15
+    front_z_tau_2_5: 0.15
+    front_z_tau_2_8: 0.15
+budget:
+  max_runtime_sec: 1800
+  max_cells: 20000

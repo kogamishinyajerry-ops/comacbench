@@ -1,0 +1,19 @@
+# Gallery card copy for turbulent_flat_plate (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: Turbulent Flat Plate (kOmegaSST, Re_x up to 2e6)
+capability: 搭建并跑通零压梯度湍流平板 RANS 验证（OpenFOAM simpleFoam + kOmegaSST，2 m 平板，U_inf=10 m/s，nu=1e-5，
+  Re_x 覆盖 0..2e6；blockMesh 100×60×1=6000 cells 粗网格 demo，y 向 grading 18 控首层 y+≈30 走壁面函数），从 plate
+  壁面 wallShearStress 提取站位 Cf（Re_x=5e5 与 1e6 两站）并逼近 1/7 幂律工程关联式 0.0592·Re_x^(−1/5)。
+expected: 交 qoi.json={"cf_rex_5e5":值, "cf_rex_1e6":值}（+可选 manifest.json 报 wall_time_sec）。冻结参考
+  0.004291 / 0.003735（held_out/qoi.json），由 reference/generate.py 按关联式逐点生成——provenance 明写这是工程
+  关联式（对历史实验的拟合），不是实验原始数据；生成脚本本身也做了 sha256 锚定，防「换脚本保声明」。
+criteria: 参照 lid_driven_cavity 模板：冻结门看 qoi.json 有没有声明的 key 与预算；QoI 准确度在 agent-eval 里是
+  ungated 连续指标，case.yaml 的 15% 容差只服务 cfdb run 的 V&V 路径。容差来源明写：6000 cells demo 网格只有 ~18
+  个单元落在尾缘边界层内、首层 y+≈28-33 处于壁面函数区，站位 Cf 对网格分辨率敏感，15% 是文档化的领域决定而非暗箱 fudge。
+what_makes_it_bite: 三个显式残差：(1) 参考是关联式不是实验——kOmegaSST 本身在不同 Re_x 处对该关联式有数个百分点系统
+  偏差，容差内的「过」不等于物理正确；(2) 入口湍流是人为给定的（intensity 5% + mixingLength 0.01 m），前缘发展段 Cf 受
+  入口条件影响，站位取得离前缘太近会测出发展段而非平衡边界层；(3) held-out 值刻意等于公开 reference（与
+  lid_driven_cavity pilot 同一自承），尚未提供独立重算的 anti-copy 价值。

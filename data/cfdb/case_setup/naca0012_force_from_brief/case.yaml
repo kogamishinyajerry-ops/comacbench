@@ -1,0 +1,97 @@
+id: naca0012_force_from_brief
+name: "Case Setup: NACA0012 alpha=0 Force Coefficients from Engineering Brief (evidence mode)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain EVIDENCE-mode task: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  drawing (visible/drawing.png), drives ANY CFD solver in its own
+  environment (Fluent, STAR-CCM+, in-house, OpenFOAM — the judge has NO
+  solver), and submits an evidence bundle (manifest.json + solver log +
+  mesh report + force-coefficient convergence history). The judge
+  validates the bundle and recomputes the QoIs from the raw evidence
+  with the frozen script reference/compute_qoi.py on the host (tail-mean
+  of the steady force history). Task physics: NACA0012 symmetric airfoil
+  at alpha = 0 deg, Re = 6e6, M = 0.3 (low-Mach RANS), chord c = 1 m.
+  QoIs: cl and cd; held-out reference = Ladson 1988 (NASA TM-4074)
+  experiment, cl = 0.0, cd = 0.0086. Task physics inherited from
+  cases/validation/naca0012 (case id naca0012_a0); the golden evidence
+  bundle is converted from a REAL docker run of that case
+  (runs/20260811T093058Z_naca0012_a0_openfoam_6ae74883) — the first time
+  the alpha=0 configuration was actually executed; see provenance.yaml.
+physics:
+  flow: rans
+  turbulence: rans_sa
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 6.0e6
+  mach: 0.3
+  alpha_deg: 0.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: unstructured_hex
+  levels: ["coarse"]
+  target_y_plus: 1.0
+solvers:
+  # Placeholder only: evidence-mode scoring runs NO solver — the judge
+  # validates the evidence bundle and executes only the frozen QoI script
+  # (reference/compute_qoi.py) on the host with timeout
+  # budget.max_runtime_sec.
+  - name: generic
+    command: "true"
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/force_history.csv
+    notes: >-
+      Evidence bundle layout v1 (per-file, per-column format contract is
+      documented in visible/task.md): manifest.json carries the solver
+      identity (traceability anchor) and optional self-reported timing;
+      evidence/solver.log is the solver-native log with residual history;
+      evidence/mesh_report.txt is the mesh cell-count/quality summary;
+      evidence/force_history.csv (header 'iter,cl,cd') holds the steady
+      force-coefficient convergence history the frozen QoI script reduces
+      by tail-segment averaging.
+outputs:
+  fields: ["U", "p", "nuTilda"]
+  curves: []
+  qoi:
+    - cl
+    - cd
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: experimental
+  # No public qoi_values: the ONLY scoring reference is the held-out copy
+  # (Ladson 1988, NASA TM-4074: cl = 0.0, cd = 0.0086 — the same values
+  # the source validation case anchors publicly). Even an agent that
+  # knows them must submit evidence whose frozen-script reduction
+  # reproduces them — the scored numbers come out of the raw force
+  # history, never out of the submission's hands.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error, mean of the
+  # per-QoI terms with cl scored absolutely because its reference is 0).
+  # Tolerances mirror the source validation case.
+  qoi_relative_tolerance:
+    cl: 0.001
+    cd: 0.10
+  qoi_absolute_tolerance:
+    cl: 0.01
+budget:
+  # Evidence mode: the judge runs no solver, so this budget gates only the
+  # host-side QoI reduction clock plus the submission's SELF-REPORTED
+  # manifest timing.wall_time_sec (within_budget semantics degraded by
+  # design — see card.yaml). 3600 s is a deliberately loose bound for the
+  # agent's own solver run on any hardware (the golden OpenFOAM docker run
+  # took 414 s wall including mesh generation).
+  max_runtime_sec: 3600
+  max_cells: null

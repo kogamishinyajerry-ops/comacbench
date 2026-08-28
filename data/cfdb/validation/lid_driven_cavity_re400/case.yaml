@@ -1,0 +1,62 @@
+id: lid_driven_cavity_re400
+name: Lid-Driven Cavity (Re=400)
+category: validation
+description: "Classic lid-driven cavity benchmark, OpenFOAM icoFoam, laminar Re=400 (L=0.1 m, U_lid=1 m/s, nu=2.5e-4). Reference: Ghia, Ghia & Shin (1982), J. Comput. Phys. 48, Table I Re=400 column (17 stations, transcription verified against multiple independent reproductions). QoI centerline_umax = max |U|/U_lid on the vertical centerline probe line (y/H up to 0.95): interpolated Ghia value 0.551 at y/H=0.95. Tolerance 10% reflects the 64x64 demo mesh and the linear interpolation across the wide 0.8516-0.9531 station gap (documented domain decisions, not hidden fudges)."
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 400.0
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  - name: openfoam
+    command: "icoFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "icoFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 0.00025
+      end_time: 10.0
+      delta_t: 0.001
+      write_interval: 1000
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - centerline_umax
+  qoi_script: post/compute_qoi.py
+reference:
+  type: dns
+  files:
+    centerline: reference/ghia1982_re400_centerline.csv
+  qoi_values:
+    centerline_umax: 0.551
+  # Held-out copy wires the agent-eval scoring path to a frozen reference kept
+  # out of the public case surface (same mechanism as the lid_driven_cavity
+  # v5.0 Wave D2 pilot). As in that pilot the held-out value is deliberately
+  # the SAME as the public qoi_values above (interpolated from Ghia et al.
+  # 1982 Table I Re=400 at y/H=0.95) — it proves the mechanism, it does NOT
+  # yet add anti-copy value from an independently recomputed number.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    centerline_umax: 0.10
+budget:
+  max_runtime_sec: 600
+  max_cells: null

@@ -1,0 +1,43 @@
+# Provenance declaration for oblique_shock (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Anderson, J. D., "Modern Compressible Flow: With Historical Perspective",
+  3rd ed., McGraw-Hill, 2003, Ch. 4 (theta-beta-M relation, oblique-shock
+  Rankine-Hugoniot jump conditions). Numerical values computed from the
+  governing equations by gen_reference.py shipped in this case directory;
+  cross-checked against the widely reproduced textbook worked example
+  M1=2, theta=10 deg -> weak beta=39.3 deg, M2~1.64-1.65 (e.g. Cengel &
+  Cimbala, "Fluid Mechanics: Fundamentals and Applications", Example 12-10:
+  beta_weak=39.3 deg, beta_strong=83.7 deg, M2n=0.8032).
+source_url: https://kyleniemeyer.github.io/gas-dynamics-notes/compressible-flows/oblique-shocks.html
+retrieved: "2026-08-11"
+transcription_verified: true
+file_hashes:
+  reference/oblique_shock_x06_profile.csv: c06d86d0c984bf19865dac6a969677e284397f40bf3c3bc08276c2688a5ea6fa
+notes:
+  - "Analytical case: every number in the reference CSV is computed pointwise by
+    gen_reference.py (stdlib-only, deterministic) from the theta-beta-M relation
+    and Rankine-Hugoniot jump conditions; no hand-typed data. The script is
+    shipped at the case root (naca0012/gen_geometry.py precedent) and kept in
+    the repo; regenerate with `python3 gen_reference.py`."
+  - "transcription_verified: true because the reference is machine-generated,
+    not transcribed; the underlying physics values were cross-checked on
+    2026-08-11 against multiple independent published sources for M1=2,
+    theta=10 deg: weak beta=39.3 deg and M2~1.64-1.65 (script: beta=39.31384 deg,
+    M2=1.640526), and Cengel & Cimbala Example 12-10 (beta_weak=39.3,
+    beta_strong=83.7, M2n=0.8032; script M2n=0.80318). All spot values agree."
+  - "Gas model is the normalised gamma=1.4 gas of the OpenFOAM rhoCentralFoam
+    wedge15Ma5 tutorial (molWeight 11640.3, Cp 2.5 => R~0.7143, a1~1 with
+    T1=1), so U1=2 gives M1=2.000004; the generator uses this exact M1."
+  - "held_out/qoi.json is written by the same generator and intentionally equals
+    the public qoi_values (lid_driven_cavity v5.0 Wave D2 pilot mechanism):
+    proves frozen anchoring + scoring-time redirection, not yet an
+    independently recomputed anti-copy value."
+  - "Weak-solution branch is selected by bisection on the rising branch of
+    theta(beta) only (peak located by scan first); an unbracketed solve can
+    converge to the strong solution beta=83.7 deg — see card.yaml."
+  - "Empirically pinned 2026-08-11: full Docker run (opencfd/openfoam-default:2312,
+    blockMesh + rhoCentralFoam to endTime 2.0, ~4 flow-throughs, 12500-cell demo
+    mesh) gave post-shock probe (0.6, 0.15) M2 = 1.63848 vs analytical 1.640526
+    (0.125% rel err) and p2 = 1.70716 vs 1.706580 (0.034%) — the 5% QoI tolerance
+    is conservative even for this coarse mesh."

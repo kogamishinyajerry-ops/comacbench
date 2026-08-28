@@ -1,0 +1,38 @@
+# Provenance declaration for natural_convection_cavity (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  de Vahl Davis, G., "Natural Convection of Air in a Square Cavity: A Bench
+  Mark Numerical Solution", Int. J. Numer. Methods Fluids 3, pp. 249-264,
+  1983 (benchmark quantities at Ra=1e4, Pr=0.71)
+source_url: https://doi.org/10.1002/fld.1650030305
+retrieved: null
+transcription_verified: false
+file_hashes:
+  reference/devahldavis1983_ra1e4.csv: 4ae977823c64185041189ef4b6581b8ab6eb07ad6941af62e2339fdc1b3b4b66
+notes:
+  - "Reference is a literature transcription (de Vahl Davis 1983 benchmark
+    table), not formula-generated, so no generate.py ships with this case;
+    each transcribed number below was spot-checked against at least two
+    independent published reproductions on 2026-08-11 via web search."
+  - "nu_avg_hot_wall=2.238 (Ra=1e4): confirmed by the Osaka Metropolitan
+    University repository paper (Table 1: de Vahl Davis 2.238/4.509/8.817),
+    Frontiers in Mechanical Engineering 2018 (Table 2: 2.238), and Sacred
+    Heart J. Sci. Humanities (Table 1: 2.238). Some reproductions quote
+    2.243/2.234 — a third-decimal transcription spread in the secondary
+    literature; 2.238 is the most widely reproduced value."
+  - "nu_max=3.528 (at y/H=0.143) and nu_min=0.586 (at y/H=1): confirmed by
+    techscience FDMP 2024 (Table 1) and J. Applied Fluid Mechanics
+    (Table 3: benchmark 3.528/0.586)."
+  - "u_max=16.178 at y/H=0.823 on the vertical centerline: confirmed by the
+    U. Southampton ePrints paper and JAFM (16.178); some sources print
+    16.182. v_max=19.617 at x/H=0.119 on the horizontal centerline:
+    confirmed by U. Southampton and UPC Barcelona thesis table (19.617 @
+    0.119). Velocities are normalized by alpha/H as in the original paper."
+  - "Known definitional trap (task statement said Ra=1e5 Nu=4.519): the
+    de Vahl Davis HOT-WALL AVERAGE at Ra=1e5 is 4.509; 4.519 is the
+    mid-plane value Nu_1/2. This case runs Ra=1e4 where the analogous pair
+    is 2.238 (wall) / 2.243 (mid-plane); the QoI here is the wall average."
+  - "QoI normalisation used by this case: Nu_avg = |q''|_avg * H /
+    (k * (T_hot - T_cold)) with k = mu*Cp/Pr = 6.437 W/(m K), i.e. the
+    dimensionless conductive heat flux across the cavity — the definition
+    of Nu in the original paper."

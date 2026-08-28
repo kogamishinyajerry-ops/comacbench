@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|    \\  /    A nd          | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      sampleDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Wake-centerline sample for the wake_length_lw_over_d QoI: the line starts
+// just behind the rear stagnation point (x = D/2 = 0.5) and reaches x = 6,
+// well past the reference recirculation length Lw/D = 2.24. The recirculation
+// bubble has Ux < 0; post/compute_qoi.py locates its downstream end by the
+// negative-to-positive Ux sign change.
+// Run with: postProcess -func sampleDict -latestTime
+
+type            sets;
+libs            (sampling);
+
+writeControl    writeTime;
+
+interpolationScheme cellPoint;
+
+setFormat       csv;
+
+fields          ( U );
+
+sets
+(
+    wakeLine
+    {
+        type    uniform;
+        axis    distance;
+        start   (0.51 0.0 0.0);
+        end     (6.0 0.0 0.0);
+        nPoints 500;
+    }
+);
+
+// ************************************************************************* //

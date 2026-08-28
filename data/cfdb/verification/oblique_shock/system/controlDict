@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Steady-state is reached as the long-time limit of the transient run:
+// flow-through time = L/U1 = 0.5, so endTime 2.0 is ~4 flow-throughs.
+// Fixed deltaT gives max Co ~ 2*2e-4/(0.8/100) = 0.05 (von Neumann stable).
+
+application     rhoCentralFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         2.0;
+
+deltaT          0.0002;
+
+writeControl    runTime;
+
+writeInterval   0.5;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep  no;
+
+maxCo           1;
+
+maxDeltaT       1e-06;
+
+functions
+{
+    // Post-shock probe: (0.6, 0.15) sits between the wedge surface
+    // (y = 0.0705 at x = 0.6) and the analytical shock (y = 0.3276), i.e.
+    // firmly inside region 2. post_shock_mach = |U|/sqrt(gamma*R*T) from
+    // these values; reference 1.640526 (gen_reference.py).
+    postShockProbe
+    {
+        type            probes;
+        libs            (sampling);
+        writeControl    timeStep;
+        writeInterval   50;
+        fields          (U p T);
+        probeLocations
+        (
+            (0.6 0.15 0)
+        );
+    }
+}
+
+
+// ************************************************************************* //

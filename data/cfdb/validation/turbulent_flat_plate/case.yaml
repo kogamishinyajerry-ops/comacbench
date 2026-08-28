@@ -1,0 +1,70 @@
+id: turbulent_flat_plate
+name: Turbulent Flat Plate (kOmegaSST, Re_x up to 2e6)
+category: validation
+description: "Zero-pressure-gradient turbulent flat plate, OpenFOAM simpleFoam + kOmegaSST, 2D steady RANS (L=2 m plate, U_inf=10 m/s, nu=1e-5 so Re_x=1e6/m, plate spans Re_x=0..2e6). Reference: engineering 1/7-power-law correlation Cf=0.0592*Re_x^(-1/5) (valid 5e5<Re_x<1e7), generated pointwise by reference/generate.py — an engineering correlation, NOT raw experimental data (declared openly in provenance). Inlet turbulence: intensity 5% + mixing length 0.01 m (turbulentIntensityKineticEnergyInlet / turbulentMixingLengthFrequencyInlet). y+ control: y-grading ratio 18 over Ny=60 gives first-cell-centre y+ ~ 28-33 (wall-function regime, nutkWallFunction/omegaWallFunction); ~18 cells inside the trailing-edge boundary layer. QoI: station Cf at Re_x=5e5 (x=0.5 m) and Re_x=1e6 (x=1.0 m), from wallShearStress on the plate patch. Tolerance 15% reflects the coarse 6000-cell demo mesh (documented domain decision, not a hidden fudge)."
+physics:
+  flow: incompressible
+  turbulence: rans_kwsst
+  dimensionality: 2d
+  steady: true
+conditions:
+  reynolds: 2000000.0
+geometry:
+  type: external
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: 30.0
+solvers:
+  - name: openfoam
+    command: "simpleFoam"
+    timeout_sec: null
+    steps:
+      - name: block_mesh
+        command: "blockMesh -case {{ run_dir }}/case"
+        timeout_sec: 60
+        critical: true
+      - name: solve
+        command: "simpleFoam -case {{ run_dir }}/case"
+        timeout_sec: 540
+        critical: true
+    parameters:
+      nu: 0.00001
+      u_inf: 10.0
+      end_time: 2000
+      delta_t: 1.0
+      write_interval: 500
+outputs:
+  fields: ["U", "p", "k", "omega", "nut"]
+  curves: []
+  qoi:
+    - cf_rex_5e5
+    - cf_rex_1e6
+  qoi_script: post/compute_qoi.py
+reference:
+  # 'analytical' is the closest schema type: the reference is a closed-form
+  # engineering correlation evaluated pointwise, not measured data. The
+  # correlation's empirical nature is declared in provenance.yaml notes.
+  type: analytical
+  files:
+    cf_stations: reference/powerlaw_cf.csv
+  qoi_values:
+    # Pointwise correlation values from reference/generate.py output
+    # (powerlaw_cf.csv rows x=0.5 m / Re_x=5e5 and x=1.0 m / Re_x=1e6).
+    cf_rex_5e5: 0.004291
+    cf_rex_1e6: 0.003735
+  # Same mechanism as the lid_driven_cavity v5.0 Wave D2 pilot: held-out
+  # copy kept out of the public case surface, wired to agent-eval scoring.
+  # The held-out values are deliberately the SAME as the public qoi_values
+  # (both from the same correlation) — proves the frozen-anchoring
+  # mechanism, does not yet add independent-recompute anti-copy value.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  qoi_relative_tolerance:
+    cf_rex_5e5: 0.15
+    cf_rex_1e6: 0.15
+budget:
+  max_runtime_sec: 600
+  max_cells: null

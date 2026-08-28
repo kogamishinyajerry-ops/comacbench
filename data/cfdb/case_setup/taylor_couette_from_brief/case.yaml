@@ -1,0 +1,82 @@
+id: taylor_couette_from_brief
+name: "Case Setup: Taylor-Couette Circular Couette from Engineering Brief (evidence mode)"
+category: case_setup
+domain: case_setup
+description: >-
+  case_setup domain EVIDENCE-mode task: the agent receives only a
+  natural-language engineering brief (visible/task.md) and an annotated
+  dimensioned drawing (visible/drawing.png), then drives ANY CFD solver in
+  its own environment (Fluent, STAR-CCM+, in-house code, OpenFOAM, ... —
+  the judge runs NO solver at all) and submits an evidence bundle
+  (manifest.json + solver-native log + mesh report + sampled radial
+  profile). The judge validates the bundle (required files, manifest
+  shape, generic CSV consistency) and recomputes the QoI from the raw
+  evidence with the frozen script reference/compute_qoi.py on the host; a
+  self-reported final QoI never enters the verdict. Task physics: laminar
+  circular Couette flow between concentric cylinders, R_i=0.05 m rotating
+  at omega=1 rad/s, R_o=0.10 m stationary, nu=1e-3 m^2/s (Re=2.5, deeply
+  subcritical for Taylor vortices), transient laminar to the steady
+  profile u_theta(r)=A*r+B/r. QoI utheta_midgap = u_theta at the mid-gap
+  radius r=0.075 m; held-out reference 0.01944444444444445 m/s (exact
+  closed-form value, the SAME number the verified source case anchors).
+  Golden evidence is reduced from the verified docker run of
+  cases/verification/taylor_couette (measured 0.01941113, 0.17%); see
+  provenance.yaml.
+physics:
+  flow: incompressible
+  turbulence: none
+  dimensionality: 2d
+  steady: false
+conditions:
+  reynolds: 2.5
+geometry:
+  type: internal
+  source: null
+mesh:
+  family: structured_hex
+  levels: ["single"]
+  target_y_plus: null
+solvers:
+  # Placeholder only: evidence mode runs NO solver on the judge — the
+  # submission is an evidence bundle produced by the agent's own solver
+  # environment; only the frozen QoI script executes (on the host).
+  - name: generic
+    command: "true"
+execution:
+  setup_mode: evidence
+  evidence:
+    required_files:
+      - manifest.json
+      - evidence/solver.log
+      - evidence/mesh_report.txt
+      - evidence/samples/profile.csv
+    notes: >-
+      Evidence bundle layout v1 (uniform across case_setup evidence tasks);
+      per-file and per-column contract is documented in visible/task.md.
+outputs:
+  fields: ["U", "p"]
+  curves: []
+  qoi:
+    - utheta_midgap
+  qoi_script: reference/compute_qoi.py
+reference:
+  type: analytical
+  # No public qoi_values: the ONLY scoring reference is the held-out copy
+  # (the closed-form mid-gap value — the same number the verified source
+  # case anchors). The value is textbook-derivable; anti-copy rests on the
+  # evidence-reduction mechanism, not secrecy.
+  held_out_files:
+    qoi: held_out/qoi.json
+metrics:
+  # Documentary only (agent-eval gates are qoi_complete + within_budget;
+  # QoI accuracy is an ungated continuous score = -qoi_error). 2% mirrors
+  # the verified taylor_couette V&V tolerance for the same physics.
+  qoi_relative_tolerance:
+    utheta_midgap: 0.02
+budget:
+  # Evidence mode: the within_budget gate consumes the SELF-REPORTED
+  # manifest timing.wall_time_sec (degraded, honesty-anchored semantics —
+  # the judge never runs the solver). 3600 s is a deliberately generous
+  # bound for a one-hour solver session; see card.yaml.
+  max_runtime_sec: 3600
+  max_cells: null

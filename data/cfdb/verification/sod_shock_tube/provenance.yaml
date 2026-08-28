@@ -1,0 +1,54 @@
+# Provenance declaration for sod_shock_tube (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Sod, G. A., "A Survey of Several Finite Difference Methods for Systems of
+  Nonlinear Hyperbolic Conservation Laws", J. Comput. Phys. 27, pp. 1-31,
+  1978 (shock tube test case, gamma = 1.4); exact Riemann solution per
+  Toro, "Riemann Solvers and Numerical Methods for Fluid Dynamics", ch. 4
+source_url: https://doi.org/10.1016/0021-9991(78)90023-2
+retrieved: null
+transcription_verified: true
+file_hashes:
+  reference/sod1978_exact_t0.2.csv: 2de6c4059efe2a3285980e2cf6fcffeb69b227e480373fa398397fd3592ac845
+  generate_reference.py: 41d510c05da064c74600c3d3a04a6e1bc9f5b2fec846450ab9fec94c56c23c4e
+notes:
+  - "Analytic-reference case: every CSV row is computed pointwise from the
+    exact Riemann solution by the frozen script generate_reference.py (Newton
+    iteration for the star pressure p*, Toro ch. 4 wave formulas). No number
+    in the CSV, qoi_values, or held_out/qoi.json is hand-typed; the script
+    prints the values inlined into case.yaml. Rerun `python3 generate_reference.py`
+    to regenerate bit-identical outputs (fixed formatting, stdlib only)."
+  - "transcription_verified: true — the script's computed star state is
+    asserted in-script (assert, fail-loud) against the universally tabulated
+    Sod values p*=0.30313, u*=0.92745, rho*_L=0.42632, rho*_R=0.26557
+    (Sod 1978 Fig. 2; Toro 2009 section 4.3.3; reproduced in countless
+    textbooks and cross-checked 2026-08-11 against public sources, e.g.
+    notjustphysics.com Sod exact-solution walkthrough and the SimFlow Sod
+    validation page). The asserts pass; wave positions in the CSV were
+    additionally eyeballed: rarefaction head x=0.2634, contact x=0.6855,
+    shock x=0.8504, matching the theory values printed by the script."
+  - "Thermo alignment with the solver: OpenFOAM R = RR/W with
+    RR = 1e3*NA*k = 8314.47007 J/kmol/K (v2312: NA=6.0221417930e23 compiled
+    default, k=1.38065e-23 from etc/controlDict) and W=28.96 gives
+    R=287.1018669 J/kg/K; Cp=3.5*R makes gamma=Cp/(Cp-R)=1.4 EXACTLY, and
+    0/T + setFieldsDict impose T=p/(R*rho) so rho_L=1, rho_R=0.125 exactly.
+    (The v2312 shockTube tutorial's Cp=1004.5 would give gamma=1.40019 and
+    rho_L=0.99975 — a ~1e-4 relative deviation, far inside tolerance, but
+    this case eliminates it by construction.)"
+  - "held_out/qoi.json deliberately contains the SAME script-computed values
+    as the public qoi_values (mirrors the lid_driven_cavity v5.0 Wave D2
+    pilot): it proves the frozen-anchoring/scoring-redirection mechanism,
+    it does NOT yet provide anti-copy value from an independently recomputed
+    number."
+  - "QoI extraction is NOT frozen by the case: shock_x_t02 conventionally
+    means argmax|d rho/dx| on the t=0.2 field; rho_plateau_t02 is rho at the
+    x=0.6 cell. Tolerances 2%/5% are documented mesh/extraction decisions
+    (1000-cell mesh, vanLeer smears the shock over ~4-8 cells), not fudges."
+  - "Empirically run 2026-08-11 (opencfd/openfoam-default:2312, arm64):
+    blockMesh + setFields + rhoCentralFoam to t=0.2, solver exit 0,
+    ExecutionTime 0.39 s. Measured with the conventional extraction above:
+    shock_x_t02 = 0.850 (0.051% vs exact 0.85043115), rho_plateau_t02 =
+    0.42631711 (0.0005% vs exact 0.42631943); far-field rho pinned at
+    0.99999999 / 0.125 exactly, confirming the thermo alignment. The
+    tolerances carry ~40x margin on this mesh; they exist for coarser
+    re-meshes and alternative extraction choices."

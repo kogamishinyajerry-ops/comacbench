@@ -1,0 +1,35 @@
+# Provenance declaration for cylinder_re40 (see src/cfdb/provenance/).
+# honesty is NEVER declared here: it is derived mechanically by the audit.
+citation: >-
+  Gautier, R., Biau, D., Lamballais, E., "A reference solution of the flow
+  over a circular cylinder at Re=40", Computers & Fluids 75, pp. 103-111,
+  2013 (Table 1: drag coefficient and wake length of the pseudo-spectral
+  reference solution). Corroborating experimental sources: Tritton (1959),
+  J. Fluid Mech. 6, Cd=1.48; Coutanceau & Bouard (1977), J. Fluid Mech. 79,
+  Lw/D=2.13 (values as transcribed in the sources listed in notes).
+source_url: https://doi.org/10.1016/j.compfluid.2012.12.017
+retrieved: "2026-08-11"
+transcription_verified: false
+file_hashes:
+  reference/literature_re40.csv: e57a25dfb1d7339e90e3630e9a6f57631f30e568f9dbc415a8f570806f4a9f8d
+notes:
+  - "Inline qoi drag_coeff_cd=1.49 and wake_length_lw_over_d=2.24 are the
+    Gautier et al. (2013) reference-solution values, spot-checked on
+    2026-08-11 via two independent channels: (a) Giannenas et al. (2021)
+    explicitly quotes 'Gautier et al. ... CD = 1.49 and Lw/D = 2.24';
+    (b) Gautier et al.'s body text quotes Posdziech & Grundmann Cd=1.4942
+    (domain up to 4000D), consistent with 1.49 at 3 sig figs. The Gautier
+    Table 1 image itself was NOT directly digitized, hence
+    transcription_verified stays false (fail-closed)."
+  - "Literature envelope cross-checked in Gautier et al. (2013) body text:
+    2.13 < Lw/D < 2.35 and 1.48 < Cd < 1.62 across 17 prior references.
+    Spot-checked rows in literature_re40.csv: Tritton 1959 Cd=1.48 (Gautier
+    Table 1 snippet + thesis tel-01393960, two transcriptions agree);
+    Coutanceau & Bouard 1977 Lw/D=2.13 (thesis tel-01393960); Dennis & Chang
+    1970 Cd=1.52 (Gautier Table 1 snippet); Calhoun 2002 Cd=1.62, Lw/D=2.18
+    (NCTS thesis table 4.2). Posdziech & Grundmann publication year was not
+    verified and is deliberately left blank in the CSV."
+  - "Tolerance 0.10 on both QoIs is a documented domain decision: it covers
+    the published literature scatter (~5-8%) plus the coarse ~10k-cell demo
+    O-grid discretization error; it is not tuned to any run result (the case
+    had not been run end-to-end at authoring time)."

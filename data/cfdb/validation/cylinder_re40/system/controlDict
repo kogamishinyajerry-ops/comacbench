@@ -1,0 +1,73 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       startTime;
+startTime       0;
+
+stopAt          endTime;
+// pseudo-time steps (SIMPLE iterations); 5000 is comfortably enough for the
+// residualControl in fvSolution (p 1e-5, U 1e-6) to engage at Re=40.
+endTime         5000;
+
+deltaT          1;
+
+writeControl    timeStep;
+writeInterval   1000;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+
+timeFormat      general;
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    // Total drag coefficient on the cylinder wall.
+    // Cd = F_x / (0.5 * rhoInf * magUInf^2 * Aref), Aref = D * unit depth = 1.
+    // Output: postProcessing/forceCoeffs1/0/coefficient.dat (Cd column).
+    forceCoeffs1
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        patches         (cylinder);
+        log             true;
+
+        rho             rhoInf;
+        rhoInf          1.0;
+
+        liftDir         (0 1 0);
+        dragDir         (1 0 0);
+        pitchAxis       (0 0 1);
+        magUInf         1.0;
+        lRef            1.0;
+        Aref            1.0;
+        CofR            (0 0 0);
+
+        executeControl  timeStep;
+        executeInterval 10;
+        writeControl    timeStep;
+        writeInterval   10;
+    }
+}
+
+// ************************************************************************* //

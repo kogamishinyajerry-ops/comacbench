@@ -1,0 +1,29 @@
+# Gallery card copy for cavity_re400_from_brief (cfdb showcase gallery).
+# Case-root metadata OUTSIDE the frozen reference/visible trees:
+# editing it never drifts a ruler (same discipline as provenance.yaml).
+# Prose is grounded in this case's real files; structural facts
+# (domain, gates, honesty, frozen status) are recomputed at render.
+title: 从工程任务书搭建方腔顶盖驱动流（Re=400）并提交证据包（evidence 模式）
+capability: case_setup 域 evidence 模式：agent 只拿到求解器无关的自然语言工程任务书（visible/task.md）和带尺寸标注的
+  方腔示意图（visible/drawing.png），在自己的环境里驱动任意求解器（Fluent/STAR-CCM+/自研/OpenFOAM 均可）把二维层流
+  顶盖驱动方腔（H=0.1 m、U_lid=1 m/s、ν=2.5e-4 m²/s、Re=400）算到定常，然后提交证据包——manifest.json（求解器身份、
+  网格规模、自报墙钟）、求解器原生日志、网格质量报告、竖直中心线采样 centerline.csv（y,u,v 逐列表头契约写在任务书里）。
+  判题端完全没有求解器，只校验证据包并用冻结 QoI 脚本从原始证据归约分数。
+expected: 交一个证据包目录。冻结 QoI 脚本（reference/compute_qoi.py，stdlib-only，宿主机执行，末行 stdout 为 JSON）读取
+  evidence/samples/centerline.csv，校验表头恰为 y,u,v、站位 y 单调递增且落在 [0, 0.095] m（不含 lid 点，契约约定采样到
+  y/H=0.95）、至少 10 站，然后归约 centerline_umax = max sqrt(u²+v²)/U_lid。held_out 参考 0.551 沿用素材案例
+  lid_driven_cavity_re400 的锚定值（Ghia et al. 1982 Table I Re=400 列在 y/H=0.95 的线性插值），案面无公开 qoi_values。
+  黄金 E2E 由素材案例真实 docker 运行产物（runs/20260811T081250Z_lid_driven_cavity_re400_openfoam_db150f3f，icoFoam
+  4096 cells）转换出证据包，归约得 0.49778——与素材案例实测钉值 0.49777502459272704（误差 9.66%）逐位一致。
+criteria: 冻结两门 AND：① qoi_complete——证据包四步校验（required 存在非空、manifest 可解析含 solver 字段、CSV 通用一致性、
+  QoI 脚本归约出声明 key）任一步失败即 fail-closed invalid；② within_budget——自报 timing.wall_time_sec ≤ 3600s。⚠ evidence
+  模式的 budget 门语义减弱：判题端不跑求解器，门吃的是 manifest 自报墙钟（未自报则退化为只门宿主机归约时钟并在 notes 里大声标注），
+  3600s 只是宽松信封（黄金 docker 运行实测 27.5s）。两门过才给连续分 score=−qoi_error，QoI 准确度是 ungated 连续指标，
+  case.yaml 的 10% 容差仅作文档（沿用素材案例）。
+what_makes_it_bite: 三个显式考点：(1) 证据包契约本身是考点——表头错一列、y 站越过 lid 点（会把 max 顶到 1.0）、站位不足 10 个、
+  CSV 出现 NaN，都被冻结脚本 fail-closed 拒掉，逼 agent 读懂并严格执行逐列文档；(2) 物理陷阱沿素材继承——Re=400 剖面弯曲区
+  插值偏差、64×64 demo 网格误差预算紧（素材实测 9.66% 贴着 10% 文档容差），网格太粗或一阶格式会把误差推出个位数；(3) 运行真实性
+  不由判题端证明（evidence 模式信任姿态：authenticity 由生产 harness 锚定，伪造需伪造整套求解器原生 artifacts，且每个被评分
+  数字都由冻结脚本从原始证据重算，自报 QoI 永不进入裁决）。负控实证：centerline.csv 的 u,v 整体乘 0.8（剖面缩放），归约 0.398、
+  误差 27.7%、score 从 −0.0966 劣化到 −0.277，区分能力成立。残差：held_out 值是文献值，anti-copy 依赖证据包机制与生产 harness，
+  而非数字保密。

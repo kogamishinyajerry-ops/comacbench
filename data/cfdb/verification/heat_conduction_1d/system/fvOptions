@@ -1,0 +1,44 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Uniform volumetric heat source. laplacianFoam (ESI v2312) reads
+// system/fvOptions and adds this source to the T equation.
+//
+// volumeMode specific: injectionRateSuSp is PER UNIT VOLUME, i.e.
+// S = 100 K/s everywhere, independent of the selected volume size.
+// (volumeMode absolute instead spreads Su over the total selected volume —
+// with this 1e-4 m^3 domain that would amplify the source by 1e4.)
+//
+// Steady analytic solution: T(x) = T_s + (S/(2*alpha)) * x * (L - x),
+// i.e. q/k = S/alpha = 1000 K/m^2, T(x) = 300 + 500*x*(1-x) [K].
+heatSource
+{
+    type            scalarSemiImplicitSource;
+    active          true;
+
+    scalarSemiImplicitSourceCoeffs
+    {
+        selectionMode   all;
+        volumeMode      specific;
+
+        injectionRateSuSp
+        {
+            T           (100 0);
+        }
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Run the Taylor-Green vortex case (ESI OpenFOAM v2312).
+# NOTE: 0/U and 0/p use #codeStream, which OpenFOAM refuses to execute as
+# root — run the container with a non-root --user and a writable case dir,
+# e.g.:
+#   docker run --rm --user 1000:1000 --entrypoint /bin/bash \
+#       -v "$PWD":/work -w /work opencfd/openfoam-default:2312 ./Allrun
+cd "${0%/*}" || exit 1
+. /usr/lib/openfoam/openfoam2312/etc/bashrc 2>/dev/null || true
+
+blockMesh -dict constant/polyMesh/blockMeshDict
+icoFoam
