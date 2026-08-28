@@ -99,7 +99,7 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 | --- | --- | --- |
 | litbench 语料（36 篇 arXiv 摘要+元数据，sha256 锁定） | data/cfdagent/litbench/ | 完成 |
 | litbench 题库（60 题，逐题引文锚定+强校验） | data/cfdagent/litbench/questions.json | 完成 |
-| litbench 任务（60 YAML+MD，qa_grounded） | tasks/cfdagent.litbench/ | 完成，oracle 1.0 / stub 0.25 / minimax 0.8667 当日落盘 |
+| litbench 任务（60 YAML+MD，qa_grounded） | tasks/cfdagent.litbench/ | 完成，oracle 1.0 / stub 0.25 / minimax 0.8667 / glm-5.3 0.7833 |
 | cfdb 镜像（42 案例，MIT，b26799e） | data/cfdb/ | 完成 |
 | cfdb 任务（17+10+15，simulation_agent 契约） | tasks/cfdb.*/ | 完成（staged） |
 | registry 批次 v0.3（11 条） | registry/registry.yaml | 完成 |

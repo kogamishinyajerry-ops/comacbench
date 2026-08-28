@@ -731,7 +731,7 @@ entries:
     assets_revision_note: 摘要 sha256 逐篇锁定（papers.json abstract_sha256）；生成器 runners/gen_tasks_cfdagent.py --check 防漂移
     risks: [摘要级量化声明只反映论文自述; 闭卷文献题可能进入未来训练语料 -> 仅作可比基线]
     status: integrated
-    integrated_note: 2026-08-28 qa_grounded 跑通（dev 终端，60 任务全过引文锚定校验）；oracle 自检 60/60（1.0000）；stub 0.2500（精确随机线）；MiniMax-M3 真实基线 0.8667（52/60，细粒度文献事实失分）；glm-5.3 基线 resume 续跑中（幂等，完成后更新 results/cfdagent.litbench/2026-08-28/）；gate 全 60/60
+    integrated_note: 2026-08-28 qa_grounded 跑通（dev 终端，60 任务全过引文锚定校验）；oracle 自检 60/60（1.0000）；stub 0.2500（精确随机线）；真实基线 MiniMax-M3 0.8667（52/60）、glm-5.3 0.7833（47/60）——区分带健康（随机线 0.25 << 0.78 < 0.87 < 1.0）；gate 全 60/60（results/cfdagent.litbench/2026-08-28/）
 
   - id: cfdb.case_setup
     name: cfdb Case Setup（GLM-CFD-Benchmark 任务书域）
