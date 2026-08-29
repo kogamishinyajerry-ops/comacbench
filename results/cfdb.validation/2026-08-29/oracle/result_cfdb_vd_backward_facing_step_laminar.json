@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdb_vd_backward_facing_step_laminar",
+  "registry_id": "cfdb.validation",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: cfdb 参考算例逐字复制（镜像 data/cfdb，上游 b26799e 已验证全跑通）\\n# 路径为生成期固化的本机仓库根（沙箱内 __file__ 指向临时副本，不可用）\\nimport shutil\\nfrom pathlib import Path\\nsrc = Path('/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench') / \\\"data/cfdb/validation/backward_facing_step_laminar\\\"\\nshutil.copytree(src, \\\"case\\\", dirs_exist_ok=True)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"cfdb_managed\", \"hits\": {\"reattachment_x_over_h\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.017273, \"abs_diff\": 0.050471684, \"got\": 2.8715283156260316, \"ref\": 2.922, \"tol\": 0.1}}, \"physics_hits\": \"1/1\", \"steps\": [{\"name\": \"block_mesh\", \"exit\": 0, \"duration_s\": 0.3, \"timeout\": false}, {\"name\": \"solve\", \"exit\": 0, \"duration_s\": 6.9, \"timeout\": false}], \"solver\": \"openfoam-v2312-docker\"}"
+  },
+  "timings": {
+    "agent_s": 6.945,
+    "setup_s": 0.0,
+    "grade_s": 6.944
+  },
+  "environment_digest": "sha256:6ade3e54860758bc54ba16fa585c162ddeb05e72692893f6c539b5347afbd9ff",
+  "assets_revision": "cfdb@b26799e",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=3/3 missing=[]",
+    "solver openfoam-v2312-docker ok=True steps=[{'name': 'block_mesh', 'exit': 0, 'duration_s': 0.3, 'timeout': False}, {'name': 'solve', 'exit': 0, 'duration_s': 6.9, 'timeout': False}]",
+    "qoi hits=1/1 physics=1.0"
+  ]
+}

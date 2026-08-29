@@ -19,17 +19,36 @@
   normalize 规则）与参考数据一样 sha256 锚定；LLM-as-judge 永不进入任何判分路径；
   held_out 对账防"手写 qoi.json 得分"。
 
-## B. 任务转化（tasks/cfdb.*，42 任务）
+## B. 任务转化（tasks/cfdb.*，2026-08-29 修订：34 任务 + 8 排除）
 
-- 生成器 `runners/gen_tasks_cfdb.py`（--check 可校验漂移）：case_setup 题面 =
-  上游 visible/task.md 逐字拷贝；verification/validation 题面 = 由 case.yaml 元数据合成
-  （描述/物理/工况/QoI 原文引用，不新增物理声明）。
-- **registry 状态 = staged 而非 integrated**：simulation_agent 的 `cfdb_case_setup` /
-  `cfdb_cfd_qoi` 两个 exec_kind 分支尚未实现（判分侧需 OpenFOAM v2312 docker 跑
-  managed 模式、evidence 模式走冻结脚本宿主降算）。任务 YAML 已写明完整判分契约，
-  实现分支后即可 oracle/staged 升级。这是如实的状态机使用，不是降级。
-- evidence 模式价值：判分侧**不跑求解器**，与本项目内网策略（env-matrix.md：商业 CFD
-  Fluent/StarCCM+ 批处理）天然兼容——agent 在内网用商业求解器自行求解并提交证据包。
+- 生成器 `runners/gen_tasks_cfdb.py`（--check 可校验漂移）：
+  - verification 9 + validation 8 = **17 个 managed 任务，已 integrated**（判分侧
+    docker opencfd v2312 按案例冻结 steps 真实求解 → 宿主执行冻结 compute_qoi.py
+    降算 QoI → 与 held_out/qoi.json 逐键容差对账；自报 QoI 永不进判分）；
+  - case_setup 17 任务保持 staged：14 个 evidence 模式（exec_kind=
+    cfdb_case_setup_evidence，**休眠**——需工具执行通道，纯 LLM provider 无法诚实
+    产出 solver log，伪造证据正是上游明确拒绝的；runner 到达即按
+    evidence_channel_missing 作废单题）+ 3 个 managed（契约就绪：managed 分支已实现，
+    题面=上游 task.md 逐字+交付契约头，随域整体验收后升 integrated）；
+  - 排除 8 案例（原因存 data/cfdb/exclusions.json，先例 cfdcode 9 排除）：
+    flat_plate_su2（无 SU2 后端）、lid_driven_cavity（参考算例不完整）、
+    naca0012 ×4（snappy 链几何未镜像）、dam_break（瞬态前锋 QoI 跨运行复现
+    超容差边界 15.5% vs 15%）、naca0012_sa_tmr（上游冻结 solve 预算 600s 在
+    arm64 原生不足 2000 步，实测 55%@600s——最高民机相关案例，上游上调预算后
+    优先重纳，harness 判分链路已就绪）。
+- oracle：data/cfdb/oracle_scripts/<dom>__<case>.py——把镜像参考算例逐字复制为
+  case/（上游 b26799e 已验证全跑通）；仓库根路径生成期固化（沙箱复制脚本，
+  __file__ 不可用）。oracle 与 foam oracle 同一 trust 层级：GT verbatim writer。
+
+## B2. 判分链路定案记录（2026-08-28/29 冒烟证据）
+
+- 容器：opencfd/openfoam-default:2312（arm64 原生）；需显式
+  `source /usr/lib/openfoam/openfoam2312/etc/bashrc`（Debian 布局，
+  /opt/openfoam2312 无 bashrc）。
+- 端到端冒烟：channel_poiseuille 参考算例 icoFoam 14.3s → probes/U →
+  冻结脚本 `{"centerline_umax": 0.149254}` vs held_out 0.15（0.5% < 5%）；
+  sod_shock_tube oracle 经完整 runner 分支：gate=1、score=1.0、
+  shock_x 误差 0.05%（容差 2%）、三步全 critical 退出 0。
 
 ## C. 与既有条目的关系
 

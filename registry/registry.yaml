@@ -743,15 +743,15 @@ entries:
     env_class: openfoam_dev
     license: MIT
     license_status: confirmed-repo
-    content: 17 个 solver-agnostic 工程任务书任务（Poiseuille/Couette/Blasius/Sod/斜激波/Taylor-Couette/Taylor-Green/NACA0012/自然对流/湍流槽道/湍流平板/后台阶/圆柱绘图/热传导等；managed 11 + evidence 6）
-    scoring: 上游冻结 QoI 脚本对账 held_out（容差 2%-15% 文档化）；LLM-judge 永不进判分（与本项目纪律同构）
-    env: dev=OpenFOAM v2312 docker（managed 模式真实运行提交案例）；evidence 模式判分不跑求解器，内网 Fluent/StarCCM+ 兼容（agent 自驱求解提交证据包）
+    content: 17 个 solver-agnostic 工程任务书任务（Poiseuille/Couette/Blasius/Sod/斜激波/Taylor-Couette/Taylor-Green/NACA0012 力/自然对流/湍流槽道/湍流平板/后台阶/热传导/绘图圆柱/空腔；14 evidence + 3 managed）
+    scoring: 上游冻结 QoI 脚本对账 held_out（managed 判分侧真跑 v2312；evidence 由证据包降算）；LLM-judge 永不进判分（与本项目纪律同构）
+    env: dev=OpenFOAM v2312 docker（managed 真跑）；evidence 判分不跑求解器、内网 Fluent/StarCCM+ 兼容
     assets_revision: cfdb@b26799e
     license_evidence: 上游 LICENSE=MIT 已核验；镜像逐字复制无改写（data/cfdb/PROVENANCE.md）
     assets_revision_note: 整目录镜像 17 案例（task.md/drawing.png/case.yaml/compute_qoi.py/held_out），sha256 入任务 YAML
-    risks: [判分依赖 simulation_agent 新增 exec_kind=cfdb_case_setup 分支（staged 解阻项）; evidence 模式反作弊强度弱于 managed（上游文档已声明）]
+    risks: [evidence 模式需工具执行通道（纯 LLM provider 无法诚实产出 solver log，伪造即上游拒绝的自报）——14 任务休眠中（exec_kind=cfdb_case_setup_evidence，runner 到达即 evidence_channel_missing 作废）; managed 分支已实现（同 verification 域），随域整体验收后升 integrated]
     status: staged
-    staged_note: 2026-08-28 镜像+42 任务生成完毕（case_setup/verification/validation 三域）；exec_kind 分支实现后升 integrated
+    staged_note: 2026-08-29 契约修订（case/ 子目录 + 步骤真跑 + 双容差）；解阻路径 = 工具执行通道接入 providers（如 FLAi 内核/容器 agent）后 3 managed 先行验收、evidence 14 任务随通道开放
 
   - id: cfdb.verification
     name: cfdb Verification（经典 V&V 案例，解析/程序化参考）
@@ -763,14 +763,14 @@ entries:
     env_class: openfoam_dev
     license: MIT
     license_status: confirmed-repo
-    content: 10 个经典验证案例（Poiseuille/Couette/Blasius(SU2+OF)/热传导/斜激波/Sod 激波管/Taylor-Couette/Taylor-Green 等，解析解或冻结脚本生成参考）
-    scoring: QoI 对账（如 Sod 激波位置 0.85043115 @2%、Taylor-Green 衰减律），参考与容差上游 sha256 锚定
-    env: OpenFOAM v2312 docker
+    content: 9 个经典验证案例（Poiseuille/Couette/Blasius/热传导/斜激波/Sod 激波管/Taylor-Couette/Taylor-Green，解析解或冻结脚本生成参考；排除 flat_plate_su2——无 SU2 后端，见 data/cfdb/exclusions.json）
+    scoring: 判分侧 docker v2312 按案例冻结 steps 真实求解 → 宿主冻结 compute_qoi.py 降算 QoI → held_out 逐键容差对账（双容差语义：相对+绝对）；自报 QoI 永不进判分
+    env: OpenFOAM v2312 docker（opencfd/openfoam-default:2312，须 --user 非 root——coded functionObject 安全检查）
     assets_revision: cfdb@b26799e
     license_evidence: 同 cfdb.case_setup
-    risks: [同 cfdb.case_setup 的 exec_kind 解阻项]
-    status: staged
-    staged_note: 2026-08-28 镜像+任务生成完毕
+    risks: [长 transient 案例单题可达小时级; --user 依赖宿主 uid 可映射（intranet docker 同构）]
+    status: integrated
+    integrated_note: 2026-08-29 simulation_agent 新增 cfdb_cfd_qoi 分支后跑通（dev 终端）；oracle 自检 9/9 满分（mean 1.0，参考算例逐字复制全链路真跑）；stub 0/9 全灭于结构门（missing_output）；踩坑与双容差定案见 results/cfdb.verification/2026-08-29/README.md
 
   - id: cfdb.validation
     name: cfdb Validation（实验/跨代码参考验证案例）
@@ -782,14 +782,14 @@ entries:
     env_class: openfoam_dev
     license: MIT
     license_status: confirmed-repo
-    content: 15 个验证案例（NACA0012 α=0/5/10/15 + SA-TMR 远场阻力、圆柱 Re40/100、空腔 Re400/1000、后台阶、dambreak、自然对流、湍流槽道 Re_tau180、湍流平板）
-    scoring: QoI 对账（St/Cd/Cl_rms/分离点等；NACA0012 SA-TMR 用 CFL3D 数值参考 0.00819，25% 容差为上游文档化决策）
-    env: OpenFOAM v2312 docker
+    content: 8 个验证案例（圆柱 Re40/100（St/Cd/Cl）、空腔 Re400/1000、后台阶、自然对流、湍流槽道 Re_tau180、湍流平板；排除 7 见 data/cfdb/exclusions.json——naca0012 ×4 snappy 未镜像、lid_driven_cavity 算例不完整、dam_break 瞬态前锋 QoI 跨运行复现超容差边界、naca0012_sa_tmr 上游 solve 预算 600s 在 arm64 原生不足 2000 步（最高民机相关案例，上游上调预算后优先重纳））
+    scoring: 判分侧 docker v2312 按案例冻结 steps 真实求解 → 宿主冻结 compute_qoi.py 降算 QoI → held_out 逐键容差对账（相对+绝对双容差）；自报 QoI 永不进判分
+    env: OpenFOAM v2312 docker（opencfd/openfoam-default:2312，须 --user 非 root——coded functionObject 安全检查）
     assets_revision: cfdb@b26799e
     license_evidence: 同 cfdb.case_setup
-    risks: [同 cfdb.case_setup 的 exec_kind 解阻项]
-    status: staged
-    staged_note: 2026-08-28 镜像+任务生成完毕
+    risks: [cylinder_re100 等 transient 单题可达小时级; 排除案例重纳依赖上游预算/几何修订]
+    status: integrated
+    integrated_note: 2026-08-29 cfdb_cfd_qoi 分支跑通（dev 终端）；oracle 自检 8/8 满分（mean 1.0，参考算例逐字复制全链路真跑，dam_break/naca0012_sa_tmr 按满分纪律排除）；stub 0/8 全灭于结构门（missing_output）；踩坑与双容差定案见 results/cfdb.verification/2026-08-29/README.md §判分链路
 
   - id: pinnacle.suite
     name: PINNacle（PINN 综合基准）

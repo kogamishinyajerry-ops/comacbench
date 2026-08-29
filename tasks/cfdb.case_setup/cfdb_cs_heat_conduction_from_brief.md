@@ -1,93 +1,14 @@
-# 工程任务书：固体内热源一维导热算例搭建（evidence 模式）
+# cfdb case_setup (evidence) — Case Setup: 1D Solid Conduction with Heat Source from Engineering Brief (evidence mode)
 
-## 任务
+case_setup domain EVIDENCE-mode task: the agent receives only a natural-language engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), drives an ARBITRARY solver in its own environment (Fluent / STAR-CCM+ / in-house / OpenFOAM — the judge has NO solver), and submits an evidence bundle (manifest.json + raw solver log + mesh report + steady-state temperature profile CSV). The judge validates the bundle and the frozen QoI script reference/compute_qoi.py reduces midplane_T (T at x = L/2, linearly interpolated from the submitted profile) on the host. Task physics: plane solid wall L = 1 m, both faces held at T = 300 K, uniform volumetric heat source with q'''/k = 1000 K/m^2, thermal diffusivity alpha = 0.1 m^2/s, transient to steady state. Held-out reference QoI = analytical midplane T(L/2) = 425.0 K (Incropera & DeWitt plane wall with generation). Golden measurement inherited from the VERIFIED case cases/verification/heat_conduction_1d (2026-08-11 docker run measured midplane_T = 424.9998849 K, 2.7e-7 relative); see provenance.yaml.
 
-根据本任务书与附图 `drawing.png`（带尺寸标注的平板示意图），用**你环境中可用的任意求解器**（商业 CFD 软件、自研代码、开源求解器均可——评分环境不预装任何求解器，由你自己驱动计算）搭建并求解一个**固体平板一维导热问题**，然后按下方"证据包合同"提交证据包。
+## 交付形式（evidence 证据包，严格遵守）
+输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+- manifest.json
+- evidence/solver.log
+- evidence/mesh_report.txt
+- evidence/samples/profile.csv
 
-评分系统不运行你的求解器：它校验证据包的完整性与一致性，并用冻结的归约脚本从你提交的原始剖面数据中重新计算 QoI。自报的最终数值不进入评分。
-
-## 物理问题
-
-- 固体平板（plane wall），厚度 **L = 1 m**（x 方向，x ∈ [0, 1]）。
-- 两侧表面（x = 0 与 x = L）均保持恒定温度 **T_s = 300 K**（第一类边界条件）。
-- 固体内有**均匀体积热源**，控制方程为：
-
-  ∂T/∂t = α · ∂²T/∂x² + S
-
-  其中热扩散率 **α = 0.1 m²/s**，温度源项 **S = 100 K/s**（等价表述：q‴/k = S/α = 1000 K/m²，稳态解只依赖该比值）。
-- 初始温度场均匀 300 K。
-- 严格一维：横向（y、z）绝热/对称，或用二维/三维计算但保证横向无温度梯度。
-
-## 求解要求
-
-- 非定常积分至**稳态**（温度剖面不再随时间变化），或直接求解稳态方程。
-  提示：扩散时间尺度 L²/α = 10 s，从 300 K 初场出发的非定常计算建议积分到 t ≥ 40 s（4 个扩散时间尺度）以压掉瞬态拖尾。
-- 网格：沿厚度方向至少 **50 个单元**，均匀剖分即可（建议 100 单元）。
-- 取**最终（稳态）时刻**沿厚度方向的温度剖面作为证据数据。
-
-## 证据包合同（submission 目录布局 v1）
-
-提交一个目录，结构如下：
-
-```
-submission/
-  manifest.json
-  evidence/
-    solver.log
-    mesh_report.txt
-    samples/
-      profile.csv
-```
-
-### `manifest.json`（必需）
-
-JSON object，至少含非空字符串字段 `solver`（求解器名称与版本，溯源锚点）。推荐完整形态：
-
-```json
-{
-  "solver": "<求解器名称 版本>",
-  "mesh_cells": 100,
-  "timing": {"wall_time_sec": 12.3},
-  "notes": "自由文本备注"
-}
-```
-
-`timing.wall_time_sec` 为自报求解墙钟（秒），用于预算门；缺省时预算门语义降级（只门宿主机归约耗时）。
-
-### `evidence/solver.log`（必需，非空）
-
-求解器原生日志文本，应包含迭代/时间步推进与残差信息（原样拷贝求解器输出即可，不要手工编辑）。
-
-### `evidence/mesh_report.txt`（必需，非空）
-
-网格摘要文本：单元总数、网格类型、质量指标（由你的网格工具输出或简述）。
-
-### `evidence/samples/profile.csv`（必需）
-
-稳态温度剖面，UTF-8 CSV，首行表头，恰好两列：
-
-| 列 | 含义 | 单位 | 要求 |
-|----|------|------|------|
-| `x` | 采样点坐标（厚度方向） | m | 严格递增，覆盖 [0, 1]，至少 20 个点 |
-| `temperature` | 该点温度 | K | 有限数值，不得为 NaN/Inf |
-
-注意：温度列必须命名为 `temperature` 而**不是** `T`——评分系统的通用 CSV 校验把任何大小写不敏感的 `t` 表头视为时间轴并要求单调非降，温度剖面在后半段递减会误触该规则。
-
-采样点取单元中心或节点均可。示例（前 3 行）：
-
-```csv
-x,temperature
-0.005,301.2487
-0.015,303.7413
-```
-
-## 通用一致性校验（评分系统强制）
-
-- 所有必需文件存在且非空；
-- `manifest.json` 可解析且含非空 `solver` 字段；
-- 所有 CSV 可解析，数值单元格不得为 NaN/Inf；
-- 表头为 time/t/iter/iteration/step/timestep 的列（本任务不需要此类列）必须全数值且单调非降。
-
-## 验收
-
-归约脚本从你提交的 `profile.csv` 线性插值出 **midplane_T = T(x = L/2)**（单位 K），与留出的解析参考值对账；QoI 相对误差作为连续分（越小越好），另设 QoI 完整性与预算两道门。
+证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
+将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
+自报最终数值不进入判分，格式不符判 0）。

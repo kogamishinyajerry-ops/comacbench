@@ -7,48 +7,51 @@ assets_revision: cfdb@b26799e
 environment_digest: computed-at-runtime
 hidden: false
 allowed_tools:
-- shell
-- openfoam
 - python
+- openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_blasius_plate_from_brief.md
-  prompt_sha256: 428d420fe39ea237300df3aee8f0ab67862ad1d33e779b60eed2855f4103aff0
+  prompt_sha256: ee5f61131b4b19ac3c7aa207fb36e5d7130fd96e2cd557c2b43b1bbb6597fd02
   assets:
   - path: data/cfdb/case_setup/blasius_plate_from_brief/case.yaml
     digest: ac99b8ec839fea5efa57ba9090fbc69ae65222558cbe644eb2a796fbdad514f4
   - path: data/cfdb/case_setup/blasius_plate_from_brief/visible/drawing.png
     digest: 239c6a709316fc8397ed9bc6e31ab4057a17e81f956b5f5ba8e828211695a125
 output_contract:
-- case_directory
-- result.json
+- evidence_bundle
 reference:
-  type: analytical
-  held_out:
-    path: data/cfdb/case_setup/blasius_plate_from_brief/held_out/qoi.json
-    digest: d6ea6fb03cf5551ecfcaff1d3d7cd36c8e99dcd826d219ce4af5bbb7e4357def
+  source: GLM-CFD-Benchmark case_setup/blasius_plate_from_brief（MIT，b26799e），判分对账源
+    held_out/qoi.json
+  revision: cfdb@b26799e
   qoi_script: reference/compute_qoi.py
   tolerances:
     cf_x020: 0.15
     cf_x050: 0.15
     cf_x080: 0.15
     cf_x100: 0.15
-  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+  abs_tolerances: {}
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散）；held_out 为判分对账源，自报 QoI 永不进判分
+  held_out:
+    path: data/cfdb/case_setup/blasius_plate_from_brief/held_out/qoi.json
+    digest: d6ea6fb03cf5551ecfcaff1d3d7cd36c8e99dcd826d219ce4af5bbb7e4357def
 grader:
   validity_gate: true
-  exec_kind: cfdb_case_setup
-  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  exec_kind: cfdb_case_setup_evidence
+  solver_backend: openfoam-v2312-docker
   mode: evidence
-  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  case_ref: data/cfdb/case_setup/blasius_plate_from_brief
+  steps: []
   qoi_script: reference/compute_qoi.py
-  upstream_note: 上游 evidence 模式：判分验证证据包并由冻结脚本降算 QoI（内网商业 CFD 兼容）
+  convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
+  oracle_source: null
 scoring:
   weights:
     physics: 0.6
     requirements: 0.4
     objective: 0.0
     robustness: 0.0
-  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
-    N/A（上游基准无目标函数/扰动重算）
+  note: physics=冻结 QoI 脚本对账 held_out（逐键相对容差，缺省 5%）；requirements=case/ 结构完备率；objective/robustness
+    N/A（无目标函数/扰动重算）
 limits:
   cpu: 2
   memory_gb: 4

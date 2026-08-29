@@ -101,19 +101,19 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 | litbench 题库（60 题，逐题引文锚定+强校验） | data/cfdagent/litbench/questions.json | 完成 |
 | litbench 任务（60 YAML+MD，qa_grounded） | tasks/cfdagent.litbench/ | 完成，oracle 1.0 / stub 0.25 / minimax 0.8667 / glm-5.3 0.7833 |
 | cfdb 镜像（42 案例，MIT，b26799e） | data/cfdb/ | 完成 |
-| cfdb 任务（17+10+15，simulation_agent 契约） | tasks/cfdb.*/ | 完成（staged） |
-| registry 批次 v0.3（11 条） | registry/registry.yaml | 完成 |
+| cfdb 任务（verification 9 + validation 8 + case_setup 17） | tasks/cfdb.*/ | verification/validation **integrated**（oracle 满分自检），case_setup staged（evidence 休眠待工具通道） |
+| registry 批次 v0.3（11 条） | registry/registry.yaml | 完成（litbench/cfdb.verification/cfdb.validation integrated） |
 | 许可证矩阵追加 | registry/license-notes.md | 完成 |
 | 生成器（--check 防漂移） | runners/gen_tasks_cfdagent.py, runners/gen_tasks_cfdb.py, runners/arxiv_corpus.py | 完成 |
 
 ## 6. 后续工作（按价值排序）
 
-1. **simulation_agent 新增 `cfdb_case_setup` / `cfdb_cfd_qoi` 两个 exec_kind 分支**
-   （判分侧：docker OpenFOAM v2312 跑 managed；evidence 走冻结脚本宿主降算）→
-   cfdb 三域升 integrated + oracle/stub 基线。这是本批最大未完成项。
+1. **cfdb.case_setup 升 integrated**：14 evidence 任务需工具执行通道接入 providers
+   （agent 自驱求解器提交证据包——FLAi 内核/容器 agent 方向）；3 managed 任务判分
+   分支已就绪，随域整体验收。dam_break/naca0012_sa_tmr 的重纳依赖上游预算/几何修订。
 2. **unifoil/thewell/pinnacle 三个 proposed 条目的数据镜像与 Lite 划层**
    （UniFoil 系数层优先——民机相关性最高）。
-3. litbench 补充真实 LLM 基线（glm/minimax，Keychain 注入）。
+3. ~~litbench 补充真实 LLM 基线~~ ✅ 已完成（minimax 0.8667 / glm-5.3 0.7833）。
 4. 法务确认 NC 边界后重审 drivanetpp/flowbench；TU Darmstadt 申请 TUDa 数据。
 5. ChatCFD 315 案例 / IteraSim 28 案例 / AI CFD Scientist 5 任务三个"论文自带基准"
    的资产定位与接入评估（代码许可已核：GPL/MIT-missing）。

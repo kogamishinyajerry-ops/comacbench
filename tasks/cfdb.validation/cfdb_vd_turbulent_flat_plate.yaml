@@ -7,47 +7,54 @@ assets_revision: cfdb@b26799e
 environment_digest: computed-at-runtime
 hidden: false
 allowed_tools:
-- shell
-- openfoam
 - python
+- openfoam
 input:
   prompt_file: tasks/cfdb.validation/cfdb_vd_turbulent_flat_plate.md
-  prompt_sha256: 4f36b4b3ff76c5a977ad0cbd12a36102d325fb688f5e2c8cb8d82b8923dbe1a5
+  prompt_sha256: a7eb6975067b2572e9a5e4bf3993c090a22e3928a1e8d9797ef320876d6ae877
   assets:
   - path: data/cfdb/validation/turbulent_flat_plate/case.yaml
     digest: bda1b19df3102ae8e78bc2ac362e216ae359440ffb9476498c4800e5462bc1c3
 output_contract:
-- result.json
+- case_directory
 reference:
-  type: analytical
-  qoi_values_public:
-    cf_rex_5e5: 0.004291
-    cf_rex_1e6: 0.003735
-  held_out_note: held_out/qoi.json 为判分对账源；上游注明与公开值同源（机制演示）
-  held_out:
-    path: data/cfdb/validation/turbulent_flat_plate/held_out/qoi.json
-    digest: 793791c754fed8c6e560f44908fb3bd4ad634fa0f5ba46f7c0920de090441aa0
+  source: GLM-CFD-Benchmark validation/turbulent_flat_plate（MIT，b26799e），判分对账源 held_out/qoi.json
+  revision: cfdb@b26799e
   qoi_script: post/compute_qoi.py
   tolerances:
     cf_rex_5e5: 0.15
     cf_rex_1e6: 0.15
-  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+  abs_tolerances: {}
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散）；held_out 为判分对账源，自报 QoI 永不进判分
+  held_out:
+    path: data/cfdb/validation/turbulent_flat_plate/held_out/qoi.json
+    digest: 793791c754fed8c6e560f44908fb3bd4ad634fa0f5ba46f7c0920de090441aa0
 grader:
   validity_gate: true
   exec_kind: cfdb_cfd_qoi
-  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  solver_backend: openfoam-v2312-docker
   mode: managed
-  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  case_ref: data/cfdb/validation/turbulent_flat_plate
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 60
+    critical: true
+  - name: solve
+    command: simpleFoam -case {{ run_dir }}/case
+    timeout_sec: 540
+    critical: true
   qoi_script: post/compute_qoi.py
-  upstream_note: 上游 managed 模式：判分侧真实运行提交案例（blockMesh → application）
+  convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
+  oracle_source: data/cfdb/oracle_scripts/validation__turbulent_flat_plate.py
 scoring:
   weights:
     physics: 0.6
     requirements: 0.4
     objective: 0.0
     robustness: 0.0
-  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
-    N/A（上游基准无目标函数/扰动重算）
+  note: physics=冻结 QoI 脚本对账 held_out（逐键相对容差，缺省 5%）；requirements=case/ 结构完备率；objective/robustness
+    N/A（无目标函数/扰动重算）
 limits:
   cpu: 2
   memory_gb: 4

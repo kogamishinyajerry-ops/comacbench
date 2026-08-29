@@ -1,69 +1,14 @@
-# 工程任务书:圆管 Hagen-Poiseuille 层流算例搭建(evidence 模式)
+# cfdb case_setup (evidence) — Case Setup: Pipe Hagen-Poiseuille from Engineering Brief (evidence mode)
 
-## 任务
+case_setup domain EVIDENCE-mode task: the agent receives only a natural-language engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), then drives ANY CFD solver in its own environment (Fluent, STAR-CCM+, in-house code, OpenFOAM, ... — the judge runs NO solver at all) and submits an evidence bundle (manifest.json + solver-native log + mesh report + sampled radial profile). The judge validates the bundle (required files, manifest shape, generic CSV consistency) and recomputes the QoIs from the raw evidence with the frozen script reference/compute_qoi.py on the host; a self-reported final QoI never enters the verdict. Task physics: fully developed laminar pipe flow (Hagen-Poiseuille), R=0.005 m, L=0.12 m, plug inlet U_mean=0.1 m/s, nu=5e-5 m^2/s (Re_D=20), transient laminar to developed state. QoIs from the radial profile at x=0.1 m: u_max (max axial velocity; held-out reference 0.2 = 2*U_mean) and wall_u_avg (wall endpoint value of the profile; held-out reference 0.0, exact for a no-slip wall — the contract anchors the wall endpoint to the wall BOUNDARY value because interior line sampling on a coarse mesh extrapolates a spurious slip velocity, the pit documented by the source case). Golden evidence is reduced from the verified docker run of cases/verification/pipe_poiseuille (measured u_max=0.199338, 0.33% low); see provenance.yaml.
 
-根据本任务书与附图 `drawing.png`(带尺寸标注的几何示意),在你自己的计算环境里用**任意 CFD 求解器**(商业软件、自研程序或开源求解器均可)从零搭建并求解一个圆管充分发展层流(Hagen-Poiseuille)算例,然后按本任务书第 4 节的合同提交一个**证据包**。评审方不运行任何求解器:评分系统只校验证据包的一致性,并用冻结脚本从你提交的原始采样数据重新归约出 QoI 打分。**自报的最终 QoI 数字不进入评分。**
+## 交付形式（evidence 证据包，严格遵守）
+输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+- manifest.json
+- evidence/solver.log
+- evidence/mesh_report.txt
+- evidence/samples/profile.csv
 
-## 1. 几何与流动
-
-- 直圆管:半径 **R = 0.005 m**(直径 D = 0.01 m),管长 **L = 0.12 m**(= 12D),轴向为 +x,见 `drawing.png`。
-- 可用轴对称建模(楔形或二维轴对称)或全三维建模,在 manifest 的 notes 里说明所用建模方式。
-- 介质:不可压缩牛顿流体,运动粘度 **ν = 5e-5 m²/s**,层流。基于直径的雷诺数 Re_D = U_mean·D/ν = 20。
-- 边界条件:
-  - 入口(x = 0):均匀速度 **U_mean = 0.1 m/s**(plug profile,沿 +x)。
-  - 出口(x = L):压力固定值 0,速度零法向梯度。
-  - 管壁(r = R):无滑移。
-- 初始状态:流体静止。瞬态积分至充分发展定常(径向扩散时间尺度 R²/ν = 0.5 s,建议 t ≥ 1.0 s;入口段长度远低于管长,x = 0.1 m 处剖面已充分发展)。
-- 充分发展解析剖面为抛物线 u(r) = 2·U_mean·(1−(r/R)²)(本任务书不给出该结论以外的任何数值答案)。
-
-## 2. 网格要求
-
-- 建议量级:轴向不少于 100 单元、径向不少于 20 单元(均布即可);壁面不使用壁面函数(层流)。
-- 网格规模与质量摘要需写入证据包(见第 4 节 mesh_report.txt)。
-
-## 3. 采样要求(含管壁滑移采样坑,务必逐条遵守)
-
-- 在最终(充分发展)时刻,于轴向站位 **x = 0.1 m** 处沿一条从轴线到管壁的径向线采样轴向速度。
-- 采样点不少于 10 个,按 r 升序,全部位于 0 ≤ r ≤ R 内;内部点取求解器原生值(节点值或单元中心值均可)。
-- **壁面端点锚定**:最后一个采样点必须在壁面上(r = R),其值必须取**壁面边界值**本身——正确无滑移壁恒为 0。注意经典采样坑:在粗网格上用内部线采样外推到壁面会得到一个虚假的"滑移速度"(量级可达 10% U_mean),本合同以壁面端点值作为无滑移锚,凡用外插值冒充壁面值者 QoI 立即暴露。
-- 轴线端(r = 0)是否包含不作强制(轴对称建模中轴线可能是塌缩边界)。
-
-## 4. 证据包合同(交付物)
-
-提交一个名为 `submission/` 的目录,布局如下(v1 统一布局):
-
-```
-submission/
-  manifest.json              # 证据包清单(JSON object)
-  evidence/
-    solver.log               # 求解器原生日志,须含残差历史
-    mesh_report.txt          # 网格报告:单元总数、类型、质量摘要
-    samples/
-      profile.csv            # 充分发展时刻径向速度剖面(见下列格式)
-```
-
-### manifest.json
-
-JSON object,字段:
-
-- `solver`(字符串,必填):求解器名称与版本。这是证据模式的可追溯锚。
-- `mesh_cells`(整数):网格单元总数。
-- `timing.wall_time_sec`(数值):求解阶段的自报墙钟秒数。评审的时限门消费这个自报值(语义减弱,靠诚信与生产环境锚定),请务必如实填写。
-- `notes`(字符串,可选):建模补充说明(轴对称/三维、周期或入口出口实现等)。
-
-### evidence/samples/profile.csv(核心数据文件)
-
-- 表头恰好为 `r,u` 两列:
-  - `r`:距管轴的径向距离,单位 m;最后一行必须为 0.005(壁面端点,取壁面边界值)。
-  - `u`:该处轴向速度,单位 m/s。
-- 纯数值、UTF-8、英文小数点;不得出现 NaN/Inf;不得空行缺值。
-- 注意:评审的通用 CSV 检查要求任何名为 time/t/iter/iteration/step/timestep 的列全数值且单调非降——本文件不要使用时间/迭代列,充分发展状态只提交最终剖面。
-
-### evidence/solver.log 与 evidence/mesh_report.txt
-
-- `solver.log`:求解器原生文本日志,须能看出求解器身份、时间推进过程和逐步残差;不接受手写伪造摘要。
-- `mesh_report.txt`:文本,至少含单元总数(须与 manifest 的 mesh_cells 一致)与网格质量摘要(按求解器原生报告)。
-
-## 5. 验收
-
-评分系统依次:① 校验上述文件齐备且非空;② 解析 manifest 与全部 CSV(任何 CSV 解析失败、NaN/Inf、时间列非单调即判 invalid);③ 用冻结脚本从 `profile.csv` 归约两个 QoI——**u_max**(剖面上 u 的最大值,解析参考 2·U_mean = 0.2 m/s)与 **wall_u_avg**(壁面端点的 u 值,解析参考 0,无滑移锚),与留出参考值对账。评分只看从证据归约出的数字。
+证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
+将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
+自报最终数值不进入判分，格式不符判 0）。

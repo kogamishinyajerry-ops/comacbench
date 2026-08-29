@@ -7,45 +7,53 @@ assets_revision: cfdb@b26799e
 environment_digest: computed-at-runtime
 hidden: false
 allowed_tools:
-- shell
-- openfoam
 - python
+- openfoam
 input:
   prompt_file: tasks/cfdb.verification/cfdb_vf_oblique_shock.md
-  prompt_sha256: f7cb1112ac44cc79cdc93f74f74159e701e8a7d8833aacba89f18a609db5fc73
+  prompt_sha256: 594818d35e7c886e1ef1dce1b83842e8760476583fb96330cc4c8c0d5000a93a
   assets:
   - path: data/cfdb/verification/oblique_shock/case.yaml
     digest: f97571e2b6cabe4b93ce63fbcc040d51ec9d057caf4996c7b2dd9ac24b6932e2
 output_contract:
-- result.json
+- case_directory
 reference:
-  type: analytical
-  qoi_values_public:
-    post_shock_mach: 1.640526
-  held_out_note: held_out/qoi.json 为判分对账源；上游注明与公开值同源（机制演示）
-  held_out:
-    path: data/cfdb/verification/oblique_shock/held_out/qoi.json
-    digest: 43294b0b4fe601d2dd586aef1dc1b4d7f2e1f45279178ed0f917a1584bcd3148
+  source: GLM-CFD-Benchmark verification/oblique_shock（MIT，b26799e），判分对账源 held_out/qoi.json
+  revision: cfdb@b26799e
   qoi_script: post/compute_qoi.py
   tolerances:
     post_shock_mach: 0.05
-  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+  abs_tolerances: {}
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散）；held_out 为判分对账源，自报 QoI 永不进判分
+  held_out:
+    path: data/cfdb/verification/oblique_shock/held_out/qoi.json
+    digest: 43294b0b4fe601d2dd586aef1dc1b4d7f2e1f45279178ed0f917a1584bcd3148
 grader:
   validity_gate: true
   exec_kind: cfdb_cfd_qoi
-  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  solver_backend: openfoam-v2312-docker
   mode: managed
-  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  case_ref: data/cfdb/verification/oblique_shock
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 60
+    critical: true
+  - name: solve
+    command: rhoCentralFoam -case {{ run_dir }}/case
+    timeout_sec: 840
+    critical: true
   qoi_script: post/compute_qoi.py
-  upstream_note: 上游 managed 模式：判分侧真实运行提交案例（blockMesh → application）
+  convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
+  oracle_source: data/cfdb/oracle_scripts/verification__oblique_shock.py
 scoring:
   weights:
     physics: 0.6
     requirements: 0.4
     objective: 0.0
     robustness: 0.0
-  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
-    N/A（上游基准无目标函数/扰动重算）
+  note: physics=冻结 QoI 脚本对账 held_out（逐键相对容差，缺省 5%）；requirements=case/ 结构完备率；objective/robustness
+    N/A（无目标函数/扰动重算）
 limits:
   cpu: 2
   memory_gb: 4

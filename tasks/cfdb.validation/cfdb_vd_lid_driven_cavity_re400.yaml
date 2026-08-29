@@ -7,45 +7,54 @@ assets_revision: cfdb@b26799e
 environment_digest: computed-at-runtime
 hidden: false
 allowed_tools:
-- shell
-- openfoam
 - python
+- openfoam
 input:
   prompt_file: tasks/cfdb.validation/cfdb_vd_lid_driven_cavity_re400.md
-  prompt_sha256: 38005b2ba086d3ea65764e6742c2793546aaa6ac8056fe935a204d8383014843
+  prompt_sha256: 9ca8b1f1b619337d341c9b2a522159ed1d13a225984daf9610750c2364a44de9
   assets:
   - path: data/cfdb/validation/lid_driven_cavity_re400/case.yaml
     digest: ab4eff82ce24c9c3a503a4e373103a71d64c16d4ceaf0cfebf9edb867d360457
 output_contract:
-- result.json
+- case_directory
 reference:
-  type: dns
-  qoi_values_public:
-    centerline_umax: 0.551
-  held_out_note: held_out/qoi.json 为判分对账源；上游注明与公开值同源（机制演示）
-  held_out:
-    path: data/cfdb/validation/lid_driven_cavity_re400/held_out/qoi.json
-    digest: 15947a7d7cdb6924fd029908c532dd7f9b69d198d6af3f743b2a2ccd4fc955ea
+  source: GLM-CFD-Benchmark validation/lid_driven_cavity_re400（MIT，b26799e），判分对账源
+    held_out/qoi.json
+  revision: cfdb@b26799e
   qoi_script: post/compute_qoi.py
   tolerances:
     centerline_umax: 0.1
-  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+  abs_tolerances: {}
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散）；held_out 为判分对账源，自报 QoI 永不进判分
+  held_out:
+    path: data/cfdb/validation/lid_driven_cavity_re400/held_out/qoi.json
+    digest: 15947a7d7cdb6924fd029908c532dd7f9b69d198d6af3f743b2a2ccd4fc955ea
 grader:
   validity_gate: true
   exec_kind: cfdb_cfd_qoi
-  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  solver_backend: openfoam-v2312-docker
   mode: managed
-  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  case_ref: data/cfdb/validation/lid_driven_cavity_re400
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 60
+    critical: true
+  - name: solve
+    command: icoFoam -case {{ run_dir }}/case
+    timeout_sec: 540
+    critical: true
   qoi_script: post/compute_qoi.py
-  upstream_note: 上游 managed 模式：判分侧真实运行提交案例（blockMesh → application）
+  convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
+  oracle_source: data/cfdb/oracle_scripts/validation__lid_driven_cavity_re400.py
 scoring:
   weights:
     physics: 0.6
     requirements: 0.4
     objective: 0.0
     robustness: 0.0
-  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
-    N/A（上游基准无目标函数/扰动重算）
+  note: physics=冻结 QoI 脚本对账 held_out（逐键相对容差，缺省 5%）；requirements=case/ 结构完备率；objective/robustness
+    N/A（无目标函数/扰动重算）
 limits:
   cpu: 2
   memory_gb: 4

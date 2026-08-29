@@ -1,90 +1,14 @@
-# 工程任务书：超声速楔形体斜激波算例搭建（oblique shock over a 10° wedge, M1=2）
+# cfdb case_setup (evidence) — Case Setup: Oblique Shock over a 10° Wedge (M1=2) from Engineering Brief
 
-## 任务
+case_setup domain, EVIDENCE mode (compressible/BL family): the agent receives only a solver-agnostic engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), drives ANY CFD solver in its own environment (Fluent, STAR-CCM+, in-house, OpenFOAM, ...), and submits an evidence bundle (manifest.json + solver log + mesh report + Mach profile CSV). The judge runs NO solver: it validates the bundle and reduces post_shock_mach from the raw evidence with the frozen QoI script reference/compute_qoi.py on the host. Task physics: 2D inviscid calorically perfect gas (gamma=1.4), freestream M1=2, 10° wedge, weak-solution oblique shock (beta=39.31384°). QoI post_shock_mach = local Mach at (0.6, 0.15), interpolated from the submitted vertical Mach profile at x=0.6; held-out reference 1.640526 (theta-beta-M weak solution, Anderson Ch. 4). Task physics and golden measurement inherited from the VERIFIED case cases/verification/oblique_shock (docker run 2026-08-11: M2=1.638477, 0.125% low); see provenance.yaml.
 
-根据本任务书与附图 `drawing.png`（带尺寸标注的楔形通道示意图），在你自己的计算环境中用**任意 CFD 求解器**（Fluent、STAR-CCM+、自研程序、OpenFOAM 等均可）从零搭建并求解一个二维超声速无粘绕流算例，然后按本任务书第「交付物：证据包」一节规定的格式提交证据包。
+## 交付形式（evidence 证据包，严格遵守）
+输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+- manifest.json
+- evidence/solver.log
+- evidence/mesh_report.txt
+- evidence/samples/mach_profile.csv
 
-评分系统**不运行你的求解器**：它校验证据包的完整性与一致性，并用冻结脚本从你提交的原始证据重新归约出待评 QoI。你自报的最终 QoI 数字不参与评分。
-
-## 流动问题定义
-
-- 二维、定常（或瞬态跑到长时间稳态极限）、**无粘**（Euler）可压缩流动。
-- 气体：量热完全气体，**比热比 γ = 1.4**。
-- 来流：**马赫数 M1 = 2.0**，方向沿 +x，均匀来流。
-- 单位制：QoI（马赫数）无量纲，任何自洽单位制均可；可用归一化单位（如 p1 = 1、T1 = 1、取气体常数使声速 a1 = 1，则 U1 = 2 即 M1 = 2）。
-
-## 几何与边界
-
-计算域为二维楔形通道（见 `drawing.png`）：
-
-- x 方向从 0 到 **1.0 m**，y 方向从 0 到 **0.8 m**，z 方向取一层做二维计算。
-- **楔形体**：顶点位于 **(0.2, 0)**，楔面从顶点起以 **半角 θ = 10°** 向上倾斜，即楔面方程 y = (x − 0.2)·tan(10°)，在出口 x = 1.0 处楔面高度为 0.8·tan(10°) ≈ 0.1411 m。
-- 边界条件：
-  - **入口**（x = 0）：均匀超声速来流，M1 = 2.0，流动方向 +x。
-  - **出口**（x = 1.0）：超声速出流（所有量零法向梯度/外插，无下游信息传入）。
-  - **楔面**：无粘滑移壁面（inviscid wall / slip wall）。
-  - **底边界**（y = 0，0 ≤ x ≤ 0.2，楔形顶点之前）：对称面/滑移壁面。
-  - **顶边界**（y = 0.8）：对称面/滑移壁面。本算例取弱解激波，激波在出口处 y ≈ 0.66 < 0.8 处穿出计算域，顶边界始终保持纯来流，该处理对无粘问题是精确的。
-  - 前后两面：二维边界（empty / symmetry）。
-
-物理预期：来流在楔面处产生一道附体斜激波（弱解，激波角 β ≈ 39.3°），波后（楔面与激波之间区域）为均匀平行于楔面的流动，马赫数 M2 ≈ 1.64，压力升高。
-
-## 网格与求解要求
-
-- 二维网格（建议结构化四边形/六面体），对激波过渡区无特殊加密要求；演示量级网格（约 10⁴ 单元）即可，但采样点（见下）附近网格须能代表波后均匀区。
-- 求解到**稳态**：密度基或可压求解器，残差充分下降且波后流场不再随时间/迭代变化（建议运行不少于 4 倍流过时间 L/U1 的等效量）。
-- 库朗数等稳定性约束按你所用求解器的要求自行保证。
-
-## 采样要求
-
-在最终（收敛）状态下，沿 **x = 0.6 m** 的竖直采样线提取当地马赫数分布：
-
-- 采样线从楔面（x = 0.6 处楔面 y ≈ 0.0705 m）起，向上穿过波后区并进入来流区（至少覆盖到 y = 0.4 m，须包含激波过渡）。
-- **必须覆盖 y = 0.15 m**（该点位于楔面与激波之间的波后均匀区，是 QoI 提取点）。
-- 建议不少于 20 个采样点，按 y 排列。马赫数由当地速度与温度（或等效状态量）计算：M = |U| / sqrt(γ·R·T)。
-
-## 交付物：证据包
-
-提交一个名为 `submission/` 的目录，布局如下（逐文件合同）：
-
-```
-submission/
-  manifest.json                  # 必需
-  evidence/
-    solver.log                   # 必需
-    mesh_report.txt              # 必需
-    samples/
-      mach_profile.csv           # 必需
-```
-
-### manifest.json（必需）
-
-JSON object，至少包含字段：
-
-- `solver`：字符串，求解器名称与版本（如 `"Fluent 2024R1"`、`"rhoCentralFoam (OpenFOAM v2312)"`），**必填**，是证据包可追溯性的锚点。
-- `mesh_cells`：整数，网格单元数。
-- `timing`：object，含 `wall_time_sec`（数值，求解器实际运行墙钟秒数，自报）。
-- `notes`：字符串，自由备注（湍流/格式/收敛判据等）。
-
-### evidence/solver.log（必需）
-
-求解器原生日志文本，须能看到迭代/时间推进与残差历史（证明真实跑过）。
-
-### evidence/mesh_report.txt（必需）
-
-网格摘要文本：单元总数、类型、关键质量指标（由你的网格工具输出或自行整理）。
-
-### evidence/samples/mach_profile.csv（必需）
-
-x = 0.6 m 竖直采样线的马赫分布，CSV 带表头，两列：
-
-| 列名 | 含义 | 单位 |
-| --- | --- | --- |
-| `y` | 采样点 y 坐标（沿 x = 0.6 m 竖直线） | m |
-| `mach` | 当地马赫数（最终收敛状态） | 无量纲 |
-
-要求：数值列不得含 NaN/Inf；y 的取值范围必须覆盖 y = 0.15 m（评分脚本在该点线性插值）。
-
-## 验收
-
-评分系统校验上述证据包（文件齐全非空、manifest 可解析且含 solver、CSV 可解析且数值有限），然后由冻结脚本从 `mach_profile.csv` 在 **y = 0.15 m** 处线性插值得到 **post_shock_mach**，与留出参考值对账。连续分为相对误差的相反数；证据包缺项、CSV 含 NaN/Inf、采样范围不覆盖 y = 0.15 等均判 invalid（fail-closed）。
+证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
+将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
+自报最终数值不进入判分，格式不符判 0）。

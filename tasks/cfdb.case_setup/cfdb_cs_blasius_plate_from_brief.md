@@ -1,88 +1,14 @@
-# 工程任务书：层流平板边界层算例搭建（Blasius 局部表面摩擦系数）
+# cfdb case_setup (evidence) — Case Setup: Laminar Flat-Plate Boundary Layer (Blasius Cf) from Engineering Brief
 
-## 任务
+case_setup domain, EVIDENCE mode (compressible/BL family): the agent receives only a solver-agnostic engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), drives ANY CFD solver in its own environment, and submits an evidence bundle (manifest.json + solver log + mesh report + wall Cf distribution CSV). The judge runs NO solver: it validates the bundle and reduces the four station Cf QoIs from the raw evidence with the frozen QoI script reference/compute_qoi.py on the host (linear interpolation of the submitted Cf(x) to x = 0.2/0.5/0.8/1.0 m). Task physics: 2D incompressible laminar flat-plate boundary layer, U_inf=1 m/s, nu=1e-5 m^2/s (Re_x = 1e5 per metre), stations span Re_x = 2e4..1e5, safely laminar. Held-out reference: Blasius Cf = 0.664/sqrt(Re_x) at the four stations (Schlichting & Gersten), inherited verbatim from the VERIFIED source case cases/verification/flat_plate_blasius_of (docker run 2026-08-11 measured Cf 4.0%/7.2%/9.4%/10.6% high at the four stations, inside the 15% V&V tolerance); see provenance.yaml.
 
-根据本任务书与附图 `drawing.png`（带尺寸标注的平板绕流示意图），在你自己的计算环境中用**任意 CFD 求解器**（Fluent、STAR-CCM+、自研程序、OpenFOAM 等均可）从零搭建并求解一个二维层流平板边界层算例，然后按本任务书第「交付物：证据包」一节规定的格式提交证据包。
+## 交付形式（evidence 证据包，严格遵守）
+输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+- manifest.json
+- evidence/solver.log
+- evidence/mesh_report.txt
+- evidence/samples/cf_distribution.csv
 
-评分系统**不运行你的求解器**：它校验证据包的完整性与一致性，并用冻结脚本从你提交的原始证据重新归约出待评 QoI。你自报的最终 QoI 数字不参与评分。
-
-## 流动问题定义
-
-- 二维、**定常**、不可压缩、**层流**（不得使用任何湍流模型）零压梯度平板边界层。
-- 来流：均匀速度 **U_inf = 1 m/s**，方向沿 +x。
-- 流体物性：运动粘度 **ν = 1e-5 m²/s**，密度恒定（不可压缩；Cf 定义中的动压用 0.5·ρ·U_inf²，ρ 取你所用单位制下的常数值并保持一致）。
-- 以前缘起算的当地雷诺数 Re_x = U_inf·x/ν = 1e5·x[m]；目标站位 Re_x = 2e4…1e5，远低于转捩雷诺数（~5e5），流动保持层流。
-
-## 几何与边界
-
-计算域为二维矩形绕流域（见 `drawing.png`）：
-
-- **平板**：无厚度平板从 **x = 0**（前缘）延伸到 **x = 1.2 m**，位于 y = 0。
-- **前缘上游发展段**：底边界从 **x = −0.2 m** 到 x = 0 为滑移壁面/对称面——让均匀入口 profile 不与壁面奇点直接相撞。
-- 计算域：x ∈ [−0.2, 1.2] m，y ∈ [0, **0.2 m**]（约 12 倍 x = 1 m 处的 Blasius 边界层厚度 δ ≈ 0.016 m），z 方向一层做二维计算。
-- 边界条件：
-  - **入口**（x = −0.2）：均匀速度 U_inf = 1 m/s（+x 方向）。
-  - **出口**（x = 1.2）：零法向梯度出流，压力参考值固定。
-  - **平板**（y = 0，0 ≤ x ≤ 1.2）：无滑移壁面。
-  - **底边界前缘上游段**（y = 0，−0.2 ≤ x < 0）：滑移壁面/对称面。
-  - **顶边界**（y = 0.2）：对称面/滑移（或等效远场边界，须保证来流不受明显压迫）。
-  - 前后两面：二维边界。
-
-## 网格与求解要求
-
-- 二维网格（建议结构化）：x 向朝前缘加密（前缘首个单元量级 ~2 mm），y 向朝壁面加密（首层网格须足以解析层流边界层速度梯度，建议壁面首格 ≤ 1e-4 m 量级、x = 0.1 m 处边界层内不少于约 15 个单元）。
-- 用**定常层流**求解器迭代到残差充分收敛（建议动量方程残差 ≤ 1e-6 量级），壁面剪切应力分布不再随迭代变化。
-
-## 采样要求
-
-在收敛状态下提取**平板壁面局部表面摩擦系数沿流向分布** Cf(x)：
-
-- Cf(x) = τ_w(x) / (0.5·ρ·U_inf²)，τ_w 为壁面剪切应力沿流向分量的大小。
-- x 自前缘起算，采样范围至少覆盖 **x = 0.2 m 到 x = 1.0 m**（四个 QoI 站位 x = 0.2 / 0.5 / 0.8 / 1.0 m 必须在范围内，评分脚本线性插值）。
-- 建议沿板均布不少于 50 个采样点（或每个壁面单元中心一个点）。
-
-## 交付物：证据包
-
-提交一个名为 `submission/` 的目录，布局如下（逐文件合同）：
-
-```
-submission/
-  manifest.json                       # 必需
-  evidence/
-    solver.log                        # 必需
-    mesh_report.txt                   # 必需
-    samples/
-      cf_distribution.csv             # 必需
-```
-
-### manifest.json（必需）
-
-JSON object，至少包含字段：
-
-- `solver`：字符串，求解器名称与版本，**必填**（证据包可追溯性锚点）。
-- `mesh_cells`：整数，网格单元数。
-- `timing`：object，含 `wall_time_sec`（数值，求解器实际运行墙钟秒数，自报）。
-- `notes`：字符串，自由备注（离散格式、收敛判据等）。
-
-### evidence/solver.log（必需）
-
-求解器原生日志文本，须能看到迭代推进与残差历史。
-
-### evidence/mesh_report.txt（必需）
-
-网格摘要文本：单元总数、类型、关键质量指标。
-
-### evidence/samples/cf_distribution.csv（必需）
-
-平板壁面 Cf 沿流向分布，CSV 带表头，两列：
-
-| 列名 | 含义 | 单位 |
-| --- | --- | --- |
-| `x` | 距前缘的流向坐标 | m |
-| `cf` | 当地表面摩擦系数 Cf(x) = τ_w/(0.5·ρ·U_inf²) | 无量纲 |
-
-要求：数值列不得含 NaN/Inf；x 的取值范围必须覆盖 0.2…1.0 m（评分脚本在四个站位线性插值）。
-
-## 验收
-
-评分系统校验上述证据包（文件齐全非空、manifest 可解析且含 solver、CSV 可解析且数值有限），然后由冻结脚本从 `cf_distribution.csv` 在 **x = 0.2 / 0.5 / 0.8 / 1.0 m** 四个站位线性插值得到 **cf_x020 / cf_x050 / cf_x080 / cf_x100**，与留出参考值（Blasius 关联式 Cf = 0.664/√Re_x 的逐点值）对账。连续分为相对误差的相反数；证据包缺项、CSV 含 NaN/Inf、采样范围不覆盖任一站位等均判 invalid（fail-closed）。
+证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
+将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
+自报最终数值不进入判分，格式不符判 0）。

@@ -72,4 +72,9 @@ def _is_time(name: str) -> bool:
 def get_solver(name: str):
     if name == OpenFOAMSolver.name or name == "openfoam":
         return OpenFOAMSolver()
+    if name == "openfoam-v2312-docker":
+        # cfdb 域后端：接口为 run_steps(work_dir, steps, timeout)（按案例 steps 声明执行），
+        # 非 run_case——仅 cfdb_cfd_qoi/cfdb_case_setup 分支使用，勿混用于 foam_basic。
+        from .openfoam_v2312 import OpenFOAMV2312
+        return OpenFOAMV2312()
     raise ValueError(f"未知求解器后端: {name}（dev 仅 openfoam10-docker；intranet 增 fluent/starccm）")

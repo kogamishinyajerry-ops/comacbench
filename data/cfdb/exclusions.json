@@ -1,0 +1,10 @@
+{
+ "verification/flat_plate_su2": "SU2 求解器案例：dev 终端无 SU2 后端镜像（仅 OpenFOAM v10/v2312），待 SU2 后端后纳入",
+ "validation/dam_break": "瞬态前锋位置 QoI 取\"最近写出时间\"场（跨运行 FP/时间步漂移敏感）：oracle 复现 front_z_tau 前沿 15.5% vs 上游 15% 容差边界，违反 oracle 满分纪律，留档复核后再纳入",
+ "validation/lid_driven_cavity": "参考算例不完整（0/ 与 system/ 未镜像；该族由 re400/re1000 完整变体覆盖）",
+ "validation/naca0012": "参考算例未镜像（snappyHexMesh 链需 gen_geometry.py 构建几何，无现成 0/constant/system）",
+ "validation/naca0012_a10": "同 naca0012：参考算例未镜像（snappy 链）",
+ "validation/naca0012_a15": "同 naca0012：参考算例未镜像（snappy 链）",
+ "validation/naca0012_a5": "同 naca0012：参考算例未镜像（snappy 链）",
+ "validation/naca0012_sa_tmr": "上游冻结 solve timeout 600s 在本机 arm64 原生不足（endTime=2000 步实测 55%@600s，QoI 在收敛中途无定义）；上游上调预算后重新纳入（NACA0012 SA-TMR 为最高民机相关案例，优先）"
+}

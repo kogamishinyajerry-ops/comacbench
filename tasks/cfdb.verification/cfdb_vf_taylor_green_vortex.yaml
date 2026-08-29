@@ -7,46 +7,54 @@ assets_revision: cfdb@b26799e
 environment_digest: computed-at-runtime
 hidden: false
 allowed_tools:
-- shell
-- openfoam
 - python
+- openfoam
 input:
   prompt_file: tasks/cfdb.verification/cfdb_vf_taylor_green_vortex.md
-  prompt_sha256: 0f170a910b5f7d3b13d860fe14921e9f529eae35a7b8da17eb43a5a49eec2611
+  prompt_sha256: 005edadd98aac112a2ddd13f67956c66e0319e95cd574e13fcad88c35b2a5125
   assets:
   - path: data/cfdb/verification/taylor_green_vortex/case.yaml
     digest: 5062873d95e6012b187134c15c8ddc5857b90e975192f4115107130f9c51ff21
 output_contract:
-- result.json
+- case_directory
 reference:
-  type: analytical
-  qoi_values_public:
-    ke_ratio_end: 0.8187307530779818
-    u_line_l2_rel_end: 0.0
-  held_out_note: held_out/qoi.json 为判分对账源；上游注明与公开值同源（机制演示）
-  held_out:
-    path: data/cfdb/verification/taylor_green_vortex/held_out/qoi.json
-    digest: fa052ebef143d241b6fd0df16d6dfcb7e9460ae676a4647f3580cbce999e2738
+  source: GLM-CFD-Benchmark verification/taylor_green_vortex（MIT，b26799e），判分对账源 held_out/qoi.json
+  revision: cfdb@b26799e
   qoi_script: post/compute_qoi.py
   tolerances:
     ke_ratio_end: 0.05
-  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+  abs_tolerances:
+    u_line_l2_rel_end: 0.05
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散）；held_out 为判分对账源，自报 QoI 永不进判分
+  held_out:
+    path: data/cfdb/verification/taylor_green_vortex/held_out/qoi.json
+    digest: fa052ebef143d241b6fd0df16d6dfcb7e9460ae676a4647f3580cbce999e2738
 grader:
   validity_gate: true
   exec_kind: cfdb_cfd_qoi
-  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  solver_backend: openfoam-v2312-docker
   mode: managed
-  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  case_ref: data/cfdb/verification/taylor_green_vortex
+  steps:
+  - name: block_mesh
+    command: blockMesh -dict constant/polyMesh/blockMeshDict -case {{ run_dir }}/case
+    timeout_sec: 60
+    critical: true
+  - name: solve
+    command: icoFoam -case {{ run_dir }}/case
+    timeout_sec: 540
+    critical: true
   qoi_script: post/compute_qoi.py
-  upstream_note: 上游 managed 模式：判分侧真实运行提交案例（blockMesh → application）
+  convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
+  oracle_source: data/cfdb/oracle_scripts/verification__taylor_green_vortex.py
 scoring:
   weights:
     physics: 0.6
     requirements: 0.4
     objective: 0.0
     robustness: 0.0
-  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
-    N/A（上游基准无目标函数/扰动重算）
+  note: physics=冻结 QoI 脚本对账 held_out（逐键相对容差，缺省 5%）；requirements=case/ 结构完备率；objective/robustness
+    N/A（无目标函数/扰动重算）
 limits:
   cpu: 2
   memory_gb: 4

@@ -7,45 +7,48 @@ assets_revision: cfdb@b26799e
 environment_digest: computed-at-runtime
 hidden: false
 allowed_tools:
-- shell
-- openfoam
 - python
+- openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_pipe_from_brief.md
-  prompt_sha256: 2097c29d872d81e001f481b4f5d2218f20838e7092d7d6305491c61db8e810f7
+  prompt_sha256: bb1e9ec332ea80fa102707227f0b6afccc494fab6a9c1077b21deb69f7721594
   assets:
   - path: data/cfdb/case_setup/pipe_from_brief/case.yaml
     digest: 663aeb83d1bc6ed8284f85b5dfdca08d5d0f57b3fcbbc7b7f3110ecbebdc8e43
   - path: data/cfdb/case_setup/pipe_from_brief/visible/drawing.png
     digest: fee8f4c8c1690b0dc57a72b2531c387c2b234ad135dc4e81e44925872d5062a9
 output_contract:
-- case_directory
-- result.json
+- evidence_bundle
 reference:
-  type: analytical
-  held_out:
-    path: data/cfdb/case_setup/pipe_from_brief/held_out/qoi.json
-    digest: dd2b5f8cefaaf3b57b5f90983ed70dd979c51ad54a61a3ef76bfa845bfe75eb2
+  source: GLM-CFD-Benchmark case_setup/pipe_from_brief（MIT，b26799e），判分对账源 held_out/qoi.json
+  revision: cfdb@b26799e
   qoi_script: reference/compute_qoi.py
   tolerances:
     u_max: 0.1
-  uncertainty_note: 容差为上游文档化决策（网格/格式耗散），见 case.yaml metrics 注释
+  abs_tolerances:
+    wall_u_avg: 0.002
+  uncertainty_note: 容差为上游文档化决策（网格/格式耗散）；held_out 为判分对账源，自报 QoI 永不进判分
+  held_out:
+    path: data/cfdb/case_setup/pipe_from_brief/held_out/qoi.json
+    digest: dd2b5f8cefaaf3b57b5f90983ed70dd979c51ad54a61a3ef76bfa845bfe75eb2
 grader:
   validity_gate: true
-  exec_kind: cfdb_case_setup
-  solver_backend: openfoam-v2312-docker（managed 模式）；evidence 模式判分不跑求解器
+  exec_kind: cfdb_case_setup_evidence
+  solver_backend: openfoam-v2312-docker
   mode: evidence
-  convergence_check: 上游 cfdb 冻结 QoI 脚本 + 容差判分（LLM-judge 永不进判分）
+  case_ref: data/cfdb/case_setup/pipe_from_brief
+  steps: []
   qoi_script: reference/compute_qoi.py
-  upstream_note: 上游 evidence 模式：判分验证证据包并由冻结脚本降算 QoI（内网商业 CFD 兼容）
+  convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
+  oracle_source: null
 scoring:
   weights:
     physics: 0.6
     requirements: 0.4
     objective: 0.0
     robustness: 0.0
-  note: physics=QoI 对账（容差内 1.0/超容差 0）；requirements=案例结构/证据包契约完整率；objective/robustness
-    N/A（上游基准无目标函数/扰动重算）
+  note: physics=冻结 QoI 脚本对账 held_out（逐键相对容差，缺省 5%）；requirements=case/ 结构完备率；objective/robustness
+    N/A（无目标函数/扰动重算）
 limits:
   cpu: 2
   memory_gb: 4
