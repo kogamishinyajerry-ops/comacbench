@@ -1,0 +1,38 @@
+{
+  "task_id": "pinnacle_burgers1d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport torch\\nimport torch.nn as nn\\nimport time\\n\\ntorch.set_num_threads(4)\\ntorch.manual_seed(0)\\nnp.random.seed(0)\\n\\nnu = 0.01 / np.pi\\n\\nclass MLP(nn.Module):\\n    def __init__(self):\\n        super().__init__()\\n        self.layers = nn.Sequential(\\n            nn.Linear(2, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 1),\\n        )\\n    \\n    def forward(self, x, t):\\n        xt = torch.cat([x, t], dim=-1)\\n        return self.layers(xt)\\n\\nmodel = MLP()\\n\\n# Collocation points (PDE residual)\\nN_f = 10000\\nx_f_data = torch.rand(N_f, 1) * 2 - 1\\nt_f_data = torch.rand(N_f, 1)\\n\\n# BC points (combined left and right boundaries)\\nN_bc = 200\\nx_bc = torch.cat([-torch.ones(N_bc, 1), torch.ones(N_bc, 1)], dim=0)\\nt_bc = torch.rand(2 * N_bc, 1)\\nu_bc = torch.zeros(2 * N_bc, 1)\\n\\n# IC points\\nN_ic = 200\\nx_ic = torch.rand(N_ic, 1) * 2 - 1\\nt_ic = torch.zeros(N_ic, 1)\\nu_ic = -torch.sin(np.pi * x_ic)\\n\\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)\\nscheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5000, gamma=0.5)\\n\\nstart = time.time()\\nfor i in range(20000):\\n    x_f = x_f_data.detach().requires_grad_(True)\\n    t_f = t_f_data.detach().requires_grad_(True)\\n    \\n    u = model(x_f, t_f)\\n    u_t = torch.autograd.grad(u, t_f, grad_outputs=torch.ones_like(u), create_graph=True)[0]\\n    u_x = torch.autograd.grad(u, x_f, grad_outputs=torch.ones_like(u), create_graph=True)[0]\\n    u_xx = torch.autograd.grad(u_x, x_f, grad_outputs=torch.ones_like(u_x), create_graph=True)[0]\\n    \\n    f = u_t + u * u_x - nu * u_xx\\n    loss_f = torch.mean(f ** 2)\\n    \\n    u_bc_pred = model(x_bc, t_bc)\\n    loss_bc = torch.mean((u_bc_pred - u_bc) ** 2)\\n    \\n    u_ic_pred = model(x_ic, t_ic)\\n    loss_ic = torch.mean((u_ic_pred - u_ic) ** 2)\\n    \\n    loss = loss_f + loss_bc + loss_ic\\n    \\n    optimizer.zero_grad()\\n    loss.backward()\\n    optimizer.step()\\n    scheduler.step()\\n\\nprint(f\\\"Training time: {time.time() - start:.1f}s\\\")\\n\\n# Prediction on output grid\\nx_test = torch.linspace(-1, 1, 101).reshape(-1, 1)\\nt_test = torch.linspace(0.1, 1.0, 10).reshape(-1, 1)\\nX, T = torch.meshgrid(x_test.squeeze(), t_test.squeeze(), indexing='ij')\\nx_flat = X.reshape(-1, 1)\\nt_flat = T.reshape(-1, 1)\\n\\nmodel.eval()\\nwith torch.no_grad():\\n    u_pred = model(x_flat, t_flat).reshape(101, 10).numpy()\\n\\nnp.save('pred.npy', u_pred)\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": 0.029404003115217403, \"threshold\": 0.09, \"passed\": true, \"shape_ok\": true, \"train_exit\": 0, \"train_s\": 657.59, \"stdout_tail\": \"Training time: 655.9s\\n\"}"
+  },
+  "timings": {
+    "agent_s": 799.526,
+    "setup_s": 0.0,
+    "grade_s": 657.667
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=0 657.59s"
+  ]
+}

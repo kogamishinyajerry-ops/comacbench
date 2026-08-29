@@ -114,7 +114,7 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 2. **unifoil/thewell 两个 proposed 条目的数据镜像与 Lite 划层**
    （UniFoil 系数层优先——民机相关性最高）。
 3. ~~litbench 补充真实 LLM 基线~~ ✅（minimax 0.8667 / glm-5.3 0.7833）；
-   **pinnacle.suite 真实 LLM 基线待补**（每 provider ~30-40 min）。
+   ~~pinnacle.suite 真实 LLM 基线待补~~ ✅（glm-5.3 0.7667 / minimax 0.6667）。
 4. 法务确认 NC 边界后重审 drivanetpp/flowbench；TU Darmstadt 申请 TUDa 数据。
 5. ChatCFD 315 案例 / IteraSim 28 案例 / AI CFD Scientist 5 任务三个"论文自带基准"
    的资产定位与接入评估（代码许可已核：GPL/MIT-missing）。

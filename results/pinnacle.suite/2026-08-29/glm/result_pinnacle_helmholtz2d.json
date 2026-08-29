@@ -1,0 +1,38 @@
+{
+  "task_id": "pinnacle_helmholtz2d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import numpy as np\\nimport torch\\nimport torch.nn as nn\\nimport time\\n\\n# --- Configuration & Seeding ---\\nseed = 42\\nnp.random.seed(seed)\\ntorch.manual_seed(seed)\\n\\n# Set device to CPU as requested\\ndevice = torch.device(\\\"cpu\\\")\\ntorch.set_num_threads(4)\\n\\n# Problem Parameters\\nk = 3.0\\nN_COLLOC = 2000  # Number of collocation points for PDE loss\\nEPOCHS = 10000\\nLR = 0.001\\nPI = np.pi\\n\\n# --- Define the PINN Model ---\\nclass PINN(nn.Module):\\n    def __init__(self):\\n        super(PINN, self).__init__()\\n        # MLP: 2 -> 64 -> 64 -> 64 -> 64 -> 1\\n        self.net = nn.Sequential(\\n            nn.Linear(2, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 64),\\n            nn.Tanh(),\\n            nn.Linear(64, 1)\\n        )\\n        # Weight initialization\\n        for m in self.modules():\\n            if isinstance(m, nn.Linear):\\n                nn.init.xavier_normal_(m.weight)\\n                nn.init.zeros_(m.bias)\\n\\n    def forward(self, x, y):\\n        # Input shape: (N, 1) each\\n        inputs = torch.cat([x, y], dim=1)\\n        out = self.net(inputs)\\n        # Hard constraint: u = (1-x^2)(1-y^2) * NN\\n        # This ensures u=0 at x=±1 and y=±1\\n        u = (1 - x**2) * (1 - y**2) * out\\n        return u\\n\\n# --- Training Setup ---\\nmodel = PINN().to(device)\\noptimizer = torch.optim.Adam(model.parameters(), lr=LR)\\n\\nprint(f\\\"Starting training on {device} for {EPOCHS} epochs...\\\")\\nstart_time = time.time()\\n\\n# --- Training Loop ---\\nmodel.train()\\nfor epoch in range(EPOCHS):\\n    optimizer.zero_grad()\\n\\n    # 1. Sample collocation points in [-1, 1] x [-1, 1]\\n    x_c = torch.rand(N_COLLOC, 1, device=device) * 2 - 1\\n    y_c = torch.rand(N_COLLOC, 1, device=device) * 2 - 1\\n    \\n    # Enable gradient tracking for PDE loss\\n    x_c.requires_grad_(True)\\n    y_c.requires_grad_(True)\\n\\n    # 2. Forward pass\\n    u_pred = model(x_c, y_c)\\n\\n    # 3. Compute derivatives (autograd)\\n    # u_x = grad(u, x)\\n    u_x = torch.autograd.grad(u_pred, x_c, grad_outputs=torch.ones_like(u_pred),\\n                              create_graph=True, retain_graph=True)[0]\\n    # u_y = grad(u, y)\\n    u_y = torch.autograd.grad(u_pred, y_c, grad_outputs=torch.ones_like(u_pred),\\n                              create_graph=True, retain_graph=True)[0]\\n    \\n    # u_xx = grad(u_x, x)\\n    u_xx = torch.autograd.grad(u_x, x_c, grad_outputs=torch.ones_like(u_x),\\n                               create_graph=True, retain_graph=True)[0]\\n    # u_yy = grad(u_y, y)\\n    u_yy = torch.autograd.grad(u_y, y_c, grad_outputs=torch.ones_like(u_y),\\n                               create_graph=True, retain_graph=True)[0]\\n\\n    # 4. Compute Source Term f\\n    # f = (k^2 - 2*pi^2) * sin(pi*x) * sin(pi*y)\\n    f_val = (k**2 - 2 * PI**2) * torch.sin(PI * x_c) * torch.sin(PI * y_c)\\n\\n    # 5. PDE Residual: Delta u + k^2 u - f = 0\\n    pde_residual = u_xx + u_yy + (k**2) * u_pred - f_val\\n    \\n    loss = torch.mean(pde_residual**2)\\n\\n    # 6. Optimization step\\n    loss.backward()\\n    optimizer.step()\\n\\n    if epoch % 1000 == 0:\\n        print(f\\\"Epoch {epoch:5d} | Loss: {loss.item():.6e}\\\")\\n\\nprint(f\\\"Training finished in {time.time() - start_time:.2f}s\\\")\\n\\n# --- Prediction on Grid ---\\nmodel.eval()\\nwith torch.no_grad():\\n    # Create grid\\n    x = np.linspace(-1, 1, 101)\\n    y = np.linspace(-1, 1, 101)\\n    X, Y = np.meshgrid(x, y, indexing='ij')\\n    \\n    # Flatten to (10201, 1)\\n    x_flat = torch.from_numpy(X.flatten()).float().view(-1, 1).to(device)\\n    y_flat = torch.from_numpy(Y.flatten()).float().view(-1, 1).to(device)\\n    \\n    # Predict\\n    pred = model(x_flat, y_flat)\\n    pred_np = pred.cpu().numpy().flatten()\\n\\n# --- Save Output ---\\nnp.save(\\\"pred.npy\\\", pred_np)\\nprint(\\\"pred.npy saved successfully.\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": 0.005165380889409979, \"threshold\": 0.01, \"passed\": true, \"shape_ok\": true, \"train_exit\": 0, \"train_s\": 235.35, \"stdout_tail\": \"0 epochs...\\nEpoch     0 | Loss: 2.798838e+01\\nEpoch  1000 | Loss: 3.130576e-03\\nEpoch  2000 | Loss: 6.512442e-04\\nEpoch  3000 | Loss: 9.298762e-04\\nEpoch  4000 | Loss: 2.471864e-04\\nEpoch  5000 | Loss: 2.294001e-03\\nEpoch  6000 | Loss: 1.440728e-04\\nEpoch  7000 | Loss: 8.227752e-05\\nEpoch  8000 | Loss: 5.560233e-04\\nEpoch  9000 | Loss: 1.322336e-03\\nTraining finished in 233.09s\\npred.npy saved successfully.\\n\"}"
+  },
+  "timings": {
+    "agent_s": 316.384,
+    "setup_s": 0.0,
+    "grade_s": 235.45
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=0 235.35s"
+  ]
+}

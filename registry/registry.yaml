@@ -809,7 +809,7 @@ entries:
     assets_revision_note: 快照克隆（非跟踪）；撤换记录（洞域 Laplace 三轮 oracle 不可训练 → Helmholtz 制造解）见 data/pinnacle/PROVENANCE.md §B
     risks: [单题训练墙钟 ≤900s（CPU 4 核实测 275-440s/题）; 阈值经 oracle 标定，LLM 变体方差待真实基线观察]
     status: integrated
-    integrated_note: 2026-08-29 code_exec 新增 pinnacle_rel_l2 分支后跑通（dev 终端，含沙箱输入投递机制与冻结 loader 宿主协议）；oracle 自检 3/3 满分（rel_l2 0.0276/0.00023/0.0263 全部低于阈值）；stub 0/3 全灭（缺 pred.npy）；torch 沙箱可用性修复记录见 env-matrix.md Phase-C
+    integrated_note: 2026-08-29 code_exec 新增 pinnacle_rel_l2 分支后跑通（dev 终端，含沙箱输入投递机制与冻结 loader 宿主协议）；oracle 自检 3/3 满分；真实基线 glm-5.3 0.7667（burgers1d 欠训练 0.346 超阈）/ MiniMax-M3 0.6667（helmholtz 候选脚本崩溃）——分化维度正交（训练充分性 vs 可执行性），stub 0/3；torch 沙箱可用性修复见 env-matrix.md Phase-C（results/pinnacle.suite/2026-08-29/）
 
   - id: unifoil.airfoil
     name: UniFoil（50 万翼型 RANS 数据集，含转捩/跨音速）

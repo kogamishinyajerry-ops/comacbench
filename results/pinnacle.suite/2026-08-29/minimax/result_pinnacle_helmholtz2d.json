@@ -1,0 +1,40 @@
+{
+  "task_id": "pinnacle_helmholtz2d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import torch\\nimport torch.nn as nn\\nimport numpy as np\\nimport time\\n\\n# Reproducibility\\ntorch.manual_seed(0)\\nnp.random.seed(0)\\ntorch.set_num_threads(4)\\n\\n# Problem setup\\nk = 3.0\\nk2 = k * k\\npi = np.pi\\n\\ndef f_source(x, y):\\n    return (k2 - 2 * pi**2) * torch.sin(pi * x) * torch.sin(pi * y)\\n\\n\\nclass MLP(nn.Module):\\n    def __init__(self, hidden=64, depth=4):\\n        super().__init__()\\n        layers = [nn.Linear(2, hidden), nn.Tanh()]\\n        for _ in range(depth - 1):\\n            layers += [nn.Linear(hidden, hidden), nn.Tanh()]\\n        layers += [nn.Linear(hidden, 1)]\\n        self.net = nn.Sequential(*layers)\\n        for m in self.net:\\n            if isinstance(m, nn.Linear):\\n                nn.init.xavier_normal_(m.weight)\\n                if m.bias is not None:\\n                    nn.init.zeros_(m.bias)\\n\\n    def forward_raw(self, xy):\\n        return self.net(xy)\\n\\n\\ndef u_hard(model, x, y):\\n    \\\"\\\"\\\"Hard boundary constraint: u = (1-x^2)(1-y^2) * N(x,y)\\\"\\\"\\\"\\n    xy = torch.cat([x, y], dim=1)\\n    N = model.forward_raw(xy)\\n    return (1 - x ** 2) * (1 - y ** 2) * N\\n\\n\\ndef pde_residual(model, x, y):\\n    \\\"\\\"\\\"Compute PDE residual: Δu + k^2 u - f\\\"\\\"\\\"\\n    x = x.requires_grad_(True)\\n    y = y.requires_grad_(True)\\n    u = u_hard(model, x, y)\\n    u_x = torch.autograd.grad(u.sum(), x, create_graph=True)[0]\\n    u_y = torch.autograd.grad(u.sum(), y, create_graph=True)[0]\\n    u_xx = torch.autograd.grad(u_x.sum(), x, create_graph=False)[0]\\n    u_yy = torch.autograd.grad(u_y.sum(), y, create_graph=False)[0]\\n    lap = u_xx + u_yy\\n    res = lap + k2 * u - f_source(x, y)\\n    return res\\n\\n\\ndef main():\\n    # Collocation points (interior)\\n    N_int = 2500\\n    x_int = (torch.rand(N_int, 1) * 2 - 1).float()\\n    y_int = (torch.rand(N_int, 1) * 2 - 1).float()\\n\\n    model = MLP(hidden=64, depth=4)\\n    opt = torch.optim.Adam(model.parameters(), lr=1e-3)\\n    scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=3000, gamma=0.5)\\n\\n    n_steps = 10000\\n    t0 = time.time()\\n    for step in range(n_steps):\\n        opt.zero_grad()\\n        res = pde_residual(model, x_int, y_int)\\n        loss = (res ** 2).mean()\\n        loss.backward()\\n        opt.step()\\n        scheduler.step()\\n        if step % 1000 == 0:\\n            print(f\\\"step {step}: loss={loss.item():.3e}, t={time.time() - t0:.1f}s\\\", flush=True)\\n\\n    # Predict on 101x101 grid\\n    xs = np.linspace(-1, 1, 101)\\n    ys = np.linspace(-1, 1, 101)\\n    X, Y = np.meshgrid(xs, ys, indexing='ij')\\n    xt = torch.tensor(X.flatten(), dtype=torch.float32).unsqueeze(1)\\n    yt = torch.tensor(Y.flatten(), dtype=torch.float32).unsqueeze(1)\\n\\n    model.eval()\\n    with torch.no_grad():\\n        u = u_hard(model, xt, yt)\\n    pred = u.squeeze().numpy().astype(np.float64)\\n\\n    # Reference (for sanity check)\\n    ref = (np.sin(pi * X) * np.sin(pi * Y)).flatten()\\n    rel = np.linalg.norm(pred - ref) / np.linalg.norm(ref)\\n    print(f\\\"Relative L2 error: {rel:.3e}\\\")\\n\\n    np.save('pred.npy', pred)\\n\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": null, \"threshold\": 0.01, \"passed\": false, \"shape_ok\": false, \"train_exit\": 1, \"train_s\": 1.42, \"stdout_tail\": \"\"}"
+  },
+  "timings": {
+    "agent_s": 47.317,
+    "setup_s": 0.0,
+    "grade_s": 1.424
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=1 1.42s"
+  ]
+}

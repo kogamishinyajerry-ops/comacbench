@@ -1,0 +1,38 @@
+{
+  "task_id": "pinnacle_burgers1d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 0.3,
+  "artifacts": {
+    "code": "\"import torch\\nimport numpy as np\\nimport time\\n\\n# -----------------------------------------------------------\\n# 1. 配置与随机种子设置\\n# -----------------------------------------------------------\\ntorch.set_num_threads(4)\\ntorch.manual_seed(0)\\nnp.random.seed(0)\\n\\ndevice = torch.device('cpu')\\n\\n# PDE 参数\\nnu = 0.01 / np.pi\\n\\n# 定义域\\nx_min, x_max = -1.0, 1.0\\nt_min, t_max = 0.0, 1.0\\n\\n# 网络结构参数\\nlayers = [2, 64, 64, 64, 64, 1]  # 2→64×4→1\\n\\n# 训练参数\\nN_f = 2000  # PDE 残差点\\nN_b = 100   # 边界点 (各50)\\nN_i = 100   # 初始点\\nepochs = 20000\\nlr = 1e-3\\n\\n# -----------------------------------------------------------\\n# 2. 数据生成\\n# -----------------------------------------------------------\\n# 内部点 (PDE)\\nx_f = np.random.uniform(x_min, x_max, (N_f, 1))\\nt_f = np.random.uniform(t_min, t_max, (N_f, 1))\\nX_f = torch.cat((torch.tensor(x_f, dtype=torch.float32), \\n                 torch.tensor(t_f, dtype=torch.float32)), dim=1).to(device)\\n\\n# 边界点\\nt_b = np.random.uniform(t_min, t_max, (N_b // 2, 1))\\nx_b_left = np.full((N_b // 2, 1), x_min)\\nx_b_right = np.full((N_b // 2, 1), x_max)\\n\\nX_b = torch.cat((\\n    torch.cat((torch.tensor(x_b_left, dtype=torch.float32), torch.tensor(t_b, dtype=torch.float32)), dim=1),\\n    torch.cat((torch.tensor(x_b_right, dtype=torch.float32), torch.tensor(t_b, dtype=torch.float32)), dim=1)\\n), dim=0).to(device)\\nu_b = torch.zeros((N_b, 1)).to(device) # Dirichlet BC: u=0\\n\\n# 初始点\\nx_i = np.random.uniform(x_min, x_max, (N_i, 1))\\nt_i = np.zeros((N_i, 1))\\nX_i = torch.cat((torch.tensor(x_i, dtype=torch.float32), \\n                 torch.tensor(t_i, dtype=torch.float32)), dim=1).to(device)\\n# IC: u(x,0) = -sin(pi*x)\\nu_i = -torch.sin(np.pi * torch.tensor(x_i, dtype=torch.float32)).to(device)\\n\\n# -----------------------------------------------------------\\n# 3. 神经网络模型\\n# -----------------------------------------------------------\\nclass PINN(torch.nn.Module):\\n    def __init__(self, layers):\\n        super(PINN, self).__init__()\\n        self.linears = torch.nn.ModuleList()\\n        for i in range(len(layers) - 1):\\n            self.linears.append(torch.nn.Linear(layers[i], layers[i+1]))\\n            if i < len(layers) - 2:\\n                self.linears.append(torch.nn.Tanh())\\n\\n    def forward(self, x):\\n        for layer in self.linears:\\n            x = layer(x)\\n        return x\\n\\nmodel = PINN(layers).to(device)\\noptimizer = torch.optim.Adam(model.parameters(), lr=lr)\\nscheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5000, gamma=0.9)\\n\\n# -----------------------------------------------------------\\n# 4. 训练循环\\n# -----------------------------------------------------------\\ndef compute_loss():\\n    # PDE 损失\\n    X_f.requires_grad = True\\n    u = model(X_f)\\n    \\n    # 计算导数\\n    # grad(outputs, inputs, grad_outputs, ...)\\n    # u_x = du/dx, u_t = du/dt\\n    grads = torch.autograd.grad(u, X_f, torch.ones_like(u), create_graph=True)[0]\\n    u_x = grads[:, 0:1]\\n    u_t = grads[:, 1:2]\\n    \\n    # u_xx = d(du/dx)/dx\\n    u_xx = torch.autograd.grad(u_x, X_f, torch.ones_like(u_x), create_graph=True)[0][:, 0:1]\\n    \\n    # Burgers 方程残差: u_t + u*u_x - nu*u_xx = 0\\n    f = u_t + u * u_x - nu * u_xx\\n    loss_f = torch.mean(f**2)\\n    \\n    # 边界条件损失\\n    u_pred_b = model(X_b)\\n    loss_b = torch.mean((u_pred_b - u_b)**2)\\n    \\n    # 初始条件损失\\n    u_pred_i = model(X_i)\\n    loss_i = torch.mean((u_pred_i - u_i)**2)\\n    \\n    total_loss = loss_f + loss_b + loss_i\\n    return total_loss, loss_f, loss_b, loss_i\\n\\nprint(\\\"开始训练...\\\")\\nstart_time = time.time()\\n\\nmodel.train()\\nfor epoch in range(epochs):\\n    optimizer.zero_grad()\\n    loss, l_f, l_b, l_i = compute_loss()\\n    loss.backward()\\n    optimizer.step()\\n    scheduler.step()\\n    \\n    if (epoch + 1) % 2000 == 0:\\n        print(f\\\"Epoch {epoch+1}/{epochs}, Total Loss: {loss.item():.6f}, PDE: {l_f.item():.4e}, BC: {l_b.item():.4e}, IC: {l_i.item():.4e}\\\")\\n\\nprint(f\\\"训练耗时: {time.time() - start_time:.2f}秒\\\")\\n\\n# -----------------------------------------------------------\\n# 5. 预测与保存\\n# -----------------------------------------------------------\\nmodel.eval()\\nwith torch.no_grad():\\n    # 生成网格: x \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": 0.3463482695179576, \"threshold\": 0.09, \"passed\": false, \"shape_ok\": true, \"train_exit\": 0, \"train_s\": 209.83, \"stdout_tail\": \"h 14000/20000, Total Loss: 0.000250, PDE: 1.5918e-04, BC: 5.2510e-07, IC: 9.0217e-05\\nEpoch 16000/20000, Total Loss: 0.000119, PDE: 8.6187e-05, BC: 1.9960e-06, IC: 3.1102e-05\\nEpoch 18000/20000, Total Loss: 0.000406, PDE: 3.5841e-04, BC: 2.7203e-05, IC: 2.0768e-05\\nEpoch 20000/20000, Total Loss: 0.000239, PDE: 2.1133e-04, BC: 1.5339e-05, IC: 1.2659e-05\\n训练耗时: 207.67秒\\n预测已保存至 pred.npy, shape: (101, 10)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 286.565,
+    "setup_s": 0.0,
+    "grade_s": 209.947
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=0 209.83s"
+  ]
+}

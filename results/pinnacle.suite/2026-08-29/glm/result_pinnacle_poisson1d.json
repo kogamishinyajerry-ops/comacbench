@@ -1,0 +1,38 @@
+{
+  "task_id": "pinnacle_poisson1d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import torch\\nimport torch.nn as nn\\nimport numpy as np\\nimport random\\n\\n# Configuration for reproducibility and environment\\nSEED = 42\\ntorch.manual_seed(SEED)\\nnp.random.seed(SEED)\\nrandom.seed(SEED)\\n\\n# Limit CPU threads as requested\\ntorch.set_num_threads(4)\\ndevice = torch.device('cpu')\\n\\n# Define the PINN architecture: MLP 1 -> 32x3 -> 1 with Tanh\\nclass PINN(nn.Module):\\n    def __init__(self):\\n        super(PINN, self).__init__()\\n        self.net = nn.Sequential(\\n            nn.Linear(1, 32),\\n            nn.Tanh(),\\n            nn.Linear(32, 32),\\n            nn.Tanh(),\\n            nn.Linear(32, 32),\\n            nn.Tanh(),\\n            nn.Linear(32, 1)\\n        )\\n\\n    def forward(self, x):\\n        return self.net(x)\\n\\n# Instantiate model\\nmodel = PINN().to(device)\\n\\n# Optimizer\\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)\\n\\n# Training parameters\\nn_steps = 8000\\nn_collocation = 256\\n\\n# Boundary points\\nx_bc = torch.tensor([[0.0], [2 * np.pi]], device=device)\\nu_bc = torch.zeros_like(x_bc)\\n\\n# Training loop\\nmodel.train()\\nfor step in range(n_steps):\\n    # Random collocation points in (0, 2pi)\\n    x_pde = torch.rand(n_collocation, 1, device=device) * (2 * np.pi)\\n    x_pde.requires_grad_(True)\\n    \\n    # Forward pass\\n    u = model(x_pde)\\n    \\n    # Compute derivatives using autograd\\n    # u_x = du/dx\\n    u_x = torch.autograd.grad(u, x_pde, grad_outputs=torch.ones_like(u), \\n                              create_graph=True, retain_graph=True)[0]\\n    # u_xx = d^2u/dx^2\\n    u_xx = torch.autograd.grad(u_x, x_pde, grad_outputs=torch.ones_like(u_x), \\n                               create_graph=True, retain_graph=True)[0]\\n    \\n    # PDE Loss: u''(x) + sin(x) = 0\\n    # We minimize the squared residual (u_xx + sin(x))^2\\n    f = u_xx + torch.sin(x_pde)\\n    loss_pde = torch.mean(f**2)\\n    \\n    # Boundary Loss: u(0)=0, u(2pi)=0\\n    u_pred_bc = model(x_bc)\\n    loss_bc = torch.mean((u_pred_bc - u_bc)**2)\\n    \\n    # Total Loss\\n    loss = loss_pde + loss_bc\\n    \\n    # Backpropagation\\n    optimizer.zero_grad()\\n    loss.backward()\\n    optimizer.step()\\n    \\n    if step % 1000 == 0:\\n        print(f\\\"Step {step}/{n_steps}, Loss: {loss.item():.6f}\\\")\\n\\n# Prediction\\nmodel.eval()\\n# Generate 256 uniform points from 0 to 2pi (inclusive)\\nx_test = torch.linspace(0, 2 * np.pi, 256, device=device).unsqueeze(1)\\n\\nwith torch.no_grad():\\n    y_pred = model(x_test)\\n\\n# Save prediction to pred.npy with shape (256,)\\nnp.save('pred.npy', y_pred.cpu().numpy().flatten())\\n\\nprint(\\\"Training complete. Output saved to pred.npy\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-4.6\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": 0.0012624680662616198, \"threshold\": 0.08, \"passed\": true, \"shape_ok\": true, \"train_exit\": 0, \"train_s\": 12.18, \"stdout_tail\": \"Step 0/8000, Loss: 0.495640\\nStep 1000/8000, Loss: 0.000087\\nStep 2000/8000, Loss: 0.000161\\nStep 3000/8000, Loss: 0.000188\\nStep 4000/8000, Loss: 0.000032\\nStep 5000/8000, Loss: 0.000009\\nStep 6000/8000, Loss: 0.000009\\nStep 7000/8000, Loss: 0.000003\\nTraining complete. Output saved to pred.npy\\n\"}"
+  },
+  "timings": {
+    "agent_s": 75.488,
+    "setup_s": 0.0,
+    "grade_s": 12.265
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=0 12.18s"
+  ]
+}
