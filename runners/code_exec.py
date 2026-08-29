@@ -499,6 +499,81 @@ def run_task(
             applicability={"physics": "field_metrics(cos/R2)", "requirements": "npy 契约",
                            "objective": "N/A(数据集无边界输入测试)", "robustness": "determinism(2 runs)"})
 
+    if kind == "pinnacle_rel_l2":
+        # PINN 训练任务（pinnacle.suite）：候选脚本沙箱内训练并写 pred.npy；
+        # 冻结 ref_loader 宿主执行（cfdb qoi_script 同款协议）计算 rel L2，
+        # 与 YAML 阈值二值比对。训练类 CPU 非逐位确定 => 不做双跑（robustness N/A）。
+        import shutil as _shutil
+        import subprocess as _sp
+        import sys as _sys
+        g = task["grader"]
+        # 沙箱输入投递（判分环境放置的冻结数据——laplace 评测点等，不经模型之手）
+        for rel in (g.get("sandbox_inputs") or []):
+            src = assets_root / rel
+            if src.exists():
+                _shutil.copy(src, iso.dir / Path(rel).name)
+        script = iso.write("candidate.py", code)
+        r1 = iso.run(script, timeout)
+        logs.append(f"train run exit={r1['exit']} {r1['duration_s']}s")
+        pred_path = iso.dir / "pred.npy"
+        gate, gf, fm = 1, [], None
+        shape_ok = False
+        if r1["timeout"]:
+            gate, gf, fm = 0, ["timeout"], "timeout"
+        elif r1["exit"] != 0:
+            gate, gf, fm = 0, [_EXEC_FAIL], _EXEC_FAIL
+        elif not pred_path.exists():
+            gate, gf, fm = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+        else:
+            pred = np.load(pred_path)
+            shape_ok = tuple(pred.shape) == tuple(g["pred_shape"])
+            if not shape_ok:
+                gate, gf, fm = 0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT
+                logs.append(f"shape mismatch: {pred.shape} vs {g['pred_shape']}")
+            elif not np.isfinite(pred).all():
+                gate, gf, fm = 0, [_NOT_PHYSICAL], _NOT_PHYSICAL
+        # 冻结 loader 宿主执行（判分材料不经模型）
+        rel_l2 = None
+        if pred_path.exists():
+            loader = assets_root / g["ref_loader"]
+            try:
+                rq = _sp.run([_sys.executable, "-B", str(loader), str(pred_path)],
+                             capture_output=True, text=True, timeout=120)
+                lines = [ln for ln in rq.stdout.strip().splitlines() if ln.strip()]
+                if rq.returncode == 0 and lines:
+                    rel_l2 = float(json.loads(lines[-1])["rel_l2"])
+                else:
+                    logs.append(f"loader exit={rq.returncode} {rq.stderr[-200:]}")
+            except Exception as e:  # noqa: BLE001
+                logs.append(f"loader error: {e!r}")
+        threshold = float(g["rel_l2_threshold"])
+        passed = bool(gate == 1 and rel_l2 is not None and rel_l2 <= threshold)
+        physics = 1.0 if passed else 0.0
+        subscores = {"requirements": 1.0 if gate == 1 else 0.0,
+                     "physics": physics if gate == 1 else 0.0,
+                     "objective": None, "robustness": None}
+        weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
+        score = aggregate_score({k: (v if v is not None else 0.0)
+                                 for k, v in subscores.items()}, weights, gate)
+        details = {"kind": "pinnacle", "rel_l2": rel_l2, "threshold": threshold,
+                   "passed": passed, "shape_ok": shape_ok,
+                   "train_exit": r1["exit"], "train_s": r1["duration_s"],
+                   "stdout_tail": r1["stdout"][-400:]}
+        return build_result(
+            task=task, adapter=ADAPTER, validity_gate=gate, gate_failures=gf,
+            subscores=subscores, score=score,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            timings={"agent_s": time.time() - t0, "setup_s": 0.0,
+                     "grade_s": time.time() - grade_t0},
+            env_digest=env_digest, logs=logs,
+            failure_mode=fm,
+            applicability={"physics": "rel_l2_threshold(冻结 loader)",
+                           "requirements": "pred.npy 契约(形状/有限值)",
+                           "objective": "N/A(无边界输入测试)",
+                           "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"})
+
     raise ValueError(f"未知 exec_kind: {kind}")
 
 

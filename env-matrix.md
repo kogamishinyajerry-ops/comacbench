@@ -62,6 +62,11 @@ aviary                      # NASA Aviary（含示例模型）
 ```
 # 无新增必选项：pandas 即可完成 superwing/hilift-lite 系数比对
 # 可选：torch(CPU 版) —— 仅当要跑 ML 基线模型（superwing/airfrans/pdebench 基线）
+# pinnacle.suite（2026-08-29）：沙箱内 torch 训练的前提 = torch 及其依赖必须在解释器主
+#   site-packages（沙箱 -s 屏蔽 user-site）。2026-08-29 实测：torch 在 uv python 主包，
+#   但 typing_extensions 落在 user-site（~/.local/lib/python3.12）→ 沙箱 import 失败；
+#   修复 = `pip install --target <解释器主 site-packages> typing_extensions`。
+#   新机器部署 pinnacle.suite 前先跑：python3 -s -E -c "import torch" 冒烟。
 ```
 
 ### Phase-D（batch-2：CAD/FEA/飞控）

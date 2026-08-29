@@ -1,0 +1,38 @@
+{
+  "task_id": "pinnacle_burgers1d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: PINN 粘性 Burgers（ν=0.01/π），IC/BC 硬约束 + PDE 残差\\nimport numpy as np\\nimport torch\\n\\ntorch.manual_seed(0)\\nnp.random.seed(0)\\ntorch.set_num_threads(4)\\n\\nnet = torch.nn.Sequential(\\n    torch.nn.Linear(2, 64), torch.nn.Tanh(),\\n    torch.nn.Linear(64, 64), torch.nn.Tanh(),\\n    torch.nn.Linear(64, 64), torch.nn.Tanh(),\\n    torch.nn.Linear(64, 1))\\n\\nNU = 0.01 / np.pi\\n\\ndef hard_u(x, t):\\n    # u = (1-t̂)·(-sin(πx)) + t̂·(1-x̂²)·N  —— 精确满足 IC 与 u(±1,t)=0\\n    xh = x / 1.0\\n    th = t / 1.0\\n    return (1 - th) * (-torch.sin(np.pi * x)) + th * (1 - xh**2) * net(\\n        torch.cat([x, t], dim=1))\\n\\ndef pde_residual(x, t):\\n    x = x.clone().requires_grad_(True)\\n    t = t.clone().requires_grad_(True)\\n    u = hard_u(x, t)\\n    u_x = torch.autograd.grad(u, x, torch.ones_like(u), create_graph=True)[0]\\n    u_t = torch.autograd.grad(u, t, torch.ones_like(u), create_graph=True)[0]\\n    u_xx = torch.autograd.grad(u_x, x, torch.ones_like(u_x), create_graph=True)[0]\\n    return u_t + u * u_x - NU * u_xx\\n\\nopt = torch.optim.Adam(net.parameters(), lr=1e-3)\\nN = 8192\\nfor it in range(12001):\\n    x = torch.rand(N, 1) * 2 - 1\\n    t = torch.rand(N, 1)\\n    opt.zero_grad()\\n    r = pde_residual(x, t)\\n    loss = (r ** 2).mean()\\n    loss.backward()\\n    opt.step()\\n    if it in (4000, 8000):\\n        for g in opt.param_groups:\\n            g[\\\"lr\\\"] *= 0.4\\n    if it % 3000 == 0:\\n        print(f\\\"iter {it} res {loss.item():.3e}\\\")\\n\\nxs = np.linspace(-1, 1, 101)\\nts = np.round(np.arange(1, 11) * 0.1, 6)\\npred = np.zeros((101, 10))\\nfor j, tv in enumerate(ts):\\n    with torch.no_grad():\\n        X = torch.tensor(xs, dtype=torch.float32).reshape(-1, 1)\\n        T = torch.full_like(X, float(tv))\\n        pred[:, j] = hard_u(X, T).numpy().ravel()\\nnp.save(\\\"pred.npy\\\", pred.astype(np.float64))\\nprint(\\\"pred.npy written\\\", pred.shape)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": 0.02755644984550706, \"threshold\": 0.09, \"passed\": true, \"shape_ok\": true, \"train_exit\": 0, \"train_s\": 205.6, \"stdout_tail\": \"iter 0 res 7.199e-01\\niter 3000 res 2.659e-02\\niter 6000 res 1.765e-02\\niter 9000 res 8.008e-03\\niter 12000 res 5.147e-03\\npred.npy written (101, 10)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 205.676,
+    "setup_s": 0.0,
+    "grade_s": 205.676
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=0 205.6s"
+  ]
+}

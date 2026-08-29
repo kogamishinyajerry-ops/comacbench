@@ -1,0 +1,38 @@
+{
+  "task_id": "pinnacle_poisson1d",
+  "registry_id": "pinnacle.suite",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "rel_l2_threshold(冻结 loader)",
+    "requirements": "pred.npy 契约(形状/有限值)",
+    "objective": "N/A(无边界输入测试)",
+    "robustness": "N/A(训练类 CPU 非逐位确定,不双跑)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: PINN u''+sin(x)=0, u=sin(x)（解析验证档）\\nimport numpy as np\\nimport torch\\n\\ntorch.manual_seed(0)\\nnp.random.seed(0)\\ntorch.set_num_threads(4)\\n\\nnet = torch.nn.Sequential(\\n    torch.nn.Linear(1, 32), torch.nn.Tanh(),\\n    torch.nn.Linear(32, 32), torch.nn.Tanh(),\\n    torch.nn.Linear(32, 32), torch.nn.Tanh(),\\n    torch.nn.Linear(32, 1))\\nopt = torch.optim.Adam(net.parameters(), lr=1e-3)\\n\\nx_c = torch.rand(2048, 1) * 2 * np.pi  # collocation\\nx_b = torch.tensor([[0.0], [2 * np.pi]])\\nones = torch.ones_like(x_c)\\nfor it in range(8000):\\n    opt.zero_grad()\\n    xc = x_c.clone().requires_grad_(True)\\n    u = net(xc)\\n    u_x = torch.autograd.grad(u, xc, torch.ones_like(u), create_graph=True)[0]\\n    u_xx = torch.autograd.grad(u_x, xc, torch.ones_like(u_x), create_graph=True)[0]\\n    loss_pde = ((u_xx + torch.sin(xc)) ** 2).mean()\\n    loss_bc = ((net(x_b) - 0.0) ** 2).sum()\\n    loss = loss_pde + 10.0 * loss_bc\\n    loss.backward()\\n    opt.step()\\n    if it % 2000 == 0:\\n        print(f\\\"iter {it} loss {loss.item():.3e}\\\")\\n\\nx = np.linspace(0.0, 2.0 * np.pi, 256).reshape(-1, 1)\\nwith torch.no_grad():\\n    pred = net(torch.tensor(x, dtype=torch.float32)).numpy().astype(np.float64).ravel()\\nnp.save(\\\"pred.npy\\\", pred)\\nprint(\\\"pred.npy written\\\", pred.shape)\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"pinnacle\", \"rel_l2\": 0.026292627117332684, \"threshold\": 0.08, \"passed\": true, \"shape_ok\": true, \"train_exit\": 0, \"train_s\": 30.07, \"stdout_tail\": \"iter 0 loss 1.165e+00\\niter 2000 loss 1.620e-02\\niter 4000 loss 5.206e-04\\niter 6000 loss 2.599e-04\\npred.npy written (256,)\\n\"}"
+  },
+  "timings": {
+    "agent_s": 30.137,
+    "setup_s": 0.0,
+    "grade_s": 30.137
+  },
+  "environment_digest": "sha256:6a72f4b13fff93110fa15b80638ce6b4bf0c087e1dd4bad8010459f21cf95530",
+  "assets_revision": "pinnacle@2026-08-29-clone",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "train run exit=0 30.07s"
+  ]
+}

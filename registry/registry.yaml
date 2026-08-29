@@ -792,7 +792,7 @@ entries:
     integrated_note: 2026-08-29 cfdb_cfd_qoi 分支跑通（dev 终端）；oracle 自检 8/8 满分（mean 1.0，参考算例逐字复制全链路真跑，dam_break/naca0012_sa_tmr 按满分纪律排除）；stub 0/8 全灭于结构门（missing_output）；踩坑与双容差定案见 results/cfdb.verification/2026-08-29/README.md §判分链路
 
   - id: pinnacle.suite
-    name: PINNacle（PINN 综合基准）
+    name: PINNacle（PINN 前向解算任务集，自建转化）
     source: https://arxiv.org/abs/2306.08827 + https://github.com/i207M/PINNacle
     tier: B
     order: 65
@@ -801,12 +801,15 @@ entries:
     env_class: python_sandbox
     license: MIT
     license_status: confirmed-repo
-    content: 20+ PDE（含流体域）× 约 10 种 PINN 方法变体的统一评测；数据由代码内置生成（无需镜像大数据）
-    scoring: 相对 L2 误差（上游协议）
-    env: Python 沙箱（Phase-A 导入清单）
-    license_evidence: 仓库 LICENSE=MIT（LICENSE 文件 + 页面 spdxId 双核验，2026-08-28）；论文 NeurIPS 2024
-    risks: [PINN 训练算力成本需按题限额; 选题需划定流体+热传导子集]
-    status: proposed
+    content: 3 道 PINN 前向解算任务（burgers1d COMSOL 参考场 / helmholtz2d 制造解 / poisson1d 解析冒烟档；模型写 PyTorch 训练脚本，沙箱内训练，冻结 loader 宿主算 rel L2 二值阈值判分——阈值 = oracle 实测 ×3，标定见 data/pinnacle/oracle_calibration.json）
+    scoring: physics=rel L2 ≤ 阈值（冻结 loader 宿主执行）；requirements=pred.npy 契约；训练类不双跑（robustness 0）
+    env: Python 沙箱 + torch CPU（部署前提见 env-matrix.md Phase-C：主 site-packages 可 import torch）
+    assets_revision: pinnacle@2026-08-29-clone
+    license_evidence: 仓库 LICENSE=MIT（LICENSE 文件核验，2026-08-29）；仅镜像 burgers1d.dat 一个参考场文件
+    assets_revision_note: 快照克隆（非跟踪）；撤换记录（洞域 Laplace 三轮 oracle 不可训练 → Helmholtz 制造解）见 data/pinnacle/PROVENANCE.md §B
+    risks: [单题训练墙钟 ≤900s（CPU 4 核实测 275-440s/题）; 阈值经 oracle 标定，LLM 变体方差待真实基线观察]
+    status: integrated
+    integrated_note: 2026-08-29 code_exec 新增 pinnacle_rel_l2 分支后跑通（dev 终端，含沙箱输入投递机制与冻结 loader 宿主协议）；oracle 自检 3/3 满分（rel_l2 0.0276/0.00023/0.0263 全部低于阈值）；stub 0/3 全灭（缺 pred.npy）；torch 沙箱可用性修复记录见 env-matrix.md Phase-C
 
   - id: unifoil.airfoil
     name: UniFoil（50 万翼型 RANS 数据集，含转捩/跨音速）

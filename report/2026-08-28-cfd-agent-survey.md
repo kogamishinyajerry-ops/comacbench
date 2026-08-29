@@ -61,7 +61,7 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 | --- | --- | --- | --- | --- |
 | FNO | 2010.08895 (ICLR'21) | Burgers/Darcy/NS .mat | 代码 MIT | litbench（方法知识）；数据不镜像（规模小但被 PDEBench 覆盖） |
 | MeshGraphNets | 2010.03409 (ICLR'21) | 6 类网格数据集 | 代码 Apache-2.0 | 同上 |
-| PINNacle | 2306.08827 (NeurIPS'24) | 20+ PDE×约10 方法 | MIT | **registry `pinnacle.suite`（proposed）**：code_exec，数据由代码生成，无镜像负担 |
+| PINNacle | 2306.08827 (NeurIPS'24) | 20+ PDE×约10 方法 | MIT | **registry `pinnacle.suite`（integrated 2026-08-29）**：3 道 PINN 前向解算 code_exec 任务（burgers1d/helmholtz2d/poisson1d），冻结 loader rel L2 阈值判分，oracle 满分自检 |
 | BLASTNet 2.0 | 2309.13457 (NeurIPS'23) | 2.2TB/744 样本/34 DNS | 数据 CC BY 4.0 | 超 resolution 方向候选，本批不立条（3D 体数据成本高，tier 外） |
 | DrivAerNet | 2403.08055 | 4,000 车完整气动 | 数据 CC BY-NC 4.0 | 并入 DrivAerNet++ 条目 |
 | DrivAerNet++ | 2406.09624 (NeurIPS D&B'24) | 8,000 车/39TB | 数据 CC BY-NC 4.0 | **registry `drivanetpp.coeff`（deferred，NC 待法务）** |
@@ -111,13 +111,15 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 1. **cfdb.case_setup 升 integrated**：14 evidence 任务需工具执行通道接入 providers
    （agent 自驱求解器提交证据包——FLAi 内核/容器 agent 方向）；3 managed 任务判分
    分支已就绪，随域整体验收。dam_break/naca0012_sa_tmr 的重纳依赖上游预算/几何修订。
-2. **unifoil/thewell/pinnacle 三个 proposed 条目的数据镜像与 Lite 划层**
+2. **unifoil/thewell 两个 proposed 条目的数据镜像与 Lite 划层**
    （UniFoil 系数层优先——民机相关性最高）。
-3. ~~litbench 补充真实 LLM 基线~~ ✅ 已完成（minimax 0.8667 / glm-5.3 0.7833）。
+3. ~~litbench 补充真实 LLM 基线~~ ✅（minimax 0.8667 / glm-5.3 0.7833）；
+   **pinnacle.suite 真实 LLM 基线待补**（每 provider ~30-40 min）。
 4. 法务确认 NC 边界后重审 drivanetpp/flowbench；TU Darmstadt 申请 TUDa 数据。
 5. ChatCFD 315 案例 / IteraSim 28 案例 / AI CFD Scientist 5 任务三个"论文自带基准"
    的资产定位与接入评估（代码许可已核：GPL/MIT-missing）。
-6. `closurechallenge.turb`（湍流封闭社区基准）按 §3 建议立条。
+6. `closurechallenge.turb`（湍流封闭社区基准，repo rmcconke/closure-challenge-benchmark
+   已克隆待核许可）按 §3 建议立条。
 
 ## 7. 方法论备注
 

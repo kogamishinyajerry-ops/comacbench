@@ -1,0 +1,48 @@
+id: pinnacle_helmholtz2d
+registry_id: pinnacle.suite
+domain: cfd
+task_type: code_exec
+model_profile: plain_llm
+assets_revision: pinnacle@2026-08-29-clone
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/pinnacle.suite/pinnacle_helmholtz2d.md
+  prompt_sha256: 771b7730a79ad7d153eb63627a300f8a24e0b95d7e8959160ff088ccb7588dea
+  assets: []
+output_contract:
+- pred.npy
+reference:
+  source: PINNacle ref（MIT，pinnacle@2026-08-29-clone）或题面解析解
+  revision: pinnacle@2026-08-29-clone
+  uncertainty_note: 参考场为上游高精度数值/解析解；阈值 = oracle 实测 rel L2 ×3 取整
+grader:
+  validity_gate: true
+  exec_kind: pinnacle_rel_l2
+  pred_shape:
+  - 10201
+  rel_l2_threshold: 0.01
+  ref_loader: data/pinnacle/ref/loaders/pinnacle_helmholtz2d.py
+  sandbox_inputs: []
+  oracle_source: data/pinnacle/oracle_scripts/pinnacle_helmholtz2d.py
+scoring:
+  weights:
+    physics: 0.7
+    requirements: 0.3
+    objective: 0.0
+    robustness: 0.0
+  note: physics=rel L2 ≤ 阈值（二值，训练类任务 CPU 非逐位确定，不做双跑）；requirements=pred.npy 契约（存在/形状/有限值）；robustness
+    权重 0
+limits:
+  cpu: 4
+  memory_gb: 8
+  wall_clock_s: 900
+  attempts: 2
+license_provenance:
+  source: github.com/i207M/PINNacle
+  license: MIT
+  status: confirmed-repo
+  revision: pinnacle@2026-08-29-clone
+  mirror_allowed: true
