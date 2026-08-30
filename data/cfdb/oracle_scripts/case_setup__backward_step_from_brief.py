@@ -1,10 +1,9 @@
-# oracle: oblique_shock_from_brief 两阶段（evidence 工具通道）——参考算例 verification/oblique_shock
+# oracle: backward_step_from_brief 两阶段（evidence 工具通道）——参考算例 validation/backward_facing_step_laminar
 import json
-import math
+import re
 from pathlib import Path
 BENCH = Path("/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench")
-GAMMA = 1.4
-R_GAS = 8314.47 / 11640.3  # 0.7143：算例 molWeight=11640.3（a1~1 标度），与上游冻结脚本一致
+PATCH = "lowerWall"
 import re
 def _read_count_list(text):
     m = re.search(r"\n\s*(\d+)\s*\n\s*\(", text)
@@ -92,63 +91,47 @@ if Path(".cfdb_assemble").exists():
     (sub / "evidence" / "samples").mkdir(parents=True, exist_ok=True)
     case_dir = Path("case")
 
-    probe_dir = None
-    for d in sorted(Path("case/postProcessing/probeLine").glob("*/"), reverse=True):
-        if (d / "U").exists():
-            probe_dir = d
-            break
-    assert probe_dir, "no probeLine output"
-    u_lines = [ln for ln in (probe_dir / "U").read_text().splitlines()
-               if ln.strip() and not ln.startswith("#")]
-    p_lines = [ln for ln in (probe_dir / "p").read_text().splitlines()
-               if ln.strip() and not ln.startswith("#")]
-    t_lines = [ln for ln in (probe_dir / "T").read_text().splitlines()
-               if ln.strip() and not ln.startswith("#")]
-    assert u_lines and p_lines and t_lines
-    ys = [round(0.001 + 0.005 * i, 3) for i in range(58)]
-    def vecs(ln):
-        return [float(v) for v in ln.replace("(", " ").replace(")", " ").split()][1:]
-    uv = vecs(u_lines[-1]); tv = vecs(t_lines[-1])
-    n = min(len(ys), len(uv) // 3, len(tv))
-    rows = []
-    for i in range(n):
-        ux, uy, uz = uv[3*i], uv[3*i+1], uv[3*i+2]
-        speed = math.sqrt(ux*ux + uy*uy + uz*uz)
-        if tv[i] <= 0:
-            continue  # 楔体固体内探针
-        rows.append((ys[i], speed / math.sqrt(GAMMA * R_GAS * tv[i])))
-    rows.sort()
-    assert rows[0][0] <= 0.15 <= rows[-1][0], "probe y coverage"
-    with open(sub / "evidence" / "samples" / "mach_profile.csv", "w") as f:
-        f.write("y,mach\n")
-        for y, m in rows:
-            f.write(f"{y:.8f},{m:.8g}\n")
-    write_manifest('oblique shock M1=2 wedge 10deg; post-shock Mach profile at x=0.6')
+    latest = latest_time_dir(case_dir)
+    tau = parse_patch_vectors(latest / "wallShearStress", PATCH)
+    xs = face_centre_coords(case_dir, PATCH, 0)
+    ys = face_centre_coords(case_dir, PATCH, 1)
+    # 下游底面 = 质心 y==0（水平面）；台阶竖直面（x≈0, y>0）必须排除——
+    # 其 tau 符号翻转会产生假再附着点
+    # 标准壁面剪切约定：-y 法向壁面上 ESI tau_x 符号相反，
+    # 取 -tau_x 使再附着泡内为负、再附着后为正（与冻结脚本符号约定一致）
+    pts = sorted((x, -t[0]) for x, yy, t in zip(xs, ys, tau)
+                 if yy < 1e-9 and x > 0.0)
+    assert len(pts) >= 10 and pts[-1][0] >= 0.05, "station coverage"
+    with open(sub / "evidence" / "samples" / "wall_shear.csv", "w") as f:
+        f.write("x,tau_w\n")
+        for x, tv in pts:
+            f.write(f"{x:.8f},{tv:.8g}\n")
+    write_manifest('laminar BFS Re=100; wall shear along lowerWall downstream of step')
     print("submission/ written")
     raise SystemExit(0)
 
 import shutil
-shutil.copytree(BENCH / "data/cfdb/verification/oblique_shock", "case", dirs_exist_ok=True)
+shutil.copytree(BENCH / "data/cfdb/validation/backward_facing_step_laminar", "case", dirs_exist_ok=True)
+# coded parabolicInlet BC 的 stale dynamicCode 构建产物指向原绝对路径，必须清除重编译
+dc = Path("case/dynamicCode")
+if dc.exists():
+    shutil.rmtree(dc)
 
 inject = (
     "\n"
-    "    probeLine\n"
+    "    wssWrite\n"
     "    {\n"
-    "        type            probes;\n"
-    "        libs            (sampling);\n"
-    "        writeControl    timeStep;\n"
-    "        writeInterval   100;\n"
-    "        fields          (U p T);\n"
-    "        probeLocations\n"
-    "        (\n"
-    + "".join(f"            (0.6 {0.001 + 0.005 * i:.3f} 0)\n" for i in range(58))
-    + "        );\n"
+    "        type            wallShearStress;\n"
+    "        libs            (fieldFunctionObjects);\n"
+    "        writeFields     yes;\n"
+    "        patches         (lowerWall);\n"
+    "        executeControl  writeTime;\n"
+    "        writeControl    writeTime;\n"
     "    }\n"
 )
 ctl = Path("case/system/controlDict")
 txt = ctl.read_text()
-if "probeLine" not in txt:
+if "wssWrite" not in txt:
     txt = txt.replace("functions\n{", "functions\n{" + inject, 1)
     ctl.write_text(txt)
-
 print("case/ written from reference case")

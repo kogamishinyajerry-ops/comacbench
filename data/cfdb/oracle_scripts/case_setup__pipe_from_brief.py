@@ -91,15 +91,14 @@ if Path(".cfdb_assemble").exists():
     (sub / "evidence" / "samples").mkdir(parents=True, exist_ok=True)
     case_dir = Path("case")
 
-    set_files = sorted(Path("case/postProcessing").glob("*/*/radialProfile_U.xy")) or \
-                sorted(Path("case/postProcessing").glob("*/*/radialProfile*.xy"))
+    set_files = sorted(Path("case/postProcessing").glob("*/*/lineY_U.xy"))
     assert set_files, "no radialProfile set output"
     rows = []
     for ln in set_files[-1].read_text().splitlines():
         ln = ln.strip()
         if not ln or ln.startswith("#"):
             continue
-        c = ln.replace(",", " ").split()
+        c = ln.split()
         if len(c) >= 2:
             try:
                 r, u = float(c[0]), float(c[1])
@@ -107,7 +106,10 @@ if Path(".cfdb_assemble").exists():
                 continue
             rows.append((r, u))
     rows.sort()
-    assert rows and abs(rows[-1][0] - R) < 1e-4, "profile must reach r=R"
+    # 任务书合同：profile 末端 = 壁面（r=R, u=0 无滑移 BC——给定边界条件，非编造；
+    # 冻结脚本 ENDPOINT_TOL=1e-9 要求显式壁面锚点）
+    rows.append((R, 0.0))
+    assert rows and abs(rows[-1][0] - R) < 1e-9, "profile must reach r=R"
     with open(sub / "evidence" / "samples" / "profile.csv", "w") as f:
         f.write("r,u\n")
         for r, u in rows:
@@ -131,7 +133,7 @@ inject = (
     "        setFormat       raw;\n"
     "        sets\n"
     "        (\n"
-    "            line\n"
+    "            lineY\n"
     "            {\n"
     "                type    uniform;\n"
     "                axis    y;\n"

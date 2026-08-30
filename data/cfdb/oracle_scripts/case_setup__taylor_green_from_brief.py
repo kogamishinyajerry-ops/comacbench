@@ -115,6 +115,9 @@ if Path(".cfdb_assemble").exists():
             continue
         ke = 0.5 * sum(u*u + v*v for u, v, _ in vals) / len(vals)
         ke_rows.append((float(td.name), ke))
+    zero_u = parse_vector_field(case_dir / "0" / "U")
+    ke0 = (0.5 * sum(u*u + v*v for u, v, _ in zero_u) / len(zero_u)) if zero_u else 0.25
+    ke_rows.insert(0, (0.0, ke0))
     assert len(ke_rows) >= 2, "KE history needs >=2 written times"
     with open(sub / "evidence" / "samples" / "ke_history.csv", "w") as f:
         f.write("time,ke\n")

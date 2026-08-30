@@ -25,9 +25,9 @@
   - verification 9 + validation 8 = **17 个 managed 任务，已 integrated**（判分侧
     docker opencfd v2312 按案例冻结 steps 真实求解 → 宿主执行冻结 compute_qoi.py
     降算 QoI → 与 held_out/qoi.json 逐键容差对账；自报 QoI 永不进判分）；
-  - case_setup 17 任务（14 evidence + 3 managed）：**evidence 工具通道 2026-08-30
-    实装**（见 §B2），blasius_plate_from_brief 已作端到端样例；oracle 逐例编写后
-    可整域验收；
+  - case_setup 17 任务：**evidence 工具通道 2026-08-30 实装并全量验收**——oracle
+    16/16 满分（14 evidence + 2 managed），cylinder_from_drawing 的 oracle 待编写
+    （按图纸 D 建算例核 cd=1.49；其 stub 可执行，结果无 oracle 背书需标注）；
   - 排除 8 案例（原因存 data/cfdb/exclusions.json，先例 cfdcode 9 排除）：
     flat_plate_su2（无 SU2 后端）、lid_driven_cavity（参考算例不完整）、
     naca0012 ×4（snappy 链几何未镜像）、dam_break（瞬态前锋 QoI 跨运行复现

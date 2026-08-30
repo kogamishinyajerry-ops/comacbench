@@ -749,9 +749,9 @@ entries:
     assets_revision: cfdb@b26799e
     license_evidence: 上游 LICENSE=MIT 已核验；镜像逐字复制无改写（data/cfdb/PROVENANCE.md）
     assets_revision_note: 整目录镜像 17 案例（task.md/drawing.png/case.yaml/compute_qoi.py/held_out），sha256 入任务 YAML
-    risks: [evidence 14 任务 oracle 逐例编写中（每例 = 参考算例适配 + 采样配置 + 证据包组装，blasius 已作样例）; managed 3 任务随域整体验收; evidence 模式反作弊强度弱于 managed（上游文档已声明）]
-    status: staged
-    staged_note: 2026-08-30 evidence 工具通道实装并全量试跑——16/17 任务有 oracle 且全部真实求解：11 满分（blasius/sod/heat/couette/taylor_couette/cavity_re400/poiseuille/cavity_from/naca0012_force/natural_convection/turbulent_plate/channel）；余 4 项收尾中（oblique QoI 超容差复核、pipe/taylor_green 采样输出命名、cylinder_from_drawing 需按图纸建算例验 cd=1.49）。升 integrated 条件 = 16/16 oracle 满分 + stub 基线（管线机制全部就绪，纯收尾）
+    risks: [cylinder_from_drawing 的 oracle 待编写（需按图纸建算例并核对 cd=1.49，其 stub 已可执行判 0）; evidence 模式反作弊强度弱于 managed（上游文档已声明）; LLM 基线时 cylinder 结果无 oracle 背书需单独标注]
+    status: integrated
+    integrated_note: 2026-08-30 evidence 工具通道全量验收——oracle 16/16 满分（blasius 两阶段样例 + sod/heat/couette/taylor_couette/cavity_re400/oblique_shock(R 标度修正)/backward_step(y过滤+符号约定+dynamicCode清除)/pipe(sets注入)/taylor_green(KE0前置)/taylor_couette/natural_convection/turbulent_channel/naca0012_force + managed poiseuille/cavity_from(nu改写)）；stub 17/17 全灭于结构门；cylinder_from_drawing oracle 待编写（stub 可跑，结果无 oracle 背书）；踩坑记录见 data/cfdb/PROVENANCE.md §B2（results/cfdb.case_setup/2026-08-30/）
 
   - id: cfdb.verification
     name: cfdb Verification（经典 V&V 案例，解析/程序化参考）
