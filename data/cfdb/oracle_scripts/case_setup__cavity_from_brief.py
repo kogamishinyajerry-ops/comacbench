@@ -1,6 +1,13 @@
-# oracle: cfdb 参考算例逐字复制（镜像 data/cfdb，上游 b26799e 已验证全跑通）
-# 路径为生成期固化的本机仓库根（沙箱内 __file__ 指向临时副本，不可用）
+# oracle: cavity_from_brief（managed）——lid_driven_cavity_re400 算例改 Re=100
+# （brief: L=0.1, U_lid=1, nu=1e-3, Re=100；held_out centerline_umax=0.665 Ghia 值。
+#   re400 算例几何/探针一致，仅 transportProperties nu 2.5e-4 -> 1e-3。）
 import shutil
 from pathlib import Path
-src = Path('/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench') / "data/cfdb/case_setup/cavity_from_brief"
-shutil.copytree(src, "case", dirs_exist_ok=True)
+
+shutil.copytree(Path("/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench")
+                / "data/cfdb/validation/lid_driven_cavity_re400", "case", dirs_exist_ok=True)
+tp = Path("case/constant/transportProperties")
+txt = tp.read_text()
+assert "2.5e-4" in txt, "unexpected nu in reference case"
+tp.write_text(txt.replace("2.5e-4", "1e-3"))
+print("case/ written (Re=100 via nu=1e-3)")

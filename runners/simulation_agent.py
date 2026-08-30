@@ -854,6 +854,9 @@ def main() -> int:
     ap.add_argument("--resume", action="store_true",
                     help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
                          "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
+    ap.add_argument("--allow-partial-oracle", action="store_true",
+                    help="oracle 模式下跳过缺 oracle_source 的任务（增量 bring-up 用："
+                         "部分案例 oracle 未编写时先验证其余；跳过记录进 logs）")
     ap.add_argument("--iterate", type=int, default=1,
                     help="迭代协议轮数上限（v0.2）：失败且可修复时把执行诊断喂回"
                          "模型修订重跑；1=单轮（默认，与既有锁定行为逐字节一致）。"
@@ -915,6 +918,9 @@ def main() -> int:
         for t in tasks:
             src = t["grader"].get("oracle_source")
             if not src:
+                if getattr(args, "allow_partial_oracle", False):
+                    print(f"[partial-oracle] 跳过（无 oracle_source）: {t.id}")
+                    continue
                 raise SystemExit(f"{t.id}: 无 oracle_source")
             p = Path(src)
             if not p.is_absolute():
@@ -931,6 +937,10 @@ def main() -> int:
                         (cand.stem, cand.read_text(encoding="utf-8")) not in companions:
                     companions.append((cand.stem + ".py",
                                        cand.read_text(encoding="utf-8")))
+        if getattr(args, "allow_partial_oracle", False):
+            before = len(tasks)
+            tasks = [t for t in tasks if t.id in oracle_cache]
+            print(f"[partial-oracle] 任务集 {before} -> {len(tasks)}（仅含已编写 oracle 的任务）")
 
     from .providers import PROVIDER_PRESETS
     model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get("model_default", "n/a")

@@ -55,7 +55,7 @@ class OpenFOAMV2312:
                    .replace("{{ case_dir }}", f"{MOUNT}/case"))
             step_timeout = float(st.get("timeout_sec") or DEFAULT_STEP_TIMEOUT)
             budget = min(step_timeout, max(30.0, total_timeout_s - (time.time() - t0)))
-            if budget <= 30.0:
+            if budget < 30.0:
                 out_steps.append({"name": st["name"], "exit": -1, "duration_s": 0.0,
                                   "timeout": True})
                 ok = False

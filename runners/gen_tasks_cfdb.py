@@ -71,8 +71,30 @@ EXCLUDE = {
 }
 
 
+# evidence 工具通道：brief 与镜像参考算例的参数匹配表（2026-08-30 逐对核验，
+# 见 report/2026-08-28-cfd-agent-survey.md）——steps 从参考算例 case.yaml 继承
+#（step 超时 ×2 作为本机执行缓冲：预算是执行资源，非判据；QoI/容差/参考不动）
+CASE_REFS = {
+    # managed case_setup 的参数匹配参考（cavity_from_brief 为 Re=100，oracle 内改 nu）
+    "backward_step_from_brief": "validation/backward_facing_step_laminar",
+    "cavity_re400_from_brief": "validation/lid_driven_cavity_re400",
+    "couette_from_brief": "verification/couette_shear",
+    "heat_conduction_from_brief": "verification/heat_conduction_1d",
+    "naca0012_force_from_brief": "validation/naca0012_sa_tmr",
+    "natural_convection_from_brief": "validation/natural_convection_cavity",
+    "oblique_shock_from_brief": "verification/oblique_shock",
+    "pipe_from_brief": "verification/pipe_poiseuille",
+    "sod_shock_from_brief": "verification/sod_shock_tube",
+    "taylor_couette_from_brief": "verification/taylor_couette",
+    "taylor_green_from_brief": "verification/taylor_green_vortex",
+    "turbulent_channel_from_brief": "validation/turbulent_channel_retau180",
+    "turbulent_plate_from_brief": "validation/turbulent_flat_plate",
+}
+
 # evidence 工具通道的 dev 侧执行步骤（agent 侧工具 = harness 代跑 OpenFOAM v2312；
-# 逐案例声明，与通道实装同批：2026-08-30 blasius 样例先行，其余 13 例待逐例标定）
+# 逐案例声明，与通道实装同批：2026-08-30 blasius 样例先行）
+CASE_REFS["poiseuille_from_brief"] = "verification/channel_poiseuille"
+CASE_REFS["cavity_from_brief"] = "validation/lid_driven_cavity_re400"
 EVIDENCE_STEPS = {
     ("case_setup", "blasius_plate_from_brief"): [
         {"name": "block_mesh", "command": "blockMesh -case {{ case_dir }}",
@@ -175,16 +197,31 @@ def _oracle_script(dom: str, cid: str) -> str:
     )
 
 
+def _resolve_steps(dom: str, cid_dir_name: str, case: dict, evidence: bool) -> list:
+    if dom == "case_setup":
+        if (dom, cid_dir_name) in EVIDENCE_STEPS:
+            return EVIDENCE_STEPS[(dom, cid_dir_name)]
+        if cid_dir_name in CASE_REFS:
+            # 从参考算例继承 steps，超时 ×2（本机执行缓冲；QoI/容差/参考不动）
+            ref_steps = ((yaml.safe_load((DATA / CASE_REFS[cid_dir_name] / "case.yaml")
+                                         .read_text(encoding="utf-8"))
+                          .get("solvers") or [{}])[0].get("steps") or [])
+            return [dict(s2, timeout_sec=int((s2.get("timeout_sec") or 300) * 2))
+                    for s2 in ref_steps]
+    return (case.get("solvers") or [{}])[0].get("steps") or []
+
+
 def build_yaml(tid: str, registry_id: str, case: dict, cdir: Path, dom: str,
                prompt_rel: str, prompt_sha: str, assets: list[dict],
                cid_dir_name: str) -> dict:
     g = case.get("execution", {}).get("setup_mode") or "managed"
     evidence = (g == "evidence")
-    steps = (EVIDENCE_STEPS.get((dom, cid_dir_name))
-             or (case.get("solvers") or [{}])[0].get("steps") or [])
+    steps = _resolve_steps(dom, cid_dir_name, case, evidence)
     budget = case.get("budget") or {}
     step_total = sum(float(s.get("timeout_sec") or 300) for s in steps)
     wall = int(budget.get("max_runtime_sec") or max(900, step_total * 1.5))
+    if dom == "case_setup":
+        wall = max(wall, 600)  # 每步独立容器 + 启动开销；上游 10s 级单容器预算不适用
     exec_kind = ("cfdb_case_setup_evidence" if evidence else
                  "cfdb_case_setup" if dom == "case_setup" else "cfdb_cfd_qoi")
     qoi_script = (case.get("outputs") or {}).get("qoi_script") or "reference/compute_qoi.py"
@@ -314,7 +351,9 @@ def main() -> int:
             else:
                 ypath.write_text(want_yaml, encoding="utf-8")
                 ppath.write_text(prompt, encoding="utf-8")
-                if not evidence:
+                # 裸 copier 模板只适用于有镜像参考算例的域（verification/validation）；
+                # case_setup 的 oracle（证据包组装/参数适配）为手工维护，生成器不覆盖
+                if not evidence and dom in ("verification", "validation"):
                     opath = DATA / "oracle_scripts" / f"{dom}__{cid_dir_name}.py"
                     opath.parent.mkdir(parents=True, exist_ok=True)
                     opath.write_text(_oracle_script(dom, cid_dir_name), encoding="utf-8")
