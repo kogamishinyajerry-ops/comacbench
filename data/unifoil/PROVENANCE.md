@@ -15,6 +15,18 @@
   zip 本体不入 git（体量），按上 sha256 可重新下载并用脚本重放。
 - 抽取含 float 宽容解析（科学计数法 CL/CD）；bad=0（63,372/63,372 全收）。
 
+## A2. 数据质量警报（2026-08-30，阻塞任务转化）
+
+- **transi 族 analysis.csv 的 CL 列不可用作真值**：全量 63,372 行的 CL ∈ [-0.05, 0.012]，
+  且在 AoA -2°..+6° 全范围无升力线斜率（斜率 ≈ -0.0003/deg，物理期望 ~-0.1/deg）——
+  这是 ADflow 优化中间态快照（convergence.pkl 依赖 baseclasses/pyOptSparse 优化框架
+  实锤），非最终气动系数。
+- CD 列量级合理（0.008 量级），但缺少可信 CL 的系数表不构成 Cl/Cd 回归任务。
+- 真系数层候选：nlf_turb_data.zip（889MB）/ ft_turb_data_*.zip（1.2-1.3GB）——
+  下载探针 2026-08-30 网络停滞未完成，待重试；或 output_*.zip（27-92GB，场数据 route，
+  成本高）。**turb_data 探针完成前不生成任务 YAML**。
+- mirror 的 CSV 保留作格式存档，任何 Cl/Cd 判分用途在警报解除前禁止。
+
 ## B. 覆盖范围与后续
 
 - transi 族（转捩档，SA + e^N）系数层已收；NLF/FT 族（nlf_turb 889MB、

@@ -67,7 +67,7 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 | DrivAerNet++ | 2406.09624 (NeurIPS D&B'24) | 8,000 车/39TB | 数据 CC BY-NC 4.0 | **registry `drivanetpp.coeff`（deferred，NC 待法务）** |
 | FlowBench | 2409.18032 | 10K+ DNS 样本 | 数据 CC BY-NC 4.0（HF 核验） | **registry `flowbench.lite`（deferred，NC 待法务）** |
 | The Well | 2412.00568 (NeurIPS D&B'24) | 15TB/16 数据集 | 代码 BSD-3/数据 CC BY 4.0 为主 | **registry `thewell.fluiddyn`（proposed，confirmed-split）** |
-| UniFoil | 2505.21124 | 50 万翼型 RANS（NLF 4,800+FT 30,000） | CC BY-SA 4.0（HF 核验） | **registry `unifoil.airfoil`（proposed，A 级——民机翼型工况最贴近）** |
+| UniFoil | 2505.21124 | 50 万翼型 RANS（NLF 4,800+FT 30,000） | CC BY-SA 4.0（HF 核验） | **registry `unifoil.airfoil`（staged，⚠ 数据质量门）**：transi analysis.csv 为优化中间态（CL 全量 ≈0 无升力线斜率，不可作真值）；真系数层在 turb_data 包（889MB+）下载探针待重试——任务生成冻结于数据质量门 |
 | Transolver | 2402.02366 | 方法（复用 6 基准） | 代码 MIT | litbench；不独立立条（无自有数据） |
 | 可压 NS 长程 rollout 基准 | 2601.22541 | 无公开代码/数据 | unknown | litbench（知识点）；数据获取待作者 |
 
@@ -111,8 +111,10 @@ litbench；其"模型发现"任务型态暂不可客观判分，不立 registry 
 1. **cfdb.case_setup 升 integrated**：14 evidence 任务需工具执行通道接入 providers
    （agent 自驱求解器提交证据包——FLAi 内核/容器 agent 方向）；3 managed 任务判分
    分支已就绪，随域整体验收。dam_break/naca0012_sa_tmr 的重纳依赖上游预算/几何修订。
-2. **unifoil/thewell 两个 proposed 条目的数据镜像与 Lite 划层**
-   （UniFoil 系数层优先——民机相关性最高）。
+2. **unifoil/thewell 数据镜像（均有外部依赖）**：unifoil = turb_data 探针重试
+   （2026-08-30 网络停滞；包内若同 transi 的简并 CL 则转 CGNS 路线评估）；
+   thewell = HF gated repo，需账号接受 PolymathicAI/the_well 条款并确认/更新
+   keychain hf-token 后重探（2026-08-30 实测 401）。
 3. ~~litbench 补充真实 LLM 基线~~ ✅（minimax 0.8667 / glm-5.3 0.7833）；
    ~~pinnacle.suite 真实 LLM 基线待补~~ ✅（glm-5.3 0.7667 / minimax 0.6667）。
 4. 法务确认 NC 边界后重审 drivanetpp/flowbench；TU Darmstadt 申请 TUDa 数据。

@@ -821,13 +821,14 @@ entries:
     env_class: data_only
     license: CC BY-SA 4.0（数据）
     license_status: confirmed-dataset
-    content: Lite 第一片=transi 族系数层已镜像（63,372 样本 / 4,618 翼型，Ma 0.10-0.85 × AoA -2..6° × Re 1e6-1e7 的 Cl/Cd 表，7.9MB，data/unifoil/）；NLF/FT 族系数层同格式待扩；场数据（CGNS 十 GB 级）不镜像
-    scoring: 系数回归（给定工况→Cl/Cd，按翼型分组 held-out 防泄漏）；任务转化路径见 data/unifoil/PROVENANCE.md §C（superwing.coeff_lite 同款）
-    env: 无执行环境（数据判分；ML 基线 torch 可选导入）
+    content: ⚠ 数据质量警报（2026-08-30）：已镜像的 transi 族 analysis.csv（63,372 行 / 4,618 翼型，7.9MB）为 ADflow 优化中间态快照——CL 列全量 ≈0（无升力线斜率），不可用作 Cl/Cd 真值；仅作格式存档。真系数层候选 = nlf_turb_data.zip（889MB）/ ft_turb_data_*.zip（1.2-1.3GB），下载探针待重试
+    scoring: 系数回归（给定工况→Cl/Cd，按翼型分组 held-out 防泄漏）；真值数据解锁后按 superwing.coeff_lite 同款生成任务
+    env: 无执行环境（数据判分）
     license_evidence: HF 数据集卡片 license=cc-by-sa-4.0（2026-08-28 核验）；源 zip sha256 + 可重放抽取脚本见 data/unifoil/PROVENANCE.md
     assets_revision: unifoil-transi-coeff@2026-08-29
-    risks: [SA 传染性：Lite 子集对外发布须同许可; transi 族为全数据集的部分切片（跨族泛化评测需扩镜像）; 任务 YAML 尚未生成（field_prediction 表格回归模式待接）]
+    risks: [数据质量: transi CL 简并（优化快照），真值待 turb_data 探针; SA 传染性：Lite 子集对外发布须同许可; 任务 YAML 被数据质量阻塞]
     status: staged
+    staged_note: 2026-08-30 可行性分析（组划分 RF 基线 + 分箱离散度）发现 CL 简并，任务生成冻结于数据质量门——这是可行性优先纪律的正确触发，不是进度延误
 
   - id: thewell.fluiddyn
     name: The Well 流体子集（15TB/16 数据集集合）
