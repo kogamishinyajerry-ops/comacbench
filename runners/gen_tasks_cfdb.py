@@ -71,6 +71,18 @@ EXCLUDE = {
 }
 
 
+# evidence 工具通道的 dev 侧执行步骤（agent 侧工具 = harness 代跑 OpenFOAM v2312；
+# 逐案例声明，与通道实装同批：2026-08-30 blasius 样例先行，其余 13 例待逐例标定）
+EVIDENCE_STEPS = {
+    ("case_setup", "blasius_plate_from_brief"): [
+        {"name": "block_mesh", "command": "blockMesh -case {{ case_dir }}",
+         "timeout_sec": 120, "critical": True},
+        {"name": "solve", "command": "simpleFoam -case {{ case_dir }}",
+         "timeout_sec": 900, "critical": True},
+    ],
+}
+
+
 def _read_no_translate(p: Path) -> str:
     if not p.exists():
         return ""
@@ -115,21 +127,34 @@ def _managed_prompt(cid: str, case: dict, dom: str) -> str:
     return "\n".join(lines)
 
 
-def _evidence_prompt(cid: str, case: dict) -> str:
-    src = case.get("execution", {}).get("evidence", {}).get("required_files") or []
+def _evidence_prompt(cid: str, case: dict, cid_dir_name: str) -> str:
+    required = (case.get("execution", {}).get("evidence", {}).get("required_files") or [])
+    task_md = DATA / "case_setup" / cid_dir_name / "visible" / "task.md"
+    brief = task_md.read_text(encoding="utf-8") if task_md.exists() else ""
     lines = [
-        f"# cfdb case_setup (evidence) — {case.get('name', cid)}",
+        f"# cfdb case_setup（evidence 工具通道）— {case.get('name', cid_dir_name)}",
         "",
-        case.get("description", "").strip(),
+        "## 两阶段交付协议（严格遵守）",
+        "你的脚本会被判分环境执行**两次**，以工作目录下的标记文件 `.cfdb_assemble` 区分：",
         "",
-        "## 交付形式（evidence 证据包，严格遵守）",
-        "输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：",
-    ] + [f"- {f}" for f in src] + [
+        "**阶段 1（首次执行，无标记）**：在当前目录创建 `case/` 子目录，写入完整可运行的",
+        "OpenFOAM 算例（`0/` `constant/` `system/`，`system/controlDict` 的 `application`",
+        "声明求解器，并按任务书配置采样/监测 functionObject）。判分环境会在 OpenFOAM",
+        "v2312 真实执行该算例（blockMesh → 求解器）：`case/` 内落运行场与",
+        "`postProcessing/` 采样输出，各步骤日志（`log.block_mesh`、`log.solve` 等）",
+        "落在**工作目录根**。",
         "",
-        "证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，",
-        "将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；",
-        "自报最终数值不进入判分，格式不符判 0）。",
+        "**阶段 2（二次执行，存在 `.cfdb_assemble` 标记）**：从 `case/` 的**运行产物**提取",
+        "原始数据，组装证据包写入当前目录（不得编造/篡改数值——判分将用冻结脚本从证据包",
+        "原始数据降算指标并与留出参考对账，自报最终值永不进入判分）：",
+    ] + [f"- {f}" for f in required] + [
         "",
+        "证据文件用 `open()` 逐文件读写（不要 import shutil——沙箱静态检查禁止）。",
+        "`manifest.json` 为 JSON 对象（至少含 solver 标识与说明字段）。",
+        "",
+        "---",
+        "",
+        brief,
     ]
     return "\n".join(lines)
 
@@ -155,7 +180,8 @@ def build_yaml(tid: str, registry_id: str, case: dict, cdir: Path, dom: str,
                cid_dir_name: str) -> dict:
     g = case.get("execution", {}).get("setup_mode") or "managed"
     evidence = (g == "evidence")
-    steps = (case.get("solvers") or [{}])[0].get("steps") or []
+    steps = (EVIDENCE_STEPS.get((dom, cid_dir_name))
+             or (case.get("solvers") or [{}])[0].get("steps") or [])
     budget = case.get("budget") or {}
     step_total = sum(float(s.get("timeout_sec") or 300) for s in steps)
     wall = int(budget.get("max_runtime_sec") or max(900, step_total * 1.5))
@@ -197,9 +223,12 @@ def build_yaml(tid: str, registry_id: str, case: dict, cdir: Path, dom: str,
             "case_ref": f"data/cfdb/{dom}/{cid_dir_name}",
             "steps": steps,
             "qoi_script": qoi_script,
+            "evidence_required_files": ((case.get("execution", {}).get("evidence", {})
+                                         .get("required_files")) or []) if evidence else [],
             "convergence_check": "全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）",
             "oracle_source": (f"data/cfdb/oracle_scripts/{dom}__{cid_dir_name}.py"
-                              if not evidence else None),
+                              if (DATA / "oracle_scripts" / f"{dom}__{cid_dir_name}.py").exists()
+                              else None),
         },
         "scoring": {
             "weights": {"physics": 0.6, "requirements": 0.4,
@@ -246,7 +275,7 @@ def main() -> int:
             tid = f"{prefix}_{cid}"
             evidence = (case.get("execution", {}).get("setup_mode") == "evidence")
             if evidence:
-                prompt = _evidence_prompt(cid, case)
+                prompt = _evidence_prompt(cid, case, cid_dir_name)
             elif dom == "case_setup":
                 # 上游任务书（visible/task.md + drawing.png）比合成题面丰富，保留原文，
                 # 前置本 harness 的交付契约头（与 _run_cfdb_task 判分契约对应）

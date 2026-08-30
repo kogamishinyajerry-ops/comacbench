@@ -328,25 +328,82 @@ _CFDB_QOI_TIMEOUT_S = 120.0
 _CFDB_DEFAULT_TOL = 0.05
 
 
+def _cfdb_compare(
+    ref_path: Path, got: dict, tols: dict, abs_tols: dict,
+) -> tuple[float, dict, int, int]:
+    """held_out 逐键容差对账（cfdb 双容差语义：零参考 QoI 用绝对容差，其余相对）。"""
+    ref = json.loads(ref_path.read_text(encoding="utf-8"))
+    hits: dict[str, Any] = {}
+    n_ok = 0
+    for k, rv in ref.items():
+        gv = got.get(k)
+        if not isinstance(gv, (int, float)) or not isinstance(rv, (int, float)):
+            hits[k] = {"status": "missing" if gv is None else "type", "ref": rv,
+                       "got": gv, "ok": False}
+            continue
+        rel = abs(float(gv) - float(rv)) / max(abs(float(rv)), 1e-12)
+        abs_diff = abs(float(gv) - float(rv))
+        if k in abs_tols:
+            ok = abs_diff <= float(abs_tols[k])
+            mode = "abs"
+        else:
+            ok = rel <= float(tols.get(k, _CFDB_DEFAULT_TOL))
+            mode = "rel"
+        hits[k] = {"status": mode, "ok": bool(ok), "rel_err": round(rel, 6),
+                   "abs_diff": round(abs_diff, 9), "got": gv, "ref": rv,
+                   "tol": float(abs_tols.get(k, tols.get(k, _CFDB_DEFAULT_TOL)))}
+        n_ok += 1 if ok else 0
+    return round(n_ok / max(1, len(ref)), 4), hits, n_ok, len(ref)
+
+
+def _cfdb_run_frozen_qoi(
+    qoi_path: Path, target_dir: Path, logs: list[str],
+) -> dict | None:
+    """冻结 QoI 脚本宿主执行（cfdb 协议：末行 stdout = JSON；失败返回 None）。"""
+    import subprocess as _sp
+    import sys as _sys
+    try:
+        rq = _sp.run([_sys.executable, "-B", str(qoi_path), str(target_dir)],
+                     capture_output=True, text=True, timeout=_CFDB_QOI_TIMEOUT_S)
+    except _sp.TimeoutExpired:
+        logs.append(f"qoi_script timeout >{_CFDB_QOI_TIMEOUT_S}s")
+        return None
+    lines = [ln for ln in rq.stdout.strip().splitlines() if ln.strip()]
+    if rq.returncode != 0 or not lines:
+        logs.append(f"qoi exit={rq.returncode} stderr={rq.stderr[-300:]}")
+        return None
+    try:
+        got = json.loads(lines[-1])
+        if not isinstance(got, dict):
+            raise ValueError("QoI 末行 JSON 顶层必须是对象")
+        return got
+    except Exception as e:  # noqa: BLE001
+        logs.append(f"qoi parse: {e!r}")
+        return None
+
+
 def _run_cfdb_task(
     task: TaskSpec, code: str, meta: dict, t0: float, env_digest: str,
     logs: list[str], applicability: dict[str, str], timeout: float,
     assets_root: Path,
 ) -> dict[str, Any]:
-    """cfdb_cfd_qoi / cfdb_case_setup（managed）：上游 GLM-CFD-Benchmark managed 语义。
+    """cfdb_cfd_qoi / cfdb_case_setup（managed + evidence 工具通道）。
 
-    管线（与 cfdb 上游 trust 机制对齐，2026-08-28 定案）：
+    managed 管线（2026-08-28 定案）：
       1. 模型脚本在沙箱 cwd 创建 case/ 完整算例（0/ constant/ system/）；
       2. 结构门：system/controlDict + constant/ + 0/ 缺一即 missing_output；
-      3. 判分侧真实求解：docker opencfd v2312 按案例冻结 steps 执行
-         （blockMesh/setFields/solve/postProcess，全部 critical 步退出 0）；
-      4. 冻结 QoI 脚本在宿主执行（sys.executable -B，cfdb 上游同款 trust
-         posture：判分材料不经模型、QoI 永不自报）；末行 stdout = JSON；
-      5. 与 held_out/qoi.json 逐键相对容差对账（per-key 容差来自案例 metrics，
-         缺省 5%）。physics = 容差内键占比；requirements = 结构完备率。
+      3. 判分侧真实求解：docker opencfd v2312 按案例冻结 steps 执行；
+      4. 冻结 QoI 脚本宿主执行（sys.executable -B）→ held_out 逐键容差对账。
+
+    evidence 工具通道（2026-08-30 实装；两阶段候选协议）：
+      1-3 同上（solver 由判分 harness 代跑 = agent 侧工具执行，产物为真实求解输出）；
+      4. 写标记 .cfdb_assemble 后**重放候选脚本**（组装阶段）：从 case/ 运行产物
+         提取原始数据组装证据包（manifest.json + evidence/*，文件清单为案例冻结
+         契约）——自报 QoI 不进入任何环节；
+      5. 证据包契约校验（清单齐全 + manifest 可解析）→ 冻结 QoI 脚本对**证据包根**
+         降算（cfdb 上游 evidence 同款：Judge runs NO solver）→ held_out 对账。
     """
     from .solvers.openfoam_v2312 import OpenFOAMV2312
-    import subprocess as _sp
     grade_t0 = time.time()
 
     def _ret(gate: int, gf: list[str], fm: str | None, subs: dict, details: dict):
@@ -403,73 +460,65 @@ def _run_cfdb_task(
                      "objective": None, "robustness": None},
                     {"steps": rr["steps"], "tail": rr["tail"][-800:]})
 
-    # 4) 冻结 QoI 脚本（宿主执行，判分材料不经模型）
+    # 4) 冻结 QoI：evidence 模式先走组装阶段 + 证据包契约，QoI 面向证据包根；
+    #    managed 模式直接对 case/ 降算（两条路径同款宿主协议，判分材料不经模型）
+    g = task["grader"]
+    is_evidence = g.get("mode") == "evidence"
+    if is_evidence:
+        # —— 工具通道第二阶段：候选脚本从运行产物组装证据包 ——
+        (iso.dir / ".cfdb_assemble").write_text("", encoding="utf-8")
+        r2 = iso.run(script, min(timeout, 300.0))
+        logs.append(f"assemble exit={r2['exit']} {r2['duration_s']}s "
+                    f"stdout_tail={r2['stdout'][-200:]!r}")
+        if r2["timeout"] or r2["exit"] != 0:
+            return _ret(0, ["timeout" if r2["timeout"] else _SCRIPT_FAIL],
+                        "timeout" if r2["timeout"] else _SCRIPT_FAIL,
+                        {"physics": 0.0, "requirements": req_ratio,
+                         "objective": None, "robustness": None},
+                        {"assemble_stderr_tail": r2["stderr"][-600:]})
+        bundle = iso.dir / "submission"   # 任务书合同：证据包根 = submission/
+        required_ev = list(g.get("evidence_required_files") or [])
+        missing_ev = [p for p in required_ev if not (bundle / p).exists()]
+        manifest_ok = False
+        try:
+            manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+            manifest_ok = isinstance(manifest, dict) and bool(manifest.get("solver"))
+        except Exception:
+            pass
+        logs.append(f"evidence missing={missing_ev} manifest_ok={manifest_ok}")
+        if missing_ev or not manifest_ok:
+            return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT,
+                        {"physics": 0.0, "requirements": req_ratio,
+                         "objective": None, "robustness": None},
+                        {"missing_evidence": missing_ev, "manifest_ok": manifest_ok})
+        qoi_target = bundle  # 证据包根 = 提交目录（cfdb evidence 语义）
+    else:
+        qoi_target = case_dir
+
     qoi_path = assets_root / g["case_ref"] / g["qoi_script"]
     if not qoi_path.exists():
         return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT,
                     {"physics": 0.0, "requirements": req_ratio,
                      "objective": None, "robustness": None},
                     {"missing": f"qoi_script: {qoi_path}"})
-    try:
-        rq = _sp.run([sys.executable, "-B", str(qoi_path), str(case_dir)],
-                     capture_output=True, text=True,
-                     timeout=_CFDB_QOI_TIMEOUT_S)
-    except _sp.TimeoutExpired:
+    got = _cfdb_run_frozen_qoi(qoi_path, qoi_target, logs)
+    if got is None:
         return _ret(0, [_SIM_FAIL], _SIM_FAIL,
                     {"physics": 0.0, "requirements": req_ratio,
                      "objective": None, "robustness": None},
-                    {"qoi_error": f"qoi_script timeout >{_CFDB_QOI_TIMEOUT_S}s"})
-    lines = [ln for ln in rq.stdout.strip().splitlines() if ln.strip()]
-    if rq.returncode != 0 or not lines:
-        return _ret(0, [_SIM_FAIL], _SIM_FAIL,
-                    {"physics": 0.0, "requirements": req_ratio,
-                     "objective": None, "robustness": None},
-                    {"qoi_error": f"exit={rq.returncode}",
-                     "qoi_stderr_tail": rq.stderr[-500:]})
-    try:
-        got = json.loads(lines[-1])
-        if not isinstance(got, dict):
-            raise ValueError("QoI 末行 JSON 顶层必须是对象")
-    except Exception as e:  # noqa: BLE001
-        return _ret(0, [_SIM_FAIL], _SIM_FAIL,
-                    {"physics": 0.0, "requirements": req_ratio,
-                     "objective": None, "robustness": None},
-                    {"qoi_error": f"parse: {e}", "qoi_stdout_tail": rq.stdout[-300:]})
+                    {"qoi_error": "frozen qoi script failed (see logs)"})
 
     # 5) held_out 容差对账
     ref_path = assets_root / task["reference"]["held_out"]["path"]
-    ref = json.loads(ref_path.read_text(encoding="utf-8"))
     tols = task["reference"].get("tolerances") or {}
     abs_tols = task["reference"].get("abs_tolerances") or {}
-    hits: dict[str, Any] = {}
-    n_ok = 0
-    for k, rv in ref.items():
-        gv = got.get(k)
-        if not isinstance(gv, (int, float)) or not isinstance(rv, (int, float)):
-            hits[k] = {"status": "missing" if gv is None else "type", "ref": rv,
-                       "got": gv, "ok": False}
-            continue
-        # 上游双容差语义（cfdb metrics）：零参考 QoI 用绝对容差，其余相对容差；
-        # 均未声明时缺省 5% 相对（abs 容差判定 |got-ref| <= abs_tol）
-        rel = abs(float(gv) - float(rv)) / max(abs(float(rv)), 1e-12)
-        abs_diff = abs(float(gv) - float(rv))
-        if k in abs_tols:
-            ok = abs_diff <= float(abs_tols[k])
-            mode = "abs"
-        else:
-            ok = rel <= float(tols.get(k, _CFDB_DEFAULT_TOL))
-            mode = "rel"
-        hits[k] = {"status": mode, "ok": bool(ok), "rel_err": round(rel, 6),
-                   "abs_diff": round(abs_diff, 9), "got": gv, "ref": rv,
-                   "tol": float(abs_tols.get(k, tols.get(k, _CFDB_DEFAULT_TOL)))}
-        n_ok += 1 if ok else 0
-    physics = round(n_ok / max(1, len(ref)), 4)
-    details = {"kind": "cfdb_managed", "hits": hits,
-               "physics_hits": f"{n_ok}/{len(ref)}",
+    physics, hits, n_ok, n_ref = _cfdb_compare(ref_path, got, tols, abs_tols)
+    details = {"kind": "cfdb_evidence" if is_evidence else "cfdb_managed",
+               "hits": hits, "physics_hits": f"{n_ok}/{n_ref}",
                "steps": rr["steps"], "solver": solver.name}
     subs = {"physics": physics, "requirements": req_ratio,
             "objective": None, "robustness": None}
-    logs.append(f"qoi hits={n_ok}/{len(ref)} physics={physics}")
+    logs.append(f"qoi hits={n_ok}/{n_ref} physics={physics}")
     return _ret(1, [], None, subs, details)
 
 
@@ -546,22 +595,11 @@ def run_task(
     if kind == "ccx_fea":
         return _run_ccx_task(task, code, meta, t0, env_digest, logs,
                              applicability, timeout)
-    if kind in ("cfdb_case_setup", "cfdb_cfd_qoi"):
+    if kind in ("cfdb_case_setup", "cfdb_cfd_qoi", "cfdb_case_setup_evidence"):
+        # evidence 工具通道已实装（2026-08-30）：两阶段候选协议——
+        # 判分 harness 代跑求解（agent 侧工具执行）→ 候选组装证据包 → 冻结 QoI 降算
         return _run_cfdb_task(task, code, meta, t0, env_digest, logs,
                               applicability, timeout, assets_root)
-    if kind == "cfdb_case_setup_evidence":
-        # 休眠契约：evidence 模式需工具执行通道（agent 自驱求解器提交证据包），
-        # 纯 LLM provider 无法诚实产出 solver log——cfdb 上游明确拒绝自报 QoI。
-        # 判分永不假装能跑：如到达此分支按环境缺失作废单题（gate=0）。
-        return build_result(task=task, adapter=ADAPTER, validity_gate=0,
-            gate_failures=["evidence_channel_missing"],
-            subscores={"physics": 0.0, "requirements": 0.0, "objective": None,
-                       "robustness": None}, score=0.0,
-            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False)},
-            timings={"agent_s": time.time() - t0, "setup_s": 0.0, "grade_s": 0.0},
-            env_digest=env_digest,
-            logs=logs + ["cfdb evidence mode dormant: needs tool-execution channel"],
-            failure_mode="evidence_channel_missing", applicability=applicability)
 
     # ---- 1) 沙箱跑脚本 → 算例目录 ----
     grade_t0 = time.time()

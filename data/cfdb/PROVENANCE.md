@@ -19,17 +19,15 @@
   normalize 规则）与参考数据一样 sha256 锚定；LLM-as-judge 永不进入任何判分路径；
   held_out 对账防"手写 qoi.json 得分"。
 
-## B. 任务转化（tasks/cfdb.*，2026-08-29 修订：34 任务 + 8 排除）
+## B. 任务转化（tasks/cfdb.*，2026-08-30 修订：34 任务 + 8 排除）
 
 - 生成器 `runners/gen_tasks_cfdb.py`（--check 可校验漂移）：
   - verification 9 + validation 8 = **17 个 managed 任务，已 integrated**（判分侧
     docker opencfd v2312 按案例冻结 steps 真实求解 → 宿主执行冻结 compute_qoi.py
     降算 QoI → 与 held_out/qoi.json 逐键容差对账；自报 QoI 永不进判分）；
-  - case_setup 17 任务保持 staged：14 个 evidence 模式（exec_kind=
-    cfdb_case_setup_evidence，**休眠**——需工具执行通道，纯 LLM provider 无法诚实
-    产出 solver log，伪造证据正是上游明确拒绝的；runner 到达即按
-    evidence_channel_missing 作废单题）+ 3 个 managed（契约就绪：managed 分支已实现，
-    题面=上游 task.md 逐字+交付契约头，随域整体验收后升 integrated）；
+  - case_setup 17 任务（14 evidence + 3 managed）：**evidence 工具通道 2026-08-30
+    实装**（见 §B2），blasius_plate_from_brief 已作端到端样例；oracle 逐例编写后
+    可整域验收；
   - 排除 8 案例（原因存 data/cfdb/exclusions.json，先例 cfdcode 9 排除）：
     flat_plate_su2（无 SU2 后端）、lid_driven_cavity（参考算例不完整）、
     naca0012 ×4（snappy 链几何未镜像）、dam_break（瞬态前锋 QoI 跨运行复现
@@ -39,6 +37,20 @@
 - oracle：data/cfdb/oracle_scripts/<dom>__<case>.py——把镜像参考算例逐字复制为
   case/（上游 b26799e 已验证全跑通）；仓库根路径生成期固化（沙箱复制脚本，
   __file__ 不可用）。oracle 与 foam oracle 同一 trust 层级：GT verbatim writer。
+
+## B2. evidence 工具通道（2026-08-30 实装）
+
+- **两阶段候选协议**（`.cfdb_assemble` 标记文件区分阶段）：
+  1. 阶段 RUN：候选脚本写 `case/` 完整算例（含任务书要求的采样 functionObject）；
+  2. 判分 harness 代跑求解（docker v2312 冻结 steps）——即 agent 侧工具执行，
+     产物为真实求解输出（场 + postProcessing + 日志在工作目录根）；
+  3. 阶段 ASSEMBLE：重放候选脚本（读标记），从 `case/` 运行产物提取原始数据
+     组装证据包 `submission/`（manifest.json + evidence/*，逐文件合同见各任务书）；
+  4. 判分：清单齐全 + manifest 可解析（fail-closed）→ 冻结 compute_qoi.py 对
+     **证据包根**降算 QoI → held_out 对账。自报数值永不进入判分；
+     Judge runs NO solver（cfdb 上游 evidence 语义，内网商业 CFD 兼容）。
+- **反作弊边界**：参考场/held_out 从不进入沙箱；候选可自由读的只有自己阶段 1 的
+  运行产物；采样配置错误 → 证据包缺数据 → 冻结脚本 fail-closed 判 0。
 
 ## B2. 判分链路定案记录（2026-08-28/29 冒烟证据）
 

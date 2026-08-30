@@ -749,9 +749,9 @@ entries:
     assets_revision: cfdb@b26799e
     license_evidence: 上游 LICENSE=MIT 已核验；镜像逐字复制无改写（data/cfdb/PROVENANCE.md）
     assets_revision_note: 整目录镜像 17 案例（task.md/drawing.png/case.yaml/compute_qoi.py/held_out），sha256 入任务 YAML
-    risks: [evidence 模式需工具执行通道（纯 LLM provider 无法诚实产出 solver log，伪造即上游拒绝的自报）——14 任务休眠中（exec_kind=cfdb_case_setup_evidence，runner 到达即 evidence_channel_missing 作废）; managed 分支已实现（同 verification 域），随域整体验收后升 integrated]
+    risks: [evidence 14 任务 oracle 逐例编写中（每例 = 参考算例适配 + 采样配置 + 证据包组装，blasius 已作样例）; managed 3 任务随域整体验收; evidence 模式反作弊强度弱于 managed（上游文档已声明）]
     status: staged
-    staged_note: 2026-08-29 契约修订（case/ 子目录 + 步骤真跑 + 双容差）；解阻路径 = 工具执行通道接入 providers（如 FLAi 内核/容器 agent）后 3 managed 先行验收、evidence 14 任务随通道开放
+    staged_note: 2026-08-30 evidence 工具通道实装（两阶段候选协议：判分 harness 代跑求解 = agent 侧工具执行 → 候选按 .cfdb_assemble 标记重组证据包 → 冻结 QoI 对证据包根降算，Judge runs NO solver 内网商业 CFD 兼容）；blasius_plate_from_brief 端到端验证满分（4/4 QoI，误差 4-10.6% 与上游 V&V 记录一致）；其余 13 例 oracle + managed 3 例验收后升 integrated
 
   - id: cfdb.verification
     name: cfdb Verification（经典 V&V 案例，解析/程序化参考）
@@ -821,12 +821,13 @@ entries:
     env_class: data_only
     license: CC BY-SA 4.0（数据）
     license_status: confirmed-dataset
-    content: 500,000+ 翼型 RANS 样本（4,800 NLF + 30,000 FT 翼型 × 宽 Re/Ma，SA + e^N 转捩），比 AirfRANS 更贴近民机翼型工况
-    scoring: 场误差 + 力系数（上游协议）；仅取系数层做 Lite（同 superwing.coeff_lite 模式）
+    content: Lite 第一片=transi 族系数层已镜像（63,372 样本 / 4,618 翼型，Ma 0.10-0.85 × AoA -2..6° × Re 1e6-1e7 的 Cl/Cd 表，7.9MB，data/unifoil/）；NLF/FT 族系数层同格式待扩；场数据（CGNS 十 GB 级）不镜像
+    scoring: 系数回归（给定工况→Cl/Cd，按翼型分组 held-out 防泄漏）；任务转化路径见 data/unifoil/PROVENANCE.md §C（superwing.coeff_lite 同款）
     env: 无执行环境（数据判分；ML 基线 torch 可选导入）
-    license_evidence: HF 数据集卡片 license=cc-by-sa-4.0（2026-08-28 核验）；SA 传染性注意同 superwing
-    risks: [全量下载体量大 -> 仅 Lite; SA 许可的派生子集发布策略]
-    status: proposed
+    license_evidence: HF 数据集卡片 license=cc-by-sa-4.0（2026-08-28 核验）；源 zip sha256 + 可重放抽取脚本见 data/unifoil/PROVENANCE.md
+    assets_revision: unifoil-transi-coeff@2026-08-29
+    risks: [SA 传染性：Lite 子集对外发布须同许可; transi 族为全数据集的部分切片（跨族泛化评测需扩镜像）; 任务 YAML 尚未生成（field_prediction 表格回归模式待接）]
+    status: staged
 
   - id: thewell.fluiddyn
     name: The Well 流体子集（15TB/16 数据集集合）
@@ -843,7 +844,25 @@ entries:
     env: 数据判分（体量按子集控制）
     license_evidence: 仓库 LICENSE=BSD-3（2026-08-28 核验）；数据许可逐子集核对后再镜像
     risks: [子集数据许可不一 -> 逐子集清点; 与 excluded.pdebench 定位区分（The Well 为其 2024 后继）]
+    blockers_note: 2026-08-29 实测 HF repo PolymathicAI/the_well 为 gated（未登录 401）——镜像前需 HF 账号接受使用条款 + token；子集选择待门开后按"最小流体子集"定 Lite
     status: proposed
+
+  - id: closurechallenge.turb
+    name: The Closure Challenge（RANS 湍流封闭 ML 社区基准）
+    source: https://arxiv.org/abs/2603.28884 + https://github.com/rmcconke/closure-challenge-benchmark
+    tier: B
+    order: 72
+    batch: v0.3-cfd-agent
+    adapter: field_prediction
+    env_class: data_only
+    license: 仓库无 LICENSE 文件（2026-08-29 克隆核验：find 无 LICENSE/COPYING，README/pyproject 无许可声明）
+    license_status: blocked-no-license
+    content: RANS 封闭 ML 社区挑战——训练数据（高保真平均场梯度）+ 3 个标准测试案例（periodic hills、square duct、NASA wall-mounted hump）+ 缩放 MAE 排行榜（评测包在姊妹仓 rmcconke/closure-challenge）；克隆实测 data/ 934MB（CBFS/DUCT/NASA_2DWMH/PH_Breuer 等）
+    scoring: 上游 eval.py 缩放 MAE（评测包姊妹仓）
+    env: 数据判分
+    license_evidence: 2026-08-29 克隆全库检索无许可声明；评测包姊妹仓许可亦未核
+    condition: 向作者澄清/等待 LICENSE 出现前不镜像数据（克隆仅本地调研用）；延续 McConkey 2021 Sci Data 策展数据线（CC BY 4.0 论文，Kaggle 数据许可另核）
+    status: deferred
 
   - id: cfdagent.metaopenfoam8
     name: MetaOpenFOAM 8 任务 NL->CFD 基准
