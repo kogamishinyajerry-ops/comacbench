@@ -1,14 +1,120 @@
-# cfdb case_setup (evidence) — Case Setup: Turbulent Flat Plate (k-omega SST RANS) from Engineering Brief
+# cfdb case_setup（evidence 工具通道）— Case Setup: Turbulent Flat Plate (k-omega SST RANS) from Engineering Brief
 
-case_setup domain, EVIDENCE mode (compressible/BL family): the agent receives only a solver-agnostic engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), drives ANY CFD solver in its own environment, and submits an evidence bundle (manifest.json + solver log + mesh report + wall Cf distribution CSV). The judge runs NO solver: it validates the bundle and reduces the two station Cf QoIs from the raw evidence with the frozen QoI script reference/compute_qoi.py on the host (linear interpolation of the submitted Cf(x) to Re_x = 5e5 and 1e6). Task physics: 2D steady incompressible zero-pressure-gradient TURBULENT flat plate, U_inf=10 m/s, nu=1e-5 m^2/s (Re_x = 1e6 per metre, plate spans 0..2e6), fully turbulent RANS with a k-omega SST class model, inlet turbulence intensity 5% / length scale 0.01 m, wall-function y+ regime. Held-out reference: 1/7-power-law engineering correlation Cf = 0.0592*Re_x^(-1/5) at the two stations (White 2006), inherited verbatim from the VALIDATED source case cases/validation/turbulent_flat_plate (docker run 2026-08-11 measured Cf 5.9%/3.0% low at the two stations, inside the 15% V&V tolerance); see provenance.yaml.
+## 两阶段交付协议（严格遵守）
+你的脚本会被判分环境执行**两次**，以工作目录下的标记文件 `.cfdb_assemble` 区分：
 
-## 交付形式（evidence 证据包，严格遵守）
-输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+**阶段 1（首次执行，无标记）**：在当前目录创建 `case/` 子目录，写入完整可运行的
+OpenFOAM 算例（`0/` `constant/` `system/`，`system/controlDict` 的 `application`
+声明求解器，并按任务书配置采样/监测 functionObject）。判分环境会在 OpenFOAM
+v2312 真实执行该算例（blockMesh → 求解器）：`case/` 内落运行场与
+`postProcessing/` 采样输出，各步骤日志（`log.block_mesh`、`log.solve` 等）
+落在**工作目录根**。
+
+**阶段 2（二次执行，存在 `.cfdb_assemble` 标记）**：从 `case/` 的**运行产物**提取
+原始数据，组装证据包写入当前目录（不得编造/篡改数值——判分将用冻结脚本从证据包
+原始数据降算指标并与留出参考对账，自报最终值永不进入判分）：
 - manifest.json
 - evidence/solver.log
 - evidence/mesh_report.txt
 - evidence/samples/cf_distribution.csv
 
-证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
-将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
-自报最终数值不进入判分，格式不符判 0）。
+证据文件用 `open()` 逐文件读写（不要 import shutil——沙箱静态检查禁止）。
+`manifest.json` 为 JSON 对象（至少含 solver 标识与说明字段）。
+
+---
+
+# 工程任务书：湍流平板边界层算例搭建（零压梯度 RANS，k-ω SST）
+
+## 任务
+
+根据本任务书与附图 `drawing.png`（带尺寸标注的平板绕流示意图），在你自己的计算环境中用**任意 CFD 求解器**（Fluent、STAR-CCM+、自研程序、OpenFOAM 等均可）从零搭建并求解一个二维零压梯度**湍流**平板边界层算例，然后按本任务书第「交付物：证据包」一节规定的格式提交证据包。
+
+评分系统**不运行你的求解器**：它校验证据包的完整性与一致性，并用冻结脚本从你提交的原始证据重新归约出待评 QoI。你自报的最终 QoI 数字不参与评分。
+
+**本算例的核心考察点是湍流建模设置**：湍流模型选择、入口湍流条件、近壁处理（y+ 与壁面函数/低雷诺数解析的匹配）都必须按下文要求显式落实，并在证据包的 manifest `notes` 字段中声明你实际采用的设置。
+
+## 流动问题定义
+
+- 二维、**定常**、不可压缩、零压梯度平板湍流边界层（RANS）。
+- 来流：均匀速度 **U_inf = 10 m/s**，方向沿 +x。
+- 流体物性：运动粘度 **ν = 1e-5 m²/s**，密度恒定。
+- 以前缘起算的当地雷诺数 Re_x = U_inf·x/ν = 1e6·x[m]；板长 2 m，Re_x 覆盖 0…2e6。
+- **从前缘起即全湍流**（不使用任何转捩模型/转捩判据；参考关联式即按全湍流假设）。
+
+## 湍流建模要求（重点）
+
+- **湍流模型**：k-ω SST 两方程涡粘模型（Menter）。若你的求解器无此模型，可选用 k-ω 类或 k-ε 类两方程模型，但必须在 manifest `notes` 中声明实际模型；评分参考（1/7 幂律关联式）对这类模型在容差内不区分。
+- **入口湍流条件**：湍流强度 **I = 5%**，湍流特征长度尺度（混合长度）**L = 0.01 m**。换算示例：k_inlet = 1.5·(I·U_inf)² = 0.375 m²/s²；ω_inlet = k^0.5/(C_μ^0.25·L) ≈ 111.8 1/s（C_μ=0.09）。若求解器用其他湍流入口变量（如涡粘比），按等效原则换算并在 notes 中说明。
+- **近壁处理**：壁面函数路线——首层网格中心 **y+ ≈ 30**（壁面函数适用区），配合与所用模型匹配的壁面函数；**不要**把首层压到 y+ ≈ 1 的低雷诺数解析区再用壁面函数（若选择低雷诺数全解析路线，须在 notes 声明并保证边界层内足够节点）。
+
+## 几何与边界
+
+计算域为二维矩形（见 `drawing.png`）：
+
+- **平板**：无厚度平板从 **x = 0**（前缘）到 **x = 2.0 m**，位于 y = 0；**入口即前缘**（入口边界直接在 x = 0，与全湍流假设一致）。
+- 计算域：x ∈ [0, 2.0] m，y ∈ [0, **0.5 m**]（远大于尾缘边界层厚度 δ ≈ 0.04 m），z 方向一层做二维计算。
+- 边界条件：
+  - **入口**（x = 0）：均匀速度 U_inf = 10 m/s，湍流条件按上文（I = 5%，L = 0.01 m）。
+  - **出口**（x = 2.0）：零法向梯度出流，压力参考值固定。
+  - **平板**（y = 0）：无滑移壁面（湍流壁面处理按上文）。
+  - **顶边界**（y = 0.5）：对称面/滑移（远场，须保持在边界层之外）。
+  - 前后两面：二维边界。
+
+## 网格与求解要求
+
+- 二维结构网格：x 向均分即可；y 向朝壁面渐变加密，使首层中心 y+ ≈ 30（演示量级：Ny ≈ 60、增长率 ≈ 18，首层高度 ~1.4e-3 m），尾缘边界层内不少于约 15 个单元。
+- 定常 RANS 迭代到残差充分收敛（建议动量与湍流方程残差 ≤ 1e-6 量级），Cf 分布不再随迭代变化。
+
+## 采样要求
+
+在收敛状态下提取**平板壁面局部表面摩擦系数沿流向分布** Cf(x)：
+
+- Cf(x) = τ_w(x) / (0.5·ρ·U_inf²)。
+- x 自前缘起算，采样范围至少覆盖 **x = 0.5 m 到 x = 1.0 m**（即 QoI 站位 Re_x = 5e5 与 1e6，评分脚本线性插值）。
+- 建议沿板均布不少于 50 个采样点（或每个壁面单元中心一个点）。
+
+## 交付物：证据包
+
+提交一个名为 `submission/` 的目录，布局如下（逐文件合同）：
+
+```
+submission/
+  manifest.json                       # 必需
+  evidence/
+    solver.log                        # 必需
+    mesh_report.txt                   # 必需
+    samples/
+      cf_distribution.csv             # 必需
+```
+
+### manifest.json（必需）
+
+JSON object，至少包含字段：
+
+- `solver`：字符串，求解器名称与版本，**必填**（证据包可追溯性锚点）。
+- `mesh_cells`：整数，网格单元数。
+- `timing`：object，含 `wall_time_sec`（数值，求解器实际运行墙钟秒数，自报）。
+- `notes`：字符串——本算例须在此声明**湍流模型、入口湍流条件实现方式、近壁处理与实测 y+ 范围**。
+
+### evidence/solver.log（必需）
+
+求解器原生日志文本，须能看到迭代推进与残差历史（含湍流方程残差）。
+
+### evidence/mesh_report.txt（必需）
+
+网格摘要文本：单元总数、类型、关键质量指标（建议含首层高度或 y+ 估计）。
+
+### evidence/samples/cf_distribution.csv（必需）
+
+平板壁面 Cf 沿流向分布，CSV 带表头，两列：
+
+| 列名 | 含义 | 单位 |
+| --- | --- | --- |
+| `x` | 距前缘的流向坐标 | m |
+| `cf` | 当地表面摩擦系数 Cf(x) = τ_w/(0.5·ρ·U_inf²) | 无量纲 |
+
+要求：数值列不得含 NaN/Inf；x 的取值范围必须覆盖 0.5…1.0 m。
+
+## 验收
+
+评分系统校验上述证据包（文件齐全非空、manifest 可解析且含 solver、CSV 可解析且数值有限），然后由冻结脚本从 `cf_distribution.csv` 在 **x = 0.5 m（Re_x = 5e5）** 与 **x = 1.0 m（Re_x = 1e6）** 两个站位线性插值得到 **cf_rex_5e5 / cf_rex_1e6**，与留出参考值（1/7 幂律工程关联式 Cf = 0.0592·Re_x^(−1/5) 的逐点值）对账。连续分为相对误差的相反数；证据包缺项、CSV 含 NaN/Inf、采样范围不覆盖任一站位等均判 invalid（fail-closed）。

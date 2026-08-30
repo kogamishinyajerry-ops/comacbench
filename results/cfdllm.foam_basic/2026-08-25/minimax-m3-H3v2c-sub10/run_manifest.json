@@ -1,0 +1,27 @@
+{
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "provider": "minimax",
+  "seed": 0,
+  "generated_at_utc": "2026-08-23T18:27:41Z",
+  "environment_digest": "sha256:4e1c28780ed130c1bba9667346af2f89b936e2e3cc29c41ab99e4335b9908c6d",
+  "environment_note": "dev 终端（外网开发机，OpenFOAM+FoamAgent，无 Fluent/StarCCM）",
+  "assets": {
+    "data/cfdllm/foam_basic/FoamBench_basic.json": "163702ebdac0c5d10592d866baba957a07bbacffe183ddb4d0edc9f508683722",
+    "data/cfdllm/foam_basic/gt_runs_status.json": "f8f276aa97d8fcf111311c374c03bdd4754c183261b5c46f15f4a8a1e5a90362"
+  },
+  "tasks_dir": "tasks/cfdllm.foam_basic",
+  "n_tasks": 110,
+  "rerun_command": "cd /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench && .venv/bin/python -m runners.simulation_agent --tasks tasks/cfdllm.foam_basic --out results/cfdllm.foam_basic/2026-08-25/minimax-m3-H3v2c-sub10 --provider minimax --seed 0 --iterate 3 --limit 10 --scaffold data/cfdllm/foam_basic/scaffold_v2.md --resume",
+  "git_commit": "43f4bba9325566d3bf40273f5b391b5db0071641",
+  "extra": {
+    "crash_tasks": 0,
+    "model": "MiniMax-M3",
+    "resumed_tasks": 0,
+    "protocol": "iterate",
+    "iterate_rounds": 3,
+    "limit": 10,
+    "harness_arm": "H3",
+    "scaffold": "data/cfdllm/foam_basic/scaffold_v2.md"
+  }
+}

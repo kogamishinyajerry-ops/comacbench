@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_taylor_green_from_brief.md
-  prompt_sha256: 458f79aab63fc6a2f1504e0ff4f161d394023da401588671e4b3f23401ac834c
+  prompt_sha256: 99a296286aa18d30bbbeec8ff78b7431fe1079662bd52a0fbaa8ed3209dacd01
   assets:
   - path: data/cfdb/case_setup/taylor_green_from_brief/case.yaml
     digest: 7ee24fe397b07aaba4008b32d9ae9fa53da31c6bae083b056bf4b25606912879
@@ -38,10 +38,24 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/taylor_green_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -dict constant/polyMesh/blockMeshDict -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: icoFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/ke_history.csv
+  - evidence/samples/line_end.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__taylor_green_from_brief.py
 scoring:
   weights:
     physics: 0.6

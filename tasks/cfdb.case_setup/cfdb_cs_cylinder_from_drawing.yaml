@@ -38,8 +38,9 @@ grader:
   case_ref: data/cfdb/case_setup/cylinder_from_drawing
   steps: []
   qoi_script: reference/compute_qoi.py
+  evidence_required_files: []
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: data/cfdb/oracle_scripts/case_setup__cylinder_from_drawing.py
+  oracle_source: null
 scoring:
   weights:
     physics: 0.6
@@ -51,7 +52,7 @@ scoring:
 limits:
   cpu: 2
   memory_gb: 4
-  wall_clock_s: 20
+  wall_clock_s: 600
   attempts: 3
 license_provenance:
   source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark

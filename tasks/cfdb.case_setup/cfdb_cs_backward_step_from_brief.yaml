@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_backward_step_from_brief.md
-  prompt_sha256: 867537835e8300ebb66e76d4e37a2a3e0fbf384a70746aa815c6c4a75877a632
+  prompt_sha256: eb239ca9fd76b6c95bf922b48a4c2576b23196901db891a019da2422ad8967b1
   assets:
   - path: data/cfdb/case_setup/backward_step_from_brief/case.yaml
     digest: bcfa3446d482648c7a3ced6149cd88d8c9eb76905d3c2939168544565d78f62b
@@ -37,8 +37,21 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/backward_step_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: simpleFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/wall_shear.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
   oracle_source: null
 scoring:

@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_sod_shock_from_brief.md
-  prompt_sha256: 2bfb2943737c96a1cfeaa0fb0f36cd25fe41f924d97cf207a783d07b71076550
+  prompt_sha256: 81c4e0c414d5e445d611156569b7de73204222b6d1c411eaa287f4790b16c20c
   assets:
   - path: data/cfdb/case_setup/sod_shock_from_brief/case.yaml
     digest: fc4daf368a963e64bee4ae5d88c8f939987f0e147454548671c0d40e35cb237a
@@ -37,10 +37,27 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/sod_shock_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: set_fields
+    command: setFields -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: rhoCentralFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/density_profile.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__sod_shock_from_brief.py
 scoring:
   weights:
     physics: 0.6

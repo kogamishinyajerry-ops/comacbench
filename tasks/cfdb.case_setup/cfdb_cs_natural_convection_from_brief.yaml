@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_natural_convection_from_brief.md
-  prompt_sha256: f7c6718b7213044532159d01aae3b378951ad27493d3e0e02ae04b89aeb0fef7
+  prompt_sha256: 9d42f18b5d5e10258333d495c3e1039b8183bf7428f912e3e1b55fbd5ed1e4b7
   assets:
   - path: data/cfdb/case_setup/natural_convection_from_brief/case.yaml
     digest: 9e5a6027e56e003b11641c4101e5a50f16ba1bfd3e2686fd5f598f346375ea80
@@ -37,10 +37,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/natural_convection_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 240
+    critical: true
+  - name: solve
+    command: buoyantSimpleFoam -case {{ run_dir }}/case
+    timeout_sec: 7200
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/hot_wall_flux.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__natural_convection_from_brief.py
 scoring:
   weights:
     physics: 0.6

@@ -1,14 +1,111 @@
-# cfdb case_setup (evidence) — Case Setup: NACA0012 alpha=0 Force Coefficients from Engineering Brief (evidence mode)
+# cfdb case_setup（evidence 工具通道）— Case Setup: NACA0012 alpha=0 Force Coefficients from Engineering Brief (evidence mode)
 
-case_setup domain EVIDENCE-mode task: the agent receives only a natural-language engineering brief (visible/task.md) and an annotated drawing (visible/drawing.png), drives ANY CFD solver in its own environment (Fluent, STAR-CCM+, in-house, OpenFOAM — the judge has NO solver), and submits an evidence bundle (manifest.json + solver log + mesh report + force-coefficient convergence history). The judge validates the bundle and recomputes the QoIs from the raw evidence with the frozen script reference/compute_qoi.py on the host (tail-mean of the steady force history). Task physics: NACA0012 symmetric airfoil at alpha = 0 deg, Re = 6e6, M = 0.3 (low-Mach RANS), chord c = 1 m. QoIs: cl and cd; held-out reference = Ladson 1988 (NASA TM-4074) experiment, cl = 0.0, cd = 0.0086. Task physics inherited from cases/validation/naca0012 (case id naca0012_a0); the golden evidence bundle is converted from a REAL docker run of that case (runs/20260811T093058Z_naca0012_a0_openfoam_6ae74883) — the first time the alpha=0 configuration was actually executed; see provenance.yaml.
+## 两阶段交付协议（严格遵守）
+你的脚本会被判分环境执行**两次**，以工作目录下的标记文件 `.cfdb_assemble` 区分：
 
-## 交付形式（evidence 证据包，严格遵守）
-输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+**阶段 1（首次执行，无标记）**：在当前目录创建 `case/` 子目录，写入完整可运行的
+OpenFOAM 算例（`0/` `constant/` `system/`，`system/controlDict` 的 `application`
+声明求解器，并按任务书配置采样/监测 functionObject）。判分环境会在 OpenFOAM
+v2312 真实执行该算例（blockMesh → 求解器）：`case/` 内落运行场与
+`postProcessing/` 采样输出，各步骤日志（`log.block_mesh`、`log.solve` 等）
+落在**工作目录根**。
+
+**阶段 2（二次执行，存在 `.cfdb_assemble` 标记）**：从 `case/` 的**运行产物**提取
+原始数据，组装证据包写入当前目录（不得编造/篡改数值——判分将用冻结脚本从证据包
+原始数据降算指标并与留出参考对账，自报最终值永不进入判分）：
 - manifest.json
 - evidence/solver.log
 - evidence/mesh_report.txt
 - evidence/force_history.csv
 
-证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
-将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
-自报最终数值不进入判分，格式不符判 0）。
+证据文件用 `open()` 逐文件读写（不要 import shutil——沙箱静态检查禁止）。
+`manifest.json` 为 JSON 对象（至少含 solver 标识与说明字段）。
+
+---
+
+# 工程任务书：NACA0012 翼型 α=0° 定常气动力算例搭建与计算
+
+## 任务
+
+根据本任务书与附图 `drawing.png`（带尺寸标注的翼型示意图），在你自己的计算环境里用**任意 CFD 求解器**（Fluent、STAR-CCM+、自研代码、OpenFOAM 等均可）搭建并计算一个 **NACA0012 对称翼型零攻角定常绕流**算例，然后按本任务书第「交付物」节规定的格式提交**证据包**。
+
+评分系统不运行你的求解器：它校验证据包的完整性与一致性，并用冻结的归约脚本从你的原始证据（升阻力系数收敛历史）重新计算质量指标 QoI，与留出的实验参考值对账。**不要在证据包里自报最终 QoI 数值**——被评分的数字一律由归约脚本从原始证据重算。
+
+## 几何与来流条件
+
+- 翼型：**NACA0012**（对称翼型，最大厚度 12% 弦长），弦长 **c = 1 m**，前缘位于 (0, 0)，弦线沿 x 轴，见 `drawing.png`。NACA 四位数翼型坐标可按标准厚度方程生成，属公开资料。
+- 攻角 **α = 0°**（来流沿 +x 方向）。
+- 远场边界距翼型各方向至少 **15c**。
+- 来流速度 **U_inf = 100 m/s**，运动粘度 **ν = 1.6667e-5 m²/s**，即基于弦长的雷诺数 **Re = U_inf·c/ν = 6.0×10⁶**。
+- 名义马赫数 **M = 0.3**（低马赫，可按不可压缩或低马赫可压缩处理，二选一并在 manifest 的 notes 里说明）。
+- 参考面积：剖面（单位展长）气动力系数，即 **A_ref = c × 单位展长**。
+
+## 求解要求
+
+- **定常 RANS**，湍流模型用 Spalart–Allmaras（SA）或同级一方程/两方程模型，**必须在 manifest 中声明所用湍流模型与近壁处理方式**（低 Re 积分 y+ ≤ 1 量级，或壁面函数 y+ ≈ 30–300），并据此设计壁面网格。
+- 求解需收敛到定常：残差下降至少 3 个量级以上，且升阻力系数随迭代进入平稳平台（末段波动远小于与实验值的偏差量级）。
+- 网格量级参考：演示量级约 1×10⁴ 个单元即可（本任务考「正确搭建 + 正确声明 + 正确提交证据」，不是网格收敛性研究）。
+
+## 质量指标（QoI）
+
+- **cl**：剖面升力系数（对称翼型零攻角，实验参考值为 0）；
+- **cd**：剖面阻力系数。
+
+归约方式：从 `evidence/force_history.csv` 的收敛历史取**末段平均**——最后 20% 数据行（至少 5 行）的 cl、cd 各自算术平均。
+
+## 交付物（证据包合同，逐文件逐列）
+
+提交一个目录，布局**严格**如下：
+
+```
+submission/
+  manifest.json
+  evidence/
+    solver.log
+    mesh_report.txt
+    force_history.csv
+```
+
+### `manifest.json`（必需，JSON object）
+
+```json
+{
+  "solver": "<求解器名称与版本，如 'Fluent 2024R1' 或 'STAR-CCM+ 2402'>",
+  "mesh_cells": <整数，网格单元数>,
+  "timing": {"wall_time_sec": <求解器实际墙钟秒数，数值>},
+  "notes": "<自由文本：必须声明湍流模型与近壁处理方式，以及可压/不可压缩处理，例如 'Spalart-Allmaras, low-Re y+ ~ 1, incompressible'>"
+}
+```
+
+- `solver` 字段必须是非空字符串（证据模式的可追溯锚点，缺失即判无效）。
+- `timing.wall_time_sec` 为自报求解墙钟，用于预算门；缺失时预算门语义降级（只门控评分端的归约时钟）。
+
+### `evidence/solver.log`（必需，非空文本）
+
+求解器原生日志，需能看到残差历史与最终收敛状态（直接从求解器输出拷贝，不要手工改写数字）。
+
+### `evidence/mesh_report.txt`（必需，非空文本）
+
+网格摘要：单元总数与基本质量信息（如最小/最大正交质量或等效指标），文本格式自由。
+
+### `evidence/force_history.csv`（必需，CSV）
+
+升阻力系数收敛历史，归约脚本的唯一 QoI 输入。格式**严格**：
+
+- 表头一行，恰为：`iter,cl,cd`
+- 之后每行对应定常求解的一个记录迭代：
+  - `iter`：迭代序号，数值，**单调非降**；
+  - `cl`：该迭代的剖面升力系数，数值；
+  - `cd`：该迭代的剖面阻力系数，数值。
+- 至少 **10 行数据**（否则不足以称为收敛历史，归约脚本拒绝）。
+- 记录间隔自定（如每 50 迭代一行），但必须覆盖到计算结束。
+- 所有数值格不得出现 NaN/Inf。
+
+### 通用约束（评分端对所有 CSV 生效）
+
+- 每个 CSV 必须可解析、含表头；数值格必须有限。
+- 名为 `time`/`t`/`iter`/`iteration`/`step`/`timestep` 的列必须全数值且单调非降（本任务的 `iter` 列即受此约束）。
+
+## 验收
+
+评分系统校验上述证据包，运行冻结归约脚本得到 **cl** 与 **cd**，与留出的实验参考值（Ladson 1988，NASA TM-4074，α=0°）对账：误差越小，连续得分越高（score = −平均相对误差；cl 参考值为 0，按绝对误差计）。证据文件缺失/为空、manifest 不可解析或缺 `solver`、CSV 不可解析或格式违反上述合同，均直接判无效。

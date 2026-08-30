@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_blasius_plate_from_brief.md
-  prompt_sha256: ee5f61131b4b19ac3c7aa207fb36e5d7130fd96e2cd557c2b43b1bbb6597fd02
+  prompt_sha256: c1df5190e6e282321481bd2adf8bef4a47398b17e392bdbab7a81a6ae9d07030
   assets:
   - path: data/cfdb/case_setup/blasius_plate_from_brief/case.yaml
     digest: ac99b8ec839fea5efa57ba9090fbc69ae65222558cbe644eb2a796fbdad514f4
@@ -40,10 +40,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/blasius_plate_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ case_dir }}
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: simpleFoam -case {{ case_dir }}
+    timeout_sec: 900
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/cf_distribution.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__blasius_plate_from_brief.py
 scoring:
   weights:
     physics: 0.6

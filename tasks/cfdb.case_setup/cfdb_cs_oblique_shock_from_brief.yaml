@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_oblique_shock_from_brief.md
-  prompt_sha256: 8cdf16363de9e5d2ecf007e10dbaff6c82c690ce6f9ade9178bd10ebab0c2166
+  prompt_sha256: edb17787341e53608bb351adcc77efcddc6deda5c5dd8124c87e26f0d618ad28
   assets:
   - path: data/cfdb/case_setup/oblique_shock_from_brief/case.yaml
     digest: c059b07f085d9c8e3fe47872e54075f37ae5380925631a6a39029ac860785006
@@ -37,10 +37,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/oblique_shock_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: rhoCentralFoam -case {{ run_dir }}/case
+    timeout_sec: 1680
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/mach_profile.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__oblique_shock_from_brief.py
 scoring:
   weights:
     physics: 0.6

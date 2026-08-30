@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_couette_from_brief.md
-  prompt_sha256: d704b7275ac0f17cb96fe93f0aa2543b11147c0313f31801c4cdcde297306d85
+  prompt_sha256: c72ec9e2a50858e50962a31a8c87cdecfba9572d57c3ec53fae0eb83cb257a56
   assets:
   - path: data/cfdb/case_setup/couette_from_brief/case.yaml
     digest: 39b6a589b0248d329b525be647c8b893a68b5e201f83e47c432c50fabbaab9e8
@@ -36,10 +36,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/couette_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: icoFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/profile.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__couette_from_brief.py
 scoring:
   weights:
     physics: 0.6

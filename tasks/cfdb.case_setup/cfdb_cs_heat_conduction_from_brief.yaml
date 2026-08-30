@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_heat_conduction_from_brief.md
-  prompt_sha256: fa0c9a9d7d485495cd204e858aaf31fc404f2471cb17d5a1cc8bdfb3c9ba39e7
+  prompt_sha256: 442cdc08db790295a43a7e3266fd446e6152afe060151e3970046d1378827059
   assets:
   - path: data/cfdb/case_setup/heat_conduction_from_brief/case.yaml
     digest: aa53cf88f1bdd262cc0b81f1926fc8e3b0fe8cd9f6f0f00f3d934ffe0f137d04
@@ -37,10 +37,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/heat_conduction_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: laplacianFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/profile.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__heat_conduction_from_brief.py
 scoring:
   weights:
     physics: 0.6

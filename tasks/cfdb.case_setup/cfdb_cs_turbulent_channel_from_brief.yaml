@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_turbulent_channel_from_brief.md
-  prompt_sha256: 4b25330a8848e2ba277d9ca7caf4ada00e68c8551c040d0f2908830e7b1c392d
+  prompt_sha256: 0a156f7e8dd69ecd793864fa0dc00eeb29736af87c4fe27ff5e7549a702bcb49
   assets:
   - path: data/cfdb/case_setup/turbulent_channel_from_brief/case.yaml
     digest: cfff74368ada5c75f5688766b487b69d00bff2f5642e4f163d79fd9ff22c8051
@@ -37,10 +37,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/turbulent_channel_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: simpleFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/samples/wall_shear.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__turbulent_channel_from_brief.py
 scoring:
   weights:
     physics: 0.6

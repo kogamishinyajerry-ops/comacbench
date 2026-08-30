@@ -36,8 +36,17 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: managed
   case_ref: data/cfdb/case_setup/poiseuille_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ run_dir }}/case
+    timeout_sec: 120
+    critical: true
+  - name: solve
+    command: icoFoam -case {{ run_dir }}/case
+    timeout_sec: 1080
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files: []
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
   oracle_source: data/cfdb/oracle_scripts/case_setup__poiseuille_from_brief.py
 scoring:
@@ -51,7 +60,7 @@ scoring:
 limits:
   cpu: 2
   memory_gb: 4
-  wall_clock_s: 360
+  wall_clock_s: 600
   attempts: 3
 license_provenance:
   source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark

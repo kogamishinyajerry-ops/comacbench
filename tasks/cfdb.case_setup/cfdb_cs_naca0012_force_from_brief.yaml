@@ -11,7 +11,7 @@ allowed_tools:
 - openfoam
 input:
   prompt_file: tasks/cfdb.case_setup/cfdb_cs_naca0012_force_from_brief.md
-  prompt_sha256: b9eafa12a03edb484a871406faf337da7d71f69899f4205a5753aab0d4a610fb
+  prompt_sha256: d67d6bcd5fa9aa157c43fc3898f00c1ce8041e31b35383b07d2361dbf1f2a411
   assets:
   - path: data/cfdb/case_setup/naca0012_force_from_brief/case.yaml
     digest: c366ab1038a27e1e22b8c5f5a03a6d3fe442112bc62d293533731ec2443926d5
@@ -39,10 +39,23 @@ grader:
   solver_backend: openfoam-v2312-docker
   mode: evidence
   case_ref: data/cfdb/case_setup/naca0012_force_from_brief
-  steps: []
+  steps:
+  - name: block_mesh
+    command: blockMesh -case {{ case_dir }}
+    timeout_sec: 240
+    critical: true
+  - name: solve
+    command: simpleFoam -case {{ case_dir }}
+    timeout_sec: 1200
+    critical: true
   qoi_script: reference/compute_qoi.py
+  evidence_required_files:
+  - manifest.json
+  - evidence/solver.log
+  - evidence/mesh_report.txt
+  - evidence/force_history.csv
   convergence_check: 全部 critical steps 退出 0 + 冻结 QoI 脚本成功降算（LLM-judge 永不进判分）
-  oracle_source: null
+  oracle_source: data/cfdb/oracle_scripts/case_setup__naca0012_force_from_brief.py
 scoring:
   weights:
     physics: 0.6

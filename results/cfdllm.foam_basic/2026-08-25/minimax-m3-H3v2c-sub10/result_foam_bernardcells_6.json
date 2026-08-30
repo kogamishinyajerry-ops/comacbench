@@ -1,0 +1,42 @@
+{
+  "task_id": "foam_bernardcells_6",
+  "registry_id": "cfdllm.foam_basic",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.4,
+  "artifacts": {
+    "code": "\"import os\\n\\ndef w(path, text):\\n    d = os.path.dirname(path)\\n    if d:\\n        os.makedirs(d, exist_ok=True)\\n    with open(path, \\\"w\\\") as f:\\n        f.write(text)\\n\\n# Bernard cell: 9 x 1 x 2 m, hot bottom 305 K / cold top 290 K, laminar\\nLX, LY, LZ = 9.0, 1.0, 2.0\\nT_HOT, T_COLD = 305.0, 290.0\\nDT, END, WRITE = 1.0, 1000.0, 50.0\\nNX, NY, NZ = 90, 10, 1  # 2D-like: Z = 1 segment; total = 900 cells (≤5000)\\n\\nw(\\\"system/controlDict\\\",\\n    \\\"FoamFile { format ascii; class dictionary; object controlDict; \\\"\\n    \\\"location \\\\\\\"system/controlDict\\\\\\\"; }\\\\n\\\"\\n    \\\"application     buoyantFoam;\\\\n\\\"\\n    \\\"startFrom       latestTime;\\\\n\\\"\\n    \\\"startTime       0;\\\\n\\\"\\n    \\\"stopAt          endTime;\\\\n\\\"\\n    \\\"endTime         \\\" + str(END) + \\\";\\\\n\\\"\\n    \\\"deltaT          \\\" + str(DT) + \\\";\\\\n\\\"\\n    \\\"writeControl    runTime;\\\\n\\\"\\n    \\\"writeInterval   \\\" + str(WRITE) + \\\";\\\\n\\\"\\n    \\\"purgeWrite      0;\\\\n\\\"\\n    \\\"writeFormat     ascii;\\\\n\\\"\\n    \\\"writePrecision  6;\\\\n\\\"\\n    \\\"timeFormat      general;\\\\n\\\"\\n    \\\"runTimeModifiable true;\\\\n\\\"\\n)\\n\\nw(\\\"system/fvSchemes\\\",\\n    \\\"FoamFile { format ascii; class dictionary; object fvSchemes; \\\"\\n    \\\"location \\\\\\\"system/fvSchemes\\\\\\\"; }\\\\n\\\"\\n    \\\"ddtSchemes { default Euler; }\\\\n\\\"\\n    \\\"gradSchemes { default Gauss linear; }\\\\n\\\"\\n    \\\"divSchemes\\\\n\\\"\\n    \\\"{\\\\n\\\"\\n    \\\"    default none;\\\\n\\\"\\n    \\\"    div(phi,U)  bounded Gauss limitedLinear 0.2;\\\\n\\\"\\n    \\\"    div(phi,K)  bounded Gauss limitedLinear 0.2;\\\\n\\\"\\n    \\\"    div(phi,h)  bounded Gauss limitedLinear 0.2;\\\\n\\\"\\n    \\\"    div(phi,T)  bounded Gauss limitedLinear 0.2;\\\\n\\\"\\n    \\\"    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;\\\\n\\\"\\n    \\\"}\\\\n\\\"\\n    \\\"laplacianSchemes { default Gauss linear corrected; }\\\\n\\\"\\n    \\\"interpolationSchemes { default linear; }\\\\n\\\"\\n    \\\"snGradSchemes { default corrected; }\\\\n\\\"\\n)\\n\\nw(\\\"system/fvSolution\\\",\\n    \\\"FoamFile { format ascii; class dictionary; object fvSolution; \\\"\\n    \\\"location \\\\\\\"system/fvSolution\\\\\\\"; }\\\\n\\\"\\n    \\\"solvers\\\\n\\\"\\n    \\\"{\\\\n\\\"\\n    \\\"    p_rgh { solver GAMG; tolerance 1e-7; relTol 0.01; \\\"\\n    \\\"smoother DICGaussSeidel; }\\\\n\\\"\\n    \\\"    p_rghFinal { solver GAMG; tolerance 1e-7; relTol 0; \\\"\\n    \\\"smoother DICGaussSeidel; }\\\\n\\\"\\n    \\\"    \\\\\\\"(U|h|k|epsilon|omega)\\\\\\\"\\\\n\\\"\\n    \\\"    {\\\\n\\\"\\n    \\\"        solver PBiCGStab; preconditioner DILU; \\\"\\n    \\\"tolerance 1e-8; relTol 0.1;\\\\n\\\"\\n    \\\"    }\\\\n\\\"\\n    \\\"    \\\\\\\"(U|h|k|epsilon|omega)Final\\\\\\\"\\\\n\\\"\\n    \\\"    {\\\\n\\\"\\n    \\\"        solver PBiCGStab; preconditioner DILU; \\\"\\n    \\\"tolerance 1e-8; relTol 0;\\\\n\\\"\\n    \\\"    }\\\\n\\\"\\n    \\\"    \\\\\\\"(rho|rhoFinal)\\\\\\\"\\\\n\\\"\\n    \\\"    {\\\\n\\\"\\n    \\\"        solver PBiCGStab; preconditioner DILU; \\\"\\n    \\\"tolerance 1e-8; relTol 0;\\\\n\\\"\\n    \\\"    }\\\\n\\\"\\n    \\\"}\\\\n\\\"\\n    \\\"PIMPLE\\\\n\\\"\\n    \\\"{\\\\n\\\"\\n    \\\"    momentumPredictor no;\\\\n\\\"\\n    \\\"    nNonOrthogonalCorrectors 0;\\\\n\\\"\\n    \\\"    pRefCell 0;\\\\n\\\"\\n    \\\"    pRefValue 0;\\\\n\\\"\\n    \\\"}\\\\n\\\"\\n    \\\"relaxationFactors { equations { \\\\\\\".*\\\\\\\" 1; } }\\\\n\\\"\\n)\\n\\nw(\\\"system/blockMeshDict\\\",\\n    \\\"FoamFile { format ascii; class dictionary; object blockMeshDict; \\\"\\n    \\\"location \\\\\\\"system/blockMeshDict\\\\\\\"; }\\\\n\\\"\\n    \\\"convertToMeters 1;\\\\n\\\"\\n    \\\"vertices (\\\\n\\\"\\n    \\\"    (0 0 0) (\\\" + str(LX) + \\\" 0 0) (\\\" + str(LX) + \\\" \\\" + str(LY) + \\\" 0) (0 \\\" + str(LY) + \\\" 0)\\\\n\\\"\\n    \\\"    (0 0 \\\" + str(LZ) + \\\") (\\\" + str(LX) + \\\" 0 \\\" + str(LZ) + \\\") (\\\"\\n    + str(LX) + \\\" \\\" + str(LY) + \\\" \\\" + str(LZ) + \\\") (0 \\\" + str(LY) + \\\" \\\" + str(LZ) + \\\")\\\\n\\\"\\n    \\\");\\\\n\\\"\\n    \\\"blocks ( hex (0 1 2 3 4 5 6 7) (\\\" + str(NX) + \\\" \\\" + str(NY) + \\\" \\\" + str(NZ)\\n    + \\\") simpleGrading (1 1 1) );\\\\n\\\"\\n    \\\"boundary (\\\\n\\\"\\n    \\\"    bottom { type wall; faces ((0 1 5 4)); }\\\\n\\\"\\n    \\\"    top    { type wall; faces ((3 2 6 7)); }\\\\n\\\"\\n    \\\"    frontAndBack { type empty; faces ((0 1 2 3) (4 5 6 7)); }\\\\n\\\"\\n    \\\"    inlet  { type patch; faces ((0 3 7 4)); }\\\\n\\\"\\n    \\\"    outlet { type patch; faces ((1 2 6 5)); }\\\\n\\\"\\n    \\\");\\\\n\\\"\\n)\\n\\nw(\\\"constant/physicalProperties\\\",\\n    \\\"FoamFile { format ascii; class dictionary; object physicalProperties; \\\"\\n    \\\"location \\\\\\\"constant/physicalProperties\\\\\\\"; }\\\\n\\\"\\n    \\\"thermoType\\\\n\\\"\\n    \\\"{\\\\n\\\"\\n    \\\"    type            heRhoThermo;\\\\n\\\"\\n    \\\"    mixture         pureMixture;\\\\n\\\"\\n    \\\"    transport       const;\\\\n\\\"\\n    \\\"    thermo          hConst;\\\\n\\\"\\n    \\\"  \"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"solver\": \"openfoam10-docker\", \"exit\": 0, \"last_time\": \"1000\", \"exec_ok\": true, \"nmse\": 9999.0, \"nmse_per_field\": {}, \"nmse_score\": 0.0}",
+    "iteration": "{\"rounds_used\": 1, \"iterate_max\": 3, \"converged\": true}"
+  },
+  "timings": {
+    "agent_s": 448.848,
+    "setup_s": 0.0,
+    "grade_s": 382.478
+  },
+  "environment_digest": "sha256:4e1c28780ed130c1bba9667346af2f89b936e2e3cc29c41ab99e4335b9908c6d",
+  "assets_revision": "foambasic@3b46d30+kaggle_v1+gt_runs_2026-08-19",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "structure present=7/7 missing=[]",
+    "solver openfoam10-docker ok=True exit=0 382.4s last_time=1000",
+    "nmse=9999 score=0.0"
+  ]
+}

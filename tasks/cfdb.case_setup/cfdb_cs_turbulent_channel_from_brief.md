@@ -1,14 +1,114 @@
-# cfdb case_setup (evidence) — Case Setup: Turbulent Channel Re_tau=180 from Engineering Brief (evidence mode)
+# cfdb case_setup（evidence 工具通道）— Case Setup: Turbulent Channel Re_tau=180 from Engineering Brief (evidence mode)
 
-case_setup domain EVIDENCE-mode task: the agent receives only a natural-language engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), drives ANY CFD solver in its own environment (Fluent, STAR-CCM+, in-house, OpenFOAM — the judge has NO solver), and submits an evidence bundle (manifest.json + solver log + mesh report + wall-shear samples). The judge validates the bundle and recomputes the QoI from the raw evidence with the frozen script reference/compute_qoi.py on the host. Task physics: fully developed turbulent plane channel at Re_tau = 180 (half-height h = 1 m, bulk velocity U_b = 1 m/s imposed, nu = 3.571429e-4 m^2/s so Re_b = 2800), steady RANS with declared turbulence model and near-wall treatment. QoI cf_bulk = tau_w/(0.5*rho*U_b^2); held-out reference = published Moser, Kim & Mansour (1999) DNS value Cf = 8.18e-3. Task physics and golden measurement (Cf = 7.842e-3, 4.13% low, docker OpenFOAM v2312 kOmegaSST on the 2048-cell demo mesh) inherited from cases/validation/turbulent_channel_retau180; see provenance.yaml.
+## 两阶段交付协议（严格遵守）
+你的脚本会被判分环境执行**两次**，以工作目录下的标记文件 `.cfdb_assemble` 区分：
 
-## 交付形式（evidence 证据包，严格遵守）
-输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+**阶段 1（首次执行，无标记）**：在当前目录创建 `case/` 子目录，写入完整可运行的
+OpenFOAM 算例（`0/` `constant/` `system/`，`system/controlDict` 的 `application`
+声明求解器，并按任务书配置采样/监测 functionObject）。判分环境会在 OpenFOAM
+v2312 真实执行该算例（blockMesh → 求解器）：`case/` 内落运行场与
+`postProcessing/` 采样输出，各步骤日志（`log.block_mesh`、`log.solve` 等）
+落在**工作目录根**。
+
+**阶段 2（二次执行，存在 `.cfdb_assemble` 标记）**：从 `case/` 的**运行产物**提取
+原始数据，组装证据包写入当前目录（不得编造/篡改数值——判分将用冻结脚本从证据包
+原始数据降算指标并与留出参考对账，自报最终值永不进入判分）：
 - manifest.json
 - evidence/solver.log
 - evidence/mesh_report.txt
 - evidence/samples/wall_shear.csv
 
-证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
-将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
-自报最终数值不进入判分，格式不符判 0）。
+证据文件用 `open()` 逐文件读写（不要 import shutil——沙箱静态检查禁止）。
+`manifest.json` 为 JSON 对象（至少含 solver 标识与说明字段）。
+
+---
+
+# 工程任务书：全发展湍流槽道流算例搭建与计算（Re_tau = 180）
+
+## 任务
+
+根据本任务书与附图 `drawing.png`（带尺寸标注的槽道示意图），在你自己的计算环境里用**任意 CFD 求解器**（Fluent、STAR-CCM+、自研代码、OpenFOAM 等均可）搭建并计算一个**全发展湍流平板槽道流**算例，然后按本任务书第「交付物」节规定的格式提交**证据包**。
+
+评分系统不运行你的求解器：它校验证据包的完整性与一致性，并用冻结的归约脚本从你的原始证据（壁面剪应力采样）重新计算质量指标 QoI，与留出的参考值对账。**不要在证据包里自报最终 QoI 数值**——被评分的数字一律由归约脚本从原始证据重算。
+
+## 几何与流动参数
+
+- 平板槽道：半高 **h = 1 m**（全高 2h = 2 m），流向周期长度 **Lx = 2πh ≈ 6.283 m**，展向周期长度 **Lz = πh ≈ 3.142 m**，见 `drawing.png`。
+- 流向（x）与展向（z）均为**周期边界**；上下壁面（y = 0 与 y = 2h）为**无滑移壁面**。
+- 不可压缩牛顿流体，运动粘度 **ν = 3.571429e-4 m²/s**。参考密度取 **ρ = 1 kg/m³**（不可压缩问题中密度为任意参考值，本任务统一取 1）。
+- 驱动方式：保持**体积流量恒定**，即体平均（bulk）速度 **U_b = 1 m/s**（可用恒定质量流驱动，或迭代调整压力梯度使 U_b 收敛到 1 m/s）。
+- 由此 Re_b = U_b·h/ν = 2800，对应摩擦雷诺数 **Re_tau ≈ 180**（湍流，全发展）。
+
+## 求解要求
+
+- 稳态 RANS（或能达到统计定常的等效方法），**必须在 manifest 中声明所用的湍流模型与近壁处理方式**（见下）。
+- 近壁处理二选一，并据此设计壁面网格：
+  - **低 Re 积分到壁面**：第一个壁面单元中心满足 y+ ≤ 1 量级；
+  - **壁面函数**：第一个壁面单元中心落在对数律区（y+ ≈ 30–300）。
+- 求解需收敛：动量/连续性残差下降至少 3 个量级以上，且壁面剪应力（或驱动压力梯度）随迭代达到平稳平台。
+- 网格量级参考：演示量级约 2000–20000 个单元即可（本任务考「正确搭建 + 正确声明 + 正确提交证据」，不是网格收敛性研究）。
+
+## 质量指标（QoI）
+
+本体摩擦系数（基于体速度）：
+
+**Cf = τ_w / (0.5 · ρ · U_b²)**
+
+其中 τ_w 为两侧壁面剪应力流向分量的面积平均幅值。归约脚本从 `evidence/samples/wall_shear.csv` 的全部采样行取 |tau_w_x| 的算术平均作为 τ_w（全发展槽道流沿 x、z 统计均匀，普通平均即面积平均），再按上式、以 ρ = 1、U_b = 1 归一化。
+
+## 交付物（证据包合同，逐文件逐列）
+
+提交一个目录，布局**严格**如下：
+
+```
+submission/
+  manifest.json
+  evidence/
+    solver.log
+    mesh_report.txt
+    samples/
+      wall_shear.csv
+```
+
+### `manifest.json`（必需，JSON object）
+
+```json
+{
+  "solver": "<求解器名称与版本，如 'Fluent 2024R1' 或 'OpenFOAM 2312 simpleFoam'>",
+  "mesh_cells": <整数，网格单元数>,
+  "timing": {"wall_time_sec": <求解器实际墙钟秒数，数值>},
+  "notes": "<自由文本：必须声明湍流模型与近壁处理方式，例如 'k-omega SST, low-Re integration, first-cell y+ ~ 1'>"
+}
+```
+
+- `solver` 字段必须是非空字符串（证据模式的可追溯锚点，缺失即判无效）。
+- `timing.wall_time_sec` 为自报求解墙钟，用于预算门；缺失时预算门语义降级（只门控评分端的归约时钟）。
+- 湍流模型与近壁处理声明写在 `notes` 里。
+
+### `evidence/solver.log`（必需，非空文本）
+
+求解器原生日志，需能看到残差历史与最终收敛状态（直接从求解器输出拷贝，不要手工改写数字）。
+
+### `evidence/mesh_report.txt`（必需，非空文本）
+
+网格摘要：单元总数与基本质量信息（如最小/最大正交质量或等效指标），文本格式自由。
+
+### `evidence/samples/wall_shear.csv`（必需，CSV）
+
+壁面剪应力采样，归约脚本的唯一 QoI 输入。格式**严格**：
+
+- 表头一行，恰为：`surface,tau_w_x_pa`
+- 之后每行一个采样点：
+  - `surface`：壁面标识，只能取 `lower`（y = 0 壁面）或 `upper`（y = 2h 壁面）；**两侧壁面都至少要有一行采样**；
+  - `tau_w_x_pa`：该采样点壁面剪应力的流向分量，单位 Pa，数值（有符号或无符号均可，归约取幅值）。
+- 建议每侧壁面沿流向/展向均布数十个采样（例如 8×4 = 32 个/侧）。
+- 所有数值格不得出现 NaN/Inf。
+
+### 通用约束（评分端对所有 CSV 生效）
+
+- 每个 CSV 必须可解析、含表头；数值格必须有限。
+- 若表头出现名为 `time`/`t`/`iter`/`iteration`/`step`/`timestep` 的列，该列必须全数值且单调非降（本任务的数据文件不需要此类列）。
+
+## 验收
+
+评分系统校验上述证据包，运行冻结归约脚本得到 **cf_bulk**，与留出的 DNS 参考值（Moser, Kim & Mansour 1999，Re_tau = 180）对账：相对误差越小，连续得分越高（score = −相对误差）。证据文件缺失/为空、manifest 不可解析或缺 `solver`、CSV 不可解析或格式违反上述合同，均直接判无效。

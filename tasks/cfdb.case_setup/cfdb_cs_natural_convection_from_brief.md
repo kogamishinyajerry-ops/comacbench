@@ -1,14 +1,174 @@
-# cfdb case_setup (evidence) — Case Setup: Natural Convection Cavity Ra=1e4 from Engineering Brief (evidence)
+# cfdb case_setup（evidence 工具通道）— Case Setup: Natural Convection Cavity Ra=1e4 from Engineering Brief (evidence)
 
-case_setup domain, EVIDENCE mode: the agent receives only a natural-language engineering brief (visible/task.md) and an annotated dimensioned drawing (visible/drawing.png), drives ANY solver in its own environment (Fluent/STAR-CCM+/in-house/OpenFOAM — the judge has no solver), and submits an evidence bundle (manifest.json + solver-native log + mesh report + hot-wall heat flux distribution CSV). The judge validates the bundle and recomputes the QoI from the raw evidence with the frozen script reference/compute_qoi.py on the host — a self-reported QoI never enters the verdict. Task physics inherited from the VALIDATED case cases/validation/natural_convection_cavity: de Vahl Davis (1983) differentially-heated square cavity, Boussinesq incompressible flow, laminar steady, unit square H=1 m, hot wall x=0 at 293 K, cold wall x=1 at 283 K, adiabatic top/bottom; g=9.81 m/s^2, beta=3e-3 1/K, rho0=1 kg/m^3, mu=4.571e-3 Pa s, Pr=0.71 -> Ra=1.0e4. QoI hot_wall_nu_avg = |q''|_avg * H / (k*dT) with k = mu*Cp/Pr = 6.437 W/(m K), i.e. Nu = |q''|_avg / 64.37, reduced from the wall heat flux distribution. Held-out reference 2.238 (de Vahl Davis 1983 hot-wall average Nu at Ra=1e4) inherited verbatim from the source case. Docker-verified measurement on the golden configuration: 2.2351 (0.13% error, 64x64 demo mesh); see provenance.yaml.
+## 两阶段交付协议（严格遵守）
+你的脚本会被判分环境执行**两次**，以工作目录下的标记文件 `.cfdb_assemble` 区分：
 
-## 交付形式（evidence 证据包，严格遵守）
-输出**单个 ```python 代码块**：脚本在当前工作目录创建证据包文件：
+**阶段 1（首次执行，无标记）**：在当前目录创建 `case/` 子目录，写入完整可运行的
+OpenFOAM 算例（`0/` `constant/` `system/`，`system/controlDict` 的 `application`
+声明求解器，并按任务书配置采样/监测 functionObject）。判分环境会在 OpenFOAM
+v2312 真实执行该算例（blockMesh → 求解器）：`case/` 内落运行场与
+`postProcessing/` 采样输出，各步骤日志（`log.block_mesh`、`log.solve` 等）
+落在**工作目录根**。
+
+**阶段 2（二次执行，存在 `.cfdb_assemble` 标记）**：从 `case/` 的**运行产物**提取
+原始数据，组装证据包写入当前目录（不得编造/篡改数值——判分将用冻结脚本从证据包
+原始数据降算指标并与留出参考对账，自报最终值永不进入判分）：
 - manifest.json
 - evidence/solver.log
 - evidence/mesh_report.txt
 - evidence/samples/hot_wall_flux.csv
 
-证据包必须来自你在自己的求解器环境中**真实求解**的产物（判分侧不运行求解器，
-将用案例冻结的 QoI 脚本从证据包原始数据降算指标并与留出参考值对账；
-自报最终数值不进入判分，格式不符判 0）。
+证据文件用 `open()` 逐文件读写（不要 import shutil——沙箱静态检查禁止）。
+`manifest.json` 为 JSON 对象（至少含 solver 标识与说明字段）。
+
+---
+
+# Engineering Brief: Natural Convection in a Square Cavity, Ra = 1e4 (2D)
+
+## Task
+
+Set up and run a two-dimensional buoyancy-driven natural convection case
+in a differentially heated square cavity with the solver of your choice
+(any CFD package or in-house code), converge it to a steady state, and
+submit an **evidence bundle** documenting the run. The quantity of
+interest is the **average Nusselt number on the hot wall**.
+
+The evaluation harness does **not** run your solver. It validates the
+evidence bundle and recomputes the QoI from your raw wall data with a
+frozen reduction script. Numbers you compute yourself never enter the
+verdict — only the raw evidence does.
+
+## Geometry
+
+- Square cavity, side **H = 1.0 m** (see `drawing.png`).
+- Coordinates: bottom-left corner at (0, 0); x to the right, y upward.
+- Two-dimensional: single cell layer (or symmetry/2D setup) in the
+  out-of-plane direction.
+
+## Fluid model and flow regime
+
+- Incompressible fluid with the **Boussinesq approximation** for
+  buoyancy: density variations enter only through the gravity body
+  force, rho = rho0 * (1 - beta * (T - T0)).
+- Laminar, steady.
+- Properties (constant):
+  - reference density **rho0 = 1.0 kg/m^3** at T0 = 288 K
+  - dynamic viscosity **mu = 4.571e-3 Pa s** (nu = 4.571e-3 m^2/s)
+  - thermal expansion coefficient **beta = 3.0e-3 1/K**
+  - specific heat **Cp = 1000 J/(kg K)**
+  - Prandtl number **Pr = 0.71**, hence thermal diffusivity
+    alpha = nu/Pr = 6.437e-3 m^2/s and conductivity
+    k = mu*Cp/Pr = 6.437 W/(m K)
+- Gravity **g = 9.81 m/s^2** acting downward (-y).
+
+## Boundary conditions
+
+- Left wall (x = 0), the **hot wall**: fixed temperature **T_hot = 293 K**.
+- Right wall (x = 1), the **cold wall**: fixed temperature
+  **T_cold = 283 K**.
+- Top and bottom walls: **adiabatic** (zero heat flux).
+- All walls: no-slip, stationary.
+
+With dT = T_hot - T_cold = 10 K this gives
+Ra = g * beta * dT * H^3 / (nu * alpha) = 1.0e4.
+
+## Solution requirements
+
+- Steady solver with coupled velocity-temperature iteration (buoyancy
+  converges slowly); converge until residuals are down by at least 4
+  orders of magnitude and the hot-wall heat flux is stationary between
+  checks.
+- Second-order spatial discretization recommended; first-order
+  upwinding smears the wall temperature gradient and directly degrades
+  the heat flux.
+- Resolve the thermal boundary layers on both vertical walls (they are
+  thin at Ra = 1e4).
+
+## Sampling requirement
+
+Export the **heat flux distribution along the hot wall** (x = 0) of the
+converged steady field:
+
+- Local wall heat flux q [W/m^2] at stations along the wall height.
+  Sign convention is free (the reduction works on magnitudes); use your
+  solver's native wall heat flux or -k * dT/dn at the wall.
+- Stations must cover the **full wall height** (y from 0 to H), be
+  monotonically increasing in y, **uniformly spaced** (equal-height
+  strips, so the plain average is the area average), at least 16
+  stations; 32-64 stations are typical.
+
+## Deliverable: evidence bundle (layout v1)
+
+Submit a directory with exactly this layout:
+
+```
+submission/
+  manifest.json
+  evidence/
+    solver.log
+    mesh_report.txt
+    samples/
+      hot_wall_flux.csv
+```
+
+### manifest.json
+
+A JSON object:
+
+```json
+{
+  "solver": "<solver name and version>",
+  "mesh_cells": 4096,
+  "timing": {"wall_time_sec": 42.0},
+  "notes": "<free text: hardware, convergence criterion reached, ...>"
+}
+```
+
+- `solver` (required): name and version of the solver you ran.
+- `mesh_cells` (recommended): total cell count of the final mesh.
+- `timing.wall_time_sec` (recommended): wall-clock seconds of the solver
+  run, self-reported. It feeds the runtime budget check (budget
+  3600 s). If omitted, the budget gate degrades to judging only the
+  harness-side reduction time.
+
+### evidence/solver.log
+
+The solver's native log, unedited, showing at least the residual history
+and the final convergence state.
+
+### evidence/mesh_report.txt
+
+Mesh summary as reported by your meshing tool or mesh check utility:
+cell count, cell type(s), and quality metrics (e.g. min/max aspect
+ratio, non-orthogonality, skewness — whatever your tool reports).
+
+### evidence/samples/hot_wall_flux.csv
+
+The hot-wall heat flux distribution, one header row plus one row per
+station:
+
+```
+y,q
+0.0078125,216.85
+...
+```
+
+- `y`: vertical coordinate of the station [m] along the hot wall, 0 at
+  the bottom. Must satisfy 0 <= y <= 1, be strictly increasing and
+  uniformly spaced down the file, start at y <= 0.02 and end at
+  y >= 0.98 (full-height coverage); at least 16 stations.
+- `q`: wall heat flux at the station [W/m^2] (sign convention free; the
+  reduction uses magnitudes).
+
+All values plain decimal or scientific notation, no NaN/Inf, no units in
+the cells, no extra columns or comment lines.
+
+## Acceptance
+
+The harness checks that every file above exists and is well-formed, then
+reduces **hot_wall_nu_avg = mean(|q|) * H / (k * dT)** from your
+`hot_wall_flux.csv` — with H = 1 m, k = 6.437 W/(m K), dT = 10 K this is
+mean(|q|) / 64.37 — and reconciles it against a held-out reference
+value. Generic consistency rules: every CSV must parse, no cell may be
+NaN/Inf, and any column named like a time/iteration axis (time, t, iter,
+iteration, step, timestep) must be fully numeric and non-decreasing.
