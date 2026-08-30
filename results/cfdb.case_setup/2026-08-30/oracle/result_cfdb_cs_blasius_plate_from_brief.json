@@ -1,0 +1,43 @@
+{
+  "task_id": "cfdb_cs_blasius_plate_from_brief",
+  "registry_id": "cfdb.case_setup",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: blasius_plate_from_brief 两阶段样例（evidence 工具通道端到端验证）\\n# 阶段 RUN: 复制 verification/flat_plate_blasius_of 参考算例（与 brief 同参数：\\n#   U=1, nu=1e-5, 站位 0.2/0.5/0.8/1.0）并注入壁面采样 functionObject\\n#   （wallShearStress writeFields + surfaces per-face 采样——这是模型侧应当自己\\n#   完成的配置，oracle 演示正确姿势）。\\n# 阶段 ASSEMBLE: 从 case/ 运行产物提取 Cf(x)=|tau_x|/(0.5·U²)（运动粘度制，U=1 →\\n#   Cf=2|wss_x|），组装 submission/ 证据包（逐文件合同见 visible/task.md）。\\nimport json\\nimport re\\nfrom pathlib import Path\\n\\nBENCH = \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench\\\"\\nU_INF = 1.0\\n\\nif not Path(\\\".cfdb_assemble\\\").exists():\\n    # ---------- 阶段 RUN ----------\\n    import shutil\\n    src = Path(BENCH) / \\\"data/cfdb/verification/flat_plate_blasius_of\\\"\\n    shutil.copytree(src, \\\"case\\\", dirs_exist_ok=True)\\n    # 注入壁面采样（per-face wallShearStress）——模型侧应按任务书自行配置\\n    ctl = Path(\\\"case/system/controlDict\\\")\\n    txt = ctl.read_text()\\n    inject = '''\\n    wssPlate\\n    {\\n        type            wallShearStress;\\n        patches         (plate);\\n        writeFields     yes;\\n    }\\n    cfSample\\n    {\\n        type            surfaces;\\n        writeControl    writeTime;\\n        surfaceFormat   raw;\\n        fields          (wallShearStress);\\n        surfaces        (\\n            plate { type patch; patches (plate); }\\n        );\\n    }\\n'''\\n    txt = txt.replace(\\\"functions\\\\n{\\\", \\\"functions\\\\n{\\\" + inject, 1)\\n    ctl.write_text(txt)\\n    print(\\\"case/ written with wall sampling FOs\\\")\\nelse:\\n    # ---------- 阶段 ASSEMBLE ----------\\n    raw_files = sorted(Path(\\\"case/postProcessing/cfSample\\\").glob(\\\"*/wallShearStress_plate.raw\\\"))\\n    assert raw_files, \\\"no cfSample output (surfaces FO missing or solver did not run)\\\"\\n    raw = raw_files[-1]  # 最晚写出时刻\\n    pts = []\\n    for ln in raw.read_text().splitlines():\\n        ln = ln.strip()\\n        if not ln or ln.startswith(\\\"#\\\"):\\n            continue\\n        c = ln.split()\\n        x, wss_x = float(c[0]), float(c[3])\\n        if x < 0.02:  # 跳过前缘奇异区\\n            continue\\n        cf = abs(wss_x) / (0.5 * U_INF * U_INF)  # 运动粘度制 rho=1 → Cf=2|tau_x|\\n        pts.append((x, cf))\\n    pts.sort()\\n    assert pts and pts[0][0] <= 0.2 and pts[-1][0] >= 1.0, \\\"x coverage must bracket 0.2..1.0\\\"\\n\\n    log_solve = Path(\\\"log.solve\\\")\\n    log_mesh = Path(\\\"log.block_mesh\\\")\\n    sub = Path(\\\"submission\\\")\\n    (sub / \\\"evidence\\\" / \\\"samples\\\").mkdir(parents=True, exist_ok=True)\\n    mesh_cells = 0\\n    m = re.search(r\\\"cells:\\\\s+(\\\\d+)\\\", log_mesh.read_text(errors=\\\"ignore\\\")) if log_mesh.exists() else None\\n    if m:\\n        mesh_cells = int(m.group(1))\\n    manifest = {\\n        \\\"solver\\\": \\\"simpleFoam (OpenFOAM v2312, docker opencfd/openfoam-default:2312)\\\",\\n        \\\"mesh_cells\\\": mesh_cells,\\n        \\\"timing\\\": {\\\"wall_time_sec\\\": 0.0},\\n        \\\"notes\\\": \\\"laminar simpleFoam, structured hex; Cf extracted from per-face \\\"\\n                 \\\"wallShearStress sampled on plate patch\\\",\\n    }\\n    (sub / \\\"manifest.json\\\").write_text(json.dumps(manifest, indent=2), encoding=\\\"utf-8\\\")\\n    (sub / \\\"evidence\\\" / \\\"solver.log\\\").write_text(\\n        log_solve.read_text(errors=\\\"ignore\\\"), encoding=\\\"utf-8\\\")\\n    (sub / \\\"evidence\\\" / \\\"mesh_report.txt\\\").write_text(\\n        log_mesh.read_text(errors=\\\"ignore\\\"), encoding=\\\"utf-8\\\")\\n    with open(sub / \\\"evidence\\\" / \\\"samples\\\" / \\\"cf_distribution.csv\\\", \\\"w\\\") as f:\\n        f.write(\\\"x,cf\\\\n\\\")\\n        for x, cf in pts:\\n            f.write(f\\\"{x:.6f},{cf:.8g}\\\\n\\\")\\n    print(f\\\"submission/ written: {len(pts)} cf samples, x [{pts[0][0]:.3f}, {pts[-1][0]:.3f}]\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"cfdb_evidence\", \"hits\": {\"cf_x020\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.040321, \"abs_diff\": 0.000189317, \"got\": 0.004884506669492188, \"ref\": 0.00469519, \"tol\": 0.15}, \"cf_x050\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.072388, \"abs_diff\": 0.000214957, \"got\": 0.00318445696368276, \"ref\": 0.0029695, \"tol\": 0.15}, \"cf_x080\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.094252, \"abs_diff\": 0.000221264, \"got\": 0.0025688541382811957, \"ref\": 0.00234759, \"tol\": 0.15}, \"cf_x100\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.106069, \"abs_diff\": 0.000222719, \"got\": 0.002322469388164794, \"ref\": 0.00209975, \"tol\": 0.15}}, \"physics_hits\": \"4/4\", \"steps\": [{\"name\": \"block_mesh\", \"exit\": 0, \"duration_s\": 0.4, \"timeout\": false}, {\"name\": \"solve\", \"exit\": 0, \"duration_s\": 10.9, \"timeout\": false}], \"solver\": \"openfoam-v2312-docker\"}"
+  },
+  "timings": {
+    "agent_s": 11.024,
+    "setup_s": 0.0,
+    "grade_s": 11.023
+  },
+  "environment_digest": "sha256:933a94add2d34bbb8bd628bc1bf631e2d5222b75b440e1deffc3fbe6bdf17800",
+  "assets_revision": "cfdb@b26799e",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=3/3 missing=[]",
+    "solver openfoam-v2312-docker ok=True steps=[{'name': 'block_mesh', 'exit': 0, 'duration_s': 0.4, 'timeout': False}, {'name': 'solve', 'exit': 0, 'duration_s': 10.9, 'timeout': False}]",
+    "assemble exit=0 0.06s stdout_tail='submission/ written: 141 cf samples, x [0.021, 1.190]\\n'",
+    "evidence missing=[] manifest_ok=True",
+    "qoi hits=4/4 physics=1.0"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "task_id": "cfdb_cs_sod_shock_from_brief",
+  "registry_id": "cfdb.case_setup",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: sod_shock_from_brief 两阶段（evidence 工具通道）——参考算例 verification/sod_shock_tube（参数与 brief 一致）\\n# 阶段 ASSEMBLE（.cfdb_assemble 存在）: 从 case/ 运行产物提取原始分布 -> submission/\\n# 阶段 RUN: 逐字复制参考算例为 case/{notes}\\nimport json\\nfrom pathlib import Path\\n\\nBENCH = Path(\\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench\\\")\\nif Path(\\\".cfdb_assemble\\\").exists():\\n    sub = Path(\\\"submission\\\")\\n    (sub / \\\"evidence\\\" / \\\"samples\\\").mkdir(parents=True, exist_ok=True)\\n    import re\\n    times = [p for p in Path(\\\"case\\\").iterdir() if p.is_dir() and p.name.replace(\\\".\\\", \\\"\\\").isdigit()]\\n    assert times, \\\"no time dirs\\\"\\n    latest = max(times, key=lambda p: float(p.name))\\n    text = (latest / \\\"rho\\\").read_text()\\n    m = re.search(r\\\"internalField\\\\s+nonuniform\\\\s+List<scalar>\\\\s+(\\\\d+)\\\\s*\\\\(\\\", text)\\n    n = int(m.group(1))\\n    start = text.index(\\\"(\\\", m.end() - 1)\\n    end = text.index(\\\"\\\\n)\\\", start)\\n    rho = [float(v) for v in text[start + 1:end].split()]\\n    assert len(rho) == n, \\\"rho parse mismatch\\\"\\n    with open(sub / \\\"evidence\\\" / \\\"samples\\\" / \\\"density_profile.csv\\\", \\\"w\\\") as f:\\n        f.write(\\\"x,rho\\\\n\\\")\\n        for i, rv in enumerate(rho):\\n            f.write(f\\\"{(i + 0.5) * 0.001:.8f},{rv:.8g}\\\\n\\\")\\n    sl = Path(\\\"log.solve\\\")\\n    bm = Path(\\\"log.block_mesh\\\")\\n    (sub / \\\"evidence\\\" / \\\"solver.log\\\").write_text(\\n        sl.read_text(errors=\\\"ignore\\\") if sl.exists() else \\\"(solver log not found)\\\\n\\\", encoding=\\\"utf-8\\\")\\n    (sub / \\\"evidence\\\" / \\\"mesh_report.txt\\\").write_text(\\n        bm.read_text(errors=\\\"ignore\\\") if bm.exists() else \\\"(blockMesh log not found)\\\\n\\\", encoding=\\\"utf-8\\\")\\n    (sub / \\\"manifest.json\\\").write_text(json.dumps({\\n        \\\"solver\\\": \\\"OpenFOAM v2312 (docker opencfd/openfoam-default:2312)\\\",\\n        \\\"timing\\\": {\\\"wall_time_sec\\\": 0.0},\\n        \\\"notes\\\": 'Sod shock tube rhoCentralFoam; density profile at t=0.2 from final field',\\n    }, indent=2), encoding=\\\"utf-8\\\")\\n    print(f\\\"submission/ written\\\")\\n    raise SystemExit(0)\\n\\nimport shutil\\nshutil.copytree(BENCH / \\\"data/cfdb/verification/sod_shock_tube\\\", \\\"case\\\", dirs_exist_ok=True)\\n\\nprint(\\\"case/ written from reference case\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"cfdb_evidence\", \"hits\": {\"shock_x_t02\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.000507, \"abs_diff\": 0.000431146, \"got\": 0.8500000000000001, \"ref\": 0.8504311464060357, \"tol\": 0.02}, \"rho_plateau_t02\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 5e-06, \"abs_diff\": 2.318e-06, \"got\": 0.42631711, \"ref\": 0.4263194281784952, \"tol\": 0.05}}, \"physics_hits\": \"2/2\", \"steps\": [{\"name\": \"block_mesh\", \"exit\": 0, \"duration_s\": 0.3, \"timeout\": false}, {\"name\": \"set_fields\", \"exit\": 0, \"duration_s\": 0.7, \"timeout\": false}, {\"name\": \"solve\", \"exit\": 0, \"duration_s\": 1.7, \"timeout\": false}], \"solver\": \"openfoam-v2312-docker\"}"
+  },
+  "timings": {
+    "agent_s": 1.843,
+    "setup_s": 0.0,
+    "grade_s": 1.843
+  },
+  "environment_digest": "sha256:933a94add2d34bbb8bd628bc1bf631e2d5222b75b440e1deffc3fbe6bdf17800",
+  "assets_revision": "cfdb@b26799e",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "structure present=3/3 missing=[]",
+    "solver openfoam-v2312-docker ok=True steps=[{'name': 'block_mesh', 'exit': 0, 'duration_s': 0.3, 'timeout': False}, {'name': 'set_fields', 'exit': 0, 'duration_s': 0.7, 'timeout': False}, {'name': 'solve', 'exit': 0, 'duration_s': 1.7, 'timeout': False}]",
+    "assemble exit=0 0.05s stdout_tail='submission/ written\\n'",
+    "evidence missing=[] manifest_ok=True",
+    "qoi hits=2/2 physics=1.0"
+  ]
+}

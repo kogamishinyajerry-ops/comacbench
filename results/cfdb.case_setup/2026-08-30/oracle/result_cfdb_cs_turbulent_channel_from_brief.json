@@ -1,0 +1,43 @@
+{
+  "task_id": "cfdb_cs_turbulent_channel_from_brief",
+  "registry_id": "cfdb.case_setup",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: turbulent_channel_from_brief 两阶段（evidence 工具通道）——参考算例 validation/turbulent_channel_retau180\\nimport json\\nfrom pathlib import Path\\nBENCH = Path(\\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench\\\")\\nFIELD_PATCHES = (\\\"bottom\\\", \\\"top\\\")   # case 场文件 patch 名\\nSURFACE_NAMES = (\\\"lower\\\", \\\"upper\\\")  # 证据包合同要求的 surface 名\\nimport re\\ndef _read_count_list(text):\\n    m = re.search(r\\\"\\\\n\\\\s*(\\\\d+)\\\\s*\\\\n\\\\s*\\\\(\\\", text)\\n    if not m:\\n        raise SystemExit(\\\"malformed polyMesh: no count/list header\\\")\\n    start = text.index(\\\"(\\\", m.end() - 1)\\n    end = text.index(\\\"\\\\n)\\\", start)\\n    return int(m.group(1)), start, end\\n\\ndef parse_points(path):\\n    text = path.read_text()\\n    n, start, end = _read_count_list(text)\\n    pts = [tuple(float(v) for v in ln.strip().strip(\\\"()\\\").split())\\n           for ln in text[start+1:end].splitlines() if ln.strip()]\\n    assert len(pts) == n\\n    return pts\\n\\ndef parse_faces(path):\\n    text = path.read_text()\\n    n, start, end = _read_count_list(text)\\n    faces = [[int(v) for v in ln.strip()[ln.strip().index(\\\"(\\\")+1:ln.strip().rindex(\\\")\\\")].split()]\\n             for ln in text[start+1:end].splitlines() if ln.strip()]\\n    assert len(faces) == n\\n    return faces\\n\\ndef patch_range(pm_dir, patch):\\n    text = (pm_dir / \\\"boundary\\\").read_text()\\n    m = re.search(patch + r\\\"\\\\s*\\\\{[^{}]*?nFaces\\\\s+(\\\\d+)\\\\s*;[^{}]*?startFace\\\\s+(\\\\d+)\\\\s*;\\\", text, re.DOTALL)\\n    if not m:\\n        m = re.search(patch + r\\\"\\\\s*\\\\{[^{}]*?startFace\\\\s+(\\\\d+)\\\\s*;[^{}]*?nFaces\\\\s+(\\\\d+)\\\\s*;\\\", text, re.DOTALL)\\n        return int(m.group(2)), int(m.group(1))\\n    return int(m.group(2)), int(m.group(1))\\n\\ndef face_centre_coords(case_dir, patch, axis):\\n    pm = case_dir / \\\"constant\\\" / \\\"polyMesh\\\"\\n    pts = parse_points(pm / \\\"points\\\")\\n    faces = parse_faces(pm / \\\"faces\\\")\\n    start, n = patch_range(pm, patch)\\n    return [sum(pts[i][axis] for i in f) / len(f) for f in faces[start:start+n]]\\n\\ndef parse_patch_vectors(field_path, patch):\\n    text = field_path.read_text()\\n    m = re.search(patch + r\\\"\\\\s*\\\\{[^{}]*?value\\\\s+nonuniform\\\\s+List<vector>\\\\s+(\\\\d+)\\\\s*\\\\(\\\", text, re.DOTALL)\\n    if not m:\\n        raise SystemExit(f\\\"no vector list for patch {patch}\\\")\\n    n = int(m.group(1))\\n    start = text.index(\\\"(\\\", m.end() - 1)\\n    end = text.index(\\\"\\\\n)\\\", start)\\n    vals = [tuple(float(v) for v in ln.strip().strip(\\\"()\\\").split())\\n            for ln in text[start+1:end].splitlines() if ln.strip()]\\n    assert len(vals) == n\\n    return vals\\n\\ndef parse_patch_scalars(field_path, patch):\\n    text = field_path.read_text()\\n    m = re.search(patch + r\\\"\\\\s*\\\\{[^{}]*?value\\\\s+nonuniform\\\\s+List<scalar>\\\\s+(\\\\d+)\\\\s*\\\\(\\\", text, re.DOTALL)\\n    if not m:\\n        raise SystemExit(f\\\"no scalar list for patch {patch}\\\")\\n    n = int(m.group(1))\\n    start = text.index(\\\"(\\\", m.end() - 1)\\n    end = text.index(\\\"\\\\n)\\\", start)\\n    vals = [float(v) for v in text[start+1:end].split()]\\n    assert len(vals) == n\\n    return vals\\n\\ndef latest_time_dir(case_dir):\\n    times = [p for p in case_dir.iterdir() if p.is_dir() and p.name.replace(\\\".\\\", \\\"\\\").isdigit()]\\n    assert times, \\\"no time dirs\\\"\\n    return max(times, key=lambda p: float(p.name))\\n\\ndef write_manifest(notes):\\n    sl = Path(\\\"log.solve\\\")\\n    bm = Path(\\\"log.block_mesh\\\")\\n    (sub / \\\"evidence\\\" / \\\"solver.log\\\").write_text(\\n        sl.read_text(errors=\\\"ignore\\\") if sl.exists() else \\\"(no log)\\\\n\\\", encoding=\\\"utf-8\\\")\\n    (sub / \\\"evidence\\\" / \\\"mesh_report.txt\\\").write_text(\\n        bm.read_text(errors=\\\"ignore\\\") if bm.exists() else \\\"(no log)\\\\n\\\", encoding=\\\"utf-8\\\")\\n    (sub / \\\"manifest.json\\\").write_text(json.dumps({\\n        \\\"solver\\\": \\\"OpenFOAM v2312 (docker opencfd/openfoam-default:2312)\\\",\\n        \\\"timing\\\": {\\\"wall_time_sec\\\": 0.0}, \\\"notes\\\": notes,\\n    }, indent=2), encoding=\\\"utf-8\\\")\\n\\nif Path(\\\".cfdb_assemble\\\").exists():\\n    sub = Path(\\\"submission\\\")\\n    (sub / \\\"evidence\\\" / \\\"samples\\\").mkdir(parents=True, exist_ok=True)\\n    case_dir = Path(\\\"case\\\")\\n\\n    latest = latest_time_dir(case_dir)\\n    rows = []\\n    for field_name, surface_name in zip(FIELD_PATCHES, SURFACE_NAMES):\\n        tau = parse_patch_vectors(\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"cfdb_evidence\", \"hits\": {\"cf_bulk\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.041294, \"abs_diff\": 0.000337782, \"got\": 0.0078422182, \"ref\": 0.00818, \"tol\": 0.1}}, \"physics_hits\": \"1/1\", \"steps\": [{\"name\": \"block_mesh\", \"exit\": 0, \"duration_s\": 0.3, \"timeout\": false}, {\"name\": \"solve\", \"exit\": 0, \"duration_s\": 20.8, \"timeout\": false}], \"solver\": \"openfoam-v2312-docker\"}"
+  },
+  "timings": {
+    "agent_s": 20.951,
+    "setup_s": 0.0,
+    "grade_s": 20.951
+  },
+  "environment_digest": "sha256:933a94add2d34bbb8bd628bc1bf631e2d5222b75b440e1deffc3fbe6bdf17800",
+  "assets_revision": "cfdb@b26799e",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.04s",
+    "structure present=3/3 missing=[]",
+    "solver openfoam-v2312-docker ok=True steps=[{'name': 'block_mesh', 'exit': 0, 'duration_s': 0.3, 'timeout': False}, {'name': 'solve', 'exit': 0, 'duration_s': 20.8, 'timeout': False}]",
+    "assemble exit=0 0.05s stdout_tail='submission/ written\\n'",
+    "evidence missing=[] manifest_ok=True",
+    "qoi hits=1/1 physics=1.0"
+  ]
+}

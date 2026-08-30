@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdb_cs_poiseuille_from_brief",
+  "registry_id": "cfdb.case_setup",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: poiseuille_from_brief（managed）——参考算例 verification/channel_poiseuille\\n# （H=0.01, L=0.12, U0=0.1, nu=5e-5, probes at x/H=10——与 brief 参数一致）\\nimport shutil\\nfrom pathlib import Path\\nshutil.copytree(Path(\\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench\\\") / \\\"data/cfdb/verification/channel_poiseuille\\\", \\\"case\\\", dirs_exist_ok=True)\\nprint(\\\"case/ written from reference case\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"cfdb_managed\", \"hits\": {\"centerline_umax\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.004973, \"abs_diff\": 0.000746, \"got\": 0.149254, \"ref\": 0.15, \"tol\": 0.05}}, \"physics_hits\": \"1/1\", \"steps\": [{\"name\": \"block_mesh\", \"exit\": 0, \"duration_s\": 0.4, \"timeout\": false}, {\"name\": \"solve\", \"exit\": 0, \"duration_s\": 16.2, \"timeout\": false}], \"solver\": \"openfoam-v2312-docker\"}"
+  },
+  "timings": {
+    "agent_s": 16.331,
+    "setup_s": 0.0,
+    "grade_s": 16.331
+  },
+  "environment_digest": "sha256:933a94add2d34bbb8bd628bc1bf631e2d5222b75b440e1deffc3fbe6bdf17800",
+  "assets_revision": "cfdb@b26799e",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=3/3 missing=[]",
+    "solver openfoam-v2312-docker ok=True steps=[{'name': 'block_mesh', 'exit': 0, 'duration_s': 0.4, 'timeout': False}, {'name': 'solve', 'exit': 0, 'duration_s': 16.2, 'timeout': False}]",
+    "qoi hits=1/1 physics=1.0"
+  ]
+}

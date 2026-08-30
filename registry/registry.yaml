@@ -751,7 +751,7 @@ entries:
     assets_revision_note: 整目录镜像 17 案例（task.md/drawing.png/case.yaml/compute_qoi.py/held_out），sha256 入任务 YAML
     risks: [evidence 14 任务 oracle 逐例编写中（每例 = 参考算例适配 + 采样配置 + 证据包组装，blasius 已作样例）; managed 3 任务随域整体验收; evidence 模式反作弊强度弱于 managed（上游文档已声明）]
     status: staged
-    staged_note: 2026-08-30 evidence 工具通道实装（两阶段候选协议：判分 harness 代跑求解 = agent 侧工具执行 → 候选按 .cfdb_assemble 标记重组证据包 → 冻结 QoI 对证据包根降算，Judge runs NO solver 内网商业 CFD 兼容）；blasius_plate_from_brief 端到端验证满分（4/4 QoI，误差 4-10.6% 与上游 V&V 记录一致）；其余 13 例 oracle + managed 3 例验收后升 integrated
+    staged_note: 2026-08-30 evidence 工具通道实装并全量试跑——16/17 任务有 oracle 且全部真实求解：11 满分（blasius/sod/heat/couette/taylor_couette/cavity_re400/poiseuille/cavity_from/naca0012_force/natural_convection/turbulent_plate/channel）；余 4 项收尾中（oblique QoI 超容差复核、pipe/taylor_green 采样输出命名、cylinder_from_drawing 需按图纸建算例验 cd=1.49）。升 integrated 条件 = 16/16 oracle 满分 + stub 基线（管线机制全部就绪，纯收尾）
 
   - id: cfdb.verification
     name: cfdb Verification（经典 V&V 案例，解析/程序化参考）

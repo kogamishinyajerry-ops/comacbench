@@ -1,0 +1,41 @@
+{
+  "task_id": "cfdb_cs_cavity_from_brief",
+  "registry_id": "cfdb.case_setup",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "field_nmse_vs_gt",
+    "requirements": "case_structure",
+    "objective": "N/A(基础题无目标函数)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"# oracle: cavity_from_brief（managed）——lid_driven_cavity_re400 算例改 Re=100\\n# （brief: L=0.1, U_lid=1, nu=1e-3, Re=100；held_out centerline_umax=0.665 Ghia 值。\\n#   re400 算例几何/探针一致，仅 transportProperties nu 2.5e-4 -> 1e-3。）\\nimport shutil\\nfrom pathlib import Path\\n\\nshutil.copytree(Path(\\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench\\\")\\n                / \\\"data/cfdb/validation/lid_driven_cavity_re400\\\", \\\"case\\\", dirs_exist_ok=True)\\ntp = Path(\\\"case/constant/transportProperties\\\")\\ntxt = tp.read_text()\\nassert \\\"2.5e-4\\\" in txt, \\\"unexpected nu in reference case\\\"\\ntp.write_text(txt.replace(\\\"2.5e-4\\\", \\\"1e-3\\\"))\\nprint(\\\"case/ written (Re=100 via nu=1e-3)\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"GT files verbatim writer\"}",
+    "grade_details": "{\"kind\": \"cfdb_managed\", \"hits\": {\"centerline_umax\": {\"status\": \"rel\", \"ok\": true, \"rel_err\": 0.041447, \"abs_diff\": 0.027562499, \"got\": 0.6374375008973429, \"ref\": 0.665, \"tol\": 0.1}}, \"physics_hits\": \"1/1\", \"steps\": [{\"name\": \"block_mesh\", \"exit\": 0, \"duration_s\": 0.3, \"timeout\": false}, {\"name\": \"solve\", \"exit\": 0, \"duration_s\": 21.4, \"timeout\": false}], \"solver\": \"openfoam-v2312-docker\"}"
+  },
+  "timings": {
+    "agent_s": 21.474,
+    "setup_s": 0.0,
+    "grade_s": 21.474
+  },
+  "environment_digest": "sha256:933a94add2d34bbb8bd628bc1bf631e2d5222b75b440e1deffc3fbe6bdf17800",
+  "assets_revision": "cfdb@b26799e",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "structure present=3/3 missing=[]",
+    "solver openfoam-v2312-docker ok=True steps=[{'name': 'block_mesh', 'exit': 0, 'duration_s': 0.3, 'timeout': False}, {'name': 'solve', 'exit': 0, 'duration_s': 21.4, 'timeout': False}]",
+    "qoi hits=1/1 physics=1.0"
+  ]
+}
