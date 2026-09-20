@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_17_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import copy as cp\\nfrom collections import Counter\\nfrom datetime import datetime, date\\n\\nimport openpyxl\\nfrom openpyxl.utils.datetime import from_excel\\n\\nSRC_FILE = \\\"ssb_17_35_init.xlsx\\\"\\nOUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"FILTER 5b\\\"\\n\\nDATA_FIRST_ROW = 1      # row 1 of the data range (headers, if any, are skipped automatically)\\nDATA_LAST_ROW = 315     # data range A1:E315\\nFIRST_COL = 1           # column A\\nLAST_COL = 5            # column E\\nOUT_FIRST_ROW = 6       # results start at I6\\nOUT_FIRST_COL = 9       # column I\\nCLEAR_LAST_ROW = 295    # answer region I6:M295\\n\\n\\ndef parse_to_date(value):\\n    \\\"\\\"\\\"Best-effort conversion of a cell value to a datetime.date.\\\"\\\"\\\"\\n    if value is None:\\n        return None\\n    if isinstance(value, datetime):\\n        return value.date()\\n    if isinstance(value, date):\\n        return value\\n    if isinstance(value, (int, float)):\\n        try:\\n            converted = from_excel(value)\\n            return converted.date() if isinstance(converted, datetime) else converted\\n        except Exception:\\n            return None\\n    if isinstance(value, str):\\n        text = value.strip()\\n        if not text:\\n            return None\\n        for fmt in (\\n            \\\"%m/%d/%Y\\\", \\\"%d/%m/%Y\\\", \\\"%Y-%m-%d\\\", \\\"%m/%d/%y\\\", \\\"%d/%m/%y\\\",\\n            \\\"%m-%d-%Y\\\", \\\"%d-%m-%Y\\\", \\\"%d.%m.%Y\\\", \\\"%d-%b-%Y\\\", \\\"%d-%b-%y\\\",\\n            \\\"%b %d, %Y\\\", \\\"%B %d, %Y\\\", \\\"%d %b %Y\\\", \\\"%d %B %Y\\\",\\n        ):\\n            try:\\n                return datetime.strptime(text, fmt).date()\\n            except ValueError:\\n                continue\\n        try:\\n            return datetime.fromisoformat(text).date()\\n        except ValueError:\\n            return None\\n    return None\\n\\n\\ndef get_sheet(wb, name):\\n    if name in wb.sheetnames:\\n        return wb[name]\\n    norm = name.replace(\\\" \\\", \\\"\\\").lower()\\n    for sheet_name in wb.sheetnames:\\n        if sheet_name.replace(\\\" \\\", \\\"\\\").lower() == norm:\\n            return wb[sheet_name]\\n    return wb[wb.sheetnames[0]]\\n\\n\\ndef main():\\n    wb = openpyxl.load_workbook(SRC_FILE)\\n    ws = get_sheet(wb, SHEET_NAME)\\n\\n    # Read the criteria (start / end dates) from I2 and J2\\n    start_date = parse_to_date(ws[\\\"I2\\\"].value)\\n    end_date = parse_to_date(ws[\\\"J2\\\"].value)\\n\\n    # Locate the column within A:E that holds the dates\\n    date_counts = Counter()\\n    for row in range(DATA_FIRST_ROW, DATA_LAST_ROW + 1):\\n        for col in range(FIRST_COL, LAST_COL + 1):\\n            if isinstance(ws.cell(row=row, column=col).value, (datetime, date)):\\n                date_counts[col] += 1\\n    if date_counts:\\n        date_col = date_counts.most_common(1)[0][0]\\n    else:\\n        date_col = FIRST_COL\\n        best = 0\\n        for col in range(FIRST_COL, LAST_COL + 1):\\n            hits = 0\\n            for row in range(DATA_FIRST_ROW, DATA_LAST_ROW + 1):\\n                if parse_to_date(ws.cell(row=row, column=col).value) is not None:\\n                    hits += 1\\n            if hits > best:\\n                best = hits\\n                date_col = col\\n\\n    # Clear any previous results inside the output region I6:M295\\n    for row in range(OUT_FIRST_ROW, CLEAR_LAST_ROW + 1):\\n        for col in range(OUT_FIRST_COL, OUT_FIRST_COL + (LAST_COL - FIRST_COL + 1)):\\n            ws.cell(row=row, column=col).value = None\\n\\n    # Collect rows whose date falls within [start, end] (inclusive)\\n    matching_rows = []\\n    for row in range(DATA_FIRST_ROW, DATA_LAST_ROW + 1):\\n        row_date = parse_to_date(ws.cell(row=row, column=date_col).value)\\n        if row_date is None:\\n            continue  # header row or non-date entry\\n        if start_date is not None and row_date < start_date:\\n            continue\\n        if end_date is not None and row_date > end_date:\\n            continue\\n        matching_rows.append(row)\\n\\n    # Copy matching rows (values + original formatting) to I6 downward\\n    out_row = OUT_FIRST_ROW\\n    for src_row in matching_rows:\\n        for offset, col in enumerate(range(FIRST_COL, LAST_COL + 1)):\\n            src_cell = ws.cell(row=src_row, column=col)\\n       \"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3-flash\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"FILTER 5b\", \"region\": \"I6:M295\", \"recalc_sheet_mappings\": [], \"match\": {\"n_gold\": 1445, \"matched\": 1445, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "5eb81a61918bc245f1e6763f3fa57e493ea49c7a1701af0e542a1d1e99ffd5ca"
+  },
+  "timings": {
+    "agent_s": 208.643,
+    "setup_s": 0.0,
+    "grade_s": 4.604
+  },
+  "environment_digest": "sha256:74efbb55d349a1570934dde543a8485e28c837de3ea31dff5696000e536b5415",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=4654",
+    "run1 exit=0 1.07s",
+    "run2 exit=0 0.61s",
+    "physics=1.0 cells=1445/1445 extra=0"
+  ]
+}

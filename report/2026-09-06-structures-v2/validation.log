@@ -1,0 +1,47 @@
+{
+  "protocol": "comacbench.pack.v1",
+  "pack": {
+    "id": "aviation-structures-v2",
+    "title": "结构仿真 Agent · 工程输入检查",
+    "revision": "2.0.0",
+    "description": "C3D20 静力悬臂梁：连接、网格、材料、边界、载荷、输出六项输入检查，加原生求解与参考数值验证。",
+    "source": "JerryDSH-COMACBench 自建；结构题由 ccx_cb_01 独立复制并锁定，不修改原题",
+    "license": "自建示例：企业数据/本体 CC0-1.0；结构题沿用仓库自建任务许可记录"
+  },
+  "runnable": true,
+  "publishable": false,
+  "task_count": 1,
+  "tasks": [
+    {
+      "id": "beam_static_01",
+      "suite": "aviation.structures",
+      "family": "industrial_simulation",
+      "path": "tasks/aviation.structures/beam_static_01.yaml",
+      "adapter": "simulation_agent",
+      "evidence_level": "solver_execution"
+    }
+  ],
+  "issues": [
+    {
+      "code": "bounded_engineering_profile",
+      "severity": "review",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader.deck_contract",
+      "message": "已接入结构化静力梁六项输入检查；仍需审查参考值、离散误差与题面语义。",
+      "suggested_fix": "完成正负例校准及工程专家审查；此检查不代表复杂结构或飞机级接受。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "expert_review_required",
+      "severity": "review",
+      "field": "pack",
+      "message": "静态检查不证明题意、工程真值与判分语义一致；当前包未完成发布审查。",
+      "suggested_fix": "校准参考实现和错误负例，再进行工程专家审查。",
+      "task_id": null
+    }
+  ],
+  "summary": {
+    "blocker": 0,
+    "review": 2,
+    "warning": 0
+  }
+}

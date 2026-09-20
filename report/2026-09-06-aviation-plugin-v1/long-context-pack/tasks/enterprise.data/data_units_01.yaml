@@ -1,0 +1,99 @@
+id: data_units_01
+registry_id: enterprise.data
+domain: enterprise_data
+task_type: code_exec
+model_profile: code_tool_agent
+assets_revision: aviation-core@1.0.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/enterprise.data/data_units_01.md
+  prompt_sha256: 3c578b8e91c638bc7540f007be7c5b8ce37bad9fa09189d89ab0c32e67afab86
+  assets: []
+output_contract:
+- script
+reference:
+  source: 自建虚构企业记录与独立断言；非生产数据
+  revision: aviation-core@1.0.0
+  n_test_cases: 7
+  uncertainty_note: 标识符、关系与错误原因精确比较；单位换算数值使用明确等式
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - assert normalize_records([{'record_id':'001','part_id':'P-01','source_id':'S-09','length':.25,'unit':'m'}])
+    == {'accepted':[{'record_id':'001','part_id':'P-01','source_id':'S-09','length_mm':250}],
+    'rejected':[]}
+  - assert normalize_records([{'record_id':'X','part_id':'P','source_id':'S','length':3,'unit':'mm'},
+    {'record_id':'X','part_id':'P','source_id':'S','length':4,'unit':'mm'}]) == {'accepted':[],
+    'rejected':[{'record_id':'X','reason':'duplicate_id'},{'record_id':'X','reason':'duplicate_id'}]}
+  - assert normalize_records([{'record_id':'A','part_id':'P','source_id':'S','length':4,'unit':'inch'}])
+    == {'accepted':[], 'rejected':[{'record_id':'A','reason':'unknown_unit'}]}
+  - assert normalize_records([{'record_id':'A','part_id':'P','source_id':'S','length':True,'unit':'mm'},
+    {'record_id':'B','part_id':'P','source_id':'S','length':float('nan'),'unit':'mm'}])
+    == {'accepted':[], 'rejected':[{'record_id':'A','reason':'invalid_length'},{'record_id':'B','reason':'invalid_length'}]}
+  - assert normalize_records([{'record_id':'A','part_id':'P','length':2,'unit':'m'},{}])
+    == {'accepted':[], 'rejected':[{'record_id':'','reason':'missing_id'},{'record_id':'A','reason':'missing_lineage'}]}
+  - 'rows=[{''record_id'':''02'',''part_id'':''Part'',''source_id'':''S2'',''length'':7,''unit'':''mm''},
+    {''record_id'':''01'',''part_id'':''part'',''source_id'':''S1'',''length'':1,''unit'':''mm''}]
+
+    before=[dict(r) for r in rows]
+
+    assert normalize_records(rows) == {''accepted'':[{''record_id'':''01'',''part_id'':''part'',''source_id'':''S1'',''length_mm'':1},
+    {''record_id'':''02'',''part_id'':''Part'',''source_id'':''S2'',''length_mm'':7}],
+    ''rejected'':[]}
+
+    assert rows == before'
+  - assert normalize_records([]) == {'accepted':[], 'rejected':[]}
+  test_imports: []
+  determinism_runs: 2
+  oracle_source: private/data_units_01.py
+scoring:
+  weights:
+    physics: 0.7
+    requirements: 0.2
+    objective: 0
+    robustness: 0.1
+  note: physics=业务断言通过率；最终报告单列全部断言通过，不能仅看可执行性
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 1200
+  attempts: 1
+license_provenance:
+  source: COMACBench 自建示例
+  license: CC0-1.0
+  revision: 1.0.0
+  mirror_allowed: true
+evaluation:
+  requirements:
+  - id: R1
+    text: 正确转换与精确保留标识符
+    check: test:1
+  - id: R2
+    text: 重复记录或重复证据处理
+    check: test:2
+  - id: R3
+    text: 缺失或未知输入处理
+    check: test:3
+  - id: R4
+    text: 非法数值或关系类型拒绝
+    check: test:4
+  - id: R5
+    text: 来源与错误原因可追溯
+    check: test:5
+  - id: R6
+    text: 顺序稳定且输入不被修改
+    check: test:6
+  - id: R7
+    text: 空输入边界
+    check: test:7
+  negative_controls:
+  - script: private/no_output.py
+    max_score: 0.3
+  - script: private/wrong_units.py
+    max_score: 0.9
+  scope: 可执行规则构建；文件级 ETL、自然语言知识抽取和企业系统集成另行评测。

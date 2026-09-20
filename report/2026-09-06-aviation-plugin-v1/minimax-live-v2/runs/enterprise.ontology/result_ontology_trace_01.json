@@ -1,0 +1,39 @@
+{
+  "task_id": "ontology_trace_01",
+  "registry_id": "enterprise.ontology",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def build_graph(entities, assertions):\\n    VALID_RELATIONS = {\\n        \\\"made_of\\\": (\\\"Part\\\", \\\"Material\\\"),\\n        \\\"verified_by\\\": (\\\"Part\\\", \\\"Analysis\\\"),\\n        \\\"satisfies\\\": (\\\"Analysis\\\", \\\"Requirement\\\"),\\n    }\\n\\n    entity_map = {e[\\\"id\\\"]: e[\\\"type\\\"] for e in entities}\\n\\n    edges = {}\\n    issues = []\\n\\n    for a in assertions:\\n        source_id = a.get(\\\"source_id\\\")\\n        relation = a.get(\\\"relation\\\")\\n        subject = a.get(\\\"subject\\\")\\n        obj = a.get(\\\"object\\\")\\n\\n        # 1. source_id must be a non-empty string\\n        if not isinstance(source_id, str) or len(source_id) == 0:\\n            issues.append({\\\"source_id\\\": \\\"\\\", \\\"reason\\\": \\\"missing_source\\\"})\\n            continue\\n\\n        # 2. relation must be one of the valid relations\\n        if relation not in VALID_RELATIONS:\\n            issues.append({\\\"source_id\\\": source_id, \\\"reason\\\": \\\"unknown_relation\\\"})\\n            continue\\n\\n        # 3. subject and object must be declared in entities\\n        if subject not in entity_map or obj not in entity_map:\\n            issues.append({\\\"source_id\\\": source_id, \\\"reason\\\": \\\"missing_entity\\\"})\\n            continue\\n\\n        # 4. endpoint types must match the relation signature\\n        expected_subject_type, expected_object_type = VALID_RELATIONS[relation]\\n        if (entity_map[subject] != expected_subject_type\\n                or entity_map[obj] != expected_object_type):\\n            issues.append({\\\"source_id\\\": source_id, \\\"reason\\\": \\\"type_mismatch\\\"})\\n            continue\\n\\n        # Valid: accumulate evidence for this edge\\n        key = (subject, relation, obj)\\n        if key not in edges:\\n            edges[key] = set()\\n        edges[key].add(source_id)\\n\\n    edge_list = []\\n    for key in sorted(edges.keys()):\\n        subj, rel, obj = key\\n        edge_list.append({\\n            \\\"subject\\\": subj,\\n            \\\"relation\\\": rel,\\n            \\\"object\\\": obj,\\n            \\\"evidence\\\": sorted(edges[key]),\\n        })\\n\\n    issues.sort(key=lambda x: (x[\\\"source_id\\\"], x[\\\"reason\\\"]))\\n\\n    return {\\\"edges\\\": edge_list, \\\"issues\\\": issues}\"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"MiniMax-M3-code-agent\", \"revision\": \"1.1.0\", \"agent_kind\": \"model_agent\", \"request_sha256\": \"abd53f3756a5cb4ccb5ffbb48df99c5118bb0e3220ed1bcca807e81abc18042a\", \"response_sha256\": \"fae63e1ce38cb9af7032d7ce099d4ca641312a87fe10f8100e11888778dc5154\", \"audit_dir\": \"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/minimax-live-v2/agent-audit/ontology_trace_01-2p52ails\", \"config_sha256\": \"37b09cf22fac48faa4c68ae99a38c34d891235c75f2a1fb62d87ce4c132760a6\", \"revision_files\": {\"model_agent.py\": \"f2b06d24488b1dde08ba18cd695426d767a5492d23914b1dbf0ad08b02229a54\"}, \"command_files\": {\"0\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\", \"1\": \"f2b06d24488b1dde08ba18cd695426d767a5492d23914b1dbf0ad08b02229a54\"}, \"identity_env\": {\"COMAC_MODEL_BASE\": \"fe8bc183d1bc885553b3b2d4721d00ef5cbcc5a8711ace07bb729a50a414cc1c\", \"COMAC_MODEL_NAME\": \"ac72b9b986af393240ee7ab3421bf3687f453613252643018979a060d5f71c94\"}, \"executable_sha256\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.04}",
+    "resume_identity": "71f72c6b59b1c767c7e8ea6361e57e59fdcf43adc3951845e99964da0051e3c8"
+  },
+  "timings": {
+    "agent_s": 58.948,
+    "setup_s": 0.0,
+    "grade_s": 0.065
+  },
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.04s"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "beam_static_01",
+  "registry_id": "aviation.structures",
+  "adapter": "simulation_agent",
+  "validity_gate": 0,
+  "gate_failures": [
+    "simulation_failed"
+  ],
+  "failure_mode": "simulation_failed",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"#!/usr/bin/env python3\\n\\\"\\\"\\\"\\nGenerate a CalculiX 2.23 input deck 'model.inp' for a cantilever beam\\nstatic deflection analysis.\\n\\nGeometry / mesh:\\n  - Length L = 100 mm along +x (root at x = 0, tip at x = L)\\n  - Rectangular cross-section: height H = 10 mm (y in [-5, 5]),\\n                               width  T = 5 mm  (z in [-2.5, 2.5])\\n  - Structured mesh of 20-node hexahedra (C3D20):\\n      NX = 20 elements along x  (>= 16 required)\\n      NY = 4  elements along y  (>= 4  required)\\n      NZ = 2  elements along z  (>= 2  required)\\n    Only the 20 serendipity nodes per element (8 corners + 12 midside)\\n    are created and shared between neighbouring elements.\\n\\nLoads / BCs:\\n  - NROOT (all nodes at x = 0): fully clamped (DOF 1, 2, 3 fixed)\\n  - NTIP  (all nodes at x = L): total Fy = -1000 N split equally over\\n    all NTIP nodes via *CLOAD (sum is exactly -1000 N)\\n\\nUnits: mm, N, MPa, tonne/mm^3 (steel: E = 210000 MPa, nu = 0.3,\\nrho = 7.85e-9 tonne/mm^3).\\n\\nThe script only writes 'model.inp' into the current working directory;\\nit does NOT run the solver and uses no subprocess / network / external files.\\n\\\"\\\"\\\"\\n\\nimport os\\n\\n# ----------------------------------------------------------------------------\\n# Parameters\\n# ----------------------------------------------------------------------------\\nL = 100.0                 # beam length along x [mm]\\nH = 10.0                  # section height along y [mm]\\nT = 5.0                   # section width along z [mm]\\n\\nNX = 20                   # elements along length  (>= 16)\\nNY = 4                    # elements through height (>= 4)\\nNZ = 2                    # elements through width  (>= 2)\\n\\nE_MOD = 210000.0          # Young's modulus [MPa]\\nNU = 0.3                  # Poisson's ratio\\nRHO = 7.85e-9             # density [tonne/mm^3]\\n\\nF_TIP_Y = -1000.0         # total tip force in y [N]\\n\\nOUT_NAME = \\\"model.inp\\\"\\n\\n\\ndef make_deck():\\n    lines = []\\n\\n    def add(s=\\\"\\\"):\\n        lines.append(s)\\n\\n    # ------------------------------------------------------------------\\n    # Node generation on the \\\"half-step\\\" grid (indices 0 .. 2*N in each\\n    # direction).  A C3D20 element uses only grid points with at most one\\n    # odd index (corners: all even; midside nodes: exactly one odd).\\n    # ------------------------------------------------------------------\\n    node_id = {}\\n    nid = 0\\n    node_lines = []\\n    for hk in range(2 * NZ + 1):\\n        for hj in range(2 * NY + 1):\\n            for hi in range(2 * NX + 1):\\n                n_even = (hi % 2 == 0) + (hj % 2 == 0) + (hk % 2 == 0)\\n                if n_even < 2:\\n                    continue  # face centres / body centre: not used by C3D20\\n                nid += 1\\n                node_id[(hi, hj, hk)] = nid\\n                x = hi * L / (2.0 * NX)\\n                y = -H / 2.0 + hj * H / (2.0 * NY)\\n                z = -T / 2.0 + hk * T / (2.0 * NZ)\\n                node_lines.append(\\n                    \\\"{:d}, {:.12g}, {:.12g}, {:.12g}\\\".format(nid, x, y, z)\\n                )\\n\\n    # ------------------------------------------------------------------\\n    # Element generation (C3D20, Abaqus/CalculiX local node ordering):\\n    #   corners 1-8, midside 9-12 (bottom edges), 13-16 (top edges),\\n    #   17-20 (vertical edges).  Local offsets in half-grid units.\\n    # ------------------------------------------------------------------\\n    LOCAL = [\\n        (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),      # nodes  1- 4\\n        (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),      # nodes  5- 8\\n        (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),      # nodes  9-12\\n        (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),      # nodes 13-16\\n        (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),      # nodes 17-20\\n    ]\\n\\n    elem_lines = []\\n    eid = 0\\n    for c in range(NZ):\\n        for b in range(NY):\\n            for a in range(NX):\\n                eid += 1\\n                base = (2 * a, 2 * b, 2 * c)\\n                conn = [\\n                    node_id[(base[0] + d0, base[1] + d1, base[2] + d2)]\\n         \"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"GLM-5.3-flash-code-agent\", \"revision\": \"1.0.0\", \"agent_kind\": \"model_agent\", \"request_sha256\": \"28ca3bf5fc0246756e0d874258d64c2782bb978f9ea7c2dfd5b8ed9fb4316974\", \"response_sha256\": \"3dbf4e7361e810dba6d620db7434685203829aa3589db29286e13dd4c62a63f4\", \"audit_dir\": \"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/glm-live/agent-audit/beam_static_01-fn3wwyx4\", \"config_sha256\": \"f73f37325729b098947e79aaa8294d2801d652a2b9fcc11b00ecb6f101d7753e\", \"revision_files\": {\"model_agent.py\": \"6d397504726f4bde20be4c0cb66d946e5f0623a8588e411ab97dc9c9c0def4d6\"}, \"command_files\": {\"0\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\", \"1\": \"6d397504726f4bde20be4c0cb66d946e5f0623a8588e411ab97dc9c9c0def4d6\"}, \"identity_env\": {\"COMAC_MODEL_BASE\": \"6bc0b5b57709c0f5b403616bcce1a37494ab444079b1af31165f0ffbcc1f4385\", \"COMAC_MODEL_NAME\": \"0d8724178b098d01df9c71a161bf380133fde5832d56d203a0f9ad03389970cc\"}, \"executable_sha256\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\"}",
+    "grade_details": "{\"ccx_stdout_tail\": \"constraints:            1\\n   terms in all multiple point constraints:            1\\n   tie constraints:            0\\n   dependent nodes tied by cyclic constraints:            0\\n   dependent nodes in pre-tension constraints:            0\\n\\n   sets:            3\\n   terms in all sets:          394\\n\\n   materials:            1\\n   constants per material and temperature:            2\\n   temperature points per material:            1\\n   plastic data points per material:            0\\n\\n   orientations:            0\\n   amplitudes:            2\\n   data points in all amplitudes:            2\\n   print requests:            2\\n   transformations:            0\\n   property cards:            0\\n\\n *ERROR in allocation: at least one fatal\\n        error message while reading the\\n        input deck: CalculiX stops.\\n\\n\"}",
+    "resume_identity": "6e6986707d716583e44887ce41c260d9c570236ccef2b8504f596cd86bc773c6"
+  },
+  "timings": {
+    "agent_s": 111.783,
+    "setup_s": 0.0,
+    "grade_s": 0.102
+  },
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "ccx exit=201 0.08s"
+  ]
+}

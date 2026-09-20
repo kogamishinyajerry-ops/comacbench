@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_263_1",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (2, 8, 3710),\\n    (3, 8, 1660),\\n    (4, 8, 2753),\\n]\\n\\n\\ndef _v(x):\\n    if isinstance(x, dict) and \\\"__date__\\\" in x:\\n        return _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d %H:%M:%S\\\") \\\\\\n            if len(x[\\\"__date__\\\"]) > 10 else _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d\\\")\\n    return x\\n\\n\\nwb = openpyxl.load_workbook(\\\"ssb_263_1_init.xlsx\\\")\\nws = wb[\\\"Sheet1\\\"] if \\\"Sheet1\\\" in wb.sheetnames else wb.worksheets[0]\\nfor cells in ws['H2:H4']:\\n    for cell in cells:\\n        if not isinstance(cell, openpyxl.cell.cell.MergedCell):\\n            cell.value = None\\nfor row, col, v in VALUES:\\n    ws.cell(row=row, column=col).value = _v(v)\\nwb.save(\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"H2:H4\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 3, \"n_expected\": 3, \"n_clear\": 0, \"matched\": 3, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "172ccc21d6eb9b5ad5779457a21b0e9a0b0e6429c42b8001b16eb64db50a081f"
+  },
+  "timings": {
+    "agent_s": 2.877,
+    "setup_s": 0.0,
+    "grade_s": 2.877
+  },
+  "environment_digest": "sha256:6324e105dbfc8530cee94bfa414a5263b893bc0c6d448b9636f03249b9e14ee1",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=802",
+    "run1 exit=0 0.27s",
+    "run2 exit=0 0.33s",
+    "physics=1.0 cells=3/3 extra=0"
+  ]
+}

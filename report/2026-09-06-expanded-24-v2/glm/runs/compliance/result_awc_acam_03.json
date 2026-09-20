@@ -1,0 +1,37 @@
+{
+  "task_id": "awc_acam_03",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.8,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 0.8,
+  "artifacts": {
+    "answer": "\"```json\\n{\\n  \\\"clause_id\\\": \\\"ACX-FUEL-243 §5.23\\\",\\n  \\\"primary_method\\\": \\\"MC8\\\",\\n  \\\"secondary_methods\\\": [\\\"MC1\\\", \\\"MC9\\\"],\\n  \\\"witnesses_required\\\": false,\\n  \\\"documented_only\\\": false\\n}\\n```\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3-flash\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"clause_id\", \"ok\": false, \"got\": \"ACX-FUEL-243 §5.23\", \"ref\": \"ACX-FUEL-243\", \"exact\": true}, {\"field\": \"primary_method\", \"ok\": true, \"got\": \"MC8\", \"ref\": \"MC8\", \"exact\": true}, {\"field\": \"secondary_methods\", \"ok\": true, \"got\": [\"mc1\", \"mc9\"], \"ref\": [\"mc1\", \"mc9\"]}, {\"field\": \"witnesses_required\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}, {\"field\": \"documented_only\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 5, \"n_hit\": 4}",
+    "resume_identity": "b4c073356181a8a11ebfcc48c21585fbc62c0e259a88c0d7f8b0572f668dab6b"
+  },
+  "timings": {
+    "agent_s": 3.801,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3c21ecdac681d1c24b57da28e6f02811f131b42a4851c26abe5bcb98de9726d7",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='```json\\n{\\n  \"clause_id\": \"ACX-FUEL-243 §5.23\",\\n  \"primary_method\": \"MC8\",\\n  \"secondary_methods\": [\"MC1\", \"MC9\"],\\n  \"witn' attempts=1"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_22_47",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.1481,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.57405,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\n\\nwb = load_workbook('ssb_22_47_init.xlsx')\\nws = wb['sheet1']\\n\\nmax_row = ws.max_row\\n\\nheader_keywords = {'name', 'names', 'header', 'id', 'number', 'value', 'no', 'no.', 'index', 'item'}\\n\\ndef looks_like_header(val):\\n    if val is None:\\n        return True\\n    if isinstance(val, str) and val.strip().lower() in header_keywords:\\n        return True\\n    return False\\n\\n# Read source data from A:C (starting from row 2)\\nraw_data = []\\nfor row in range(2, max_row + 1):\\n    val_a = ws.cell(row=row, column=1).value\\n    val_b = ws.cell(row=row, column=2).value\\n    val_c = ws.cell(row=row, column=3).value\\n    \\n    # Skip empty cells\\n    if val_b is None or val_b == '':\\n        continue\\n    # Skip headers\\n    if looks_like_header(val_b):\\n        continue\\n    \\n    raw_data.append((row, val_a, val_b, val_c))\\n\\n# Read helper column J\\nhelper_order = []\\nhelper_seen = set()\\nfor row in range(2, max_row + 1):\\n    val_j = ws.cell(row=row, column=10).value\\n    if val_j is None or val_j == '':\\n        continue\\n    if looks_like_header(val_j):\\n        continue\\n    if val_j not in helper_seen:\\n        helper_order.append(val_j)\\n        helper_seen.add(val_j)\\n\\n# Remove duplicates (defined by identical entries in both B and C)\\nseen = set()\\nfiltered_data = []\\nfor item in raw_data:\\n    key = (item[2], item[3])\\n    if key not in seen:\\n        seen.add(key)\\n        filtered_data.append(item)\\n\\n# Sort based on helper column or alphabetically\\nif helper_order:\\n    priority = {name: idx for idx, name in enumerate(helper_order)}\\n    original_order = {item[0]: idx for idx, item in enumerate(filtered_data)}\\n    \\n    def sort_key(item):\\n        name = item[2]\\n        if name in priority:\\n            return (0, priority[name], original_order[item[0]])\\n        else:\\n            return (1, 0, original_order[item[0]])\\n    \\n    sorted_data = sorted(filtered_data, key=sort_key)\\nelse:\\n    sorted_data = sorted(filtered_data, key=lambda x: str(x[2]))\\n\\n# Clear F2:H10\\nfor row in range(2, 11):\\n    for col in range(6, 9):\\n        ws.cell(row=row, column=col).value = None\\n\\n# Write output to F:H (limit 9 rows for F2:H10)\\nfor i, item in enumerate(sorted_data[:9]):\\n    ws.cell(row=2 + i, column=6, value=item[1])  # F = A value\\n    ws.cell(row=2 + i, column=7, value=item[2])  # G = B value (name)\\n    ws.cell(row=2 + i, column=8, value=item[3])  # H = C value\\n\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"openai_compat\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"sheet1\", \"region\": \"F2:H10\", \"recalc_sheet_mappings\": [{\"sheet1\": \"sheet1 -1\", \"ورقة1\": \"ورقة1\"}, {\"sheet1\": \"sheet1 -1\", \"ورقة1\": \"ورقة1\"}], \"match\": {\"n_gold\": 27, \"matched\": 4, \"n_extra\": 0}, \"misses\": [{\"cell\": \"sheet1!R2C6\", \"status\": \"mismatch\", \"got\": \"5\", \"ref\": \"1\"}, {\"cell\": \"sheet1!R2C7\", \"status\": \"mismatch\", \"got\": \"HASSAN\", \"ref\": \"HASSONA\"}, {\"cell\": \"sheet1!R2C8\", \"status\": \"mismatch\", \"got\": \"133444422\", \"ref\": \"123344555\"}, {\"cell\": \"sheet1!R3C6\", \"status\": \"mismatch\", \"got\": \"1\", \"ref\": \"2\"}, {\"cell\": \"sheet1!R3C7\", \"status\": \"mismatch\", \"got\": \"HASSAN\", \"ref\": \"HAMMED\"}, {\"cell\": \"sheet1!R4C6\", \"status\": \"mismatch\", \"got\": \"4\", \"ref\": \"3\"}, {\"cell\": \"sheet1!R4C7\", \"status\": \"mismatch\", \"got\": \"HAMAN\", \"ref\": \"HASSAN\"}, {\"cell\": \"sheet1!R4C8\", \"status\": \"mismatch\", \"got\": \"133444424\", \"ref\": \"123444441\"}, {\"cell\": \"sheet1!R5C6\", \"status\": \"mismatch\", \"got\": \"2\", \"ref\": \"4\"}, {\"cell\": \"sheet1!R5C7\", \"status\": \"mismatch\", \"got\": \"HAMMED\", \"ref\": \"HUSSNI\"}, {\"cell\": \"sheet1!R6C6\", \"status\": \"mismatch\", \"got\": \"1\", \"ref\": \"5\"}, {\"cell\": \"sheet1!R6C7\", \"status\": \"mismatch\", \"got\": \"HASSONA\", \"ref\": \"HASSAN\"}]}",
+    "resume_identity": "bd6c04b216ab208b154002f1247f2285c7f25db99ee9ffe411df069ee863697a"
+  },
+  "timings": {
+    "agent_s": 357.458,
+    "setup_s": 0.0,
+    "grade_s": 2.781
+  },
+  "environment_digest": "sha256:74efbb55d349a1570934dde543a8485e28c837de3ea31dff5696000e536b5415",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=openai_compat code_len=2411",
+    "run1 exit=0 0.25s",
+    "run2 exit=0 0.23s",
+    "physics=0.1481 cells=4/27 extra=0"
+  ]
+}

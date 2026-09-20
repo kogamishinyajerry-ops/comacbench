@@ -1,0 +1,151 @@
+{
+  "protocol": "comacbench.pack.v1",
+  "pack": {
+    "id": "aviation-core-v1",
+    "title": "航空工程 Agent · 入门评测包",
+    "revision": "1.0.0",
+    "description": "结构仿真实跑、工程数据清洗、知识本体证据关系三条完整入口；不代表飞机级验收。",
+    "source": "JerryDSH-COMACBench 自建；结构题由 ccx_cb_01 独立复制并锁定，不修改原题",
+    "license": "自建示例：企业数据/本体 CC0-1.0；结构题沿用仓库自建任务许可记录"
+  },
+  "runnable": false,
+  "publishable": false,
+  "task_count": 3,
+  "tasks": [
+    {
+      "id": "beam_static_01",
+      "suite": "aviation.structures",
+      "family": "industrial_simulation",
+      "path": "tasks/aviation.structures/beam_static_01.yaml",
+      "adapter": "simulation_agent",
+      "evidence_level": "solver_execution"
+    },
+    {
+      "id": "data_units_01",
+      "suite": "enterprise.data",
+      "family": "enterprise_data",
+      "path": "tasks/enterprise.data/data_units_01.yaml",
+      "adapter": "code_exec",
+      "evidence_level": "executable_checks"
+    },
+    {
+      "id": "ontology_trace_01",
+      "suite": "enterprise.ontology",
+      "family": "knowledge_ontology",
+      "path": "tasks/enterprise.ontology/ontology_trace_01.yaml",
+      "adapter": "code_exec",
+      "evidence_level": "executable_checks"
+    }
+  ],
+  "issues": [
+    {
+      "code": "invalid_tolerance",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader.numeric_rel_tol",
+      "message": "相对容差无效或宽到不能判别。",
+      "suggested_fix": "提供 0 到 1 之间、带依据的容差。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "partial_engineering_gate",
+      "severity": "review",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader",
+      "message": "当前核验实际求解与数值输出；网格、边界条件、材料与工况并未逐项独立审查。",
+      "suggested_fix": "限制结论范围；增加对应检查器和故障负例后才能升级工程声明。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "uncovered_requirement",
+      "severity": "review",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "材料、载荷分配、边界与最小网格满足题面全部要求",
+      "suggested_fix": "补充检查器，当前不能据此宣称通过。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "missing_file",
+      "severity": "blocker",
+      "field": "input.prompt_file",
+      "message": "材料不可读取：tasks/enterprise.data/data_units_01.md",
+      "suggested_fix": "补齐包内文件；使用相对路径，不使用符号链接。",
+      "task_id": "data_units_01"
+    },
+    {
+      "code": "vacuous_test",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:grader.tests[0]",
+      "message": "断言无法执行或没有检查候选函数。",
+      "suggested_fix": "用候选函数的输出与独立预期结果比较。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "test_count_mismatch",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:reference.n_test_cases",
+      "message": "参考声明的测试数量与实际断言数不符。",
+      "suggested_fix": "核对清单和遗漏的用例。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:evaluation.requirements",
+      "message": "需求引用了不存在的断言。",
+      "suggested_fix": "填写实际断言序号。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:evaluation.requirements",
+      "message": "需求引用了不存在的断言。",
+      "suggested_fix": "填写实际断言序号。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:evaluation.requirements",
+      "message": "需求引用了不存在的断言。",
+      "suggested_fix": "填写实际断言序号。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:evaluation.requirements",
+      "message": "需求引用了不存在的断言。",
+      "suggested_fix": "填写实际断言序号。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:evaluation.requirements",
+      "message": "需求引用了不存在的断言。",
+      "suggested_fix": "填写实际断言序号。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/enterprise.ontology/ontology_trace_01.yaml:evaluation.requirements",
+      "message": "需求引用了不存在的断言。",
+      "suggested_fix": "填写实际断言序号。",
+      "task_id": "ontology_trace_01"
+    },
+    {
+      "code": "expert_review_required",
+      "severity": "review",
+      "field": "pack",
+      "message": "静态检查不证明题意、工程真值与判分语义一致；当前包未完成发布审查。",
+      "suggested_fix": "校准参考实现和错误负例，再进行工程专家审查。",
+      "task_id": null
+    }
+  ],
+  "summary": {
+    "blocker": 10,
+    "review": 3,
+    "warning": 0
+  }
+}

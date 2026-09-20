@@ -1,0 +1,39 @@
+{
+  "task_id": "beam_static_01",
+  "registry_id": "aviation.structures",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nGenerate CalculiX 2.23 input deck for cantilever beam static deflection.\\n\\nGeometry: L=100 mm, H=10 mm, T=5 mm\\nMesh: 16 x 4 x 2 C3D20 hexahedra (structured)\\nMaterial: Steel (E=210000 MPa, nu=0.3, rho=7.85e-9 tonne/mm^3)\\nLoad: Total Fy=-1000 N at tip, distributed equally among all 45 tip-face nodes\\nBC: Fully clamped at root (all 6 DOFs)\\n\\\"\\\"\\\"\\n\\n# --- Parameters ---------------------------------------------------------------\\n# Geometry (mm)\\nL = 100.0   # length along +x\\nH = 10.0    # height along y\\nT = 5.0     # width  along z\\n\\n# Mesh density (elements per direction) -- meets minimum requirements\\nNx = 16\\nNy = 4\\nNz = 2\\n\\n# Material (steel)\\nE   = 210000.0     # MPa\\nnu  = 0.3\\nrho = 7.85e-9      # tonne/mm^3\\n\\n# Load\\nFy_total = -1000.0  # N (total y-force at tip)\\n\\n# --- Structured grid of nodes ------------------------------------------------\\n# For C3D20 we need (2*Nx+1) x (2*Ny+1) x (2*Nz+1) nodes so that adjacent\\n# elements share mid-side nodes.\\nNx_n = 2 * Nx + 1\\nNy_n = 2 * Ny + 1\\nNz_n = 2 * Nz + 1\\n\\nnodes    = []\\nnode_ids = {}  # (ix, iy, iz) -> global node id\\nfor ix in range(Nx_n):\\n    for iy in range(Ny_n):\\n        for iz in range(Nz_n):\\n            x = ix * L / (2 * Nx)\\n            y = -H / 2.0 + iy * H / (2 * Ny)\\n            z = -T / 2.0 + iz * T / (2 * Nz)\\n            nid = ix * Ny_n * Nz_n + iy * Nz_n + iz + 1\\n            nodes.append((nid, x, y, z))\\n            node_ids[(ix, iy, iz)] = nid\\n\\n# --- C3D20 connectivity (relative to element-local grid indices) --------------\\n# Corners 1..8, then mid-side nodes 9..20 on the 12 edges.\\nelem_conn = [\\n    (0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0),   # 1..4 (bottom face)\\n    (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),   # 5..8 (top face)\\n    (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0),   # 9..12 (bottom edges)\\n    (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),   # 13..16 (top edges)\\n    (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1),   # 17..20 (vertical edges)\\n]\\n\\n# --- Build elements -----------------------------------------------------------\\nelements = []\\nfor ix in range(Nx):\\n    for iy in range(Ny):\\n        for iz in range(Nz):\\n            enodes = [node_ids[(2 * ix + di, 2 * iy + dj, 2 * iz + dk)]\\n                      for di, dj, dk in elem_conn]\\n            eid = ix * Ny * Nz + iy * Nz + iz + 1\\n            elements.append((eid, enodes))\\n\\n# --- Root and tip face node sets ---------------------------------------------\\nroot_nodes = []\\ntip_nodes  = []\\nfor iy in range(Ny_n):\\n    for iz in range(Nz_n):\\n        root_nodes.append(node_ids[(0,      iy, iz)])\\n        tip_nodes .append(node_ids[(2 * Nx, iy, iz)])\\n\\nn_tip        = len(tip_nodes)\\nFy_per_node  = Fy_total / n_tip  # equal share per tip node\\n\\n# --- Write the input deck -----------------------------------------------------\\ndef write_block(f, items, per_line=15):\\n    \\\"\\\"\\\"Write a comma-separated list wrapped to <=16 entries per line.\\\"\\\"\\\"\\n    s = [str(x) for x in items]\\n    for i in range(0, len(s), per_line):\\n        f.write(\\\", \\\".join(s[i:i + per_line]) + \\\"\\\\n\\\")\\n\\nwith open('model.inp', 'w') as f:\\n    # Heading\\n    f.write(\\\"*HEADING\\\\n\\\")\\n    f.write(\\\"Cantilever beam static deflection\\\\n\\\")\\n    f.write(\\\"**\\\\n\\\")\\n\\n    # Nodes\\n    f.write(\\\"*NODE\\\\n\\\")\\n    for nid, x, y, z in nodes:\\n        f.write(f\\\"{nid}, {x:.4f}, {y:.4f}, {z:.4f}\\\\n\\\")\\n\\n    # Elements (C3D20) -- connectivity wrapped to <=16 entries per line\\n    f.write(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\\n\\\")\\n    for eid, enodes in elements:\\n        entries = [str(eid)] + [str(n) for n in enodes]   # 21 entries\\n        f.write(\\\", \\\".join(entries[:16]) + \\\"\\\\n\\\")          # 16 entries\\n        f.write(\\\", \\\".join(entries[16:]) + \\\"\\\\n\\\")          #  5 entries\\n\\n    # Material\\n    f.write(\\\"*MATERIAL, NAME=STEEL\\\\n\\\")\\n    f.write(\\\"*ELASTIC\\\\n\\\")\\n    f.write(f\\\"{E:.1f}, {nu}\\\\n\\\")\\n    f.write(\\\"*DENSITY\\\\n\\\")\\n    f.write(f\\\"{rho:.3e}\\\\n\\\")\\n\\n    # Section\\n    f.write(\\\"*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\\n\\\")\\n\\n    # Node sets\\n    f.write(\\\"*NSET, NSET=NROOT\\\\n\\\")\\n    write_block(f, root_nodes, per_line=15)\\n    f.write(\\\"*NSET, NSET=NT\"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"recorded-replay\", \"source_response_sha256\": \"fe52fb5e574d0bf12f30ee6cb145e331ac1befa62ea522695f6b81889971db18\"}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.178644, \"got\": -3.130798, \"ref\": -3.811745}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": false, \"rel_err\": 0.177778, \"got\": 822.2222000000003, \"ref\": 1000.0000999999999}}, \"physics_hits\": \"0/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.14}"
+  },
+  "timings": {
+    "agent_s": 0.162,
+    "setup_s": 0.0,
+    "grade_s": 0.161
+  },
+  "environment_digest": "sha256:b805a8328928de15269f768f9c6879f39df61bff6e101e38bcd5007b40917a6d",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.02s",
+    "ccx exit=0 0.14s"
+  ]
+}

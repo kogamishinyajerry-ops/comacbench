@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_290_27",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9783,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.98915,
+  "artifacts": {
+    "code": "\"import shutil\\nshutil.copyfile('ssb_290_27_init.xlsx',\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A14:I137\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 460, \"n_expected\": 460, \"n_clear\": 0, \"matched\": 450, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R14C2\", \"status\": \"mismatch\", \"got\": \"PID1\", \"ref\": \"1\"}, {\"cell\": \"Sheet1!R26C2\", \"status\": \"mismatch\", \"got\": \"PID2\", \"ref\": \"2\"}, {\"cell\": \"Sheet1!R39C2\", \"status\": \"mismatch\", \"got\": \"PID3\", \"ref\": \"3\"}, {\"cell\": \"Sheet1!R54C2\", \"status\": \"mismatch\", \"got\": \"PID4\", \"ref\": \"4\"}, {\"cell\": \"Sheet1!R67C2\", \"status\": \"mismatch\", \"got\": \"PID5\", \"ref\": \"5\"}, {\"cell\": \"Sheet1!R80C2\", \"status\": \"mismatch\", \"got\": \"GG 1\", \"ref\": \"1\"}, {\"cell\": \"Sheet1!R91C2\", \"status\": \"mismatch\", \"got\": \"GG 2\", \"ref\": \"2\"}, {\"cell\": \"Sheet1!R103C2\", \"status\": \"mismatch\", \"got\": \"GG 4\", \"ref\": \"4\"}, {\"cell\": \"Sheet1!R114C2\", \"status\": \"mismatch\", \"got\": \"GG 5\", \"ref\": \"5\"}, {\"cell\": \"Sheet1!R128C2\", \"status\": \"mismatch\", \"got\": \"GG 6\", \"ref\": \"6\"}]}",
+    "offline_evidence": "{\"kind\": \"unchanged\", \"source_sha256\": \"4e2ac6d130645d23955bb6593bdf543ecf192335a8054b3ba34ee4d350b5a070\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 2.262,
+    "setup_s": 0.0,
+    "grade_s": 2.261
+  },
+  "environment_digest": "sha256:c50e7f86457f116f26a230b0c3050c3208f0f26d60e377a028467d82ffbf45df",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=68",
+    "run1 exit=0 0.02s",
+    "run2 exit=0 0.02s",
+    "physics=0.9783 cells=450/460 extra=0"
+  ]
+}

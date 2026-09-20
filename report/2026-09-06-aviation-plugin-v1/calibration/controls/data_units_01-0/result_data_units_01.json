@@ -1,0 +1,39 @@
+{
+  "task_id": "data_units_01",
+  "registry_id": "enterprise.data",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 0.3,
+  "artifacts": {
+    "code": "\"pass\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 0, \"cases_total\": 7, \"failed_cases\": [{\"case\": 1, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}, {\"case\": 2, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}, {\"case\": 3, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}, {\"case\": 4, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}, {\"case\": 5, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}, {\"case\": 6, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}, {\"case\": 7, \"pass\": false, \"err\": \"NameError: name 'normalize_records' is not defined\"}], \"determinism\": 1.0, \"run1_s\": 0.02}",
+    "resume_identity": "56e5a3f188d483fb1a449bd53e524eb7ac2c7d5f3a30b944153614729df9db89"
+  },
+  "timings": {
+    "agent_s": 0.045,
+    "setup_s": 0.0,
+    "grade_s": 0.043
+  },
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

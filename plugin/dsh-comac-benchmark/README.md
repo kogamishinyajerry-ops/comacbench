@@ -62,7 +62,7 @@ UI 在 `plugin/dsh-comac-workbench/`（client plugin，注册进 conversation.vi
 ```bash
 # 1) host 半（本插件）：拷三文件 + patch 条目
 mkdir -p ~/.dsh/plugins/dsh-comac-benchmark
-cp plugin/dsh-comac-benchmark/{index.js,package.json,snapshot.mjs} ~/.dsh/plugins/dsh-comac-benchmark/
+cp plugin/dsh-comac-benchmark/{index.js,packs.js,package.json,snapshot.mjs} ~/.dsh/plugins/dsh-comac-benchmark/
 # ~/.dsh/profiles/web/cordis.patch.yml 追加（若已有 dsh-comac-benchmark 条目则把 inject 改为 [tools, webServer]）：
 #   - insert:
 #       - id: dsh-comac-benchmark
@@ -81,10 +81,25 @@ ln -sfn /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/plugin/dsh-com
 # 4) UI 改动后：cd plugin/dsh-comac-workbench && node build.mjs（fail-loud，格式断言内置）
 ```
 
-更新插件后重新 `cp` 两个文件即可；改判分逻辑请改仓库 `runners/`（无需动插件）。
+更新 host 插件需同时复制 `index.js` 和 `packs.js`；改判分逻辑请改仓库 `runners/`。
+
+## 工程师评测与贡献入口（2026-09-06）
+
+新增 `comac_pack_catalog`、`comac_pack_validate`、`comac_agent_run`、`comac_agent_result`。
+使用方法见 [工程师指南](../../docs/aviation-quickstart.md)。`/comac/packs` 是只读 GET，复用同一 Python 预检结果；工作台“工程师入口”提供可复制命令和贡献反馈。
+
+新入口优先用仓库 `.venv/bin/python`，可通过 `COMAC_BENCH_PYTHON` 指定解释器。
+`comac_agent_run` 仅提交脱离启动请求，完成状态以 `run.json` 为准；不会把 PID 返回当作运行成功。
+新评测包不自动登记进既有 registry；静态检查和校准通过后仍需工程审查。
+
+`node plugin/dsh-comac-benchmark/test-packs.mjs` 验证新增工具、非法包零起跑和只读路由守卫；不启动原有全量 stub 测试。
 
 ## 验证
 
 - `node smoke.mjs`（本目录）：mock ctx 逐工具冒烟——registry 38 项 / bench 详情 /
   stub 脱离起跑到 comac_results 端到端读数（曾跑通：stub 0/100 gate、
   non_physical ×100 与已知画像一致）
+
+### CFD 研究证据准入
+
+现有四个 pack/agent 工具及 `/comac/packs` 已转接 `comacbench.admission`，参数不变。CFD 包自动展示 Re=100/200/300 共 48 组研究；缺失、未知或摘要异常的研究附件阻断启动。CLI 改用 `python -m comacbench.admission`，完整原生文件校验用 `python -m comacbench.evidence --full`。研究候选带不替代公开 10% 容差，Re=200/300 尚不能调用评分。协议及便携依赖见 `docs/specs/cfd-evidence-admission-v1.md`。

@@ -1,0 +1,128 @@
+id: backward_step_01
+registry_id: aviation.cfd
+domain: aerodynamics
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: aviation-cfd-step@1.0.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- openfoam
+input:
+  prompt_file: tasks/aviation.cfd/backward_step_01.md
+  prompt_sha256: 61ba71a73e12b519c5ed947b037ff224c0864fc989ada607df6c5528f8470894
+  assets:
+  - path: templates/0/U
+    digest: cb08051312ffcf25ec4403d854cf90970ab7f1ac57763a64b4713ca4a14e677f
+  - path: templates/0/p
+    digest: 3c4867fba2e9f5d86d9892ba4619fead37c4bdadfbf3663efa237c5972391563
+  - path: templates/constant/transportProperties
+    digest: cae5a61bda5291fb20878cf91b201ca29c88a1f3e87af12864641d43c8600aa9
+  - path: templates/constant/turbulenceProperties
+    digest: b73bc35b8ab742c6b9752a1cc5a6798a09947477275338a2e2c333b7fa8ab488
+  - path: templates/system/blockMeshDict
+    digest: 7c0b067fcd114e4598e9c0a63f1a62ec7f96e227e4ba6908b10cb19ed8136cfd
+  - path: templates/system/controlDict
+    digest: ecb67bf1d2f175cf9c83ed995b48f15489a40758d553a7ae045552bc63bab345
+  - path: templates/system/fvSchemes
+    digest: f7e500cb2761d1348eff329c6c7bd35811767a2a664a9f4633256319662ce527
+  - path: templates/system/fvSolution
+    digest: e58ba60187c5876aebd44e2a35e63798e247784bd987b0bab9594a831da9fe29
+output_contract:
+- case/0/U
+- case/0/p
+- case/constant/transportProperties
+- case/constant/turbulenceProperties
+- case/system/blockMeshDict
+- case/system/controlDict
+- case/system/fvSchemes
+- case/system/fvSolution
+reference:
+  source: Erturk 2008, Table 5, ER=2, Re=100; independently checked paper definition
+    Re=Um*2h/nu
+  revision: erturk2008+bounded-short-domain-v1
+  doi: 10.1016/j.compfluid.2007.09.003
+  values:
+    reattachment_x_over_h: 2.922
+  rel_tol: 0.1
+  uncertainty_note: 短域 -5h..30h、基础网格与论文细网格存在差别；10% 为继承的演示容差，待网格与域长度敏感性研究。
+grader:
+  answer_format: code
+  exec_kind: cfd_step
+  validity_gate: true
+  result_keys:
+  - reattachment_x_over_h
+  numeric_rel_tol: 0.1
+  solver_backend: openfoam10-pinned-docker
+  oracle_source: private/reference.py
+  cfd_contract:
+    profile: openfoam10.backward_step.v1
+    thresholds:
+      min_cells: 6100
+      max_mass_imbalance: 0.0001
+      max_p_residual: 1.0e-05
+      max_U_residual: 1.0e-06
+      min_residual_decades: 4
+      max_qoi_change: 0.01
+      max_relative_error: 0.1
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: 六阶段均通过并位于参考带才得满分；任何硬门槛失败总分为零。
+limits:
+  cpu: 2
+  memory_gb: 4
+  wall_clock_s: 600
+  attempts: 1
+license_provenance:
+  source: github.com/kogamishinyajerry-ops/GLM-CFD-Benchmark; adapted native input
+    templates
+  license: MIT
+  status: confirmed-repo
+  revision: cfdb@b26799e+foundation10-native-wss-v1
+  mirror_allowed: true
+evaluation:
+  units: m, s, m^2/s, m^2/s^2, m^3/s
+  requirements:
+  - id: C1
+    text: 输入文件、物理单位、边界和公开方言完整
+    check: cfd:inputs
+  - id: C2
+    text: 实际网格通过 checkMesh、最小划分与入口剖面核对
+    check: cfd:mesh
+  - id: C3
+    text: 平台实际执行 simpleFoam，保留原生日志与场
+    check: cfd:solver
+  - id: C4
+    text: 原生残差、收敛声明和结束迭代一致
+    check: cfd:convergence
+  - id: C5
+    text: 原生 phi 边界通量满足守恒
+    check: cfd:conservation
+  - id: C6
+    text: 从原生壁面剪切重算稳定再附着点并对比参考
+    check: cfd:qoi
+  negative_controls:
+  - script: private/missing_boundary.py
+    max_score: 0
+    expected_issue: boundary_mismatch
+  - script: private/wrong_viscosity.py
+    max_score: 0
+    expected_issue: fluid_mismatch
+  - script: private/precomputed_qoi.py
+    max_score: 0
+    expected_issue: precomputed_output
+  - script: private/coarse_mesh.py
+    max_score: 0
+    expected_issue: mesh_below_minimum
+  - script: private/not_converged.py
+    max_score: 0
+    expected_issue: not_converged
+  - script: private/wrong_inlet.py
+    max_score: 0
+    expected_issue: inlet_profile_mismatch
+  scope: 二维 Re=100 层流后向台阶的受限原生证据链；不含网格收敛、商业求解器、复杂飞机流动或工程接受。

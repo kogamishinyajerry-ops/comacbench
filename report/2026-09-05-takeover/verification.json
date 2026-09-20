@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-05",
+  "scope": "Current local checkout; no live provider, full CFD solve, browser acceptance, or intranet deployment",
+  "node_syntax": {"commands": ["node --check plugin/dsh-comac-benchmark/index.js", "node --check plugin/dsh-comac-benchmark/snapshot.mjs"], "exit_codes": [0, 0]},
+  "mock_workbench": {
+    "method": "Import repository plugin and apply to mock tools/effect/webServer; invoke in-memory handler without opening a port",
+    "registered_tools": 6,
+    "nonloopback_get": 403,
+    "loopback_post": 405,
+    "unknown_route": 404,
+    "overview_status": 200,
+    "latest_date": "2026-08-30",
+    "radar": [],
+    "runs": 159,
+    "view_tasks": 10838,
+    "compact_view_json_bytes": 2085362,
+    "pretty_view_json_bytes": 3137372
+  },
+  "isolated_workbench_build": {
+    "method": "Copy package files, src, build.mjs and tsdown config into new temporary directory; symlink existing node_modules; node build.mjs",
+    "output_directory": "/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/comacbench-workbench-build-lw2s_ory",
+    "exit_code": 0,
+    "reported_bundle_size": "1.18 MB",
+    "factory_assertion": "PASS",
+    "warning": "inlineDynamicImports deprecated; use codeSplitting false"
+  },
+  "local_installation": {
+    "inspected_profile": "/Users/Zhuanz/.dsh/profiles/web",
+    "host_plugin_registered": true,
+    "host_file_matches_repo_sha256": false,
+    "workbench_client_mount_exists": false,
+    "workbench_client_registration_found": false,
+    "running_process_loaded_version": "not inspected",
+    "configuration_changed": false
+  },
+  "environment": {
+    "python": "3.12.13",
+    "node": "v24.14.0",
+    "docker_server": "29.2.1",
+    "docker_info_exit": 0,
+    "commands_present": ["docker", "ccx", "soffice", "dsh"],
+    "octave_command_present": false,
+    "target_intranet": "unverified"
+  },
+  "git_manifest_commit_checks": {
+    "method": "git cat-file -e <recorded-commit>^{commit} for each distinct nonempty manifest git_commit",
+    "unresolvable_value": "unknown(no-git)",
+    "affected_manifests": 29,
+    "other_nonempty_commits_resolve": true,
+    "configured_remote_names": []
+  }
+}

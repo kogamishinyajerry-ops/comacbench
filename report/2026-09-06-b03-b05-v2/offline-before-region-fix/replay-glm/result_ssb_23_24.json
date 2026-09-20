@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_23_24",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"\\nAutomatically delete rows (columns A:E) whose word in column A matches any\\nword found in column I, shifting the remaining rows up — the programmatic\\nequivalent of selecting A1:E1 and pressing CTRL + MINUS for every duplicate.\\n\\nResult is written into 'Sheet1' cells A1:E1102 of output.xlsx\\n(a copy of the provided input workbook, all other sheets preserved).\\n\\\"\\\"\\\"\\n\\nfrom openpyxl import load_workbook\\n\\nINPUT_FILE = \\\"ssb_23_24_init.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Sheet1\\\"\\nANSWER_ROWS = 1102          # answer region: A1:E1102\\n\\n# ---------------------------------------------------------------- load\\nwb = load_workbook(INPUT_FILE)                      # keeps every existing sheet\\nws = wb[SHEET_NAME] if SHEET_NAME in wb.sheetnames else wb.active\\n\\nn_rows = max(ws.max_row, ANSWER_ROWS)               # never miss data past row 1102\\n\\n# ------------------------------------------------- 1) words in column I\\n# Collect every word that appears anywhere in column I (a cell may hold\\n# several words separated by spaces, commas, semicolons or tabs).\\nstop_words = set()\\nfor r in range(1, ws.max_row + 1):\\n    val = ws.cell(row=r, column=9).value            # column I = 9\\n    if val is None:\\n        continue\\n    text = str(val).strip()\\n    if not text:\\n        continue\\n    for token in text.replace(\\\",\\\", \\\" \\\").replace(\\\";\\\", \\\" \\\").replace(\\\"\\\\t\\\", \\\" \\\").split():\\n        stop_words.add(token.strip().lower())\\n\\n# ------------------------------- 2) keep rows whose A-word is NOT in I\\nkept = []\\nfor r in range(1, n_rows + 1):\\n    vals = [ws.cell(row=r, column=c).value for c in range(1, 6)]   # A..E\\n    a_val = vals[0]\\n\\n    if a_val is None or str(a_val).strip() == \\\"\\\":\\n        kept.append(vals)                           # empty row: nothing to delete\\n        continue\\n\\n    if str(a_val).strip().lower() in stop_words:\\n        continue                                    # match in column I -> delete row\\n\\n    kept.append(vals)\\n\\n# ----------------------- 3) clear A1:E{n_rows} and shift remaining up\\nfor r in range(1, n_rows + 1):\\n    for c in range(1, 6):\\n        ws.cell(row=r, column=c).value = None\\n\\nfor i, vals in enumerate(kept):\\n    r = i + 1\\n    for c, v in enumerate(vals):\\n        if v is not None:\\n            ws.cell(row=r, column=c + 1).value = v\\n\\n# ---------------------------------------------------------------- save\\nwb.save(OUTPUT_FILE)\\nprint(f\\\"Deleted {n_rows - len(kept)} matching row(s); \\\"\\n      f\\\"{len(kept)} row(s) written to {SHEET_NAME}!A1:E{ANSWER_ROWS} in {OUTPUT_FILE}\\\")\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:E1102\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 1084, \"n_expected\": 3733, \"n_clear\": 2649, \"matched\": 3733, \"n_extra\": 0}, \"misses\": []}",
+    "offline_evidence": "{\"kind\": \"replay-glm\", \"source_sha256\": \"2c738085e6bc46fe08be628a21f17775df3539e0cfa3c2d3a91311c6c9572bd8\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 3.294,
+    "setup_s": 0.0,
+    "grade_s": 3.294
+  },
+  "environment_digest": "sha256:c50e7f86457f116f26a230b0c3050c3208f0f26d60e377a028467d82ffbf45df",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=2498",
+    "run1 exit=0 0.42s",
+    "run2 exit=0 0.35s",
+    "physics=1.0 cells=3733/3733 extra=0"
+  ]
+}

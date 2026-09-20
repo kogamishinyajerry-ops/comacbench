@@ -1,0 +1,37 @@
+{
+  "task_id": "awx_ce_05",
+  "registry_id": "awext.clause_extract",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"```json\\n{\\n  \\\"family\\\": \\\"loads\\\",\\n  \\\"clause_no\\\": \\\"§5.71\\\",\\n  \\\"positive_load_limit\\\": 3.24,\\n  \\\"negative_load_limit\\\": -0.72,\\n  \\\"cycles_or_actions\\\": 1000,\\n  \\\"probability_per_hour\\\": 1.9,\\n  \\\"applies_to\\\": [\\\"empennage\\\", \\\"engine-mount\\\"],\\n  \\\"compliance_methods\\\": [\\\"analysis\\\", \\\"inspection\\\", \\\"test\\\"],\\n  \\\"amendment_year\\\": 2022\\n}\\n```\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3-flash\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"family\", \"ok\": true, \"got\": \"loads\", \"ref\": \"loads\"}, {\"field\": \"clause_no\", \"ok\": true, \"got\": \"§5.71\", \"ref\": \"§5.71\"}, {\"field\": \"positive_load_limit\", \"ok\": true, \"got\": 3.24, \"ref\": 3.24}, {\"field\": \"negative_load_limit\", \"ok\": true, \"got\": -0.72, \"ref\": -0.72}, {\"field\": \"cycles_or_actions\", \"ok\": true, \"got\": 1000, \"ref\": 1000, \"exact\": true}, {\"field\": \"probability_per_hour\", \"ok\": true, \"got\": 1.9, \"ref\": 1.9}, {\"field\": \"applies_to\", \"ok\": true, \"got\": [\"empennage\", \"engine-mount\"], \"ref\": [\"empennage\", \"engine-mount\"]}, {\"field\": \"compliance_methods\", \"ok\": true, \"got\": [\"analysis\", \"inspection\", \"test\"], \"ref\": [\"analysis\", \"inspection\", \"test\"]}, {\"field\": \"amendment_year\", \"ok\": true, \"got\": 2022, \"ref\": 2022, \"exact\": true}], \"n_fields\": 9, \"n_hit\": 9}",
+    "resume_identity": "6d31d185199f74ea9fb9465b88c7f76710bda4bd84617dcd1bf9c73539726eb8"
+  },
+  "timings": {
+    "agent_s": 7.447,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "awext@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='```json\\n{\\n  \"family\": \"loads\",\\n  \"clause_no\": \"§5.71\",\\n  \"positive_load_limit\": 3.24,\\n  \"negative_load_limit\": -0.72,\\n  ' attempts=1"
+  ]
+}

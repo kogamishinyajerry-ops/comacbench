@@ -1,0 +1,37 @@
+{
+  "task_id": "awc_trc_02",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"{\\\"requirement_id\\\":\\\"SPEC-26\\\",\\\"clause_ref\\\":\\\"§25.312\\\",\\\"evidence_ids\\\":[\\\"AN-4\\\",\\\"TR-56\\\"],\\\"verified_params\\\":[\\\"PARAM_D7\\\"],\\\"test_only_params\\\":[\\\"PARAM_A9\\\",\\\"PARAM_B8\\\",\\\"PARAM_C7\\\"],\\\"coverage_complete\\\":false}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"requirement_id\", \"ok\": true, \"got\": \"SPEC-26\", \"ref\": \"SPEC-26\", \"exact\": true}, {\"field\": \"clause_ref\", \"ok\": true, \"got\": \"§25.312\", \"ref\": \"§25.312\", \"exact\": true}, {\"field\": \"evidence_ids\", \"ok\": true, \"got\": [\"an-4\", \"tr-56\"], \"ref\": [\"an-4\", \"tr-56\"]}, {\"field\": \"verified_params\", \"ok\": true, \"got\": [\"param_d7\"], \"ref\": [\"param_d7\"]}, {\"field\": \"test_only_params\", \"ok\": true, \"got\": [\"param_a9\", \"param_b8\", \"param_c7\"], \"ref\": [\"param_a9\", \"param_b8\", \"param_c7\"]}, {\"field\": \"coverage_complete\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 6, \"n_hit\": 6}",
+    "resume_identity": "89ae77ffe0f7109cb8ebd60db2d926a963878803064b6765e5ac1f9c445346d7"
+  },
+  "timings": {
+    "agent_s": 3.302,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3c21ecdac681d1c24b57da28e6f02811f131b42a4851c26abe5bcb98de9726d7",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\"requirement_id\":\"SPEC-26\",\"clause_ref\":\"§25.312\",\"evidence_ids\":[\"AN-4\",\"TR-56\"],\"verified_params\":[\"PARAM_D7\"],\"test_' attempts=1"
+  ]
+}

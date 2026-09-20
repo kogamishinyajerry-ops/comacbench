@@ -1,0 +1,85 @@
+id: beam_static_01
+registry_id: aviation.structures
+domain: structures
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: aviation-core@1.0.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- calculix
+input:
+  prompt_file: tasks/aviation.structures/beam_static_01.md
+  prompt_sha256: fe849b65d4f062bf61d9643e0c8c09cfba1d94e55991718ad6464f7a7816dd17
+  assets: []
+output_contract:
+- model.inp
+reference:
+  source: gold make_case.py 实跑 ccx 2.23 的 .dat 解析值（确定性；自建任务）
+  revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+  values:
+    tip_defl_mm: -3.811745
+    root_rf_sum_n: 1000.0000999999999
+  rel_tol: 0.05
+  uncertainty_note: 解析交叉验证：tip_defl_mm=-3.81; root_rf_sum_n=1000；容差覆盖模型网格离散化差（题面钉死最小网格与
+    C3D20）
+grader:
+  answer_format: code
+  exec_kind: ccx_fea
+  validity_gate: true
+  result_keys:
+  - tip_defl_mm
+  - root_rf_sum_n
+  numeric_rel_tol: 1.5
+  exact_keys: []
+  extract:
+    tip_defl_mm:
+      type: max_abs_udof
+      set: NTIP
+      dof: 2
+    root_rf_sum_n:
+      type: sum_rf
+      set: NROOT
+      dof: 2
+  solver_backend: calculix-ccx-native
+  oracle_source: private/beam_static_01.py
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: physics=.dat 数值字段命中均值；requirements=模型可执行+model.inp+dat 键完备
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 300
+  attempts: 1
+license_provenance:
+  source: 自建（受 SimJEB 支架域启发，未镜像其数据；求解器 CalculiX GPL-2.0 仅作执行后端）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+evaluation:
+  units: mm, N, MPa, tonne/mm^3
+  requirements:
+  - id: S1
+    text: 生成可运行的 model.inp 并实际执行 CalculiX
+    check: solver_exit
+  - id: S2
+    text: 尖端位移和根部合力落入 5% 参考带
+    check: reference_metrics
+  - id: S3
+    text: 材料、载荷分配、边界与最小网格满足题面全部要求
+    check: not_covered
+  negative_controls:
+  - script: private/no_output.py
+    max_score: 0
+  - script: private/wrong_load.py
+    max_score: 0.5
+  scope: 结构基础算例；不代表飞机结构设计接受。

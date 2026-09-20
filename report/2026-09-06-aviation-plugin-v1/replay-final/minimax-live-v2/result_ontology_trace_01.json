@@ -1,0 +1,38 @@
+{
+  "task_id": "ontology_trace_01",
+  "registry_id": "enterprise.ontology",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def build_graph(entities, assertions):\\n    VALID_RELATIONS = {\\n        \\\"made_of\\\": (\\\"Part\\\", \\\"Material\\\"),\\n        \\\"verified_by\\\": (\\\"Part\\\", \\\"Analysis\\\"),\\n        \\\"satisfies\\\": (\\\"Analysis\\\", \\\"Requirement\\\"),\\n    }\\n\\n    entity_map = {e[\\\"id\\\"]: e[\\\"type\\\"] for e in entities}\\n\\n    edges = {}\\n    issues = []\\n\\n    for a in assertions:\\n        source_id = a.get(\\\"source_id\\\")\\n        relation = a.get(\\\"relation\\\")\\n        subject = a.get(\\\"subject\\\")\\n        obj = a.get(\\\"object\\\")\\n\\n        # 1. source_id must be a non-empty string\\n        if not isinstance(source_id, str) or len(source_id) == 0:\\n            issues.append({\\\"source_id\\\": \\\"\\\", \\\"reason\\\": \\\"missing_source\\\"})\\n            continue\\n\\n        # 2. relation must be one of the valid relations\\n        if relation not in VALID_RELATIONS:\\n            issues.append({\\\"source_id\\\": source_id, \\\"reason\\\": \\\"unknown_relation\\\"})\\n            continue\\n\\n        # 3. subject and object must be declared in entities\\n        if subject not in entity_map or obj not in entity_map:\\n            issues.append({\\\"source_id\\\": source_id, \\\"reason\\\": \\\"missing_entity\\\"})\\n            continue\\n\\n        # 4. endpoint types must match the relation signature\\n        expected_subject_type, expected_object_type = VALID_RELATIONS[relation]\\n        if (entity_map[subject] != expected_subject_type\\n                or entity_map[obj] != expected_object_type):\\n            issues.append({\\\"source_id\\\": source_id, \\\"reason\\\": \\\"type_mismatch\\\"})\\n            continue\\n\\n        # Valid: accumulate evidence for this edge\\n        key = (subject, relation, obj)\\n        if key not in edges:\\n            edges[key] = set()\\n        edges[key].add(source_id)\\n\\n    edge_list = []\\n    for key in sorted(edges.keys()):\\n        subj, rel, obj = key\\n        edge_list.append({\\n            \\\"subject\\\": subj,\\n            \\\"relation\\\": rel,\\n            \\\"object\\\": obj,\\n            \\\"evidence\\\": sorted(edges[key]),\\n        })\\n\\n    issues.sort(key=lambda x: (x[\\\"source_id\\\"], x[\\\"reason\\\"]))\\n\\n    return {\\\"edges\\\": edge_list, \\\"issues\\\": issues}\"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"recorded-replay\", \"source_response_sha256\": \"fae63e1ce38cb9af7032d7ce099d4ca641312a87fe10f8100e11888778dc5154\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}"
+  },
+  "timings": {
+    "agent_s": 0.05,
+    "setup_s": 0.0,
+    "grade_s": 0.049
+  },
+  "environment_digest": "sha256:b805a8328928de15269f768f9c6879f39df61bff6e101e38bcd5007b40917a6d",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

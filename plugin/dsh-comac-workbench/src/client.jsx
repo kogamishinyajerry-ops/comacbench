@@ -4,6 +4,7 @@ import * as React from "react";
 import { api, watchTheme } from "./api.js";
 import { css } from "./styles.js";
 import { OverviewPage, MatrixPage, BenchPage, DrillPanel, MonitorPage } from "./pages.jsx";
+import { EngineeringPage } from "./engineering.jsx";
 
 const h = React.createElement;
 
@@ -24,7 +25,7 @@ function parseHash() {
   const h6 = (location.hash || "").replace(/^#/, "");
   const q = new URLSearchParams(h6);
   return {
-    page: q.get("page") || "overview",
+    page: q.get("page") || "engineering",
     date: q.get("date"), rid: q.get("rid"), provider: q.get("provider"), task: q.get("task"),
   };
 }
@@ -62,7 +63,10 @@ export function Workbench() {
     setErr(null);
     const load = async () => {
       try {
-        if (nav.page === "overview") {
+        if (nav.page === "engineering") {
+          const packs = await api("packs");
+          if (!dead) setData((d) => ({ ...d, engineering: packs }));
+        } else if (nav.page === "overview") {
           const o = await api("overview");
           if (!dead) { setData((d) => ({ ...d, overview: o })); setSnapshots(o.snapshots ?? []); }
         } else if (nav.page === "matrix") {
@@ -150,13 +154,14 @@ export function Workbench() {
 
   // ---------- 渲染 ----------
   const page = nav.page;
-  const tabs = [["overview", "总览"], ["matrix", "对比矩阵"], ["monitor", "运行监控"]];
+  const tabs = [["engineering", "工程师入口"], ["overview", "总览"], ["matrix", "对比矩阵"], ["monitor", "运行监控"]];
   const body = () => {
     if (err) return h("div", { className: "comac-wb-err" },
       h("div", null, `加载失败：${err}`),
       h("button", { onClick: () => setErr(null) }, "重试"));
     const loading = h("div", { className: "comac-wb-load" }, "读取中…");
 
+    if (page === "engineering") return h(EngineeringPage, { data: data?.engineering, snapshotMode: mode !== "live" });
     if (page === "overview") {
       const d = mode === "snapshot" ? snapDerived?.overview : data?.overview;
       return d ? h(OverviewPage, { data: d, go }) : loading;

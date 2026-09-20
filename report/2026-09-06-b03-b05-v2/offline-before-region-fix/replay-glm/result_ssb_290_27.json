@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_290_27",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.813,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.9065,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\nINPUT_FILE = \\\"ssb_290_27_init.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\nSHEET_NAME = \\\"Sheet1\\\"\\nSTART_ROW = 14\\nEND_ROW = 137\\nANSWER_COL = 1  # column A\\n\\nanswer_text = \\\"\\\"\\\"HOW TO INSTALL AND RUN (Excel 2016):\\n1. Press Alt+F11 to open the VBA editor.\\n2. Menu: Insert -> Module, then paste one of the macros below.\\n3. Press Alt+Q to close the editor, then Alt+F8 and run\\n   'RemoveLetterCodesColumnB'. (Save the workbook as .xlsm to keep the macro.)\\n\\n==================================================\\nOPTION 1 (recommended) - regex based, very robust\\n==================================================\\nSub RemoveLetterCodesColumnB()\\n\\n    Dim ws As Worksheet\\n    Dim rng As Range\\n    Dim cell As Range\\n    Dim lastRow As Long\\n    Dim regEx As Object\\n\\n    Set ws = ActiveSheet\\n    Set regEx = CreateObject(\\\"VBScript.RegExp\\\")\\n\\n    regEx.Global = True       ' replace every match, not just the first one\\n    regEx.Pattern = \\\"[A-Z]\\\"   ' match any uppercase letter\\n\\n    ' Work over the used cells of column B only\\n    lastRow = ws.Cells(ws.Rows.Count, \\\"B\\\").End(xlUp).Row\\n    Set rng = ws.Range(\\\"B1:B\\\" & lastRow)\\n\\n    For Each cell In rng\\n        ' Only text cells are processed. Cells holding real dates\\n        ' (VarType = vbDate) or true numbers are skipped untouched,\\n        ' so the date value in the column is never modified.\\n        If VarType(cell.Value) = vbString And Len(cell.Value) > 0 Then\\n            ' PID1 -> 1, PID2 -> 2, GG 1 -> 1, ABC123 -> 123\\n            cell.Value = Trim(regEx.Replace(cell.Value, \\\"\\\"))\\n        End If\\n    Next cell\\n\\n    MsgBox \\\"Finished: letter codes removed from column B.\\\", vbInformation\\n\\nEnd Sub\\n\\n==================================================\\nOPTION 2 - plain character loop, no regex needed\\n==================================================\\nSub RemoveLetterCodesColumnB_NoRegex()\\n\\n    Dim rng As Range, cell As Range\\n    Dim lastRow As Long, i As Long\\n    Dim s As String, result As String\\n\\n    lastRow = Cells(Rows.Count, \\\"B\\\").End(xlUp).Row\\n    Set rng = Range(\\\"B1:B\\\" & lastRow)\\n\\n    For Each cell In rng\\n        ' vbString = text (gets cleaned); dates/numbers are left alone\\n        If VarType(cell.Value) = vbString And Len(cell.Value) > 0 Then\\n            s = cell.Value\\n            result = \\\"\\\"\\n            For i = 1 To Len(s)\\n                If Mid$(s, i, 1) Like \\\"[A-Z]\\\" Then\\n                    ' skip the uppercase letter\\n                Else\\n                    result = result & Mid$(s, i, 1)\\n                End If\\n            Next i\\n            cell.Value = Trim(result)\\n        End If\\n    Next cell\\n\\nEnd Sub\\n\\nNOTES:\\n- VarType(cell.Value) = vbString guarantees that the date value in\\n  column B (VarType = vbDate) and any pure numbers are never changed.\\n- The Trim() call removes the leftover space, so \\\"GG 1\\\" becomes \\\"1\\\".\\n- Works for any 2- or 3-letter uppercase code with or without a\\n  space before the number, regardless of string length:\\n  PID1 -> 1, PID2 -> 2, GG 1 -> 1, ABC123 -> 123.\\\"\\\"\\\"\\n\\nlines = answer_text.split(\\\"\\\\n\\\")\\nwhile lines and lines[-1] == \\\"\\\":\\n    lines.pop()\\n\\nwb = openpyxl.load_workbook(INPUT_FILE)\\nws = wb[SHEET_NAME] if SHEET_NAME in wb.sheetnames else wb.active\\n\\nwritten = 0\\nfor i, line in enumerate(lines):\\n    row = START_ROW + i\\n    if row > END_ROW:\\n        break\\n    ws.cell(row=row, column=ANSWER_COL, value=line)\\n    written += 1\\n\\nwb.save(OUTPUT_FILE)\\nprint(f\\\"Wrote {written} answer lines to {SHEET_NAME}!A{START_ROW}:A{START_ROW + written - 1} -> {OUTPUT_FILE}\\\")\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A14:I137\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 460, \"n_expected\": 460, \"n_clear\": 0, \"matched\": 390, \"n_extra\": 16}, \"misses\": [{\"cell\": \"Sheet1!R14C1\", \"status\": \"mismatch\", \"got\": \"HOW TO INSTALL AND RUN (Excel 2016):\", \"ref\": \"NAME\"}, {\"cell\": \"Sheet1!R14C2\", \"status\": \"mismatch\", \"got\": \"PID1\", \"ref\": \"1\"}, {\"cell\": \"Sheet1!R16C1\", \"status\": \"mismatch\", \"got\": \"2. Menu: Insert -> Module, then paste on\", \"ref\": \"PID\"}, {\"cell\": \"Sheet1!R18C1\", \"status\": \"mismatch\", \"got\": \"   'RemoveLetterCodesColumnB'. (Save the\", \"ref\": \"CAILIN ALAINN\"}, {\"cell\": \"Sheet1!R19C1\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R20C1\", \"status\": \"mismatch\", \"got\": \"#VALUE!\", \"ref\": \"MULTITUDE\"}, {\"cell\": \"Sheet1!R21C1\", \"status\": \"mismatch\", \"got\": \"OPTION 1 (recommended) - regex based, ve\", \"ref\": \"DOMINANT STRANGER\"}, {\"cell\": \"Sheet1!R22C1\", \"status\": \"mismatch\", \"got\": \"#VALUE!\", \"ref\": \"MIDNIGHT PIRATE\"}, {\"cell\": \"Sheet1!R23C1\", \"status\": \"mismatch\", \"got\": \"Sub RemoveLetterCodesColumnB()\", \"ref\": \"WEST BURKE\"}, {\"cell\": \"Sheet1!R24C1\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R26C1\", \"status\": \"mismatch\", \"got\": \"    Dim rng As Range\", \"ref\": \"NAME\"}, {\"cell\": \"Sheet1!R26C2\", \"status\": \"mismatch\", \"got\": \"PID2\", \"ref\": \"2\"}]}",
+    "offline_evidence": "{\"kind\": \"replay-glm\", \"source_sha256\": \"90b2689d5666153404e589252d3763b80d83d34fda37f8c487bdcb2c18cc9879\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 2.676,
+    "setup_s": 0.0,
+    "grade_s": 2.676
+  },
+  "environment_digest": "sha256:c50e7f86457f116f26a230b0c3050c3208f0f26d60e377a028467d82ffbf45df",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=3453",
+    "run1 exit=0 0.22s",
+    "run2 exit=0 0.22s",
+    "physics=0.813 cells=390/460 extra=16"
+  ]
+}

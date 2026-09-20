@@ -1,0 +1,71 @@
+{
+  "protocol": "comacbench.pack.v1",
+  "pack": {
+    "id": "aviation-core-v1",
+    "title": "航空工程 Agent · 入门评测包",
+    "revision": "1.0.0",
+    "description": "结构仿真实跑、工程数据清洗、知识本体证据关系三条完整入口；不代表飞机级验收。",
+    "source": "JerryDSH-COMACBench 自建；结构题由 ccx_cb_01 独立复制并锁定，不修改原题",
+    "license": "自建示例：企业数据/本体 CC0-1.0；结构题沿用仓库自建任务许可记录"
+  },
+  "runnable": true,
+  "publishable": false,
+  "task_count": 3,
+  "tasks": [
+    {
+      "id": "beam_static_01",
+      "suite": "aviation.structures",
+      "family": "industrial_simulation",
+      "path": "tasks/aviation.structures/beam_static_01.yaml",
+      "adapter": "simulation_agent",
+      "evidence_level": "solver_execution"
+    },
+    {
+      "id": "data_units_01",
+      "suite": "enterprise.data",
+      "family": "enterprise_data",
+      "path": "tasks/enterprise.data/data_units_01.yaml",
+      "adapter": "code_exec",
+      "evidence_level": "executable_checks"
+    },
+    {
+      "id": "ontology_trace_01",
+      "suite": "enterprise.ontology",
+      "family": "knowledge_ontology",
+      "path": "tasks/enterprise.ontology/ontology_trace_01.yaml",
+      "adapter": "code_exec",
+      "evidence_level": "executable_checks"
+    }
+  ],
+  "issues": [
+    {
+      "code": "partial_engineering_gate",
+      "severity": "review",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader",
+      "message": "当前核验实际求解与数值输出；网格、边界条件、材料与工况并未逐项独立审查。",
+      "suggested_fix": "限制结论范围；增加对应检查器和故障负例后才能升级工程声明。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "uncovered_requirement",
+      "severity": "review",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "材料、载荷分配、边界与最小网格满足题面全部要求",
+      "suggested_fix": "补充检查器，当前不能据此宣称通过。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "expert_review_required",
+      "severity": "review",
+      "field": "pack",
+      "message": "静态检查不证明题意、工程真值与判分语义一致；当前包未完成发布审查。",
+      "suggested_fix": "校准参考实现和错误负例，再进行工程专家审查。",
+      "task_id": null
+    }
+  ],
+  "summary": {
+    "blocker": 0,
+    "review": 3,
+    "warning": 0
+  }
+}

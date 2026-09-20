@@ -1,0 +1,119 @@
+{
+  "protocol": "comacbench.pack.v1",
+  "pack": {
+    "id": "aviation-structures-v2",
+    "title": "结构仿真 Agent · 工程输入检查",
+    "revision": "2.0.0",
+    "description": "C3D20 静力悬臂梁：连接、网格、材料、边界、载荷、输出六项输入检查，加原生求解与参考数值验证。",
+    "source": "JerryDSH-COMACBench 自建；结构题由 ccx_cb_01 独立复制并锁定，不修改原题",
+    "license": "自建示例：企业数据/本体 CC0-1.0；结构题沿用仓库自建任务许可记录"
+  },
+  "runnable": false,
+  "publishable": false,
+  "task_count": 1,
+  "tasks": [
+    {
+      "id": "beam_static_01",
+      "suite": "aviation.structures",
+      "family": "industrial_simulation",
+      "path": "tasks/aviation.structures/beam_static_01.yaml",
+      "adapter": "simulation_agent",
+      "evidence_level": "solver_execution"
+    }
+  ],
+  "issues": [
+    {
+      "code": "missing_file",
+      "severity": "blocker",
+      "field": "input.prompt_file",
+      "message": "材料不可读取：tasks/aviation.structures/beam_static_01.md",
+      "suggested_fix": "补齐包内文件；使用相对路径，不使用符号链接。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "invalid_tolerance",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader.numeric_rel_tol",
+      "message": "相对容差无效或宽到不能判别。",
+      "suggested_fix": "提供 0 到 1 之间、带依据的容差。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "invalid_deck_contract",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader.deck_contract.material",
+      "message": "材料需完整声明弹性模量 MPa、泊松比和密度 tonne/mm³。",
+      "suggested_fix": "补齐 profile 声明的完整参数，不得以空值或未知字段关闭检查。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "bounded_engineering_profile",
+      "severity": "review",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:grader.deck_contract",
+      "message": "已接入结构化静力梁六项输入检查；仍需审查参考值、离散误差与题面语义。",
+      "suggested_fix": "完成正负例校准及工程专家审查；此检查不代表复杂结构或飞机级接受。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "结构检查引用缺少可用契约或检查项不存在。",
+      "suggested_fix": "使用有效 deck_contract 及已实现的 deck: 检查 ID。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "结构检查引用缺少可用契约或检查项不存在。",
+      "suggested_fix": "使用有效 deck_contract 及已实现的 deck: 检查 ID。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "结构检查引用缺少可用契约或检查项不存在。",
+      "suggested_fix": "使用有效 deck_contract 及已实现的 deck: 检查 ID。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "结构检查引用缺少可用契约或检查项不存在。",
+      "suggested_fix": "使用有效 deck_contract 及已实现的 deck: 检查 ID。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "结构检查引用缺少可用契约或检查项不存在。",
+      "suggested_fix": "使用有效 deck_contract 及已实现的 deck: 检查 ID。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "unknown_check",
+      "severity": "blocker",
+      "field": "tasks/aviation.structures/beam_static_01.yaml:evaluation.requirements",
+      "message": "结构检查引用缺少可用契约或检查项不存在。",
+      "suggested_fix": "使用有效 deck_contract 及已实现的 deck: 检查 ID。",
+      "task_id": "beam_static_01"
+    },
+    {
+      "code": "expert_review_required",
+      "severity": "review",
+      "field": "pack",
+      "message": "静态检查不证明题意、工程真值与判分语义一致；当前包未完成发布审查。",
+      "suggested_fix": "校准参考实现和错误负例，再进行工程专家审查。",
+      "task_id": null
+    }
+  ],
+  "summary": {
+    "blocker": 9,
+    "review": 2,
+    "warning": 0
+  }
+}

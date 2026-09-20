@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\n# Load the input workbook\\nwb = openpyxl.load_workbook('ssb_455_35_init.xlsx')\\n\\n# Get the first worksheet\\nws = wb.worksheets[0]\\n\\n# VBA code to delete rows where first character in column B is not 'H' or 'A'\\nvba_code = '''Sub DeleteRows()\\n    Dim ws As Worksheet\\n    Dim lastRow As Long\\n    Dim i As Long\\n    Dim firstChar As String\\n    \\n    Set ws = ActiveSheet\\n    lastRow = ws.Cells(ws.Rows.Count, \\\"B\\\").End(xlUp).Row\\n    \\n    For i = lastRow To 2 Step -1\\n        firstChar = Left(ws.Cells(i, \\\"B\\\").Value, 1)\\n        If firstChar <> \\\"H\\\" And firstChar <> \\\"A\\\" Then\\n            ws.Rows(i).Delete\\n        End If\\n    Next i\\nEnd Sub'''\\n\\n# Write the VBA code into A1:J10411 of Worksheet1\\n# Split into lines and write across cells\\nlines = vba_code.split('\\\\n')\\nrow = 1\\ncol = 1\\nfor line in lines:\\n    ws.cell(row=row, column=col, value=line)\\n    col += 1\\n    if col > 10:\\n        col = 1\\n        row += 1\\n\\n# Save as output.xlsx\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Worksheet1\", \"region\": \"A1:J10411\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 10, \"n_expected\": 93411, \"n_clear\": 93401, \"matched\": 0, \"n_extra\": 1}, \"misses\": [{\"cell\": \"Worksheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"Sub DeleteRows()\", \"ref\": \"Action\"}, {\"cell\": \"Worksheet1!R1C2\", \"status\": \"mismatch\", \"got\": \"    Dim ws As Worksheet\", \"ref\": \"User\"}, {\"cell\": \"Worksheet1!R1C3\", \"status\": \"mismatch\", \"got\": \"    Dim lastRow As Long\", \"ref\": \"Date\"}, {\"cell\": \"Worksheet1!R1C4\", \"status\": \"mismatch\", \"got\": \"    Dim i As Long\", \"ref\": \"Client\"}, {\"cell\": \"Worksheet1!R1C5\", \"status\": \"mismatch\", \"got\": \"    Dim firstChar As String\", \"ref\": \"Packslip\"}, {\"cell\": \"Worksheet1!R1C6\", \"status\": \"mismatch\", \"got\": \"    \", \"ref\": \"PO Number\"}, {\"cell\": \"Worksheet1!R1C7\", \"status\": \"mismatch\", \"got\": \"    Set ws = ActiveSheet\", \"ref\": \"Quantity\"}, {\"cell\": \"Worksheet1!R1C8\", \"status\": \"mismatch\", \"got\": \"    lastRow = ws.Cells(ws.Rows.Count, \\\"B\", \"ref\": \"Packsize\"}, {\"cell\": \"Worksheet1!R1C9\", \"status\": \"mismatch\", \"got\": \"    \", \"ref\": \"Extended Product Code\"}, {\"cell\": \"Worksheet1!R1C10\", \"status\": \"mismatch\", \"got\": \"    For i = lastRow To 2 Step -1\", \"ref\": \"Bin Label\"}, {\"cell\": \"Worksheet1!R2C1\", \"status\": \"not_cleared\", \"got\": \"        firstChar = Left(ws.Cells(i, \\\"B\\\"\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C2\", \"status\": \"not_cleared\", \"got\": \"        If firstChar <> \\\"H\\\" And firstCha\", \"ref\": null}]}",
+    "offline_evidence": "{\"kind\": \"replay-minimax\", \"source_sha256\": \"cebb818a6f4f475c0fc826b911fd0f7ae6ce7cea475009be127cb6a41f9ddfbf\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 7.92,
+    "setup_s": 0.0,
+    "grade_s": 7.92
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=956",
+    "run1 exit=0 1.32s",
+    "run2 exit=0 1.33s",
+    "physics=0.0 cells=0/93411 extra=1"
+  ]
+}

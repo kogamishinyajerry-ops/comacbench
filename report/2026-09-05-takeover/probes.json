@@ -1,0 +1,83 @@
+{
+  "note": "Observed behavior, not a global PASS verdict.",
+  "temporary_output": "/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/comacbench-takeover-probes-xpoucxtm",
+  "observations": {
+    "discrete_wrong_values_rejected": true,
+    "invalid_limits_and_weights_accepted_at_load": true,
+    "outside_cwd_read": {
+      "static_violations": [],
+      "syntax_ok": true,
+      "child_exit": 0,
+      "read_own_canary_successfully": true
+    },
+    "formula_wrong_sheet": {
+      "gate": 1,
+      "score": 1.0,
+      "gate_failures": [],
+      "required_sheet": "RequiredSheet",
+      "candidate_sheet": "WrongSheet"
+    },
+    "resume": {
+      "command": [
+        "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python",
+        "-m",
+        "runners.qa_grounded",
+        "--tasks",
+        "tasks/awext.clause_extract",
+        "--out",
+        "/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/comacbench-takeover-probes-xpoucxtm/invalid-resume",
+        "--provider",
+        "oracle",
+        "--resume"
+      ],
+      "exit": 0,
+      "count": 12,
+      "gate_passed": 12,
+      "mean": 0.9907416666666666,
+      "wrong_cached_identity_preserved": true,
+      "wrong_cached_environment_preserved": true
+    },
+    "awext_oracle": {
+      "command": [
+        "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python",
+        "-m",
+        "runners.qa_grounded",
+        "--tasks",
+        "tasks/awext.clause_extract",
+        "--out",
+        "/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/comacbench-takeover-probes-xpoucxtm/awext-oracle",
+        "--provider",
+        "oracle"
+      ],
+      "exit": 0,
+      "count": 12,
+      "gate_passed": 12,
+      "mean": 1.0
+    },
+    "awcom_hidden_oracle": {
+      "command": [
+        "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python",
+        "-m",
+        "runners.qa_grounded",
+        "--tasks",
+        "tasks/awcom.compliance",
+        "--out",
+        "/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/comacbench-takeover-probes-xpoucxtm/awcom-oracle-hidden",
+        "--provider",
+        "oracle",
+        "--hidden",
+        "8"
+      ],
+      "exit": 0,
+      "count": 8,
+      "gate_passed": 8,
+      "mean": 1.0
+    },
+    "hidden_manifest": {
+      "recorded_n_tasks": 15,
+      "requested_hidden_n": 8,
+      "rerun_contains_hidden": false
+    },
+    "runner_python_syntax_pass": 50
+  }
+}

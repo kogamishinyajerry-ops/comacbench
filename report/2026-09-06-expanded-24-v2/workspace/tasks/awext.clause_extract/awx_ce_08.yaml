@@ -1,0 +1,49 @@
+id: awx_ce_08
+registry_id: awext.clause_extract
+domain: office_productivity
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: awext@selfbuilt-2026-08-26
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/awext.clause_extract/awx_ce_08.md
+  prompt_sha256: e54e2ed893043350cc66f6c440483a5acda32357958810f9aa849bfe7ec6c260
+  assets: []
+output_contract:
+- json
+reference:
+  source: 自建条款风格卡（参数化合成，非真实规章原文——防误引；civair-kb 恢复后按 doc_id 重锚）
+  revision: awext@selfbuilt-2026-08-26
+  reference_json: {"family": "stall", "clause_no": "§8.62", "positive_load_limit": 2.64, "negative_load_limit": -1.17, "cycles_or_actions": 1000, "probability_per_hour": 2.6, "applies_to": ["control-surface", "empennage", "landing-gear", "wing"], "compliance_methods": ["inspection", "test"], "amendment_year": 2022}
+  rel_tol: 0.02
+  uncertainty_note: 字段级判分（数值 2% 容差；列表排序 casefold 精确）
+grader:
+  answer_format: json_extract
+  validity_gate: true
+  numeric_rel_tol: 0.02
+  exact_keys:
+  - amendment_year
+  - cycles_or_actions
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: false
+scoring:
+  weights:
+    requirements: 1.0
+    physics: 0.0
+    objective: 0.0
+    robustness: 0.0
+  note: requirements=JSON 字段命中比例（qa_grounded json_extract 层）
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 120
+  attempts: 3
+license_provenance:
+  source: 自建（条款风格卡；KB 联动待锚定）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: awext@selfbuilt-2026-08-26

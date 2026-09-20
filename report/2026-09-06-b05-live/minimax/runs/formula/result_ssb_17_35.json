@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_17_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\nfrom copy import copy\\nfrom datetime import datetime, date\\n\\n# Load the workbook\\nwb = load_workbook('ssb_17_35_init.xlsx')\\n\\n# Get the sheet 'FILTER 5b'\\nws = wb['FILTER 5b']\\n\\n# Read the criteria dates from I2 (start) and J2 (end)\\nstart_date = ws['I2'].value\\nend_date = ws['J2'].value\\n\\n# Clear existing data in output range I6:M295\\nfor row in range(6, 296):\\n    for col in range(9, 14):  # Columns I to M\\n        ws.cell(row=row, column=col).value = None\\n\\n# If criteria are not provided, save and exit\\nif start_date is None or end_date is None:\\n    wb.save('output.xlsx')\\nelse:\\n    # Find the date column by examining the data\\n    date_col = None\\n    for col in range(1, 6):  # Columns A to E\\n        sample_value = ws.cell(row=2, column=col).value\\n        if isinstance(sample_value, (datetime, date)):\\n            date_col = col\\n            break\\n\\n    if date_col is None:\\n        date_col = 1  # Default to column A\\n\\n    # Read and filter the data based on the date criteria\\n    filtered_data = []\\n    for row in range(2, 316):  # Data rows from 2 to 315\\n        date_value = ws.cell(row=row, column=date_col).value\\n        if date_value is None:\\n            continue\\n        \\n        # Check if date is within the specified range\\n        if isinstance(date_value, (datetime, date)):\\n            if start_date <= date_value <= end_date:\\n                row_data = []\\n                for col in range(1, 6):  # Columns A to E\\n                    row_data.append(ws.cell(row=row, column=col).value)\\n                filtered_data.append((row, row_data))\\n\\n    # Write filtered results to I6:M295\\n    output_start_row = 6\\n    output_start_col = 9  # Column I\\n\\n    for idx, (src_row, row_data) in enumerate(filtered_data):\\n        target_row = output_start_row + idx\\n        if target_row > 295:  # Don't exceed row 295\\n            break\\n        \\n        for col_offset, value in enumerate(row_data):\\n            target_col = output_start_col + col_offset\\n            \\n            # Copy value to target cell\\n            target_cell = ws.cell(row=target_row, column=target_col)\\n            target_cell.value = value\\n            \\n            # Copy formatting from source cell to maintain original formatting\\n            src_cell = ws.cell(row=src_row, column=col_offset + 1)\\n            if src_cell.has_style:\\n                target_cell.font = copy(src_cell.font)\\n                target_cell.border = copy(src_cell.border)\\n                target_cell.fill = copy(src_cell.fill)\\n                target_cell.number_format = src_cell.number_format\\n                target_cell.protection = copy(src_cell.protection)\\n                target_cell.alignment = copy(src_cell.alignment)\\n\\n# Save the workbook\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"openai_compat\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"FILTER 5b\", \"region\": \"I6:M295\", \"recalc_sheet_mappings\": [], \"match\": {\"n_gold\": 1445, \"matched\": 1445, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "bd6c04b216ab208b154002f1247f2285c7f25db99ee9ffe411df069ee863697a"
+  },
+  "timings": {
+    "agent_s": 85.572,
+    "setup_s": 0.0,
+    "grade_s": 3.702
+  },
+  "environment_digest": "sha256:74efbb55d349a1570934dde543a8485e28c837de3ea31dff5696000e536b5415",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=openai_compat code_len=2765",
+    "run1 exit=0 0.53s",
+    "run2 exit=0 0.53s",
+    "physics=1.0 cells=1445/1445 extra=0"
+  ]
+}

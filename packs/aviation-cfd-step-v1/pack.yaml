@@ -1,0 +1,21 @@
+protocol: comacbench.pack.v1
+id: aviation-cfd-step-v1
+title: CFD 仿真 Agent · 后向台阶原生证据
+revision: 1.1.0
+description: 生成输入 → 网格 → 原生求解 → 收敛与守恒 → 壁面剪切再附着长度；问题可定位，证据可复查。
+license: 'MIT: adapted GLM-CFD-Benchmark native templates; solver is a separately
+  installed GPL backend'
+source: GLM-CFD-Benchmark b26799e native inputs + Erturk 2008 Table 5; platform evidence
+  checks self-built
+suites:
+- id: aviation.cfd
+  family: industrial_simulation
+  tasks:
+  - tasks/aviation.cfd/backward_step_01.yaml
+validation_evidence:
+  protocol: comacbench.research-links.v1
+  purpose: research_support
+  studies:
+  - bfs-re100-validated-v1
+  - bfs-re200-validated-v1
+  - bfs-re300-validated-v1

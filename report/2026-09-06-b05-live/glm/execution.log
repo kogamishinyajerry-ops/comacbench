@@ -1,0 +1,114 @@
+[live] request 1, group=extract, model=glm-5.3-flash
+[live] received 1, usage={'completion_tokens': 374, 'completion_tokens_details': {'reasoning_tokens': 262}, 'prompt_tokens': 349, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 723}
+[live] request 2, group=extract, model=glm-5.3-flash
+[live] received 2, usage={'completion_tokens': 325, 'completion_tokens_details': {'reasoning_tokens': 213}, 'prompt_tokens': 347, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 672}
+[done] 2 tasks | gate pass 2 | fail 0 | voided 0
+       results -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/extract
+       manifest -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/extract/run_manifest.json
+       summary -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/extract/summary.md
+       rerun: cd /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench && /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python -m runners.qa_grounded --tasks /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/workspace/tasks/awext.clause_extract --out /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/extract --provider glm --seed 20260905 --resume --model glm-5.3-flash
+[live] request 3, group=compliance, model=glm-5.3-flash
+[live] received 3, usage={'completion_tokens': 548, 'completion_tokens_details': {'reasoning_tokens': 487}, 'prompt_tokens': 504, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 1052}
+[live] request 4, group=compliance, model=glm-5.3-flash
+[live] received 4, usage={'completion_tokens': 287, 'completion_tokens_details': {'reasoning_tokens': 205}, 'prompt_tokens': 529, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 816}
+[done] 2 tasks | gate pass 2 | fail 0 | voided 0
+       results -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/compliance
+       manifest -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/compliance/run_manifest.json
+       summary -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/compliance/summary.md
+       rerun: cd /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench && /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python -m runners.qa_grounded --tasks /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/workspace/tasks/awcom.compliance --out /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/compliance --provider glm --seed 20260905 --resume --model glm-5.3-flash
+[live] request 5, group=hidden, model=glm-5.3-flash
+[live] received 5, usage={'completion_tokens': 886, 'completion_tokens_details': {'reasoning_tokens': 830}, 'prompt_tokens': 491, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 1377}
+[live] request 6, group=hidden, model=glm-5.3-flash
+[live] received 6, usage={'completion_tokens': 210, 'completion_tokens_details': {'reasoning_tokens': 135}, 'prompt_tokens': 531, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 741}
+[done] 2 tasks | gate pass 2 | fail 0 | voided 0
+       results -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/hidden
+       manifest -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/hidden/run_manifest.json
+       summary -> /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/hidden/summary.md
+       rerun: cd /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench && /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python -m runners.qa_grounded --tasks /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/workspace/tasks/awcom.compliance --out /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-b05-live/glm/runs/hidden --provider glm --seed 20260905 --resume --model glm-5.3-flash --hidden 2
+[live] request 7, group=formula, model=glm-5.3-flash
+[live] received 7, usage={'completion_tokens': 7362, 'completion_tokens_details': {'reasoning_tokens': 6186}, 'prompt_tokens': 220, 'prompt_tokens_details': {'cached_tokens': 0}, 'total_tokens': 7582}
+[live] request 8, group=formula, model=glm-5.3-flash
+[stopped] API/evidence uncertainty: TimeoutError
+{
+  "protocol_sha256": "2b34d9d8527fc9de96a97e70fefa8d47b27c127333e8dccffa3864ad63f217c0",
+  "model": "glm-5.3-flash",
+  "groups": [
+    {
+      "name": "extract",
+      "n_tasks": 2,
+      "scores": [
+        {
+          "task_id": "awx_ce_01",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        },
+        {
+          "task_id": "awx_ce_02",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        }
+      ]
+    },
+    {
+      "name": "compliance",
+      "n_tasks": 2,
+      "scores": [
+        {
+          "task_id": "awc_acam_01",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        },
+        {
+          "task_id": "awc_rev_01",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        }
+      ]
+    },
+    {
+      "name": "hidden",
+      "n_tasks": 2,
+      "scores": [
+        {
+          "task_id": "awc_acam_h09",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        },
+        {
+          "task_id": "awc_rev_h08",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        }
+      ]
+    },
+    {
+      "name": "formula",
+      "n_tasks": 1,
+      "scores": [
+        {
+          "task_id": "ssb_17_35",
+          "gate": 1,
+          "score": 1.0,
+          "failure_mode": null
+        }
+      ]
+    }
+  ],
+  "cache_verification": [],
+  "started_at_epoch": 1788624864.4836109,
+  "status": "stopped",
+  "stop_reason": "API/evidence uncertainty: TimeoutError",
+  "requests": 8,
+  "usage": {
+    "prompt_tokens": 2971,
+    "completion_tokens": 9992,
+    "total_tokens": 12963
+  },
+  "elapsed_s": 890.576
+}

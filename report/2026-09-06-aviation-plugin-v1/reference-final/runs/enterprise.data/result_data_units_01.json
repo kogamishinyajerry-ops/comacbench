@@ -1,0 +1,39 @@
+{
+  "task_id": "data_units_01",
+  "registry_id": "enterprise.data",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef normalize_records(records):\\n    counts = {}\\n    for r in records:\\n        key = r.get('record_id')\\n        if isinstance(key, str) and key:\\n            counts[key] = counts.get(key, 0) + 1\\n    accepted, rejected = [], []\\n    for row in records:\\n        rid = row.get('record_id', '')\\n        if not isinstance(rid, str) or not rid:\\n            reason = 'missing_id'\\n            rid = ''\\n        elif counts[rid] > 1:\\n            reason = 'duplicate_id'\\n        elif not isinstance(row.get('part_id'), str) or not row['part_id'] or not isinstance(row.get('source_id'), str) or not row['source_id']:\\n            reason = 'missing_lineage'\\n        elif row.get('unit') not in ('mm', 'm'):\\n            reason = 'unknown_unit'\\n        elif isinstance(row.get('length'), bool) or not isinstance(row.get('length'), (int, float)) or not math.isfinite(row['length']) or row['length'] <= 0:\\n            reason = 'invalid_length'\\n        else:\\n            accepted.append({'record_id': rid, 'part_id': row['part_id'], 'length_mm': row['length'] * (1000 if row['unit'] == 'm' else 1), 'source_id': row['source_id']})\\n            continue\\n        rejected.append({'record_id': rid, 'reason': reason})\\n    return {'accepted': sorted(accepted, key=lambda r: r['record_id']), 'rejected': sorted(rejected, key=lambda r: (r['record_id'], r['reason']))}\"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"reference-interface-fixture\", \"revision\": \"1.0.0\", \"agent_kind\": \"reference_fixture\", \"request_sha256\": \"ff5be138fece3597d527aba880bc2778494705598ce217dd77ca781bce4118dc\", \"response_sha256\": \"409e3baacb15d9943cddc631396e8ff42991e958ff0639c476d2ffe82d7c6432\", \"audit_dir\": \"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/reference-final/agent-audit/data_units_01-u50g6n5r\", \"config_sha256\": \"27eff9ea4156e67f5d107cd80142b87af3d1ac56bb9df1c1f143e8b68993d7d8\", \"revision_files\": {\"reference_agent.py\": \"47cc9d0b9cd8f0469314fb9ec3c9c796b94d74b84f8b64dd6f5e97459d52acda\", \"reference_answers/beam_static_01.py\": \"78c464b7378eff89200ec04985c24eba5940e995e2eb4f3a24aaff20c1f7e917\", \"reference_answers/data_units_01.py\": \"984317019e51abe680489a26a4877677db5d9d0c9bfa948a969d72d9a18f96cd\", \"reference_answers/ontology_trace_01.py\": \"836d81d643aa2ccacd3ef0f3a48ac26bbe6ef7bf890dcfa8ad4b6767cc597f6f\"}, \"command_files\": {\"0\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\", \"1\": \"47cc9d0b9cd8f0469314fb9ec3c9c796b94d74b84f8b64dd6f5e97459d52acda\"}, \"identity_env\": {}, \"executable_sha256\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}",
+    "resume_identity": "8cdd44df48e830707fb4bd6baf7cd3cf7c08ca142ce8e6d7cfe7e447352f2601"
+  },
+  "timings": {
+    "agent_s": 0.088,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:b805a8328928de15269f768f9c6879f39df61bff6e101e38bcd5007b40917a6d",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

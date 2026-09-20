@@ -1,0 +1,66 @@
+test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) ... 
+  test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='mesh') ... FAIL
+  test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='material') ... FAIL
+  test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='boundary') ... FAIL
+  test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='load') ... FAIL
+  test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='output') ... FAIL
+test_reference_passes_all_six_engineering_checks (test_structural_contract.DeckAuditTests.test_reference_passes_all_six_engineering_checks) ... FAIL
+test_historical_disconnected_tip_load_is_rejected_before_solver (test_structural_contract.StructuralContractTests.test_historical_disconnected_tip_load_is_rejected_before_solver) ... ok
+
+======================================================================
+FAIL: test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='mesh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 78, in test_mesh_material_boundary_and_load_faults
+    self.assertFalse(result['passed'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='material')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 78, in test_mesh_material_boundary_and_load_faults
+    self.assertFalse(result['passed'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='boundary')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 78, in test_mesh_material_boundary_and_load_faults
+    self.assertFalse(result['passed'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='load')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 78, in test_mesh_material_boundary_and_load_faults
+    self.assertFalse(result['passed'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) (check='output')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 78, in test_mesh_material_boundary_and_load_faults
+    self.assertFalse(result['passed'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_reference_passes_all_six_engineering_checks (test_structural_contract.DeckAuditTests.test_reference_passes_all_six_engineering_checks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 84, in test_reference_passes_all_six_engineering_checks
+    self.assertEqual({x['id'] for x in result['checks']},
+AssertionError: Items in the second set but not the first:
+'boundary'
+'load'
+'mesh'
+'material'
+'output'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.393s
+
+FAILED (failures=6)

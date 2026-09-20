@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_23_24",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\nwb = openpyxl.load_workbook('ssb_23_24_init.xlsx')\\nws = wb['Sheet1']\\n\\n# Collect all words from column I (column index 9)\\nwords_in_I = set()\\nfor row in range(1, ws.max_row + 1):\\n    cell_value = ws.cell(row=row, column=9).value\\n    if cell_value is not None:\\n        words_in_I.add(str(cell_value).strip().lower())\\n\\n# Identify rows whose column A value appears in column I\\nrows_to_delete = []\\nfor row in range(1, ws.max_row + 1):\\n    cell_a = ws.cell(row=row, column=1).value\\n    if cell_a is not None:\\n        a_value = str(cell_a).strip().lower()\\n        if a_value in words_in_I:\\n            rows_to_delete.append(row)\\n\\n# Delete matching rows from bottom to top so indices stay valid\\n# delete_rows shifts cells up by default (like Ctrl + Minus)\\nfor row in reversed(rows_to_delete):\\n    ws.delete_rows(row)\\n\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:E1102\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 1084, \"n_expected\": 3733, \"n_clear\": 2649, \"matched\": 3733, \"n_extra\": 0}, \"misses\": []}",
+    "offline_evidence": "{\"kind\": \"replay-minimax\", \"source_sha256\": \"3f6281bda7db6d22753bfa72f9caf1cd54c5e9ca8770313d8603e4f35ccc6afe\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 33.7,
+    "setup_s": 0.0,
+    "grade_s": 33.7
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=848",
+    "run1 exit=0 15.7s",
+    "run2 exit=0 15.53s",
+    "physics=1.0 cells=3733/3733 extra=0"
+  ]
+}

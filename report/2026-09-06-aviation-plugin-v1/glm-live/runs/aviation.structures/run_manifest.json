@@ -1,0 +1,68 @@
+{
+  "registry_id": "aviation.structures",
+  "adapter": "simulation_agent",
+  "provider": "external",
+  "seed": 0,
+  "generated_at_utc": "2026-09-06T02:32:54Z",
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "environment_note": "dev 终端（外网开发机，OpenFOAM+FoamAgent，无 Fluent/StarCCM）",
+  "assets": {},
+  "tasks_dir": "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-core-v1/tasks/aviation.structures",
+  "n_tasks": 1,
+  "rerun_command": "cd /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench && env COMAC_AGENT_CONFIG=/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/examples/agents/glm-5.3-flash.json COMAC_AGENT_PACK_ROOT=/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-core-v1 COMAC_AGENT_AUDIT=/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/glm-live/agent-audit /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python -m runners.simulation_agent --tasks /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-core-v1/tasks/aviation.structures --out /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/glm-live/runs/aviation.structures --provider external --seed 0 --resume --model GLM-5.3-flash-code-agent --iterate 1",
+  "git_commit": "25a81e7c38580274b532a8a62abab9954f75c633",
+  "extra": {
+    "model": "GLM-5.3-flash-code-agent",
+    "harness_arm": "H0",
+    "scaffold": null,
+    "iterate_rounds": 1,
+    "limit": 0,
+    "protocol": "single",
+    "resume_identity": {
+      "version": 1,
+      "adapter": "simulation_agent",
+      "provider": {
+        "name": "external",
+        "model": "GLM-5.3-flash-code-agent",
+        "revision": "1.0.0",
+        "protocol": "comacbench.agent.v1",
+        "agent_kind": "model_agent",
+        "config_sha256": "f73f37325729b098947e79aaa8294d2801d652a2b9fcc11b00ecb6f101d7753e",
+        "revision_files": {
+          "model_agent.py": "6d397504726f4bde20be4c0cb66d946e5f0623a8588e411ab97dc9c9c0def4d6"
+        },
+        "command_files": {
+          "0": "f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc",
+          "1": "6d397504726f4bde20be4c0cb66d946e5f0623a8588e411ab97dc9c9c0def4d6"
+        },
+        "identity_env": {
+          "COMAC_MODEL_BASE": "6bc0b5b57709c0f5b403616bcce1a37494ab444079b1af31165f0ffbcc1f4385",
+          "COMAC_MODEL_NAME": "0d8724178b098d01df9c71a161bf380133fde5832d56d203a0f9ad03389970cc"
+        },
+        "executable_sha256": "f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc"
+      },
+      "seed": 0,
+      "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+      "assets": {},
+      "python": "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python",
+      "options": {
+        "iterate": 1,
+        "limit": 0,
+        "scaffold": null,
+        "allow_partial_oracle": false
+      },
+      "runtime_inputs": {},
+      "referenced_files": {
+        "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-core-v1/private/beam_static_01.py": "78c464b7378eff89200ec04985c24eba5940e995e2eb4f3a24aaff20c1f7e917"
+      },
+      "tasks": {
+        "beam_static_01": "710445c5f12ca4f9c6468bd556ebb3d31436c3d68000de47b03fdb5a31ea153e"
+      }
+    },
+    "selected_task_ids": [
+      "beam_static_01"
+    ],
+    "crash_tasks": 0,
+    "resumed_tasks": 0
+  }
+}

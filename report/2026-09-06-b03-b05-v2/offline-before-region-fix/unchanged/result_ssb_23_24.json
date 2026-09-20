@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_23_24",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0054,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.5027,
+  "artifacts": {
+    "code": "\"import shutil\\nshutil.copyfile('ssb_23_24_init.xlsx',\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:E1102\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 1084, \"n_expected\": 3733, \"n_clear\": 2649, \"matched\": 20, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"ATALAYAS\", \"ref\": \"BACALAOS\"}, {\"cell\": \"Sheet1!R1C4\", \"status\": \"mismatch\", \"got\": \"37105\", \"ref\": \"32737\"}, {\"cell\": \"Sheet1!R1C5\", \"status\": \"mismatch\", \"got\": \"AAAALSTY\", \"ref\": \"AAABCLOS\"}, {\"cell\": \"Sheet1!R2C1\", \"status\": \"mismatch\", \"got\": \"BACALAOS\", \"ref\": \"GALABEAS\"}, {\"cell\": \"Sheet1!R2C4\", \"status\": \"mismatch\", \"got\": \"32737\", \"ref\": \"25659\"}, {\"cell\": \"Sheet1!R2C5\", \"status\": \"mismatch\", \"got\": \"AAABCLOS\", \"ref\": \"AAABEGLS\"}, {\"cell\": \"Sheet1!R3C1\", \"status\": \"mismatch\", \"got\": \"GALABEAS\", \"ref\": \"GALABIAS\"}, {\"cell\": \"Sheet1!R3C4\", \"status\": \"mismatch\", \"got\": \"25659\", \"ref\": \"28772\"}, {\"cell\": \"Sheet1!R3C5\", \"status\": \"mismatch\", \"got\": \"AAABEGLS\", \"ref\": \"AAABGILS\"}, {\"cell\": \"Sheet1!R4C1\", \"status\": \"mismatch\", \"got\": \"GALABIAS\", \"ref\": \"ABOMASAL\"}, {\"cell\": \"Sheet1!R4C4\", \"status\": \"mismatch\", \"got\": \"28772\", \"ref\": \"32738\"}, {\"cell\": \"Sheet1!R4C5\", \"status\": \"mismatch\", \"got\": \"AAABGILS\", \"ref\": \"AAABLMOS\"}]}",
+    "offline_evidence": "{\"kind\": \"unchanged\", \"source_sha256\": \"0378ee23761a0ea51e4b62ac2fb07732f482765fcd3604b794512fa7248b2f82\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 2.637,
+    "setup_s": 0.0,
+    "grade_s": 2.637
+  },
+  "environment_digest": "sha256:c50e7f86457f116f26a230b0c3050c3208f0f26d60e377a028467d82ffbf45df",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=67",
+    "run1 exit=0 0.02s",
+    "run2 exit=0 0.02s",
+    "physics=0.0054 cells=20/3733 extra=0"
+  ]
+}

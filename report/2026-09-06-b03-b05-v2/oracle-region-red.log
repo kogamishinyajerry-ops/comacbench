@@ -1,0 +1,23 @@
+test_generated_oracle_accepts_sheet_qualified_region (tests.test_formula_contract.FormulaContractTests.test_generated_oracle_accepts_sheet_qualified_region) ... ERROR
+
+======================================================================
+ERROR: test_generated_oracle_accepts_sheet_qualified_region (tests.test_formula_contract.FormulaContractTests.test_generated_oracle_accepts_sheet_qualified_region)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_formula_contract.py", line 99, in test_generated_oracle_accepts_sheet_qualified_region
+    code = ssb_oracle_script('init.xlsx', self.root/'golden.xlsx', 'RequiredSheet', "'RequiredSheet'!A1:B4")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/runners/gen_tasks_office2.py", line 626, in ssb_oracle_script
+    for row in wb[sheet][region] for cell in row if cell.value is not None]
+               ~~~~~~~~~^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/worksheet/worksheet.py", line 294, in __getitem__
+    min_col, min_row, max_col, max_row = range_boundaries(key)
+                                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/utils/cell.py", line 148, in range_boundaries
+    raise ValueError(msg)
+ValueError: 'RequiredSheet'!A1:B4 is not a valid coordinate or range
+
+----------------------------------------------------------------------
+Ran 1 test in 0.032s
+
+FAILED (errors=1)

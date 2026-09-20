@@ -1,0 +1,37 @@
+{
+  "task_id": "awx_ce_01",
+  "registry_id": "awext.clause_extract",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.8889,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 0.8889,
+  "artifacts": {
+    "answer": "\"{\\\"family\\\":\\\"loads\\\",\\\"clause_no\\\":\\\"1.77\\\",\\\"positive_load_limit\\\":2.25,\\\"negative_load_limit\\\":-0.95,\\\"cycles_or_actions\\\":1000,\\\"probability_per_hour\\\":4.0,\\\"applies_to\\\":[\\\"control-surface\\\",\\\"engine-mount\\\",\\\"wing\\\"],\\\"compliance_methods\\\":[\\\"analysis\\\",\\\"inspection\\\",\\\"simulation\\\"],\\\"amendment_year\\\":2022}\"",
+    "model_meta": "{\"provider\": \"openai_compat\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"family\", \"ok\": true, \"got\": \"loads\", \"ref\": \"loads\"}, {\"field\": \"clause_no\", \"ok\": false, \"got\": \"1.77\", \"ref\": \"§1.77\"}, {\"field\": \"positive_load_limit\", \"ok\": true, \"got\": 2.25, \"ref\": 2.25}, {\"field\": \"negative_load_limit\", \"ok\": true, \"got\": -0.95, \"ref\": -0.95}, {\"field\": \"cycles_or_actions\", \"ok\": true, \"got\": 1000, \"ref\": 1000, \"exact\": true}, {\"field\": \"probability_per_hour\", \"ok\": true, \"got\": 4.0, \"ref\": 4.0}, {\"field\": \"applies_to\", \"ok\": true, \"got\": [\"control-surface\", \"engine-mount\", \"wing\"], \"ref\": [\"control-surface\", \"engine-mount\", \"wing\"]}, {\"field\": \"compliance_methods\", \"ok\": true, \"got\": [\"analysis\", \"inspection\", \"simulation\"], \"ref\": [\"analysis\", \"inspection\", \"simulation\"]}, {\"field\": \"amendment_year\", \"ok\": true, \"got\": 2022, \"ref\": 2022, \"exact\": true}], \"n_fields\": 9, \"n_hit\": 8}",
+    "resume_identity": "418455dd6861d50da8f84988c1bc409179b7d103d726abce2ecfaffa3948c197"
+  },
+  "timings": {
+    "agent_s": 9.118,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3c21ecdac681d1c24b57da28e6f02811f131b42a4851c26abe5bcb98de9726d7",
+  "assets_revision": "awext@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\"family\":\"loads\",\"clause_no\":\"1.77\",\"positive_load_limit\":2.25,\"negative_load_limit\":-0.95,\"cycles_or_actions\":1000,\"pr' attempts=1"
+  ]
+}

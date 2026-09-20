@@ -1,0 +1,67 @@
+{
+  "registry_id": "aviation.structures",
+  "adapter": "simulation_agent",
+  "provider": "external",
+  "seed": 0,
+  "generated_at_utc": "2026-09-06T04:35:13Z",
+  "environment_digest": "sha256:1c12c242d1d71acc68b62654c2a20f0c4c8435f2c720d26e789eb1b18bdfbe86",
+  "environment_note": "dev 终端（外网开发机，OpenFOAM+FoamAgent，无 Fluent/StarCCM）",
+  "assets": {},
+  "tasks_dir": "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-structures-v2/tasks/aviation.structures",
+  "n_tasks": 1,
+  "rerun_command": "cd /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench && env COMAC_AGENT_CONFIG=/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-structures-v2/replay-agents/minimax-live-v2-agent.json COMAC_AGENT_PACK_ROOT=/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-structures-v2 COMAC_AGENT_AUDIT=/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-structures-v2/minimax-replay/agent-audit /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python -m runners.simulation_agent --tasks /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-structures-v2/tasks/aviation.structures --out /Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-structures-v2/minimax-replay/runs/aviation.structures --provider external --seed 0 --resume --model minimax-live-v2-recorded-replay --iterate 1",
+  "git_commit": "25a81e7c38580274b532a8a62abab9954f75c633",
+  "extra": {
+    "model": "minimax-live-v2-recorded-replay",
+    "harness_arm": "H0",
+    "scaffold": null,
+    "iterate_rounds": 1,
+    "limit": 0,
+    "protocol": "single",
+    "resume_identity": {
+      "version": 1,
+      "adapter": "simulation_agent",
+      "provider": {
+        "name": "external",
+        "model": "minimax-live-v2-recorded-replay",
+        "revision": "2.0.0",
+        "protocol": "comacbench.agent.v1",
+        "agent_kind": "recorded_replay",
+        "config_sha256": "7fd8a02a2afa02b59ffe2ab6cb0ddc0c16e228973f6fdba1607262ebf718f6e7",
+        "revision_files": {
+          "recorded_agent.py": "ac8c11a222c15e3bf5ba48df8405ee7378bbb55b478e54f738baad0e60f6eaa9",
+          "minimax-live-v2.json": "fe52fb5e574d0bf12f30ee6cb145e331ac1befa62ea522695f6b81889971db18"
+        },
+        "command_files": {
+          "0": "f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc",
+          "1": "ac8c11a222c15e3bf5ba48df8405ee7378bbb55b478e54f738baad0e60f6eaa9",
+          "2": "fe52fb5e574d0bf12f30ee6cb145e331ac1befa62ea522695f6b81889971db18"
+        },
+        "identity_env": {},
+        "executable_sha256": "f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc"
+      },
+      "seed": 0,
+      "environment_digest": "sha256:1c12c242d1d71acc68b62654c2a20f0c4c8435f2c720d26e789eb1b18bdfbe86",
+      "assets": {},
+      "python": "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/bin/python",
+      "options": {
+        "iterate": 1,
+        "limit": 0,
+        "scaffold": null,
+        "allow_partial_oracle": false
+      },
+      "runtime_inputs": {},
+      "referenced_files": {
+        "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/packs/aviation-structures-v2/private/beam_static_01.py": "78c464b7378eff89200ec04985c24eba5940e995e2eb4f3a24aaff20c1f7e917"
+      },
+      "tasks": {
+        "beam_static_01": "b2d7c8db5f4bd1248ab7b588ce2c0e851d38781e730edf7e5003e320b7961f5d"
+      }
+    },
+    "selected_task_ids": [
+      "beam_static_01"
+    ],
+    "crash_tasks": 0,
+    "resumed_tasks": 0
+  }
+}

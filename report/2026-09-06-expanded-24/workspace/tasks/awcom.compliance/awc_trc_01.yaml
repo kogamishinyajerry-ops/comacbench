@@ -1,0 +1,49 @@
+id: awc_trc_01
+registry_id: awcom.compliance
+domain: airworthiness
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: awcom@selfbuilt-2026-08-26
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/awcom.compliance/awc_trc_01.md
+  prompt_sha256: 829a638f70ed2af0c9d8de9223f50d57be0d6f1da65b936715464220dfeadcaa
+  assets: []
+output_contract:
+- json
+reference:
+  source: 自建 ACX 规章框架（决策表在题面；KB 恢复后重锚真实条款）
+  revision: awcom@selfbuilt-2026-08-26
+  reference_json: {"requirement_id": "SPEC-63", "clause_ref": "§25.279", "evidence_ids": ["AN-5", "TR-25"], "verified_params": ["PARAM_A2", "PARAM_B3"], "test_only_params": [], "coverage_complete": true}
+  rel_tol: 0.02
+  uncertainty_note: json_extract 字段级（exact_keys 精确；列表排序 casefold）
+grader:
+  answer_format: json_extract
+  validity_gate: true
+  numeric_rel_tol: 0.02
+  exact_keys:
+  - requirement_id
+  - clause_ref
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: false
+scoring:
+  weights:
+    requirements: 1.0
+    physics: 0.0
+    objective: 0.0
+    robustness: 0.0
+  note: requirements=JSON 字段命中比例
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 180
+  attempts: 3
+license_provenance:
+  source: 自建（适航审定工程族 P1；ACX 虚构规章）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: awcom@selfbuilt-2026-08-26

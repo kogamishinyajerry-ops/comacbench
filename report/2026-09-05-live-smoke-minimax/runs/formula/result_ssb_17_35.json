@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_17_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\nfrom copy import copy\\nfrom datetime import datetime\\n\\ndef main():\\n    # Load the workbook\\n    wb = load_workbook('output.xlsx')\\n    ws = wb['FILTER 5b']\\n    \\n    # Get criteria dates from I2 (start) and J2 (end)\\n    start_date = ws['I2'].value\\n    end_date = ws['J2'].value\\n    \\n    # Helper to parse a date that may be a string or datetime\\n    def parse_date(val):\\n        if val is None:\\n            return None\\n        if isinstance(val, datetime):\\n            return val\\n        if isinstance(val, str):\\n            for fmt in ['%m/%d/%Y', '%Y-%m-%d', '%d/%m/%Y', '%m-%d-%Y',\\n                        '%m/%d/%y', '%d-%m-%Y', '%Y/%m/%d']:\\n                try:\\n                    return datetime.strptime(val, fmt)\\n                except ValueError:\\n                    continue\\n        return None\\n    \\n    start_date = parse_date(start_date)\\n    end_date = parse_date(end_date)\\n    \\n    if start_date is None or end_date is None:\\n        wb.save('output.xlsx')\\n        return\\n    \\n    # Iterate through data rows A2:E315, filter by date in column A,\\n    # and copy matching rows to I6:M295 with original formatting\\n    output_row = 6\\n    for src_row in range(2, 316):\\n        # Stop if we've filled the output range\\n        if output_row > 295:\\n            break\\n        \\n        # Read the date value from column A\\n        raw_date = ws.cell(row=src_row, column=1).value\\n        row_date = parse_date(raw_date)\\n        \\n        # Skip rows that have no date or a date outside the criteria range\\n        if row_date is None:\\n            continue\\n        if not (start_date <= row_date <= end_date):\\n            continue\\n        \\n        # Copy columns A:E to columns I:M, preserving formatting\\n        for col_offset in range(5):\\n            src_col = 1 + col_offset   # A=1 ... E=5\\n            dst_col = 9 + col_offset   # I=9 ... M=13\\n            \\n            src_cell = ws.cell(row=src_row, column=src_col)\\n            dst_cell = ws.cell(row=output_row, column=dst_col)\\n            \\n            # Copy the value\\n            dst_cell.value = src_cell.value\\n            \\n            # Copy the formatting (font, fill, border, alignment, number format)\\n            if src_cell.has_style:\\n                dst_cell.font = copy(src_cell.font)\\n                dst_cell.fill = copy(src_cell.fill)\\n                dst_cell.border = copy(src_cell.border)\\n                dst_cell.alignment = copy(src_cell.alignment)\\n                dst_cell.number_format = src_cell.number_format\\n                dst_cell.protection = copy(src_cell.protection)\\n        \\n        output_row += 1\\n    \\n    # Save the workbook\\n    wb.save('output.xlsx')\\n\\nif __name__ == '__main__':\\n    main()\"",
+    "model_meta": "{\"provider\": \"openai_compat\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 123, in __init__\\n    self.archive = _validate_archive(fn)\\n                   ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/reader/excel.py\\\", line 95, in _validate_archive\\n    archive = ZipFile(filename, 'r')\\n              ^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/zipfile/__init__.py\\\", line 1352, in __init__\\n    self.fp = io.open(file, filemode)\\n              ^^^^^^^^^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'output.xlsx'\\n\"}",
+    "resume_identity": "e68fcb60f8044dde0265d47a616cfee410f7bab9d9a619f21da5b1dd5565f2fd"
+  },
+  "timings": {
+    "agent_s": 48.303,
+    "setup_s": 0.0,
+    "grade_s": 0.213
+  },
+  "environment_digest": "sha256:c199ab97d79dfd26f750aec22d06423a147bd3c92cdd4ab8b6200a8de203e70e",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=openai_compat code_len=2719",
+    "run1 exit=1 0.21s"
+  ]
+}

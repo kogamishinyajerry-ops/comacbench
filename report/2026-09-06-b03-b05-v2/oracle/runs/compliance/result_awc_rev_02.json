@@ -1,0 +1,37 @@
+{
+  "task_id": "awc_rev_02",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"```json\\n{\\n  \\\"changed_params\\\": {\\n    \\\"limit_load_factor\\\": {\\n      \\\"old\\\": 2.1,\\n      \\\"new\\\": 1.9\\n    }\\n  },\\n  \\\"changed_param_count\\\": 1,\\n  \\\"added_applicability\\\": [\\n    \\\"fuselage\\\"\\n  ],\\n  \\\"removed_applicability\\\": [],\\n  \\\"severity\\\": \\\"major\\\",\\n  \\\"compliance_recheck\\\": true\\n}\\n```\"",
+    "model_meta": "{\"provider\": \"oracle\"}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"changed_params.limit_load_factor.old\", \"ok\": true, \"got\": 2.1, \"ref\": 2.1, \"exact\": true}, {\"field\": \"changed_params.limit_load_factor.new\", \"ok\": true, \"got\": 1.9, \"ref\": 1.9, \"exact\": true}, {\"field\": \"changed_param_count\", \"ok\": true, \"got\": 1, \"ref\": 1, \"exact\": true}, {\"field\": \"added_applicability\", \"ok\": true, \"got\": [\"fuselage\"], \"ref\": [\"fuselage\"]}, {\"field\": \"removed_applicability\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"severity\", \"ok\": true, \"got\": \"major\", \"ref\": \"major\", \"exact\": true}, {\"field\": \"compliance_recheck\", \"ok\": true, \"got\": true, \"ref\": true, \"exact\": true}], \"n_fields\": 7, \"n_hit\": 7}",
+    "resume_identity": "88c14690170611e1373bb39da0e6dc11a058ad926ad26601f5d98c96a0368bfb"
+  },
+  "timings": {
+    "agent_s": 0.0,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='```json\\n{\\n  \"changed_params\": {\\n    \"limit_load_factor\": {\\n      \"old\": 2.1,\\n      \"new\": 1.9\\n    }\\n  },\\n  \"changed_para' attempts=1"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "protocol": "comacbench.agent.v1",
+  "name": "my-model-agent",
+  "revision": "1.1.0",
+  "kind": "model_agent",
+  "command": [
+    "{python}",
+    "./model_agent.py"
+  ],
+  "revision_files": [
+    "model_agent.py"
+  ],
+  "timeout_s": 900,
+  "env": [
+    "COMAC_MODEL_BASE",
+    "COMAC_MODEL_NAME",
+    "COMAC_MODEL_KEY"
+  ],
+  "identity_env": [
+    "COMAC_MODEL_BASE",
+    "COMAC_MODEL_NAME"
+  ]
+}

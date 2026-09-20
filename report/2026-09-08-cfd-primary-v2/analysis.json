@@ -1,0 +1,1499 @@
+{
+  "reynolds": 200,
+  "rows": [
+    {
+      "id": "re200-u5-d30-g1",
+      "config": {
+        "scale": 1,
+        "upstream_h": 5,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 6100,
+        "near_step_dx_h": 0.1,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.9119479470607725,
+        "iteration": 1266
+      },
+      "relative_change": 1.1542667559037005e-08,
+      "inlet": {
+        "passed": true,
+        "area_m2": 9.999999999999998e-05,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010012499999999998,
+        "native_phi_flux_m3_s": 0.000100125,
+        "relative_bias": 0.0012499999999995293,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 6.152879712432671e-15,
+        "effective_reynolds": 200.25000000000003,
+        "faces": 20,
+        "midpoint_bias_prediction": 0.00125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 9.999999999999999e-05,
+        "velocity_dot_area_flux_m3_s": 0.00010012500000000002,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 8.25781224563339e-15,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.911924552087055,
+        "quadratic_x_over_h": 4.936747150414842,
+        "first_wall_distance_m": [
+          0.000114586788749,
+          0.000114586788749
+        ],
+        "y2_over_y1": [
+          3.075690586220183,
+          3.075690586220183
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.005048751253341112
+      },
+      "old_x_over_h": 4.9119479470607725,
+      "old_near_wall_gap": 0.005048751253341112,
+      "evidence_sha256": "31d4cc02702b397890781af0bd3331dcb1efcf0b7b648fedfb2346a5ab5a8134",
+      "result_sha256": "b6be3e57abaeff233f45b497475ed5e86fc636ead111124155042fa70190832a"
+    },
+    {
+      "id": "re200-u5-d30-g2",
+      "config": {
+        "scale": 2,
+        "upstream_h": 5,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 24400,
+        "near_step_dx_h": 0.05,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.952125787010803,
+        "iteration": 3761
+      },
+      "relative_change": 8.302976346803415e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000005,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010003125000000001,
+        "native_phi_flux_m3_s": 0.00010003125,
+        "relative_bias": 0.00031249999999993783,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 1.2784667550159816e-14,
+        "effective_reynolds": 200.0624999999999,
+        "faces": 40,
+        "midpoint_bias_prediction": 0.0003125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010003125000000001,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 1.902109074536009e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.9521133081874265,
+        "quadratic_x_over_h": 4.964917356631408,
+        "first_wall_distance_m": [
+          5.7533065324e-05,
+          5.7533065324e-05
+        ],
+        "y2_over_y1": [
+          3.036185321141433,
+          3.036185321141433
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0025830461847630363
+      },
+      "old_x_over_h": 4.952125787010803,
+      "old_near_wall_gap": 0.002583046184763216,
+      "evidence_sha256": "2fa6b74d0622090811610d1025c758dfb79350ecab853271ceb9df391aea6580",
+      "result_sha256": "49d5ed207d61512bc52da39f476290739e09bc43bd0aaf69905a090d460f7adb"
+    },
+    {
+      "id": "re200-u5-d30-g4",
+      "config": {
+        "scale": 4,
+        "upstream_h": 5,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 97600,
+        "near_step_dx_h": 0.025,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.969295311316151,
+        "iteration": 12370
+      },
+      "relative_change": 8.720205543819806e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.0001000000000000001,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010000781250000001,
+        "native_phi_flux_m3_s": 0.0001000078125,
+        "relative_bias": 7.812499999992895e-05,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 2.6957629774309356e-14,
+        "effective_reynolds": 200.01562499999983,
+        "faces": 80,
+        "midpoint_bias_prediction": 7.8125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000003,
+        "velocity_dot_area_flux_m3_s": 0.00010000781249999994,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 4.0742781363446485e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.969290241707629,
+        "quadratic_x_over_h": 4.975772317379152,
+        "first_wall_distance_m": [
+          2.88244663182e-05,
+          2.88244663182e-05
+        ],
+        "y2_over_y1": [
+          3.017702901138461,
+          3.017702901138461
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.001303405343661409
+      },
+      "old_x_over_h": 4.969295311316151,
+      "old_near_wall_gap": 0.001303405343661409,
+      "evidence_sha256": "378205b2d5dfe84d46fb4e4ecbb89005f359c75f520ca72f635c3b29bddf53d9",
+      "result_sha256": "5a4722b27b3032dcdb32e93fa5aa9880c712b548fbb1dc7241718239ecd15048"
+    },
+    {
+      "id": "re200-u5-d30-g8",
+      "config": {
+        "scale": 8,
+        "upstream_h": 5,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 390400,
+        "near_step_dx_h": 0.0125,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.977052467507386,
+        "iteration": 26854
+      },
+      "relative_change": 6.470853901367653e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000013,
+        "analytic_flux_m3_s": 9.999999999999998e-05,
+        "velocity_area_flux_m3_s": 0.00010000195312500002,
+        "native_phi_flux_m3_s": 0.0001000019531249624,
+        "relative_bias": 1.9531250000426326e-05,
+        "phi_match_relative": 3.7621815385247014e-13,
+        "max_face_phi_match_relative": 4.279171505466858e-12,
+        "effective_reynolds": 200.0039062499245,
+        "faces": 160,
+        "midpoint_bias_prediction": 1.953125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010000195312500003,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 8.881784197001252e-16,
+        "max_phi_relative_error": 4.27747212903926e-12,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.977048846371151,
+        "quadratic_x_over_h": 4.980311771149497,
+        "first_wall_distance_m": [
+          1.442647767565e-05,
+          1.442647767565e-05
+        ],
+        "y2_over_y1": [
+          3.0087569521882136,
+          3.0087569521882136
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.000654866241292167
+      },
+      "old_x_over_h": 0.00649170786082456,
+      "old_near_wall_gap": 0.04640491979889077,
+      "evidence_sha256": "34a2505a8d919a2523a1d75659adc60c3941ca3842734b913459856fa83a764e",
+      "result_sha256": "f87ede22bda329352ebd8c6c5715c4a68b6d1e27162c426f4b2c1e2d1143bdd4"
+    },
+    {
+      "id": "re200-u10-d30-g1",
+      "config": {
+        "scale": 1,
+        "upstream_h": 10,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 6600,
+        "near_step_dx_h": 0.1,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.911847190055681,
+        "iteration": 1264
+      },
+      "relative_change": 1.1296104927343854e-08,
+      "inlet": {
+        "passed": true,
+        "area_m2": 9.999999999999998e-05,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010012499999999998,
+        "native_phi_flux_m3_s": 0.000100125,
+        "relative_bias": 0.0012499999999995293,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 6.152879712432671e-15,
+        "effective_reynolds": 200.25000000000003,
+        "faces": 20,
+        "midpoint_bias_prediction": 0.00125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 9.999999999999999e-05,
+        "velocity_dot_area_flux_m3_s": 0.00010012500000000002,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 8.25781224563339e-15,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.911823811243663,
+        "quadratic_x_over_h": 4.936646635490164,
+        "first_wall_distance_m": [
+          0.000114586788749,
+          0.000114586788749
+        ],
+        "y2_over_y1": [
+          3.075690586220183,
+          3.075690586220183
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.005048904103672195
+      },
+      "old_x_over_h": 4.911847190055681,
+      "old_near_wall_gap": 0.005048904103672195,
+      "evidence_sha256": "ff5411bb05ce809d5378f4b90b478b40c3db2a7e67394a9a2d5e192dbf957137",
+      "result_sha256": "4b9d0b1dfcd383ca460df940f27e02ea1a7bd7d6eb8a46c4fc3cf42deeb29e87"
+    },
+    {
+      "id": "re200-u10-d30-g2",
+      "config": {
+        "scale": 2,
+        "upstream_h": 10,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 26400,
+        "near_step_dx_h": 0.05,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.9521012676398595,
+        "iteration": 3762
+      },
+      "relative_change": 8.427893650410685e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000005,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010003125000000001,
+        "native_phi_flux_m3_s": 0.00010003125,
+        "relative_bias": 0.00031249999999993783,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 1.2784667550159816e-14,
+        "effective_reynolds": 200.0624999999999,
+        "faces": 40,
+        "midpoint_bias_prediction": 0.0003125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010003125000000001,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 1.902109074536009e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.952088793152412,
+        "quadratic_x_over_h": 4.964892860260946,
+        "first_wall_distance_m": [
+          5.7533065324e-05,
+          5.7533065324e-05
+        ],
+        "y2_over_y1": [
+          3.036185321141433,
+          3.036185321141433
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.002583063618806571
+      },
+      "old_x_over_h": 4.9521012676398595,
+      "old_near_wall_gap": 0.002583063618806571,
+      "evidence_sha256": "67976e190affee0f95071667278367ca29bff8ad4c12a3b7c11bf88acbe0bda0",
+      "result_sha256": "b07cdfd9b7c640a3534cba75fbefc37cf0b24cfc860c44099c86c46b140780ab"
+    },
+    {
+      "id": "re200-u10-d30-g4",
+      "config": {
+        "scale": 4,
+        "upstream_h": 10,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 105600,
+        "near_step_dx_h": 0.025,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.9692888758525635,
+        "iteration": 12308
+      },
+      "relative_change": 1.0350314305942656e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.0001000000000000001,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010000781250000001,
+        "native_phi_flux_m3_s": 0.0001000078125,
+        "relative_bias": 7.812499999992895e-05,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 2.6957629774309356e-14,
+        "effective_reynolds": 200.01562499999983,
+        "faces": 80,
+        "midpoint_bias_prediction": 7.8125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000003,
+        "velocity_dot_area_flux_m3_s": 0.00010000781249999994,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 4.0742781363446485e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.969283806355919,
+        "quadratic_x_over_h": 4.9757658747237254,
+        "first_wall_distance_m": [
+          2.88244663182e-05,
+          2.88244663182e-05
+        ],
+        "y2_over_y1": [
+          3.017702901138461,
+          3.017702901138461
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0013034055843756309
+      },
+      "old_x_over_h": 4.9692888758525635,
+      "old_near_wall_gap": 0.001303405584375452,
+      "evidence_sha256": "68f6ef826edee74fd7627e77ff3b9be37a9e032689b353e8fc934d7e61ee0373",
+      "result_sha256": "3cb25652b3d925c00fa9a217c125219636aaa8ef575e6df46b25c9f6cce4cede"
+    },
+    {
+      "id": "re200-u10-d30-g8",
+      "config": {
+        "scale": 8,
+        "upstream_h": 10,
+        "downstream_h": 30,
+        "reynolds": 200,
+        "expected_cells": 422400,
+        "near_step_dx_h": 0.0125,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.97705032637188,
+        "iteration": 26541
+      },
+      "relative_change": 5.4402822951991455e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000013,
+        "analytic_flux_m3_s": 9.999999999999998e-05,
+        "velocity_area_flux_m3_s": 0.00010000195312500002,
+        "native_phi_flux_m3_s": 0.0001000019531249624,
+        "relative_bias": 1.9531250000426326e-05,
+        "phi_match_relative": 3.7621815385247014e-13,
+        "max_face_phi_match_relative": 4.279171505466858e-12,
+        "effective_reynolds": 200.0039062499245,
+        "faces": 160,
+        "midpoint_bias_prediction": 1.953125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010000195312500003,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 8.881784197001252e-16,
+        "max_phi_relative_error": 4.27747212903926e-12,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.9770467056782355,
+        "quadratic_x_over_h": 4.98030962835122,
+        "first_wall_distance_m": [
+          1.442647767565e-05,
+          1.442647767565e-05
+        ],
+        "y2_over_y1": [
+          3.0087569521882136,
+          3.0087569521882136
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0006548661889292235
+      },
+      "old_x_over_h": 0.006491707656557555,
+      "old_near_wall_gap": 0.04640491624792172,
+      "evidence_sha256": "4d1c8e8edecf8ad3d1b928635701fa2141ac4ca960458247bba6569a2f45c58e",
+      "result_sha256": "e1a7fe0d497300ad17a697b4e9f34a23d7e1813cb522b762fbff9ca836f17704"
+    },
+    {
+      "id": "re200-u5-d60-g1",
+      "config": {
+        "scale": 1,
+        "upstream_h": 5,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 7420,
+        "near_step_dx_h": 0.1,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.911947935511992,
+        "iteration": 1247
+      },
+      "relative_change": 9.217689104839617e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 9.999999999999998e-05,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010012499999999998,
+        "native_phi_flux_m3_s": 0.000100125,
+        "relative_bias": 0.0012499999999995293,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 6.152879712432671e-15,
+        "effective_reynolds": 200.25000000000003,
+        "faces": 20,
+        "midpoint_bias_prediction": 0.00125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 9.999999999999999e-05,
+        "velocity_dot_area_flux_m3_s": 0.00010012500000000002,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 8.25781224563339e-15,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.911924540540201,
+        "quadratic_x_over_h": 4.936747138805589,
+        "first_wall_distance_m": [
+          0.000114586788749,
+          0.000114586788749
+        ],
+        "y2_over_y1": [
+          3.075690586220183,
+          3.075690586220183
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.005048751252900228
+      },
+      "old_x_over_h": 4.911947935511992,
+      "old_near_wall_gap": 0.005048751252900228,
+      "evidence_sha256": "d43fde3fde7b23ea1ec09a9cefa8ed347865c47e6a3242b2d98d3f635c4b4eca",
+      "result_sha256": "cd0494ffccb6c56f57c264e4f78094ded2b75894ecd08a5a7aa79602fc3b3bd0"
+    },
+    {
+      "id": "re200-u5-d60-g2",
+      "config": {
+        "scale": 2,
+        "upstream_h": 5,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 29680,
+        "near_step_dx_h": 0.05,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.952125742168442,
+        "iteration": 3698
+      },
+      "relative_change": 1.91715539196525e-08,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000005,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010003125000000001,
+        "native_phi_flux_m3_s": 0.00010003125,
+        "relative_bias": 0.00031249999999993783,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 1.2784667550159816e-14,
+        "effective_reynolds": 200.0624999999999,
+        "faces": 40,
+        "midpoint_bias_prediction": 0.0003125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010003125000000001,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 1.902109074536009e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.952113263353091,
+        "quadratic_x_over_h": 4.964917311700588,
+        "first_wall_distance_m": [
+          5.7533065324e-05,
+          5.7533065324e-05
+        ],
+        "y2_over_y1": [
+          3.036185321141433,
+          3.036185321141433
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.002583046190290132
+      },
+      "old_x_over_h": 4.952125742168442,
+      "old_near_wall_gap": 0.002583046190290311,
+      "evidence_sha256": "67b4a89eaaafd429e71ac5607110098c7fb39164db010a9a4540e37257ddec6a",
+      "result_sha256": "63c68f36ee84161e854fd18a55e65b2e229db82d0bf4b197081c66719d4c21b3"
+    },
+    {
+      "id": "re200-u5-d60-g4",
+      "config": {
+        "scale": 4,
+        "upstream_h": 5,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 118720,
+        "near_step_dx_h": 0.025,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.969295093228729,
+        "iteration": 12079
+      },
+      "relative_change": 1.4134621129286242e-08,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.0001000000000000001,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010000781250000001,
+        "native_phi_flux_m3_s": 0.0001000078125,
+        "relative_bias": 7.812499999992895e-05,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 2.6957629774309356e-14,
+        "effective_reynolds": 200.01562499999983,
+        "faces": 80,
+        "midpoint_bias_prediction": 7.8125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000003,
+        "velocity_dot_area_flux_m3_s": 0.00010000781249999994,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 4.0742781363446485e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.969290023624354,
+        "quadratic_x_over_h": 4.97577209880768,
+        "first_wall_distance_m": [
+          2.88244663182e-05,
+          2.88244663182e-05
+        ],
+        "y2_over_y1": [
+          3.017702901138461,
+          3.017702901138461
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0013034053034557422
+      },
+      "old_x_over_h": 4.969295093228729,
+      "old_near_wall_gap": 0.0013034053034557422,
+      "evidence_sha256": "8dee50408c2627a248d2495b0afab2178d7057b1d67176bff53b39f67a952b40",
+      "result_sha256": "de4c244ab37e67af0fd144a9ce872e2b0aba3bdc6888af36e0d725bebf296c13"
+    },
+    {
+      "id": "re200-u5-d60-g8",
+      "config": {
+        "scale": 8,
+        "upstream_h": 5,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 474880,
+        "near_step_dx_h": 0.0125,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.977051511080276,
+        "iteration": 25616
+      },
+      "relative_change": 2.8595233756900844e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000013,
+        "analytic_flux_m3_s": 9.999999999999998e-05,
+        "velocity_area_flux_m3_s": 0.00010000195312500002,
+        "native_phi_flux_m3_s": 0.0001000019531249624,
+        "relative_bias": 1.9531250000426326e-05,
+        "phi_match_relative": 3.7621815385247014e-13,
+        "max_face_phi_match_relative": 4.279171505466858e-12,
+        "effective_reynolds": 200.0039062499245,
+        "faces": 160,
+        "midpoint_bias_prediction": 1.953125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010000195312500003,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 8.881784197001252e-16,
+        "max_phi_relative_error": 4.27747212903926e-12,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.977047890142108,
+        "quadratic_x_over_h": 4.980310813680053,
+        "first_wall_distance_m": [
+          1.442647767565e-05,
+          1.442647767565e-05
+        ],
+        "y2_over_y1": [
+          3.0087569521882136,
+          3.0087569521882136
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0006548661577082411
+      },
+      "old_x_over_h": 0.006491707869458415,
+      "old_near_wall_gap": 0.04640491994728419,
+      "evidence_sha256": "f73d96a18713083d5f89801ee2d3465b1be53c71de30510ffc062b4f8f271dcc",
+      "result_sha256": "33915a692102d63f42bc265ba0bffa7df600adf8fb237405383b02f6f68e1bfa"
+    },
+    {
+      "id": "re200-u10-d60-g1",
+      "config": {
+        "scale": 1,
+        "upstream_h": 10,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 7920,
+        "near_step_dx_h": 0.1,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.91184717956845,
+        "iteration": 1247
+      },
+      "relative_change": 9.23834580215898e-09,
+      "inlet": {
+        "passed": true,
+        "area_m2": 9.999999999999998e-05,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010012499999999998,
+        "native_phi_flux_m3_s": 0.000100125,
+        "relative_bias": 0.0012499999999995293,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 6.152879712432671e-15,
+        "effective_reynolds": 200.25000000000003,
+        "faces": 20,
+        "midpoint_bias_prediction": 0.00125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 9.999999999999999e-05,
+        "velocity_dot_area_flux_m3_s": 0.00010012500000000002,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 8.25781224563339e-15,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.91182380075816,
+        "quadratic_x_over_h": 4.93664662495127,
+        "first_wall_distance_m": [
+          0.000114586788749,
+          0.000114586788749
+        ],
+        "y2_over_y1": [
+          3.075690586220183,
+          3.075690586220183
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.005048904103934083
+      },
+      "old_x_over_h": 4.91184717956845,
+      "old_near_wall_gap": 0.005048904103934083,
+      "evidence_sha256": "8cc157d963b03a9e4db32dce9d37eeaffe28dd473af396fb10a20300f28fedf4",
+      "result_sha256": "6f37e317a206dfd9559910fe79b2d7ce1f6d64f51019b42e4b4707484cfdd2c6"
+    },
+    {
+      "id": "re200-u10-d60-g2",
+      "config": {
+        "scale": 2,
+        "upstream_h": 10,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 31680,
+        "near_step_dx_h": 0.05,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.952101224617508,
+        "iteration": 3701
+      },
+      "relative_change": 1.5644265104702304e-10,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000005,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010003125000000001,
+        "native_phi_flux_m3_s": 0.00010003125,
+        "relative_bias": 0.00031249999999993783,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 1.2784667550159816e-14,
+        "effective_reynolds": 200.0624999999999,
+        "faces": 40,
+        "midpoint_bias_prediction": 0.0003125
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010003125000000001,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 1.902109074536009e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.952088750137739,
+        "quadratic_x_over_h": 4.964892817154071,
+        "first_wall_distance_m": [
+          5.7533065324e-05,
+          5.7533065324e-05
+        ],
+        "y2_over_y1": [
+          3.036185321141433,
+          3.036185321141433
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0025830636241794135
+      },
+      "old_x_over_h": 4.952101224617508,
+      "old_near_wall_gap": 0.0025830636241794135,
+      "evidence_sha256": "760ce8c4ef0fb66cd3f3d867c8ee9cf096b47d629234709cbbeeb948bd6c9776",
+      "result_sha256": "6e127575dc7c217fb79c3a5f6507527aee4190ff6e57fa2d5cf61b95db3e3ca1"
+    },
+    {
+      "id": "re200-u10-d60-g4",
+      "config": {
+        "scale": 4,
+        "upstream_h": 10,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 126720,
+        "near_step_dx_h": 0.025,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.969288708565218,
+        "iteration": 12094
+      },
+      "relative_change": 1.670879292188415e-08,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.0001000000000000001,
+        "analytic_flux_m3_s": 0.00010000000000000002,
+        "velocity_area_flux_m3_s": 0.00010000781250000001,
+        "native_phi_flux_m3_s": 0.0001000078125,
+        "relative_bias": 7.812499999992895e-05,
+        "phi_match_relative": 1.3552527156068803e-16,
+        "max_face_phi_match_relative": 2.6957629774309356e-14,
+        "effective_reynolds": 200.01562499999983,
+        "faces": 80,
+        "midpoint_bias_prediction": 7.8125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000003,
+        "velocity_dot_area_flux_m3_s": 0.00010000781249999994,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 6.661338147750939e-16,
+        "max_phi_relative_error": 4.0742781363446485e-14,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.969283639071561,
+        "quadratic_x_over_h": 4.975765707064783,
+        "first_wall_distance_m": [
+          2.88244663182e-05,
+          2.88244663182e-05
+        ],
+        "y2_over_y1": [
+          3.017702901138461,
+          3.017702901138461
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0013034055534750888
+      },
+      "old_x_over_h": 4.969288708565218,
+      "old_near_wall_gap": 0.0013034055534750888,
+      "evidence_sha256": "8bcce9bfacc570cefbd03afc33ffe9e60531d8da56825b0f6f7de73c8398deeb",
+      "result_sha256": "b68c5344b09f2f5874b6404652b3b5e5dc2b64ead1e8c3a293ba1b39b9ad6dd5"
+    },
+    {
+      "id": "re200-u10-d60-g8",
+      "config": {
+        "scale": 8,
+        "upstream_h": 10,
+        "downstream_h": 60,
+        "reynolds": 200,
+        "expected_cells": 506880,
+        "near_step_dx_h": 0.0125,
+        "spanwise_layers": 1,
+        "grading_sections": [
+          [
+            10,
+            100,
+            1
+          ],
+          [
+            20,
+            40,
+            4
+          ],
+          [
+            30,
+            33,
+            1
+          ]
+        ]
+      },
+      "valid": true,
+      "checks": {
+        "identity_both_times": true,
+        "qoi_stable": true,
+        "inlet_reproduced": true,
+        "wall_boundary_passed": true
+      },
+      "qoi": {
+        "x_over_h": 4.977049625984467,
+        "iteration": 25688
+      },
+      "relative_change": 1.5658182783574485e-08,
+      "inlet": {
+        "passed": true,
+        "area_m2": 0.00010000000000000013,
+        "analytic_flux_m3_s": 9.999999999999998e-05,
+        "velocity_area_flux_m3_s": 0.00010000195312500002,
+        "native_phi_flux_m3_s": 0.0001000019531249624,
+        "relative_bias": 1.9531250000426326e-05,
+        "phi_match_relative": 3.7621815385247014e-13,
+        "max_face_phi_match_relative": 4.279171505466858e-12,
+        "effective_reynolds": 200.0039062499245,
+        "faces": 160,
+        "midpoint_bias_prediction": 1.953125e-05
+      },
+      "geometric_inlet": {
+        "passed": true,
+        "polygon_area_m2": 0.0001,
+        "gauss_integral_m3_s": 0.00010000000000000002,
+        "velocity_dot_area_flux_m3_s": 0.00010000195312500003,
+        "max_outward_normal_error": 0.0,
+        "max_profile_error_m_s": 8.881784197001252e-16,
+        "max_phi_relative_error": 4.27747212903926e-12,
+        "face_average": false
+      },
+      "wall": {
+        "passed": true,
+        "laminar": true,
+        "no_slip": true,
+        "empty_2d": true,
+        "first_cell_x_over_h": 4.977046005435871,
+        "quadratic_x_over_h": 4.980308927201558,
+        "first_wall_distance_m": [
+          1.442647767565e-05,
+          1.442647767565e-05
+        ],
+        "y2_over_y1": [
+          3.0087569521882136,
+          3.0087569521882136
+        ],
+        "diagnostic_only": true,
+        "method": "quadratic du/dy on actual unequal wall distances, no wall function",
+        "relative_native_gap": 0.0006548661279314603
+      },
+      "old_x_over_h": 0.006491707663719527,
+      "old_near_wall_gap": 0.04640491636973471,
+      "evidence_sha256": "44912d5bdf0cbaeee4701c03b677e88f6a51089715b44346227e46ff0d9ea790",
+      "result_sha256": "329123236b8388b453178c27929d19803b2e08a012d6741c71ff52dfdce10a7d"
+    }
+  ],
+  "groups": [
+    {
+      "upstream_h": 5,
+      "downstream_h": 30,
+      "old_gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.226549934727432,
+        "extrapolated": 4.982107747020896,
+        "fine_gci": 0.0032229005578436228,
+        "medium_gci": 0.007567951951244396,
+        "asymptotic_ratio": 1.003467101815221,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      },
+      "gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.1462503130554422,
+        "extrapolated": 4.983445489055809,
+        "fine_gci": 0.0016056244107730537,
+        "medium_gci": 0.003559402504071944,
+        "asymptotic_ratio": 1.0015610173485907,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      }
+    },
+    {
+      "upstream_h": 10,
+      "downstream_h": 30,
+      "old_gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.2277661334008572,
+        "extrapolated": 4.982095945340135,
+        "fine_gci": 0.003221554886305117,
+        "medium_gci": 0.0075711995977040345,
+        "asymptotic_ratio": 1.0034707707463535,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      },
+      "gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.1469705920999371,
+        "extrapolated": 4.983441065432617,
+        "fine_gci": 0.0016050518483996037,
+        "medium_gci": 0.0035599131821515435,
+        "asymptotic_ratio": 1.0015618835437463,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      }
+    },
+    {
+      "upstream_h": 5,
+      "downstream_h": 60,
+      "old_gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.226563296479661,
+        "extrapolated": 4.982107192441532,
+        "fine_gci": 0.003222816056511862,
+        "medium_gci": 0.007567823353562937,
+        "asymptotic_ratio": 1.0034670668626378,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      },
+      "gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.1463730805775683,
+        "extrapolated": 4.983442931964038,
+        "fine_gci": 0.0016052227080461336,
+        "medium_gci": 0.003558814296062346,
+        "asymptotic_ratio": 1.0015608688367321,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      }
+    },
+    {
+      "upstream_h": 10,
+      "downstream_h": 60,
+      "old_gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.227775397954846,
+        "extrapolated": 4.982095541935604,
+        "fine_gci": 0.0032214956006460594,
+        "medium_gci": 0.007571108696494108,
+        "asymptotic_ratio": 1.0034707456831193,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      },
+      "gci": {
+        "applicable": true,
+        "refinement_ratio": 2,
+        "observed_order": 1.1470592573072231,
+        "extrapolated": 4.983439210039972,
+        "fine_gci": 0.001604761991458085,
+        "medium_gci": 0.0035594886674534094,
+        "asymptotic_ratio": 1.0015617763173776,
+        "note": "Three-point fitted ratio is not independent proof of asymptotic convergence."
+      }
+    }
+  ],
+  "fine_domain_effect": 5.703578721765562e-07,
+  "diagnostics_passed": true,
+  "bridges_passed": true,
+  "policy": {
+    "fine_gci_max": 0.005,
+    "fine_domain_effect_max": 0.0025,
+    "p_residual_max": 1e-09,
+    "U_residual_max": 1e-10,
+    "qoi_change_max": 1e-05,
+    "mass_imbalance_max": 1e-06,
+    "inlet_flux_match_max": 1e-08,
+    "fine_inlet_bias_max": 0.0001,
+    "fine_wall_gap_max": 0.001,
+    "bridge_qoi_change_max": 1e-05
+  },
+  "current_benchmark_tolerance": 0.1,
+  "calibrated_tolerance": null,
+  "expanded_re200": false,
+  "gate_passed": true,
+  "screening_tolerance_candidate": {
+    "relative_band": 0.02,
+    "terms": {
+      "observed_error": 0.014081256610106476,
+      "fine_gci": 0.0016040298947266399,
+      "domain": 5.703578721765562e-07,
+      "iteration": 1.905659287091157e-08,
+      "reference_rounding": 0.00010036130068245685
+    },
+    "policy": "Prior v1 conservative screening sum rounded upward in 0.5 percentage-point steps; not a statistical confidence interval; old scores unchanged."
+  },
+  "failed_gates": [],
+  "identity": "comacbench.cfd-primary-recirculation.v2",
+  "identity_sha256": "f97ade6e72033981b25b51aa2781961054abcee66c2a50f53c260cb0928a27bd",
+  "old_analysis_sha256": "11357a20858eab4d1cb36c4b4d5497cdde859e1bddd14fc8b06c2fbeb6de6678",
+  "old_gate_passed": false,
+  "old_files_unchanged": 340,
+  "feedback": [],
+  "native_solver_calls": 0,
+  "model_calls": 0,
+  "field_snapshots_verified": 32,
+  "next_condition_authorized_for_execution": false,
+  "expansion_decision": "ready_for_next_condition_planning",
+  "source_path": "report/2026-09-07-cfd-re200",
+  "parent_gate_verified": true
+}

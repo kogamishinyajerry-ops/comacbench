@@ -1,0 +1,39 @@
+{
+  "task_id": "ontology_trace_01",
+  "registry_id": "enterprise.ontology",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"def build_graph(entities, assertions):\\n    types = {e['id']: e['type'] for e in entities}\\n    signatures = {'made_of': ('Part', 'Material'), 'verified_by': ('Part', 'Analysis'), 'satisfies': ('Analysis', 'Requirement')}\\n    edges, issues = {}, []\\n    for a in assertions:\\n        source = a.get('source_id', '')\\n        if not isinstance(source, str) or not source:\\n            reason, source = 'missing_source', ''\\n        elif a.get('relation') not in signatures:\\n            reason = 'unknown_relation'\\n        elif a.get('subject') not in types or a.get('object') not in types:\\n            reason = 'missing_entity'\\n        elif (types[a['subject']], types[a['object']]) != signatures[a['relation']]:\\n            reason = 'type_mismatch'\\n        else:\\n            key = (a['subject'], a['relation'], a['object'])\\n            edges.setdefault(key, set()).add(source)\\n            continue\\n        issues.append({'source_id': source, 'reason': reason})\\n    return {'edges': [{'subject': k[0], 'relation': k[1], 'object': k[2], 'evidence': sorted(v)} for k, v in sorted(edges.items())], 'issues': sorted(issues, key=lambda x: (x['source_id'], x['reason']))}\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}",
+    "resume_identity": "be3b4565dd1aa6bf718f29ff5882d21f7d64fd8be415615422001670a49508b8"
+  },
+  "timings": {
+    "agent_s": 0.041,
+    "setup_s": 0.0,
+    "grade_s": 0.04
+  },
+  "environment_digest": "sha256:b805a8328928de15269f768f9c6879f39df61bff6e101e38bcd5007b40917a6d",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

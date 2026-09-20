@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_279_23",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (3, 1, 1),\\n    (3, 2, \\\"tig\\\"),\\n    (4, 1, 2),\\n    (4, 2, \\\"tig\\\"),\\n    (5, 1, 3),\\n    (5, 2, \\\"tib\\\"),\\n    (6, 1, 4),\\n    (6, 2, \\\"tig\\\"),\\n    (7, 1, 5),\\n    (7, 2, \\\"tig\\\"),\\n    (8, 1, 6),\\n    (8, 2, \\\"tib\\\"),\\n    (9, 1, 7),\\n    (9, 2, \\\"tig\\\"),\\n    (10, 1, 8),\\n    (10, 2, \\\"tig\\\"),\\n    (11, 1, 9),\\n    (11, 2, \\\"tib\\\"),\\n    (12, 1, 10),\\n    (12, 2, \\\"tig\\\"),\\n    (17, 1, 1),\\n    (17, 2, \\\"tig\\\"),\\n    (18, 1, 2),\\n    (18, 2, \\\"tig\\\"),\\n    (19, 1, 3),\\n    (19, 2, \\\"tib\\\"),\\n    (20, 1, 4),\\n    (20, 2, \\\"tig\\\"),\\n    (21, 1, 5),\\n    (21, 2, \\\"tig\\\"),\\n    (22, 1, 6),\\n    (22, 2, \\\"tib\\\"),\\n    (23, 1, 7),\\n    (23, 2, \\\"tig\\\"),\\n    (24, 1, 8),\\n    (24, 2, \\\"tig\\\"),\\n    (25, 1, 9),\\n    (25, 2, \\\"tib\\\"),\\n    (26, 1, 10),\\n    (26, 2, \\\"tig\\\"),\\n]\\n\\n\\ndef _v(x):\\n    if isinstance(x, dict) and \\\"__date__\\\" in x:\\n        return _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d %H:%M:%S\\\") \\\\\\n            if len(x[\\\"__date__\\\"]) > 10 else _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d\\\")\\n    return x\\n\\n\\nwb = openpyxl.load_workbook(\\\"ssb_279_23_init.xlsx\\\")\\nws = wb[\\\"Sheet1\\\"] if \\\"Sheet1\\\" in wb.sheetnames else wb.worksheets[0]\\nfor row, col, v in VALUES:\\n    ws.cell(row=row, column=col).value = _v(v)\\nwb.save(\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A3:B26\", \"recalc_sheet_mappings\": [], \"match\": {\"n_gold\": 40, \"matched\": 40, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "ad0be832c32c80fd867739b3f627c5d381707c92546e495d73e263bf2286a165"
+  },
+  "timings": {
+    "agent_s": 2.505,
+    "setup_s": 0.0,
+    "grade_s": 2.504
+  },
+  "environment_digest": "sha256:7325e766f1aac5b1e8e0df09ec4973ed04c3adcc5d5c914d70edffec348ec3e7",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=1314",
+    "run1 exit=0 0.16s",
+    "run2 exit=0 0.2s",
+    "physics=1.0 cells=40/40 extra=0"
+  ]
+}

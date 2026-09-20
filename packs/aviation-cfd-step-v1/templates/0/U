@@ -1,0 +1,60 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    inlet
+    {
+        type fixedValue;
+        value nonuniform List<vector>
+20
+(
+(0.14625 0 0)
+(0.41625 0 0)
+(0.65625 0 0)
+(0.86625 0 0)
+(1.04625 0 0)
+(1.19625 0 0)
+(1.31625 0 0)
+(1.40625 0 0)
+(1.46625 0 0)
+(1.49625 0 0)
+(1.49625 0 0)
+(1.46625 0 0)
+(1.40625 0 0)
+(1.31625 0 0)
+(1.19625 0 0)
+(1.04625 0 0)
+(0.86625 0 0)
+(0.65625 0 0)
+(0.41625 0 0)
+(0.14625 0 0)
+);
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    lowerWall
+    {
+        type            noSlip;
+    }
+    upperWall
+    {
+        type            noSlip;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}

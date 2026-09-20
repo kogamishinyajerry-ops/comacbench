@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_22_47",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nfrom openpyxl import load_workbook\\nimport shutil\\n\\n# Copy input to output\\nshutil.copy('input.xlsx', 'output.xlsx')\\n\\nwb = load_workbook('output.xlsx')\\nws = wb['sheet1']\\nmax_row = ws.max_row\\n\\n# Read all rows from the sheet\\nall_rows = []\\nfor r in range(1, max_row + 1):\\n    all_rows.append({\\n        'row': r,\\n        'A': ws.cell(row=r, column=1).value,\\n        'B': ws.cell(row=r, column=2).value,\\n        'C': ws.cell(row=r, column=3).value,\\n        'J': ws.cell(row=r, column=10).value,\\n    })\\n\\n# Detect header row (assume first non-empty B row; default row 1)\\nheader_row = 1\\nfor d in all_rows:\\n    if d['B'] is not None and str(d['B']).strip() != '':\\n        if d['row'] == 1 or not isinstance(d['B'], (int, float)):\\n            header_row = d['row']\\n            break\\n\\n# Extract helper order from column J (skip header, dedupe preserving first appearance)\\nhelper_order = []\\nhelper_seen = set()\\nfor d in all_rows:\\n    if d['row'] <= header_row:\\n        continue\\n    j_val = d['J']\\n    if j_val is None:\\n        continue\\n    name = str(j_val).strip()\\n    if name == '':\\n        continue\\n    key = name.lower()\\n    if key not in helper_seen:\\n        helper_seen.add(key)\\n        helper_order.append(name)\\n\\n# Collect unique items from B:C, skipping header, empty cells, and duplicates\\nitems = []\\nseen_pairs = set()\\nfor d in all_rows:\\n    if d['row'] <= header_row:\\n        continue\\n    b = d['B']\\n    c = d['C']\\n    if b is None or str(b).strip() == '':\\n        continue\\n    b_str = str(b).strip()\\n    c_str = str(c).strip() if c is not None else ''\\n    pair_key = (b_str.lower(), c_str)\\n    if pair_key in seen_pairs:\\n        continue\\n    seen_pairs.add(pair_key)\\n    items.append({'orig_row': d['row'], 'b': b, 'c': c})\\n\\n# Sort using helper column order or alphabetically if helper is empty\\nif helper_order:\\n    h_idx = {name.lower(): i for i, name in enumerate(helper_order)}\\n\\n    def sort_key(item):\\n        b_low = str(item['b']).strip().lower()\\n        if b_low in h_idx:\\n            # Items in helper come first, ordered by helper position, then original order\\n            return (0, h_idx[b_low], item['orig_row'])\\n        # Items not in helper come after, in original order\\n        return (1, 0, item['orig_row'])\\n\\n    items.sort(key=sort_key)\\nelse:\\n    # Alphabetical sort A-Z by column B\\n    items.sort(key=lambda x: (str(x['b']).strip().lower(), x['orig_row']))\\n\\n# Final sort: sort only column H (C values) lowest to highest\\ndef c_sort_key(item):\\n    c = item['c']\\n    if c is None or str(c).strip() == '':\\n        return (1, 0)  # empty/None values go last\\n    if isinstance(c, (int, float)):\\n        return (0, float(c))\\n    try:\\n        return (0, float(c))\\n    except (ValueError, TypeError):\\n        return (0, str(c))\\n\\nitems.sort(key=c_sort_key)\\n\\n# Write output to F2:H10 (up to 9 rows)\\nmax_output = 9\\nfor i, item in enumerate(items[:max_output]):\\n    r = 2 + i\\n    ws.cell(row=r, column=6).value = i + 1          # F: sequence index\\n    ws.cell(row=r, column=7).value = item['b']        # G: name (from B)\\n    ws.cell(row=r, column=8).value = item['c']        # H: value (from C), sorted ascending\\n\\nwb.save('output.xlsx')\\nprint(f\\\"Sorted {min(len(items), max_output)} rows written to F2:H10 in output.xlsx\\\")\"",
+    "model_meta": "{\"provider\": \"openai_compat\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_oisio_e8/model.py\\\", line 6, in <module>\\n    shutil.copy('input.xlsx', 'output.xlsx')\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/shutil.py\\\", line 435, in copy\\n    copyfile(src, dst, follow_symlinks=follow_symlinks)\\n  File \\\"/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/shutil.py\\\", line 260, in copyfile\\n    with open(src, 'rb') as fsrc:\\n         ^^^^^^^^^^^^^^^\\nFileNotFoundError: [Errno 2] No such file or directory: 'input.xlsx'\\n\"}",
+    "resume_identity": "e68fcb60f8044dde0265d47a616cfee410f7bab9d9a619f21da5b1dd5565f2fd"
+  },
+  "timings": {
+    "agent_s": 66.348,
+    "setup_s": 0.0,
+    "grade_s": 0.226
+  },
+  "environment_digest": "sha256:c199ab97d79dfd26f750aec22d06423a147bd3c92cdd4ab8b6200a8de203e70e",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=openai_compat code_len=3239",
+    "run1 exit=1 0.22s"
+  ]
+}

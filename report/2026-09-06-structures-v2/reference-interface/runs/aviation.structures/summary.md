@@ -1,0 +1,21 @@
+# simulation_agent 结果汇总（provider=external, model=reference-interface-fixture, seed=0）
+
+## ValidityGate 分布（先看 gate，再看子分）
+
+- 任务总数: 1
+- gate 通过: 1
+- gate 失败: 0（直接 0 分）
+- 作废: 0
+- gate 失败原因分布: 无
+
+## physics（NMSE 阈值分）分布（n=1）
+
+- 1.0: 1
+- 0.5: 0
+- 0.0: 0
+
+## 每任务明细
+
+| task | gate | nmse | nmse_score | score | 关键信息 |
+| --- | --- | --- | --- | --- | --- |
+| beam_static_01 | 1 | - | 1.0 | 1.0 | missing=exec_fail |

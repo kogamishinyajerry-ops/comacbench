@@ -1,0 +1,37 @@
+{
+  "task_id": "awc_acam_01",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"{\\n  \\\"clause_id\\\": \\\"ACX-STALL-241\\\",\\n  \\\"primary_method\\\": \\\"MC4\\\",\\n  \\\"secondary_methods\\\": [\\\"MC3\\\", \\\"MC8\\\", \\\"MC9\\\"],\\n  \\\"witnesses_required\\\": false,\\n  \\\"documented_only\\\": false\\n}\"",
+    "model_meta": "{\"provider\": \"openai_compat\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"clause_id\", \"ok\": true, \"got\": \"ACX-STALL-241\", \"ref\": \"ACX-STALL-241\", \"exact\": true}, {\"field\": \"primary_method\", \"ok\": true, \"got\": \"MC4\", \"ref\": \"MC4\", \"exact\": true}, {\"field\": \"secondary_methods\", \"ok\": true, \"got\": [\"mc3\", \"mc8\", \"mc9\"], \"ref\": [\"mc3\", \"mc8\", \"mc9\"]}, {\"field\": \"witnesses_required\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}, {\"field\": \"documented_only\", \"ok\": true, \"got\": false, \"ref\": false, \"exact\": true}], \"n_fields\": 5, \"n_hit\": 5}",
+    "resume_identity": "96d09d0635c4e56fcc964be433d30325f7052a1fe5b8d07898ce3193b2aac9be"
+  },
+  "timings": {
+    "agent_s": 4.557,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:074d30b58a6d6924604e1ad98b2088d783f8bf8b7d280bffbb39858b97035122",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\\n  \"clause_id\": \"ACX-STALL-241\",\\n  \"primary_method\": \"MC4\",\\n  \"secondary_methods\": [\"MC3\", \"MC8\", \"MC9\"],\\n  \"witnesses_' attempts=1"
+  ]
+}

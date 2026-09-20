@@ -1,0 +1,40 @@
+{
+  "task_id": "beam_static_01",
+  "registry_id": "aviation.structures",
+  "adapter": "simulation_agent",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "numeric_vs_reference",
+    "requirements": "model.inp+dat 键完备",
+    "objective": "N/A(静态任务)",
+    "robustness": "N/A(无扰动重算)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"make_case.py — write a valid CalculiX input deck `model.inp` in the cwd.\\n\\nUnits: mm, N, MPa, tonne/mm^3 (steel E=210000 MPa, nu=0.3, rho=7.85e-9).\\n20-node hex C3D20 elements on a structured mesh; connectivity and nset lines\\nare wrapped to at most 16 entries per line (CalculiX line limit).\\n\\\"\\\"\\\"\\nimport math\\n\\nL, H, T = 100, 10, 5\\nNX, NY, NZ = 20, 4, 2\\n\\n\\ndef seg(x0, x1, n):\\n    return [x0 + (x1 - x0) * i / (2 * n) for i in range(2 * n + 1)]\\n\\n\\nxs, ys, zs = seg(0.0, L, NX), seg(-H / 2, H / 2, NY), seg(-T / 2, T / 2, NZ)\\nnid = {}\\nnodes = []\\n\\n\\ndef get_node(i, j, k):\\n    if (i, j, k) not in nid:\\n        nid[(i, j, k)] = len(nodes) + 1\\n        nodes.append((len(nodes) + 1, xs[i], ys[j], zs[k]))\\n    return nid[(i, j, k)]\\n\\n\\ndef elem(i, j, k):\\n    c = [(2 * i, 2 * j, 2 * k), (2 * i + 2, 2 * j, 2 * k),\\n         (2 * i + 2, 2 * j + 2, 2 * k), (2 * i, 2 * j + 2, 2 * k),\\n         (2 * i, 2 * j, 2 * k + 2), (2 * i + 2, 2 * j, 2 * k + 2),\\n         (2 * i + 2, 2 * j + 2, 2 * k + 2), (2 * i, 2 * j + 2, 2 * k + 2),\\n         (2 * i + 1, 2 * j, 2 * k), (2 * i + 2, 2 * j + 1, 2 * k),\\n         (2 * i + 1, 2 * j + 2, 2 * k), (2 * i, 2 * j + 1, 2 * k),\\n         (2 * i + 1, 2 * j, 2 * k + 2), (2 * i + 2, 2 * j + 1, 2 * k + 2),\\n         (2 * i + 1, 2 * j + 2, 2 * k + 2), (2 * i, 2 * j + 1, 2 * k + 2),\\n         (2 * i, 2 * j, 2 * k + 1), (2 * i + 2, 2 * j, 2 * k + 1),\\n         (2 * i + 2, 2 * j + 2, 2 * k + 1), (2 * i, 2 * j + 2, 2 * k + 1)]\\n    return [get_node(*q) for q in c]\\n\\n\\nels = []\\nfor k in range(NZ):\\n    for j in range(NY):\\n        for i in range(NX):\\n            els.append((len(els) + 1, elem(i, j, k)))\\n\\nNROOT = [n[0] for n in nodes if abs(n[1]) < 1e-9]\\nNTIP = [n[0] for n in nodes if abs(n[1] - L) < 1e-9]\\nsets = {\\\"NROOT\\\": NROOT, \\\"NTIP\\\": NTIP}\\n\\nwith open(\\\"model.inp\\\", \\\"w\\\") as f:\\n    f.write(\\\"*NODE\\\\n\\\")\\n    for n_, x, y, z in nodes:\\n        f.write(f\\\"{n_}, {x:.6f}, {y:.6f}, {z:.6f}\\\\n\\\")\\n    f.write(\\\"*ELEMENT, TYPE=C3D20, ELSET=EALL\\\\n\\\")\\n    for en, conn in els:\\n        ids = [en] + conn\\n        for s in range(0, len(ids), 16):\\n            f.write(\\\", \\\".join(str(c) for c in ids[s:s + 16]) + \\\"\\\\n\\\")\\n    for name, idlist in sets.items():\\n        f.write(f\\\"*NSET, NSET={name}\\\\n\\\")\\n        for s in range(0, len(idlist), 16):\\n            f.write(\\\", \\\".join(str(c) for c in idlist[s:s + 16]) + \\\"\\\\n\\\")\\n    f.write(\\\"*MATERIAL, NAME=STEEL\\\\n*ELASTIC\\\\n210000.0, 0.3\\\\n*DENSITY\\\\n7.85e-9\\\\n\\\")\\n    f.write(\\\"*SOLID SECTION, ELSET=EALL, MATERIAL=STEEL\\\\n\\\")\\n    f.write(\\\"*BOUNDARY\\\\nNROOT, 1, 3, 0.0\\\\n\\\")\\n    f.write(\\\"*STEP\\\\n*STATIC\\\\n\\\")\\n    for nd in NTIP:\\n        f.write(f\\\"*CLOAD\\\\n{nd}, 2, {-1000.0 / len(NTIP):.9f}\\\\n\\\")\\n    f.write(\\\"*NODE PRINT, NSET=NTIP\\\\nU\\\\n*NODE PRINT, NSET=NROOT\\\\nRF\\\\n*END STEP\\\\n\\\")\"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"reference-interface-fixture\", \"revision\": \"1.0.0\", \"agent_kind\": \"reference_fixture\", \"request_sha256\": \"28ca3bf5fc0246756e0d874258d64c2782bb978f9ea7c2dfd5b8ed9fb4316974\", \"response_sha256\": \"dc6b078f3b55778dead721c8a544762abf1dbdf07e66efae3d74c6c265fd7ba0\", \"audit_dir\": \"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/reference-interface/agent-audit/beam_static_01-au41pbep\", \"config_sha256\": \"27eff9ea4156e67f5d107cd80142b87af3d1ac56bb9df1c1f143e8b68993d7d8\", \"revision_files\": {\"reference_agent.py\": \"47cc9d0b9cd8f0469314fb9ec3c9c796b94d74b84f8b64dd6f5e97459d52acda\", \"reference_answers/beam_static_01.py\": \"78c464b7378eff89200ec04985c24eba5940e995e2eb4f3a24aaff20c1f7e917\", \"reference_answers/data_units_01.py\": \"984317019e51abe680489a26a4877677db5d9d0c9bfa948a969d72d9a18f96cd\", \"reference_answers/ontology_trace_01.py\": \"836d81d643aa2ccacd3ef0f3a48ac26bbe6ef7bf890dcfa8ad4b6767cc597f6f\"}, \"command_files\": {\"0\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\", \"1\": \"47cc9d0b9cd8f0469314fb9ec3c9c796b94d74b84f8b64dd6f5e97459d52acda\"}, \"identity_env\": {}, \"executable_sha256\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\"}",
+    "grade_details": "{\"kind\": \"ccx_fea\", \"hits\": {\"tip_defl_mm\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": -3.811745, \"ref\": -3.811745}, \"root_rf_sum_n\": {\"status\": \"tol\", \"ok\": true, \"rel_err\": 0.0, \"got\": 1000.0000999999999, \"ref\": 1000.0000999999999}}, \"physics_hits\": \"2/2\", \"rel_tol\": 0.05, \"ccx_s\": 0.15}",
+    "resume_identity": "b101c615f168abc9a84a22a86cc8b6fcdcbc5d83b0f0a35c208d8d68e1b38fb2"
+  },
+  "timings": {
+    "agent_s": 0.228,
+    "setup_s": 0.0,
+    "grade_s": 0.182
+  },
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "make_case exit=0 0.03s",
+    "ccx exit=0 0.15s"
+  ]
+}

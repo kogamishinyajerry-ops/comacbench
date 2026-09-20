@@ -1,0 +1,135 @@
+id: beam_static_01
+registry_id: aviation.structures
+domain: structures
+task_type: simulation_agent
+model_profile: plain_llm
+assets_revision: aviation-structures@2.0.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+- calculix
+input:
+  prompt_file: tasks/aviation.structures/beam_static_01.md
+  prompt_sha256: be77a35c95d6b8aef616572aa785d80e8a4ad8bf7e5cf2e570c6bf248655d755
+  assets: []
+output_contract:
+- model.inp
+reference:
+  source: gold make_case.py 实跑 ccx 2.23 的 .dat 解析值（确定性；自建任务）
+  revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+  values:
+    tip_defl_mm: -3.811745
+    root_rf_sum_n: 1000.0000999999999
+  rel_tol: 0.05
+  uncertainty_note: 解析交叉验证：tip_defl_mm=-3.81; root_rf_sum_n=1000；容差覆盖模型网格离散化差（题面钉死最小网格与
+    C3D20）
+grader:
+  answer_format: code
+  exec_kind: ccx_fea
+  validity_gate: true
+  result_keys:
+  - tip_defl_mm
+  - root_rf_sum_n
+  numeric_rel_tol: 0.05
+  exact_keys: []
+  extract:
+    tip_defl_mm:
+      type: max_abs_udof
+      set: NTIP
+      dof: 2
+    root_rf_sum_n:
+      type: sum_rf
+      set: NROOT
+      dof: 2
+  solver_backend: calculix-ccx-native
+  oracle_source: private/beam_static_01.py
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: true
+  deck_contract:
+    profile: ccx.cantilever.v1
+    geometry_mm:
+    - 100
+    - 10
+    - 5
+    min_elements:
+    - 16
+    - 4
+    - 2
+    material:
+      youngs_modulus_mpa: 210000
+      poisson_ratio: 0.3
+      density_tonne_mm3: 7.85e-09
+    total_fy_n: -1000
+scoring:
+  weights:
+    physics: 0.5
+    requirements: 0.5
+    objective: 0.0
+    robustness: 0.0
+  note: 工程输入六项检查全部通过后实际求解；任何输入硬门槛失败总分归零。physics 和 requirements 权重及数值参考保持 v1。
+limits:
+  cpu: 1
+  memory_gb: 4
+  wall_clock_s: 300
+  attempts: 1
+license_provenance:
+  source: 自建（受 SimJEB 支架域启发，未镜像其数据；求解器 CalculiX GPL-2.0 仅作执行后端）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: ccxfea@selfbuilt-2026-08-24+ccx2.23
+evaluation:
+  units: mm, N, MPa, tonne/mm^3
+  requirements:
+  - id: S1
+    text: 生成可运行的 model.inp 并实际执行 CalculiX
+    check: solver_exit
+  - id: S2
+    text: 尖端位移和根部合力落入 5% 参考带
+    check: reference_metrics
+  - id: S3
+    text: 受载节点参与单元连接，不含未使用节点
+    check: deck:connectivity
+  - id: S4
+    text: 完整结构化 C3D20 网格、几何和三方向最小划分
+    check: deck:mesh
+  - id: S5
+    text: 全部单元分配正确钢材参数与密度
+    check: deck:material
+  - id: S6
+    text: 仅固定全部根部节点三个平移自由度
+    check: deck:boundary
+  - id: S7
+    text: 仅向全部尖端网格节点均分 -1000 N 的 Y 向集中力
+    check: deck:load
+  - id: S8
+    text: 步内恰好请求 NTIP 位移与 NROOT 反力
+    check: deck:output
+  negative_controls:
+  - script: private/unconnected_load.py
+    max_score: 0
+    expected_issue: unconnected_loaded_nodes
+  - script: private/coarse_mesh.py
+    max_score: 0
+    expected_issue: mesh_below_minimum
+  - script: private/wrong_material.py
+    max_score: 0
+    expected_issue: material_mismatch
+  - script: private/missing_density.py
+    max_score: 0
+    expected_issue: material_mismatch
+  - script: private/incomplete_clamp.py
+    max_score: 0
+    expected_issue: clamp_mismatch
+  - script: private/extra_constraint.py
+    max_score: 0
+    expected_issue: clamp_mismatch
+  - script: private/wrong_load.py
+    max_score: 0
+    expected_issue: tip_load_mismatch
+  - script: private/missing_print.py
+    max_score: 0
+    expected_issue: print_contract_mismatch
+  scope: 单个基础静力梁的声明输入契约与原生求解；未证明网格收敛、一般复杂结构可靠性或飞机级工程接受。

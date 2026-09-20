@@ -34,6 +34,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, openSync, readFileSync, readdirSync, statSync, writeSync } from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { packCommand, registerPackTools } from "./packs.js";
 
 export const name = "dsh-comac-benchmark";
 export const inject = ["tools", "webServer"];
@@ -442,6 +443,7 @@ function registerWorkbenchRoutes(ctx) {
             snapshots: snapshotList(),
           });
         }
+        if (seg[0] === "packs") return json(res, 200, packCommand(HOME, ["catalog"]));
         if (seg[0] === "registry") return json(res, 200, { ok: true, entries: loadRegistryFull() });
         if (seg[0] === "runs") return json(res, 200, { ok: true, runs: runsIndex() });
         if (seg[0] === "matrix") {
@@ -506,6 +508,7 @@ function registerWorkbenchRoutes(ctx) {
 
 export function apply(ctx) {
   const T = ctx.tools;
+  registerPackTools(ctx, HOME);
 
   T.register({
     name: "comac_registry",

@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_269_43",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\nINPUT_FILE = \\\"ssb_269_43_init.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\n\\ndef has_value(cell):\\n    \\\"\\\"\\\"Return True if the cell contains an actual value (not empty/whitespace).\\\"\\\"\\\"\\n    if cell is None:\\n        return False\\n    v = cell.value\\n    if v is None:\\n        return False\\n    if isinstance(v, str) and v.strip() == \\\"\\\":\\n        return False\\n    return True\\n\\n\\ndef delete_rows_i_filled_h_blank(ws):\\n    \\\"\\\"\\\"\\n    Equivalent of the VBA macro:\\n        delete a row if column I has a value but the same row's column H is blank.\\n    Rows are collected first, then deleted bottom-up so indices stay valid.\\n    \\\"\\\"\\\"\\n    rows_to_delete = []\\n    max_row = ws.max_row\\n\\n    for r in range(1, max_row + 1):\\n        i_cell = ws.cell(row=r, column=9)  # Column I\\n        h_cell = ws.cell(row=r, column=8)  # Column H\\n        if has_value(i_cell) and not has_value(h_cell):\\n            rows_to_delete.append(r)\\n\\n    # Delete from the bottom up (like stepping backwards in the VBA loop),\\n    # so shifting caused by earlier deletions doesn't break later indices.\\n    for r in sorted(rows_to_delete, reverse=True):\\n        ws.delete_rows(r)\\n\\n    return rows_to_delete\\n\\n\\ndef main():\\n    wb = openpyxl.load_workbook(INPUT_FILE)\\n\\n    # Choose Sheet1 (fallback to active sheet if somehow missing)\\n    if \\\"Sheet1\\\" in wb.sheetnames:\\n        ws = wb[\\\"Sheet1\\\"]\\n    else:\\n        ws = wb.active\\n\\n    deleted = delete_rows_i_filled_h_blank(ws)\\n    print(f\\\"Deleted {len(deleted)} row(s): {deleted}\\\")\\n\\n    # Preserve all other sheets untouched, save result\\n    wb.save(OUTPUT_FILE)\\n    print(f\\\"Saved workbook as {OUTPUT_FILE}\\\")\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:I7\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 20, \"n_expected\": 25, \"n_clear\": 5, \"matched\": 25, \"n_extra\": 0}, \"misses\": []}",
+    "offline_evidence": "{\"kind\": \"replay-glm\", \"source_sha256\": \"6d98a89b842e9c1488ade9b8fbbdc5ec3ae1dba1e898083a1124230d27d5acbe\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 2.575,
+    "setup_s": 0.0,
+    "grade_s": 2.575
+  },
+  "environment_digest": "sha256:c50e7f86457f116f26a230b0c3050c3208f0f26d60e377a028467d82ffbf45df",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=1648",
+    "run1 exit=0 0.18s",
+    "run2 exit=0 0.2s",
+    "physics=1.0 cells=25/25 extra=0"
+  ]
+}

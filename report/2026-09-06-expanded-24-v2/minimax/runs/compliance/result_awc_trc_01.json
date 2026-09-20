@@ -1,0 +1,37 @@
+{
+  "task_id": "awc_trc_01",
+  "registry_id": "awcom.compliance",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 0.8333,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 0.8333,
+  "artifacts": {
+    "answer": "\"{\\\"requirement_id\\\":\\\"SPEC-63\\\",\\\"clause_ref\\\":\\\"25.279\\\",\\\"evidence_ids\\\":[\\\"AN-5\\\",\\\"TR-25\\\"],\\\"verified_params\\\":[\\\"PARAM_A2\\\",\\\"PARAM_B3\\\"],\\\"test_only_params\\\":[],\\\"coverage_complete\\\":true}\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"requirement_id\", \"ok\": true, \"got\": \"SPEC-63\", \"ref\": \"SPEC-63\", \"exact\": true}, {\"field\": \"clause_ref\", \"ok\": false, \"got\": \"25.279\", \"ref\": \"§25.279\", \"exact\": true}, {\"field\": \"evidence_ids\", \"ok\": true, \"got\": [\"an-5\", \"tr-25\"], \"ref\": [\"an-5\", \"tr-25\"]}, {\"field\": \"verified_params\", \"ok\": true, \"got\": [\"param_a2\", \"param_b3\"], \"ref\": [\"param_a2\", \"param_b3\"]}, {\"field\": \"test_only_params\", \"ok\": true, \"got\": [], \"ref\": []}, {\"field\": \"coverage_complete\", \"ok\": true, \"got\": true, \"ref\": true, \"exact\": true}], \"n_fields\": 6, \"n_hit\": 5}",
+    "resume_identity": "89ae77ffe0f7109cb8ebd60db2d926a963878803064b6765e5ac1f9c445346d7"
+  },
+  "timings": {
+    "agent_s": 2.913,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:3c21ecdac681d1c24b57da28e6f02811f131b42a4851c26abe5bcb98de9726d7",
+  "assets_revision": "awcom@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\"requirement_id\":\"SPEC-63\",\"clause_ref\":\"25.279\",\"evidence_ids\":[\"AN-5\",\"TR-25\"],\"verified_params\":[\"PARAM_A2\",\"PARAM_B' attempts=1"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\nwb = openpyxl.load_workbook('ssb_455_35_init.xlsx')\\nws = wb['Worksheet1']\\n\\nrows_to_delete = []\\nfor row_idx in range(2, ws.max_row + 1):\\n    b_value = ws.cell(row=row_idx, column=2).value\\n    if b_value is None:\\n        rows_to_delete.append(row_idx)\\n    else:\\n        s = str(b_value)\\n        if len(s) == 0 or s[0] not in ('H', 'A'):\\n            rows_to_delete.append(row_idx)\\n\\nfor row_idx in reversed(rows_to_delete):\\n    ws.delete_rows(row_idx, 1)\\n\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Worksheet1\", \"region\": \"A1:J10411\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 10, \"n_expected\": 93411, \"n_clear\": 93401, \"matched\": 93411, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "96d970194260e0eaf3cf5c26f0f72752be2e70567438db7999128d7e37bb3cce"
+  },
+  "timings": {
+    "agent_s": 240.96,
+    "setup_s": 0.0,
+    "grade_s": 217.948
+  },
+  "environment_digest": "sha256:55df26c1200cf846b95ac5045f65eabf4b82a5edcf0d19a70e52a6a5109b311f",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=491",
+    "run1 exit=0 107.14s",
+    "run2 exit=0 107.65s",
+    "physics=1.0 cells=93411/93411 extra=0"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_279_23",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.75,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.875,
+  "artifacts": {
+    "code": "\"import shutil\\nshutil.copyfile('ssb_279_23_init.xlsx',\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A3:B26\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 40, \"n_expected\": 40, \"n_clear\": 0, \"matched\": 30, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R3C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}, {\"cell\": \"Sheet1!R4C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}, {\"cell\": \"Sheet1!R5C2\", \"status\": \"mismatch\", \"got\": \"(tib) this is bad\", \"ref\": \"tib\"}, {\"cell\": \"Sheet1!R6C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}, {\"cell\": \"Sheet1!R7C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}, {\"cell\": \"Sheet1!R8C2\", \"status\": \"mismatch\", \"got\": \"(tib) this is bad\", \"ref\": \"tib\"}, {\"cell\": \"Sheet1!R9C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}, {\"cell\": \"Sheet1!R10C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}, {\"cell\": \"Sheet1!R11C2\", \"status\": \"mismatch\", \"got\": \"(tib) this is bad\", \"ref\": \"tib\"}, {\"cell\": \"Sheet1!R12C2\", \"status\": \"mismatch\", \"got\": \"(tig) this is good\", \"ref\": \"tig\"}]}",
+    "offline_evidence": "{\"kind\": \"unchanged\", \"source_sha256\": \"984752036318407aa1e759a5b17823c6ba10b1887a1de08884678bd56e59e8e2\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 2.418,
+    "setup_s": 0.0,
+    "grade_s": 2.418
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=68",
+    "run1 exit=0 0.02s",
+    "run2 exit=0 0.02s",
+    "physics=0.75 cells=30/40 extra=0"
+  ]
+}

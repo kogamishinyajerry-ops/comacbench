@@ -1,0 +1,25 @@
+.....F
+======================================================================
+FAIL: test_wrong_task_rejected_and_evidence_retained (test_external_agent.ExternalAgentTests.test_wrong_task_rejected_and_evidence_retained)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/comacbench/agent.py", line 116, in invoke
+    raise ValueError('agent_process_failed; original stderr retained locally')
+ValueError: agent_process_failed; original stderr retained locally
+
+The above exception was the direct cause of the following exception:
+
+runners.providers.ProviderError: external agent: agent_process_failed; original stderr retained locally
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_external_agent.py", line 40, in test_wrong_task_rejected_and_evidence_retained
+    with self.assertRaisesRegex(ProviderError,'identity_mismatch'): self.call()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "identity_mismatch" does not match "external agent: agent_process_failed; original stderr retained locally"
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.186s
+
+FAILED (failures=1)

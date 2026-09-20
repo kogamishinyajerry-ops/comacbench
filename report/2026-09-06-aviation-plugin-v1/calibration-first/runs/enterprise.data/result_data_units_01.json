@@ -1,0 +1,39 @@
+{
+  "task_id": "data_units_01",
+  "registry_id": "enterprise.data",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\ndef normalize_records(records):\\n    counts = {}\\n    for r in records:\\n        key = r.get('record_id')\\n        if isinstance(key, str) and key:\\n            counts[key] = counts.get(key, 0) + 1\\n    accepted, rejected = [], []\\n    for row in records:\\n        rid = row.get('record_id', '')\\n        if not isinstance(rid, str) or not rid:\\n            reason = 'missing_id'\\n            rid = ''\\n        elif counts[rid] > 1:\\n            reason = 'duplicate_id'\\n        elif not isinstance(row.get('part_id'), str) or not row['part_id'] or not isinstance(row.get('source_id'), str) or not row['source_id']:\\n            reason = 'missing_lineage'\\n        elif row.get('unit') not in ('mm', 'm'):\\n            reason = 'unknown_unit'\\n        elif isinstance(row.get('length'), bool) or not isinstance(row.get('length'), (int, float)) or not math.isfinite(row['length']) or row['length'] <= 0:\\n            reason = 'invalid_length'\\n        else:\\n            accepted.append({'record_id': rid, 'part_id': row['part_id'], 'length_mm': row['length'] * (1000 if row['unit'] == 'm' else 1), 'source_id': row['source_id']})\\n            continue\\n        rejected.append({'record_id': rid, 'reason': reason})\\n    return {'accepted': sorted(accepted, key=lambda r: r['record_id']), 'rejected': sorted(rejected, key=lambda r: (r['record_id'], r['reason']))}\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"dev gold source\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.02}",
+    "resume_identity": "a84e13233639b797b20e4e54bd13a169c77093c0e116b8d5f2e65feff739504e"
+  },
+  "timings": {
+    "agent_s": 0.044,
+    "setup_s": 0.0,
+    "grade_s": 0.044
+  },
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.02s"
+  ]
+}

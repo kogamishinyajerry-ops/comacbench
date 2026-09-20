@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_279_23",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\nimport re\\n\\n# Load the input workbook\\nwb = openpyxl.load_workbook('ssb_279_23_init.xlsx')\\nws = wb['Sheet1']\\n\\n# Iterate over column B cells in the answer region (rows 3 to 26)\\nfor row in range(3, 27):\\n    cell = ws.cell(row=row, column=2)  # Column B\\n    value = cell.value\\n\\n    # Leave blank cells blank\\n    if value is None or (isinstance(value, str) and value == ''):\\n        continue\\n\\n    text = str(value)\\n\\n    # Extract content within the first pair of parentheses\\n    match = re.search(r'\\\\(([^)]*)\\\\)', text)\\n    if match:\\n        cell.value = match.group(1)\\n    # else: leave as is if no parentheses\\n\\n# Save the workbook\\nwb.save('output.xlsx')\"",
+    "model_meta": "{\"provider\": \"minimax\", \"model\": \"MiniMax-M3\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A3:B26\", \"recalc_sheet_mappings\": [], \"match\": {\"n_gold\": 40, \"matched\": 40, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "4f293961c2c9b286cf3b3a0aceeed07ba3747fc0e747ae0587cf2694efd3cb58"
+  },
+  "timings": {
+    "agent_s": 36.556,
+    "setup_s": 0.0,
+    "grade_s": 2.526
+  },
+  "environment_digest": "sha256:7325e766f1aac5b1e8e0df09ec4973ed04c3adcc5d5c914d70edffec348ec3e7",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=minimax code_len=664",
+    "run1 exit=0 0.18s",
+    "run2 exit=0 0.25s",
+    "physics=1.0 cells=40/40 extra=0"
+  ]
+}

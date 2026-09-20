@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_341_40",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\n# ----------------------------------------------------------------------------\\n# The task (originally a VBA question): whenever\\n#   Column A = 'Government'\\n#   Column B = 'Germany'\\n#   Column C = 'Carretera'\\n# the word 'Volkswagen' should be written into column Q of that row.\\n#\\n# Here we perform the same conditional fill with openpyxl on the provided\\n# workbook, preserving every existing sheet, and save the result as\\n# output.xlsx.\\n# ----------------------------------------------------------------------------\\n\\nINPUT_FILE = \\\"ssb_341_40_init.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\n# Load the workbook (all sheets are kept)\\nwb = openpyxl.load_workbook(INPUT_FILE)\\n\\n# Work on Sheet1 (fall back to the active sheet if the name ever differs)\\nif \\\"Sheet1\\\" in wb.sheetnames:\\n    ws = wb[\\\"Sheet1\\\"]\\nelse:\\n    ws = wb.active\\n\\n\\ndef norm(value):\\n    \\\"\\\"\\\"Normalize a cell value for robust comparison.\\\"\\\"\\\"\\n    return str(value).strip() if value is not None else \\\"\\\"\\n\\n\\n# Data starts in row 2 (row 1 holds headers). The answer region is A1:Q701,\\n# so we process data rows 2 through 701 at most.\\nlast_row = min(ws.max_row, 701)\\n\\nmatches = 0\\nfor r in range(2, last_row + 1):\\n    col_a = norm(ws.cell(row=r, column=1).value)   # Column A\\n    col_b = norm(ws.cell(row=r, column=2).value)   # Column B\\n    col_c = norm(ws.cell(row=r, column=3).value)   # Column C\\n\\n    if (\\n        col_a.lower() == \\\"government\\\"\\n        and col_b.lower() == \\\"germany\\\"\\n        and col_c.lower() == \\\"carretera\\\"\\n    ):\\n        ws.cell(row=r, column=17).value = \\\"Volkswagen\\\"  # Column Q\\n        matches += 1\\n\\nprint(f\\\"Rows updated with 'Volkswagen' in column Q: {matches}\\\")\\n\\n# Save a copy of the workbook (all original sheets preserved) as output.xlsx\\nwb.save(OUTPUT_FILE)\\nprint(f\\\"Saved workbook as {OUTPUT_FILE}\\\")\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3-flash\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:Q701\", \"recalc_sheet_mappings\": [], \"match\": {\"n_gold\": 11234, \"matched\": 11234, \"n_extra\": 0}, \"misses\": []}",
+    "resume_identity": "2e2ad1042a0171bfd835329d11a4729b0c55901e31b4ccc1062914cf1fe0c1c4"
+  },
+  "timings": {
+    "agent_s": 47.418,
+    "setup_s": 0.0,
+    "grade_s": 2.999
+  },
+  "environment_digest": "sha256:7325e766f1aac5b1e8e0df09ec4973ed04c3adcc5d5c914d70edffec348ec3e7",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=glm code_len=1785",
+    "run1 exit=0 0.31s",
+    "run2 exit=0 0.3s",
+    "physics=1.0 cells=11234/11234 extra=0"
+  ]
+}

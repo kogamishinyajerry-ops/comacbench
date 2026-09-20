@@ -1,0 +1,39 @@
+{
+  "task_id": "data_units_01",
+  "registry_id": "enterprise.data",
+  "adapter": "code_exec",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 1.0,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 1.0
+  },
+  "subscore_applicability": {
+    "physics": "hidden_unit_tests",
+    "requirements": "executability",
+    "objective": "N/A(数据集无边界输入测试)",
+    "robustness": "determinism(2 runs)"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "code": "\"import math\\n\\n\\ndef normalize_records(records):\\n    \\\"\\\"\\\"清洗并归一化工程记录。\\n\\n    输入: 记录对象列表，每条含 record_id / part_id / source_id / length / unit。\\n    输出: {\\\"accepted\\\": [...], \\\"rejected\\\": [...]}，不修改输入。\\n\\n    判定优先级（每条记录只报首个失败原因）：\\n      1. record_id 不是非空字符串            -> missing_id     (record_id 记为 \\\"\\\")\\n      2. 非空 record_id 在整个输入中重复      -> duplicate_id   (所有同 ID 行均拒绝)\\n      3. part_id / source_id 非非空字符串     -> missing_lineage\\n      4. unit 不是精确小写 \\\"mm\\\" 或 \\\"m\\\"        -> unknown_unit\\n      5. length 非有限正数或为布尔值          -> invalid_length\\n    \\\"\\\"\\\"\\n    accepted = []\\n    rejected = []\\n\\n    if not records:\\n        return {\\\"accepted\\\": [], \\\"rejected\\\": []}\\n\\n    def _get(rec, key):\\n        if isinstance(rec, dict):\\n            return rec.get(key)\\n        return None\\n\\n    # 第一遍：统计所有“非空字符串” record_id 的出现次数，用于重复判定。\\n    # 注意：ID 区分大小写并保留前导零；缺失/非法 ID 不参与重复统计。\\n    id_counts = {}\\n    for rec in records:\\n        rid = _get(rec, \\\"record_id\\\")\\n        if isinstance(rid, str) and rid != \\\"\\\":\\n            id_counts[rid] = id_counts.get(rid, 0) + 1\\n\\n    # 第二遍：按优先级逐条判定。\\n    for rec in records:\\n        rid = _get(rec, \\\"record_id\\\")\\n\\n        # 1. record_id 必须是非空字符串\\n        if not isinstance(rid, str) or rid == \\\"\\\":\\n            rejected.append({\\\"record_id\\\": \\\"\\\", \\\"reason\\\": \\\"missing_id\\\"})\\n            continue\\n\\n        # 2. 非空 record_id 重复：所有同 ID 行全部拒绝\\n        if id_counts[rid] > 1:\\n            rejected.append({\\\"record_id\\\": rid, \\\"reason\\\": \\\"duplicate_id\\\"})\\n            continue\\n\\n        # 3. 溯源字段必须是非空字符串\\n        part_id = _get(rec, \\\"part_id\\\")\\n        source_id = _get(rec, \\\"source_id\\\")\\n        if (not isinstance(part_id, str) or part_id == \\\"\\\"\\n                or not isinstance(source_id, str) or source_id == \\\"\\\"):\\n            rejected.append({\\\"record_id\\\": rid, \\\"reason\\\": \\\"missing_lineage\\\"})\\n            continue\\n\\n        # 4. 单位必须精确为小写 \\\"mm\\\" 或 \\\"m\\\"，不做任何猜测\\n        unit = _get(rec, \\\"unit\\\")\\n        if not (isinstance(unit, str) and unit in (\\\"mm\\\", \\\"m\\\")):\\n            rejected.append({\\\"record_id\\\": rid, \\\"reason\\\": \\\"unknown_unit\\\"})\\n            continue\\n\\n        # 5. length 必须是有限正数，且不能是布尔值\\n        length = _get(rec, \\\"length\\\")\\n        if isinstance(length, bool) or not isinstance(length, (int, float)):\\n            rejected.append({\\\"record_id\\\": rid, \\\"reason\\\": \\\"invalid_length\\\"})\\n            continue\\n        if isinstance(length, float):\\n            if not math.isfinite(length) or length <= 0:\\n                rejected.append({\\\"record_id\\\": rid, \\\"reason\\\": \\\"invalid_length\\\"})\\n                continue\\n        elif length <= 0:\\n            rejected.append({\\\"record_id\\\": rid, \\\"reason\\\": \\\"invalid_length\\\"})\\n            continue\\n\\n        # 接受：m 乘以 1000 归一为毫米；mm 保持原值\\n        length_mm = length * 1000 if unit == \\\"m\\\" else length\\n        accepted.append({\\n            \\\"record_id\\\": rid,\\n            \\\"part_id\\\": part_id,\\n            \\\"source_id\\\": source_id,\\n            \\\"length_mm\\\": length_mm,\\n        })\\n\\n    accepted.sort(key=lambda r: r[\\\"record_id\\\"])\\n    rejected.sort(key=lambda r: (r[\\\"record_id\\\"], r[\\\"reason\\\"]))\\n\\n    return {\\\"accepted\\\": accepted, \\\"rejected\\\": rejected}\"",
+    "model_meta": "{\"provider\": \"external\", \"model\": \"GLM-5.3-flash-code-agent\", \"revision\": \"1.1.0\", \"agent_kind\": \"model_agent\", \"request_sha256\": \"5b3e76395a77740935a1fb451b5bda90e1d68c3a4c2e294c56e813e05c0a6a81\", \"response_sha256\": \"bbbcc96b61f37f9fa6b3fa355af774acf10154ec45d27681c4b0dc8dea0d91b8\", \"audit_dir\": \"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/report/2026-09-06-aviation-plugin-v1/glm-live-v2/agent-audit/data_units_01-dh_i8due\", \"config_sha256\": \"36e2d3659437c563ae366f8d0bfd90e27f7e867c8639bdf1b159cc0c8b9cdb1d\", \"revision_files\": {\"model_agent.py\": \"f2b06d24488b1dde08ba18cd695426d767a5492d23914b1dbf0ad08b02229a54\"}, \"command_files\": {\"0\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\", \"1\": \"f2b06d24488b1dde08ba18cd695426d767a5492d23914b1dbf0ad08b02229a54\"}, \"identity_env\": {\"COMAC_MODEL_BASE\": \"6bc0b5b57709c0f5b403616bcce1a37494ab444079b1af31165f0ffbcc1f4385\", \"COMAC_MODEL_NAME\": \"0d8724178b098d01df9c71a161bf380133fde5832d56d203a0f9ad03389970cc\"}, \"executable_sha256\": \"f8cf5db64fd3715840686fcdb0f00b8b7e6c9b1e9b5f10a31183160c9bb6a6fc\"}",
+    "grade_details": "{\"kind\": \"unit_tests\", \"cases_pass\": 7, \"cases_total\": 7, \"failed_cases\": [], \"determinism\": 1.0, \"run1_s\": 0.03}",
+    "resume_identity": "85a43a7870032e4bd30278dfe49d96a51831a4ee349b912066c5f12a098158f1"
+  },
+  "timings": {
+    "agent_s": 34.409,
+    "setup_s": 0.0,
+    "grade_s": 0.059
+  },
+  "environment_digest": "sha256:caf58f7c13c95de02587ad11fea00da031538c27c8511db6b7983b3d7720943b",
+  "assets_revision": "aviation-core@1.0.0",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "run1 exit=0 0.03s"
+  ]
+}

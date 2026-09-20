@@ -1,0 +1,43 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "missing_output"
+  ],
+  "failure_mode": "missing_output",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"import openpyxl\\n\\nINPUT_FILE = \\\"ssb_455_35_init.xlsx\\\"\\nOUTPUT_FILE = \\\"output.xlsx\\\"\\n\\n# Load the provided input workbook (formulas kept as-is, all sheets preserved)\\nwb = openpyxl.load_workbook(INPUT_FILE)\\n\\n# Locate the target worksheet\\nif \\\"Worksheet1\\\" in wb.sheetnames:\\n    ws = wb[\\\"Worksheet1\\\"]\\nelse:\\n    ws = wb[wb.sheetnames[0]]\\n\\nmax_row = ws.max_row\\nmax_col = ws.max_column\\n\\n\\ndef starts_with_H_or_A(value):\\n    \\\"\\\"\\\"Return True if the first character of the column B value is 'H' or 'A'.\\\"\\\"\\\"\\n    if value is None:\\n        return False\\n    s = str(value)\\n    return len(s) > 0 and s[0] in (\\\"H\\\", \\\"A\\\")\\n\\n\\n# Collect every row whose column B value starts with 'H' or 'A'\\nrows_to_keep = []\\nfor row in ws.iter_rows(min_row=1, max_row=max_row, max_col=max_col, values_only=True):\\n    b_value = row[1] if max_col >= 2 else None  # column B is the 2nd column\\n    if starts_with_H_or_A(b_value):\\n        rows_to_keep.append(row)\\n\\n# Write the kept rows back starting at row 1 (equivalent to deleting the other rows)\\nfor r_idx, row_values in enumerate(rows_to_keep, start=1):\\n    for c_idx, val in enumerate(row_values, start=1):\\n        ws.cell(row=r_idx, column=c_idx, value=val)\\n\\n# Remove the leftover rows at the bottom that are no longer needed\\nnew_last_row = len(rows_to_keep)\\nif max_row > new_last_row:\\n    ws.delete_rows(new_last_row + 1, max_row - new_last_row)\\n\\n# Save the completed workbook as output.xlsx (all other sheets remain untouched)\\nwb.save(OUTPUT_FILE)\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"missing\": \"nonempty answer region Worksheet1!A1:J10411\"}",
+    "offline_evidence": "{\"kind\": \"replay-glm\", \"source_sha256\": \"d5d83019600fbe77a4fe5eaeb9e0301dcd237ecd0cc6282a66cdf75c167ca897\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 5.081,
+    "setup_s": 0.0,
+    "grade_s": 5.081
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=1456",
+    "run1 exit=0 0.8s",
+    "run2 exit=0 0.92s"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_269_43",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.8,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.9,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (1, 1, \\\"XXMTKGMA\\\"),\\n    (1, 2, 2010022),\\n    (1, 8, \\\"2022/01/26\\\"),\\n    (1, 9, 14862.42),\\n    (2, 1, \\\"XXMRKAMA\\\"),\\n    (2, 2, 2010023),\\n    (2, 8, \\\"2022/02/14\\\"),\\n    (2, 9, 20832.33),\\n    (3, 1, \\\"XXMTKGMB\\\"),\\n    (3, 2, 2010024),\\n    (3, 8, \\\"2022/02/15\\\"),\\n    (3, 9, 13923.56),\\n    (4, 1, \\\"XXERK1MK\\\"),\\n    (4, 2, 2010025),\\n    (4, 8, \\\"2022/04/14\\\"),\\n    (4, 9, 23528.95),\\n    (5, 1, \\\"XXERK1MG\\\"),\\n    (5, 2, 2010025),\\n    (5, 8, \\\"2022/04/14\\\"),\\n    (5, 9, 22557.38),\\n]\\n\\n\\ndef _v(x):\\n    if isinstance(x, dict) and \\\"__date__\\\" in x:\\n        return _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d %H:%M:%S\\\") \\\\\\n            if len(x[\\\"__date__\\\"]) > 10 else _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d\\\")\\n    return x\\n\\n\\nwb = openpyxl.load_workbook(\\\"ssb_269_43_init.xlsx\\\")\\nws = wb[\\\"Sheet1\\\"] if \\\"Sheet1\\\" in wb.sheetnames else wb.worksheets[0]\\nfor cells in ws['A1:I7']:\\n    for cell in cells:\\n        if not isinstance(cell, openpyxl.cell.cell.MergedCell):\\n            cell.value = None\\nfor row, col, v in VALUES:\\n    ws.cell(row=row, column=col).value = _v(v)\\nwb.save(\\\"output.xlsx\\\")\\n\\nimport openpyxl\\nw=openpyxl.load_workbook(\\\"output.xlsx\\\")\\ns=w['Sheet1']\\ninitial=openpyxl.load_workbook('ssb_269_43_init.xlsx')\\nfor coordinate in ['A4', 'B4', 'H4', 'I4', 'A5']:\\n    s[coordinate]=initial['Sheet1'][coordinate].value\\ninitial.close()\\nw.save(\\\"output.xlsx\\\")\\nw.close()\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:I7\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 20, \"n_expected\": 25, \"n_clear\": 5, \"matched\": 20, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R4C1\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R4C2\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R4C8\", \"status\": \"missing\"}, {\"cell\": \"Sheet1!R4C9\", \"status\": \"mismatch\", \"got\": \"49618.31\", \"ref\": \"23528.95\"}, {\"cell\": \"Sheet1!R5C1\", \"status\": \"mismatch\", \"got\": \"XXERK1MK\", \"ref\": \"XXERK1MG\"}]}",
+    "offline_evidence": "{\"kind\": \"partial\", \"source_sha256\": \"1830757da3c16d42c4b723067db985891bd44ec79554435a51adddbf1ce01f9e\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 2.534,
+    "setup_s": 0.0,
+    "grade_s": 2.533
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=1492",
+    "run1 exit=0 0.18s",
+    "run2 exit=0 0.2s",
+    "physics=0.8 cells=20/25 extra=0"
+  ]
+}

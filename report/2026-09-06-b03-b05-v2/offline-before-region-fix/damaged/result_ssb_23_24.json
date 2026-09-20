@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_23_24",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.9997,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.99985,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (1, 1, \\\"BACALAOS\\\"),\\n    (1, 4, 32737),\\n    (1, 5, \\\"AAABCLOS\\\"),\\n    (2, 1, \\\"GALABEAS\\\"),\\n    (2, 4, 25659),\\n    (2, 5, \\\"AAABEGLS\\\"),\\n    (3, 1, \\\"GALABIAS\\\"),\\n    (3, 4, 28772),\\n    (3, 5, \\\"AAABGILS\\\"),\\n    (4, 1, \\\"ABOMASAL\\\"),\\n    (4, 4, 32738),\\n    (4, 5, \\\"AAABLMOS\\\"),\\n    (5, 1, \\\"MALACIAS\\\"),\\n    (5, 4, 31682),\\n    (5, 5, \\\"AAACILMS\\\"),\\n    (6, 1, \\\"CALISAYA\\\"),\\n    (6, 3, \\\"s\\\"),\\n    (6, 4, 31683),\\n    (6, 5, \\\"AAACILSY\\\"),\\n    (7, 1, \\\"MALVASIA\\\"),\\n    (7, 3, \\\"ns\\\"),\\n    (7, 4, 31685),\\n    (7, 5, \\\"AAAILMSV\\\"),\\n    (8, 1, \\\"APLASIAS\\\"),\\n    (8, 4, 34426),\\n    (8, 5, \\\"AAAILPSS\\\"),\\n    (9, 1, \\\"BAALEBOS\\\"),\\n    (9, 4, 26320),\\n    (9, 5, \\\"AABBELOS\\\"),\\n    (10, 1, \\\"ABUSABLE\\\"),\\n    (10, 4, 32689),\\n    (10, 5, \\\"AABBELSU\\\"),\\n    (11, 1, \\\"CAUSABLE\\\"),\\n    (11, 4, 22365),\\n    (11, 5, \\\"AABCELSU\\\"),\\n    (12, 1, \\\"BASILICA\\\"),\\n    (12, 3, \\\"elns\\\"),\\n    (12, 4, 26448),\\n    (12, 5, \\\"AABCIILS\\\"),\\n    (13, 1, \\\"LEASABLE\\\"),\\n    (13, 2, \\\"p\\\"),\\n    (13, 4, 23385),\\n    (13, 5, \\\"AABEELLS\\\"),\\n    (14, 1, \\\"SALEABLE\\\"),\\n    (14, 4, 23386),\\n    (14, 5, \\\"AABEELLS\\\"),\\n    (15, 1, \\\"SEALABLE\\\"),\\n    (15, 4, 23387),\\n    (15, 5, \\\"AABEELLS\\\"),\\n    (16, 1, \\\"SAVEABLE\\\"),\\n    (16, 4, 19145),\\n    (16, 5, \\\"AABEELSV\\\"),\\n    (17, 1, \\\"KIELBASA\\\"),\\n    (17, 3, \\\"s\\\"),\\n    (17, 4, 18682),\\n    (17, 5, \\\"AABEIKLS\\\"),\\n    (18, 1, \\\"ISABELLA\\\"),\\n    (18, 3, \\\"s\\\"),\\n    (18, 4, 16809),\\n    (18, 5, \\\"AABEILLS\\\"),\\n    (19, 1, \\\"SAILABLE\\\"),\\n    (19, 4, 16810),\\n    (19, 5, \\\"AABEILLS\\\"),\\n    (20, 1, \\\"AMUSABLE\\\"),\\n    (20, 4, 22369),\\n    (20, 5, \\\"AABELMSU\\\"),\\n    (21, 1, \\\"LAVABOES\\\"),\\n    (21, 4, 14037),\\n    (21, 5, \\\"AABELOSV\\\"),\\n    (22, 1, \\\"ABIGAILS\\\"),\\n    (22, 4, 22611),\\n    (22, 5, \\\"AABGIILS\\\"),\\n    (23, 1, \\\"ALBIZIAS\\\"),\\n    (23, 4, 31234),\\n    (23, 5, \\\"AABIILSZ\\\"),\\n    (24, 1, \\\"SUBAXIAL\\\"),\\n    (24, 4, 30664),\\n    (24, 5, \\\"AABILSUX\\\"),\\n    (25, 1, \\\"ACICULAS\\\"),\\n    (25, 4, 34843),\\n    (25, 5, \\\"AACCILSU\\\"),\\n    (26, 1, \\\"CAMELIAS\\\"),\\n    (26, 4, 12564),\\n    (26, 5, \\\"AACEILMS\\\"),\\n    (27, 1, \\\"COAEVALS\\\"),\\n    (27, 4, 14039),\\n    (27, 5, \\\"AACELOSV\\\"),\\n    (28, 1, \\\"SCAPULAE\\\"),\\n    (28, 4, 22372),\\n    (28, 5, \\\"AACELPSU\\\"),\\n    (29, 1, \\\"FASCIOLA\\\"),\\n    (29, 3, \\\"s\\\"),\\n    (29, 4, 17657),\\n    (29, 5, \\\"AACFILOS\\\"),\\n    (30, 1, \\\"ACHOLIAS\\\"),\\n    (30, 4, 17658),\\n    (30, 5, \\\"AACHILOS\\\"),\\n    (31, 1, \\\"ASOCIALS\\\"),\\n    (31, 4, 22091),\\n    (31, 5, \\\"AACILOSS\\\"),\\n    (32, 1, \\\"CALALOOS\\\"),\\n    (32, 4, 32116),\\n    (32, 5, \\\"AACLLOOS\\\"),\\n    (33, 1, \\\"CLAUSULA\\\"),\\n    (33, 3, \\\"er\\\"),\\n    (33, 4, 39375),\\n    (33, 5, \\\"AACLLSUU\\\"),\\n    (34, 1, \\\"LEAFAGES\\\"),\\n    (34, 4, 14926),\\n    (34, 5, \\\"AAEEFGLS\\\"),\\n    (35, 1, \\\"LEAKAGES\\\"),\\n    (35, 4, 20930),\\n    (35, 5, \\\"AAEEGKLS\\\"),\\n    (36, 1, \\\"SALVAGEE\\\"),\\n    (36, 3, \\\"s\\\"),\\n    (36, 4, 14927),\\n    (36, 5, \\\"AAEEGLSV\\\"),\\n    (37, 1, \\\"SEAKALES\\\"),\\n    (37, 4, 28904),\\n    (37, 5, \\\"AAEEKLSS\\\"),\\n    (38, 1, \\\"HAULAGES\\\"),\\n    (38, 4, 18230),\\n    (38, 5, \\\"AAEGHLSU\\\"),\\n    (39, 1, \\\"SEMIGALA\\\"),\\n    (39, 3, \\\"s\\\"),\\n    (39, 4, 8763),\\n    (39, 5, \\\"AAEGILMS\\\"),\\n    (40, 1, \\\"ALGESIAS\\\"),\\n    (40, 4, 12670),\\n    (40, 5, \\\"AAEGILSS\\\"),\\n    (41, 1, \\\"GALAXIES\\\"),\\n    (41, 4, 14222),\\n    (41, 5, \\\"AAEGILSX\\\"),\\n    (42, 1, \\\"AASVOGEL\\\"),\\n    (42, 3, \\\"s\\\"),\\n    (42, 4, 10210),\\n    (42, 5, \\\"AAEGLOSV\\\"),\\n    (43, 1, \\\"ALKALIES\\\"),\\n    (43, 4, 22902),\\n    (43, 5, \\\"AAEIKLLS\\\"),\\n    (44, 1, \\\"ALKALISE\\\"),\\n    (44, 3, \\\"drs\\\"),\\n    (44, 4, 22903),\\n    (44, 5, \\\"AAEIKLLS\\\"),\\n    (45, 1, \\\"MALAISES\\\"),\\n    (45, 4, 16816),\\n    (45, 5, \\\"AAEILMSS\\\"),\\n    (46, 1, \\\"PAPALISE\\\"),\\n    (46, 3, \\\"ds\\\"),\\n    (46, 4, 24894),\\n    (46, 5, \\\"AAEILPPS\\\"),\\n    (47, 1, \\\"AISLEWAY\\\"),\\n    (47, 3, \\\"s\\\"),\\n    (47, 4, 12565),\\n    (47, 5, \\\"AAEILSWY\\\"),\\n    (48, 1, \\\"APPLAUSE\\\"),\\n    (48, 3, \\\"s\\\"),\\n    (48, 4, 32690),\\n    (48, 5, \\\"AAELPPSU\\\"),\\n    (49, 1, \\\"ALFAQUIS\\\"),\\n    (49, 4, 30666),\\n    (49, 5, \\\"AAFILQSU\\\"),\\n    (50, 1, \\\"AGLOSSIA\\\"),\\n    (50, 3, \\\"s\\\"),\\n    (50, 4, 17838),\\n    (50, 5, \\\"AAGILOSS\\\"),\\n    (51, 1, \\\"MASOOLAH\\\"),\\n    (51, 3, \\\"s\\\"),\\n    (51, 4, 29056),\\n    (51, 5, \\\"AAHLMOOS\\\"),\\n    \"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Sheet1\", \"region\": \"A1:E1102\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 1084, \"n_expected\": 3733, \"n_clear\": 2649, \"matched\": 3732, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Sheet1!R1C1\", \"status\": \"mismatch\", \"got\": \"__NEGATIVE_CONTROL_WRONG__\", \"ref\": \"BACALAOS\"}]}",
+    "offline_evidence": "{\"kind\": \"damaged\", \"source_sha256\": \"7666e26163f09ec926c93968307c19f049f763ee473511704dc7f356e71426a6\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 3.383,
+    "setup_s": 0.0,
+    "grade_s": 3.375
+  },
+  "environment_digest": "sha256:c50e7f86457f116f26a230b0c3050c3208f0f26d60e377a028467d82ffbf45df",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=26398",
+    "run1 exit=0 0.44s",
+    "run2 exit=0 0.4s",
+    "physics=0.9997 cells=3732/3733 extra=0"
+  ]
+}

@@ -1,0 +1,20 @@
+protocol: comacbench.pack.v1
+id: aviation-core-v1
+title: 航空工程 Agent · 入门评测包
+revision: 1.0.0
+description: 结构仿真实跑、工程数据清洗、知识本体证据关系三条完整入口；不代表飞机级验收。
+license: 自建示例：企业数据/本体 CC0-1.0；结构题沿用仓库自建任务许可记录
+source: JerryDSH-COMACBench 自建；结构题由 ccx_cb_01 独立复制并锁定，不修改原题
+suites:
+- id: aviation.structures
+  family: industrial_simulation
+  tasks:
+  - tasks/aviation.structures/beam_static_01.yaml
+- id: enterprise.data
+  family: enterprise_data
+  tasks:
+  - tasks/enterprise.data/data_units_01.yaml
+- id: enterprise.ontology
+  family: knowledge_ontology
+  tasks:
+  - tasks/enterprise.ontology/ontology_trace_01.yaml

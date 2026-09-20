@@ -1,0 +1,37 @@
+{
+  "task_id": "awx_ce_06",
+  "registry_id": "awext.clause_extract",
+  "adapter": "qa_grounded",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": null,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": 0.0
+  },
+  "subscore_applicability": {
+    "physics": "N/A",
+    "objective": "merged_into_requirements",
+    "requirements": "json_field_extract",
+    "robustness": "N/A"
+  },
+  "score": 1.0,
+  "artifacts": {
+    "answer": "\"{\\\"family\\\": \\\"structure\\\", \\\"clause_no\\\": \\\"§6.24\\\", \\\"positive_load_limit\\\": 2.37, \\\"negative_load_limit\\\": -1.0, \\\"cycles_or_actions\\\": 1000, \\\"probability_per_hour\\\": 2.8, \\\"applies_to\\\": [\\\"control-surface\\\", \\\"empennage\\\", \\\"engine-mount\\\", \\\"landing-gear\\\"], \\\"compliance_methods\\\": [\\\"analysis\\\", \\\"inspection\\\"], \\\"amendment_year\\\": 2011}\"",
+    "model_meta": "{\"provider\": \"glm\", \"model\": \"glm-5.3-flash\", \"finish_reason\": \"stop\", \"escalated\": false}",
+    "layer_details": "{\"kind\": \"json_extract\", \"fields\": [{\"field\": \"family\", \"ok\": true, \"got\": \"structure\", \"ref\": \"structure\"}, {\"field\": \"clause_no\", \"ok\": true, \"got\": \"§6.24\", \"ref\": \"§6.24\"}, {\"field\": \"positive_load_limit\", \"ok\": true, \"got\": 2.37, \"ref\": 2.37}, {\"field\": \"negative_load_limit\", \"ok\": true, \"got\": -1.0, \"ref\": -1.0}, {\"field\": \"cycles_or_actions\", \"ok\": true, \"got\": 1000, \"ref\": 1000, \"exact\": true}, {\"field\": \"probability_per_hour\", \"ok\": true, \"got\": 2.8, \"ref\": 2.8}, {\"field\": \"applies_to\", \"ok\": true, \"got\": [\"control-surface\", \"empennage\", \"engine-mount\", \"landing-gear\"], \"ref\": [\"control-surface\", \"empennage\", \"engine-mount\", \"landing-gear\"]}, {\"field\": \"compliance_methods\", \"ok\": true, \"got\": [\"analysis\", \"inspection\"], \"ref\": [\"analysis\", \"inspection\"]}, {\"field\": \"amendment_year\", \"ok\": true, \"got\": 2011, \"ref\": 2011, \"exact\": true}], \"n_fields\": 9, \"n_hit\": 9}",
+    "resume_identity": "6d31d185199f74ea9fb9465b88c7f76710bda4bd84617dcd1bf9c73539726eb8"
+  },
+  "timings": {
+    "agent_s": 10.54,
+    "setup_s": 0.0,
+    "grade_s": 0.0
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "awext@selfbuilt-2026-08-26",
+  "logs": [
+    "answer='{\"family\": \"structure\", \"clause_no\": \"§6.24\", \"positive_load_limit\": 2.37, \"negative_load_limit\": -1.0, \"cycles_or_actio' attempts=1"
+  ]
+}

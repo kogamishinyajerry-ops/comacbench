@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.0001,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.50005,
+  "artifacts": {
+    "code": "\"import shutil\\nshutil.copyfile('ssb_455_35_init.xlsx',\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Worksheet1\", \"region\": \"A1:J10411\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 10, \"n_expected\": 93411, \"n_clear\": 93401, \"matched\": 10, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Worksheet1!R2C1\", \"status\": \"not_cleared\", \"got\": \"PICKLINE\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C2\", \"status\": \"not_cleared\", \"got\": \"RL\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C3\", \"status\": \"not_cleared\", \"got\": \"20210427 08:54:29.69\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C4\", \"status\": \"not_cleared\", \"got\": \"ABC\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C5\", \"status\": \"not_cleared\", \"got\": \"2523025\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C7\", \"status\": \"not_cleared\", \"got\": \"1.00\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C8\", \"status\": \"not_cleared\", \"got\": \"1.00\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C9\", \"status\": \"not_cleared\", \"got\": \"CS30363|HDS\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C10\", \"status\": \"not_cleared\", \"got\": \"1105D1\", \"ref\": null}, {\"cell\": \"Worksheet1!R3C1\", \"status\": \"not_cleared\", \"got\": \"PICKDETL\", \"ref\": null}, {\"cell\": \"Worksheet1!R3C2\", \"status\": \"not_cleared\", \"got\": \"RL\", \"ref\": null}, {\"cell\": \"Worksheet1!R3C3\", \"status\": \"not_cleared\", \"got\": \"20210427 08:54:29.64\", \"ref\": null}]}",
+    "offline_evidence": "{\"kind\": \"unchanged\", \"source_sha256\": \"ef9da8a5ab83beb454d29278f44f952ef832790be726a564170dd6ff82d301ee\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 5.068,
+    "setup_s": 0.0,
+    "grade_s": 5.067
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=68",
+    "run1 exit=0 0.02s",
+    "run2 exit=0 0.02s",
+    "physics=0.0001 cells=10/93411 extra=0"
+  ]
+}

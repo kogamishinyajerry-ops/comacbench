@@ -1,0 +1,51 @@
+test_generated_dat_cannot_substitute_for_solver_output (test_structural_contract.DeckAuditTests.test_generated_dat_cannot_substitute_for_solver_output) ... ERROR
+test_mesh_material_boundary_and_load_faults (test_structural_contract.DeckAuditTests.test_mesh_material_boundary_and_load_faults) ... ok
+test_native_solver_result_keeps_full_evidence_and_completed_audit (test_structural_contract.DeckAuditTests.test_native_solver_result_keeps_full_evidence_and_completed_audit) ... ok
+test_reference_passes_all_six_engineering_checks (test_structural_contract.DeckAuditTests.test_reference_passes_all_six_engineering_checks) ... ok
+test_rejects_mesh_and_dialect_failures_with_specific_feedback (test_structural_contract.DeckAuditTests.test_rejects_mesh_and_dialect_failures_with_specific_feedback) ... 
+  test_rejects_mesh_and_dialect_failures_with_specific_feedback (test_structural_contract.DeckAuditTests.test_rejects_mesh_and_dialect_failures_with_specific_feedback) (code='undefined_connectivity') ... FAIL
+test_valid_sets_generate_case_and_additive_loads (test_structural_contract.DeckAuditTests.test_valid_sets_generate_case_and_additive_loads) ... ok
+test_historical_disconnected_tip_load_is_rejected_before_solver (test_structural_contract.StructuralContractTests.test_historical_disconnected_tip_load_is_rejected_before_solver) ... ok
+test_calibration_rejects_wrong_failure_reason_even_at_zero_score (test_structural_contract.StructuralPackTests.test_calibration_rejects_wrong_failure_reason_even_at_zero_score) ... ok
+test_malformed_or_conflicting_contract_blocks_contribution (test_structural_contract.StructuralPackTests.test_malformed_or_conflicting_contract_blocks_contribution) ... ok
+test_structural_pack_maps_all_six_checks (test_structural_contract.StructuralPackTests.test_structural_pack_maps_all_six_checks) ... ok
+
+======================================================================
+ERROR: test_generated_dat_cannot_substitute_for_solver_output (test_structural_contract.DeckAuditTests.test_generated_dat_cannot_substitute_for_solver_output)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 130, in test_generated_dat_cannot_substitute_for_solver_output
+    result = evaluate(code)
+             ^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 33, in evaluate
+    return run_task(task, provider='external', model='recorded-test', seed=0,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/runners/simulation_agent.py", line 655, in run_task
+    return _run_ccx_task(task, code, meta, t0, env_digest, logs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/runners/simulation_agent.py", line 353, in _run_ccx_task
+    got = parse_dat(iso.dir / "model.dat", dict(g["extract"]))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/runners/solvers/calculix.py", line 108, in parse_dat
+    text = Path(dat_path).read_text(encoding="utf-8", errors="replace")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Zhuanz/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_jjxjwgq6/model.dat'
+
+======================================================================
+FAIL: test_rejects_mesh_and_dialect_failures_with_specific_feedback (test_structural_contract.DeckAuditTests.test_rejects_mesh_and_dialect_failures_with_specific_feedback) (code='undefined_connectivity')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/tests/test_structural_contract.py", line 109, in test_rejects_mesh_and_dialect_failures_with_specific_feedback
+    self.assertIn(code, {i['code'] for i in result['issues']})
+AssertionError: 'undefined_connectivity' not found in {'invalid_deck'}
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.991s
+
+FAILED (failures=1, errors=1)

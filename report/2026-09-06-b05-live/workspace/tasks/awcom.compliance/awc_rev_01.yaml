@@ -1,0 +1,51 @@
+id: awc_rev_01
+registry_id: awcom.compliance
+domain: airworthiness
+task_type: qa_grounded
+model_profile: plain_llm
+assets_revision: awcom@selfbuilt-2026-08-26
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: []
+input:
+  prompt_file: tasks/awcom.compliance/awc_rev_01.md
+  prompt_sha256: cfdfea021dbe39989ab791b6c4533693c3364d2b889a7a2fe002d97c271210ed
+  assets: []
+output_contract:
+- json
+reference:
+  source: 自建 ACX 规章框架（决策表在题面；KB 恢复后重锚真实条款）
+  revision: awcom@selfbuilt-2026-08-26
+  reference_json: {"changed_params": {"flap_limit_speed_ktas": {"old": 199.3, "new": 189.3}}, "changed_param_count": 1, "added_applicability": [], "removed_applicability": ["empennage"], "severity": "major", "compliance_recheck": true}
+  rel_tol: 0.02
+  uncertainty_note: json_extract 字段级（exact_keys 精确；列表排序 casefold）
+grader:
+  answer_format: json_extract
+  validity_gate: true
+  numeric_rel_tol: 0.02
+  exact_keys:
+  - changed_param_count
+  - old
+  - new
+  - severity
+  sandbox:
+    banned: shell/network/process
+    isolated_interpreter: false
+scoring:
+  weights:
+    requirements: 1.0
+    physics: 0.0
+    objective: 0.0
+    robustness: 0.0
+  note: requirements=JSON 字段命中比例
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 180
+  attempts: 3
+license_provenance:
+  source: 自建（适航审定工程族 P1；ACX 虚构规章）
+  license: self-built
+  status: confirmed-selfbuilt
+  mirror_allowed: true
+  revision: awcom@selfbuilt-2026-08-26

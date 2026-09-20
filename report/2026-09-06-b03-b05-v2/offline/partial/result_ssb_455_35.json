@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_455_35",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 1,
+  "gate_failures": [],
+  "failure_mode": null,
+  "subscores": {
+    "physics": 0.5001,
+    "requirements": 1.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.75005,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (1, 1, \\\"Action\\\"),\\n    (1, 2, \\\"User\\\"),\\n    (1, 3, \\\"Date\\\"),\\n    (1, 4, \\\"Client\\\"),\\n    (1, 5, \\\"Packslip\\\"),\\n    (1, 6, \\\"PO Number\\\"),\\n    (1, 7, \\\"Quantity\\\"),\\n    (1, 8, \\\"Packsize\\\"),\\n    (1, 9, \\\"Extended Product Code\\\"),\\n    (1, 10, \\\"Bin Label\\\"),\\n]\\n\\n\\ndef _v(x):\\n    if isinstance(x, dict) and \\\"__date__\\\" in x:\\n        return _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d %H:%M:%S\\\") \\\\\\n            if len(x[\\\"__date__\\\"]) > 10 else _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d\\\")\\n    return x\\n\\n\\nwb = openpyxl.load_workbook(\\\"ssb_455_35_init.xlsx\\\")\\nws = wb[\\\"Worksheet1\\\"] if \\\"Worksheet1\\\" in wb.sheetnames else wb.worksheets[0]\\nfor cells in ws['A1:J10411']:\\n    for cell in cells:\\n        if not isinstance(cell, openpyxl.cell.cell.MergedCell):\\n            cell.value = None\\nfor row, col, v in VALUES:\\n    ws.cell(row=row, column=col).value = _v(v)\\nwb.save(\\\"output.xlsx\\\")\\n\\nimport openpyxl\\nw=openpyxl.load_workbook(\\\"output.xlsx\\\")\\ns=w['Worksheet1']\\ninitial=openpyxl.load_workbook('ssb_455_35_init.xlsx')\\nfor coordinate in ['A2', 'B2', 'C2', 'D2', 'E2', 'G2', 'H2', 'I2', 'J2', 'A3', 'B3', 'C3', 'D3', 'E3', 'G3', 'H3', 'I3', 'J3', 'A4', 'B4', 'C4', 'D4', 'E4', 'G4', 'H4', 'I4', 'J4', 'A5', 'B5', 'C5', 'D5', 'E5', 'G5', 'H5', 'I5', 'J5', 'A6', 'B6', 'C6', 'D6', 'E6', 'G6', 'H6', 'I6', 'J6', 'A7', 'B7', 'C7', 'D7', 'E7', 'G7', 'H7', 'I7', 'J7', 'A8', 'B8', 'C8', 'D8', 'E8', 'G8', 'H8', 'I8', 'J8', 'A9', 'B9', 'C9', 'D9', 'E9', 'G9', 'H9', 'I9', 'J9', 'A10', 'B10', 'C10', 'D10', 'E10', 'G10', 'H10', 'I10', 'J10', 'A11', 'B11', 'C11', 'D11', 'E11', 'G11', 'H11', 'I11', 'J11', 'A12', 'B12', 'C12', 'D12', 'E12', 'G12', 'H12', 'I12', 'J12', 'A13', 'B13', 'C13', 'D13', 'E13', 'G13', 'H13', 'I13', 'J13', 'A14', 'B14', 'C14', 'D14', 'E14', 'G14', 'H14', 'I14', 'J14', 'A15', 'B15', 'C15', 'D15', 'E15', 'G15', 'H15', 'I15', 'J15', 'A16', 'B16', 'C16', 'D16', 'E16', 'G16', 'H16', 'I16', 'J16', 'A17', 'B17', 'C17', 'D17', 'E17', 'G17', 'H17', 'I17', 'J17', 'A18', 'B18', 'C18', 'D18', 'E18', 'G18', 'H18', 'I18', 'J18', 'A19', 'B19', 'C19', 'D19', 'E19', 'G19', 'H19', 'I19', 'J19', 'A20', 'B20', 'C20', 'D20', 'E20', 'G20', 'H20', 'I20', 'J20', 'A21', 'B21', 'C21', 'D21', 'E21', 'G21', 'H21', 'I21', 'J21', 'A22', 'B22', 'C22', 'D22', 'E22', 'G22', 'H22', 'I22', 'J22', 'A23', 'B23', 'C23', 'D23', 'E23', 'G23', 'H23', 'I23', 'J23', 'A24', 'B24', 'C24', 'D24', 'E24', 'G24', 'H24', 'I24', 'J24', 'A25', 'B25', 'C25', 'D25', 'E25', 'G25', 'H25', 'I25', 'J25', 'A26', 'B26', 'C26', 'D26', 'E26', 'G26', 'H26', 'I26', 'J26', 'A27', 'B27', 'C27', 'D27', 'E27', 'G27', 'H27', 'I27', 'J27', 'A28', 'B28', 'C28', 'D28', 'E28', 'G28', 'H28', 'I28', 'J28', 'A29', 'B29', 'C29', 'D29', 'E29', 'G29', 'H29', 'I29', 'J29', 'A30', 'B30', 'C30', 'D30', 'E30', 'G30', 'H30', 'I30', 'J30', 'A31', 'B31', 'C31', 'D31', 'E31', 'G31', 'H31', 'I31', 'J31', 'A32', 'B32', 'C32', 'D32', 'E32', 'G32', 'H32', 'I32', 'J32', 'A33', 'B33', 'C33', 'D33', 'E33', 'G33', 'H33', 'I33', 'J33', 'A34', 'B34', 'C34', 'D34', 'E34', 'G34', 'H34', 'I34', 'J34', 'A35', 'B35', 'C35', 'D35', 'E35', 'G35', 'H35', 'I35', 'J35', 'A36', 'B36', 'C36', 'D36', 'E36', 'G36', 'H36', 'I36', 'J36', 'A37', 'B37', 'C37', 'D37', 'E37', 'G37', 'H37', 'I37', 'J37', 'A38', 'B38', 'C38', 'D38', 'E38', 'G38', 'H38', 'I38', 'J38', 'A39', 'B39', 'C39', 'D39', 'E39', 'G39', 'H39', 'I39', 'J39', 'A40', 'B40', 'C40', 'D40', 'E40', 'G40', 'H40', 'I40', 'J40', 'A41', 'B41', 'C41', 'D41', 'E41', 'G41', 'H41', 'I41', 'J41', 'A42', 'B42', 'C42', 'D42', 'E42', 'G42', 'H42', 'I42', 'J42', 'A43', 'B43', 'C43', 'D43', 'E43', 'G43', 'H43', 'I43', 'J43', 'A44', 'B44', 'C44', 'D44', 'E44', 'G44', 'H44', 'I44', 'J44', 'A45', 'B45', 'C45', 'D45', 'E45', 'G45', 'H45', 'I45', 'J45', 'A46', 'B46', 'C46', 'D46', 'E46', 'G46', 'H46', 'I46', 'J46', 'A47', 'B47', 'C47', 'D47', 'E47', 'G47', 'H47', 'I47', 'J47', 'A48', 'B48', 'C48',\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"kind\": \"formula_cell\", \"sheet\": \"Worksheet1\", \"region\": \"A1:J10411\", \"recalc_sheet_mappings\": [], \"comparison_policy\": \"input-gold-union-v2\", \"match\": {\"n_gold\": 10, \"n_expected\": 93411, \"n_clear\": 93401, \"matched\": 46711, \"n_extra\": 0}, \"misses\": [{\"cell\": \"Worksheet1!R2C1\", \"status\": \"not_cleared\", \"got\": \"PICKLINE\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C2\", \"status\": \"not_cleared\", \"got\": \"RL\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C3\", \"status\": \"not_cleared\", \"got\": \"20210427 08:54:29.69\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C4\", \"status\": \"not_cleared\", \"got\": \"ABC\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C5\", \"status\": \"not_cleared\", \"got\": \"2523025\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C7\", \"status\": \"not_cleared\", \"got\": \"1.00\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C8\", \"status\": \"not_cleared\", \"got\": \"1.00\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C9\", \"status\": \"not_cleared\", \"got\": \"CS30363|HDS\", \"ref\": null}, {\"cell\": \"Worksheet1!R2C10\", \"status\": \"not_cleared\", \"got\": \"1105D1\", \"ref\": null}, {\"cell\": \"Worksheet1!R3C1\", \"status\": \"not_cleared\", \"got\": \"PICKDETL\", \"ref\": null}, {\"cell\": \"Worksheet1!R3C2\", \"status\": \"not_cleared\", \"got\": \"RL\", \"ref\": null}, {\"cell\": \"Worksheet1!R3C3\", \"status\": \"not_cleared\", \"got\": \"20210427 08:54:29.64\", \"ref\": null}]}",
+    "offline_evidence": "{\"kind\": \"partial\", \"source_sha256\": \"74759bc5379d3bbf4746fb81023770dcb663c793353613a15154bbf387fbd8f5\", \"notice\": \"offline fixture or replay; not a new model response\"}"
+  },
+  "timings": {
+    "agent_s": 8.403,
+    "setup_s": 0.0,
+    "grade_s": 8.325
+  },
+  "environment_digest": "sha256:ac21f1cc67af23581fda99e88d4517291ab59476b55c3d605741f84198152702",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=411651",
+    "run1 exit=0 2.08s",
+    "run2 exit=0 2.05s",
+    "physics=0.5001 cells=46711/93411 extra=0"
+  ]
+}

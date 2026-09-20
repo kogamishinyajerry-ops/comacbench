@@ -82,3 +82,34 @@ integrated -> active     进入常规评测轮换
 4. 评分实现必须先落 gate 检查器再落子分——gate 是本体系的底线；
 5. 隐藏动态题的生成器、采样策略、参考答案隔离方案随 M3 一并评审；
 6. env_class 为 `missing` 的条目自动进入 `paused-env`，不得出现在任何里程碑排期里；环境依赖变化只改 env-matrix.md，再同步 registry。
+# 航空工程 Agent 评测入口（2026-09-06）
+
+现可通过统一评测包连接本地 agent，完成工业仿真/企业数据/知识本体的入门评测，并自动检查新贡献材料。参阅 [工程师快速使用指南](docs/aviation-quickstart.md) 与 [开发路线和验收范围](docs/specs/aviation-plugin-v1.md)。
+
+```bash
+source .venv/bin/activate
+python -m comacbench validate packs/aviation-core-v1
+python -m comacbench run packs/aviation-core-v1 --agent examples/agents/reference.json --out ./reference-demo-01
+```
+
+上述 reference 是带答案的接口自检程序；评测自己的 agent 时替换配置。当前 3 题首包包含实际 CalculiX 求解及虚构企业数据/本体规则，不代表飞机级验收。运行后打开输出目录 `report.html`；贡献者使用 `init → validate → calibrate`，材料缺失或判分问题会生成定位与修复建议。
+
+
+### 结构仿真输入检查 v2（2026-09-06）
+
+`packs/aviation-structures-v2` 已提供一个可直接连接 agent 的静力梁包：节点连接、网格、材料、边界、载荷、输出六项检查，随后原生 CalculiX 求解与数值对账。配套 8 个可定位故障负例、完整 deck/dat/日志证据和可视化反馈；旧 v1 包保持原版本。
+
+```bash
+.venv/bin/python -m comacbench run packs/aviation-structures-v2 --agent ./agent.json --out ./structure-run-01
+```
+
+[使用与贡献指南](docs/aviation-quickstart.md) · [本轮校准及回放证据](report/2026-09-06-structures-v2/README.md) · [后续工程路线](docs/aviation-benchmark-roadmap.md)。
+
+
+CFD 后向台阶包 `packs/aviation-cfd-step-v1` 已可通过同一 CLI/plugin 入口调用：平台执行 OpenFOAM 10，检查实际网格、原生残差和质量守恒，从底壁剪切重算再附着长度，并保留原始场、日志与摘要。配套 6 个故障负例和离线曲线报告。
+
+```bash
+.venv/bin/python -m comacbench run packs/aviation-cfd-step-v1 --agent ./agent.json --out ./cfd-run-01
+```
+
+[CFD 使用说明](docs/aviation-quickstart.md#cfd-原生证据包) · [CFD 校准及接口证据](report/2026-09-06-cfd-step-v1/README.md) · [三网格/四域敏感性研究](report/2026-09-06-cfd-sensitivity/README.md)。12 个算例已收敛，fine GCI 约 0.884% 未过研究门，原 10% 带保持未校准状态；先继续核验网格误差，再扩展工况与工程接受。

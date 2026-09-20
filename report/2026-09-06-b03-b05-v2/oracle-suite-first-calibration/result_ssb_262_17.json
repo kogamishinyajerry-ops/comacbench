@@ -1,0 +1,42 @@
+{
+  "task_id": "ssb_262_17",
+  "registry_id": "spreadsheetbench.verified_subset",
+  "adapter": "design_artifact",
+  "validity_gate": 0,
+  "gate_failures": [
+    "code_not_executable"
+  ],
+  "failure_mode": "code_not_executable",
+  "subscores": {
+    "physics": 0.0,
+    "requirements": 0.0,
+    "objective": null,
+    "robustness": null
+  },
+  "subscore_applicability": {
+    "physics": "answer 区域单元格命中（LibreOffice 重算后 vs golden 同区域）",
+    "requirements": "工作簿可读+sheet 保持（区域可寻址）",
+    "objective": "N/A(本版无优化目标)",
+    "robustness": "N/A(双跑一致性由 gate 覆盖)"
+  },
+  "score": 0.0,
+  "artifacts": {
+    "code": "\"\\\"\\\"\\\"oracle — copy init workbook, write embedded golden answer-region values.\\\"\\\"\\\"\\nimport datetime as _dt\\nimport json\\nimport openpyxl\\n\\nVALUES = [\\n    (1, 1, \\\"Sr. No\\\"),\\n    (1, 2, \\\"Team\\\"),\\n    (1, 3, \\\"Task\\\"),\\n    (1, 4, \\\"Start Date\\\"),\\n    (1, 5, \\\"End Date\\\"),\\n    (1, 6, \\\"Responsibility\\\"),\\n    (2, 1, 3),\\n    (2, 2, \\\"N3\\\"),\\n    (2, 3, \\\"CT1\\\"),\\n    (2, 4, {\\\"__date__\\\": \\\"2022-02-01 00:00:00\\\"}),\\n    (2, 5, {\\\"__date__\\\": \\\"2022-08-01 00:00:00\\\"}),\\n    (2, 6, \\\"R2\\\"),\\n    (3, 1, 3),\\n    (3, 2, \\\"N2\\\"),\\n    (3, 3, \\\"CT1\\\"),\\n    (3, 4, {\\\"__date__\\\": \\\"2022-02-01 00:00:00\\\"}),\\n    (3, 5, {\\\"__date__\\\": \\\"2022-08-01 00:00:00\\\"}),\\n    (3, 6, \\\"R3\\\"),\\n    (4, 1, 3),\\n    (4, 2, \\\"N1\\\"),\\n    (4, 3, \\\"CT1\\\"),\\n    (4, 4, {\\\"__date__\\\": \\\"2022-02-01 00:00:00\\\"}),\\n    (4, 5, {\\\"__date__\\\": \\\"2022-08-01 00:00:00\\\"}),\\n    (4, 6, \\\"R4\\\"),\\n    (5, 1, 4),\\n    (5, 2, \\\"N3\\\"),\\n    (5, 3, \\\"CT2\\\"),\\n    (5, 4, {\\\"__date__\\\": \\\"2022-02-01 00:00:00\\\"}),\\n    (5, 5, {\\\"__date__\\\": \\\"2022-09-01 00:00:00\\\"}),\\n    (5, 6, \\\"R2\\\"),\\n    (6, 1, 4),\\n    (6, 2, \\\"N2\\\"),\\n    (6, 3, \\\"CT2\\\"),\\n    (6, 4, {\\\"__date__\\\": \\\"2022-02-01 00:00:00\\\"}),\\n    (6, 5, {\\\"__date__\\\": \\\"2022-09-01 00:00:00\\\"}),\\n    (6, 6, \\\"R3\\\"),\\n    (7, 1, 4),\\n    (7, 2, \\\"N1\\\"),\\n    (7, 3, \\\"CT2\\\"),\\n    (7, 4, {\\\"__date__\\\": \\\"2022-02-01 00:00:00\\\"}),\\n    (7, 5, {\\\"__date__\\\": \\\"2022-09-01 00:00:00\\\"}),\\n    (7, 6, \\\"R4\\\"),\\n    (8, 1, 1),\\n    (8, 2, \\\"N3\\\"),\\n    (8, 3, \\\"DT1\\\"),\\n    (8, 4, {\\\"__date__\\\": \\\"2022-01-10 00:00:00\\\"}),\\n    (8, 5, {\\\"__date__\\\": \\\"2022-12-01 00:00:00\\\"}),\\n    (8, 6, \\\"R2\\\"),\\n    (9, 1, 2),\\n    (9, 2, \\\"N3\\\"),\\n    (9, 3, \\\"DT2\\\"),\\n    (9, 4, {\\\"__date__\\\": \\\"2022-01-10 00:00:00\\\"}),\\n    (9, 5, {\\\"__date__\\\": \\\"2022-10-01 00:00:00\\\"}),\\n    (9, 6, \\\"R2\\\"),\\n    (10, 1, 5),\\n    (10, 2, \\\"N3\\\"),\\n    (10, 3, \\\"DT3\\\"),\\n    (10, 4, {\\\"__date__\\\": \\\"2022-05-01 00:00:00\\\"}),\\n    (10, 5, {\\\"__date__\\\": \\\"2022-06-30 00:00:00\\\"}),\\n    (10, 6, \\\"R2\\\"),\\n    (11, 1, 1),\\n    (11, 2, \\\"N2\\\"),\\n    (11, 3, \\\"NT1\\\"),\\n    (11, 4, {\\\"__date__\\\": \\\"2022-01-10 00:00:00\\\"}),\\n    (11, 5, {\\\"__date__\\\": \\\"2022-12-01 00:00:00\\\"}),\\n    (11, 6, \\\"R3\\\"),\\n    (12, 1, 2),\\n    (12, 2, \\\"N2\\\"),\\n    (12, 3, \\\"NT2\\\"),\\n    (12, 4, {\\\"__date__\\\": \\\"2022-01-10 00:00:00\\\"}),\\n    (12, 5, {\\\"__date__\\\": \\\"2022-10-01 00:00:00\\\"}),\\n    (12, 6, \\\"R3\\\"),\\n    (13, 1, 1),\\n    (13, 2, \\\"N1\\\"),\\n    (13, 3, \\\"ST1\\\"),\\n    (13, 4, {\\\"__date__\\\": \\\"2022-01-01 00:00:00\\\"}),\\n    (13, 5, {\\\"__date__\\\": \\\"2022-12-01 00:00:00\\\"}),\\n    (13, 6, \\\"R4\\\"),\\n    (14, 1, 2),\\n    (14, 2, \\\"N1\\\"),\\n    (14, 3, \\\"ST2\\\"),\\n    (14, 4, {\\\"__date__\\\": \\\"2022-01-01 00:00:00\\\"}),\\n    (14, 5, {\\\"__date__\\\": \\\"2022-10-01 00:00:00\\\"}),\\n    (14, 6, \\\"R4\\\"),\\n]\\n\\n\\ndef _v(x):\\n    if isinstance(x, dict) and \\\"__date__\\\" in x:\\n        return _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d %H:%M:%S\\\") \\\\\\n            if len(x[\\\"__date__\\\"]) > 10 else _dt.datetime.strptime(x[\\\"__date__\\\"], \\\"%Y-%m-%d\\\")\\n    return x\\n\\n\\nwb = openpyxl.load_workbook(\\\"ssb_262_17_init.xlsx\\\")\\nws = wb[\\\"Sheet1\\\"] if \\\"Sheet1\\\" in wb.sheetnames else wb.worksheets[0]\\nfor cells in ws[\\\"Sheet1'!A1:F14\\\"]:\\n    for cell in cells:\\n        if not isinstance(cell, openpyxl.cell.cell.MergedCell):\\n            cell.value = None\\nfor row, col, v in VALUES:\\n    ws.cell(row=row, column=col).value = _v(v)\\nwb.save(\\\"output.xlsx\\\")\\n\"",
+    "model_meta": "{\"provider\": \"oracle\", \"note\": \"gold script verbatim（判分器自检）\"}",
+    "grade_details": "{\"run\": 1, \"exit\": 1, \"stderr_tail\": \"Traceback (most recent call last):\\n  File \\\"/var/folders/q4/859yhpgn6x3fx6kv4mj5gmv40000gp/T/bm_sandbox_0knrqvwo/model.py\\\", line 103, in <module>\\n    for cells in ws[\\\"Sheet1'!A1:F14\\\"]:\\n                 ~~^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/worksheet/worksheet.py\\\", line 294, in __getitem__\\n    min_col, min_row, max_col, max_row = range_boundaries(key)\\n                                         ^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"/Users/Zhuanz/projects/jerry-personal/JerryDSH-COMACBench/.venv/lib/python3.12/site-packages/openpyxl/utils/cell.py\\\", line 148, in range_boundaries\\n    raise ValueError(msg)\\nValueError: Sheet1'!A1:F14 is not a valid coordinate or range\\n\"}",
+    "resume_identity": "6a370bf64ad52d500433423631b3c34dcc3f73a7638587092285dfa792c5f39f"
+  },
+  "timings": {
+    "agent_s": 0.176,
+    "setup_s": 0.0,
+    "grade_s": 0.175
+  },
+  "environment_digest": "sha256:63f6f0f65a034758c73b0b8ef290308b9c0f61bf92cafc238382dda3fb2a685f",
+  "assets_revision": "ssb400@adapted-2026-08-26",
+  "logs": [
+    "violations=[]",
+    "syntax_ok=True",
+    "provider=oracle code_len=3114",
+    "run1 exit=1 0.17s"
+  ]
+}
