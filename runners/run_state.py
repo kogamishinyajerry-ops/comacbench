@@ -4,13 +4,26 @@ Metadata extends manifest.extra / result.artifacts; it is not an authenticity pr
 """
 from __future__ import annotations
 
-import fcntl
 import json
 import math
 import os
 from pathlib import Path
 import shlex
 import sys
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows fallback
+    import msvcrt
+
+    def _msvcrt_flock(fd, _flags):
+        fd.seek(0)
+        msvcrt.locking(fd.fileno(), msvcrt.LK_NBLCK, 1)
+
+    class fcntl:  # minimal shim of the POSIX module surface we use
+        LOCK_EX = 1
+        LOCK_NB = 2
+        flock = staticmethod(_msvcrt_flock)
 
 from . import common
 from .providers import PROVIDER_PRESETS
@@ -117,7 +130,7 @@ class RunState:
         try:
             try:
                 fcntl.flock(self.lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
+            except OSError:  # POSIX: BlockingIOError; Windows: PermissionError from msvcrt
                 self._reject('another writer owns this output directory')
             files = sorted(self.out.glob('result_*.json'))
             manifest = self.out / 'run_manifest.json'

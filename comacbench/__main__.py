@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import importlib.metadata
 import json
 import os
@@ -14,6 +13,20 @@ import sys
 import time
 
 import yaml
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows fallback
+    import msvcrt
+
+    def _msvcrt_flock(fd, _flags):
+        fd.seek(0)
+        msvcrt.locking(fd.fileno(), msvcrt.LK_NBLCK, 1)
+
+    class fcntl:  # minimal shim of the POSIX module surface we use
+        LOCK_EX = 1
+        LOCK_NB = 2
+        flock = staticmethod(_msvcrt_flock)
 
 from .agent import identity as agent_identity, load_agent
 from .pack import validate_pack, fingerprint, digest
@@ -121,7 +134,7 @@ def execute(args):
     with (out/'.lock').open('a+') as lock:
         try:
             fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-        except BlockingIOError:
+        except OSError:  # POSIX: BlockingIOError; Windows: PermissionError from msvcrt
             raise ValueError('output directory is already running')
         state=out/'run.json'
         if state.exists():

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comacbench"
+version = "0.3.1"
+description = "Engineering-agent benchmark harness: packs, gates, native solver evidence"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=5.4",
+    "numpy",
+    "scipy",
+    "scikit-learn",
+]
+
+[project.scripts]
+comacbench = "comacbench.__main__:main"
+
+[tool.setuptools]
+packages = ["comacbench"]
+
+[tool.setuptools.package-data]
+comacbench = ["report.html"]
