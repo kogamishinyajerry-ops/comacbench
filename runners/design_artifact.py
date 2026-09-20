@@ -63,8 +63,7 @@ except ImportError:  # noqa: BLE001 — .venv（无 OCP）跑 xlsx_table 模式
 
 from . import common
 from .common import (FM_MISSING_OUTPUT, TaskSpec, aggregate_score, build_result,
-                     environment_digest, gate_distribution, load_tasks,
-                     write_run_manifest)
+                     environment_digest, gate_distribution, load_tasks)
 from .providers import ProviderError, get_answer
 from .sandbox import IsolatedRun, static_check
 
@@ -984,38 +983,107 @@ def _run_formula_task(
         if rr is None:
             return _ret(0, [_SIM_FAIL], _SIM_FAIL, _ZERO_SUBS,
                         {"run": run_no, "soffice": "recalc failed"})
-        outs.append(iso.dir / f"recalc_{FORMULA_OUTPUT}")
+        outs.append((out, iso.dir / f"recalc_{FORMULA_OUTPUT}"))
 
-    def region_cells(path):
+    class MissingSheets(ValueError):
+        pass
+
+    class ConversionSheets(ValueError):
+        pass
+
+    converted_sheets = []
+
+    def region_cells(path, required_sheets, original=None, data_only=True):
         import openpyxl
-        wb = openpyxl.load_workbook(path, data_only=True)
+        import re
+        wb = openpyxl.load_workbook(path, data_only=data_only)
         try:
-            ws = wb[sheet] if sheet in wb.sheetnames else wb.worksheets[0]
+            names = wb.sheetnames
+            target = sheet
+            if original is not None:
+                source = openpyxl.load_workbook(original, read_only=True)
+                try:
+                    names = source.sheetnames
+                finally:
+                    source.close()
+            missing = sorted(required_sheets - set(names))
+            if missing:
+                raise MissingSheets(f"missing required sheets: {missing}")
+            if original is not None and names != wb.sheetnames:
+                # LibreOffice can append " -1" (ssb_22_47). The original output
+                # must satisfy the contract; only this positional rename is allowed.
+                if len(names) != len(wb.sheetnames) or any(
+                        before != after and not re.fullmatch(re.escape(before) + r" -[1-9]\d*", after)
+                        for before, after in zip(names, wb.sheetnames)):
+                    raise ConversionSheets("sheet structure changed during LibreOffice conversion")
+                target = wb.sheetnames[names.index(sheet)]
+                converted_sheets.append(dict(zip(names, wb.sheetnames)))
+            ws = wb[target]
             return {(row, col): ws.cell(row=row, column=col).value
                     for row in range(r1, r2 + 1)
                     for col in range(c1, c2 + 1)
-                    if ws.cell(row=row, column=col).value is not None}
+                    if ws.cell(row=row, column=col).value not in (None, "")}
         finally:
             wb.close()
 
     try:
-        got1, got2 = region_cells(outs[0]), region_cells(outs[1])
+        import openpyxl
+        required_sheets = {sheet}
+        input_cells = set()
+        for ap, _ in assets:
+            if ap.suffix.lower() in (".xlsx", ".xlsm"):
+                wb = openpyxl.load_workbook(ap, read_only=True)
+                try:
+                    required_sheets.update(wb.sheetnames)
+                    has_answer_sheet = sheet in wb.sheetnames
+                finally:
+                    wb.close()
+                if has_answer_sheet:
+                    input_cells.update(region_cells(ap, {sheet}, data_only=False))
         gp = Path(g["golden_workbook"])
         if not gp.is_absolute():
             gp = assets_root / gp
-        gcells = region_cells(gp)
+        gcells = region_cells(gp, {sheet})
+        expected_cells = input_cells | gcells.keys()
+        if not expected_cells:
+            raise ValueError("input and golden answer regions contain no evaluable cells")
+    except Exception as e:  # reference/input failure is not a candidate failure
+        return _ret(0, [common.FM_CRASH], common.FM_CRASH, _ZERO_SUBS,
+                    {"reference_error": str(e)[:300]})
+
+    try:
+        got1 = region_cells(outs[0][1], required_sheets, original=outs[0][0])
+        got2 = region_cells(outs[1][1], required_sheets, original=outs[1][0])
+    except MissingSheets as e:
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, _ZERO_SUBS,
+                    {"missing_sheet": str(e)})
+    except ConversionSheets as e:
+        return _ret(0, [common.FM_CRASH], common.FM_CRASH, _ZERO_SUBS,
+                    {"conversion_error": str(e)})
     except Exception as e:  # noqa: BLE001
         return _ret(0, [_GEOM_FAIL], _GEOM_FAIL, _ZERO_SUBS,
                     {"parse_error": str(e)[:300]})
+
+    if gcells and (not got1 or not got2):
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, _ZERO_SUBS,
+                    {"missing": f"nonempty answer region {sheet}!{g['answer_position']}"})
 
     if _xlsx_canonical({(f"{k[0]}:{k[1]}", ""): v for k, v in got1.items()}) != \
        _xlsx_canonical({(f"{k[0]}:{k[1]}", ""): v for k, v in got2.items()}):
         return _ret(0, [_NONDET_FAIL], _NONDET_FAIL, _ZERO_SUBS,
                     {"determinism": "run1/run2 answer 区域不一致"})
 
-    matched, misses, wrong_extra = 0, [], 0
-    for key, gv in gcells.items():
+    matched, misses = 0, []
+    for key in sorted(expected_cells):
+        gv = gcells.get(key)
         mv = got1.get(key)
+        if gv is None:
+            if mv is None:
+                matched += 1
+            else:
+                misses.append({"cell": f"{sheet}!R{key[0]}C{key[1]}", "status": "not_cleared",
+                               "got": str(mv)[:40], "ref": None})
+            continue
         if mv is None:
             misses.append({"cell": f"{sheet}!R{key[0]}C{key[1]}", "status": "missing"})
             continue
@@ -1029,20 +1097,27 @@ def _run_formula_task(
         else:
             misses.append({"cell": f"{sheet}!R{key[0]}C{key[1]}", "status": "mismatch",
                            "got": str(mv)[:40], "ref": str(gv)[:40]})
-    # extra 惩罚修正（2026-08-26 实测教训）：answer 区域内 init 常有既有数据，
-    # golden 只改其中子集——区域内「golden 无值而 got 有值」不罚（可能是 init
-    # 保留值）；只对值不同于 golden 的已判 mismatch。真正的滥用防护=工作簿级
-    # sheet 结构保持（region_cells 已保证）。故 extra=0，如实声明。
-    extra = 0
-    physics = round(matched / max(1, len(gcells)), 4)
-    requirements = 1.0  # 工作簿可读 + sheet 保持已在 region_cells 语义内
+    # Input-only cells must be cleared. Do not reward the blank background or
+    # ignore new content where both input and gold were blank.
+    extra_cells = sorted(got1.keys() - expected_cells)
+    extra = len(extra_cells)
+    misses.extend({"cell": f"{sheet}!R{key[0]}C{key[1]}", "status": "extra"}
+                  for key in extra_cells[:12])
+    physics = round(max(0, matched - extra) / len(expected_cells), 4)
+    if matched != len(expected_cells) or extra:
+        physics = min(physics, 0.9999)  # rounding must not manufacture full credit
+    requirements = 1.0  # output file, required sheets and expected nonempty content checked
     details = {"kind": "formula_cell", "sheet": sheet,
                "region": g["answer_position"],
-               "match": {"n_gold": len(gcells), "matched": matched, "n_extra": extra},
+               "recalc_sheet_mappings": converted_sheets,
+               "comparison_policy": "input-gold-union-v2",
+               "match": {"n_gold": len(gcells), "n_expected": len(expected_cells),
+                         "n_clear": len(expected_cells - gcells.keys()),
+                         "matched": matched, "n_extra": extra},
                "misses": misses[:12]}
     subs = {"physics": physics, "requirements": requirements,
             "objective": None, "robustness": None}
-    logs.append(f"physics={physics} cells={matched}/{len(gcells)} extra={extra}")
+    logs.append(f"physics={physics} cells={matched}/{len(expected_cells)} extra={extra}")
     return _ret(1, [], None, subs, details)
 
 
@@ -1400,8 +1475,8 @@ def main() -> int:
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--resume", action="store_true",
-                    help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
-                         "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
+                    help="仅复用身份匹配的完整结果；旧协议、损坏或条件不一致时"
+                         "拒绝续写，请使用新 --out 目录")
     ap.add_argument("--iterate", type=int, default=1,
                     help="迭代协议轮数上限（v0.3 harness 臂 H3）：失败且可修复时"
                          "把诊断喂回模型修订重跑；1=单轮（默认，与既有行为一致）")
@@ -1443,6 +1518,23 @@ def main() -> int:
         want = t["input"].get("prompt_sha256")
         if want and common.sha256_bytes(text.encode()) != want:
             raise SystemExit(f"{t.id}: 题面 sha256 漂移（{pf}）——按新评测周期处理")
+        if t["grader"].get("artifact_kind") == "formula_cell":
+            # Mirror _run_formula_task staging: only declared inputs, by basename.
+            # Bind this execution contract into the effective prompt/run identity.
+            names = [Path(a["path"]).name for a in t["input"].get("assets", []) or []]
+            text += ("\n\n## Input files available at execution\n"
+                     "These files are staged in the Python working directory:\n"
+                     + "\n".join(f"- `{name}`" for name in names)
+                     + "\nLoad the provided input workbook by its exact filename, "
+                     "preserve all existing sheets, and save your completed workbook "
+                     "as `output.xlsx`. The runner does not create `output.xlsx` "
+                     "for you before your code runs.\n"
+                     "Execute the requested data operations in your Python script. "
+                     "The answer region identifies the resulting workbook cells, "
+                     "not a place for explanatory text. Do not write VBA code, "
+                     "macro installation instructions, or prose into worksheet cells. "
+                     "Preserve unrelated values and formulas; change only what the "
+                     "task requests, including removing data when deletion is required.\n")
         prompt_cache[t.id] = text
         asset_paths.append(pf)
     env_digest = environment_digest(extra_paths=asset_paths)
@@ -1469,79 +1561,68 @@ def main() -> int:
                 p = (assets_root / src).resolve()
             oracle_cache[t.id] = p.read_text(encoding="utf-8")
 
-    from .providers import PROVIDER_PRESETS
-    model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get(
-        "model_default", "n/a")
+    from .run_state import RunState, provider_identity, rerun_command
+    model_label = provider_identity(args.provider, args.model)["model"]
+    rerun = rerun_command("runners.design_artifact", args, model_label)
 
-    rerun = (f"cd {common.BENCH_ROOT} && {sys.executable} -m runners.design_artifact "
-             f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
-             f"--provider {args.provider}"
-             + (f" --model {args.model}" if args.model else "")
-             + f" --seed {args.seed}"
-             + (" --resume" if args.resume else ""))
-
-    results, crash, resumed = [], 0, 0
-    for t in tasks:
-        rp = out_dir / f"result_{t.id}.json"
-        if args.resume and rp.exists():
-            try:
-                results.append(json.loads(rp.read_text(encoding="utf-8")))
+    with RunState(out_dir=out_dir, tasks=tasks, prompts=prompt_cache,
+                  adapter=ADAPTER, provider=args.provider, model=args.model,
+                  seed=args.seed, env_digest=env_digest, assets=asset_hashes,
+                  tasks_dir=tasks_dir, rerun=rerun, resume=args.resume,
+                  options={"iterate": args.iterate, "limit": args.limit,
+                           "scaffold": args.scaffold},
+                  extra={"model": model_label,
+                         "harness_arm": ("H3" if args.scaffold and args.iterate > 1
+                                         else "H2" if args.scaffold
+                                         else "H1" if args.iterate > 1 else "H0"),
+                         "scaffold": args.scaffold or None,
+                         "iterate_rounds": args.iterate, "limit": args.limit,
+                         "python": sys.executable,
+                         "determinism_rel_tol": DETERMINISM_REL_TOL,
+                         "iface_radius_rel_tol": IFACE_RADIUS_REL_TOL}) as run:
+        results, crash, resumed = [], 0, 0
+        for t in tasks:
+            if t.id in run.cached:
+                results.append(run.cached[t.id])
                 resumed += 1
                 continue
-            except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
-                pass
-        try:
-            if args.iterate > 1 or args.scaffold:
-                r = run_task_iterate(t, iterate=max(1, args.iterate),
-                                     provider=args.provider, model=args.model,
-                                     seed=args.seed, env_digest=env_digest,
-                                     prompt_cache=prompt_cache,
-                                     assets_root=assets_root,
-                                     oracle_cache=oracle_cache or None)
-            else:
-                r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
-                             env_digest=env_digest, prompt_cache=prompt_cache,
-                             assets_root=assets_root,
-                             oracle_cache=oracle_cache or None)
-        except ProviderError as e:
-            raise SystemExit(f"[终止] provider 失败: {e}")
-        except Exception as e:  # noqa: BLE001
-            crash += 1
-            r = build_result(task=t, adapter=ADAPTER, validity_gate=0,
-                gate_failures=[common.FM_CRASH],
-                subscores={"physics": None, "requirements": None, "objective": None,
-                           "robustness": None}, score=0.0, artifacts={},
-                timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
-                env_digest=env_digest, logs=[f"runner exception: {e!r}"],
-                failure_mode=common.FM_CRASH)
-        results.append(r)
-        (out_dir / f"result_{t.id}.json").write_text(
-            json.dumps(r, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            try:
+                if args.iterate > 1 or args.scaffold:
+                    r = run_task_iterate(t, iterate=max(1, args.iterate),
+                                         provider=args.provider, model=args.model,
+                                         seed=args.seed, env_digest=env_digest,
+                                         prompt_cache=prompt_cache,
+                                         assets_root=assets_root,
+                                         oracle_cache=oracle_cache or None)
+                else:
+                    r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
+                                 env_digest=env_digest, prompt_cache=prompt_cache,
+                                 assets_root=assets_root,
+                                 oracle_cache=oracle_cache or None)
+            except ProviderError as e:
+                raise SystemExit(f"[终止] provider 失败: {e}")
+            except Exception as e:  # noqa: BLE001
+                crash += 1
+                r = build_result(task=t, adapter=ADAPTER, validity_gate=0,
+                    gate_failures=[common.FM_CRASH],
+                    subscores={"physics": None, "requirements": None, "objective": None,
+                               "robustness": None}, score=0.0, artifacts={},
+                    timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
+                    env_digest=env_digest, logs=[f"runner exception: {e!r}"],
+                    failure_mode=common.FM_CRASH)
+            results.append(r)
+            run.write_result(t, r)
 
-    mf = write_run_manifest(out_dir, registry_id=registry_id, adapter=ADAPTER,
-                            provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
-                            env_digest=env_digest, assets=asset_hashes,
-                            rerun_command=rerun,
-                            extra={"crash_tasks": crash, "model": model_label,
-                                   "resumed_tasks": resumed,
-                                   "harness_arm": ("H3" if (args.scaffold and args.iterate > 1)
-                                                   else "H2" if args.scaffold
-                                                   else "H1" if args.iterate > 1 else "H0"),
-                                   "scaffold": (args.scaffold or None),
-                                   "iterate_rounds": args.iterate,
-                                   "limit": args.limit,
-                                   "python": ".venv-cad/bin/python",
-                                   "determinism_rel_tol": DETERMINISM_REL_TOL,
-                                   "iface_radius_rel_tol": IFACE_RADIUS_REL_TOL})
-    sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
-    dist = gate_distribution(results)
-    scores = [r["score"] for r in results]
-    print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
-          f"| fail {dist['gate_failed']} | voided {dist['voided']} | crash {crash} "
-          f"| mean {sum(scores) / len(scores):.4f}")
-    print(f"       summary -> {sm}")
-    print(f"       rerun: {rerun}")
-    return 0
+        mf = run.finish(crash_tasks=crash, resumed_tasks=resumed)
+        sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
+        dist = gate_distribution(results)
+        scores = [r["score"] for r in results]
+        print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
+              f"| fail {dist['gate_failed']} | voided {dist['voided']} | crash {crash} "
+              f"| mean {sum(scores) / len(scores):.4f}")
+        print(f"       summary -> {sm}")
+        print(f"       rerun: {rerun}")
+        return 0
 
 
 if __name__ == "__main__":

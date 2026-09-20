@@ -17,6 +17,8 @@ requirement; verified_params = parameters covered by BOTH the test report and
 the analysis note; test_only_params = covered by the test report but NOT the
 analysis note; coverage_complete = every parameter listed in the requirement
 is in verified_params.
+Copy `clause_ref` verbatim from the requirement, including the § symbol and
+the complete clause number; omit the sentence-ending punctuation.
 
 ## Requirement
 

@@ -17,6 +17,10 @@ containing EXACTLY these fields (no extra fields):
 
 Rules: copy values verbatim from the card (numbers as numbers); sort the two
 list fields ascending (string sort); do not add commentary outside the JSON.
+Field boundaries: `family` is only the label inside the Category parentheses
+before the word "family"; omit the surrounding category text and the word "family".
+`clause_no` is the Section identifier, including the § symbol and the complete
+number; omit the title after the dash.
 
 ## Requirement card
 

@@ -18,6 +18,10 @@ def _v(x):
 
 wb = openpyxl.load_workbook("ssb_267_18_init.xlsx")
 ws = wb["Folha1"] if "Folha1" in wb.sheetnames else wb.worksheets[0]
+for cells in ws['G1:G2']:
+    for cell in cells:
+        if not isinstance(cell, openpyxl.cell.cell.MergedCell):
+            cell.value = None
 for row, col, v in VALUES:
     ws.cell(row=row, column=col).value = _v(v)
 wb.save("output.xlsx")

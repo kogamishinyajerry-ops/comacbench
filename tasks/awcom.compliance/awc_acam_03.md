@@ -11,6 +11,9 @@ Read the requirement card and the available evidence, then respond with ONE
   "documented_only": boolean
 }
 
+Field boundary: `clause_id` is the Document identifier only, without the Section
+number or its title. Copy the Document identifier verbatim.
+
 Compliance method catalog (authoritative for this task; ACX fictional standard):
 - MC0 = compliance statement (符合性声明)
 - MC1 = descriptive documentation / drawings (说明性文件)

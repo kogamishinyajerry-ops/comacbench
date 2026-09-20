@@ -37,6 +37,16 @@ REV_A = "awdoc@selfbuilt-2026-08-26"
 REV_B = "awext@selfbuilt-2026-08-26"
 REV_C = "ssb400@adapted-2026-08-26"
 
+# Local contract corrections; upstream instructions and reference workbooks stay intact.
+SSB_PROMPT_CLARIFICATIONS = {
+    "ssb_279_23": "\n\n## Extraction boundary\nKeep only the text inside the first complete pair of "
+                  "parentheses; remove both parentheses as well as the surrounding text. "
+                  "Leave cells without parentheses and blank cells unchanged.",
+    "ssb_455_35": "\n\n## Header boundary\nRow 1 is the header and must remain unchanged. "
+                  "Apply the H/A filter to data rows starting at row 2. If no data rows "
+                  "qualify, the output must contain the original header row only.",
+}
+
 
 # ================================================================ A. awdoc
 
@@ -418,6 +428,10 @@ containing EXACTLY these fields (no extra fields):
 
 Rules: copy values verbatim from the card (numbers as numbers); sort the two
 list fields ascending (string sort); do not add commentary outside the JSON.
+Field boundaries: `family` is only the label inside the Category parentheses
+before the word "family"; omit the surrounding category text and the word "family".
+`clause_no` is the Section identifier, including the § symbol and the complete
+number; omit the title after the dash.
 
 ## Requirement card
 
@@ -603,6 +617,28 @@ def ssb_candidate_ok(item, root: Path) -> tuple[bool, str]:
     return True, f"static={n_static} empty={n_formula}"
 
 
+def ssb_oracle_script(init_name, golden_path, sheet, region):
+    """Embed reference values for offline calibration, including required blanks."""
+    import openpyxl
+    region = region.split("!")[-1]
+    wb = openpyxl.load_workbook(golden_path, data_only=True)
+    try:
+        values = [(cell.row, cell.column, cell.value)
+                  for row in wb[sheet][region] for cell in row if cell.value is not None]
+    finally:
+        wb.close()
+    return ('"""Offline oracle: reproduce the full declared answer region."""\n'
+            'import datetime\nimport openpyxl\n'
+            f'VALUES = {values!r}\n'
+            f'wb = openpyxl.load_workbook({init_name!r})\nws = wb[{sheet!r}]\n'
+            f'for cells in ws[{region!r}]:\n'
+            '    for cell in cells:\n'
+            '        if not isinstance(cell, openpyxl.cell.cell.MergedCell):\n'
+            '            cell.value = None\n'
+            'for row, col, value in VALUES:\n    ws.cell(row, col).value = value\n'
+            'wb.save("output.xlsx")\nwb.close()\n')
+
+
 def gen_ssb(limit=50):
     dest = BENCH / "data" / "spreadsheetbench" / "verified_400"
     root = fetch_ssb(dest.parent)
@@ -637,10 +673,16 @@ def gen_ssb(limit=50):
         golden_f = sp / f"1_{sid}_golden.xlsx"
         shutil.copy(init_f, inputs_dir / f"{tid}_init.xlsx")
         shutil.copy(golden_f, gold_dir / f"{tid}_golden.xlsx")
+        oracle_dir = dest / "gold_scripts"
+        oracle_dir.mkdir(parents=True, exist_ok=True)
+        answer_sheet = str(item['answer_sheet']).split(',')[0].strip(" '")
+        (oracle_dir / f"{tid}.py").write_text(ssb_oracle_script(
+            f"{tid}_init.xlsx", golden_f, answer_sheet, item['answer_position']), encoding="utf-8")
         prompt = (item["instruction"] +
                   f"\n\n## Answer region\nWrite your answer into sheet "
                   f"`{item['answer_sheet']}` cells `{item['answer_position']}` "
                   f"of `output.xlsx` (a copy of the provided input workbook).")
+        prompt += SSB_PROMPT_CLARIFICATIONS.get(tid, "")
         psha = hashlib.sha256(prompt.encode()).hexdigest()
         (tasks_dir / f"{tid}.md").write_text(prompt, encoding="utf-8")
         isha = hashlib.sha256((inputs_dir / f"{tid}_init.xlsx").read_bytes()).hexdigest()
@@ -677,6 +719,7 @@ grader:
   answer_sheet: {str(item['answer_sheet']).split(',')[0].strip(" '")}
   answer_position: "{item['answer_position']}"
   golden_workbook: data/spreadsheetbench/verified_400/gold/{tid}_golden.xlsx
+  oracle_source: data/spreadsheetbench/verified_400/gold_scripts/{tid}.py
   numeric_rel_tol: 0.005
   sandbox:
     banned: shell/network/process

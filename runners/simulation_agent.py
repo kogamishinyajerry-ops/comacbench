@@ -34,7 +34,7 @@ from typing import Any
 from . import common
 from .common import (FM_MISSING_OUTPUT, TaskSpec, aggregate_score,
                      build_result, environment_digest, gate_distribution,
-                     load_tasks, write_run_manifest)
+                     load_tasks)
 from .providers import ProviderError, get_answer
 from .sandbox import IsolatedRun, static_check
 from .solvers.openfoam import get_solver
@@ -249,6 +249,11 @@ def _run_ccx_task(
     题面钉死最小网格与单元类型，离散化差进容差带。
     """
     from .solvers.calculix import parse_dat, run_ccx
+    import hashlib
+    import math
+    engineering = "deck_contract" in task["grader"]
+    deck_audit = None
+    solver_started = False
     grade_t0 = time.time()
     iso = IsolatedRun()
     script = iso.write("make_case.py", code)
@@ -256,14 +261,40 @@ def _run_ccx_task(
     logs.append(f"make_case exit={r1['exit']} {r1['duration_s']}s")
 
     def _ret(gate: int, gf: list[str], fm: str | None, subs: dict, details: dict):
+        artifacts = {"code": json.dumps(code[:4000], ensure_ascii=False),
+                     "model_meta": json.dumps(meta, ensure_ascii=False)}
+        if engineering:
+            evidence = {"complete": True, "files": {}}
+            for name in ("make_case.py", "model.inp", "model.dat", "model.solver.log"):
+                path = iso.dir / name
+                if name != "make_case.py" and not path.exists() and not path.is_symlink():
+                    continue
+                if name != "make_case.py" and (path.is_symlink() or not path.is_file() or path.stat().st_size > 8*1024*1024):
+                    evidence["complete"] = False
+                    evidence["files"][name] = {"error": "not a regular file or over 8 MiB"}
+                    continue
+                raw = code.encode("utf-8") if name == "make_case.py" else path.read_bytes()
+                try:
+                    content = raw.decode("utf-8")
+                except UnicodeError:
+                    evidence["complete"] = False
+                    evidence["files"][name] = {"error": "not UTF-8"}
+                    continue
+                evidence["files"][name] = {"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "text": content,
+                                           "origin": "submitted_code" if name == "make_case.py" else "generated_input" if name == "model.inp" else "solver" if solver_started else "untrusted_candidate_output"}
+            if not evidence["complete"]:
+                gate, gf, fm = 0, gf + ["evidence_capture_failed"], "evidence_capture_failed"
+            details = {"kind": "ccx_fea", **details, "deck_audit": deck_audit,
+                       "evidence_files": {k: {f: v for f, v in value.items() if f != "text"}
+                                          for k, value in evidence["files"].items()}}
+            artifacts["engineering_evidence"] = json.dumps(evidence, ensure_ascii=False)
+        artifacts["grade_details"] = json.dumps(details, ensure_ascii=False)
         weights = {**DEFAULT_WEIGHTS, **(task["scoring"].get("weights") or {})}
         score = aggregate_score({k: (v if v is not None else 0.0)
                                  for k, v in subs.items()}, weights, gate)
         return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
             gate_failures=gf, subscores=subs, score=score,
-            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
-                       "model_meta": json.dumps(meta, ensure_ascii=False),
-                       "grade_details": json.dumps(details, ensure_ascii=False)},
+            artifacts=artifacts,
             timings={"agent_s": time.time() - t0, "setup_s": 0.0,
                      "grade_s": time.time() - grade_t0},
             env_digest=env_digest, logs=logs, failure_mode=fm,
@@ -282,7 +313,36 @@ def _run_ccx_task(
                     {"physics": 0.0, "requirements": 0.0, "objective": None,
                      "robustness": None}, {"missing": "model.inp"})
 
-    rr = run_ccx(iso.dir, "model", timeout - (time.time() - t0))
+    if engineering:
+        if inp.is_symlink() or not inp.is_file() or inp.stat().st_size > 8*1024*1024:
+            return _ret(0, ["invalid_deck"], "invalid_deck", {}, {"reason": "model.inp must be a regular file up to 8 MiB"})
+        from .solvers.cantilever_contract import audit_cantilever_deck
+        try:
+            deck_text = inp.read_text(encoding="utf-8")
+        except UnicodeError:
+            return _ret(0, ["invalid_deck"], "invalid_deck", {}, {"reason": "model.inp must be UTF-8"})
+        deck_audit = audit_cantilever_deck(deck_text, task["grader"]["deck_contract"])
+        if not deck_audit["passed"]:
+            reason = "unsupported_deck_feature" if any(i["code"] == "unsupported_deck_feature" for i in deck_audit["issues"]) else "engineering_contract_failed"
+            return _ret(0, [reason], reason,
+                        {"physics": 0.0, "requirements": 0.0, "objective": None,
+                         "robustness": None}, {"kind": "ccx_fea", "deck_audit": deck_audit})
+
+    # The external-agent protocol has a separate generation timeout. Its network /
+    # reasoning latency must not consume the declared artifact/solver budget.
+    budget_t0 = grade_t0 if meta.get("provider") == "external" else t0
+    if engineering:
+        # Generated .dat/log files are not solver evidence. Remove them first.
+        for name in ("model.dat", "model.solver.log", "model.frd", "model.sta", "model.cvg"):
+            path = iso.dir / name
+            if path.exists() or path.is_symlink():
+                if path.is_dir() and not path.is_symlink():
+                    return _ret(0, ["invalid_deck"], "invalid_deck", {}, {"reason": f"unexpected output directory: {name}"})
+                path.unlink()
+        solver_started = True
+        rr = run_ccx(iso.dir, "model", timeout - (time.time() - budget_t0), capture_log=True)
+    else:
+        rr = run_ccx(iso.dir, "model", timeout - (time.time() - budget_t0))
     logs.append(f"ccx exit={rr['exit']} {rr['duration_s']}s"
                 + (" TIMEOUT" if rr["timeout"] else ""))
     if rr["timeout"] or rr["exit"] != 0:
@@ -293,7 +353,14 @@ def _run_ccx_task(
                     {"ccx_stdout_tail": rr["stdout_tail"][-800:]})
 
     g = task["grader"]
+    if engineering and not (iso.dir / "model.dat").is_file():
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT,
+                    {"physics": 0.0, "requirements": 0.0, "objective": None, "robustness": None},
+                    {"missing": "model.dat", "ccx_s": rr["duration_s"]})
     got = parse_dat(iso.dir / "model.dat", dict(g["extract"]))
+    invalid_metrics = [k for k, value in got.items() if not math.isfinite(float(value))] if engineering else []
+    for k in invalid_metrics:
+        got.pop(k)
     keys = list(g["result_keys"])
     ref = dict(task["reference"]["values"])
     tol = float(g.get("numeric_rel_tol", 0.05))
@@ -318,6 +385,10 @@ def _run_ccx_task(
     details = {"kind": "ccx_fea", "hits": hits,
                "physics_hits": f"{n_ok}/{len(keys)}", "rel_tol": tol,
                "ccx_s": rr["duration_s"]}
+    if invalid_metrics:
+        details["nonfinite_metrics"] = invalid_metrics
+    if engineering and (len(present) != len(keys) or any(not math.isfinite(float(got[k])) for k in present)):
+        return _ret(0, [FM_MISSING_OUTPUT], FM_MISSING_OUTPUT, subs, details)
     return _ret(1, [], None, subs, details)
 
 
@@ -586,6 +657,23 @@ def run_task(
             applicability=applicability)
 
     # ---- exec_kind 分派 ----
+    if kind == "cfd_step":
+        from .solvers.cfd_step_runtime import evaluate
+        grade_t0 = time.time()
+        details = evaluate(task, code, timeout)
+        gate = int(details['cfd_audit']['passed'])
+        failures = [i['code'] for i in details['cfd_audit']['issues']]
+        return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+            gate_failures=failures, subscores={'physics':float(gate),'requirements':float(gate),
+                'objective':None,'robustness':None}, score=float(gate),
+            artifacts={'code':json.dumps(code[:4000],ensure_ascii=False),
+                'model_meta':json.dumps(meta,ensure_ascii=False),
+                'grade_details':json.dumps(details,ensure_ascii=False)},
+            timings={'agent_s':grade_t0-t0,'setup_s':0.0,'grade_s':time.time()-grade_t0},
+            env_digest=env_digest, logs=logs, failure_mode=failures[0] if failures else None,
+            applicability={'physics':'native wall shear reattachment vs reference',
+                'requirements':'native inputs, mesh, convergence and mass balance',
+                'objective':'N/A','robustness':'N/A'})
     if kind in ("aviary_mission", "pycycle_cycle"):
         return _run_aviary_task(task, code, meta, t0, env_digest, logs,
                                 applicability, companions=companions)
@@ -848,12 +936,12 @@ def main() -> int:
     ap.add_argument("--tasks", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--provider", default="stub",
-                    choices=["stub", "oracle", "openai_compat", "glm", "minimax"])
+                    choices=["stub", "oracle", "openai_compat", "glm", "minimax", "external"])
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--resume", action="store_true",
-                    help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
-                         "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
+                    help="仅复用身份匹配的完整结果；旧协议、损坏或条件不一致时"
+                         "拒绝续写，请使用新 --out 目录")
     ap.add_argument("--allow-partial-oracle", action="store_true",
                     help="oracle 模式下跳过缺 oracle_source 的任务（增量 bring-up 用："
                          "部分案例 oracle 未编写时先验证其余；跳过记录进 logs）")
@@ -942,78 +1030,67 @@ def main() -> int:
             tasks = [t for t in tasks if t.id in oracle_cache]
             print(f"[partial-oracle] 任务集 {before} -> {len(tasks)}（仅含已编写 oracle 的任务）")
 
-    from .providers import PROVIDER_PRESETS
-    model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get("model_default", "n/a")
+    from .run_state import RunState, provider_identity, rerun_command
+    model_label = provider_identity(args.provider, args.model)["model"]
+    rerun = rerun_command("runners.simulation_agent", args, model_label)
 
-    rerun = (f"cd {common.BENCH_ROOT} && {sys.executable} -m runners.simulation_agent "
-             f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
-             f"--provider {args.provider}"
-             + (f" --model {args.model}" if args.model else "")
-             + f" --seed {args.seed}"
-             + (f" --iterate {args.iterate}" if args.iterate > 1 else "")
-             + (f" --limit {args.limit}" if args.limit else "")
-             + (f" --scaffold {args.scaffold}" if args.scaffold else "")
-             + (" --resume" if args.resume else ""))
-
-    results, crash, resumed = [], 0, 0
-    for t in tasks:
-        rp = out_dir / f"result_{t.id}.json"
-        if args.resume and rp.exists():
-            try:
-                results.append(json.loads(rp.read_text(encoding="utf-8")))
+    with RunState(out_dir=out_dir, tasks=tasks, prompts=prompt_cache,
+                  adapter=ADAPTER, provider=args.provider, model=args.model,
+                  seed=args.seed, env_digest=env_digest, assets=asset_hashes,
+                  tasks_dir=tasks_dir, rerun=rerun, resume=args.resume,
+                  options={"iterate": args.iterate, "limit": args.limit,
+                           "scaffold": args.scaffold, "allow_partial_oracle": args.allow_partial_oracle},
+                  extra={"model": model_label,
+                         "harness_arm": ("H3" if args.scaffold and args.iterate > 1
+                                         else "H2" if args.scaffold
+                                         else "H1" if args.iterate > 1 else "H0"),
+                         "scaffold": args.scaffold or None,
+                         "iterate_rounds": args.iterate, "limit": args.limit,
+                         "protocol": "iterate" if args.iterate > 1 else "single"},
+                  runtime_inputs={name: common.sha256_bytes(content.encode())
+                                  for name, content in companions}) as run:
+        results, crash, resumed = [], 0, 0
+        for t in tasks:
+            if t.id in run.cached:
+                results.append(run.cached[t.id])
                 resumed += 1
                 continue
-            except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
-                pass
-        try:
-            if args.iterate > 1:
-                r = run_task_iterate(t, iterate=args.iterate,
-                                     provider=args.provider, model=args.model,
-                                     seed=args.seed, env_digest=env_digest,
-                                     prompt_cache=prompt_cache,
-                                     assets_root=assets_root,
-                                     oracle_cache=oracle_cache or None,
-                                     companions=companions or None)
-            else:
-                r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
-                             env_digest=env_digest, prompt_cache=prompt_cache,
-                             assets_root=assets_root, oracle_cache=oracle_cache or None,
-                             companions=companions or None)
-        except ProviderError as e:
-            raise SystemExit(f"[终止] provider 失败: {e}")
-        except Exception as e:  # noqa: BLE001
-            crash += 1
-            r = build_result(task=t, adapter=ADAPTER, validity_gate=0,
-                gate_failures=[common.FM_CRASH],
-                subscores={"physics": None, "requirements": None, "objective": None,
-                           "robustness": None}, score=0.0, artifacts={},
-                timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
-                env_digest=env_digest, logs=[f"runner exception: {e!r}"],
-                failure_mode=common.FM_CRASH)
-        results.append(r)
-        (out_dir / f"result_{t.id}.json").write_text(
-            json.dumps(r, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            try:
+                if args.iterate > 1:
+                    r = run_task_iterate(t, iterate=args.iterate,
+                                         provider=args.provider, model=args.model,
+                                         seed=args.seed, env_digest=env_digest,
+                                         prompt_cache=prompt_cache,
+                                         assets_root=assets_root,
+                                         oracle_cache=oracle_cache or None,
+                                         companions=companions or None)
+                else:
+                    r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
+                                 env_digest=env_digest, prompt_cache=prompt_cache,
+                                 assets_root=assets_root, oracle_cache=oracle_cache or None,
+                                 companions=companions or None)
+            except ProviderError as e:
+                raise SystemExit(f"[终止] provider 失败: {e}")
+            except Exception as e:  # noqa: BLE001
+                crash += 1
+                r = build_result(task=t, adapter=ADAPTER, validity_gate=0,
+                    gate_failures=[common.FM_CRASH],
+                    subscores={"physics": None, "requirements": None, "objective": None,
+                               "robustness": None}, score=0.0, artifacts={},
+                    timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
+                    env_digest=env_digest, logs=[f"runner exception: {e!r}"],
+                    failure_mode=common.FM_CRASH)
+            results.append(r)
+            run.write_result(t, r)
 
-    mf = write_run_manifest(out_dir, registry_id=registry_id, adapter=ADAPTER,
-                            provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
-                            env_digest=env_digest, assets=asset_hashes,
-                            rerun_command=rerun,
-                            extra={"crash_tasks": crash, "model": model_label,
-                                   "resumed_tasks": resumed,
-                                   "protocol": "iterate" if args.iterate > 1 else "single",
-                                   "iterate_rounds": args.iterate,
-                                   "limit": args.limit,
-                                   "harness_arm": ("H3" if (args.scaffold and args.iterate > 1)
-                                                   else "H2" if args.scaffold
-                                                   else "H1" if args.iterate > 1 else "H0"),
-                                   "scaffold": (args.scaffold or None)})
-    sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
-    dist = gate_distribution(results)
-    print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
-          f"| fail {dist['gate_failed']} | voided {dist['voided']} | crash {crash}")
-    print(f"       summary -> {sm}")
-    print(f"       rerun: {rerun}")
-    return 0
+        mf = run.finish(crash_tasks=crash, resumed_tasks=resumed)
+        sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
+        dist = gate_distribution(results)
+        print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
+              f"| fail {dist['gate_failed']} | voided {dist['voided']} | crash {crash}")
+        print(f"       summary -> {sm}")
+        print(f"       rerun: {rerun}")
+        return 0
 
 
 if __name__ == "__main__":

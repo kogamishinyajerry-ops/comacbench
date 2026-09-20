@@ -488,6 +488,9 @@ def get_answer(
     images             data:image/...;base64 URI 列表（多模态任务由 adapter 传入；
                        纯文本 preset 收到即抛错——multimodal_only 准入纪律）。
     """
+    if provider == "external":
+        from comacbench.agent import invoke
+        return invoke(task, prompt, seed=seed, expect=expect)
     if expect == "free_vqa":
         if provider == "stub":
             raw = _stub_free_text(task, seed, prompt)

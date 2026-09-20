@@ -18,6 +18,7 @@ import os
 import platform
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -185,6 +186,7 @@ def write_run_manifest(
     assets: dict[str, str],
     rerun_command: str,
     extra: dict[str, Any] | None = None,
+    task_ids: list[str] | None = None,
 ) -> Path:
     manifest = {
         "registry_id": registry_id,
@@ -196,15 +198,29 @@ def write_run_manifest(
         "environment_note": "dev 终端（外网开发机，OpenFOAM+FoamAgent，无 Fluent/StarCCM）",
         "assets": assets,                     # {label: sha256}
         "tasks_dir": str(tasks_dir),
-        "n_tasks": len(list(Path(tasks_dir).glob('*.yaml'))),
+        "n_tasks": len(task_ids) if task_ids is not None else len(list(Path(tasks_dir).glob('*.yaml'))),
         "rerun_command": rerun_command,
         "git_commit": _git_commit(),
         "extra": extra or {},
     }
     path = Path(out_dir) / "run_manifest.json"
-    path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
-                    encoding="utf-8")
+    write_json_atomic(path, manifest)
     return path
+
+
+def write_json_atomic(path: Path, value: Any) -> None:
+    """Publish a complete JSON file; interruption cannot leave a partial result."""
+    fd, tmp = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, indent=2, ensure_ascii=False, allow_nan=False)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 def _git_commit() -> str:

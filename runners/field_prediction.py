@@ -29,7 +29,7 @@ from typing import Any
 from . import common
 from .common import (FM_MISSING_OUTPUT, TaskSpec, aggregate_score,
                      build_result, environment_digest, gate_distribution,
-                     load_tasks, write_run_manifest)
+                     load_tasks)
 from .providers import ProviderError, get_answer
 
 ADAPTER = "field_prediction"
@@ -201,8 +201,8 @@ def main() -> int:
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--resume", action="store_true",
-                    help="跳过 out 下已有 result_<task_id>.json 的任务（读入参与"
-                         "汇总，损坏文件自动重跑）；summary/manifest 按全量重建")
+                    help="仅复用身份匹配的完整结果；旧协议、损坏或条件不一致时"
+                         "拒绝续写，请使用新 --out 目录")
     args = ap.parse_args()
 
     tasks_dir = Path(args.tasks)
@@ -234,58 +234,47 @@ def main() -> int:
         with open(pf, encoding="utf-8", newline="") as f:
             prompt_cache[t.id] = f.read()
 
-    from .providers import PROVIDER_PRESETS
-    model_label = args.model or PROVIDER_PRESETS.get(args.provider, {}).get("model_default", "n/a")
+    from .run_state import RunState, provider_identity, rerun_command
+    model_label = provider_identity(args.provider, args.model)["model"]
+    rerun = rerun_command("runners.field_prediction", args, model_label)
 
-    rerun = (f"cd {common.BENCH_ROOT} && python3 -m runners.field_prediction "
-             f"--tasks {tasks_dir.as_posix()} --out {out_dir.as_posix()} "
-             f"--provider {args.provider}"
-             + (f" --model {args.model}" if args.model else "")
-             + f" --seed {args.seed}"
-             + (" --resume" if args.resume else ""))
-
-    results, crash, resumed = [], 0, 0
-    for t in tasks:
-        rp = out_dir / f"result_{t.id}.json"
-        if args.resume and rp.exists():
-            try:
-                results.append(json.loads(rp.read_text(encoding="utf-8")))
+    with RunState(out_dir=out_dir, tasks=tasks, prompts=prompt_cache,
+                  adapter=ADAPTER, provider=args.provider, model=args.model,
+                  seed=args.seed, env_digest=env_digest, assets=asset_hashes,
+                  tasks_dir=tasks_dir, rerun=rerun, resume=args.resume,
+                  extra={'model': model_label}) as run:
+        results, crash, resumed = [], 0, 0
+        for t in tasks:
+            if t.id in run.cached:
+                results.append(run.cached[t.id])
                 resumed += 1
                 continue
-            except Exception:  # noqa: BLE001 — 损坏的半截文件按缺失处理重跑
-                pass
-        try:
-            r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
-                         env_digest=env_digest, prompt_cache=prompt_cache,
-                         assets_root=assets_root)
-        except ProviderError as e:
-            raise SystemExit(f"[终止] provider 失败: {e}")
-        except Exception as e:  # noqa: BLE001
-            crash += 1
-            r = build_result(task=t, adapter=ADAPTER, validity_gate=0,
-                gate_failures=[common.FM_CRASH],
-                subscores={"physics": None, "requirements": None, "objective": None,
-                           "robustness": None}, score=0.0, artifacts={},
-                timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
-                env_digest=env_digest, logs=[f"runner exception: {e!r}"],
-                failure_mode=common.FM_CRASH)
-        results.append(r)
-        (out_dir / f"result_{t.id}.json").write_text(
-            json.dumps(r, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            try:
+                r = run_task(t, provider=args.provider, model=args.model, seed=args.seed,
+                             env_digest=env_digest, prompt_cache=prompt_cache,
+                             assets_root=assets_root)
+            except ProviderError as e:
+                raise SystemExit(f"[终止] provider 失败: {e}")
+            except Exception as e:  # noqa: BLE001
+                crash += 1
+                r = build_result(task=t, adapter=ADAPTER, validity_gate=0,
+                    gate_failures=[common.FM_CRASH],
+                    subscores={"physics": None, "requirements": None, "objective": None,
+                               "robustness": None}, score=0.0, artifacts={},
+                    timings={"agent_s": 0.0, "setup_s": 0.0, "grade_s": 0.0},
+                    env_digest=env_digest, logs=[f"runner exception: {e!r}"],
+                    failure_mode=common.FM_CRASH)
+            results.append(r)
+            run.write_result(t, r)
 
-    mf = write_run_manifest(out_dir, registry_id=registry_id, adapter=ADAPTER,
-                            provider=args.provider, seed=args.seed, tasks_dir=tasks_dir,
-                            env_digest=env_digest, assets=asset_hashes,
-                            rerun_command=rerun,
-                            extra={"crash_tasks": crash, "model": model_label,
-                                   "resumed_tasks": resumed})
-    sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
-    dist = gate_distribution(results)
-    print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
-          f"| fail {dist['gate_failed']} | voided {dist['voided']} | crash {crash}")
-    print(f"       summary -> {sm}")
-    print(f"       rerun: {rerun}")
-    return 0
+        mf = run.finish(crash_tasks=crash, resumed_tasks=resumed)
+        sm = write_summary(out_dir, results, args.provider, model_label, args.seed)
+        dist = gate_distribution(results)
+        print(f"[done] {dist['n_tasks']} tasks | gate pass {dist['gate_passed']} "
+              f"| fail {dist['gate_failed']} | voided {dist['voided']} | crash {crash}")
+        print(f"       summary -> {sm}")
+        print(f"       rerun: {rerun}")
+        return 0
 
 
 if __name__ == "__main__":

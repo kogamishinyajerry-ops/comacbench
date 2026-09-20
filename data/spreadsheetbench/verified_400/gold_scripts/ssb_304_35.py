@@ -121,6 +121,10 @@ def _v(x):
 
 wb = openpyxl.load_workbook("ssb_304_35_init.xlsx")
 ws = wb["start"] if "start" in wb.sheetnames else wb.worksheets[0]
+for cells in ws['A3:F36']:
+    for cell in cells:
+        if not isinstance(cell, openpyxl.cell.cell.MergedCell):
+            cell.value = None
 for row, col, v in VALUES:
     ws.cell(row=row, column=col).value = _v(v)
 wb.save("output.xlsx")
