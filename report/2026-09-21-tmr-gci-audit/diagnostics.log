@@ -1,0 +1,193 @@
+### diag273b (湍流指定 选择器 + 场函数真实名)
+DB-START
+DB-TYPES in=default 2 out=default 3
+DIAG-INLET-TSPEC-CLASS star.kwturb.KwTurbSpecOption
+DIAG-INLET-TSPEC-SEL 2
+DIAG-KWSPEC-OPT-OPT K_OMEGA
+DIAG-KWSPEC-OPT-OPT INTENSITY_LENGTH_SCALE
+DIAG-KWSPEC-OPT-OPT INTENSITY_VISCOSITY_RATIO
+DIAG-IC-TSPEC-CLASS star.kwturb.KwTurbSpecOption
+DIAG-IC-TSPEC-SEL 2
+DIAG-INLET-TI = 0.01
+DIAG-INLET-TVR = 10.0
+DIAG-IC-TI = 0.01
+DIAG-IC-TVR = 10.0
+DIAG-IC-VSCALE = 1.0 m/s
+DIAG-FF Dynamic Viscosity | DynamicViscosity
+DIAG-FF Effective Viscosity | EffectiveViscosity
+DIAG-FF Specific Dissipation Rate | SpecificDissipationRate
+DIAG-FF Turbulent Charge | TurbulentCharge
+DIAG-FF Turbulent Kinetic Energy | TurbulentKineticEnergy
+DIAG-FF Turbulent Viscosity Ratio | TurbulentViscosityRatio
+DIAG-FF Turbulent Viscosity | TurbulentViscosity
+DIAG-FF-COUNT 104
+DB-DONE
+
+### api_probe (SimulationIterator / StepStoppingCriterion)
+API-IT public void star.common.SimulationIterator.run()
+API-IT public void star.common.SimulationIterator.run(int,boolean)
+API-IT public void star.common.SimulationIterator.run(boolean)
+API-IT public void star.common.SimulationIterator.run(int)
+API-IT public void star.common.SimulationIterator.run(star.common.AdjointRunnableSolver)
+API-IT public void star.common.SimulationIterator.run(star.common.RunnableSolver)
+API-IT public void star.common.SimulationIterator.step(int)
+API-IT public void star.common.SimulationIterator.step(star.common.AdjointRunnableSolver,int,boolean)
+API-IT public void star.common.SimulationIterator.step(star.common.RunnableSolver,int,boolean)
+API-IT public void star.common.SimulationIterator.step(int,boolean)
+API-IT public void star.common.SimulationIterator.step(star.common.RunnableSolver,int)
+API-IT public void star.common.SimulationIterator.step(star.common.AdjointRunnableSolver,int)
+API-IT public star.base.neo.NeoObservable star.common.SimulationIterator.getIterationObservable()
+API-IT public int star.common.SimulationIterator.getCurrentIteration()
+API-IT public int star.common.SimulationIterator.getCurrentTimeLevel()
+API-IT public star.common.AutoSave star.common.SimulationIterator.getAutoSave()
+API-IT public boolean star.common.SimulationIterator.isIterating()
+API-IT public void star.common.SimulationIterator.runAutomation()
+API-IT public void star.common.SimulationIterator.stepAdjoint(star.common.AdjointRunnableSolver,java.util.Collection,int,boolean)
+API-IT public star.common.RunnableSolver star.common.SimulationIterator.getRunnableSolver()
+API-IT public star.common.AutoExport star.common.SimulationIterator.getAutoExport()
+API-IT public void star.common.SimulationIterator.runAdjoint(star.common.AdjointRunnableSolver,java.util.Collection,int,boolean)
+API-IT public int star.common.SimulationIterator.getVerbosity()
+API-IT public void star.common.SimulationIterator.setVerbosity(int)
+API-IT public double star.common.SimulationIterator.getElapsedTime()
+API-IT public star.common.SimulationIterator star.common.SimulationIterator.getSelf()
+API-IT public int star.common.SimulationIterator.getNumberOfSteps()
+API-IT public void star.common.SimulationIterator.stepAndWait(int)
+API-IT public double star.common.SimulationIterator.getCpuTime()
+API-IT public void star.common.SimulationIterator.setNumberOfSteps(int)
+API-IT public boolean star.common.SimulationIterator.isBusy()
+API-IT public void star.common.SimulationIterator.runAndWait()
+API-IT public star.common.RootObject star.common.SimulationObject.getRootObject()
+API-IT public star.common.Simulation star.common.SimulationObject.getSimulation()
+API-IT public javax.swing.ImageIcon star.base.neo.NamedObject.getIcon()
+API-IT public void star.base.neo.NamedObject.setPresentationName(java.lang.String)
+API-IT public star.coremodule.objectselector.ObjectSelectorInput star.base.neo.NamedObject.getTagsInput()
+API-IT public void star.base.neo.NamedObject.setTagsInput(star.coremodule.objectselector.ObjectSelectorInput)
+API-IT public java.lang.String star.base.neo.NamedObject.getPresentationName()
+API-IT public java.lang.Object star.base.neo.ClientServerObject.getProperty(java.lang.String)
+API-IT public boolean star.base.neo.ClientServerObject.getBoolean(java.lang.String)
+API-IT public int star.base.neo.ClientServerObject.getInt(java.lang.String)
+API-IT public long star.base.neo.ClientServerObject.getLong(java.lang.String)
+API-IT public double star.base.neo.ClientServerObject.getDouble(java.lang.String)
+API-IT public boolean star.base.neo.ClientServerObject.isEmpty()
+API-IT public final java.lang.String star.base.neo.ClientServerObject.getMessage(java.lang.String)
+API-IT public star.base.neo.ClientServerObject star.base.neo.ClientServerObject.getParent()
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.base.neo.NeoProperty)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,int)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,java.lang.Enum)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.base.neo.DoubleVector)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,boolean)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,java.awt.Font)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,long)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,double)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.common.FieldFunction)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.base.neo.ClientServerObject)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.base.neo.StringVector)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.base.neo.BooleanVector)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,star.base.neo.IntVector)
+API-IT public void star.base.neo.ClientServerObject.set(java.lang.String,java.lang.String)
+API-IT public java.io.File star.base.neo.ClientServerObject.getFile(java.lang.String)
+API-IT public java.lang.String star.base.neo.ClientServerObject.getDisplayName()
+API-IT public java.lang.String star.base.neo.ClientServerObject.getString(java.lang.String)
+API-IT public java.util.Collection star.base.neo.ClientServerObject.getChildren()
+API-IT public java.awt.Font star.base.neo.ClientServerObject.getFont(java.lang.String)
+API-IT public java.lang.String star.base.neo.ClientServerObject.getQualifiedName()
+API-IT public java.lang.Enum star.base.neo.ClientServerObject.getEnum(java.lang.String,java.lang.Class)
+API-IT public star.base.neo.ServerConnection star.base.neo.ClientServerObject.getServer()
+API-IT public star.base.neo.ClientServerObjectKey star.base.neo.ClientServerObject.getObjectKey()
+API-IT public star.base.neo.ClientServerObjectKey star.base.neo.ClientServerObject.getObjectKey(java.lang.String)
+API-IT public star.base.neo.ObjectRegistry star.base.neo.ClientServerObject.getObjectRegistry()
+API-IT public boolean star.base.neo.ClientServerObject.isConnected()
+API-IT public java.lang.Object star.base.neo.ClientServerObject.getJournalKey()
+API-IT public boolean star.base.neo.ClientServerObject.isGraphicsObject()
+API-IT public java.util.Vector star.base.neo.ClientServerObject.getReferences()
+API-IT public star.base.neo.ClientServerObject star.base.neo.ClientServerObject.getClientServerObject(java.lang.String)
+API-IT public java.util.Vector star.base.neo.ClientServerObject.getVector(java.lang.String)
+API-IT public star.base.neo.NeoSubject star.base.neo.ClientServerObject.getChangedObservable()
+API-IT public java.util.Comparator star.base.neo.ClientServerObject.getChildrenComparator()
+API-IT public star.base.neo.NeoSubject star.base.neo.ClientServerObject.getPropertyChangeObservable()
+API-IT public boolean star.base.neo.ClientServerObject.isFromSameRootObject(star.base.neo.ClientServerObject)
+API-IT public java.beans.PropertyDescriptor[] star.base.neo.ClientServerObject.getLinkedBeanPropertyDescriptors()
+API-IT public java.lang.String star.base.neo.ClientServerObject.getMenuPresentationName()
+API-IT public boolean star.base.neo.ClientServerObject.isFromSameSimulation(star.base.neo.ClientServerObject)
+API-IT public java.lang.String star.base.neo.ClientServerObject.getObjectKeyAsString()
+API-IT public boolean star.base.neo.ClientServerObject.getAllowShowDependencies()
+API-IT public java.beans.PropertyDescriptor[] star.base.neo.ClientServerObject.getBeanPropertyDescriptors()
+API-IT public star.base.neo.NeoSubject star.base.neo.ClientServerObject.getIconChangedObservable()
+API-IT public java.util.Vector star.base.neo.ClientServerObject.getObjectVector(java.lang.String)
+API-IT public java.lang.String star.base.neo.ClientServerObject.getBeanDisplayName()
+API-IT public star.base.neo.NeoProperty star.base.neo.ClientServerObject.getNeoProperty(java.lang.String)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,star.base.neo.ClientServerObjectKey)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,star.base.neo.ClientServerObject)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,double)
+API-IT public void star.base.neo.ClientServerObject.setSilently(star.base.neo.ClientServerObject)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,star.base.neo.NeoProperty)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,boolean)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,java.lang.String)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,java.util.Vector)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,int)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,long)
+API-IT public void star.base.neo.ClientServerObject.setSilently(java.lang.String,star.base.neo.SerializableEnum)
+API-IT public void star.base.neo.ClientServerObject.setObjectVector(java.lang.String,java.lang.Class,java.util.Collection)
+API-IT public void star.base.neo.ClientServerObject.setObjectVector(java.lang.String,java.util.Collection)
+API-IT public java.util.Collection star.base.neo.ClientServerObject.getFiles(java.lang.String)
+API-IT public long star.base.neo.ClientServerObject.getObjectId()
+API-IT public star.base.neo.IntVector star.base.neo.ClientServerObject.getIntVector(java.lang.String)
+API-IT public star.common.TagGroup star.base.neo.ClientServerObject.getTagGroup()
+API-IT public star.base.neo.BooleanVector star.base.neo.ClientServerObject.getBooleanVector(java.lang.String)
+API-IT public star.base.neo.DoubleVector star.base.neo.ClientServerObject.getDoubleVector(java.lang.String)
+API-IT public star.base.neo.StringVector star.base.neo.ClientServerObject.getStringVector(java.lang.String)
+API-IT public java.lang.String star.base.neo.ClientServerObject.getAsStringArg()
+API-IT public final java.lang.String star.base.neo.ClientServerObject.getVisualId()
+API-IT public star.base.neo.NeoJournal star.base.neo.NeoJournalObject.getJournal()
+API-IT public java.lang.String star.base.neo.NeoJournalObject.getVariableName()
+API-IT public java.lang.String star.base.neo.NeoJournalObject.getTypeCast(java.lang.String)
+API-IT public java.lang.String star.base.neo.NeoJournalObject.getJournalClassName()
+API-IT public final native java.lang.Class java.lang.Object.getClass()
+API-MSC-CLASS star.common.StepStoppingCriterion
+API-MSC-SET-INT-OK
+API-CRIT Maximum Steps | star.common.StepStoppingCriterion
+API-CRIT Stop File | star.common.AbortFileStoppingCriterion
+
+### controlled probe 137x97
+PR-START G137
+PR-SETUP-DONE
+PR-INIT-K-IN = 1.5000000000000001E-4
+PR-INIT-K-OUT = 1.5000000000000001E-4
+PR-INIT-K-SLIP = 1.5E-4
+PR-INIT-OM-OUT = 0.9574923992496288
+PR-INIT-TVR-OUT = 10.000000000000002
+PR-INIT-DONE
+PR-RUN-OK
+PR-K-IN = 0.3749999999999999
+PR-K-SLIP = 81.3322490826001
+PR-K-PLATE = 5.84438956460327E-6
+PR-K-OUT = 0.5074078240568822
+PR-TVR-PLATE = 2.992506087317406E-10
+PR-TVR-OUT = 30.64415880479922
+PR-MUT-PLATE = 5.551338192460773E-15
+PR-MU-PLATE = 1.8550800000000012E-5
+PR-YPLUS-PLATE = 0.10731987512893369
+PR-OM-PLATE = 3.118858535942749E9
+PR-DONE G137
+
+### controlled probe 273x193
+PR-START G273
+PR-SETUP-DONE
+PR-INIT-K-IN = 1.499999999999999E-4
+PR-INIT-K-OUT = 1.5000000000000001E-4
+PR-INIT-K-SLIP = 1.5000000000000001E-4
+PR-INIT-OM-OUT = 0.9574923992496289
+PR-INIT-TVR-OUT = 10.000000000000005
+PR-INIT-DONE
+PR-RUN-OK
+PR-K-IN = 0.3749999999999992
+PR-K-SLIP = 26.320311405314897
+PR-K-PLATE = 3.8143807247475326E-6
+PR-K-OUT = 2.345655357817286
+PR-TVR-PLATE = 1.9433247563832804E-10
+PR-TVR-OUT = 117.45296837612638
+PR-MUT-PLATE = 3.6050228890714956E-15
+PR-MU-PLATE = 1.8550799999999995E-5
+PR-YPLUS-PLATE = 0.05779199890485316
+PR-OM-PLATE = 3.133237696959552E9
+PR-DONE G273
