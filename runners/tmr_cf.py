@@ -600,7 +600,14 @@ def read_field_slice(path: str | Path) -> list[FieldRow]:
     Specific Dissipation Rate / Turbulent Kinetic Energy / Turbulent Viscosity Ratio
     / Velocity[i]。
     """
-    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    path = Path(path)
+    with path.open("rb") as fh:
+        magic = fh.read(2)
+    if magic == b"\x1f\x8b":
+        raise ValueError(
+            f"{path.name} 是 gzip 压缩件；先 `gunzip -k {path.name}` 再读"
+            "（本函数只读纯文本 .daten）")
+    text = path.read_text(encoding="utf-8", errors="replace")
     header: list[str] | None = None
     rows: list[FieldRow] = []
     for line in text.splitlines():
@@ -945,7 +952,11 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
         return 0 if v.ok else 1
 
     if args.cmd == "field":
-        rows = read_field_slice(args.daten)
+        try:
+            rows = read_field_slice(args.daten)
+        except ValueError as exc:
+            print(f"error: {exc}")
+            return 2
         s = field_sanity(rows, u_inf=args.u, re_target=args.re_target,
                          nu_tol_pct=args.nu_tol, re_tol_pct=args.re_tol)
         print(s.summary())

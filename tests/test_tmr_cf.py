@@ -487,6 +487,18 @@ class FieldSanityTests(unittest.TestCase):
         self.assertFalse(s.ok)
         self.assertIn("空切片", s.reasons)
 
+    def test_gzip_slice_is_rejected_with_actionable_message(self):
+        """证据件常以 .gz 归档（见 report §17）——必须给出可操作的提示而不是乱解析。"""
+        import gzip
+        from runners.tmr_cf import read_field_slice
+        p = Path(tempfile.mkdtemp()) / "slice.daten.gz"
+        with gzip.open(p, "wt", encoding="utf-8") as fh:
+            fh.write("# Centroid[X]\n  1  0.5\n")
+        self.addCleanup(lambda: p.unlink(missing_ok=True))
+        with self.assertRaises(ValueError) as ctx:
+            read_field_slice(p)
+        self.assertIn("gunzip", str(ctx.exception))
+
 
 if __name__ == "__main__":
     unittest.main()
