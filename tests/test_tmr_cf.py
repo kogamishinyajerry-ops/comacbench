@@ -151,6 +151,55 @@ class DatanAndReferenceTests(unittest.TestCase):
         self.assertAlmostEqual(cf[0], 2.5e-2)
 
 
+class MultiZoneReferenceTests(unittest.TestCase):
+    """TMR 的 Cf 参考文件常把多个求解器装在同一个 .dat 里（实测 cf_plate_sstv.dat
+    同时含 CFL3D 与 FUN3D）。按行拼接会得到一条**混合曲线**——必须 fail-closed。"""
+
+    TWO_ZONE = ('variables="x","cf"\n'
+                'zone, t="CFL3D"\n'
+                " 0.5  2.0E-03\n 1.0  1.8E-03\n"
+                'zone, t="FUN3D"\n'
+                " 0.5  1.9E-03\n 1.0  1.7E-03\n")
+
+    def _write(self, text: str) -> Path:
+        d = Path(tempfile.mkdtemp())
+        p = d / "twozone.dat"
+        p.write_text(text, encoding="utf-8")
+        self.addCleanup(lambda: p.unlink(missing_ok=True))
+        return p
+
+    def test_reference_zones_lists_names_in_order(self):
+        from runners.tmr_cf import reference_zones
+        self.assertEqual(reference_zones(self._write(self.TWO_ZONE)), ["CFL3D", "FUN3D"])
+
+    def test_read_reference_without_zone_fails_closed(self):
+        p = self._write(self.TWO_ZONE)
+        with self.assertRaisesRegex(ValueError, "必须用 zone="):
+            read_reference(p)
+
+    def test_read_reference_selects_zone_by_index_and_name(self):
+        p = self._write(self.TWO_ZONE)
+        for sel in (0, "CFL3D"):
+            x, cf = read_reference(p, zone=sel)
+            self.assertEqual(len(x), 2)
+            self.assertAlmostEqual(cf[0], 2.0e-3)
+        x, cf = read_reference(p, zone="FUN3D")
+        self.assertAlmostEqual(cf[0], 1.9e-3)
+
+    def test_read_reference_rejects_unknown_zone(self):
+        p = self._write(self.TWO_ZONE)
+        with self.assertRaisesRegex(ValueError, "不存在"):
+            read_reference(p, zone="SU2")
+
+    def test_mixed_reference_would_bias_the_comparison(self):
+        """把两 zone 混起来的后果：插值取到邻近的另一个 zone 值 -> 偏差被污染。"""
+        p = self._write(self.TWO_ZONE)
+        x_m, cf_m = [0.5, 1.0], [2.0e-3, 1.8e-3]
+        cfl = read_reference(p, zone="CFL3D")
+        clean = compare_cf(x_m, cf_m, *cfl, x_min=0.0, x_max=2.0, n_bins=2)
+        self.assertAlmostEqual(clean.mean_dev_pct, 0.0, places=9)
+
+
 class CfTests(unittest.TestCase):
     def test_cf_from_tau_uses_dynamic_pressure(self):
         q = 0.5 * 1.18415 * 50.0 ** 2

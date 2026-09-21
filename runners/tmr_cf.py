@@ -29,11 +29,16 @@
   **只比较同一 k 量级下的残差轨迹**，跨算例比较必须看 Cf/场量而非残差数值。
 * 残差门通过 ≠ 解正确：545x385 档残差平滑下降（Tke 单调 0.54→0.49）却出现壁面 τ 崩塌
   （Cf ~1e-5），必须叠加场侧 sanity（见 convergence_report 文档的 caveat）。
+* **参考文件不是单条曲线**：TMR 的 `cf_plate_sstv.dat` 含两个 zone
+  （`zone, t="CFL3D"` 与 `zone, t="FUN3D"`，990 行里 447 个 x 站点各出现两次且 cf 不同）。
+  按行拼接会得到一条**混合参考**，插值指标被污染（实测口径差 0.2–0.3 pp）。
+  `read_reference` 因此 fail-closed：多 zone 且未显式指定 `zone=` 直接抛错。
 """
 
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -210,25 +215,87 @@ def read_daten(path: str | Path) -> tuple[list[float], list[float]]:
     return [xs[i] for i in order], [taus[i] for i in order]
 
 
-def read_reference(path: str | Path) -> tuple[list[float], list[float]]:
-    """读 TMR 参考 .dat（Tecplot 风格 ``variables="x","cf"``）→ (x, cf)，按 x 升序。"""
-    xs: list[float] = []
-    cfs: list[float] = []
+def reference_zones(path: str | Path) -> list[str]:
+    """列出 TMR 参考 .dat 里的所有 zone 名（按出现序）；无 zone 行时返回 ``['']``。
+
+    TMR 的 Cf 参考文件常把多个求解器的结果装在同一个文件里，例如
+    ``cf_plate_sstv.dat`` 同时含 ``zone, t="CFL3D"`` 与 ``zone, t="FUN3D"``。
+    **按行拼接会得到一条混合曲线**——务必先列 zone 再显式选取（见 read_reference）。
+    """
+    names: list[str] = []
     for raw in Path(path).read_text(encoding="utf-8", errors="replace").splitlines():
         line = raw.strip()
+        if not line.lower().startswith("zone"):
+            continue
+        m = re.search(r't\s*=\s*"([^"]*)"', line)
+        if m:
+            names.append(m.group(1))
+        else:
+            m2 = re.search(r't\s*=\s*(\S+)', line)
+            names.append(m2.group(1) if m2 else f"zone{len(names)}")
+    return names or [""]
+
+
+def read_reference(
+    path: str | Path, *, zone: int | str | None = None
+) -> tuple[list[float], list[float]]:
+    """读 TMR 参考 .dat（Tecplot 风格 ``variables="x","cf"``）→ (x, cf)，按 x 升序。
+
+    Args:
+        zone: 选择 zone（``int`` 索引或 ``str`` 名）。
+            ``None`` 时**仅当文件只有一个 zone** 才取它；多 zone 时抛
+            ``ValueError``（fail-closed：宁可报错，也不静默拼接成混合参考）。
+    """
+    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    names = reference_zones(path)
+
+    blocks: list[list[tuple[float, float]]] = [[]]
+    for raw in text.splitlines():
+        line = raw.strip()
         low = line.lower()
-        if not line or "variables" in low or low.startswith("zone"):
+        if not line or "variables" in low:
+            continue
+        if low.startswith("zone"):
+            blocks.append([])
             continue
         parts = line.split()
         if len(parts) < 2:
             continue
         try:
-            xs.append(float(parts[0].replace("D", "E").replace("d", "e")))
-            cfs.append(float(parts[1].replace("D", "E").replace("d", "e")))
+            blocks[-1].append((
+                float(parts[0].replace("D", "E").replace("d", "e")),
+                float(parts[1].replace("D", "E").replace("d", "e")),
+            ))
         except ValueError:
             continue
-    if not xs:
+    # 首个 block 是 zone 行之前的散点（某些文件没有 zone 行）
+    if blocks[0]:
+        data_blocks = blocks
+    else:
+        data_blocks = blocks[1:]
+
+    if not data_blocks or all(not b for b in data_blocks):
         raise ValueError(f"no data rows parsed from {path}")
+
+    if zone is None:
+        nonempty = [b for b in data_blocks if b]
+        if len(nonempty) > 1:
+            raise ValueError(
+                f"{Path(path).name} 含 {len(nonempty)} 个 zone {names}；"
+                "必须用 zone= 显式指定，避免拼接成混合参考")
+        rows = nonempty[0]
+    else:
+        if isinstance(zone, int):
+            if not (0 <= zone < len(data_blocks)) or not data_blocks[zone]:
+                raise ValueError(f"zone 索引 {zone} 越界或为空（共 {len(data_blocks)} 个）")
+            rows = data_blocks[zone]
+        else:
+            if zone not in names:
+                raise ValueError(f"zone 名 {zone!r} 不存在；可选 {names}")
+            rows = data_blocks[names.index(zone)]
+
+    xs = [r[0] for r in rows]
+    cfs = [r[1] for r in rows]
     order = sorted(range(len(xs)), key=lambda i: xs[i])
     return [xs[i] for i in order], [cfs[i] for i in order]
 
@@ -474,6 +541,8 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
     p_cf.add_argument("--x-min", type=float, default=0.0)
     p_cf.add_argument("--x-max", type=float, default=2.0)
     p_cf.add_argument("--label", default="")
+    p_cf.add_argument("--zone", default=None,
+                      help="参考文件含多 zone 时必填（如 CFL3D / FUN3D）")
 
     p_gci = sub.add_parser("gci", help="三档网格 Richardson 外推 + GCI（量取 x>0.5 Cf 均值）")
     p_gci.add_argument("daten", nargs=3, type=Path, metavar=("FINE", "MEDIUM", "COARSE"))
@@ -484,6 +553,8 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
     p_gci.add_argument("--u", type=float, default=50.0)
     p_gci.add_argument("--reference", type=Path, default=None,
                        help="可选：同时打印各档对参考的偏差")
+    p_gci.add_argument("--zone", default=None,
+                       help="参考文件含多 zone 时必填（如 CFL3D / FUN3D）")
 
     args = ap.parse_args(argv)
 
@@ -499,7 +570,7 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
 
     if args.cmd == "cf":
         xs, taus = read_daten(args.daten)
-        xr, cfr = read_reference(args.reference)
+        xr, cfr = read_reference(args.reference, zone=args.zone)
         cf = cf_from_tau(taus, rho=args.rho, u_inf=args.u)
         res = compare_cf(xs, cf, xr, cfr, x_min=args.x_min, x_max=args.x_max,
                          n_bins=args.bins, label=args.label or args.daten.stem)
@@ -523,7 +594,7 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
     g = richardson_gci(qois, ratios, safety=args.safety)
     print(f"Richardson/GCI: {g.summary()}")
     if args.reference is not None:
-        xr, cfr = read_reference(args.reference)
+        xr, cfr = read_reference(args.reference, zone=args.zone)
         ref = fully_turbulent_mean_cf(xr, cfr, x_lo=args.x_lo)
         print(f"reference mean Cf(x>={args.x_lo}) = {ref:.6f}")
         for p, q in zip(args.daten, qois):
