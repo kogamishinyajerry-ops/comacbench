@@ -500,5 +500,150 @@ class FieldSanityTests(unittest.TestCase):
         self.assertIn("gunzip", str(ctx.exception))
 
 
+class SliceDiagnosisTests(unittest.TestCase):
+    """切片诊断：板面上的边界层是不是**从零起步**。
+
+    这条门存在的理由（2026-09-21 阶段五实测）：``field_sanity`` 抓到了 Re 口径偏低
+    36 %，但漏掉了一类更根本的错误 —— 273x193/12000 步的场里
+    **前缘 δ99 = 19.57 mm 是理论值的 290 倍、上游对称条带上近壁 u 只有 16 % 来流**。
+    板的「边界层」其实是一个从域入口带进来的滞止高 k 层（k≈100，Ti≈16 %），
+    于是 Cf(x) 被压成近常数、GCI 无从收口。两个入口湍流口径（1600× 之差）
+    给出几乎相同的读数，说明它被这个伪层完全淹没。
+    """
+
+    U = 50.0
+    RE = 5.0e6
+
+    def _rows(self, stations):
+        """stations: {x: [(z, u), ...]} -> FieldRow 列表（k/omega/tvr 取自洽常数）。"""
+        from runners.tmr_cf import FieldRow
+        return [FieldRow(x=x, z=z, omega=1.0e3, k=0.35, tvr=10.0, u=u, w=0.0)
+                for x, prof in stations.items() for z, u in prof]
+
+    def _law(self, x, delta, *, n=101, zmax=None):
+        """1/7 幂律边界层剖面（u/U = min(1, (z/delta)^(1/7))）；含 z=0 点。"""
+        zmax = zmax if zmax is not None else 20.0 * delta
+        return [(zmax * i / n, self.U * min(1.0, (zmax * i / n / delta) ** (1.0 / 7.0)))
+                for i in range(0, n + 1)]
+
+    def _linear(self, x, delta, *, n=400, zmax=None):
+        """线性剖面（u/U = min(1, z/delta)）—— 解析值 delta*=delta/2, theta=delta/6, H=3。"""
+        zmax = zmax if zmax is not None else 6.0 * delta
+        return [(zmax * i / n, self.U * min(1.0, zmax * i / n / delta))
+                for i in range(0, n + 1)]
+
+    def _uniform(self, xs, zs=(1e-6, 1e-4, 1e-3, 1e-2, 0.1, 0.5)):
+        return {x: [(z, self.U) for z in zs] for x in xs}
+
+    def _clean(self):
+        """上游均匀来流 + 板上前缘很薄：应当 PASS。"""
+        st = self._uniform([-0.30, -0.20, -0.10, -0.05])
+        st[0.001] = self._law(0.001, 1.0e-4)
+        st[0.50] = self._law(0.50, 3.0e-3)
+        st[1.99] = self._law(1.99, 3.0e-2)
+        return st
+
+    def test_clean_case_passes(self):
+        from runners.tmr_cf import diagnose_slice
+        d = diagnose_slice(self._rows(self._clean()), u_inf=self.U, re_target=self.RE)
+        self.assertTrue(d.ok, d.reasons)
+        self.assertEqual(d.n_upstream, 4)
+        self.assertAlmostEqual(d.up_u_ratio_min, 1.0, places=6)
+        self.assertLess(d.lead_ratio, 5.0)
+
+    def test_upstream_retardation_is_caught(self):
+        """实测形态：上游条带近壁 u 掉到 16 % 来流 —— 这不该是均匀来流入流区。"""
+        from runners.tmr_cf import diagnose_slice
+        st = self._clean()
+        st[-0.10] = [(1e-6, 8.2), (1e-4, 8.5), (1e-3, 14.2), (1e-2, 41.2), (0.1, 50.0)]
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=self.RE)
+        self.assertFalse(d.ok)
+        self.assertAlmostEqual(d.up_u_ratio_min, 8.2 / self.U, places=4)
+        self.assertTrue(any("上游伪层" in r for r in d.reasons), d.reasons)
+
+    def test_thick_leading_edge_is_caught(self):
+        """实测形态：前缘 δ99 = 19.6 mm，理论 0.067 mm（290 倍）。"""
+        from runners.tmr_cf import diagnose_slice
+        st = self._clean()
+        st[0.001] = self._law(0.001, 2.1e-2)      # d99 ≈ 0.93*21 mm ≈ 19.6 mm
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=self.RE)
+        self.assertFalse(d.ok)
+        self.assertGreater(d.lead_ratio, 200.0)
+        self.assertGreater(d.lead_delta99_mm, 18.0)
+        self.assertLess(d.lead_delta99_mm, 22.0)
+        self.assertTrue(any("前缘" in r for r in d.reasons), d.reasons)
+
+    def test_both_defects_reported_together(self):
+        from runners.tmr_cf import diagnose_slice
+        st = self._clean()
+        st[-0.10] = [(1e-6, 8.2), (1e-2, 41.2), (0.1, 50.0)]
+        st[0.001] = self._law(0.001, 2.1e-2)
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=self.RE)
+        self.assertEqual(len(d.reasons), 2, d.reasons)
+
+    def test_linear_profile_gives_analytic_moments(self):
+        """δ* = δ/2、θ = δ/6、H = 3 —— 校验梯形积分与截断到 d99 的处理。"""
+        from runners.tmr_cf import diagnose_slice
+        delta = 1.0e-2
+        st = self._uniform([-0.20])
+        st[1.00] = self._linear(1.00, delta)
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=0.0)
+        row = next(s for s in d.stations if s[0] == 1.00)
+        _, d99, ds, th, h = row
+        self.assertAlmostEqual(ds / 1e3 / delta, 0.5, delta=0.01)
+        self.assertAlmostEqual(th / 1e3 / delta, 1.0 / 6.0, delta=0.005)
+        self.assertAlmostEqual(h, 3.0, delta=0.05)
+        self.assertLessEqual(d99 / 1e3, delta * 1.02)
+
+    def test_re_target_zero_skips_lead_check(self):
+        from runners.tmr_cf import diagnose_slice
+        st = self._clean()
+        st[0.001] = self._law(0.001, 2.1e-2)
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=0.0)
+        self.assertTrue(d.ok, d.reasons)
+        self.assertIsNone(None)          # 只为可读性：该分支不做前缘判据
+
+    def test_missing_upstream_fails_closed(self):
+        from runners.tmr_cf import diagnose_slice
+        st = {0.001: self._law(0.001, 1.0e-4), 1.0: self._law(1.0, 5.0e-3)}
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=self.RE)
+        self.assertFalse(d.ok)
+        self.assertEqual(d.n_upstream, 0)
+        self.assertTrue(any("不含 x<0" in r for r in d.reasons), d.reasons)
+
+    def test_missing_plate_fails_closed(self):
+        from runners.tmr_cf import diagnose_slice
+        st = self._uniform([-0.30, -0.10])
+        d = diagnose_slice(self._rows(st), u_inf=self.U, re_target=self.RE)
+        self.assertFalse(d.ok)
+        self.assertTrue(any("不含 x>0" in r for r in d.reasons), d.reasons)
+
+    def test_empty_slice_fails_closed(self):
+        from runners.tmr_cf import diagnose_slice
+        d = diagnose_slice([], u_inf=self.U, re_target=self.RE)
+        self.assertFalse(d.ok)
+        self.assertIn("空切片", d.reasons)
+
+    def test_summary_carries_the_two_numbers(self):
+        from runners.tmr_cf import diagnose_slice
+        st = self._clean()
+        st[-0.10] = [(1e-6, 8.2), (1e-2, 41.2), (0.1, 50.0)]
+        st[0.001] = self._law(0.001, 2.1e-2)
+        s = diagnose_slice(self._rows(st), u_inf=self.U, re_target=self.RE).summary()
+        self.assertIn("slice FAIL", s)
+        self.assertIn("上游 u/U_min=", s)
+        self.assertIn("理论", s)
+
+    def test_gzip_slice_is_rejected(self):
+        import gzip
+        from runners.tmr_cf import read_field_slice
+        p = Path(tempfile.mkdtemp()) / "s.daten.gz"
+        with gzip.open(p, "wt", encoding="utf-8") as fh:
+            fh.write("# Centroid[X]\n  1  0.5\n")
+        self.addCleanup(lambda: p.unlink(missing_ok=True))
+        with self.assertRaises(ValueError):
+            read_field_slice(p)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -764,6 +764,153 @@ def field_sanity(
         reasons=reasons)
 
 
+@dataclass
+class SliceDiagnosis:
+    """二维切片诊断：**板面上的边界层是不是从零起步的**（2026-09-21 阶段五新增）。
+
+    动机：``field_sanity`` 只回答「这份场跑在它自称的 Re 上吗」，抓不出另一类错误——
+    Re 正确、Cf 量级也「正常」，但板面上承载的根本不是一条从 x=0 起步的边界层。
+
+    实测（273x193，12000 步，U=50，Re_unit=3.19e6）：
+
+    * 前缘第一个站位 x=0.001 处 ``d99 = 19.57 mm``，湍流理论值 ``0.37*x*Re_x^-0.2``
+      只有 ``0.074 mm`` —— **相差 260 倍**；
+    * 上游对称条带（x<0，本该是均匀来流）近壁 ``u`` 掉到 ``8.2 m/s``（16 % U），
+      ``k ~ 100 m^2/s^2``（Ti ~ 16 %）；
+    * 该「伪层」进入板面后直接成为板的边界层，使 ``Cf(x)`` 被压成近常数
+      （斜率 -0.03 对参考 -0.14），GCI 无从收口。
+
+    判据（任一触发即 ``ok = False``）：
+
+    1. ``lead_ratio = d99(前缘首站) / 0.37*x*Re_x^-0.2 > lead_tol``（默认 5）
+    2. ``up_u_ratio_min < up_tol``（默认 0.9）—— 上游条带本该是均匀来流
+
+    与 ``field_sanity`` 一样 fail-closed：数据不足以判定时报 ``ok=False``。
+    """
+
+    n_faces: int
+    n_stations: int
+    n_upstream: int
+    up_u_ratio_min: float
+    up_k_max: float
+    lead_x: float
+    lead_delta99_mm: float
+    lead_theory_mm: float
+    lead_ratio: float
+    stations: list[tuple[float, float, float, float, float]] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)
+
+    @property
+    def ok(self) -> bool:
+        return not self.reasons
+
+    def summary(self) -> str:
+        head = ("slice PASS" if self.ok
+                else "slice FAIL") + f" | {self.n_stations} 站位 / {self.n_faces} 面"
+        bits = []
+        if self.n_upstream:
+            bits.append(f"上游 u/U_min={self.up_u_ratio_min:.3f}, k_max={self.up_k_max:.4g}")
+        if not math.isnan(self.lead_ratio):
+            bits.append(f"前缘 x={self.lead_x:g}: d99={self.lead_delta99_mm:.3f} mm"
+                        f" / 理论 {self.lead_theory_mm:.4f} mm = {self.lead_ratio:.1f}x")
+        if self.reasons:
+            bits.append("; ".join(self.reasons))
+        return head + (" | " + " | ".join(bits) if bits else "")
+
+
+def _bl_station(col: Sequence[FieldRow], u_inf: float) -> tuple[float, float, float]:
+    """单站位的 (d99, delta*, theta)，全部用梯形积分（只积到 d99）。"""
+    d99 = next((r.z for r in col if r.u >= 0.99 * u_inf), math.nan)
+    z_top = d99 if not math.isnan(d99) else col[-1].z
+    ds = th = 0.0
+    for a, b in zip(col, col[1:]):
+        if b.z > z_top:
+            break
+        h = b.z - a.z
+        ds += 0.5 * ((1 - a.u / u_inf) + (1 - b.u / u_inf)) * h
+        th += 0.5 * (((a.u / u_inf) * (1 - a.u / u_inf))
+                     + ((b.u / u_inf) * (1 - b.u / u_inf))) * h
+    return d99, ds, th
+
+
+def diagnose_slice(
+    rows: Sequence[FieldRow], *,
+    u_inf: float = 50.0,
+    re_target: float = 5.0e6,
+    lead_tol: float = 5.0,
+    up_tol: float = 0.9,
+) -> SliceDiagnosis:
+    """从二维切片算「边界层起步厚度 + 上游伪层 + 边界层积分量」。
+
+    Args:
+        rows: ``read_field_slice`` 的结果。
+        u_inf: 来流速度（δ99 与积分量都以它为基准）。
+        re_target: 用于理论 δ 的参考 Re（按单位长度）；0/None 时跳过前缘判据。
+        lead_tol: 前缘 δ99 允许是理论湍流值的几倍。
+        up_tol: 上游条带近壁 u/u_inf 的下限。
+
+    Note:
+        - 前缘站位取「x>0 且 x>=1e-4 的第一个站位」：x→0 时理论 δ→0，比值会发散，
+          1e-4 是避免除零的保护阈值（TMR 参考表本身也从 x=0.001 起）。
+        - 上游指标取 x<0 各站位近壁（z 最小那行）的**最小值/最大值**：伪层是
+          「上游靠近对称面的那一段整体被滞止」，取极值是它的正确度量。
+    """
+    reasons: list[str] = []
+    if not rows:
+        return SliceDiagnosis(0, 0, 0, math.nan, math.nan, math.nan,
+                              math.nan, math.nan, math.nan, [], ["空切片"])
+
+    by_x: dict[float, list[FieldRow]] = {}
+    for r in rows:
+        by_x.setdefault(round(r.x, 10), []).append(r)
+    stations_sorted = sorted(by_x)
+    cols = {xv: sorted(by_x[xv], key=lambda r: r.z) for xv in stations_sorted}
+    data = {xv: _bl_station(cols[xv], u_inf) for xv in stations_sorted}
+
+    up = [xv for xv in stations_sorted if xv < -1e-6]
+    if up:
+        up_u_ratio_min = min(cols[xv][0].u / u_inf for xv in up)
+        up_k_max = max(cols[xv][0].k for xv in up)
+    else:
+        up_u_ratio_min = up_k_max = math.nan
+
+    lead = next((xv for xv in stations_sorted if xv > 0.0 and xv >= 1e-4), None)
+    if lead is None:
+        lead_x = lead_d99 = lead_th = lead_ratio = math.nan
+    else:
+        lead_x = lead
+        lead_d99 = data[lead][0]
+        if re_target:
+            re_x = re_target * lead
+            lead_th = 0.37 * lead * re_x ** (-0.2)
+            lead_ratio = (lead_d99 / lead_th) if lead_th else math.nan
+        else:
+            lead_th = lead_ratio = math.nan
+
+    if not up:
+        reasons.append("切片不含 x<0 站位，无法判定上游条带")
+    elif up_u_ratio_min < up_tol:
+        reasons.append(
+            f"上游条带近壁 u/U 最低 {up_u_ratio_min:.3f} < {up_tol:g}"
+            f"（应为均匀来流；k_max={up_k_max:.4g}）—— 存在上游伪层")
+    if lead is None:
+        reasons.append("切片不含 x>0 站位，无法判定前缘")
+    elif re_target and not math.isnan(lead_ratio) and lead_ratio > lead_tol:
+        reasons.append(
+            f"前缘 d99 {lead_d99 * 1e3:.3f} mm = 理论 {lead_th * 1e3:.4f} mm 的 "
+            f"{lead_ratio:.0f}x > {lead_tol:g}x（边界层不是从零起步）")
+
+    return SliceDiagnosis(
+        n_faces=len(rows), n_stations=len(stations_sorted), n_upstream=len(up),
+        up_u_ratio_min=up_u_ratio_min, up_k_max=up_k_max,
+        lead_x=lead_x, lead_delta99_mm=lead_d99 * 1e3, lead_theory_mm=lead_th * 1e3,
+        lead_ratio=lead_ratio,
+        stations=[(xv, data[xv][0] * 1e3, data[xv][1] * 1e3, data[xv][2] * 1e3,
+                   (data[xv][1] / data[xv][2]) if data[xv][2] else math.nan)
+                  for xv in stations_sorted],
+        reasons=reasons)
+
+
 # ------------------------------------------------------------------- GCI / 外推
 
 
@@ -890,6 +1037,18 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
     p_fld.add_argument("--nu-tol", type=float, default=2.0, help="nu 反推允许离散度（%%）")
     p_fld.add_argument("--re-tol", type=float, default=2.0, help="Re_unit 允许偏差（%%）")
 
+    p_slc = sub.add_parser(
+        "slice",
+        help="二维切片诊断：上游伪层 + 前缘 d99 / 理论 + 边界层积分量逐站位表")
+    p_slc.add_argument("daten", type=Path, help="Y=0 二维切片导出件（带表头列名）")
+    p_slc.add_argument("--u", type=float, default=50.0, help="来流速度（δ99/积分量的基准）")
+    p_slc.add_argument("--re-target", type=float, default=5.0e6,
+                       help="理论 δ 用的 Re_unit（按单位长度）；给 0 跳过前缘判据")
+    p_slc.add_argument("--lead-tol", type=float, default=5.0,
+                       help="前缘 d99 允许是理论湍流值的几倍")
+    p_slc.add_argument("--up-tol", type=float, default=0.9,
+                       help="上游条带近壁 u/U 的下限")
+
     p_gci = sub.add_parser("gci", help="三档网格 Richardson 外推 + GCI（量取 x>0.5 Cf 均值）")
     p_gci.add_argument("daten", nargs=3, type=Path, metavar=("FINE", "MEDIUM", "COARSE"))
     p_gci.add_argument("--ratios", default="2,2", help="相邻档细化比 r21,r32")
@@ -969,6 +1128,36 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
               f"TVR near max (z<=0.02 z_max) = {s.tvr_near_max:.3f}   "
               f"contrast = {s.tvr_contrast:.1f}x")
         return 0 if s.ok else 1
+
+    if args.cmd == "slice":
+        try:
+            rows = read_field_slice(args.daten)
+        except ValueError as exc:
+            print(f"error: {exc}")
+            return 2
+        fld = field_sanity(rows, u_inf=args.u, re_target=args.re_target,
+                           nu_tol_pct=2.0, re_tol_pct=2.0)
+        d = diagnose_slice(rows, u_inf=args.u, re_target=args.re_target,
+                           lead_tol=args.lead_tol, up_tol=args.up_tol)
+        print(fld.summary())
+        print(d.summary())
+        print(f"    上游 x<0 站位 {d.n_upstream} 个；近壁 u/U 最低 "
+              f"{d.up_u_ratio_min:.4f}，k 最高 {d.up_k_max:.4g}")
+        print()
+        print("     x        d99(mm)   dstar(mm)  theta(mm)    H")
+        targets = (-0.30, -0.10, 0.001, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1.00,
+                   1.50, 1.99)
+        picked: list[tuple[float, float, float, float, float]] = []
+        for t in targets:
+            cand = [s for s in d.stations if s[0] >= -0.35]
+            if not cand:
+                continue
+            best = min(cand, key=lambda s: abs(s[0] - t))
+            if all(abs(best[0] - p[0]) > 1e-9 for p in picked):
+                picked.append(best)
+        for xv, d99, ds, th, h in sorted(picked):
+            print(f"  {xv:8.3f}   {d99:9.4f}   {ds:9.4f}  {th:9.4f}  {h:6.3f}")
+        return 0 if (fld.ok and d.ok) else 1
 
     fine, medium, coarse = args.daten
     qois: list[float] = []
