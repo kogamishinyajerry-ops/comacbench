@@ -77,4 +77,9 @@ def get_solver(name: str):
         # 非 run_case——仅 cfdb_cfd_qoi/cfdb_case_setup 分支使用，勿混用于 foam_basic。
         from .openfoam_v2312 import OpenFOAMV2312
         return OpenFOAMV2312()
-    raise ValueError(f"未知求解器后端: {name}（dev 仅 openfoam10-docker；intranet 增 fluent/starccm）")
+    if name == "starccm-19.02.009-batch":
+        # commercial_cfd 线（Windows dev 终端，2026-09-21）：
+        # nasa_tmr / crm_dpw_hlpw 的 StarCCM+ 批处理后端，详见 starccm.py 模块头。
+        from .starccm import StarCCMSolver
+        return StarCCMSolver()
+    raise ValueError(f"未知求解器后端: {name}（dev: openfoam10-docker/openfoam-v2312-docker/starccm-19.02.009-batch；intranet 再增 fluent）")
