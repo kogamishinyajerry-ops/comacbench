@@ -13,12 +13,16 @@ from pathlib import Path
 from runners.tmr_cf import (
     CfComparison,
     ConvergenceVerdict,
+    QoiVerdict,
     cf_from_tau,
     compare_cf,
     convergence_report,
     dev_band_score,
+    fully_turbulent_mean_cf,
+    qoi_stationary,
     read_daten,
     read_reference,
+    reference_zones,
     residual_history,
 )
 
@@ -107,6 +111,85 @@ class ConvergenceGateTests(unittest.TestCase):
         self.assertIn("tke", v.drift)
         self.assertLess(v.drift["tke"], 0.0)
 
+    # ---- ok 与 strict_ok 必须能分开（2026-09-21 实测教训）----
+
+    def test_still_drifting_turbulence_passes_ok_but_fails_strict(self):
+        """复刻 273x193@6000：Tke 在最后 300 步仍净降 -10.44%（还差很远）。
+
+        本门只抓「回升」，所以 ``ok`` 仍为 True——这正是它的设计本意；
+        GCI 前必须叠加 ``strict_ok``，否则会把「还在往下走」的解当收敛解外推。
+        """
+        decay = 0.999632                     # 300 步净 -10.44%，对齐实测 -10.46%
+        rows = [(i, 1.34e-7, 1.30e-3, 0.2767 / decay ** (6000 - i), 4.81e-7)
+                for i in range(5701, 6001)]
+        v = convergence_report(_log(rows), window=300, decay_tol=0.10)
+        self.assertTrue(v.ok, v.summary())
+        self.assertTrue(v.turbulence_stationary)
+        self.assertFalse(v.drift_ok)
+        self.assertFalse(v.strict_ok)
+        self.assertLess(v.drift["tke"], -10.0)
+        self.assertTrue(any("still drifting" in r for r in v.reasons), v.reasons)
+        self.assertIn("still-drift", v.summary())
+
+    def test_settled_turbulence_is_strict_ok(self):
+        """复刻 137x97@6000：Tke 窗漂移 -0.02%（已趴平），Sdr -5.5%（在 10% 容差内）。"""
+        sdr = 0.999812                       # 300 步净 -5.48%，对齐实测
+        rows = [(i, 2.81e-7, 2.40e-3, 0.1158, 6.653e-8 / sdr ** (6000 - i))
+                for i in range(5701, 6001)]
+        v = convergence_report(_log(rows), window=300, decay_tol=0.10)
+        self.assertTrue(v.ok, v.summary())
+        self.assertTrue(v.drift_ok)
+        self.assertTrue(v.strict_ok)
+        self.assertAlmostEqual(v.drift["sdr"], -5.48, delta=0.1)
+
+    def test_decay_tol_none_disables_still_drift_check(self):
+        decay = 0.999632
+        rows = [(i, 1.34e-7, 1.30e-3, 0.2767 / decay ** (6000 - i), 4.81e-7)
+                for i in range(5701, 6001)]
+        v = convergence_report(_log(rows), window=300, decay_tol=None)
+        self.assertTrue(v.strict_ok)
+        self.assertTrue(v.drift_ok)
+        self.assertIsNone(v.decay_tol)
+
+
+class QoiStationarityTests(unittest.TestCase):
+    """QoI 平稳性判据——湍流残差量级不可靠时的主收敛判据。"""
+
+    def test_settled_series_passes(self):
+        v = qoi_stationary([0.002480, 0.002503, 0.002512, 0.0025145, 0.0025149],
+                           tol_pct=1.0, window=3)
+        self.assertIsInstance(v, QoiVerdict)
+        self.assertTrue(v.ok, v.summary())
+        self.assertEqual(v.n, 5)
+
+    def test_still_rising_series_fails(self):
+        """复刻 273x193 的 Cf 单调攀升：每 1000 步 +4% 左右，远未停住。"""
+        v = qoi_stationary([0.002200, 0.002320, 0.002440, 0.002514, 0.002600],
+                           tol_pct=1.0, window=3)
+        self.assertFalse(v.ok)
+        self.assertIn("增量", v.reason)
+
+    def test_too_few_increments_fails_closed(self):
+        v = qoi_stationary([0.0024, 0.0025], tol_pct=1.0, window=3)
+        self.assertFalse(v.ok)
+        self.assertIn("有效增量", v.reason)
+
+    def test_net_drift_reported_even_when_passing(self):
+        v = qoi_stationary([0.0030, 0.0030, 0.0030, 0.0030], tol_pct=1.0, window=3)
+        self.assertTrue(v.ok)
+        self.assertAlmostEqual(v.drift_pct, 0.0, places=6)
+
+    def test_zero_baseline_reports_undefined_increments(self):
+        """全零 QoI（τ 崩塌）不得被当成「平稳通过」。"""
+        v = qoi_stationary([0.0, 0.0, 0.0, 0.0], tol_pct=1.0, window=3)
+        self.assertFalse(v.ok)
+        self.assertIn("有效增量", v.reason)
+
+    def test_empty_series_fails_closed(self):
+        v = qoi_stationary([], tol_pct=1.0, window=3)
+        self.assertFalse(v.ok)
+        self.assertIn("空序列", v.reason)
+
 
 class DatanAndReferenceTests(unittest.TestCase):
     def _write(self, text: str) -> Path:
@@ -169,7 +252,6 @@ class MultiZoneReferenceTests(unittest.TestCase):
         return p
 
     def test_reference_zones_lists_names_in_order(self):
-        from runners.tmr_cf import reference_zones
         self.assertEqual(reference_zones(self._write(self.TWO_ZONE)), ["CFL3D", "FUN3D"])
 
     def test_read_reference_without_zone_fails_closed(self):

@@ -33,6 +33,16 @@
   （`zone, t="CFL3D"` 与 `zone, t="FUN3D"`，990 行里 447 个 x 站点各出现两次且 cf 不同）。
   按行拼接会得到一条**混合参考**，插值指标被污染（实测口径差 0.2–0.3 pp）。
   `read_reference` 因此 fail-closed：多 zone 且未显式指定 `zone=` 直接抛错。
+  补测（2026-09-21）：两 zone 在 x>=0.25 处一致到 0.01–0.03%，仅前缘差 ~1%，
+  所以「必须选 zone」是**口径卫生要求**，不是数值上的主误差源。
+* **残差门通过 ≠ 湍流残差已停止漂移**：同是 6000 步，137x97 的 Tke 窗漂移 -0.02%
+  （已趴平），273x193 的 -10.46%（仍在缓慢下降）。两者 ``ok`` 都是 True，因为本门
+  只抓「回升」。要用 `strict_ok`（叠加 `drift_ok`）或直接看 `qoi_stationary()`。
+* **参考 Cf 不是单调曲线**：CFL3D/FUN3D zone 在 x≈0.005–0.01 处有前缘峰
+  （Cf≈0.0054–0.0056，约为平台值的 2 倍），随后按 x^-0.14 衰减；壁面 x 网格从
+  x=0.001 起。把前缘段混入 GCI 会污染观察阶次，故 `fully_turbulent_mean_cf`
+  默认取 x>=0.5。另注：两个 zone 里 x<=0 的 96 个点是**上游对称面**（cf=0），
+  按行取均值会把它当成「壁面低 Cf」。
 """
 
 from __future__ import annotations
@@ -101,7 +111,20 @@ def residual_history(text: str) -> list[ResidualRow]:
 
 @dataclass
 class ConvergenceVerdict:
-    """残差收敛门结论（validity gate 的「求解收敛」项）。"""
+    """残差收敛门结论（validity gate 的「求解收敛」项）。
+
+    两个层级别混淆（2026-09-21 实测教训）：
+
+    * ``ok``        —— 阈值门 + **无系统性回升**。单调下降一律算通过（这是本门的
+      设计本意：它抓的是「发散 / 极限环」，不是「还没跑够」）。
+    * ``strict_ok`` —— ``ok`` **且**湍流残差已停止漂移（``drift_ok``）。GCI / 外推
+      的前置条件应当用这一个，否则会把「仍在缓慢下降」的解当成收敛解来做外推，
+      得到伪收敛阶次。
+
+    实测对照（同为 6000 步）：137x97 的 Tke 窗漂移 -0.02%（已趴平）→ ``strict_ok``
+    为真；273x193 的 Tke 窗漂移 -10.46%（还差很多）→ ``ok`` 仍为真但 ``strict_ok``
+    为假。只看 ``ok`` 无法区分这两者。
+    """
 
     ok: bool
     n_iter: int
@@ -111,10 +134,19 @@ class ConvergenceVerdict:
     turbulence_stationary: bool
     reasons: list[str] = field(default_factory=list)
     drift: dict[str, float] = field(default_factory=dict)
+    drift_ok: bool = True
+    decay_tol: float | None = None
+
+    @property
+    def strict_ok(self) -> bool:
+        """``ok`` 且湍流残差已停止漂移——GCI / Richardson 外推的推荐前置判据。"""
+        return self.ok and self.drift_ok
 
     def summary(self) -> str:
         state = "PASS" if self.ok else "FAIL"
         head = f"convergence {state} @ iter {self.n_iter}"
+        if self.ok and not self.drift_ok:
+            head += " (still-drift: strict gate would reject)"
         if not self.reasons:
             return head
         return head + " | " + "; ".join(self.reasons)
@@ -127,17 +159,28 @@ def convergence_report(
     momentum_tol: float = 1.0e-2,
     window: int = 300,
     growth_tol: float = 0.05,
+    decay_tol: float | None = 0.10,
 ) -> ConvergenceVerdict:
-    """残差收敛判据：阈值 + 最近窗内湍流量「平稳」（不允许系统性回升）。
+    """残差收敛判据：阈值 + 最近窗内湍流量「不回升」+（可选）「已停止漂移」。
 
     与 adapters/README.md §3 的措辞对齐：**残差阈值**（continuity / momentum）
-    + **监控量平稳**（湍流残差在最近 window 步内不得超出窗首值 growth_tol 以上）。
+    + **监控量平稳**（湍流残差在最近 window 步内）。「平稳」被拆成两个可独立
+    观测的子条件，因为二者的处置完全不同：
+
+    * 回升（rebound）→ ``growth_tol`` 判定，**进 ``ok``**。含义：发散 / 极限环，
+      解是坏的。
+    * 持续下滑（still-drift）→ ``decay_tol`` 判定，**不进 ``ok``，进 ``drift_ok``**。
+      含义：还没跑够，解是好的但没到位。单调下降是健康行为，因此默认不否决 ``ok``
+      （既有契约：``test_decaying_residuals_pass``），但 GCI 这类外推必须叠加
+      ``strict_ok``。
 
     Args:
         continuity_tol: 连续性方程残差上限。
         momentum_tol: 各动量分量残差上限（稳态外流常见 1e-3~1e-5，这里留宽）。
         window: 判定「平稳」的回看步数。
         growth_tol: 窗内允许的相对回升（默认 5%）。
+        decay_tol: 窗内允许的相对净漂移（两侧都用 ``|drift|``）；``None`` 关闭该项
+            （此时 ``drift_ok`` 恒为 True）。
 
     Note:
         caveat：**本门通过不等于解正确。** 545x385 档残差平滑下降却被观测到壁面 τ
@@ -148,7 +191,8 @@ def convergence_report(
     if not rows:
         return ConvergenceVerdict(
             ok=False, n_iter=0, final=None, continuity_ok=False, momentum_ok=False,
-            turbulence_stationary=False, reasons=["no residual table found"])
+            turbulence_stationary=False, reasons=["no residual table found"],
+            drift_ok=False, decay_tol=decay_tol)
 
     final = rows[-1]
     cont = final.get("continuity")
@@ -166,6 +210,7 @@ def convergence_report(
     tail = rows[-window:] if len(rows) >= window else rows
     drift: dict[str, float] = {}
     stationary = True
+    drift_ok = True
     for key in turb_keys:
         series = [r.get(key) for r in tail]
         series = [v for v in series if v is not None]
@@ -179,12 +224,18 @@ def convergence_report(
                 f"{key} non-stationary in last {len(series)} iters "
                 f"(peak {peak:.4g} vs window-start {first:.4g}, "
                 f"{(peak / first - 1) * 100.0:+.1f}%)")
+        if decay_tol is not None and abs(drift[key]) > decay_tol * 100.0:
+            drift_ok = False
+            reasons.append(
+                f"{key} still drifting in last {len(series)} iters "
+                f"({drift[key]:+.2f}% net, |drift| > {decay_tol * 100.0:.0f}%)")
 
     ok = continuity_ok and momentum_ok and stationary
     return ConvergenceVerdict(
         ok=ok, n_iter=final.iteration, final=final,
         continuity_ok=continuity_ok, momentum_ok=momentum_ok,
-        turbulence_stationary=stationary, reasons=reasons, drift=drift)
+        turbulence_stationary=stationary, reasons=reasons, drift=drift,
+        drift_ok=drift_ok, decay_tol=decay_tol)
 
 
 # --------------------------------------------------------------------------- Cf
@@ -446,6 +497,79 @@ def fully_turbulent_mean_cf(
     return sum(sel) / len(sel)
 
 
+# --------------------------------------------------------------- QoI 平稳性判据
+
+
+@dataclass
+class QoiVerdict:
+    """QoI（壁面 Cf）平稳性结论——细网格上比湍流残差更可信的收敛判据。"""
+
+    ok: bool
+    n: int
+    first: float
+    last: float
+    drift_pct: float
+    last_step_pcts: list[float] = field(default_factory=list)
+    reason: str = ""
+
+    def summary(self) -> str:
+        state = "PASS" if self.ok else "FAIL"
+        head = (f"QoI stationary {state} | n={self.n} | "
+                f"{self.first:.6f} -> {self.last:.6f} (net {self.drift_pct:+.3f}%)")
+        if self.reason:
+            head += " | " + self.reason
+        return head
+
+
+def qoi_stationary(
+    values: Sequence[float], *, tol_pct: float = 1.0, window: int = 3
+) -> QoiVerdict:
+    """判定 QoI 序列是否已平稳：最后 ``window`` 个相邻相对增量都落在 ``tol_pct`` 内。
+
+    为什么需要这个（2026-09-21 实测）：STAR-CCM+ 的湍流残差按 k 场量级归一化，
+    **绝对量级跨算例不可比**（入口 Ti 差 10x → Tke 残差整体差 100x，轨迹形状完全
+    相同）。因此「湍流残差数值小」既不是收敛的充分条件也不是必要条件。真正的
+    收敛判据应当落在 **目标量本身** 上：把壁面 τ 按迭代分块导出，看 Cf 是否停止
+    移动。
+
+    实测对照（273x193，默认 IC）：Cf(x>=0.5) 在 3000 步时 1.69e-3（seed 版）/
+    2.4e-3 量级，6000 步明显更高，说明本算例的 τ 是靠**对流把湍流从入口搬进来**
+    慢慢建立的，迭代次数是主导变量。
+
+    Args:
+        values: 按迭代递增的同一 QoI 序列（如各检查点的 Cf(x>=0.5) 均值）。
+        tol_pct: 相邻检查点之间允许的相对变化上限（%）。
+        window: 需要连续平稳的检查点增量个数。
+
+    Note:
+        - 有效增量不足 ``window`` 个时 fail-closed（``ok=False``）：样本不足以判定。
+          分母为 0 的增量（QoI 全零，即 τ 崩塌）**不计为 0% 的平稳**，同样 fail-closed。
+        - 只做**增量**判定，不做总体漂移判定：一个线性缓慢上升的序列可能在
+          单点对单点上都很小却始终不收敛，此时应增大检查点间隔或看 ``drift_pct``。
+    """
+    vals = [float(v) for v in values]
+    if not vals:
+        return QoiVerdict(False, 0, math.nan, math.nan, math.nan, [], reason="空序列")
+    drift = (vals[-1] - vals[0]) / vals[0] * 100.0 if vals[0] else math.nan
+    steps: list[float] = []
+    for a, b in zip(vals, vals[1:]):
+        if a == 0.0:
+            continue    # 相对增量无定义（分母为 0）；不静默当成 0% 的「平稳」
+        steps.append((b - a) / a * 100.0)
+    if len(steps) < window:
+        return QoiVerdict(
+            False, len(vals), vals[0], vals[-1], drift, steps,
+            reason=(f"有效增量只有 {len(steps)} 个（需连续 {window} 个）；"
+                    f"序列含 0 值时相对增量无定义"))
+    tail = steps[-window:]
+    worst = max(abs(s) for s in tail)
+    if worst > tol_pct:
+        return QoiVerdict(False, len(vals), vals[0], vals[-1], drift, steps,
+                          reason=(f"最后 {window} 个增量最大 |Δ| = {worst:.3f}% "
+                                  f"> {tol_pct:g}%；最近值 {vals[-1]:.6f}"))
+    return QoiVerdict(True, len(vals), vals[0], vals[-1], drift, steps)
+
+
 # ------------------------------------------------------------------- GCI / 外推
 
 
@@ -492,8 +616,10 @@ def richardson_gci(
     Note:
         - 观察阶次 `p = ln(ε32/ε21) / ln(r)`，要求 ε21、ε32 同号；
           异号 = 振荡收敛，此时 p 无定义，本函数记 oscillatory=True 且不报 GCI。
-        - **前置条件：三档解必须都过了 convergence_report().ok**；
-          未收敛的解做 GCI 只得到伪收敛（2026-09-21 的教训）。
+        - **前置条件：三档解必须都过了 `ConvergenceVerdict.strict_ok`**（不是 `ok`——
+          `ok` 允许「仍在单调下降」的解通过）；未收敛的解做 GCI 只得到伪收敛
+          （2026-09-21 的教训）。若残差判据不可靠，退而用 `qoi_stationary()` 对 QoI
+          序列本身做平稳性判定。
     """
     if len(values) != 3:
         raise ValueError("需要恰好三档解 (fine, medium, coarse)")
@@ -531,6 +657,8 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
 
     p_res = sub.add_parser("residual", help="对 STAR-CCM+ 批处理日志跑收敛门")
     p_res.add_argument("logs", nargs="+", type=Path)
+    p_res.add_argument("--strict", action="store_true",
+                       help="用 strict_ok（ok 且湍流残差已停止漂移）决定退出码")
 
     p_cf = sub.add_parser("cf", help="导出场 .daten 与 TMR 参考 Cf 比对")
     p_cf.add_argument("daten", type=Path)
@@ -543,6 +671,20 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
     p_cf.add_argument("--label", default="")
     p_cf.add_argument("--zone", default=None,
                       help="参考文件含多 zone 时必填（如 CFL3D / FUN3D）")
+
+    p_qoi = sub.add_parser(
+        "qoi",
+        help="QoI 平稳性判据：按迭代顺序给一组导出场，看 x>=x_lo 的 Cf 均值是否停住")
+    p_qoi.add_argument("daten", nargs="+", type=Path,
+                       metavar="DATEN", help="按迭代递增顺序排列的各检查点导出件")
+    p_qoi.add_argument("--x-lo", type=float, default=0.5)
+    p_qoi.add_argument("--x-hi", type=float, default=2.0)
+    p_qoi.add_argument("--tol", type=float, default=1.0, help="相邻检查点容许变化（%）")
+    p_qoi.add_argument("--window", type=int, default=3, help="需连续平稳的增量个数")
+    p_qoi.add_argument("--rho", type=float, default=1.18415)
+    p_qoi.add_argument("--u", type=float, default=50.0)
+    p_qoi.add_argument("--reference", type=Path, default=None)
+    p_qoi.add_argument("--zone", default=None)
 
     p_gci = sub.add_parser("gci", help="三档网格 Richardson 外推 + GCI（量取 x>0.5 Cf 均值）")
     p_gci.add_argument("daten", nargs=3, type=Path, metavar=("FINE", "MEDIUM", "COARSE"))
@@ -563,9 +705,11 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
         for log in args.logs:
             v = convergence_report(log.read_text(encoding="utf-8", errors="replace"))
             print(f"{log.name}: {v.summary()}")
+            print(f"    ok={v.ok} strict_ok={v.strict_ok} "
+                  f"(drift_ok={v.drift_ok}, decay_tol={v.decay_tol})")
             for k, d in sorted(v.drift.items()):
                 print(f"    drift[{k}] = {d:+.2f}% over window")
-            rc |= 0 if v.ok else 1
+            rc |= 0 if (v.strict_ok if args.strict else v.ok) else 1
         return rc
 
     if args.cmd == "cf":
@@ -582,6 +726,26 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
         print(f"fully-turbulent mean Cf (x>={args.x_min + 0.5:.2f}): "
               f"{fully_turbulent_mean_cf(xs, cf):.6f}")
         return 0
+
+    if args.cmd == "qoi":
+        series: list[float] = []
+        for p in args.daten:
+            xs, taus = read_daten(p)
+            cf = cf_from_tau(taus, rho=args.rho, u_inf=args.u)
+            q = fully_turbulent_mean_cf(xs, cf, x_lo=args.x_lo, x_hi=args.x_hi)
+            series.append(q)
+            print(f"{p.name}: mean Cf(x in [{args.x_lo}, {args.x_hi}]) = {q:.6f}")
+        v = qoi_stationary(series, tol_pct=args.tol, window=args.window)
+        print(v.summary())
+        for i, s in enumerate(v.last_step_pcts):
+            print(f"    Δ[{i}] = {s:+.4f}%")
+        if args.reference is not None:
+            xr, cfr = read_reference(args.reference, zone=args.zone)
+            ref = fully_turbulent_mean_cf(xr, cfr, x_lo=args.x_lo, x_hi=args.x_hi)
+            print(f"reference mean Cf = {ref:.6f}")
+            for p, q in zip(args.daten, series):
+                print(f"  {p.name}: dev vs reference = {(q - ref) / ref * 100.0:+.2f}%")
+        return 0 if v.ok else 1
 
     fine, medium, coarse = args.daten
     qois: list[float] = []
