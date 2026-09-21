@@ -1,0 +1,16 @@
+protocol: comacbench.pack.v1
+id: aviation-data-starter-v1
+title: 初次接入 · 数据与证据规则
+revision: 1.0.0
+description: 复用两个公开入门任务，检查单位、记录标识、来源及关系约束；无需工程求解器，不代表文件级数据处理或飞机设计验收。
+license: 复用 aviation-core-v1 自建数据与本体示例；任务许可记录为 CC0-1.0
+source: aviation-core-v1 at 5dff83c18f9782e7f4448d23899970069f0f1b87；题面、断言、参考实现和负例原样复用，不新增独立能力覆盖
+suites:
+- id: enterprise.data
+  family: enterprise_data
+  tasks:
+  - tasks/enterprise.data/data_units_01.yaml
+- id: enterprise.ontology
+  family: knowledge_ontology
+  tasks:
+  - tasks/enterprise.ontology/ontology_trace_01.yaml
