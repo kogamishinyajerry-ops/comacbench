@@ -377,5 +377,116 @@ class RichardsonGciTests(unittest.TestCase):
         self.assertGreater(r.extrapolated, 0.00205)
 
 
+class FieldSanityTests(unittest.TestCase):
+    """场侧 sanity：从二维切片反推 nu，并检查算例是否真的跑在它自称的 Re 上。
+
+    这条门存在的理由（2026-09-21 实测）：写的是「U=50 / nu=1e-5 -> Re=5e6」，
+    但反推得 nu=1.56659e-5（= STAR-CCM+ 默认空气 mu/rho），实际 Re_unit=3.19e6，
+    比 TMR 目标低 36%。**残差门和 Cf 门都发现不了这种口径错误，只有场侧反推能。**
+    """
+
+    NU = 1.56659e-05
+
+    def _slice(self, specs, *, nu=NU, header=None):
+        """specs: (x, z, k, tvr, u, w) -> 自动派生 omega = k/(nu*tvr)。"""
+        hdr = header or ["Shell Id", "Centroid[X]", "Centroid[Z]",
+                         "Specific Dissipation Rate", "Turbulent Kinetic Energy",
+                         "Turbulent Viscosity Ratio", "Velocity[i]", "Velocity[k]"]
+        lines = ["# " + ", ".join(hdr)]
+        for i, (x, z, k, tvr, u, w) in enumerate(specs, start=1):
+            om = k / (nu * tvr)
+            vals = {"Shell Id": f"{i}", "Centroid[X]": f"{x:.12f}",
+                    "Centroid[Z]": f"{z:.12e}",
+                    "Specific Dissipation Rate": f"{om:.12e}",
+                    "Turbulent Kinetic Energy": f"{k:.12e}",
+                    "Turbulent Viscosity Ratio": f"{tvr:.12e}",
+                    "Velocity[i]": f"{u:.6f}", "Velocity[k]": f"{w:.6e}"}
+            lines.append("  " + "  ".join(vals[c] for c in hdr))
+        p = Path(tempfile.mkdtemp()) / "slice.daten"
+        p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        self.addCleanup(lambda: p.unlink(missing_ok=True))
+        return p
+
+    def test_read_field_slice_looks_up_columns_by_name(self):
+        from runners.tmr_cf import read_field_slice
+        # 列序被打乱，且多余列夹杂其中——必须按名字取值
+        hdr = ["Turbulent Kinetic Energy", "Centroid[X]", "Velocity[i]", "Centroid[Z]",
+               "Specific Dissipation Rate", "Turbulent Viscosity Ratio", "Velocity[k]"]
+        p = self._slice([(0.5, 1.0e-6, 0.25, 12.0, 48.0, 1.0e-3)], header=hdr)
+        rows = read_field_slice(p)
+        self.assertEqual(len(rows), 1)
+        self.assertAlmostEqual(rows[0].x, 0.5)
+        self.assertAlmostEqual(rows[0].z, 1.0e-6)
+        self.assertAlmostEqual(rows[0].k, 0.25)
+        self.assertAlmostEqual(rows[0].tvr, 12.0)
+        self.assertAlmostEqual(rows[0].u, 48.0)
+
+    def test_recovers_nu_and_re_unit_from_self_consistent_slice(self):
+        from runners.tmr_cf import field_sanity, read_field_slice
+        p = self._slice([
+            (1.90, 9.7e-1, 0.0299, 8.17, 50.000, 0.0),      # 出口远场
+            (0.001, 2.78e-3, 89.7, 617.0, 20.7, 0.0),        # 板前缘近壁
+            (1.00, 5.0e-7, 1.0e-5, 1.0e-3, 0.3, 0.0),        # 贴壁
+        ])
+        s = field_sanity(read_field_slice(p), u_inf=50.0, re_target=3.19e6)
+        self.assertTrue(s.ok, s.reasons)
+        self.assertAlmostEqual(s.nu_median / self.NU, 1.0, places=4)
+        self.assertLess(s.nu_spread_pct, 1.0e-6)
+        self.assertAlmostEqual(s.re_unit, 50.0 / self.NU, places=2)
+
+    def test_re_unit_mismatch_is_caught_and_fix_suggested(self):
+        """U=50 + nu=1.5666e-5 -> Re_unit=3.19e6, 距 5e6 目标 -36%。"""
+        from runners.tmr_cf import field_sanity, read_field_slice
+        p = self._slice([(1.0, 9.7e-1, 0.359, 9.97, 50.0, 0.0),
+                         (1.0, 5.0e-7, 1.0e-5, 1.0e-3, 0.3, 0.0)])
+        s = field_sanity(read_field_slice(p), u_inf=50.0, re_target=5.0e6)
+        self.assertFalse(s.ok)
+        self.assertTrue(s.nu_consistent)   # 场本身自洽，是 Re 口径错了
+        self.assertLess(s.re_gap_pct, -30.0)
+        self.assertIn("Re_unit", s.reasons[0])
+        self.assertIn("78.3", s.reasons[0])  # 建议的修正速度 5e6*nu
+
+    def test_re_check_can_be_skipped(self):
+        from runners.tmr_cf import field_sanity, read_field_slice
+        p = self._slice([(1.0, 9.7e-1, 0.359, 9.97, 50.0, 0.0),
+                         (1.0, 5.0e-7, 1.0e-5, 1.0e-3, 0.3, 0.0)])
+        s = field_sanity(read_field_slice(p), u_inf=50.0, re_target=0.0)
+        self.assertTrue(s.ok, s.reasons)
+        self.assertTrue(math.isnan(s.re_gap_pct))
+
+    def test_inconsistent_nu_is_flagged(self):
+        """同一片场里 nu 差 10 倍 => 场不自洽，必须 fail-closed。"""
+        from runners.tmr_cf import field_sanity, read_field_slice
+        rows = [(1.0, 9.7e-1, 0.359, 9.97, 50.0, 0.0)] * 5
+        rows.append((0.5, 5.0e-7, 0.36, 99.7, 50.0, 0.0))
+        # 用同一个 nu 派生 omega，再把其中一行的 omega 人为改坏
+        p = self._slice(rows)
+        text = p.read_text(encoding="utf-8").replace("9.970000000000e+01", "1.000000000000e+04")
+        p.write_text(text, encoding="utf-8")
+        s = field_sanity(read_field_slice(p), u_inf=50.0, re_target=0.0)
+        self.assertFalse(s.ok)
+        self.assertFalse(s.nu_consistent)
+        self.assertGreater(s.nu_spread_pct, 2.0)
+
+    def test_tvr_contrast_reported(self):
+        from runners.tmr_cf import field_sanity, read_field_slice
+        p = self._slice([
+            (1.9, 9.7e-1, 0.0299, 10.0, 50.0, 0.0),    # 远场 mu_t/mu = 10
+            (0.001, 1.0e-6, 89.7, 600.0, 20.7, 0.0),   # 前缘近壁 600
+        ])
+        s = field_sanity(read_field_slice(p), u_inf=50.0, re_target=0.0)
+        self.assertAlmostEqual(s.tvr_far, 10.0, places=6)
+        self.assertAlmostEqual(s.tvr_near_max, 600.0, places=6)
+        self.assertAlmostEqual(s.tvr_contrast, 60.0, places=6)
+        self.assertAlmostEqual(s.tvr_max, 600.0, places=6)
+        self.assertAlmostEqual(s.k_max, 89.7, places=6)
+
+    def test_empty_slice_fails_closed(self):
+        from runners.tmr_cf import field_sanity
+        s = field_sanity([], u_inf=50.0, re_target=5.0e6)
+        self.assertFalse(s.ok)
+        self.assertIn("空切片", s.reasons)
+
+
 if __name__ == "__main__":
     unittest.main()

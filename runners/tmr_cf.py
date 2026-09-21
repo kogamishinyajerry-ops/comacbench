@@ -43,6 +43,12 @@
   x=0.001 起。把前缘段混入 GCI 会污染观察阶次，故 `fully_turbulent_mean_cf`
   默认取 x>=0.5。另注：两个 zone 里 x<=0 的 96 个点是**上游对称面**（cf=0），
   按行取均值会把它当成「壁面低 Cf」。
+* **必须先确认算例真的跑在它自称的 Re 上**：`field_sanity()` 从二维切片反推
+  `nu = k/(omega*TVR)`。2026-09-21 实测：写的是「U=50 / nu=1e-5 -> Re=5e6」，
+  但反推得 ν = 1.56659e-5（= STAR-CCM+ 默认空气 μ/ρ，52224 样本离散度 0.01%），
+  于是实际 **Re_unit = 3.19e6，比目标低 36%**。修法是 U = 5e6·ν = 78.33 m/s
+  （此时 TMR 的 k=1.125U²/Re_L、ω=125U/L 恰好等价于 Ti=3.873e-4、TVR=0.009）。
+  这类口径错误**不会**由残差门或 Cf 门发现，只有场侧反推能抓。
 """
 
 from __future__ import annotations
@@ -570,6 +576,187 @@ def qoi_stationary(
     return QoiVerdict(True, len(vals), vals[0], vals[-1], drift, steps)
 
 
+# --------------------------------------------------------------------- 场侧 sanity
+
+
+@dataclass(frozen=True)
+class FieldRow:
+    """二维切片（.daten）的一行：Y=0 平面上的一个面。"""
+
+    x: float
+    z: float          # 壁法向（板在 z=0）
+    omega: float
+    k: float
+    tvr: float        # mu_t / mu
+    u: float
+    w: float = math.nan
+
+
+def read_field_slice(path: str | Path) -> list[FieldRow]:
+    """读 STAR-CCM+ 导出到 .daten 的二维切片（带表头列名）。
+
+    与 ``read_daten``（壁面 tau 导出）不同：这里靠表头**按名字**定位列，
+    因为场导出的列集合随宏而变。必须至少含 Centroid[X] / Centroid[Z] /
+    Specific Dissipation Rate / Turbulent Kinetic Energy / Turbulent Viscosity Ratio
+    / Velocity[i]。
+    """
+    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    header: list[str] | None = None
+    rows: list[FieldRow] = []
+    for line in text.splitlines():
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            if header is None:
+                header = [t.strip() for t in s.lstrip("#").split(",")]
+            continue
+        if header is None:
+            continue
+        vals = s.split()
+        if len(vals) < len(header):
+            continue
+        col = {name: i for i, name in enumerate(header)}
+
+        def g(*names: str, default: float = math.nan) -> float:
+            for n in names:
+                if n in col:
+                    try:
+                        return float(vals[col[n]])
+                    except ValueError:
+                        return default
+            return default
+
+        rows.append(FieldRow(
+            x=g("Centroid[X]"), z=g("Centroid[Z]"),
+            omega=g("Specific Dissipation Rate"),
+            k=g("Turbulent Kinetic Energy"),
+            tvr=g("Turbulent Viscosity Ratio"),
+            u=g("Velocity[i]"), w=g("Velocity[k]"),
+        ))
+    return rows
+
+
+@dataclass
+class FieldSanity:
+    """场侧 sanity 结论 —— 守恒门（残差）与 QoI 门（Cf）之外的第三道读数。
+
+    它回答两个**不依赖参考数据**的问题：
+
+    1. 这份场自洽吗？（SST 的 μt = ρk/ω 蕴含 ``nu = k/(omega*TVR)`` 必须是常数。
+       若反推出的 ν 离散度大，说明场/导出有问题，任何 Cf 比较都不必谈。）
+    2. **算例真的跑在它自称的雷诺数上吗？** 用反推的 ν 算出 ``Re_unit = U/nu``，
+       与目标 Re 比对。2026-09-21 实测：跑了几十轮的「Re=5e6」算例其实是
+       ``U=50, nu=1.5666e-5 -> Re_unit=3.19e6``，低了 36%（详见报告 §11）。
+    """
+
+    n_faces: int
+    nu_median: float
+    nu_spread_pct: float
+    k_max: float
+    tvr_max: float
+    tvr_far: float
+    tvr_near_max: float
+    re_unit: float
+    re_target: float
+    re_gap_pct: float
+    reasons: list[str] = field(default_factory=list)
+
+    @property
+    def nu_consistent(self) -> bool:
+        return not any(r.startswith("nu") for r in self.reasons)
+
+    @property
+    def ok(self) -> bool:
+        return not self.reasons
+
+    @property
+    def tvr_contrast(self) -> float:
+        """近壁/前段涡粘性相对远场的对比度（>1 表示近壁被涡粘性占据）。"""
+        return self.tvr_near_max / self.tvr_far if self.tvr_far else math.nan
+
+    def summary(self) -> str:
+        state = "PASS" if self.ok else "FAIL"
+        head = (f"field sanity {state} | n={self.n_faces} | "
+                f"nu={self.nu_median:.6e} (spread {self.nu_spread_pct:.3f}%) | "
+                f"Re_unit={self.re_unit:.4g} vs target {self.re_target:.4g} "
+                f"({self.re_gap_pct:+.1f}%)")
+        if self.reasons:
+            head += " | " + "; ".join(self.reasons)
+        return head
+
+
+def field_sanity(
+    rows: Sequence[FieldRow], *,
+    u_inf: float = 50.0,
+    re_target: float = 5.0e6,
+    nu_tol_pct: float = 2.0,
+    re_tol_pct: float = 2.0,
+) -> FieldSanity:
+    """从二维切片算场侧 sanity（ν 反推 + Re 一致性 + 近壁污染指标）。
+
+    Args:
+        rows: ``read_field_slice`` 的结果。
+        u_inf: 来流速度（用于 Re_unit = u_inf/nu）。
+        re_target: TMR 口径要求的目标 Re_unit（按单位长度）。传 0 或 None 跳过检查。
+        nu_tol_pct: ``nu = k/(omega*TVR)`` 的允许离散度（用 p05–p95 相对中位数）。
+        re_tol_pct: Re_unit 与目标的允许偏差。
+
+    Note:
+        - 只对 ``k>0`` 且 ``omega>0`` 且 ``tvr>0`` 的面做 ν 反推（贴壁/SST 的
+          ω 壁面值会到 1e9 量级，此时 tvr→0，比值仍成立但数值噪声大）。
+        - ``tvr_far`` 取 z 最大的 20 % 那一档的中位数（自由来流）；
+          ``tvr_near_max`` 取 z 最小的 2 % 那一档的最大值（近壁/前段）。
+    """
+    reasons: list[str] = []
+    if not rows:
+        return FieldSanity(0, math.nan, math.nan, math.nan, math.nan,
+                           math.nan, math.nan, math.nan, re_target, math.nan,
+                           ["空切片"])
+
+    nu = [r.k / (r.omega * r.tvr)
+          for r in rows if r.k > 0.0 and r.omega > 0.0 and r.tvr > 0.0]
+    nu_sorted = sorted(nu)
+
+    def pct(seq: Sequence[float], q: float) -> float:
+        if not seq:
+            return math.nan
+        i = min(len(seq) - 1, max(0, int(round(q * (len(seq) - 1)))))
+        return seq[i]
+
+    nu_med = pct(nu_sorted, 0.5)
+    spread = ((pct(nu_sorted, 0.95) - pct(nu_sorted, 0.05)) / nu_med * 100.0
+              if nu_med else math.nan)
+    if not nu:
+        reasons.append("nu: 无可用样本（k/omega/tvr 需全为正）")
+    elif spread > nu_tol_pct:
+        reasons.append(f"nu 离散度 {spread:.2f}% > {nu_tol_pct:g}%"
+                       f"（场不自洽或导出口径不一致）")
+
+    z_max = max(r.z for r in rows)
+    far = sorted(r.tvr for r in rows if r.z >= 0.8 * z_max)
+    near = [r.tvr for r in rows if r.z <= 0.02 * z_max]
+    tvr_far = pct(sorted(far), 0.5) if far else math.nan
+    tvr_near_max = max(near) if near else math.nan
+
+    re_unit = u_inf / nu_med if nu_med else math.nan
+    if re_target and not math.isnan(re_unit):
+        re_gap = (re_unit - re_target) / re_target * 100.0
+        if abs(re_gap) > re_tol_pct:
+            reasons.append(
+                f"Re_unit {re_unit:.4g} 偏离目标 {re_target:.4g} {re_gap:+.1f}%"
+                f"（nu={nu_med:.6e}, U={u_inf:g} -> 需要 U={re_target * nu_med:.3f}）")
+    else:
+        re_gap = math.nan
+
+    return FieldSanity(
+        n_faces=len(rows), nu_median=nu_med, nu_spread_pct=spread,
+        k_max=max(r.k for r in rows), tvr_max=max(r.tvr for r in rows),
+        tvr_far=tvr_far, tvr_near_max=tvr_near_max,
+        re_unit=re_unit, re_target=re_target, re_gap_pct=re_gap,
+        reasons=reasons)
+
+
 # ------------------------------------------------------------------- GCI / 外推
 
 
@@ -686,6 +873,16 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
     p_qoi.add_argument("--reference", type=Path, default=None)
     p_qoi.add_argument("--zone", default=None)
 
+    p_fld = sub.add_parser(
+        "field",
+        help="二维切片场侧 sanity：反推 nu=k/(omega*TVR) + Re 一致性 + 近壁污染指标")
+    p_fld.add_argument("daten", type=Path, help="Y=0 二维切片导出件（带表头列名）")
+    p_fld.add_argument("--u", type=float, default=50.0, help="来流速度（用于 Re_unit）")
+    p_fld.add_argument("--re-target", type=float, default=5.0e6,
+                       help="目标 Re_unit（按单位长度）；给 0 跳过该检查")
+    p_fld.add_argument("--nu-tol", type=float, default=2.0, help="nu 反推允许离散度（%%）")
+    p_fld.add_argument("--re-tol", type=float, default=2.0, help="Re_unit 允许偏差（%%）")
+
     p_gci = sub.add_parser("gci", help="三档网格 Richardson 外推 + GCI（量取 x>0.5 Cf 均值）")
     p_gci.add_argument("daten", nargs=3, type=Path, metavar=("FINE", "MEDIUM", "COARSE"))
     p_gci.add_argument("--ratios", default="2,2", help="相邻档细化比 r21,r32")
@@ -746,6 +943,21 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI
             for p, q in zip(args.daten, series):
                 print(f"  {p.name}: dev vs reference = {(q - ref) / ref * 100.0:+.2f}%")
         return 0 if v.ok else 1
+
+    if args.cmd == "field":
+        rows = read_field_slice(args.daten)
+        s = field_sanity(rows, u_inf=args.u, re_target=args.re_target,
+                         nu_tol_pct=args.nu_tol, re_tol_pct=args.re_tol)
+        print(s.summary())
+        print(f"    nu = k/(omega*TVR)  median = {s.nu_median:.6e}  "
+              f"(p05-p95 spread {s.nu_spread_pct:.3f}%)")
+        print(f"    Re_unit = U/nu     = {s.re_unit:.4g}  "
+              f"target = {s.re_target:.4g}  ({s.re_gap_pct:+.2f}%)")
+        print(f"    k_max = {s.k_max:.4g}   TVR_max = {s.tvr_max:.4g}")
+        print(f"    TVR far (z>=0.8 z_max) = {s.tvr_far:.3f}   "
+              f"TVR near max (z<=0.02 z_max) = {s.tvr_near_max:.3f}   "
+              f"contrast = {s.tvr_contrast:.1f}x")
+        return 0 if s.ok else 1
 
     fine, medium, coarse = args.daten
     qois: list[float] = []
