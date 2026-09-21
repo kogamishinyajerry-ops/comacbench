@@ -1,7 +1,7 @@
 """Native Re=300 matrix with frozen sources, bounded I/O and fail-closed replay."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import fcntl
+from studies._win_compat import fcntl
 import json
 from pathlib import Path
 import shutil

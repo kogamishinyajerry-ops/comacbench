@@ -1,7 +1,7 @@
 """New Re=300 identity: validated wall branches and provenance-aware continuation."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import fcntl
+from studies._win_compat import fcntl
 import json
 from pathlib import Path
 import shutil

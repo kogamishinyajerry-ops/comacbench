@@ -1,4 +1,5 @@
 """Evidence admission at the same public pack boundary used by the plugin."""
+import sys
 import tempfile
 import shutil
 import unittest
@@ -91,7 +92,8 @@ class AdmissionExecutionTests(unittest.TestCase):
             meta['suites'] = [s for s in meta['suites'] if s['id'] == 'enterprise.data']
             (pack/'pack.yaml').write_text(yaml.safe_dump(meta, allow_unicode=True))
             out = Path(tmp)/'run'
-            command = [str(ROOT/'.venv/bin/python'), '-m', 'comacbench.admission', 'calibrate', str(pack), '--out', str(out)]
+            # sys.executable is the venv interpreter on both POSIX (bin/python) and Windows (Scripts/python.exe)
+            command = [sys.executable, '-m', 'comacbench.admission', 'calibrate', str(pack), '--out', str(out)]
             result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
             state = json.loads((out/'run.json').read_text())

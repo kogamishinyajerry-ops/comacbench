@@ -24,7 +24,7 @@ class Re300Tests(unittest.TestCase):
             self.assertAlmostEqual(float(dictionary(new/'constant/transportProperties')['nu'][-1]),.02/300,places=16)
             self.assertEqual(dictionary(new/'system/controlDict')['purgeWrite'],['2'])
             for p in old.rglob('*'):
-                if p.is_file() and str(p.relative_to(old)) not in ('system/controlDict','constant/transportProperties'):
+                if p.is_file() and p.relative_to(old).as_posix() not in ('system/controlDict','constant/transportProperties'):
                     self.assertEqual(p.read_bytes(),(new/p.relative_to(old)).read_bytes())
 
     def test_flux_missing_conflicting_and_bad_address_rejected(self):

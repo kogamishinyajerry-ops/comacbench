@@ -35,7 +35,7 @@ def audit_inputs(case):
         bad('precomputed_output','case','算例根目录不能是符号链接。','生成正规算例目录。')
         return {'passed':False,'issues':issues,'parsed':{}}
     for path in case.rglob('*'):
-        name=str(path.relative_to(case))
+        name=path.relative_to(case).as_posix()
         if path.is_symlink() or path.is_file() and name not in INPUTS or path.is_dir() and name not in {'0','constant','system'}:
             bad('precomputed_output',name,'只接收声明的原生输入；不能提供预制场、日志、自报 QoI 或符号链接。','删除预制结果，由平台从本次真实求解场重算。')
     for name in INPUTS:

@@ -111,7 +111,7 @@ class ExecutionVersionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             a=Path(d)/'a';b=Path(d)/'b'
             self.assertEqual(write_case(a,8,10,60,100),paired(b,8,10,60,100))
-            changes=[str(p.relative_to(a)) for p in a.rglob('*') if p.is_file() and p.read_bytes()!=(b/p.relative_to(a)).read_bytes()]
+            changes=[p.relative_to(a).as_posix() for p in a.rglob('*') if p.is_file() and p.read_bytes()!=(b/p.relative_to(a)).read_bytes()]
             self.assertEqual(changes,['system/fvSolution'])
             old=dictionary(a/'system/fvSolution');new=dictionary(b/'system/fvSolution')
             self.assertEqual(new['relaxationFactors'],{'fields':{'p':['0.05']},'equations':{'U':['0.95']}})

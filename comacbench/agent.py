@@ -111,7 +111,10 @@ def invoke(task, prompt, *, seed, expect):
                 proc.communicate((raw_request+'\n').encode(),timeout=cfg.get('timeout_s',300))
                 status={'exit_code':proc.returncode,'timeout':False}
             except subprocess.TimeoutExpired:
-                os.killpg(proc.pid,signal.SIGKILL)
+                if os.name=='nt':
+                    proc.kill()
+                else:
+                    os.killpg(proc.pid,signal.SIGKILL)
                 proc.communicate()
                 status={'exit_code':proc.returncode,'timeout':True}
         status['duration_s']=round(time.monotonic()-t0,3)

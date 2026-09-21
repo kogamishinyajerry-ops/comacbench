@@ -1,7 +1,7 @@
 """Reproducible native CFD sensitivity experiment; never changes benchmark scores."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import fcntl
+from studies._win_compat import fcntl
 import hashlib
 import json
 import math
