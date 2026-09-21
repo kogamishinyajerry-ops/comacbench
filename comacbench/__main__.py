@@ -31,6 +31,7 @@ except ImportError:  # pragma: no cover - Windows fallback
 from .agent import identity as agent_identity, load_agent
 from .pack import validate_pack, fingerprint, digest
 from .report import write_report
+from .completion import completion_summary, negative_control_passed, result_issues
 
 REPO=Path(__file__).resolve().parents[1]
 MODULES={'code_exec':'runners.code_exec','simulation_agent':'runners.simulation_agent'}
@@ -96,15 +97,20 @@ def result_rows(root, report, runs, provider):
         if not p.exists():
             continue
         r=json.loads(p.read_text())
+        envelope_issues=result_issues(r, task_id=task['id'], suite=task['suite'])
+        if not isinstance(r,dict):
+            r={}
         try:
             details=json.loads(r.get('artifacts',{}).get('grade_details','{}'))
         except (ValueError,TypeError):
             details={}
         spec=yaml.safe_load((root/task['path']).read_text())
-        rows.append({**task,'validity_gate':r.get('validity_gate'),'score':r.get('score'),
+        rows.append({**task,'validity_gate':r.get('validity_gate'),
+                     'score':r.get('score') if 'invalid_score' not in envelope_issues else None,
+                     'result_issues':envelope_issues,
                      'subscores':r.get('subscores'),'failure_mode':r.get('failure_mode'),
                      'gate_failures':r.get('gate_failures'), 'details':details,
-                     'full_pass':r.get('validity_gate')==1 and r.get('score')==1,
+                     'full_pass':not envelope_issues and r.get('validity_gate')==1 and r.get('score')==1,
                      'result_file':str(p), 'result_sha256':digest(p),
                      'requirements':spec.get('evaluation',{}).get('requirements',[]),
                      'scope':spec.get('evaluation',{}).get('scope',''),
@@ -161,8 +167,12 @@ def execute(args):
             for suite in dict.fromkeys(t['suite'] for t in validation['tasks']):
                 run_suite(root,suite,out/'runs'/suite,provider,args.seed,env,args.resume)
                 doc['results']=result_rows(root,validation,out/'runs',provider)
+                doc['completion']=completion_summary(validation['tasks'],doc['results'])
                 save(state,doc)
                 write_report(out/'report.html',doc)
+            doc['completion']=completion_summary(validation['tasks'],doc['results'])
+            if not doc['completion']['complete']:
+                raise ValueError('result_completeness_failed: '+json.dumps(doc['completion'],ensure_ascii=False))
             if calibration:
                 controls=[]
                 for task in validation['tasks']:
@@ -192,8 +202,11 @@ def execute(args):
                         details=json.loads(result.get('artifacts',{}).get('grade_details','{}'))
                         actual_issues=[i['code'] for i in (details.get('deck_audit') or details.get('cfd_audit') or {}).get('issues',[])]
                         expected=control.get('expected_issue')
-                        controls.append({'task_id':task['id'],'control':control['script'],'score':result['score'],
-                                         'max_score':control['max_score'],'passed':result['score']<=control['max_score'] and not result.get('voided') and (expected is None or expected in actual_issues),
+                        envelope_issues=result_issues(result,task_id=task['id'],suite=task['suite'])
+                        controls.append({'task_id':task['id'],'control':control['script'],
+                                         'score':result.get('score') if 'invalid_score' not in envelope_issues else None,
+                                         'result_issues':envelope_issues,
+                                         'max_score':control['max_score'],'passed':negative_control_passed(result,control,task_id=task['id'],suite=task['suite'],actual_issues=actual_issues),
                                          'expected_issue':expected, 'actual_issues':actual_issues,
                                          'gate_failures':result.get('gate_failures'),'failure_mode':result.get('failure_mode')})
                 doc['controls']=controls
@@ -203,6 +216,7 @@ def execute(args):
             doc['status']='interrupted'
             doc['error']=str(e)
             doc['results']=result_rows(root,validation,out/'runs',provider)
+            doc['completion']=completion_summary(validation['tasks'],doc['results'])
             save(state,doc)
             write_report(out/'report.html',doc)
             raise
