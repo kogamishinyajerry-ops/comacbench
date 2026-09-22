@@ -1,0 +1,42 @@
+name: Campaign archive audit
+
+"on":
+  pull_request:
+    paths:
+      - 'comacbench/**'
+      - 'tests/test_campaign.py'
+      - '.github/workflows/campaign-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  campaign:
+    name: Campaign / ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.13']
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
+        with:
+          persist-credentials: false
+          lfs: false
+          # Avoid solver data, large mirrors and Windows-invalid research paths.
+          # This is the campaign source test, NOT a full repository acceptance.
+          sparse-checkout: |
+            comacbench
+            tests
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6, pinned
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Test campaign guards (standard library only)
+        run: python -m unittest discover -s tests -p test_campaign.py -v
+      - name: Compile campaign sources
+        run: python -m py_compile comacbench/campaign.py comacbench/campaign_integrity.py
