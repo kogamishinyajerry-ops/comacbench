@@ -24,3 +24,11 @@ results/_snapshots/*-full/
 *.egg-info/
 probes/evidence/
 probes/.probe_runtime/
+
+# 探针运行产物（probes/test_report_full.py 生成：临时工作目录 + 浏览器验收结果快照）
+probes/.tmp_node/
+probes/evidence-browser/
+
+# data/cfdllm/foam_basic/gt_runs/ 已由 sparse-checkout 排除（该目录整体走 LFS，
+# 且路径含 ':' 在 Windows 上无法创建）；checkout 残留的转义游离文件（':' → U+F03A）不入库
+data/cfdllm/foam_basic/gt_runs/

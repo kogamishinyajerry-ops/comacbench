@@ -1,0 +1,4059 @@
+{
+  "commit": "5543fa5e4a5f5db716a782a5c1bfb5b4585ac8cd",
+  "python": "3.13.14 (main, Jun 11 2026, 04:04:46) [MSC v.1944 64 bit (AMD64)]",
+  "scope": "fixed workload evaluator (fix/private) on local files, not full CLI",
+  "scenarios": 26,
+  "positive": 6,
+  "positive_passed": 6,
+  "negative": 20,
+  "false_accepts": 0,
+  "false_rejects": 0,
+  "evaluator_crashes": 0,
+  "results": [
+    {
+      "name": "oracle_workload_baseline_01",
+      "task_id": "workload_baseline_01",
+      "expected_accept": true,
+      "actual_accept": true,
+      "defect": false,
+      "error": null,
+      "failed_checks": [],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\oracle_workload_baseline_01"
+    },
+    {
+      "name": "oracle_workload_missing_unit_02",
+      "task_id": "workload_missing_unit_02",
+      "expected_accept": true,
+      "actual_accept": true,
+      "defect": false,
+      "error": null,
+      "failed_checks": [],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-B'",
+          "actual": "'BLEED-CHK-B'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P2': 1}",
+          "actual": "实际计数 {'P2': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\oracle_workload_missing_unit_02"
+    },
+    {
+      "name": "oracle_workload_conflict_dup_03",
+      "task_id": "workload_conflict_dup_03",
+      "expected_accept": true,
+      "actual_accept": true,
+      "defect": false,
+      "error": null,
+      "failed_checks": [],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P2']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-C'",
+          "actual": "'BLEED-CHK-C'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P2",
+              "BLEED-CHK-C",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P2",
+              "BLEED-CHK-C",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P1': 1}",
+          "actual": "实际计数 {'P1': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\oracle_workload_conflict_dup_03"
+    },
+    {
+      "name": "oracle_workload_stale_output_04",
+      "task_id": "workload_stale_output_04",
+      "expected_accept": true,
+      "actual_accept": true,
+      "defect": false,
+      "error": null,
+      "failed_checks": [],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-D'",
+          "actual": "'BLEED-CHK-D'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P0': 1}",
+          "actual": "实际计数 {'P0': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\oracle_workload_stale_output_04"
+    },
+    {
+      "name": "legal_reorder",
+      "task_id": "workload_baseline_01",
+      "expected_accept": true,
+      "actual_accept": true,
+      "defect": false,
+      "error": null,
+      "failed_checks": [],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "version",
+            "point",
+            "case_id"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\legal_reorder"
+    },
+    {
+      "name": "wrong_physical_values",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "values_match_input"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": false,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": [
+            [
+              "P1",
+              "altitude_m",
+              "输入=0 交付=-999999"
+            ],
+            [
+              "P1",
+              "mass_flow_kg_s",
+              "输入=1.2 交付=-999999"
+            ],
+            [
+              "P2",
+              "altitude_m",
+              "输入=6000 交付=-999999"
+            ],
+            [
+              "P2",
+              "mass_flow_kg_s",
+              "输入=0.95 交付=-999999"
+            ],
+            [
+              "P3",
+              "altitude_m",
+              "输入=11000 交付=-999999"
+            ]
+          ]
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\wrong_physical_values"
+    },
+    {
+      "name": "booleans_as_measurements",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "units_explicit",
+        "values_match_input"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": false,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": [
+            [
+              "P1",
+              "altitude_m",
+              "True"
+            ],
+            [
+              "P1",
+              "mass_flow_kg_s",
+              "True"
+            ],
+            [
+              "P2",
+              "altitude_m",
+              "True"
+            ],
+            [
+              "P2",
+              "mass_flow_kg_s",
+              "True"
+            ],
+            [
+              "P3",
+              "altitude_m",
+              "True"
+            ]
+          ]
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": false,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": [
+            [
+              "P1",
+              "altitude_m",
+              "输入=0 交付=True"
+            ],
+            [
+              "P1",
+              "mass_flow_kg_s",
+              "输入=1.2 交付=True"
+            ],
+            [
+              "P2",
+              "altitude_m",
+              "输入=6000 交付=True"
+            ],
+            [
+              "P2",
+              "mass_flow_kg_s",
+              "输入=0.95 交付=True"
+            ],
+            [
+              "P3",
+              "altitude_m",
+              "输入=11000 交付=True"
+            ]
+          ]
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\booleans_as_measurements"
+    },
+    {
+      "name": "nonfinite_measurements",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "units_explicit",
+        "values_match_input"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": false,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": [
+            [
+              "P1",
+              "altitude_m",
+              "nan"
+            ],
+            [
+              "P1",
+              "mass_flow_kg_s",
+              "nan"
+            ],
+            [
+              "P2",
+              "altitude_m",
+              "nan"
+            ],
+            [
+              "P2",
+              "mass_flow_kg_s",
+              "nan"
+            ],
+            [
+              "P3",
+              "altitude_m",
+              "nan"
+            ]
+          ]
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": false,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": [
+            [
+              "P1",
+              "altitude_m",
+              "输入=0 交付=nan"
+            ],
+            [
+              "P1",
+              "mass_flow_kg_s",
+              "输入=1.2 交付=nan"
+            ],
+            [
+              "P2",
+              "altitude_m",
+              "输入=6000 交付=nan"
+            ],
+            [
+              "P2",
+              "mass_flow_kg_s",
+              "输入=0.95 交付=nan"
+            ],
+            [
+              "P3",
+              "altitude_m",
+              "输入=11000 交付=nan"
+            ]
+          ]
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\nonfinite_measurements"
+    },
+    {
+      "name": "wrong_case_and_missing_lineage",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "row_shape_valid",
+        "case_id_lineage",
+        "source_version_lineage",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": false,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": [
+            [
+              "P1",
+              [
+                "source_version"
+              ]
+            ],
+            [
+              "P2",
+              [
+                "source_version"
+              ]
+            ],
+            [
+              "P3",
+              [
+                "source_version"
+              ]
+            ]
+          ]
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": false,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'OTHER-CASE'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": false,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": [
+            [
+              "P1",
+              "输入 version='2026-09-12'",
+              "交付=None"
+            ],
+            [
+              "P2",
+              "输入 version='2026-09-12'",
+              "交付=None"
+            ],
+            [
+              "P3",
+              "输入 version='2026-09-12'",
+              "交付=None"
+            ]
+          ]
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "OTHER-CASE",
+              "1999-01-01"
+            ],
+            [
+              "P2",
+              "OTHER-CASE",
+              "1999-01-01"
+            ],
+            [
+              "P3",
+              "OTHER-CASE",
+              "1999-01-01"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\wrong_case_and_missing_lineage"
+    },
+    {
+      "name": "extra_job",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P99",
+              "OTHER",
+              "old"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\extra_job"
+    },
+    {
+      "name": "duplicate_job",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\duplicate_job"
+    },
+    {
+      "name": "missing_required_exceptions_file",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "deliverable_kinds_declared",
+        "exceptions_present",
+        "exceptions_header_valid",
+        "exceptions_reconciled",
+        "rejection_reasons_match"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": false,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 0
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": false,
+          "expected": "exceptions.csv 已声明且文件存在",
+          "actual": "deliverable 未声明"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": false,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": "文件不可解析"
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": false,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "文件不可解析"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": false,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "文件不可解析"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\missing_required_exceptions_file"
+    },
+    {
+      "name": "bad_exceptions_header",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "exceptions_header_valid"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": false,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "wrong",
+            "header"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\bad_exceptions_header"
+    },
+    {
+      "name": "drop_legitimate_P3",
+      "task_id": "workload_missing_unit_02",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "rows_reconciled",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": false,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P3']",
+          "actual": "缺失 ['P3'] 多余/重复 [] 实际计数 {'P1': 1}"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-B'",
+          "actual": "'BLEED-CHK-B'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P2': 1}",
+          "actual": "实际计数 {'P2': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\drop_legitimate_P3"
+    },
+    {
+      "name": "accept_conflicting_P1",
+      "task_id": "workload_conflict_dup_03",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "rows_reconciled",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": false,
+          "expected": "合法 point 恰好各出现一次: ['P2']",
+          "actual": "缺失 [] 多余/重复 ['P1'] 实际计数 {'P2': 1, 'P1': 1}"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-C'",
+          "actual": "'BLEED-CHK-C'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P2",
+              "BLEED-CHK-C",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-C",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-C",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P1': 1}",
+          "actual": "实际计数 {'P1': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\accept_conflicting_P1"
+    },
+    {
+      "name": "stale_P0_in_run_manifest",
+      "task_id": "workload_stale_output_04",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-D'",
+          "actual": "'BLEED-CHK-D'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P0",
+              "BLEED-CHK-D",
+              "old"
+            ],
+            [
+              "P1",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-D",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P0': 1}",
+          "actual": "实际计数 {'P0': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\stale_P0_in_run_manifest"
+    },
+    {
+      "name": "wrong_rejection_reason",
+      "task_id": "workload_missing_unit_02",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "rejection_reasons_match"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-B'",
+          "actual": "'BLEED-CHK-B'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-B",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P2': 1}",
+          "actual": "实际计数 {'P2': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": false,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": [
+            [
+              "P2",
+              "期望类别=missing_unit",
+              "reason='looks good'",
+              "detail=''"
+            ]
+          ]
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\wrong_rejection_reason"
+    },
+    {
+      "name": "malformed_rows_type",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "normalized_structure",
+        "rows_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": false,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "rows 缺失或类型为 int"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": false,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "缺失 ['P1', 'P2', 'P3'] 多余/重复 [] 实际计数 {}"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\malformed_rows_type"
+    },
+    {
+      "name": "all_valid_rows_rejected",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "rows_reconciled",
+        "manifest_reconciled",
+        "exceptions_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": false,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "缺失 ['P1', 'P2', 'P3'] 多余/重复 [] 实际计数 {}"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": []
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": false,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {'P1': 1, 'P2': 1, 'P3': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\all_valid_rows_rejected"
+    },
+    {
+      "name": "legal_duplicate_input",
+      "task_id": "workload_legal_dup_05",
+      "expected_accept": true,
+      "actual_accept": true,
+      "defect": false,
+      "error": null,
+      "failed_checks": [],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P2']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-E'",
+          "actual": "'BLEED-CHK-E'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P2",
+              "BLEED-CHK-E",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P2",
+              "BLEED-CHK-E",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P1': 1}",
+          "actual": "实际计数 {'P1': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\legal_duplicate_input"
+    },
+    {
+      "name": "stale_version_reuse",
+      "task_id": "workload_stale_refresh_06",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "source_version_lineage",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-F'",
+          "actual": "'BLEED-CHK-F'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": false,
+          "expected": "每行 source_version == '2026-09-20'",
+          "actual": [
+            [
+              "P1",
+              "输入 version='2026-09-20'",
+              "交付='2026-09-12'"
+            ],
+            [
+              "P2",
+              "输入 version='2026-09-20'",
+              "交付='2026-09-12'"
+            ]
+          ]
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-F",
+              "2026-09-20"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-F",
+              "2026-09-20"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-F",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-F",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {'P0': 1}",
+          "actual": "实际计数 {'P0': 1}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\stale_version_reuse"
+    },
+    {
+      "name": "missing_run_manifest_deliverable",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "deliverable_kinds_declared",
+        "manifest_present",
+        "manifest_header_valid",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": false,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 0,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": false,
+          "expected": "run_manifest.csv 已声明且文件存在",
+          "actual": "deliverable 未声明"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": false,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": "文件不可解析"
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": "文件不可解析"
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\missing_run_manifest_deliverable"
+    },
+    {
+      "name": "duplicate_kind_declaration",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "deliverable_kinds_declared"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": false,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 2,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\duplicate_kind_declaration"
+    },
+    {
+      "name": "mass_flow_off_by_10x",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "values_match_input"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": false,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": [
+            [
+              "P1",
+              "mass_flow_kg_s",
+              "输入=1.2 交付=12.0"
+            ],
+            [
+              "P2",
+              "mass_flow_kg_s",
+              "输入=0.95 交付=9.5"
+            ],
+            [
+              "P3",
+              "mass_flow_kg_s",
+              "输入=0.72 交付=7.199999999999999"
+            ]
+          ]
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": true,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\mass_flow_off_by_10x"
+    },
+    {
+      "name": "unparseable_manifest_csv",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "manifest_header_valid",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": true,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-A'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": false,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": "文件不可解析"
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": "文件不可解析"
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\unparseable_manifest_csv"
+    },
+    {
+      "name": "wrong_case_identity",
+      "task_id": "workload_baseline_01",
+      "expected_accept": false,
+      "actual_accept": false,
+      "defect": false,
+      "error": null,
+      "failed_checks": [
+        "case_id_lineage",
+        "manifest_reconciled"
+      ],
+      "checks": [
+        {
+          "name": "deliverable_kinds_declared",
+          "passed": true,
+          "expected": "normalized/run_manifest/exceptions 各声明恰好一次",
+          "actual": {
+            "normalized": 1,
+            "run_manifest": 1,
+            "exceptions": 1
+          }
+        },
+        {
+          "name": "normalized_present",
+          "passed": true,
+          "expected": "JSON 对象",
+          "actual": "ok"
+        },
+        {
+          "name": "normalized_structure",
+          "passed": true,
+          "expected": "rows 为列表，每行是含 point 字符串字段的对象",
+          "actual": "ok"
+        },
+        {
+          "name": "row_shape_valid",
+          "passed": true,
+          "expected": "每行字段齐全: point/altitude_m/mass_flow_kg_s/source_version",
+          "actual": "ok"
+        },
+        {
+          "name": "units_explicit",
+          "passed": true,
+          "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+          "actual": "ok"
+        },
+        {
+          "name": "rows_reconciled",
+          "passed": true,
+          "expected": "合法 point 恰好各出现一次: ['P1', 'P2', 'P3']",
+          "actual": "ok"
+        },
+        {
+          "name": "values_match_input",
+          "passed": true,
+          "expected": "逐行数值与输入对应值精确一致（期望值取自输入行）",
+          "actual": "ok"
+        },
+        {
+          "name": "case_id_lineage",
+          "passed": false,
+          "expected": "normalized.case_id == 'BLEED-CHK-A'",
+          "actual": "'BLEED-CHK-Z'"
+        },
+        {
+          "name": "source_version_lineage",
+          "passed": true,
+          "expected": "每行 source_version == '2026-09-12'",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "manifest_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'case_id', 'version']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "case_id",
+            "version"
+          ]
+        },
+        {
+          "name": "manifest_reconciled",
+          "passed": false,
+          "expected": [
+            [
+              "P1",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-A",
+              "2026-09-12"
+            ]
+          ],
+          "actual": [
+            [
+              "P1",
+              "BLEED-CHK-Z",
+              "2026-09-12"
+            ],
+            [
+              "P2",
+              "BLEED-CHK-Z",
+              "2026-09-12"
+            ],
+            [
+              "P3",
+              "BLEED-CHK-Z",
+              "2026-09-12"
+            ]
+          ]
+        },
+        {
+          "name": "exceptions_present",
+          "passed": true,
+          "expected": "已声明且存在",
+          "actual": "ok"
+        },
+        {
+          "name": "exceptions_header_valid",
+          "passed": true,
+          "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+          "actual": [
+            "point",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "exceptions_reconciled",
+          "passed": true,
+          "expected": "每个被拒收 point 一行: {}",
+          "actual": "实际计数 {}"
+        },
+        {
+          "name": "rejection_reasons_match",
+          "passed": true,
+          "expected": "拒收理由与问题类别匹配且 detail 非空",
+          "actual": "ok"
+        }
+      ],
+      "workspace": "probes\\evidence\\workload\\wrong_case_identity"
+    }
+  ]
+}
