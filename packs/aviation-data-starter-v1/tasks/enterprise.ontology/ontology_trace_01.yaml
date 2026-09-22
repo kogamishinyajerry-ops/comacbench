@@ -1,0 +1,117 @@
+id: ontology_trace_01
+registry_id: enterprise.ontology
+domain: knowledge_ontology
+task_type: code_exec
+model_profile: code_tool_agent
+assets_revision: aviation-core@1.0.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools:
+- python
+input:
+  prompt_file: tasks/enterprise.ontology/ontology_trace_01.md
+  prompt_sha256: 4b1a179075adc3f3ee9d63cc0d61a7e67e8c5830042b64db5cbae4c63e0d3a31
+  assets: []
+output_contract:
+- script
+reference:
+  source: 自建虚构企业记录与独立断言；非生产数据
+  revision: aviation-core@1.0.0
+  n_test_cases: 7
+  uncertainty_note: 标识符、关系与错误原因精确比较；单位换算数值使用明确等式
+grader:
+  answer_format: code
+  exec_kind: unit_tests_problem
+  validity_gate: true
+  tests:
+  - 'assert build_graph([{''id'': ''P-001'', ''type'': ''Part''}, {''id'': ''M1'',
+    ''type'': ''Material''}, {''id'': ''A1'', ''type'': ''Analysis''}, {''id'': ''R1'',
+    ''type'': ''Requirement''}], [{''subject'': ''P-001'', ''relation'': ''made_of'',
+    ''object'': ''M1'', ''source_id'': ''S1''}]) == {''edges'':[{''subject'': ''P-001'',
+    ''relation'': ''made_of'', ''object'': ''M1'', ''evidence'': [''S1'']}], ''issues'':[]}'
+  - 'assert build_graph([{''id'': ''P-001'', ''type'': ''Part''}, {''id'': ''M1'',
+    ''type'': ''Material''}, {''id'': ''A1'', ''type'': ''Analysis''}, {''id'': ''R1'',
+    ''type'': ''Requirement''}], [{''subject'': ''P-001'', ''relation'': ''made_of'',
+    ''object'': ''M1'', ''source_id'': ''S1''}, {''subject'': ''P-001'', ''relation'':
+    ''made_of'', ''object'': ''M1'', ''source_id'': ''S2''}, {''subject'': ''P-001'',
+    ''relation'': ''made_of'', ''object'': ''M1'', ''source_id'': ''S1''}]) == {''edges'':[{''subject'':
+    ''P-001'', ''relation'': ''made_of'', ''object'': ''M1'', ''evidence'': [''S1'',
+    ''S2'']}], ''issues'':[]}'
+  - 'assert build_graph([{''id'': ''P-001'', ''type'': ''Part''}, {''id'': ''M1'',
+    ''type'': ''Material''}, {''id'': ''A1'', ''type'': ''Analysis''}, {''id'': ''R1'',
+    ''type'': ''Requirement''}], [{''subject'': ''P-001'', ''relation'': ''made_of'',
+    ''object'': ''UNKNOWN'', ''source_id'': ''S3''}]) == {''edges'':[], ''issues'':[{''source_id'':''S3'',''reason'':''missing_entity''}]}'
+  - 'assert build_graph([{''id'': ''P-001'', ''type'': ''Part''}, {''id'': ''M1'',
+    ''type'': ''Material''}, {''id'': ''A1'', ''type'': ''Analysis''}, {''id'': ''R1'',
+    ''type'': ''Requirement''}], [{''subject'': ''P-001'', ''relation'': ''satisfies'',
+    ''object'': ''R1'', ''source_id'': ''S4''}]) == {''edges'':[], ''issues'':[{''source_id'':''S4'',''reason'':''type_mismatch''}]}'
+  - 'assert build_graph([{''id'': ''P-001'', ''type'': ''Part''}, {''id'': ''M1'',
+    ''type'': ''Material''}, {''id'': ''A1'', ''type'': ''Analysis''}, {''id'': ''R1'',
+    ''type'': ''Requirement''}], [{''subject'': ''P-001'', ''relation'': ''made_of'',
+    ''object'': ''M1'', ''source_id'': ''''}, {''subject'': ''P-001'', ''relation'':
+    ''similar_to'', ''object'': ''M1'', ''source_id'': ''S5''}]) == {''edges'':[],
+    ''issues'':[{''source_id'':'''',''reason'':''missing_source''},{''source_id'':''S5'',''reason'':''unknown_relation''}]}'
+  - 'es=[{''id'': ''P-001'', ''type'': ''Part''}, {''id'': ''M1'', ''type'': ''Material''},
+    {''id'': ''A1'', ''type'': ''Analysis''}, {''id'': ''R1'', ''type'': ''Requirement''}]
+
+    aa=[{''subject'': ''A1'', ''relation'': ''satisfies'', ''object'': ''R1'', ''source_id'':
+    ''SRC-09''}, {''subject'': ''P-001'', ''relation'': ''verified_by'', ''object'':
+    ''A1'', ''source_id'': ''SRC-08''}]
+
+    before=[dict(x) for x in aa]
+
+    assert build_graph(es,aa) == {''edges'':[{''subject'': ''A1'', ''relation'': ''satisfies'',
+    ''object'': ''R1'', ''evidence'': [''SRC-09'']}, {''subject'': ''P-001'', ''relation'':
+    ''verified_by'', ''object'': ''A1'', ''evidence'': [''SRC-08'']}],''issues'':[]}
+
+    assert aa == before'
+  - assert build_graph([],[]) == {'edges':[], 'issues':[]}
+  test_imports: []
+  determinism_runs: 2
+  oracle_source: private/ontology_trace_01.py
+scoring:
+  weights:
+    physics: 0.7
+    requirements: 0.2
+    objective: 0
+    robustness: 0.1
+  note: physics=业务断言通过率；最终报告单列全部断言通过，不能仅看可执行性
+limits:
+  cpu: 1
+  memory_gb: 2
+  wall_clock_s: 30
+  attempts: 1
+license_provenance:
+  source: COMACBench 自建示例
+  license: CC0-1.0
+  revision: 1.0.0
+  mirror_allowed: true
+evaluation:
+  requirements:
+  - id: R1
+    text: 正确转换与精确保留标识符
+    check: test:1
+  - id: R2
+    text: 重复记录或重复证据处理
+    check: test:2
+  - id: R3
+    text: 缺失或未知输入处理
+    check: test:3
+  - id: R4
+    text: 非法数值或关系类型拒绝
+    check: test:4
+  - id: R5
+    text: 来源与错误原因可追溯
+    check: test:5
+  - id: R6
+    text: 顺序稳定且输入不被修改
+    check: test:6
+  - id: R7
+    text: 空输入边界
+    check: test:7
+  negative_controls:
+  - script: private/no_output.py
+    max_score: 0.3
+  - script: private/wrong_relation.py
+    max_score: 0.9
+  scope: 可执行规则构建；文件级 ETL、自然语言知识抽取和企业系统集成另行评测。
