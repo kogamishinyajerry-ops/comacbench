@@ -13,6 +13,7 @@ Agent 提交脚本或算例输入；平台执行检查或真实求解器，从�
 | 先看懂一次评测怎样完成 | [初次接入指南](docs/first-run.zh-CN.md)；`aviation-data-starter-v1` | 理解材料检查、校准、接口自检和真实 Agent 评测的区别 |
 | 检查结构建模脚本 | `aviation-structures-v2`；先准备 CalculiX | 一个静力梁任务的输入契约、实际求解和数值核对 |
 | 研究 CFD 原生证据检查 | `aviation-cfd-step-v1`；需固定 OpenFOAM 10 Docker 环境 | 受限 Re=100 后向台阶；当前不能代表飞机 CFD 能力 |
+| 对比多次运行与公开任务变体 | [任务族实验指南](docs/hydrogym-campaigns.md) | 固定分母、核查原始结果和身份；不宣称隔离迁移已验证 |
 | 接入自己的任务或研究模型差异 | [开发者协议](docs/aviation-quickstart.md)、[研究目录](registry/registry.yaml) | 按任务契约和既有评测边界扩展 |
 
 **当前用于受控开发与试测，不是飞机设计放行工具。** 示例满分不证明真实工程迁移；参考程序满分不属于模型成绩；材料检查通过不代表这台机器已经能运行。
@@ -64,6 +65,12 @@ python -m comacbench run packs/aviation-data-starter-v1 --agent ./my-agent.json 
 研究目录声明 31 项 integrated benchmark、约 2.7k 个任务，涉及知识、代码、CAD、CFD、结构、动力、飞控、总体设计、办公与适航等方向。这一层用于研究、基线和判分资产积累，不等于全部已成为可直接交给工程师使用的产品包。
 
 事实清单：[registry/registry.yaml](registry/registry.yaml)；许可记录：[registry/license-notes.md](registry/license-notes.md)；历史架构与数量说明：[2026-09-11 评估](report/2026-09-11-dev-status-and-beta-readiness.md)。
+
+## 已完成首跑，再组织任务族实验
+
+新增的 `python -m comacbench.campaign` 只读现有运行记录，分别报告开发集、公开迁移回归和压力集。使用固定的 Agent × case × seed 矩阵，参考答案不计入模型成绩，漏跑和损坏结果不从分母删除。
+
+从 [starter 计划](examples/campaigns/starter.plan.json) 和[操作指南](docs/hydrogym-campaigns.md)开始。该计划仅复用现有轻量包，没有新增隐藏题或迁移任务；所有报告保留 `publishable=false`、`isolated_transfer_verified=false`。这一步不安装 HydroGym，也不改现有判分器。
 
 ## 当前版本与部署边界
 
