@@ -200,7 +200,14 @@ def execute(args):
                         if rr.returncode: raise ValueError(f'negative control runner failed: {dest}')
                         result=json.loads((dest/f'result_{task["id"]}.json').read_text())
                         details=json.loads(result.get('artifacts',{}).get('grade_details','{}'))
-                        actual_issues=[i['code'] for i in (details.get('deck_audit') or details.get('cfd_audit') or {}).get('issues',[])]
+                        audit=details.get('deck_audit') or details.get('cfd_audit') or {}
+                        actual_issues=[i['code'] for i in audit.get('issues',[])]
+                        # deliverable_review 的诊断在 gate_failures/failure_mode，
+                        # 不在 deck/cfd audit —— 统一汇入 actual_issues
+                        actual_issues += [f for f in (result.get('gate_failures') or [])
+                                          if f not in actual_issues]
+                        if result.get('failure_mode') and result['failure_mode'] not in actual_issues:
+                            actual_issues.append(result['failure_mode'])
                         expected=control.get('expected_issue')
                         envelope_issues=result_issues(result,task_id=task['id'],suite=task['suite'])
                         controls.append({'task_id':task['id'],'control':control['script'],

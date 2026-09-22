@@ -326,6 +326,24 @@ def _validate_pack(root):
                     from runners.solvers.backward_step import STAGES
                     if g.get('exec_kind')!='cfd_step' or req['check'][4:] not in STAGES:
                         problem('unknown_check','evaluation.requirements','未知或未启用的 CFD 检查。','使用公开六阶段 cfd: 检查项。')
+                elif req['check'].startswith('evaluator:'):
+                    if g.get('exec_kind')!='file_package':
+                        problem('unknown_check','evaluation.requirements','evaluator: 检查只属于 file_package 任务。','使用对应执行类型的检查 ID。')
+                    else:
+                        ev_mod=(g.get('evaluator') or {}).get('module')
+                        ev_path=root/'private'/((ev_mod or 'x').replace('.','/')+'.py') if ev_mod else None
+                        names=set()
+                        if ev_path and ev_path.is_file():
+                            import ast as _ast
+                            try:
+                                tree=_ast.parse(ev_path.read_text(encoding='utf-8'))
+                                names={a.value for n in _ast.walk(tree)
+                                       if isinstance(n,_ast.Call) and isinstance(n.func,_ast.Name) and n.func.id=='add'
+                                       for a in n.args if isinstance(a,_ast.Constant) and isinstance(a.value,str)}
+                            except (SyntaxError, ValueError, UnicodeError, OSError):
+                                names=set()
+                        if req['check'][10:] not in names:
+                            problem('unknown_check','evaluation.requirements',f'evaluator 未产出检查 {req["check"][10:]}。','引用 evaluator 内实际 add(...) 的检查名。')
                 elif req['check'] not in ({'solver_exit','reference_metrics','output_contract'} if g.get('exec_kind')=='ccx_fea' else {'output_contract'}):
                     problem('unknown_check','evaluation.requirements','未知的判分检查引用。','使用实际检查 ID。')
             negs=ev['negative_controls']
@@ -344,6 +362,11 @@ def _validate_pack(root):
                         enabled=g.get('exec_kind')=='ccx_fea' and 'deck_contract' in g
                         if g.get('exec_kind')=='cfd_step':
                             from runners.solvers.backward_step import ISSUE_CODES
+                            enabled=True
+                        if g.get('exec_kind')=='file_package':
+                            ISSUE_CODES={'manifest_missing','manifest_invalid',
+                                         'deliverable_path_escape','deliverable_tree_mismatch',
+                                         'deliverable_content_check_failed'}
                             enabled=True
                         if not enabled or not isinstance(n['expected_issue'],str) or n['expected_issue'] not in ISSUE_CODES:
                             problem('unknown_expected_issue','evaluation.negative_controls.expected_issue','负例引用未知或未启用的工程诊断。','指定结构契约检查器的真实问题代码。')

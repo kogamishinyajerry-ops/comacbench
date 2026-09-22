@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from pathlib import Path
 
@@ -112,12 +113,16 @@ def declared_tree(manifest: dict, root: Path) -> tuple[list[Path], list[str]]:
 
 
 def actual_tree(workspace: Path, declared: list[Path]) -> tuple[list[Path], list[str]]:
-    """workspace 里实际存在的交付文件（排除 runner 自己写的文件与目录）。"""
+    """workspace 里实际存在的交付文件（排除平台投递的 inputs/ 与 runner 自身文件）。"""
     reserved = {workspace / "make_case.py", workspace / MANIFEST}
     out: list[Path] = []
     issues: list[str] = []
     for p in sorted(workspace.rglob("*")):
         if p.is_dir() or p in reserved:
+            continue
+        rel = p.relative_to(workspace)
+        if rel.parts and rel.parts[0] == "inputs":
+            # 平台投递的只读输入（判分环境放置，不经 agent 之手）——不是交付物
             continue
         if p.is_symlink() or not p.is_file():
             issues.append(_TREE_MISMATCH)
@@ -258,6 +263,17 @@ def run_task(
 
     grade_t0 = time.time()
     iso = IsolatedRun()
+    # 输入资产投递（与 code_exec sandbox_inputs 同构：判分环境放置，不经 agent 之手）
+    import shutil as _shutil
+    pack_root = Path(task.yaml_path).resolve().parents[2]
+    for a in (task["input"].get("assets") or []):
+        src = pack_root / a["path"]
+        if src.is_file():
+            dst = iso.dir / "inputs" / a["path"]
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            _shutil.copy(src, dst)
+    if any((iso.dir / "inputs").rglob("*")):
+        os.environ.setdefault("WORKLOAD_INPUTS", str(iso.dir / "inputs"))
     script = iso.write("make_case.py", code)
     r1 = iso.run(script, min(timeout, 300.0))
     logs.append(f"make_case exit={r1['exit']} {r1['duration_s']}s")
@@ -341,7 +357,9 @@ def main() -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     env = environment_digest()
-    prompt_cache = {t.id: (Path(args.tasks) / t["input"]["prompt_file"]).read_text(
+    # prompt_file 相对 pack 根（tasks/ 的上级），与校验器的解析口径一致
+    pack_root = Path(args.tasks).resolve().parents[1]
+    prompt_cache = {t.id: (pack_root / t["input"]["prompt_file"]).read_text(
         encoding="utf-8") for t in tasks}
     oracle_cache = {}
     if args.provider == "oracle":
@@ -349,7 +367,7 @@ def main() -> int:
             src = t["grader"].get("oracle_source")
             if not src:
                 raise SystemExit(f"{t.id}: oracle 模式需要 grader.oracle_source")
-            p = Path(args.tasks).parent / src
+            p = pack_root / src
             oracle_cache[t.id] = p.read_text(encoding="utf-8")
     for t in tasks:
         r = run_task(t, provider=args.provider, model=args.model,
@@ -360,3 +378,5 @@ def main() -> int:
             json.dumps(r, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"{t.id}: gate={r['validity_gate']} score={r['score']}")
     return 0
+if __name__ == "__main__":
+    raise SystemExit(main())

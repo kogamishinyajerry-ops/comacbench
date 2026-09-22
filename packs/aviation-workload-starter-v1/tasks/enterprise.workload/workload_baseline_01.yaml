@@ -1,0 +1,43 @@
+id: workload_baseline_01
+registry_id: enterprise.workload
+domain: data
+task_type: deliverable_review
+model_profile: plain_llm
+assets_revision: aviation-workload-starter@1.0.0
+environment_digest: computed-at-runtime
+hidden: false
+allowed_tools: [python]
+input:
+  prompt_file: tasks/enterprise.workload/workload_baseline_01.md
+  prompt_sha256: 238e686422a32f1cd4ca5620afb813e40da3ff5c12a8d953c12abdaafd08d64e
+  assets:
+  - path: assets/workload_baseline_01_case.json
+    digest: sha256:d088d130347d188b1de023ed1865ba647d1629e693e0e9175d12f85d08a719e2
+output_contract:
+- manifest.json
+reference:
+  source: 自建合成工况（CC0-1.0）；判定矩阵见 private/workload_evaluator.py
+  revision: aviation-workload-starter@1.0.0
+  n_test_cases: 7
+  uncertainty_note: 行级判定为精确语义比较；数值换算按题面显式单位
+license_provenance:
+  license: CC0-1.0
+  source: synthetic workload rows
+  revision: '1.0.0'
+grader:
+  answer_format: code
+  exec_kind: file_package
+  validity_gate: true
+  evaluator: {module: workload_evaluator}
+  deliverable_kinds: [normalized, run_manifest, exceptions]
+  oracle_source: private/workload_oracle.py
+limits: {cpu: 1, memory_gb: 1, wall_clock_s: 120, attempts: 1}
+scoring:
+  weights: {physics: 0.55, requirements: 0.45, objective: 0, robustness: 0}
+evaluation:
+  requirements:
+  - {id: norm, text: 交付规范化记录且单位显式, check: 'evaluator:normalized_present'}
+  - {id: units, text: 规范化输出带显式单位字段, check: 'evaluator:units_explicit'}
+  - {id: manifest, text: 运行清单与接受工况一致, check: 'evaluator:manifest_present'}
+  negative_controls:
+  - {script: private/workload_baseline_01_neg_guess.py, max_score: 0, expected_issue: deliverable_content_check_failed}
