@@ -1,23 +1,17 @@
 // Thin proxy to the Python contribution/agent CLI. No grading logic here.
-import { spawn, spawnSync } from "node:child_process";
-import { closeSync, existsSync, openSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
-function python(repo) {
-  return process.env.COMAC_BENCH_PYTHON || (existsSync(path.join(repo, ".venv/bin/python"))
-    ? path.join(repo, ".venv/bin/python") : "python3");
-}
+import { decodePackReply, launchPackProcess, resolvePackPython } from "./pack-runtime.js";
 
 export function packCommand(repo, args) {
-  const r = spawnSync(python(repo), ["-m", "comacbench.admission", ...args], {
+  const r = spawnSync(resolvePackPython(repo), ["-m", "comacbench.admission", ...args], {
     cwd: repo, encoding: "utf8", timeout: 30000, maxBuffer: 8 * 1024 * 1024,
     env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" },
   });
-  let data;
-  try { data = JSON.parse(r.stdout || r.stderr); }
-  catch { throw new Error(r.error?.message || "评测包命令未返回有效 JSON"); }
-  return { ok: r.status === 0, ...data };
+  return decodePackReply(r);
 }
 
 export function registerPackTools(ctx, repo) {
@@ -39,7 +33,7 @@ export function registerPackTools(ctx, repo) {
     { pack: { type: "string" }, agent: { type: "string", description: "agent JSON 配置路径；run 必填" },
       out: { type: "string", description: "运行输出目录" }, mode: { type: "string", enum: ["run", "calibrate"] },
       seed: { type: "integer" }, resume: { type: "boolean" } }, ["pack", "out", "mode"],
-    (a) => {
+    async (a) => {
       if (!["run", "calibrate"].includes(a.mode)) throw new Error("mode 必须是 run 或 calibrate");
       const pack = path.resolve(repo, a.pack), out = path.resolve(repo, a.out);
       const validation = packCommand(repo, ["validate", pack]);
@@ -51,15 +45,10 @@ export function registerPackTools(ctx, repo) {
       }
       if (a.resume) args.push("--resume");
       const log = path.join(os.tmpdir(), `comac-agent-${Date.now()}-${process.pid}.log`);
-      const fd = openSync(log, "wx");
-      const child = spawn(python(repo), args, { cwd: repo, detached: true, stdio: ["ignore", fd, fd],
-        env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" } });
-      closeSync(fd);
-      child.on("error", () => {}); // status is read from the run directory; no uncaught host exception
-      child.unref();
-      return { ok: true, status: "launch_requested", pid: child.pid, log, out,
+      const pid = await launchPackProcess(repo, resolvePackPython(repo), args, log);
+      return { ok: true, status: "launch_requested", pid, log, out,
         result: path.join(out, "run.json"), report: path.join(out, "report.html"),
-        note: "启动请求已提交；完成以 run.json status 为准，用 comac_agent_result 查看。" };
+        note: "进程已创建，不代表应用已就绪或评测完成；完成以 run.json status 为准，用 comac_agent_result 查看。" };
     });
   register("comac_agent_result", "读取工程师 agent 的完成状态、分项结果和贡献质量反馈；仅读取 run.json。",
     { out: { type: "string" } }, ["out"], (a) => {
@@ -69,6 +58,7 @@ export function registerPackTools(ctx, repo) {
       if (data.identity?.protocol !== "comacbench.run.v1") throw new Error("不是本协议的运行档案");
       return { ok: true, status: data.status, error: data.error, agent: data.agent,
         pack: data.pack, results: data.results, controls: data.controls,
+        completion: data.completion ?? null, completion_available: data.completion != null,
         calibration_passed: data.calibration_passed, validation: data.validation,
         report: path.join(out, "report.html"), rerun: data.rerun };
     });
