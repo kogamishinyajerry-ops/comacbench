@@ -57,6 +57,23 @@ def archive(root, *, name='candidate', variant='dev', seed=0, mode='run'):
         'registry_id': 'aviation.data', 'adapter': 'code_exec',
         'provider': 'oracle' if mode == 'calibrate' else 'external', 'seed': seed,
         'n_tasks': len(tasks), 'environment_digest': 'sha256:' + 'f' * 64})
+    if mode == 'calibrate':
+        # Match actual CLI archives: calibration has per-task raw negative runs,
+        # not just full-pass positive result rows.
+        doc.update(calibration_passed=True, controls=[])
+        for task in tasks:
+            tid, suite = task['id'], task['suite']
+            negative = root / 'controls' / f'{tid}-0'
+            raw = json.loads((root / 'runs' / suite / f'result_{tid}.json').read_text(encoding='utf-8'))
+            raw.update(score=0.0)
+            write(negative / f'result_{tid}.json', raw)
+            write(negative / 'run_manifest.json', {
+                'registry_id': suite, 'adapter': task['adapter'], 'provider': 'oracle',
+                'seed': seed, 'n_tasks': 1, 'assets': {},
+                'environment_digest': raw['environment_digest']})
+            doc['controls'].append({'task_id': tid, 'control': f'private/{tid}_wrong.py',
+                                    'passed': True, 'score': 0.0, 'max_score': 0.0,
+                                    'result_issues': [], 'expected_issue': None, 'actual_issues': []})
     write(root / 'run.json', doc)
     return root / 'run.json'
 
@@ -552,6 +569,258 @@ class CampaignTests(unittest.TestCase):
         for value in ('CON', 'aux.txt', 'COM1', 'name.'):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 c.identifier(value)
+
+
+    def edit_calibration(self, fn):
+        self.mutate_doc(fn, path=self.anchors / 'dev/run.json')
+
+    def edit_control(self, fn, *, manifest=False):
+        path = self.anchors / 'dev/controls/units-0' / (
+            'run_manifest.json' if manifest else 'result_units.json')
+        doc, _ = c.read_json(path)
+        fn(doc)
+        write(path, doc)
+
+    def assert_freeze_blocked(self, code):
+        with self.assertRaisesRegex(ValueError, code):
+            c.freeze_plan(self.plan, self.anchors)
+
+    def test_failed_calibration_is_not_an_admission_anchor(self):
+        self.edit_calibration(lambda doc: doc.update(calibration_passed=False))
+        self.assert_freeze_blocked('calibration_not_passed')
+
+    def test_missing_calibration_verdict_is_not_a_pass(self):
+        self.edit_calibration(lambda doc: doc.pop('calibration_passed'))
+        self.assert_freeze_blocked('calibration_not_passed')
+
+    def test_calibration_verdict_must_be_boolean_true(self):
+        self.edit_calibration(lambda doc: doc.update(calibration_passed=1))
+        self.assert_freeze_blocked('calibration_not_passed')
+
+    def test_empty_calibration_controls_rejected(self):
+        self.edit_calibration(lambda doc: doc.update(controls=[]))
+        self.assert_freeze_blocked('calibration_controls_missing')
+
+    def test_failed_control_summary_is_not_admitted(self):
+        self.edit_calibration(lambda doc: doc['controls'][0].update(passed=False))
+        self.assert_freeze_blocked('calibration_control_not_passed')
+
+    def test_raw_negative_can_overrule_successful_summary(self):
+        self.edit_control(lambda doc: doc.update(score=1.0))
+        self.assert_freeze_blocked('calibration_raw_control_failed')
+
+    def test_crashed_negative_is_not_calibration_success(self):
+        self.edit_control(lambda doc: doc.update(failure_mode='crash', validity_gate=0))
+        self.assert_freeze_blocked('calibration_raw_control_failed')
+
+    def test_calibration_diagnosis_recomputed_from_raw(self):
+        self.edit_calibration(lambda doc: doc['controls'][0].update(
+            expected_issue='invented_diagnosis', actual_issues=['invented_diagnosis']))
+        self.assert_freeze_blocked('calibration_raw_control_failed')
+
+    def test_calibration_real_named_diagnosis_is_accepted(self):
+        self.edit_calibration(lambda doc: doc['controls'][0].update(expected_issue='wrong_units'))
+        self.edit_control(lambda doc: doc.update(gate_failures=['wrong_units']))
+        frozen = c.freeze_plan(self.plan, self.anchors)
+        self.assertEqual(frozen['body']['cases'][0]['calibration']['status'], 'recorded_pass')
+
+    def test_control_summary_score_must_match_raw(self):
+        self.edit_calibration(lambda doc: doc['controls'][0].update(score=.5))
+        self.assert_freeze_blocked('calibration_summary_mismatch')
+
+    def test_missing_raw_control_rejected(self):
+        (self.anchors / 'dev/controls/units-0/result_units.json').unlink()
+        self.assert_freeze_blocked('missing_file')
+
+    def test_missing_control_manifest_rejected(self):
+        (self.anchors / 'dev/controls/units-0/run_manifest.json').unlink()
+        self.assert_freeze_blocked('missing_file')
+
+    def test_control_provider_must_be_oracle(self):
+        self.edit_control(lambda doc: doc.update(provider='external'), manifest=True)
+        self.assert_freeze_blocked('calibration_manifest_mismatch')
+
+    def test_control_seed_must_match_anchor(self):
+        self.edit_control(lambda doc: doc.update(seed=42), manifest=True)
+        self.assert_freeze_blocked('calibration_manifest_mismatch')
+
+    def test_control_environment_must_match_raw(self):
+        self.edit_control(lambda doc: doc.update(environment_digest='sha256:' + 'b' * 64), manifest=True)
+        self.assert_freeze_blocked('calibration_manifest_mismatch')
+
+    def test_each_declared_task_needs_a_recorded_negative(self):
+        self.edit_calibration(lambda doc: doc['controls'].pop())
+        self.assert_freeze_blocked('calibration_control_coverage_missing')
+
+    def test_duplicate_control_cannot_create_coverage(self):
+        self.edit_calibration(lambda doc: doc['controls'].append(deepcopy(doc['controls'][0])))
+        self.assert_freeze_blocked('invalid_calibration_control_identity')
+
+    def test_control_unknown_task_rejected(self):
+        self.edit_calibration(lambda doc: doc['controls'][0].update(task_id='not_in_roster'))
+        self.assert_freeze_blocked('calibration_task_mismatch')
+
+    def test_control_nonfinite_json_rejected(self):
+        self.edit_control(lambda doc: doc.update(score=float('nan')))
+        self.assert_freeze_blocked('nonfinite_json')
+
+    def test_control_bad_artifacts_shape_rejected(self):
+        self.edit_control(lambda doc: doc.update(artifacts=[]))
+        self.assert_freeze_blocked('invalid_calibration_artifacts')
+
+    def test_reference_anchor_is_explicitly_not_calibration(self):
+        self.plan['cases'][0]['anchor'] = 'baseline/run.json'
+        self.lock = c.freeze_plan(self.plan, self.anchors)
+        report = self.report()
+        self.assertTrue(report['complete'])
+        self.assertEqual(report['case_admission'][0]['calibration_status'], 'not_checked')
+        self.assertIn('仅预检正例，未核对校准负例', c.render_html(report))
+
+    def test_calibration_raw_hashes_recorded_in_lock(self):
+        records = self.lock['body']['cases'][0]['calibration']['controls']
+        self.assertEqual(len(records), 2)
+        self.assertTrue(all(c.SHA.fullmatch(r['result_sha256']) and
+                            c.SHA.fullmatch(r['manifest_sha256']) for r in records))
+
+    def test_matching_raw_and_manifest_still_must_match_anchor_environment(self):
+        self.mutate_manifest(lambda doc: doc.update(environment_digest='sha256:' + 'b' * 64))
+        path = self.path()
+        doc, _ = c.read_json(path)
+        for row in doc['results']:
+            raw_path = path.parent / 'runs' / row['suite'] / f'result_{row["id"]}.json'
+            raw, _ = c.read_json(raw_path)
+            raw['environment_digest'] = 'sha256:' + 'b' * 64
+            write(raw_path, raw)
+            row['result_sha256'] = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+        write(path, doc)
+        self.assert_blocked('suite_contract_drift')
+
+    def test_runner_assets_are_part_of_frozen_contract(self):
+        self.mutate_manifest(lambda doc: doc.update(assets={'changed.csv': 'b' * 64}))
+        self.assert_blocked('suite_contract_drift')
+
+    def test_unstable_manifest_metadata_not_part_of_contract(self):
+        self.mutate_manifest(lambda doc: doc.update(generated_at_utc='later', tasks_dir='C:/elsewhere',
+                                                     extra={'resumed_tasks': 2}))
+        self.assertTrue(self.report()['complete'])
+
+    def test_same_pack_reordered_roster_cannot_be_transfer_case(self):
+        shutil.copytree(self.anchors / 'dev', self.anchors / 'reordered')
+        self.mutate_doc(lambda doc: doc['validation']['tasks'].reverse(), self.anchors / 'reordered/run.json')
+        self.plan['cases'][1]['anchor'] = 'reordered/run.json'
+        self.assert_freeze_blocked('duplicate_case_contract')
+
+    def test_additional_raw_result_is_not_silently_ignored(self):
+        path = self.path().parent / 'runs/aviation.data/result_units.json'
+        shutil.copyfile(path, path.with_name('result_unregistered.json'))
+        self.assert_blocked('unexpected_runner_records')
+
+    def test_additional_suite_manifest_is_not_silently_ignored(self):
+        write(self.path().parent / 'runs/undeclared/run_manifest.json', {})
+        self.assert_blocked('unexpected_runner_records')
+
+    def test_nested_deliverable_named_result_is_not_a_runner_record(self):
+        write(self.path().parent / 'runs/aviation.data/deliverables/result_analysis.json', {})
+        self.assertTrue(self.report()['complete'])
+
+    def test_linked_unregistered_run_blocks_inventory(self):
+        outside = self.root / 'outside'
+        archive(outside)
+        try:
+            (self.runs / 'linked-retry').symlink_to(outside, target_is_directory=True)
+        except OSError:
+            self.skipTest('symlink permission unavailable')
+        report = self.report()
+        self.assertFalse(report['complete'])
+        self.assertTrue(any('symlink_forbidden' in issue for issue in report['archive_issues']))
+        self.assertTrue(all(g['pass_rate'] is None for g in report['groups']))
+        self.assertTrue(all(not pair['comparable'] for pair in report['comparisons']))
+
+    def test_unreadable_archive_directory_blocks_all_comparisons(self):
+        from unittest.mock import patch
+        from comacbench import campaign_integrity as integrity
+        hidden = self.runs / 'unreadable'
+        hidden.mkdir()
+        original = integrity.os.scandir
+        def guarded(path):
+            if Path(path) == hidden:
+                raise PermissionError('fixture access denied')
+            return original(path)
+        with patch.object(integrity.os, 'scandir', side_effect=guarded):
+            report = self.report()
+        self.assertFalse(report['complete'])
+        self.assertTrue(any('archive_scan_failed' in issue for issue in report['archive_issues']))
+        self.assertTrue(all(g['pass_rate'] is None for g in report['groups']))
+
+    def test_archive_entry_limit_is_explicit(self):
+        from comacbench.campaign_integrity import scan_archive
+        _, issues = scan_archive(self.runs, max_entries=1)
+        self.assertIn('archive_entry_limit', issues)
+
+    def test_archive_depth_limit_is_explicit(self):
+        from comacbench.campaign_integrity import scan_archive
+        _, issues = scan_archive(self.runs, max_depth=0)
+        self.assertTrue(any('archive_depth_limit' in i for i in issues))
+
+    def test_simulated_windows_reparse_point_is_not_followed(self):
+        import stat
+        from types import SimpleNamespace
+        from unittest.mock import patch, MagicMock
+        from comacbench import campaign_integrity as integrity
+        entry = SimpleNamespace(path=str(self.runs / 'junction'), name='junction',
+            stat=lambda **kwargs: SimpleNamespace(st_mode=stat.S_IFDIR, st_file_attributes=0x400))
+        manager = MagicMock()
+        manager.__enter__.return_value = iter([entry])
+        with patch.object(integrity.os, 'scandir', return_value=manager) as scanner:
+            records, issues = integrity.scan_archive(self.runs)
+        self.assertEqual(scanner.call_count, 1)
+        self.assertEqual(records, set())
+        self.assertTrue(any('archive_reparse_forbidden' in i for i in issues))
+
+    def test_old_lock_requires_explicit_refreeze(self):
+        self.lock['body']['protocol'] = c.LEGACY_LOCK
+        self.lock['sha256'] = c.sha(self.lock['body'])
+        with self.assertRaisesRegex(ValueError, 'legacy_lock_requires_refreeze'):
+            self.report()
+
+    def test_v2_cannot_omit_suite_contract(self):
+        self.lock['body']['cases'][0].pop('suite_contracts')
+        self.lock['sha256'] = c.sha(self.lock['body'])
+        with self.assertRaisesRegex(ValueError, 'suite_contract_roster_mismatch'):
+            self.report()
+
+    def test_v2_requires_calibration_evidence_record(self):
+        self.lock['body']['cases'][0]['calibration']['controls'] = []
+        self.lock['sha256'] = c.sha(self.lock['body'])
+        with self.assertRaisesRegex(ValueError, 'invalid_calibration_record'):
+            self.report()
+
+    def test_cli_rejects_old_lock_without_rewriting_it(self):
+        self.lock['body']['protocol'] = c.LEGACY_LOCK
+        self.lock['sha256'] = c.sha(self.lock['body'])
+        path = self.root / 'legacy.json'
+        write(path, self.lock)
+        original = path.read_bytes()
+        out = self.root / 'legacy-output'
+        errors = io.StringIO()
+        with contextlib.redirect_stderr(errors):
+            rc = c.main(['report', str(path), '--runs', str(self.runs), '--out', str(out)])
+        self.assertEqual(rc, 2)
+        self.assertIn('legacy_lock_requires_refreeze', errors.getvalue())
+        self.assertEqual(path.read_bytes(), original)
+        self.assertFalse(out.exists())
+
+    def test_inventory_issues_are_escaped_in_html(self):
+        report = self.report()
+        report['archive_issues'] = ['<script>unexpected</script>']
+        page = c.render_html(report)
+        self.assertIn('归档扫描未通过', page)
+        self.assertNotIn('<script>', page)
+
+    def test_new_case_scope_is_escaped_in_html(self):
+        report = self.report()
+        report['case_admission'][0]['scope_note'] = '<img src=x onerror=alert(1)>'
+        self.assertNotIn('<img ', c.render_html(report))
 
 
 if __name__ == '__main__':

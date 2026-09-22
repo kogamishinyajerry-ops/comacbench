@@ -18,9 +18,11 @@ import sys
 from typing import Any
 
 from .completion import classify_evidence_level, result_issues
+from .campaign_integrity import calibration_record, scan_archive, suite_contract
 
 PLAN = 'comacbench.campaign.plan.v1'
-LOCK = 'comacbench.campaign.lock.v1'
+LOCK = 'comacbench.campaign.lock.v2'
+LEGACY_LOCK = 'comacbench.campaign.lock.v1'
 REPORT = 'comacbench.campaign.report.v1'
 ID = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$')
 SHA = re.compile(r'^[0-9a-f]{64}$')
@@ -181,7 +183,16 @@ def inspect_run(path: Path, *, scoring: bool) -> dict[str, Any]:
     require(isinstance(validation, dict) and validation.get('runnable') is True,
             'invalid_validation')
     tasks = roster(validation.get('tasks'))
-    manifests, manifest_hashes = {}, {}
+    inventory, inventory_issues = scan_archive(path.parent / 'runs')
+    require(not inventory_issues, 'run_inventory_failed: ' + '; '.join(inventory_issues))
+    expected_files = {f'{t["suite"]}/result_{t["id"]}.json' for t in tasks}
+    expected_files |= {f'{t["suite"]}/run_manifest.json' for t in tasks}
+    # Only direct runner records, not arbitrary nested engineering artifacts.
+    direct_records = {rel for rel in inventory if len(PurePosixPath(rel).parts) == 2
+                      and PurePosixPath(rel).name != 'run.json'}
+    require(not (direct_records - expected_files),
+            'unexpected_runner_records: ' + ', '.join(sorted(direct_records - expected_files)))
+    manifests, manifest_hashes, contracts = {}, {}, {}
     for suite in sorted({t['suite'] for t in tasks}):
         manifest, digest = read_json(contained_file(path.parent, f'runs/{suite}/run_manifest.json'))
         expected_provider = 'oracle' if doc['mode'] == 'calibrate' else 'external'
@@ -194,6 +205,7 @@ def inspect_run(path: Path, *, scoring: bool) -> dict[str, Any]:
                 and manifest['environment_digest'].startswith('sha256:')
                 and SHA.fullmatch(manifest['environment_digest'][7:]), 'suite_environment_missing')
         manifests[suite], manifest_hashes[suite] = manifest, digest
+        contracts[suite] = suite_contract(manifest)
     rows = doc.get('results')
     require(isinstance(rows, list) and all(isinstance(r, dict) for r in rows),
             'invalid_result_rows')
@@ -229,12 +241,17 @@ def inspect_run(path: Path, *, scoring: bool) -> dict[str, Any]:
         checked.append({'suite': suite, 'id': tid, 'score': raw['score'],
                         'full_pass': raw['validity_gate'] == 1 and raw['score'] == 1,
                         'evidence_level': evidence, 'result_sha256': raw_sha})
+    calibration = calibration_record(doc, path.parent, tasks,
+                                     read_json=read_json, locate=contained_file, decode=decode)
     return {'contract': contract, 'tasks': tasks, 'results': checked,
+            'suite_contracts': contracts, 'calibration': calibration,
             'agent': identity['agent'], 'seed': identity['seed'],
             'mode': doc['mode'], 'run_sha256': doc_sha, 'manifest_sha256': manifest_hashes}
 
 
 def validate_body(body: Any) -> None:
+    if isinstance(body, dict) and body.get('protocol') == LEGACY_LOCK:
+        raise ValueError('legacy_lock_requires_refreeze: freeze the original plan and anchors into a new v2 lock')
     require(isinstance(body, dict) and body.get('protocol') == LOCK, 'lock_protocol_mismatch')
     require(body.get('scope') == 'public_regression', 'unsupported_scope')
     identifier(body.get('id'))
@@ -269,7 +286,29 @@ def validate_body(body: Any) -> None:
                 'missing_scope_note')
         tasks = roster(case.get('tasks'))
         contract = runtime_contract(case.get('contract'))
-        key = (contract['pack_sha256'], sha(tasks))
+        suites = case.get('suite_contracts')
+        require(isinstance(suites, dict) and set(suites) == {t['suite'] for t in tasks},
+                'suite_contract_roster_mismatch')
+        for sid, stable in suites.items():
+            require(suite_contract(stable) == stable and stable['registry_id'] == sid
+                    and all(t.get('adapter') == stable['adapter'] for t in tasks if t['suite'] == sid),
+                    'invalid_suite_contract')
+        calibration = case.get('calibration')
+        require(isinstance(calibration, dict) and calibration.get('status') in ('not_checked', 'recorded_pass')
+                and isinstance(calibration.get('controls'), list), 'invalid_calibration_record')
+        if calibration['status'] == 'not_checked':
+            require(not calibration['controls'], 'invalid_calibration_record')
+        else:
+            require(bool(calibration['controls']) and all(
+                isinstance(control, dict) and isinstance(control.get('task_id'), str)
+                and isinstance(control.get('control'), str)
+                and isinstance(control.get('result_sha256'), str) and SHA.fullmatch(control['result_sha256'])
+                and isinstance(control.get('manifest_sha256'), str) and SHA.fullmatch(control['manifest_sha256'])
+                for control in calibration['controls']), 'invalid_calibration_record')
+            require({control['task_id'] for control in calibration['controls']} == {t['id'] for t in tasks},
+                    'calibration_control_coverage_missing')
+        # Reordering the same roster does not create a new transfer configuration.
+        key = (contract['pack_sha256'], sha(sorted(tasks, key=lambda t: (t['suite'], t['id']))))
         require(key not in case_keys, 'duplicate_case_contract')
         case_keys.add(key)
         engines.add(sha(contract['engine']))
@@ -316,7 +355,8 @@ def freeze_plan(plan: dict[str, Any], anchors: Path) -> dict[str, Any]:
         body['cases'].append({k: entry[k] for k in ('id', 'family', 'split', 'scope_note')})
         body['cases'][-1].update(contract=run['contract'], tasks=run['tasks'],
                                 anchor_sha256=run['run_sha256'], anchor_manifests=run['manifest_sha256'],
-                                required_evidence=required)
+                                required_evidence=required, suite_contracts=run['suite_contracts'],
+                                calibration=run['calibration'])
     validate_body(body)
     return {'body': body, 'sha256': sha(body)}
 
@@ -341,6 +381,7 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
                     require(run['seed'] == seed, 'seed_mismatch')
                     require(run['contract'] == case['contract'], 'runtime_contract_drift')
                     require(run['tasks'] == case['tasks'], 'task_contract_drift')
+                    require(run['suite_contracts'] == case['suite_contracts'], 'suite_contract_drift')
                     for result in run['results']:
                         key = result['suite'] + '/' + result['id']
                         # Legitimate engineering failures can stop before the solver.
@@ -355,7 +396,8 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
                     cell['issues'] = [str(exc)]
                 cells.append(cell)
     # Unexpected run directories include unregistered retries; never select best-of-N.
-    discovered = {p.relative_to(runs).as_posix() for p in runs.rglob('run.json')}
+    inventory, archive_issues = scan_archive(runs)
+    discovered = {rel for rel in inventory if PurePosixPath(rel).name == 'run.json'}
     unexpected = sorted(discovered - expected_paths)
     groups = []
     for subject in body['subjects']:
@@ -369,7 +411,7 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
                          **{k: sum(c[k] for c in subset)
                             for k in ('expected', 'passed', 'failed', 'unresolved')}}
                 group['pass_rate'] = (group['passed'] / group['expected']
-                                      if group['unresolved'] == 0 and not unexpected else None)
+                                      if group['unresolved'] == 0 and not unexpected and not archive_issues else None)
                 groups.append(group)
     comparisons = []
     index = {(g['subject'], g['family'], g['split']): g for g in groups}
@@ -383,7 +425,7 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
                                 'paired_task_executions': group['expected'], 'comparable': ready,
                                 'delta_pass_rate': group['pass_rate'] - base['pass_rate'] if ready else None})
     return {'protocol': REPORT, 'id': body['id'], 'scope': 'public_regression',
-            'lock_sha256': lock['sha256'], 'complete': not unexpected and all(not c['issues'] for c in cells),
+            'lock_sha256': lock['sha256'], 'complete': not unexpected and not archive_issues and all(not c['issues'] for c in cells),
             'publishable': False, 'isolated_transfer_verified': False,
             'engineering_artifacts_reverified': False,
             'integrity_scope': 'run_manifest_and_result_json_only',
@@ -395,7 +437,10 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
                        'No statistical independence or confidence is inferred from repeated seeds.'],
             'seeds': body['seeds'], 'case_count': len(body['cases']),
             'family_count': len({c['family'] for c in body['cases']}),
-            'groups': groups, 'comparisons': comparisons, 'cells': cells, 'unexpected_runs': unexpected}
+            'case_admission': [{'case': c['id'], 'scope_note': c['scope_note'],
+                                'calibration_status': c['calibration']['status']} for c in body['cases']],
+            'groups': groups, 'comparisons': comparisons, 'cells': cells,
+            'unexpected_runs': unexpected, 'archive_issues': archive_issues}
 
 
 def render_html(report: dict[str, Any]) -> str:
@@ -407,6 +452,12 @@ def render_html(report: dict[str, Any]) -> str:
     diagnostics = ''.join(f'<li>{escape(c["run"])}: {escape("; ".join(c["issues"]))}</li>'
                           for c in report['cells'] if c['issues'])
     diagnostics += ''.join(f'<li>未登记运行：{escape(p)}</li>' for p in report['unexpected_runs'])
+    diagnostics += ''.join(f'<li>归档扫描未通过：{escape(issue)}</li>'
+                           for issue in report.get('archive_issues', []))
+    admissions = ''.join(f'<li>{escape(case["case"])}：'
+                         + ('已核对校准正例与原始负例记录' if case['calibration_status'] == 'recorded_pass'
+                            else '仅预检正例，未核对校准负例')
+                         + f'。{escape(case["scope_note"])}</li>' for case in report.get('case_admission', []))
     comparisons = ''.join('<li>' + escape(f'{p["family"]} / {SPLIT_NAMES[p["split"]]}: {p["candidate"]} − {p["baseline"]}: ')
                           + ('证据不足，不作比较' if not p['comparable'] else
                              escape(f'{p["delta_pass_rate"] * 100:+.1f} 个百分点')) + '</li>'
@@ -425,6 +476,7 @@ table{{border-collapse:collapse;width:100%;min-width:800px;font-size:14px}}td,th
 <p>{report['family_count']} 个声明任务族，{report['case_count']} 个算例配置；随机种子 {escape(report['seeds'])}。
 分母为预先登记的任务执行次数，未完成项不会被删除。无跨任务族总分。窄屏可横向滚动表格。</p>
 <div class="scroll"><table><thead><tr><th>Agent</th><th>任务族</th><th>分集</th><th>通过</th><th>任务未全过</th><th>待核验</th><th>计划</th><th>通过率</th></tr></thead><tbody>{table}</tbody></table></div>
+<h2>算例准入边界</h2><ul>{admissions}</ul>
 <h2>配对比较</h2><ul>{comparisons or '<li>未登记对照，不计算提升。</li>'}</ul>
 <h2>需要处理的证据问题</h2><ul>{diagnostics or '<li>未发现本工具覆盖范围内的 JSON 完整性问题。</li>'}</ul>
 <h2>结论边界</h2><p>检查了 run.json、运行清单与原始 result JSON 的摘要、身份和判分结果。
