@@ -44,7 +44,7 @@ from .common import (FM_MISSING_OUTPUT, TaskSpec, aggregate_score, build_result,
                      environment_digest, load_tasks, write_json_atomic)
 from . import common
 from .providers import ProviderError, get_answer
-from .sandbox import IsolatedRun, static_check
+from .sandbox import IsolatedRun, cleanup_all, static_check
 
 _EV_LOCK = threading.Lock()  # evaluator 模块缓存写入锁（PR-B）
 
@@ -408,8 +408,9 @@ def run_task(
             dst = iso.dir / "inputs" / a["path"]
             dst.parent.mkdir(parents=True, exist_ok=True)
             _shutil.copy(src, dst)
-    if any((iso.dir / "inputs").rglob("*")):
-        os.environ.setdefault("WORKLOAD_INPUTS", str(iso.dir / "inputs"))
+    # 注：曾经在这里把沙箱 inputs/ 路径写进进程环境变量 WORKLOAD_INPUTS，但全仓库
+    # 无人读取它（oracle/neg_guess 走相对路径，子进程 env 是显式构造的、不继承）。
+    # 它只会往进程环境里留一个指向**即将被回收**的沙箱目录的绝对路径，故移除。
     script = iso.write("make_case.py", code)
     r1 = iso.run(script, min(timeout, 300.0))
     logs.append(f"make_case exit={r1['exit']} {r1['duration_s']}s")
@@ -567,31 +568,37 @@ def main() -> int:
                 assets[f"evaluator:{ev_src}"] = hashlib.sha256(
                     evp.read_bytes()).hexdigest()
 
-    with RunState(out_dir=out, tasks=tasks, prompts=prompt_cache,
-                  adapter=ADAPTER, provider=args.provider, model=args.model,
-                  seed=args.seed, env_digest=env, assets=assets,
-                  tasks_dir=Path(args.tasks), rerun=rerun,
-                  resume=args.resume) as run:
-        results, resumed = [], 0
-        for t in tasks:
-            if t.id in run.cached:
-                results.append(run.cached[t.id])
-                resumed += 1
-                print(f"{t.id}: reused (resume)")
-                continue
-            r = run_task(t, provider=args.provider, model=args.model,
-                         seed=args.seed, env_digest=env,
-                         prompt_cache=prompt_cache, assets_root=Path(args.tasks),
-                         oracle_cache=oracle_cache or None,
-                         evidence_dir=out / "evidence" / t.id)
-            # 证据归档已在 run_task 内完成（IsolatedRun 存活期内按二进制流复制原件，
-            # 并在写 result 之前密封 evidence_manifest.json）。此处不再补写任何
-            # 证据文件——否则会出现"清单未覆盖的归档物"，复用核验将无从对账。
-            results.append(r)
-            run.write_result(t, r)
-            print(f"{t.id}: gate={r['validity_gate']} score={r['score']}"
-                  + (" voided" if r.get("voided") else ""))
-        run.finish(resumed_tasks=resumed)
+    try:
+        with RunState(out_dir=out, tasks=tasks, prompts=prompt_cache,
+                      adapter=ADAPTER, provider=args.provider, model=args.model,
+                      seed=args.seed, env_digest=env, assets=assets,
+                      tasks_dir=Path(args.tasks), rerun=rerun,
+                      resume=args.resume) as run:
+            results, resumed = [], 0
+            for t in tasks:
+                if t.id in run.cached:
+                    results.append(run.cached[t.id])
+                    resumed += 1
+                    print(f"{t.id}: reused (resume)")
+                    continue
+                r = run_task(t, provider=args.provider, model=args.model,
+                             seed=args.seed, env_digest=env,
+                             prompt_cache=prompt_cache,
+                             assets_root=Path(args.tasks),
+                             oracle_cache=oracle_cache or None,
+                             evidence_dir=out / "evidence" / t.id)
+                # 证据归档已在 run_task 内完成（IsolatedRun 存活期内按二进制流复制
+                # 原件，并在写 result 之前密封 evidence_manifest.json）。此处不再补写
+                # 任何证据文件——否则会出现"清单未覆盖的归档物"，复用核验无从对账。
+                results.append(r)
+                run.write_result(t, r)
+                print(f"{t.id}: gate={r['validity_gate']} score={r['score']}"
+                      + (" voided" if r.get("voided") else ""))
+            run.finish(resumed_tasks=resumed)
+    finally:
+        # 证据已按字节复制进 run 目录，隔离子工作目录在此之后不再被读取。
+        # 确定性回收，不把清理留给解释器退出（atexit 仅作崩溃兜底）。
+        cleanup_all()
     return 0
 if __name__ == "__main__":
     raise SystemExit(main())

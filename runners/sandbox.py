@@ -19,12 +19,20 @@
 from __future__ import annotations
 
 import ast
+import atexit
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 from typing import Any
+
+# 活着的隔离子工作目录。`IsolatedRun` 此前既不支持显式关闭、也没有任何回收，
+# 每次运行都在系统临时目录留下一个 bm_sandbox_* 目录（实测曾积压 759 个）。
+# 现在：① `close()` / 上下文管理器做主动回收；② `cleanup_all()` 供各 adapter
+# CLI 在退出前一次性收尾；③ `atexit` 兜底，崩溃路径也不会留残余。
+_LIVE_DIRS: set[Path] = set()
 
 # 静态黑名单：导入即违规（网络/进程/系统侵入）
 BANNED_IMPORTS = {
@@ -87,10 +95,28 @@ def static_check(code: str, allow_shutil: bool = False) -> tuple[list[str], bool
 
 
 class IsolatedRun:
-    """一次性隔离子进程工作目录。"""
+    """一次性隔离子进程工作目录。
+
+    用完必须回收：`with IsolatedRun() as iso:` 或显式 `iso.close()`。
+    未回收的目录由 `cleanup_all()` / `atexit` 兜底清除。
+    """
 
     def __init__(self) -> None:
         self.dir = Path(tempfile.mkdtemp(prefix="bm_sandbox_"))
+        _LIVE_DIRS.add(self.dir)
+
+    def close(self) -> None:
+        """回收本工作目录（幂等）。"""
+        if self.dir in _LIVE_DIRS:
+            _LIVE_DIRS.discard(self.dir)
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def __enter__(self) -> "IsolatedRun":
+        return self
+
+    def __exit__(self, *exc) -> bool:
+        self.close()
+        return False
 
     def write(self, name: str, content: str) -> Path:
         p = self.dir / name
@@ -113,3 +139,23 @@ class IsolatedRun:
             return {"exit": -1, "stdout": (e.stdout or b"")[-20000:] if isinstance(e.stdout, bytes) else (e.stdout or "")[-20000:],
                     "stderr": f"[sandbox timeout after {timeout_s}s]",
                     "duration_s": round(time.time() - t0, 2), "timeout": True}
+
+
+def live_sandboxes() -> list[Path]:
+    """尚未回收的隔离子工作目录（诊断用）。"""
+    return sorted(_LIVE_DIRS)
+
+
+def cleanup_all() -> int:
+    """回收全部未关闭的隔离子工作目录；返回实际移除的数量（幂等）。"""
+    pending = sorted(_LIVE_DIRS)
+    _LIVE_DIRS.clear()
+    removed = 0
+    for directory in pending:
+        if directory.is_dir():
+            shutil.rmtree(directory, ignore_errors=True)
+            removed += 1
+    return removed
+
+
+atexit.register(cleanup_all)
