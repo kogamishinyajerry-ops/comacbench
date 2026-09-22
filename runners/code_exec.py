@@ -538,7 +538,7 @@ def run_task(
             loader = assets_root / g["ref_loader"]
             try:
                 rq = _sp.run([_sys.executable, "-B", str(loader), str(pred_path)],
-                             capture_output=True, text=True, timeout=120)
+                             capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120)
                 lines = [ln for ln in rq.stdout.strip().splitlines() if ln.strip()]
                 if rq.returncode == 0 and lines:
                     rel_l2 = float(json.loads(lines[-1])["rel_l2"])

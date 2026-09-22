@@ -180,10 +180,22 @@ def _validate_pack(root):
                     problem('reference_exposed', f'input.assets[{ai}]', '判分答案或参考实现被列入 agent 可见输入。', '从 input.assets 移除，留在 grader/reference。')
             if t.get('task_type') not in KINDS or g.get('exec_kind') not in KINDS.get(t.get('task_type'), set()):
                 problem('unsupported_grader', 'grader.exec_kind', '该执行类型尚未通过贡献入口的契约校验。', '使用已支持类型或先补充对应验证规则；不能仅登记字符串。')
-            from runners.solvers.backward_step import INPUTS as CFD_INPUTS
-            supported_output={'ccx_fea':['model.inp'],'unit_tests_problem':['script'],
-                              'cfd_step':['case/'+name for name in CFD_INPUTS],
-                              'file_package':['manifest.json']}.get(g.get('exec_kind'))
+            # 只在真正需要 CFD 步骤白名单时才导入 runner。此前是无条件导入，
+            # 使**任何**题的预检都依赖 `runners/` 可导入——而 `runners/` 是仓库
+            # 根目录、不在 `comacbench` 包内，`pip install` 到 site-packages 后
+            # 预检会直接 ModuleNotFoundError（离线交付包实测踩到）。
+            outputs={'ccx_fea':['model.inp'],'unit_tests_problem':['script'],
+                     'file_package':['manifest.json']}
+            if g.get('exec_kind')=='cfd_step':
+                try:
+                    from runners.solvers.backward_step import INPUTS as CFD_INPUTS
+                except ImportError:
+                    problem('cfd_runner_unavailable', 'grader.exec_kind',
+                            'cfd_step 判分需要 runners/ 可导入，但当前环境导入不到。',
+                            '在仓库根目录运行（runners/ 随交付一起部署），或改用已支持类型。')
+                else:
+                    outputs['cfd_step']=['case/'+name for name in CFD_INPUTS]
+            supported_output=outputs.get(g.get('exec_kind'))
             if supported_output and t.get('output_contract') != supported_output:
                 problem('unsupported_output', 'output_contract', '当前判分器未覆盖声明的全部交付物。', f'当前支持 {supported_output}；其他制品需先实现检查器。')
             if g.get('exec_kind') == 'file_package':
@@ -238,7 +250,7 @@ def _validate_pack(root):
                 available={a.get('path') for a in assets if isinstance(a,dict)}
                 for name,content in TEMPLATES.items():
                     p=file('templates/'+name,'input.templates',tid=tid)
-                    if p and (p.read_text()!=content or 'templates/'+name not in available):
+                    if p and (p.read_text(encoding="utf-8")!=content or 'templates/'+name not in available):
                         problem('cfd_template_mismatch','input.templates/'+name,'公开方言模板缺失、被改写或没有交给受测 agent。','保留完整公开模板并列入带摘要的 input.assets；参考脚本留在 private。')
                 required={'cfd:'+s for s in ('inputs','mesh','solver','convergence','conservation','qoi')}
                 cfd_checks={r.get('check') for r in t.get('evaluation',{}).get('requirements',[]) if isinstance(r,dict)}

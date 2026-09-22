@@ -47,7 +47,7 @@ def audit_inputs(case):
         code='unsupported_input'
         try:
             if name=='system/fvSchemes':
-                require(tokens((case/name).read_text())==tokens(TEMPLATES[name]),'离散格式须使用公开模板，仅可调整空白和注释。')
+                require(tokens((case/name).read_text(encoding="utf-8"))==tokens(TEMPLATES[name]),'离散格式须使用公开模板，仅可调整空白和注释。')
                 continue
             data=dictionary(case/name)
             expected=Reader(TEMPLATES[name]).mapping()

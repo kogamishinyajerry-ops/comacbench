@@ -138,7 +138,7 @@ class RunState:
                 if not self.resume:
                     self._reject('output already contains a run; matching runs require --resume')
                 try:
-                    saved = json.loads(manifest.read_text())
+                    saved = json.loads(manifest.read_text(encoding='utf-8'))
                 except (OSError, ValueError):
                     self._reject('missing or unreadable run_manifest.json')
                 if not isinstance(saved, dict) or not isinstance(saved.get('extra'), dict) or saved['extra'].get('resume_identity') != self.identity:
@@ -159,7 +159,7 @@ class RunState:
                     if tid not in self.tasks:
                         self._reject(f'unexpected cached task: {file.name}')
                     try:
-                        row = json.loads(file.read_text())
+                        row = json.loads(file.read_text(encoding='utf-8'))
                     except (OSError, ValueError):
                         self._reject(f'unreadable cached result: {file.name}')
                     task = self.tasks[tid]

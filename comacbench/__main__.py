@@ -96,7 +96,7 @@ def result_rows(root, report, runs, provider):
         p=runs/task['suite']/f'result_{task["id"]}.json'
         if not p.exists():
             continue
-        r=json.loads(p.read_text())
+        r=json.loads(p.read_text(encoding="utf-8"))
         envelope_issues=result_issues(r, task_id=task['id'], suite=task['suite'])
         if not isinstance(r,dict):
             r={}
@@ -104,7 +104,7 @@ def result_rows(root, report, runs, provider):
             details=json.loads(r.get('artifacts',{}).get('grade_details','{}'))
         except (ValueError,TypeError):
             details={}
-        spec=yaml.safe_load((root/task['path']).read_text())
+        spec=yaml.safe_load((root/task['path']).read_text(encoding="utf-8"))
         rows.append({**task,'validity_gate':r.get('validity_gate'),
                      'score':r.get('score') if 'invalid_score' not in envelope_issues else None,
                      'result_issues':envelope_issues,
@@ -153,7 +153,7 @@ def execute(args):
             raise ValueError('output directory is already running')
         state=out/'run.json'
         if state.exists():
-            previous=json.loads(state.read_text())
+            previous=json.loads(state.read_text(encoding="utf-8"))
             if not args.resume or previous.get('identity') != ident:
                 raise ValueError('run identity mismatch or --resume missing; use a new --out')
         elif any(p.name!='.lock' for p in out.iterdir()):
@@ -185,7 +185,7 @@ def execute(args):
             if calibration:
                 controls=[]
                 for task in validation['tasks']:
-                    spec=yaml.safe_load((root/task['path']).read_text())
+                    spec=yaml.safe_load((root/task['path']).read_text(encoding="utf-8"))
                     for ci,control in enumerate(spec['evaluation']['negative_controls']):
                         stage=out/'control-packs'/f'{task["id"]}-{ci}'
                         if not stage.exists():
@@ -194,9 +194,9 @@ def execute(args):
                                 if f.name!=Path(task['path']).name:
                                     f.unlink()
                             np=stage/task['path']
-                            neg=yaml.safe_load(np.read_text())
+                            neg=yaml.safe_load(np.read_text(encoding="utf-8"))
                             neg['grader']['oracle_source']=control['script']
-                            np.write_text(yaml.safe_dump(neg,allow_unicode=True,sort_keys=False))
+                            np.write_text(yaml.safe_dump(neg,allow_unicode=True,sort_keys=False), encoding="utf-8")
                         dest=out/'controls'/f'{task["id"]}-{ci}'
                         # Same adapter invocation, one task. Control copies are private calibration inputs.
                         module=MODULES[task['adapter']]
@@ -207,7 +207,7 @@ def execute(args):
                         with dest.with_suffix('.log').open('ab') as log:
                             rr=subprocess.run(command,cwd=REPO,env=env,stdout=log,stderr=subprocess.STDOUT)
                         if rr.returncode: raise ValueError(f'negative control runner failed: {dest}')
-                        result=json.loads((dest/f'result_{task["id"]}.json').read_text())
+                        result=json.loads((dest/f'result_{task["id"]}.json').read_text(encoding="utf-8"))
                         details=json.loads(result.get('artifacts',{}).get('grade_details','{}'))
                         audit=details.get('deck_audit') or details.get('cfd_audit') or {}
                         actual_issues=[i['code'] for i in audit.get('issues',[])]

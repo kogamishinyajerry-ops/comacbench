@@ -13,7 +13,7 @@ def validate_pack(root):
         result['issues'].append({'code': code, 'severity': severity, 'field': 'pack.validation_evidence',
                                 'task_id': None, 'message': message, 'suggested_fix': fix})
     try:
-        pack = yaml.load(base.safe_file(root, 'pack.yaml').read_text(), Loader=base.UniqueSafeLoader)
+        pack = yaml.load(base.safe_file(root, 'pack.yaml').read_text(encoding="utf-8"), Loader=base.UniqueSafeLoader)
         links = pack.get('validation_evidence') if isinstance(pack, dict) else None
         cfd = any(t.get('exec_kind') == 'cfd_step' for t in result['tasks'])
         if cfd or links is not None:
@@ -69,7 +69,7 @@ def write_report(path, data):
         table += f'<tr><td>Re={r["reynolds"]}</td><td>{r["matrix_cases"]}/16 通过</td><td>{r["candidate_relative_tolerance"]:.1%}</td><td><a href="{html.escape(url)}">打开研究图表</a><br>{html.escape(r["analysis"])}</td></tr>'
     table += '</table></section>'
     p = Path(path)
-    p.write_text(p.read_text().replace('<section id="coverage">', table+'<section id="coverage">'))
+    p.write_text(p.read_text(encoding="utf-8").replace('<section id="coverage">', table+'<section id="coverage">'))
 
 
 def main():

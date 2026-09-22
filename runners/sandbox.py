@@ -128,7 +128,7 @@ class IsolatedRun:
         try:
             r = subprocess.run(
                 [sys.executable, "-E", "-s", str(script)],
-                cwd=self.dir, capture_output=True, text=True, timeout=timeout_s,
+                cwd=self.dir, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=timeout_s,
                 env={"PATH": "/usr/bin:/bin", "HOME": str(self.dir),
                      "MPLCONFIGDIR": str(self.dir)},
             )

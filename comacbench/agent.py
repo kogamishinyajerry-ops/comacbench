@@ -118,7 +118,7 @@ def invoke(task, prompt, *, seed, expect):
                 proc.communicate()
                 status={'exit_code':proc.returncode,'timeout':True}
         status['duration_s']=round(time.monotonic()-t0,3)
-        (attempt/'status.json').write_text(json.dumps(status)+'\n')
+        (attempt/'status.json').write_text(json.dumps(status)+'\n', encoding='utf-8')
         if status['timeout']:
             raise ValueError('agent_timeout; original attempt retained')
         if proc.returncode != 0:

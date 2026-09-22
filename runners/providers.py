@@ -373,7 +373,7 @@ def _train_superwing_ml() -> dict[str, Any]:
                  + [f"Utip_{i}" for i in range(10)]
                  + ["tcroot"])
     shapes: dict[int, list[float]] = {}
-    for line in (d / "configs.dat").read_text().splitlines():
+    for line in (d / "configs.dat").read_text(encoding="utf-8").splitlines():
         if line.startswith(("VARIABLES", "ZONE", "TITLE")) or not line.strip():
             continue
         vals = line.split()

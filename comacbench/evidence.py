@@ -27,7 +27,7 @@ def checked(root, rel, expected):
 
 
 def catalog(root=ROOT):
-    return json.loads(checked(root, CATALOG, CATALOG_SHA256).read_text())['studies']
+    return json.loads(checked(root, CATALOG, CATALOG_SHA256).read_text(encoding="utf-8"))['studies']
 
 
 def verify_study(study, root=ROOT, full=False):
@@ -36,7 +36,7 @@ def verify_study(study, root=ROOT, full=False):
         raise ValueError('native_evidence_deleted: 原始场已按用户要求清理；仅保留历史分析与回执，不能完整复核。')
     for rel, expected in study['anchors'].items():
         checked(root, rel, expected)
-    analysis = json.loads(safe_file(root, study['analysis']).read_text())
+    analysis = json.loads(safe_file(root, study['analysis']).read_text(encoding="utf-8"))
     rows = analysis['rows']
     expected = set(itertools.product([1, 2, 4, 8], [5, 10], [30, 60]))
     actual = {(r['config']['scale'], r['config']['upstream_h'], r['config']['downstream_h']) for r in rows}
@@ -50,7 +50,7 @@ def verify_study(study, root=ROOT, full=False):
     if full:
         for rel in study['native_manifests']:
             manifest = safe_file(root, rel)
-            for name, record in json.loads(manifest.read_text())['files'].items():
+            for name, record in json.loads(manifest.read_text(encoding="utf-8"))['files'].items():
                 checked(manifest.parent, name, record['sha256'])
                 native_count += 1
     return {k: study[k] for k in ('id','reynolds','report','analysis','reference')} | {

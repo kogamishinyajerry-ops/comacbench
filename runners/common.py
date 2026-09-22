@@ -231,7 +231,7 @@ def _git_commit() -> str:
     try:
         out = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=BENCH_ROOT,
-            capture_output=True, text=True, timeout=10,
+            capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=10,
         )
         return out.stdout.strip() or "unknown(no-git)"
     except Exception:

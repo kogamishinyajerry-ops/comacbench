@@ -1134,7 +1134,7 @@ def _soffice_recalc(workdir: Path, fname: str):
             ["soffice", "--headless", "--norestore", "--convert-to",
              "xlsx:Calc MS Excel 2007 XML", "--outdir", str(outdir),
              str(workdir / fname)],
-            capture_output=True, text=True, timeout=180)
+            capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=180)
         conv = outdir / fname
         if r.returncode != 0 or not conv.exists():
             return None
@@ -1448,8 +1448,11 @@ def write_summary(out_dir: Path, results: list[dict[str, Any]],
             d = json.loads(det_raw)
             if "physics_hits" in d:
                 vol_rel = f"{d['physics_hits']['volume_mm3']['rel_err']:.2e}"
-                bbox_rel = f"{max(d['physics_hits'][k]['rel_err'] for k in
-                                   ('bbox_len_x', 'bbox_len_y', 'bbox_len_z')):.2e}"
+                # 写成单行 f-string：多行 f-string 需要 Python 3.12+（PEP 701），
+                # 而本仓声明 requires-python >=3.10，在 3.11 上整个模块会 SyntaxError。
+                worst_bbox = max(d['physics_hits'][k]['rel_err']
+                                 for k in ('bbox_len_x', 'bbox_len_y', 'bbox_len_z'))
+                bbox_rel = f"{worst_bbox:.2e}"
             if "interface_checks" in d:
                 n_ok = sum(1 for c in d["interface_checks"] if c.get("ok"))
                 iface = f"{n_ok}/{len(d['interface_checks'])}"
