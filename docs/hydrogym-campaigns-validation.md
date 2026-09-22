@@ -33,6 +33,19 @@ Chromium/Playwright 对最终 HTML 使用 `set_content` 渲染合成报告，检
 3. Windows 路径、离线打开、源码／wheel 安装行为与目标内网环境验收。
 4. 至少一组真实 Agent 配对回归。参考实现不属于模型成绩；没有新增真实迁移任务。
 
+## Windows 完整仓库补充验证（2026-09-22，合并后实测）
+
+针对上述 1、2 两项，在完整 checkout（Windows 11、Git Bash、Python 3.11.8、系统级安装）上执行：
+
+- **专项测试**：`python -m unittest discover -s tests -p test_campaign.py` → **80 用例全绿**（24.5s；作者环境为 Linux/3.13.5 的 2.0s，用时差异来自真实子进程 CLI 往返）。
+- **全量回归**：`pytest -q tests/` → **1 failed, 340 passed, 17 skipped**。唯一失败 `test_adapter_resume.py::test_all_adapter_clis_refuse_mixed_seed_and_preserve_valid_cache` 在**未合并的纯净 HEAD 上复现同败**，根因是 `data/superwing/coeff_lite/index.npy` 的 LFS 资产摘要漂移（期望 60289845…，实际 70aab9a9…），与本 PR 改动面零交集。
+- **证据完整性／发行链门禁**：`tests/test_evidence_integrity.py`（21 用例）+ `tests/test_release_chain.py` 保持全绿。
+- **真实闭环（非合成夹具）**：`comacbench run`（reference 锚点 + 确定性本地 user_agent 锚点，各 2/2 满分）→ `campaign freeze`（sha256 `70a7d6a8239c14441510c2b8efa48c19fbac393f61b37fb63eeaea4a4cbc9184`）→ 3 个 seed 真实运行 → `campaign report` → `complete:true`、exit 0。
+- **真实负例 fail-closed**：删除 seed-2 后重报 → `complete:false`、exit 2、分组 `pass_rate=null`（不给虚假通过率）。
+- 说明：因本机无模型 API 凭据（COMAC_MODEL_* 未配置），user_agent 锚点使用**确定性本地包装器**（复用 reference answers，仅验证管线，**不构成模型成绩**）；第 4 项"真实 Agent 配对回归"仍待有凭据的环境补做。
+
+仍待办：第 3 项的 wheel 安装与内网环境验收（源码工作区的 Windows 真实路径行为已在上述闭环覆盖）。
+
 ## 不被本测试覆盖的结论
 
 本工具核验 run.json、suite run_manifest.json 与原始 result JSON，复用原有结果有效性判定并重算满分状态；**不重新执行独立物理验收，不核对全部工程产物字节**。不能据此宣称既有证据归档／可信恢复问题修复、真实模型成绩提升、隐藏任务隔离通过、CFD 数值正确或内网首发批准。
