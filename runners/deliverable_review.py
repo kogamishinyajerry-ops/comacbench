@@ -34,6 +34,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
 import time
 from pathlib import Path
 
@@ -41,6 +42,8 @@ from .common import (FM_MISSING_OUTPUT, TaskSpec, aggregate_score,
                      build_result, environment_digest, load_tasks)
 from .providers import ProviderError, get_answer
 from .sandbox import IsolatedRun, static_check
+
+_EV_LOCK = threading.Lock()  # evaluator 模块缓存写入锁（PR-B）
 
 ADAPTER = "deliverable_review"
 DEFAULT_WEIGHTS = {"physics": 0.55, "requirements": 0.45,
@@ -143,6 +146,11 @@ def evaluate_deliverables(
     位于 pack 的 private/ 下）：函数 ``evaluate(task, workspace, deliverables)
     -> {"checks": [{"name","passed","expected","actual"}], "summary": str}``。
     本函数不信任 evaluator 之外的任何自评。
+
+    加载方式（PR-B 修复）：按 evaluator **文件内容 SHA256** 派生唯一模块名，
+    经 spec_from_file_location 加载并缓存。绝不 import_module(mod_name)——
+    sys.modules 按模块名缓存，同一进程先后载入 A/B 两个 pack 的同名
+    evaluator 时 B 会命中 A 的缓存代码（验收 P1 实测复现）。
     """
     g = task["grader"]
     spec = g.get("evaluator") or {}
@@ -152,12 +160,12 @@ def evaluate_deliverables(
     if not mod_name:
         return {"checks": checks, "summary": "no evaluator module declared",
                 "evaluated": False}, []
-    import importlib
+    import hashlib
+    import importlib.util
     import contextlib
     import io
     import sys
-    # evaluator 是 pack 的 private/ 资产：按「pack 根 = 任务 YAML 的 tasks/ 上级」
-    # 定位并临时挂到 sys.path（与 oracle_source 的解析层级一致）。
+    import threading
     yaml_path = getattr(task, "yaml_path", None)
     if yaml_path is None and isinstance(task.get("_yaml_path"), str):
         yaml_path = task["_yaml_path"]
@@ -168,19 +176,26 @@ def evaluate_deliverables(
                 "evaluated": False}, []
     # yaml 在 <pack>/tasks/<suite>/x.yaml => parents[2] 是 pack 根。
     pack_root = Path(yaml_path).resolve().parents[2]
-    # evaluator 位于 pack/private/（与 oracle_source 同层）：挂 private 目录导入。
-    ev_dir = pack_root / "private"
-    inserted = str(ev_dir) not in sys.path
-    if inserted:
-        sys.path.insert(0, str(ev_dir))
-    try:
-        mod = importlib.import_module(mod_name)
-    finally:
-        if inserted:
+    ev_file = pack_root / "private" / f"{mod_name}.py"
+    if not ev_file.is_file():
+        return {"checks": [], "summary": f"evaluator file missing: {mod_name}",
+                "evaluated": False}, ["evaluator_error"]
+    ev_sha = hashlib.sha256(ev_file.read_bytes()).hexdigest()
+    cache_key = f"_comacbench_ev_{mod_name}_{ev_sha[:16]}"
+    with _EV_LOCK:
+        mod = sys.modules.get(cache_key)
+        if mod is None:
+            pyspec = importlib.util.spec_from_file_location(cache_key, ev_file)
+            if pyspec is None or pyspec.loader is None:
+                return {"checks": [], "summary": "evaluator spec unresolved",
+                        "evaluated": False}, ["evaluator_error"]
+            mod = importlib.util.module_from_spec(pyspec)
+            sys.modules[cache_key] = mod
             try:
-                sys.path.remove(str(ev_dir))
-            except ValueError:
-                pass
+                pyspec.loader.exec_module(mod)
+            except Exception:
+                sys.modules.pop(cache_key, None)
+                raise
     deliverables = [{"path": d["path"], "kind": d["kind"]}
                     for d in manifest["deliverables"]]
     buf = io.StringIO()
@@ -191,15 +206,28 @@ def evaluate_deliverables(
         return {"checks": checks, "summary": f"evaluator crashed: {exc}",
                 "evaluated": False, "stderr": str(exc)}, ["evaluator_error"]
     raw = out.get("checks") if isinstance(out, dict) else None
-    if not isinstance(raw, list):
+    if not isinstance(raw, list) or not raw:
         return {"checks": checks, "summary": "evaluator returned no checks",
                 "evaluated": False}, ["evaluator_error"]
+    names: set[str] = set()
     for c in raw:
         if not isinstance(c, dict) or not isinstance(c.get("name"), str):
-            continue
+            return {"checks": checks,
+                    "summary": "evaluator protocol violation: bad check shape",
+                    "evaluated": False}, ["evaluator_error"]
+        if c["name"] in names:
+            return {"checks": checks,
+                    "summary": f"evaluator protocol violation: duplicate name {c['name']!r}",
+                    "evaluated": False}, ["evaluator_error"]
+        names.add(c["name"])
+        if type(c.get("passed")) is not bool:
+            # 字符串 "false" 等绝不能被 bool(...) 隐转成 True（验收 P1）
+            return {"checks": checks,
+                    "summary": "evaluator protocol violation: passed must be bool",
+                    "evaluated": False}, ["evaluator_error"]
         checks.append({
             "name": c["name"],
-            "passed": bool(c.get("passed")),
+            "passed": c["passed"],
             "expected": c.get("expected"),
             "actual": c.get("actual"),
         })
@@ -316,6 +344,27 @@ def run_task(
                           for k, val in evidence["files"].items()}})
 
     ev, ev_issues = evaluate_deliverables(task, ws, manifest)
+    # PR-B 故障三分：evaluator 崩溃/协议违规 = 判分侧基础设施故障 → 作废
+    # （completion 按 result['voided'] 识别，见 comacbench/completion.py）。
+    # 不得把基础设施作废算成 agent 零分，也不得删除该任务的 result。
+    if "evaluator_error" in ev_issues:
+        res = build_result(task=task, adapter=ADAPTER, validity_gate=0,
+            gate_failures=["infrastructure_voided"],
+            subscores={"physics": None, "requirements": None, "objective": None,
+                       "robustness": None}, score=0.0,
+            artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+                       "model_meta": json.dumps(meta, ensure_ascii=False),
+                       "grade_details": json.dumps(
+                           {**details, "stage": "evaluator",
+                            "evaluator": ev, "error_origin": "evaluator"},
+                           ensure_ascii=False)},
+            timings={"agent_s": grade_t0 - t0, "setup_s": 0.0,
+                     "grade_s": time.time() - grade_t0},
+            env_digest=env_digest, logs=logs,
+            failure_mode="crash",  # 对齐 completion.VOIDED_FAILURE_MODES
+            applicability=applicability)
+        res["voided"] = True  # completion.result_issues 按 voided 布尔识别
+        return res
     checks = ev["checks"]
     passed = sum(1 for c in checks if c["passed"])
     req = 1.0 if (tree_ok and not issues) else 0.0
@@ -327,14 +376,26 @@ def run_task(
     score = aggregate_score({"physics": phy, "requirements": req,
                              "objective": 0.0, "robustness": 0.0},
                             weights, gate)
-    return build_result(task=task, adapter=ADAPTER, validity_gate=gate,
+    # PR-B 证据归档：交付字节复制进 result（不依赖 IsolatedRun 临时目录）。
+    # 哈希是索引；这里存原始内容，报告/复核者可离线验读。
+    archived = {}
+    for rel in sorted(evidence["files"]):
+        f = ws / rel
+        if f.is_file() and not f.is_symlink():
+            try:
+                archived[rel] = f.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                archived[rel] = f.read_bytes().hex()[:200000]  # 二进制截断保底
+    result = build_result(task=task, adapter=ADAPTER, validity_gate=gate,
         gate_failures=[] if gate else failures,
         subscores={"physics": phy, "requirements": req, "objective": None,
                    "robustness": None}, score=score,
-        artifacts={"code": json.dumps(code[:4000], ensure_ascii=False),
+        artifacts={"code": json.dumps(code, ensure_ascii=False),
                    "model_meta": json.dumps(meta, ensure_ascii=False),
                    "engineering_evidence": json.dumps(evidence,
                                                       ensure_ascii=False),
+                   "deliverable_files": json.dumps(archived,
+                                                   ensure_ascii=False),
                    "grade_details": json.dumps({**details, "evaluator": ev},
                                                ensure_ascii=False)},
         timings={"agent_s": grade_t0 - t0, "setup_s": 0.0,
@@ -342,6 +403,8 @@ def run_task(
         env_digest=env_digest, logs=logs,
         failure_mode=failures[0] if failures else None,
         applicability=applicability)
+    result["deliverable_files_dir"] = None  # 占位：main() 归档后回填
+    return result
 
 
 def main() -> int:
@@ -352,6 +415,12 @@ def main() -> int:
     ap.add_argument("--provider", default="stub")
     ap.add_argument("--model", default=None)
     ap.add_argument("--seed", type=int, default=0)
+    # PR-B：与上层 CLI（run_suite）协议一致的可信复跑。B04 基线：传 --resume
+    # 曾直接 argparse 退出 2。行为复用 RunState（与 code_exec 同机制）：
+    # 同身份（env/资产/任务清单一致）→ 已完成任务复用不重跑；身份变化 →
+    # _reject 拒绝复用并要求新目录（旧证据不覆盖）。
+    ap.add_argument("--resume", action="store_true",
+                    help="reuse valid results from the same run identity")
     args = ap.parse_args()
     tasks = load_tasks(args.tasks)
     out = Path(args.out)
@@ -369,14 +438,63 @@ def main() -> int:
                 raise SystemExit(f"{t.id}: oracle 模式需要 grader.oracle_source")
             p = pack_root / src
             oracle_cache[t.id] = p.read_text(encoding="utf-8")
+
+    from .run_state import RunState, provider_identity, rerun_command
+    model_label = provider_identity(args.provider, args.model)["model"]
+    rerun = rerun_command("runners.deliverable_review", args, model_label)
+    assets = {}
     for t in tasks:
-        r = run_task(t, provider=args.provider, model=args.model,
-                     seed=args.seed, env_digest=env,
-                     prompt_cache=prompt_cache, assets_root=Path(args.tasks),
-                     oracle_cache=oracle_cache or None)
-        (out / f"result_{t.id}.json").write_text(
-            json.dumps(r, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(f"{t.id}: gate={r['validity_gate']} score={r['score']}")
+        for a in (t["input"].get("assets") or []):
+            ap2 = pack_root / a["path"]
+            if ap2.is_file():
+                assets[a["path"]] = hashlib.sha256(ap2.read_bytes()).hexdigest()
+        ev_src = (t["grader"].get("evaluator") or {}).get("module")
+        if ev_src:
+            evp = pack_root / "private" / f"{ev_src}.py"
+            if evp.is_file():
+                assets[f"evaluator:{ev_src}"] = hashlib.sha256(
+                    evp.read_bytes()).hexdigest()
+
+    with RunState(out_dir=out, tasks=tasks, prompts=prompt_cache,
+                  adapter=ADAPTER, provider=args.provider, model=args.model,
+                  seed=args.seed, env_digest=env, assets=assets,
+                  tasks_dir=Path(args.tasks), rerun=rerun,
+                  resume=args.resume) as run:
+        results, resumed = [], 0
+        for t in tasks:
+            if t.id in run.cached:
+                results.append(run.cached[t.id])
+                resumed += 1
+                print(f"{t.id}: reused (resume)")
+                continue
+            r = run_task(t, provider=args.provider, model=args.model,
+                         seed=args.seed, env_digest=env,
+                         prompt_cache=prompt_cache, assets_root=Path(args.tasks),
+                         oracle_cache=oracle_cache or None)
+            # PR-B 证据归档：交付字节落到 run 目录（evidence/<task_id>/），
+            # 复核不依赖 IsolatedRun 临时目录；result 只存相对路径。
+            ev_dir = out / "evidence" / t.id
+            ev_dir.mkdir(parents=True, exist_ok=True)
+            files = r.get("artifacts", {}).get("deliverable_files")
+            if files:
+                import shutil as _sh
+                for rel, content in json.loads(files).items():
+                    dst = ev_dir / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    if isinstance(content, str) and len(content) < 200000 \
+                            and not all(c in "0123456789abcdef" for c in content[:64] if c):
+                        dst.write_text(content, encoding="utf-8")
+                    else:
+                        dst.write_text(str(content)[:100000], encoding="utf-8")
+                (ev_dir / "evaluator_output.json").write_text(
+                    r["artifacts"].get("grade_details", "{}"),
+                    encoding="utf-8")
+                r["deliverable_files_dir"] = f"evidence/{t.id}"
+            results.append(r)
+            run.write_result(t, r)
+            print(f"{t.id}: gate={r['validity_gate']} score={r['score']}"
+                  + (" voided" if r.get("voided") else ""))
+        run.finish(resumed_tasks=resumed)
     return 0
 if __name__ == "__main__":
     raise SystemExit(main())
