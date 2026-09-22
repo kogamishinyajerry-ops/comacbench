@@ -14,7 +14,7 @@ for r in dedup.values():
 with (w/"outputs"/"run_manifest.csv").open("w", newline="", encoding="utf-8") as fh:
     wr = csv.DictWriter(fh, fieldnames=["point","case_id","version"]); wr.writeheader()
     for r in rows: wr.writerow({"point": r["point"], "case_id": case["case_id"], "version": case.get("version","")})
-(w/"outputs"/"exceptions.csv").write_text("point,reason,detail\n", encoding="utf-8")
+(w/"outputs"/"exceptions.csv").write_text("point,reason_code,reason,detail\n", encoding="utf-8")
 (w/"manifest.json").write_text(json.dumps({"protocol": "comacbench.artifacts.v1", "deliverables": [
   {"path": "outputs/normalized.json", "kind": "normalized"},
   {"path": "outputs/run_manifest.csv", "kind": "run_manifest"},

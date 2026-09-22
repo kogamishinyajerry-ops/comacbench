@@ -38,7 +38,7 @@
     {
       "name": "units_explicit",
       "passed": true,
-      "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+      "expected": "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf/超出 float 范围的整数）",
       "actual": "ok"
     },
     {
@@ -128,9 +128,10 @@
     {
       "name": "exceptions_header_valid",
       "passed": true,
-      "expected": "表头包含 ['point', 'reason', 'detail']（列序不限、无重复列）",
+      "expected": "表头包含 ['point', 'reason_code', 'reason', 'detail']（列序不限、无重复列）",
       "actual": [
         "point",
+        "reason_code",
         "reason",
         "detail"
       ]
@@ -144,7 +145,7 @@
     {
       "name": "rejection_reasons_match",
       "passed": true,
-      "expected": "拒收理由与问题类别匹配且 detail 非空",
+      "expected": "每行的 reason_code 等于该 point 的问题类别（公开词表 ['conflict', 'missing_unit', 'stale']），且 reason/detail 非空",
       "actual": "ok"
     }
   ],

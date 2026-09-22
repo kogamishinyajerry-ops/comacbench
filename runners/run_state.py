@@ -176,12 +176,67 @@ class RunState:
                     if type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1 or gate not in (0, 1) or (gate == 0 and score != 0):
                         self._reject(f'invalid cached score/gate: {file.name}')
                     self._validate_result_fields(row, file)
+                    self._verify_evidence(row, file)
                     self.cached[tid] = row
             self.finish()
             return self
         except BaseException:
             self.__exit__(None, None, None)
             raise
+
+    def _verify_evidence(self, row, file):
+        """复用前核验归档证据字节——证据是 result 的一部分，不是可选附件。
+
+        fail-closed：归档不可核验就拒绝复用并要求新目录，绝不因 result.json
+        里曾有过满分就继续授予可复核状态。同时核对两处索引（result 内联索引
+        与证据目录自描述清单）一致，以便发现只改了证据目录的改动。
+        未声明 ``deliverable_files_dir`` 的 adapter 不受影响（向后兼容）。
+        """
+        artifacts = row.get('artifacts')
+        if not isinstance(artifacts, dict):
+            self._reject(f'missing artifacts: {file.name}')
+        rel_dir = artifacts.get('deliverable_files_dir')
+        if rel_dir is None:
+            return  # 该 adapter 未归档原件
+        if not isinstance(rel_dir, str) or not rel_dir.strip():
+            self._reject(f'invalid evidence dir declaration: {file.name}')
+        root = self.out.resolve()
+        ev_dir = (self.out / rel_dir).resolve()
+        if ev_dir != root and root not in ev_dir.parents:
+            self._reject(f'evidence dir escapes the run directory: {rel_dir!r}')
+        index = artifacts.get('deliverable_files')
+        try:
+            declared = json.loads(index) if isinstance(index, str) else index
+        except ValueError:
+            self._reject(f'unreadable cached evidence index: {file.name}')
+        manifest_path = ev_dir / common.EVIDENCE_MANIFEST
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            self._reject(f'evidence manifest missing or unreadable: '
+                         f'{rel_dir}/{common.EVIDENCE_MANIFEST}')
+        if (not isinstance(manifest, dict)
+                or manifest.get('protocol') != common.EVIDENCE_PROTOCOL
+                or manifest.get('task_id') != row.get('task_id')
+                or not isinstance(manifest.get('files'), list)):
+            self._reject(f'evidence manifest malformed: {rel_dir}')
+        if manifest.get('complete') is not True:
+            self._reject(f'evidence marked incomplete at capture time: {rel_dir}')
+        if not isinstance(declared, list) or declared != manifest['files']:
+            self._reject(f'evidence index disagrees with manifest: {rel_dir}')
+        for entry in manifest['files']:
+            if not isinstance(entry, dict) or not isinstance(entry.get('path'), str):
+                self._reject(f'evidence manifest malformed: {rel_dir}')
+            rel = entry['path']
+            target = (ev_dir / rel).resolve()
+            if ev_dir not in target.parents:
+                self._reject(f'evidence entry escapes its directory: {rel!r}')
+            if not target.is_file() or target.is_symlink():
+                self._reject(f'archived evidence file missing: {rel_dir}/{rel}')
+            sha, size = common.sha256_file(target), target.stat().st_size
+            if sha != entry.get('sha256') or size != entry.get('bytes'):
+                self._reject(f'archived evidence bytes do not match the '
+                             f'recorded digest: {rel_dir}/{rel}')
 
     def _validate_result_fields(self, row, file):
         def number(value):

@@ -30,6 +30,34 @@ ORACLE = PACK / 'private/workload_oracle.py'
 EVIDENCE = ROOT / 'probes/evidence/workload'
 RUNTIME = ROOT / 'probes/.probe_runtime'           # 运行时构造 case 的伪 pack 根
 EVIDENCE.mkdir(parents=True, exist_ok=True)
+
+
+def _source_commit():
+    """被测源码版本：运行时采集，不写死。
+
+    此前这里硬编码基线 `5543fa5e…`，脚本重跑后该字段不会更新，证据基线会与实际
+    被测版本脱钩。改为运行时 `git rev-parse HEAD`；仓库不可用时显式标注而不是
+    伪装成某个已知提交。
+    """
+    import subprocess as _sp
+    try:
+        out = _sp.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT,
+                      capture_output=True, text=True, timeout=10)
+        commit = out.stdout.strip()
+    except Exception:
+        commit = ''
+    return commit or 'unknown(no-git)'
+
+
+def _digest(path):
+    """被测文件的字节摘要——commit 之外的第二种版本锚点。"""
+    import hashlib
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError:
+        return 'missing'
+
+
 spec = importlib.util.spec_from_file_location('fixed_workload_evaluator', EVALUATOR)
 ev = importlib.util.module_from_spec(spec); spec.loader.exec_module(ev)
 
@@ -39,7 +67,8 @@ def readc(ws, name):
     with (ws / 'outputs' / name).open(newline='') as f: return list(csv.DictReader(f))
 def writec(ws, name, rows, fields=None):
     fields = fields or {'run_manifest.csv': ['point', 'case_id', 'version'],
-                        'exceptions.csv': ['point', 'reason', 'detail']}[name]
+                        'exceptions.csv': ['point', 'reason_code', 'reason',
+                                           'detail']}[name]
     with (ws / 'outputs' / name).open('w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=fields); w.writeheader(); w.writerows(rows)
 
@@ -74,8 +103,10 @@ def keep_conflict(ws):
 def stale(ws):
     rs = readc(ws, 'run_manifest.csv'); rs.append(dict(point='P0', case_id='BLEED-CHK-D', version='old')); writec(ws, 'run_manifest.csv', rs)
 def nonsense_reason(ws):
+    # reason_code 必须落在公开词表 (missing_unit/conflict/stale) 内；这里给一个
+    # 表外值 + 空 detail —— 语义上"看起来像解释"，但不可机器判定，必须拦下。
     rs = readc(ws, 'exceptions.csv')
-    for r in rs: r['reason'] = 'looks good'; r['detail'] = ''
+    for r in rs: r['reason_code'] = 'looks_good'; r['detail'] = ''
     writec(ws, 'exceptions.csv', rs)
 def malformed_rows(ws):
     d = readj(ws); d['rows'] = 42; writej(ws, d)
@@ -87,7 +118,9 @@ def reordered(ws):
 def reject_all(ws):
     d = readj(ws); d['rows'] = []; writej(ws, d)
     writec(ws, 'run_manifest.csv', [])
-    writec(ws, 'exceptions.csv', [dict(point=p, reason='missing_unit:altitude', detail='全部拒收') for p in ('P1', 'P2', 'P3')])
+    writec(ws, 'exceptions.csv', [dict(point=p, reason_code='missing_unit',
+                                       reason='缺单位', detail='全部拒收')
+                                  for p in ('P1', 'P2', 'P3')])
 def old_version_reuse(ws):
     d = readj(ws)
     for r in d['rows']: r['source_version'] = '2026-09-12'
@@ -211,7 +244,8 @@ for r in report:
     verdict = 'pass' if not r['defect'] else 'FAIL'
     print(r['name'].ljust(w) + f"{r['expected_accept']!s:<7}{r['actual_accept']!s:<7}{verdict}")
 
-summary = dict(commit='5543fa5e4a5f5db716a782a5c1bfb5b4585ac8cd', python=sys.version,
+summary = dict(commit=_source_commit(), python=sys.version,
+               sources={'evaluator': _digest(EVALUATOR), 'oracle': _digest(ORACLE)},
                scope='fixed workload evaluator (fix/private) on local files, not full CLI',
                scenarios=len(report),
                positive=sum(r['expected_accept'] for r in report),

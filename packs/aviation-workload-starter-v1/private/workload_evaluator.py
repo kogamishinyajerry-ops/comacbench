@@ -1,4 +1,4 @@
-"""workload 家族的独立 evaluator（判分侧资产，artifacts.v2）。
+"""workload 家族的独立 evaluator（判分侧资产，artifacts.v1）。
 
 对每个变体，从冻结规则与 case 输入**独立推导期望**，再与 agent 交付对账：
   - normalized.json：行级规范化记录（含单位与血缘）
@@ -13,9 +13,11 @@
     case_id / version
 
 对账要求：按 point 主键的精确多重集合（不漏、不多、不重），数值逐行与输入精确
-比对（排除 bool/NaN/Inf），manifest 三元组 (point, case_id, version) 精确集合相等，
-exceptions 逐 point 对账且理由必须与问题类别匹配。比较全部基于内容，不依赖列序/
-行序/字节表示。
+比对（排除 bool/NaN/Inf/超出 float 范围的整数），manifest 三元组
+(point, case_id, version) 精确集合相等，exceptions 逐 point 对账，且每行的
+``reason_code`` 必须落在**公开词表** REASON_CODES 内并与该 point 的问题类别
+精确相等；``reason``/``detail`` 只作人类可读解释（校验非空），不据其措辞推断
+语义成立。比较全部基于内容，不依赖列序/行序/字节表示。
 """
 from __future__ import annotations
 
@@ -23,18 +25,27 @@ import csv
 import io
 import json
 import math
+import sys
 from collections import Counter
 from pathlib import Path
 
 REQUIRED_KINDS = ("normalized", "run_manifest", "exceptions")
 MANIFEST_COLUMNS = ("point", "case_id", "version")
-EXCEPTION_COLUMNS = ("point", "reason", "detail")
+EXCEPTION_COLUMNS = ("point", "reason_code", "reason", "detail")
 ROW_FIELDS = ("point", "altitude_m", "mass_flow_kg_s", "source_version")
-REASON_KEYWORDS = {
-    "missing_unit": ("unit", "单位"),
-    "conflict": ("conflict", "冲突", "矛盾"),
-    "stale": ("stale", "陈旧", "旧版"),
+# 公开、可机器判定的拒收代码词表（题面同文公开）。reason_code 必须是本词表
+# 中与期望类别相等的那一项；reason/detail 只作人类可读解释，不接受用措辞
+# 里"碰巧出现某个关键词"来推断语义成立。
+REASON_CODES = {
+    "missing_unit": "missing_unit",
+    "conflict": "conflict",
+    "stale": "stale",
 }
+PUBLIC_REASON_CODES = tuple(sorted(set(REASON_CODES.values())))
+
+# int -> float 的溢出阈；超过即视为越界数值，交给检查判失败而不是让
+# math.isfinite() 抛 OverflowError 把模型交付错误升级成基础设施作废。
+_MAX_FINITE_INT = int(sys.float_info.max)
 
 
 def _read_json(p: Path):
@@ -68,8 +79,17 @@ def _case(task) -> dict:
 
 
 def _is_number(x) -> bool:
-    return (type(x) in (int, float) and not isinstance(x, bool)
-            and math.isfinite(x))
+    """有限数值判定。巨大整数先按范围判断，不让 int->float 转换抛 OverflowError。
+
+    ``math.isfinite(10**400)`` 会抛 ``OverflowError: int too large to convert to
+    float``——那是**模型交付了越界数值**，属于内容检查该判失败的情形，不能让
+    它冒泡成判分基础设施故障（更不该被最外层记成 voided）。
+    """
+    if type(x) is bool or type(x) not in (int, float):
+        return False
+    if type(x) is int:
+        return -_MAX_FINITE_INT <= x <= _MAX_FINITE_INT
+    return math.isfinite(x)
 
 
 def _derive_expected(case: dict):
@@ -183,7 +203,7 @@ def evaluate(task, workspace: Path, deliverables) -> dict:
             if not _is_number(v):
                 bad_units.append([r.get("point"), f, repr(v)])
     add("units_explicit", not bad_units,
-        "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf）",
+        "altitude_m 与 mass_flow_kg_s 为有限数值（排除 bool/NaN/Inf/超出 float 范围的整数）",
         bad_units[:5] or "ok")
 
     # ---- 多重集合对账（按 point 主键） ----
@@ -288,7 +308,8 @@ def evaluate(task, workspace: Path, deliverables) -> dict:
     bad_reasons = []
     if e_rows is None:
         add("rejection_reasons_match", False,
-            "拒收理由与问题类别匹配且 detail 非空", "文件不可解析")
+            "每行的 reason_code 等于该 point 的问题类别，且 reason/detail 非空",
+            "文件不可解析")
     else:
         for r in e_rows:
             if not isinstance(r, dict):
@@ -297,17 +318,20 @@ def evaluate(task, workspace: Path, deliverables) -> dict:
             cat = exp_exc_cat.get(pt)
             if cat is None:
                 continue  # 多余行已由 exceptions_reconciled 判定
-            reason = r.get("reason")
-            detail = r.get("detail")
-            reason_s = "" if reason is None else str(reason)
-            detail_s = "" if detail is None else str(detail)
-            kw_ok = any(kw in reason_s.lower() or kw in reason_s
-                        for kw in REASON_KEYWORDS[cat])
-            if not (kw_ok and detail_s.strip()):
-                bad_reasons.append([pt, f"期望类别={cat}",
-                                    f"reason={reason_s!r}", f"detail={detail_s!r}"])
+            code = r.get("reason_code")
+            code_s = "" if code is None else str(code)
+            detail_s = "" if r.get("detail") is None else str(r.get("detail"))
+            # 机器判定：代码必须落在公开词表内，且与期望类别**精确相等**。
+            # 不再用「reason 里含某个关键词」推断语义成立。
+            code_ok = (code_s in PUBLIC_REASON_CODES
+                       and code_s == REASON_CODES[cat])
+            if not (code_ok and detail_s.strip()):
+                bad_reasons.append([pt, f"期望 reason_code={REASON_CODES[cat]!r}",
+                                    f"reason_code={code_s!r}",
+                                    f"detail={detail_s!r}"])
         add("rejection_reasons_match", not bad_reasons,
-            "拒收理由与问题类别匹配且 detail 非空",
+            f"每行的 reason_code 等于该 point 的问题类别"
+            f"（公开词表 {list(PUBLIC_REASON_CODES)}），且 reason/detail 非空",
             bad_reasons[:5] or "ok")
 
     failed = [c["name"] for c in checks if not c["passed"]]

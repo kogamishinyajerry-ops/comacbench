@@ -36,6 +36,10 @@ FM_CRASH = "crash"                        # 运行器/判分器自身故障     
 # 作废类（任务不计分，也不计入模型失败——是 harness 自身问题）
 VOIDED_FAILURE_MODES = {FM_ENV_MISMATCH, FM_CRASH}
 
+# ---- 证据归档契约（adapter 归档原件 / RunState 复用前核验，共用同一口径） ----
+EVIDENCE_PROTOCOL = "comacbench.evidence.v1"
+EVIDENCE_MANIFEST = "evidence_manifest.json"
+
 REQUIRED_TASK_FIELDS = [
     "id", "registry_id", "domain", "task_type", "model_profile",
     "assets_revision", "allowed_tools", "input", "output_contract",
