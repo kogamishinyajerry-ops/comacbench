@@ -67,6 +67,58 @@ def completion_summary(
     }
 
 
+# ---------------------------------------------------------------------------
+# 证据等级（PR-C）：描述「结果背后是什么证据」，不是分数。
+# 等级不把作废行升级成任何已完成证据；file_artifacts_checked 仅当
+# deliverable_review 真的归档了 engineering_evidence 时授予。
+# ---------------------------------------------------------------------------
+SOLVER_EXECUTED = 'solver_executed'
+EXECUTABLE_CHECKS = 'executable_checks'
+INPUT_AUDIT = 'input_audit'
+FILE_ARTIFACTS_CHECKED = 'file_artifacts_checked'
+NO_COMPLETED_EXECUTION = 'no_completed_execution'
+KNOWN_EVIDENCE_LEVELS = (SOLVER_EXECUTED, EXECUTABLE_CHECKS, INPUT_AUDIT,
+                         FILE_ARTIFACTS_CHECKED)
+
+
+def classify_evidence_level(result: Any) -> str:
+    """Classify what kind of evidence backs a result row.
+
+    Rules (acceptance B03 + P1 evidence_level):
+    - A row with result_issues (including voided) has no completed execution
+      to show; it keeps NO_COMPLETED_EXECUTION regardless of adapter kind.
+    - A row that already carries a known evidence_level and has no issues is
+      respected (pass-through: producers like __main__ computed it from the
+      run facts; we do not downgrade verified evidence).
+    - solver_executed: the run actually executed a solver (ccx_fea with
+      measured runtime, or an explicit solver_executed flag).
+    - file_artifacts_checked: deliverable_review runs whose artifacts include
+      engineering_evidence (real deliverable bytes archived for review).
+    - executable_checks: unit-test style checks ran.
+    - input_audit: deck/cfd audit only.
+    """
+    if not isinstance(result, dict):
+        return NO_COMPLETED_EXECUTION
+    issues = result.get('result_issues') or []
+    if issues:
+        return NO_COMPLETED_EXECUTION
+    declared = result.get('evidence_level')
+    if declared in KNOWN_EVIDENCE_LEVELS:
+        return declared
+    details = result.get('details') or {}
+    artifacts = result.get('artifacts') or {}
+    if details.get('solver_executed') or (
+            details.get('kind') == 'ccx_fea' and details.get('ccx_s') is not None):
+        return SOLVER_EXECUTED
+    if details.get('kind') == 'deliverable_review' and artifacts.get('engineering_evidence'):
+        return FILE_ARTIFACTS_CHECKED
+    if details.get('kind') == 'unit_tests':
+        return EXECUTABLE_CHECKS
+    if details.get('deck_audit') or details.get('cfd_audit'):
+        return INPUT_AUDIT
+    return NO_COMPLETED_EXECUTION
+
+
 def negative_control_passed(
     result: Any, control: Mapping[str, Any], *, task_id: str, suite: str,
     actual_issues: Sequence[str],
