@@ -16,10 +16,10 @@
    每一项都要有一行，理由具体到字段。
 
 manifest.json 格式：
-{{"protocol": "comacbench.artifacts.v1", "deliverables": [
-  {{"path": "outputs/normalized.json", "kind": "normalized"}},
-  {{"path": "outputs/run_manifest.csv", "kind": "run_manifest"}},
-  {{"path": "outputs/exceptions.csv", "kind": "exceptions"}}]}}
+{"protocol": "comacbench.artifacts.v1", "deliverables": [
+  {"path": "outputs/normalized.json", "kind": "normalized"},
+  {"path": "outputs/run_manifest.csv", "kind": "run_manifest"},
+  {"path": "outputs/exceptions.csv", "kind": "exceptions"}]}
 
 ## 判分边界
 

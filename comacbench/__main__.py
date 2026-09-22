@@ -114,7 +114,16 @@ def result_rows(root, report, runs, provider):
                      'result_file':str(p), 'result_sha256':digest(p),
                      'requirements':spec.get('evaluation',{}).get('requirements',[]),
                      'scope':spec.get('evaluation',{}).get('scope',''),
-                     'evidence_level': 'solver_executed' if details.get('solver_executed') or details.get('kind')=='ccx_fea' and details.get('ccx_s') is not None else 'executable_checks' if details.get('kind')=='unit_tests' else 'input_audit' if details.get('deck_audit') or details.get('cfd_audit') else 'no_completed_execution',
+                     # PR-C：证据等级反映「结果背后是什么证据」，不是分数。
+                     # deliverable_review 的文件制品核验独立成级（file_artifacts_checked），
+                     # 不再落 no_completed_execution，也不伪装 solver_executed。
+                     # 作废/异常行无论 adapter 为何都保持 no_completed_execution。
+                     'evidence_level': ('no_completed_execution' if envelope_issues else
+                                        'solver_executed' if details.get('solver_executed') or details.get('kind')=='ccx_fea' and details.get('ccx_s') is not None else
+                                        'file_artifacts_checked' if details.get('kind')=='deliverable_review' and (r.get('artifacts') or {}).get('engineering_evidence') else
+                                        'executable_checks' if details.get('kind')=='unit_tests' else
+                                        'input_audit' if details.get('deck_audit') or details.get('cfd_audit') else
+                                        'no_completed_execution'),
                      'provider':provider})
     return rows
 
