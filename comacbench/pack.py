@@ -12,7 +12,8 @@ import yaml
 
 PROTOCOL = 'comacbench.pack.v1'
 FAMILIES = {'industrial_simulation', 'enterprise_data', 'knowledge_ontology'}
-KINDS = {'simulation_agent': {'ccx_fea','cfd_step'}, 'code_exec': {'unit_tests_problem'}}
+KINDS = {'simulation_agent': {'ccx_fea','cfd_step'}, 'code_exec': {'unit_tests_problem'},
+         'deliverable_review': {'file_package'}}
 ID = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$')
 
 
@@ -181,9 +182,34 @@ def _validate_pack(root):
                 problem('unsupported_grader', 'grader.exec_kind', '该执行类型尚未通过贡献入口的契约校验。', '使用已支持类型或先补充对应验证规则；不能仅登记字符串。')
             from runners.solvers.backward_step import INPUTS as CFD_INPUTS
             supported_output={'ccx_fea':['model.inp'],'unit_tests_problem':['script'],
-                              'cfd_step':['case/'+name for name in CFD_INPUTS]}.get(g.get('exec_kind'))
+                              'cfd_step':['case/'+name for name in CFD_INPUTS],
+                              'file_package':['manifest.json']}.get(g.get('exec_kind'))
             if supported_output and t.get('output_contract') != supported_output:
                 problem('unsupported_output', 'output_contract', '当前判分器未覆盖声明的全部交付物。', f'当前支持 {supported_output}；其他制品需先实现检查器。')
+            if g.get('exec_kind') == 'file_package':
+                ev_spec = g.get('evaluator') or {}
+                if not isinstance(ev_spec, dict) or not ev_spec.get('module'):
+                    problem('missing_evaluator', 'grader.evaluator.module',
+                            '文件制品任务必须声明独立 evaluator 模块（判分侧资产）。',
+                            '在 grader.evaluator.module 指向 private/ 下的判分模块。')
+                else:
+                    from pathlib import Path as _P
+                    ev_path = _P(root) / 'private' / (ev_spec['module'].replace('.', '/') + '.py')
+                    if not ev_path.is_file():
+                        problem('missing_evaluator', 'grader.evaluator.module',
+                                f'evaluator 模块文件不存在：{ev_spec["module"]}',
+                                '把判分模块放在 pack 的 private/ 下并在 YAML 引用。')
+                if not isinstance(g.get('deliverable_kinds'), list) or not g.get('deliverable_kinds'):
+                    problem('missing_deliverable_kinds', 'grader.deliverable_kinds',
+                            '题面必须公开可交付制品的 kind 枚举（隐藏的是实例与答案，不是规则）。',
+                            '列出本任务接受的制品类型（如 result_table / rejection_list）。')
+                for nc in t.get('evaluation', {}).get('negative_controls', []):
+                    if isinstance(nc, dict) and nc.get('expected_issue') not in {
+                            'manifest_missing', 'manifest_invalid', 'deliverable_path_escape',
+                            'deliverable_tree_mismatch', 'deliverable_content_check_failed'}:
+                        problem('invalid_fault_code', 'evaluation.negative_controls',
+                                f'负例 expected_issue 不是本类型已实现的诊断码：{nc.get("expected_issue")}',
+                                '使用 artifacts.v1 的五个命名诊断之一。')
             if g.get('validity_gate') is not True:
                 problem('missing_gate', 'grader.validity_gate', '工程有效性门不能关闭。', '启用 validity_gate。')
             weights = t['scoring'].get('weights', {})

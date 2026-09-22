@@ -34,7 +34,7 @@ from .report import write_report
 from .completion import completion_summary, negative_control_passed, result_issues
 
 REPO=Path(__file__).resolve().parents[1]
-MODULES={'code_exec':'runners.code_exec','simulation_agent':'runners.simulation_agent'}
+MODULES={'code_exec':'runners.code_exec','simulation_agent':'runners.simulation_agent','deliverable_review':'runners.deliverable_review'}
 
 
 def save(path, data):
