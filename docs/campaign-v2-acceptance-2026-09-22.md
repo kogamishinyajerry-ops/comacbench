@@ -76,6 +76,21 @@ Linux / Python 3.13.5：
 
 新增 `.github/workflows/campaign-audit.yml`：在 Linux/Windows、Python 3.11/3.13 运行专项门禁，仅稀疏检出源文件与测试，不安装依赖或下载 LFS、调用模型。Actions 使用已核对的固定 commit。**工作流文件提交不等于 CI 已通过**，以 GitHub 实际运行状态为准。
 
+## 维护者 Windows 完整仓库实测（2026-09-22，合并 `c0afe75d` 后）
+
+在 Windows 11 / Git Bash / Python 3.11.8 完整 checkout（非最小重建工作区）上复验：
+
+- **专项测试**：`unittest discover -s tests -p test_campaign.py` → **120/120 全绿**（43.9s；作者环境 2.35s 的差异来自真实子进程 CLI 往返）。
+- **全量回归**：`pytest -q tests/` → **1 failed, 380 passed, 17 skipped**。唯一失败仍为既存 `test_adapter_resume`（superwing `index.npy` LFS 摘要漂移），与本 PR 改动面零交集。
+- **证据完整性／发行链**：22/22 全绿。
+- **v1 锁拒绝语义**：旧 `experiment.lock.json` → `legacy_lock_requires_refreeze`、exit 2，指引明确。
+- **真实迁移路径**：旧引擎归档（anchors + 3 seed，缺失 seed-2 用旧提交 `11ad7be7` 的 git worktree 以同引擎补齐——期间新引擎写入被身份保护正确拒绝过一次，证明混引擎归档无法静默通过）→ v2 重新 freeze（sha256 `e37dd812…`）→ report `complete:true` / exit 0，**未重跑任何模型或求解器**。
+- **真实校准负例核对**：真实 `comacbench calibrate` 输出（4 个负例：no_output / wrong_units / wrong_relation 等）作为 case 锚点 freeze → `calibration.status=recorded_pass`，4 份 `controls/` 原始 result + manifest 全部被重读核对并写入锁。**篡改探测**：将一份负例 result 的 `score` 改为 1.0 后重新 freeze → `calibration_raw_control_failed` / exit 2。
+- **额外 runner 记录**：向 seed-0 的 suite 目录混入未登记 `result_extra_sneaky.json` → 对应 cell `unexpected_runner_records` 阻断、`complete:false`（但 archive_issues 为空，错误归类正确）。
+- 上述探测均在真实 harness 产物上执行后清理复原，最终干净重报恢复 `complete:true`。
+
+仍待办：GitHub Actions 四矩阵（ubuntu/windows × 3.11/3.13）的实际运行结果以仓库页面为准；superwing LFS 合法资产恢复；真实模型 Agent 配对（需凭据）。
+
 所有报告继续保留 `publishable=false`、`isolated_transfer_verified=false`、`engineering_artifacts_reverified=false`。未增加模型成绩、隐藏迁移证明、预算强制执行或全工程产物字节复验。
 
 ## 下一步只推进一个业务实验
