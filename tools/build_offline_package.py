@@ -271,10 +271,20 @@ $vlog = Get-Content (Join-Path $acc 'validate.log') -Raw -Encoding UTF8
 Check 'validate' ($rcVal -eq 0) ("exit=" + $rcVal + " runnable=" + ($vlog -match '"runnable":\s*true'))
 
 Write-Host '       acceptance 2/2: release chain (pytest) ...'
+# Offline package cannot ship Chromium (~200 MB, and browser binaries cannot be
+# installed without network). The chain therefore runs with an explicitly declared
+# lower report-render requirement. This is NOT a skip: the chain still requires
+# probes/test_report_full.py to exit 0 and its static TDZ layer to PASS. The
+# downgrade is recorded here, in MANIFEST.json and in 02_EVIDENCE.md.
+$env:COMAC_REPORT_RENDER = 'static'
 & $vpy -m pytest -q --no-header -p no:cacheprovider (Join-Path $packDir 'tests/test_release_chain.py') *> (Join-Path $acc 'release-chain.log')
 $rcChain = $LASTEXITCODE
 Check 'release chain' ($rcChain -eq 0) ("exit=" + $rcChain + " ten-phase end-to-end")
 Pop-Location
+Write-Host '[WARN] report render layer : static'
+Write-Host '       browser layer (Playwright + Chromium) is NOT bundled with this offline'
+Write-Host '       package; the release chain ran with COMAC_REPORT_RENDER=static.'
+Write-Host '       The static TDZ layer still passed. See 02_EVIDENCE.md.'
 
 Write-Host ''
 if ($fail -eq 0) {
@@ -385,9 +395,15 @@ zip 的 SHA-256 记录在同级 `COMACBench-assets-v<版本>.zip.sha256`（`sha2
 
 ## 解压注意事项
 
-- 用 **7-Zip**，或 PowerShell 的 `Expand-Archive`（两者都按 zip 的 UTF-8 名字标记位解码）。
+| 方式 | 结论 |
+|---|---|
+| **7-Zip**（首选） | 推荐。右键 → 解压到 `D:\COMACBench`。 |
+| `Expand-Archive`（PowerShell 5.1） | **不推荐**：实测在本包上只解出 9437/11381 个文件就失败退出（该 cmdlet 对万级条目/大文件有已知限制），且不报错到底。 |
+| Python `zipfile`（保底） | 若上面两者都不行：`python -c "import zipfile;zipfile.ZipFile(r'路径\\包.zip').extractall(r'D:\\')"` |
+
 - 解压到**纯 ASCII 路径**，例如 `D:\COMACBench`。含中文或空格的路径会让部分工具链出问题。
-- 解压后**先跑 `verify.bat`**，再做别的。
+- 包内条目名**全部为 ASCII**，因此不存在 zip 中文名编码问题。
+- 解压后**先跑 `verify.bat`**，再做别的。注意 **`verify` 会逐文件算 SHA-256，实测约 3 分钟**（含 223 MB 的 git bundle），属正常。
 
 ## 排错表
 
@@ -462,10 +478,17 @@ EVIDENCE = """# 02 · 证据分级与边界
    完整 `pytest tests/` 在源环境下的实测结果是 `5 failed, 256 passed, 17 skipped`，
    其中 5 项失败全部是 `OSError: [WinError 1314]`（Windows 符号链接特权缺口），
    与本次交付内容无关；本包未在内网复现该套件。
-4. **不证明 `publishable`。** 该字段在本版本 `comacbench/pack.py` 中是**硬编码 `False`**，
+4. **不证明报告能被真实浏览器渲染。** 本包**不含** Playwright 与 Chromium
+   （浏览器二进制无法离线安装，且约 200 MB 与 benchmark 使用无关）。
+   发行级链路的报告渲染层以 `COMAC_REPORT_RENDER=static` 运行：
+   要求 `probes/test_report_full.py` 整体退出 0 且**静态层 TDZ PASS**，
+   浏览器层为 `NOT_RUN`。**这是已声明的降级，不是跳过**——降级事实同时记录在本文件、
+   `MANIFEST.json` 的 `acceptance_baseline.report_render_layer` 与 `install.ps1` 输出中。
+   若内网有 Chromium，设 `COMAC_REPORT_RENDER=browser` 可要求完整浏览器层。
+5. **不证明 `publishable`。** 该字段在本版本 `comacbench/pack.py` 中是**硬编码 `False`**，
    不参与计算（`plugin/dsh-comac-benchmark/test-packs.mjs` 亦将其断言锁死）。
    本版本的实际发布门是 `runnable`（blocker 数为 0）。
-5. **不证明二进制与源码严格同源。** payload 由 `git archive <commit>` 导出并在导出后
+6. **不证明二进制与源码严格同源。** payload 由 `git archive <commit>` 导出并在导出后
    做了**规则化裁剪**（见 `01_READ_ME_FIRST.md` 末节与 `MANIFEST.json` 的 `prune_rules`）。
    裁剪规则与结果文件清单都在包里，可自行复核。
 
@@ -749,7 +772,13 @@ def main() -> int:
         "wheelhouse": wheels,
         "acceptance_baseline": {
             "comacbench_validate": "runnable = true",
-            "release_chain": "tests/test_release_chain.py pass",
+            "release_chain": "tests/test_release_chain.py pass (ten phases)",
+            "report_render_layer": "static",
+            "report_render_note": "本包不含 Playwright + Chromium（浏览器二进制无法离线安装，"
+                                  "且约 200 MB 与 benchmark 使用无关），故发行链以 "
+                                  "COMAC_REPORT_RENDER=static 运行：仍要求 "
+                                  "probes/test_report_full.py 整体退出 0、静态层 TDZ PASS，"
+                                  "浏览器层为 NOT_RUN。这是**已声明的降级**，非跳过。",
             "note": "装机验收只覆盖 validate 与航空工作包发行级链路；CFD 套件因 LFS 数据缺失无法运行。",
         },
         "source_env_gate": {
