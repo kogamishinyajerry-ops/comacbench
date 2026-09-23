@@ -39,6 +39,7 @@ jobs:
         run: |
           # BEGIN_SOURCE_EXPORT
           import os, re, subprocess, tarfile, tempfile
+          from contextlib import ExitStack
           from pathlib import Path, PurePosixPath
           sha = os.environ['SOURCE_SHA']
           if not re.fullmatch(r'[0-9a-f]{40}', sha):
@@ -47,7 +48,7 @@ jobs:
           workspace.mkdir(parents=True, exist_ok=True)
           selected = ('comacbench', 'tests', '.github/workflows')
           with tempfile.TemporaryDirectory(dir=os.environ['RUNNER_TEMP']) as temp:
-              bare, bundle = Path(temp)/'source.git', Path(temp)/'source.tar'
+              bare = Path(temp)/'source.git'
               def git(*args):
                   return subprocess.check_output(['git', '-C', str(bare), *args], text=True).strip()
               subprocess.run(['git', 'init', '--bare', str(bare)], check=True)
@@ -55,20 +56,34 @@ jobs:
               git('-c', 'protocol.version=2', 'fetch', '--no-tags', '--depth=1', '--filter=blob:none', 'origin', sha)
               if git('rev-parse', 'FETCH_HEAD') != sha:
                   raise ValueError('source identity mismatch')
-              git('archive', '--format=tar', f'--output={bundle}', sha, *selected)
-              with tarfile.open(bundle) as archive:
-                  members = archive.getmembers()
-                  if len(members) > 50000 or sum(m.size for m in members) > 128*1024*1024:
-                      raise ValueError('source archive exceeds scope')
-                  for member in members:
-                      path = PurePosixPath(member.name)
-                      allowed = any(path == PurePosixPath(s) or path.is_relative_to(s)
-                                    or PurePosixPath(s).is_relative_to(path) for s in selected)
-                      if (not allowed or path.is_absolute() or '..' in path.parts
-                              or ':' in member.name or '\\' in member.name
-                              or not (member.isfile() or member.isdir())):
-                          raise ValueError('unsafe source member: ' + member.name)
-                  archive.extractall(workspace, members=members, filter='data')
+              # Archiving the commit with pathspecs still unpacks its root tree
+              # on Git for Windows. Anchor each selected TREE to the exact commit
+              # and archive that object, never the root containing research paths.
+              with ExitStack() as stack:
+                  exports, total_members, total_bytes = [], 0, 0
+                  for i, selection in enumerate(selected):
+                      tree = git('rev-parse', f'{sha}:{selection}')
+                      if not re.fullmatch(r'[0-9a-f]{40}', tree) or git('cat-file', '-t', tree) != 'tree':
+                          raise ValueError('expected source subtree: ' + selection)
+                      bundle = Path(temp)/f'source-{i}.tar'
+                      git('archive', '--format=tar', f'--prefix={selection}/', f'--output={bundle}', tree)
+                      archive = stack.enter_context(tarfile.open(bundle))
+                      members = archive.getmembers()
+                      total_members += len(members)
+                      total_bytes += sum(m.size for m in members)
+                      if total_members > 50000 or total_bytes > 128*1024*1024:
+                          raise ValueError('source archive exceeds scope')
+                      for member in members:
+                          path, scope = PurePosixPath(member.name), PurePosixPath(selection)
+                          allowed = path == scope or path.is_relative_to(scope) or scope.is_relative_to(path)
+                          if (not allowed or path.is_absolute() or '..' in path.parts
+                                  or ':' in member.name or '\\' in member.name
+                                  or not (member.isfile() or member.isdir())):
+                              raise ValueError('unsafe source member: ' + member.name)
+                      exports.append((archive, members))
+                  # Validate all selected trees before materializing any source.
+                  for archive, members in exports:
+                      archive.extractall(workspace, members=members, filter='data')
           for required in ('comacbench/campaign.py', 'tests/test_campaign.py'):
               if not (workspace/required).is_file():
                   raise ValueError('required source missing: ' + required)
