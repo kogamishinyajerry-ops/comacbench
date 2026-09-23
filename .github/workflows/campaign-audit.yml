@@ -4,7 +4,7 @@ name: Campaign archive audit
   pull_request:
     paths:
       - 'comacbench/**'
-      - 'tests/test_campaign.py'
+      - 'tests/test_campaign*.py'
       - '.github/workflows/campaign-audit.yml'
   workflow_dispatch:
 
@@ -23,20 +23,58 @@ jobs:
         python: ['3.11', '3.13']
     env:
       PYTHONUTF8: '1'
+      GIT_TERMINAL_PROMPT: '0'
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, pinned
-        with:
-          persist-credentials: false
-          lfs: false
-          # Avoid solver data, large mirrors and Windows-invalid research paths.
-          # This is the campaign source test, NOT a full repository acceptance.
-          sparse-checkout: |
-            comacbench
-            tests
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6, pinned
         with:
           python-version: ${{ matrix.python }}
-      - name: Test campaign guards (standard library only)
-        run: python -m unittest discover -s tests -p test_campaign.py -v
+      - name: Export pinned source trees without worktree
+        # Sparse checkout still validated colon-bearing research paths on Windows.
+        # Export ONLY these trees from a bare fetch; do not disable protectNTFS.
+        # This is scoped source CI, not wheel/full-repository acceptance.
+        shell: python
+        env:
+          SOURCE_URL: https://github.com/${{ github.repository }}.git
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          # BEGIN_SOURCE_EXPORT
+          import os, re, subprocess, tarfile, tempfile
+          from pathlib import Path, PurePosixPath
+          sha = os.environ['SOURCE_SHA']
+          if not re.fullmatch(r'[0-9a-f]{40}', sha):
+              raise ValueError('expected exact source commit')
+          workspace = Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          workspace.mkdir(parents=True, exist_ok=True)
+          selected = ('comacbench', 'tests', '.github/workflows')
+          with tempfile.TemporaryDirectory(dir=os.environ['RUNNER_TEMP']) as temp:
+              bare, bundle = Path(temp)/'source.git', Path(temp)/'source.tar'
+              def git(*args):
+                  return subprocess.check_output(['git', '-C', str(bare), *args], text=True).strip()
+              subprocess.run(['git', 'init', '--bare', str(bare)], check=True)
+              git('remote', 'add', 'origin', os.environ['SOURCE_URL'])
+              git('-c', 'protocol.version=2', 'fetch', '--no-tags', '--depth=1', '--filter=blob:none', 'origin', sha)
+              if git('rev-parse', 'FETCH_HEAD') != sha:
+                  raise ValueError('source identity mismatch')
+              git('archive', '--format=tar', f'--output={bundle}', sha, *selected)
+              with tarfile.open(bundle) as archive:
+                  members = archive.getmembers()
+                  if len(members) > 50000 or sum(m.size for m in members) > 128*1024*1024:
+                      raise ValueError('source archive exceeds scope')
+                  for member in members:
+                      path = PurePosixPath(member.name)
+                      allowed = any(path == PurePosixPath(s) or path.is_relative_to(s)
+                                    or PurePosixPath(s).is_relative_to(path) for s in selected)
+                      if (not allowed or path.is_absolute() or '..' in path.parts
+                              or ':' in member.name or '\\' in member.name
+                              or not (member.isfile() or member.isdir())):
+                          raise ValueError('unsafe source member: ' + member.name)
+                  archive.extractall(workspace, members=members, filter='data')
+          for required in ('comacbench/campaign.py', 'tests/test_campaign.py'):
+              if not (workspace/required).is_file():
+                  raise ValueError('required source missing: ' + required)
+          print('Campaign source snapshot:', sha)
+          # END_SOURCE_EXPORT
+      - name: Test campaign guards and paired comparisons (standard library only)
+        run: python -m unittest discover -s tests -p "test_campaign*.py" -v
       - name: Compile campaign sources
-        run: python -m py_compile comacbench/campaign.py comacbench/campaign_integrity.py
+        run: python -m compileall -q comacbench

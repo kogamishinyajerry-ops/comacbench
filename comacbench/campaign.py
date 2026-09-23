@@ -19,6 +19,7 @@ from typing import Any
 
 from .completion import classify_evidence_level, result_issues
 from .campaign_integrity import calibration_record, scan_archive, suite_contract
+from .campaign_comparison import recorded_diagnostics, paired_outcomes, render_comparison
 
 PLAN = 'comacbench.campaign.plan.v1'
 LOCK = 'comacbench.campaign.lock.v2'
@@ -240,7 +241,8 @@ def inspect_run(path: Path, *, scoring: bool) -> dict[str, Any]:
         evidence = classify_evidence_level({'details': details, 'artifacts': artifacts})
         checked.append({'suite': suite, 'id': tid, 'score': raw['score'],
                         'full_pass': raw['validity_gate'] == 1 and raw['score'] == 1,
-                        'evidence_level': evidence, 'result_sha256': raw_sha})
+                        'evidence_level': evidence, 'result_sha256': raw_sha,
+                        'validity_gate': raw['validity_gate'], **recorded_diagnostics(raw)})
     calibration = calibration_record(doc, path.parent, tasks,
                                      read_json=read_json, locate=contained_file, decode=decode)
     return {'contract': contract, 'tasks': tasks, 'results': checked,
@@ -414,6 +416,7 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
                                       if group['unresolved'] == 0 and not unexpected and not archive_issues else None)
                 groups.append(group)
     comparisons = []
+    cell_index = {(cell['subject'], cell['case'], cell['seed']): cell for cell in cells}
     index = {(g['subject'], g['family'], g['split']): g for g in groups}
     for pair in body['comparisons']:
         for group in groups:
@@ -423,7 +426,12 @@ def evaluate(lock: dict[str, Any], runs: Path) -> dict[str, Any]:
             ready = group['pass_rate'] is not None and base['pass_rate'] is not None
             comparisons.append({**pair, 'family': group['family'], 'split': group['split'],
                                 'paired_task_executions': group['expected'], 'comparable': ready,
-                                'delta_pass_rate': group['pass_rate'] - base['pass_rate'] if ready else None})
+                                'delta_pass_rate': group['pass_rate'] - base['pass_rate'] if ready else None,
+                                'paired_outcomes': paired_outcomes(
+                                    [case for case in body['cases']
+                                     if (case['family'], case['split']) == (group['family'], group['split'])],
+                                    body['seeds'], cell_index, baseline=pair['baseline'],
+                                    candidate=pair['candidate'], blocked=bool(unexpected or archive_issues))})
     return {'protocol': REPORT, 'id': body['id'], 'scope': 'public_regression',
             'lock_sha256': lock['sha256'], 'complete': not unexpected and not archive_issues and all(not c['issues'] for c in cells),
             'publishable': False, 'isolated_transfer_verified': False,
@@ -458,10 +466,7 @@ def render_html(report: dict[str, Any]) -> str:
                          + ('已核对校准正例与原始负例记录' if case['calibration_status'] == 'recorded_pass'
                             else '仅预检正例，未核对校准负例')
                          + f'。{escape(case["scope_note"])}</li>' for case in report.get('case_admission', []))
-    comparisons = ''.join('<li>' + escape(f'{p["family"]} / {SPLIT_NAMES[p["split"]]}: {p["candidate"]} − {p["baseline"]}: ')
-                          + ('证据不足，不作比较' if not p['comparable'] else
-                             escape(f'{p["delta_pass_rate"] * 100:+.1f} 个百分点')) + '</li>'
-                          for p in report['comparisons'])
+    comparisons = ''.join(render_comparison(pair, split_label=SPLIT_NAMES[pair['split']]) for pair in report['comparisons'])
     return f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>COMACBench · {escape(report['id'])}</title>
