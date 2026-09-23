@@ -22,7 +22,7 @@ req=urllib.request.Request(url,data=json.dumps(body).encode(),headers={
     'Content-Type':'application/json','Authorization':'Bearer '+os.environ['COMAC_MODEL_KEY']})
 with urllib.request.urlopen(req,timeout=840) as response:
     result=json.load(response)
-Path('provider-response.json').write_text(json.dumps(result,ensure_ascii=False))
+Path('provider-response.json').write_text(json.dumps(result,ensure_ascii=False),encoding='utf-8')
 choice=result['choices'][0]
 if choice.get('finish_reason')=='length':
     raise ValueError('model output truncated; keep this failed attempt and use a new protocol/version for a larger cap')
