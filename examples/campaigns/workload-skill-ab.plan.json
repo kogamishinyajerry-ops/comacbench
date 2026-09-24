@@ -1,0 +1,20 @@
+{
+  "protocol": "comacbench.campaign.plan.v1",
+  "id": "workload-skill-ab-v1",
+  "scope": "public_regression",
+  "seeds": [0, 1, 2],
+  "subjects": [
+    {"id": "baseline", "anchor": "baseline/run.json"},
+    {"id": "with-skill", "anchor": "with-skill/run.json"}
+  ],
+  "cases": [
+    {
+      "id": "workload",
+      "family": "engineering-batch-deliverables",
+      "split": "development",
+      "scope_note": "复用 aviation-workload-starter-v1 的四项公开合成任务。只测工况输入文件、清单和对账，不运行真实性能程序；不代表隐藏迁移或飞机设计能力。",
+      "anchor": "calibration/run.json"
+    }
+  ],
+  "comparisons": [{"baseline": "baseline", "candidate": "with-skill"}]
+}
