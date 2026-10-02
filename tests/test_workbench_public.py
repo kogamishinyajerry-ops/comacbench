@@ -10,7 +10,7 @@ import test_workbench_native as native_fixtures
 from comacbench import workbench as wb
 from comacbench import workbench_ccx as ccx
 from comacbench.workbench_public import dispatch, public_observation
-from comacbench.workbench_admission import audit_trial, unknown_admission
+from comacbench.workbench_admission import audit_trial, unknown_admission, CONTRACT_SHA256, _digest
 from comacbench.workbench_report import export_report, render
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,17 +85,28 @@ class PublicBoundaryTests(unittest.TestCase):
         audit = self.root / "audit"; audit.mkdir()
         model = {"provider": "zai-coding-cn", "model": "glm-4.7"}
         sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
-        control = {"protocol": "comacbench.public-boundary.v1", "session_manifest_sha256": manifest["manifest_sha256"],
+        control = {"protocol": "comacbench.public-boundary.v2", "session_manifest_sha256": manifest["manifest_sha256"],
             "engine_sha256": manifest["engine_sha256"], "plugin_sha256": sha(ROOT / "scripts/dsh_public_boundary.mjs"),
             "gateway_sha256": sha(ROOT / "comacbench/workbench_public.py"),
             "budget": {"actions": 32, "solver_calls": 6, "solve_timeout_s": 120, "tool_calls": 96, "model_assemblies": 64},
             "model": model, "fresh_headless_session": True, "creation_source": "startup", "runtime_context_suppressed": True,
             "mode": "native", "task_scope": "same_public_task_development_repeat", "prior_public_task_exposure": True, "public_observe_success": True,
             "probe": {"all_denied": True, "schemas": ["workbench"], "probes": [{"is_error": True}] * 9}, "agent_id": "test", "complete_public_system": "fixture"}
+        contract = json.loads((ROOT / 'comacbench/public_input_v2.json').read_text())
+        control.update(contract_version=contract['version'], contract_sha256=CONTRACT_SHA256,
+                       complete_public_system=contract['sections'][0]['text'], public_user_entry=contract['user_entry'], runtime=contract['runtime'])
+        assembled = {k:contract[k] for k in ('sections','contexts','tools')}
+        messages = [{'role':'system', 'content':[{'type':'text','text':contract['sections'][0]['text']}]},
+                    {'role':'user','content':[{'type':'text','text':contract['user_entry']}]}]
+        actual = {'messages':messages,'tools':contract['tools']}
         request = {"op": "observe"}; args = {"request": request}
         output = json.dumps(dispatch(self.session, request))
-        rows = [{"type": "ready"}, {"type": "assembly", "schemas": ["workbench"], "contexts": [], "model": model},
-            {"type": "prompt_probe", "sections": [{"text": "fixture"}], "contexts": [], "schemas": ["workbench"]},
+        rows = [{"type": "ready"}, {"type": "assembly", "schemas": ["workbench"], **assembled, "model": model,
+                "number":1, "contract_version":contract['version'], "contract_sha256":CONTRACT_SHA256,
+                "input_sha256":_digest(assembled), "public_system_sha256":hashlib.sha256(contract['sections'][0]['text'].encode()).hexdigest()},
+            {"type":"model_input", "number":1, "assembly_number":1, "model":model, **actual,
+             "contract_version":contract['version'], "contract_sha256":CONTRACT_SHA256, "input_sha256":_digest(actual)},
+            {"type": "prompt_probe", **assembled, "schemas": ["workbench"]},
             {"type": "broker", "call_id": "call-1", "request": request, "exit_code": 0, "stdout": output},
             {"type": "tool_result", "call_id": "call-1", "name": "workbench", "arguments": args,
              "is_error": False, "content": [{"type": "text", "text": output}]}]

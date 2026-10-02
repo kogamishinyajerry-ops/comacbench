@@ -1,33 +1,19 @@
-# 原生 CalculiX 工作包：受限 Agent 入口与成绩准入
+# 原生固定梁工作台：修复准入逐项审计与逐轮公开输入边界
 
-固定 C3D20 梁的两工况基线、载荷选择性重算和限值变化重验已完成本机校准。此次追加解决独立审阅 5392352453 指出的工具越界与报告准入缺口：受试 Agent 只能通过绑定一个 session 的工作台工具操作，报告首屏和 JSON 明确给出合规、参考暴露、成绩准入及原因；未知不默认合规。
+修复 review 5393976144 复现的错误放行：重复 broker 回执不再能顶替缺失调用；每条 Agent 可见响应都按当前公开状态验证；重复 JSON key、截断和非有限值不能获得准入。正常任务动作失败仍保留为任务失败，网关前拒绝和 broker 失败另行记录。
 
-PR 保持 Draft，叠在 `review/change-workbench-product-scope-20261002`；不自动合并。
+冻结公开输入合同 v2，并检查完整 sections、contexts、工具 schema、公开用户入口及最终 DSH 派发消息。每轮记录实际内容及摘要；旧 v1 记录缺少逐轮正文时为 unknown，不补写常量或改旧身份追认。报告首屏区分任务完成与成绩准入，冲突或未知不能显示通过。
 
-## 变更
+PR 保持 Draft，叠在 PR #7 的 `review/change-workbench-product-scope-20261002` / `59f3dbe659b750964f5a81c99eb619352657c2ae`，不自动合并。四个物理引擎文件与场景、3% / 1e-5 / 1e-6 阈值未变；固定梁既有本机校准结论保留。
 
-- 分开公开操作合同与维护者材料。固定宿主工具采用 typed object schema、当前信息投影、精确动作字段和文件白名单；不提供内部 session、未来阶段或参考答案。
-- DSH 串行创建钩子安装工具 allowlist，全局执行 guard 拒绝文件、命令、脚本、网页与委派入口；禁用自动读取上下文。实际启动时核对当前模型、完整 prompt、工具 schema、禁止访问和可用 observe。
-- 从主机控制记录、模型工具请求/结果与环境行动推导 `protocol_conformance`、`reference_exposure`、`score_admissible`。Agent 自述不能建立合规。旧证据不修改，以独立审阅附录补充结论。
-- 报告增加原始产物直接链接，区分本机固定梁证据、冻结场景旧说明、其他平台部署与工程批准。
-- 修复首次受限试验暴露的弱类型参数问题，新增字符串拒绝与真实入口预检；失败记录完整保留。
+验证：
 
-边界为可信 DSH 宿主中的工具能力限制，不是 OS 隔离、对抗管理员防篡改或模型服务端身份认证。物理引擎四文件与场景相对 `ee6872ea` 完全不变，3% / 1e-5 / 1e-6 阈值未改。
+- 原 reviewer 7 项：修复前 2 pass / 5 fail；修复后 7 pass。原 JS 服务替身 `--require-safe` 失败现场保留。
+- 原有 124 项专项加 22 项回归：146 tests，145 pass、1 native opt-in skip；另 4 项源码导出 pass。
+- JS 服务替身五项控制、安装 DSH 服务的 11 类组装/派发变更控制、既有权限/预算专项通过。真实服务测试使用无网络 adapter 和任务 body 替身，不是模型成绩。
+- 实际 DSH headless 无模型预检：发现入口换行不符后修复；最终在派发验证处 `PREFLIGHT_COMPLETE_NO_MODEL` 停止。失败与成功停止记录都保留，0 模型调用、0 行动、0 新求解。
+- 两份 closeout 轨迹按原引擎与原入口复读；旧成功轨迹保持 complete=true / needs_review、17 行动、3 个归档 job。新增附录准入为 unknown / unknown / false，旧报告原样保留。没有重跑历史 27 个 job。
 
-## 实际验证
+[详细修复与验收附录](docs/admission-audit-v2-2026-10-03.md) 包含已知限制和固定预算待授权方案。本轮没有再次运行付费模型。要取得 v2 的真实受试轨迹仍需另行授权一次同配置运行；不宣称独立新任务、模型比较、未见题或跨软件泛化。
 
-- 最终受试源码 `8a46c97b812ff09213728747c61af59aa3d743be`；macOS 26.5.2、Python 3.12.13、既有 CalculiX 2.23。后续提交仅更新 CI 源码导出、导出专项和交付文档；受试运行时代码一致。
-- 修复首次 CI 导出遗漏 wrapper 的问题：补入 scripts 子树、必需文件检查与导出断言；失败日志保留。
-- 124 项工作台专项：123 passed、1 native opt-in skipped。DSH 权限专项通过，禁止工具实现执行次数为零，后加 allow policy 无法覆盖 guard。
-- 10 份历史会话按原引擎复读通过，与原报告完全一致；27 个归档 job，0 新求解、0 版本探测。reference 15/3 complete=true/needs_review；stale 与 false-ready 继续被拒绝。
-- 唯一初次复测失败：7 工具调用、0 行动、0 求解；JSON 字符串被网关拒绝，不能作模型能力成绩。
-- 经用户明确追加一次授权，修复后同一既有 DSH/glm-4.7 配置：19 工具调用、17 行动（2 次过早提交被拒）、3 真实求解，complete=true、claim=needs_review。原始 INP/DAT/日志独立解析通过。基线 2 次、载荷变更 1 次、限值变更 0 次求解。
-- 新记录主机审计通过：conformant / not_observed_in_recorded_run / score_admissible=true，仅准入同题公开开发记录；不是未见题、隐藏测试、无历史暴露或泛化成绩。旧 Agent 记录仍为 nonconformant / observed / false。
-- 6 份主要报告、181 个本地文件链接的静态完整性通过。浏览器真实 file:// 操作仍 BLOCKED（Chrome 154.0.8037.95 工具策略拒绝），没有绕过或冒充人工验收。
-
-## 证据与限制
-
-完整记录见 [本轮收口](docs/native-closeout-2026-10-02.md)、[边界与审计](docs/restricted-public-trial.md)。
-本机证据包 `COMACBench-PR8-Closeout-Evidence-2026-10-02.zip` 包含源码与差异、权限拦截、全部失败、两次工具轨迹、原始求解文件、原引擎复读、报告与浏览器 BLOCKED 记录；原始大体积证据未上传 GitHub。
-
-Mac 人工 file:// 点击仍待确认；Windows 原生/浏览器、完整仓库测试、wheel、离线部署和工程批准均未验证。只支持可信本地、固定梁、线性静力的公开开发校准，不提供真实型号或内部数据，不改变既有分数，不把参考程序当模型。
+证据 ZIP 包含新源码、差异、全部失败/控制/专项原始日志、新准入附录，以及上轮 `COMACBench-PR8-Closeout-Evidence-2026-10-02.zip` 原件。可信本地宿主边界不等于 OS 隔离或对抗管理员。Chrome file:// 打开被工具安全策略拒绝，实际 JSON/INP/DAT/日志链接点击仍 BLOCKED；Windows、完整仓库、wheel、内网部署及工程批准未验证。

@@ -1,0 +1,121 @@
+{
+  "version": "comacbench.public-input.v2",
+  "sections": [
+    {
+      "name": "comacbench-public-system",
+      "text": "You are operating an already public fixed calibration work package. Use only the workbench tool. Begin with {\"request\":{\"op\":\"observe\"}} to obtain the complete public operation contract and current inputs. Determine conclusions from current observations and errors. Complete the work package within its fixed budgets. This is one public development repeat, not an unseen test or a generalization score. Report failures honestly.",
+      "interpolate": false
+    }
+  ],
+  "contexts": [],
+  "tools": [
+    {
+      "name": "workbench",
+      "description": "Operate one host-bound public calibration session. observe returns the self-contained contract and current inputs. No filesystem paths, shell, code, arbitrary deck, or other sessions are accepted.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "type": "object",
+            "description": "An object, not a JSON-encoded string. Start with {\"op\":\"observe\"}.",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "type": "string",
+                "enum": [
+                  "observe",
+                  "solve",
+                  "check",
+                  "put",
+                  "advance",
+                  "submit",
+                  "read_native"
+                ]
+              },
+              "target": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "claim": {
+                "type": "string",
+                "enum": [
+                  "requirements_met",
+                  "needs_review"
+                ]
+              },
+              "basis": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {}
+              },
+              "payload": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "requirement_revision": {
+                    "type": "string"
+                  },
+                  "claim": {
+                    "type": "string",
+                    "enum": [
+                      "requirements_met",
+                      "needs_review"
+                    ]
+                  },
+                  "cases": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "point": {
+                          "type": "string"
+                        },
+                        "uy_mm": {
+                          "type": "number"
+                        },
+                        "rfy_n": {
+                          "type": "number"
+                        },
+                        "meets_requirement": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "point",
+                        "uy_mm",
+                        "rfy_n",
+                        "meets_requirement"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "requirement_revision",
+                  "claim",
+                  "cases"
+                ]
+              }
+            },
+            "required": [
+              "op"
+            ]
+          }
+        },
+        "required": [
+          "request"
+        ]
+      }
+    }
+  ],
+  "user_entry": "完成工具绑定的公开固定梁工作包。首先调用 workbench 的 observe，按其公开合同、当前输入和错误反馈操作。根据实际结果形成并检查 review，完成后提交。只使用该工具；失败保留并如实说明。这是同题已公开的一次受限开发复测，不是未见题、隐藏测试或泛化成绩。",
+  "runtime": {
+    "@deepseek-ai/cordis": "6a9394c0877ff45218818c6e815edd038f8057e1a1deb390a8d43ec81c57691e",
+    "@deepseek-ai/dsh-system-prompt": "ff422afac6ba85f89afa985d921aed0b603feb354a05a549c48eae04cf0d2f57",
+    "@deepseek-ai/dsh-llm": "9132c8a8053ee82b9fb1ded4f98c85cf557f288a15a85c552c6b1fb319ead120",
+    "@deepseek-ai/dsh-tools": "40f47709337c3c205d4e09e647f8588f4977e66f6d52f019b3cc7ef81159d84f",
+    "@deepseek-ai/dsh-agent-loop": "00c4814d63f3d1e2754eb09144832d19b30499d6ea444730473f740b587948c2"
+  }
+}

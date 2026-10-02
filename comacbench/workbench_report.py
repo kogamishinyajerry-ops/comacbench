@@ -29,6 +29,14 @@ def render(data: dict[str, Any]) -> str:
     status = "工作包检查完成" if done else "尚未完成工作包"
     admission = {**unknown_admission(observation["subject"]["kind"]),
                  **{key: data[key] for key in ("protocol_conformance", "reference_exposure", "score_admissible", "deviation_reasons") if key in data}}
+    established = (observation["subject"]["kind"] == "user_agent"
+                   and admission["protocol_conformance"] == "conformant"
+                   and admission["reference_exposure"] == "not_observed_in_recorded_run"
+                   and admission["score_admissible"] is True
+                   and not admission["deviation_reasons"])
+    admission["score_admissible"] = established
+    if not established and not admission["deviation_reasons"]:
+        admission["deviation_reasons"] = ["准入证据缺失或状态冲突；不能确认合规或无参考暴露。"]
     admission_panel = ('<section class="card" id="score-admission"><h2 style="margin-top:0">成绩准入 · 公开开发记录</h2>'
         f'<p>protocol_conformance: <strong>{escape(admission["protocol_conformance"])}</strong> · '
         f'reference_exposure: <strong>{escape(admission["reference_exposure"])}</strong> · '

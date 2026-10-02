@@ -9,13 +9,94 @@ import { spawn } from 'node:child_process';
 const requireDSH = createRequire(join(process.env.COMACBENCH_DSH_ROOT, 'package.json'));
 const { defineTool } = await import(pathToFileURL(requireDSH.resolve('@deepseek-ai/dsh-tools')));
 export const name = 'comacbench-public-boundary';
-export const inject = ['tools', 'systemPrompt', 'agentDefaultModel'];
+export const inject = ['tools', 'systemPrompt', 'agentDefaultModel', 'llm'];
 export const provide = ['comacbenchBoundary'];
 const sha = value => createHash('sha256').update(value).digest('hex');
-export const PUBLIC_SYSTEM = 'You are operating an already public fixed calibration work package. '
-  + 'Use only the workbench tool. Begin with {"request":{"op":"observe"}} to obtain the complete public operation contract and current inputs. '
-  + 'Determine conclusions from current observations and errors. Complete the work package within its fixed budgets. '
-  + 'This is one public development repeat, not an unseen test or a generalization score. Report failures honestly.';
+export const CONTRACT_SHA256 = 'd6b1d694ed9c92093b9b022b1dcc208b5bf046b2608cdbaee0319052008b9271';
+const contractBytes = readFileSync(new URL('../comacbench/public_input_v2.json', import.meta.url));
+if (sha(contractBytes) !== CONTRACT_SHA256) throw new Error('public_contract_version_mismatch');
+export const CONTRACT = JSON.parse(contractBytes);
+export const PUBLIC_SYSTEM = CONTRACT.sections[0].text;
+export const canonical = value => JSON.stringify(value, function (_key, v) {
+  return v && !Array.isArray(v) && typeof v === 'object'
+    ? Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]])) : v;
+});
+const same = (a, b) => canonical(a) === canonical(b);
+const freeze = value => {
+  if (value && typeof value === 'object') { Object.values(value).forEach(freeze); Object.freeze(value); }
+  return value;
+};
+freeze(CONTRACT);
+
+// These instance wrappers cover the post-waterfall assembly and dispatch paths of
+// the pinned installed DSH. They are local host controls, not hostile-host isolation.
+export function installPromptBoundary(ctx, record, model, hostResults, noModel = false) {
+  for (const [pkg, digest] of Object.entries(CONTRACT.runtime)) {
+    if (sha(readFileSync(requireDSH.resolve(pkg))) !== digest) throw new Error('unsupported_dsh_runtime:' + pkg);
+  }
+  const fail = (code, actual) => {
+    record({ type: 'blocked', code, actual });
+    throw new Error(code);
+  };
+  const validate = a => same(a.sections, CONTRACT.sections) && same(a.contexts, []) && same(a.tools, CONTRACT.tools);
+  // DSH restores the complete section AFTER this cooperative waterfall. Check
+  // transforms too, so a later mutation is rejected, even if DSH would discard it.
+  ctx.on('system-prompt/assemble', async (input, _context, next) => {
+    const before = canonical(input.sections);
+    const publicSection = input.sections.filter(s => s.name === CONTRACT.sections[0].name);
+    if (!same(publicSection, CONTRACT.sections)) fail('assembly_section_source_changed', input);
+    const value = await next();
+    if (canonical(value.sections) !== before || !same(value.contexts, []) || !same(value.tools, CONTRACT.tools))
+      fail('assembly_boundary_failed', value);
+    return value;
+  }, { prepend: true });
+  let assemblies = 0, dispatches = 0, latest;
+  const assemble = ctx.systemPrompt.assemble;
+  ctx.systemPrompt.assemble = async function (...args) {
+    const value = await assemble.apply(this, args);
+    if (!validate(value) || !same(ctx.agentDefaultModel.currentSelection(), model) || ++assemblies > 64)
+      fail('final_assembly_boundary_failed', value);
+    latest = structuredClone({ sections: value.sections, contexts: value.contexts, tools: value.tools });
+    record({ type: 'assembly', contract_version: CONTRACT.version, contract_sha256: CONTRACT_SHA256,
+      ...latest, schemas: value.tools.map(s => s.name), model, number: assemblies,
+      public_system_sha256: sha(value.sections.map(s => s.text).join('\n\n')),
+      input_sha256: sha(canonical(latest)) });
+    return freeze(value);
+  };
+  // Both preparedCall.stream and ordinary stream pass through adapterStream,
+  // after every llm/stream middleware. No adapter/provider is replaced.
+  // A preflight traverses the real Agent loop and LLM waterfall without even
+  // asking the provider for model capabilities. This stub is preflight-only.
+  if (noModel) ctx.llm.prepareCall = async config => ({ config,
+    stream: options => ctx.llm.stream(options) });
+  const dispatch = ctx.llm.adapterStream;
+  if (typeof dispatch !== 'function') throw new Error('unsupported_dsh_dispatch');
+  ctx.llm.adapterStream = function (options, prepared) {
+    const actual = structuredClone({ messages: options.messages, tools: options.tools });
+    if (!latest || ++dispatches > 64 || !same(actual.tools, CONTRACT.tools)
+        || options.provider !== model.provider || options.model !== model.model) fail('dispatch_boundary_failed', actual);
+    const systems = actual.messages.filter(m => m.role === 'system');
+    const users = actual.messages.filter(m => m.role === 'user');
+    if (systems.length !== 1 || !same(systems[0].content, [{type:'text', text: PUBLIC_SYSTEM}])
+        || users.length !== 1 || !same(users[0].content, [{type:'text', text: CONTRACT.user_entry}]))
+      fail('public_entry_changed', actual);
+    for (const m of actual.messages) {
+      if (!['system', 'user', 'assistant', 'tool'].includes(m.role)) fail('unexpected_message_source', actual);
+      if (m.role === 'tool') {
+        const host = hostResults.get(m.toolCallId);
+        if (!host || !same(m.content, host.content) || m.isError !== host.is_error) fail('tool_message_changed', actual);
+      }
+      if (m.role === 'assistant' && (m.source?.kind !== 'model' || m.source.provider !== model.provider || m.source.model !== model.model))
+        fail('assistant_source_changed', actual);
+    }
+    record({ type: 'model_input', contract_version: CONTRACT.version, contract_sha256: CONTRACT_SHA256,
+      assembly_number: assemblies, number: dispatches, model, ...actual, input_sha256: sha(canonical(actual)) });
+    if (noModel) throw new Error('PREFLIGHT_COMPLETE_NO_MODEL');
+    // Seal the checked envelope, including histories, before DSH's adapter projection.
+    freeze(options.messages); freeze(options.tools);
+    return dispatch.call(this, Object.freeze({ ...options }), prepared);
+  };
+}
 
 export function installBoundary(ctx, invoke, record, maxToolCalls = 96) {
   if (ctx.tools.get('workbench')) throw new Error('workbench_tool_name_collision');
@@ -86,7 +167,14 @@ export async function apply(ctx, config) {
   const auditDir = resolve(config.auditDir);
   mkdirSync(auditDir, { recursive: false });
   let seq = 0;
-  const record = row => appendFileSync(join(auditDir, 'boundary.jsonl'), JSON.stringify({ seq: ++seq, ...row }) + '\n');
+  const hostResults = new Map();
+  const record = row => {
+    if (row.type === 'tool_result') {
+      if (hostResults.has(row.call_id)) throw new Error('duplicate_host_call_id');
+      hostResults.set(row.call_id, structuredClone(row));
+    }
+    appendFileSync(join(auditDir, 'boundary.jsonl'), JSON.stringify({ seq: ++seq, ...row }) + '\n');
+  };
   const model = ctx.agentDefaultModel.currentSelection();
   if (model.provider !== 'zai-coding-cn' || model.model !== 'glm-4.7') {
     record({ type: 'blocked', code: 'existing_model_changed', model });
@@ -98,13 +186,14 @@ export async function apply(ctx, config) {
     let stdout = '', stderr = '';
     child.stdout.on('data', data => { stdout += data; });
     child.stderr.on('data', data => { stderr += data; });
-    child.on('error', reject);
+    let processError = null;
+    child.on('error', error => { processError = error.code ?? 'spawn_error'; });
     child.on('close', code => {
       // Host diagnostics remain in the protected audit; no path-bearing traceback
       // is forwarded to the model. Failed and interrupted calls remain recorded.
-      record({ type: 'broker', call_id: callId, request, exit_code: code, stdout, stderr });
-      if (code !== 0) return done({ result: { ok: false, code: 'broker_process_failed' } });
-      try { done(JSON.parse(stdout)); } catch { reject(new Error('broker_invalid_json')); }
+      record({ type: 'broker', call_id: callId, request, exit_code: code, stdout, stderr, process_error: processError });
+      if (code !== 0 || processError) return done({ result: { ok: false, code: 'broker_process_failed' } });
+      try { done(JSON.parse(stdout)); } catch { done({ result: { ok: false, code: 'broker_invalid_json' } }); }
     });
     child.stdin.end(JSON.stringify(request));
   });
@@ -112,24 +201,13 @@ export async function apply(ctx, config) {
   ctx.systemPrompt.suppressRuntimeContext();
   ctx.systemPrompt.section({ name: 'comacbench-public-system', order: 0, text: PUBLIC_SYSTEM,
     complete: true, interpolate: false });
-  let assemblies = 0;
-  ctx.on('system-prompt/assemble', async (_assembly, _context, next) => {
-    const assembly = await next();
-    const schemas = assembly.tools.map(s => s.name);
-    const currentModel = ctx.agentDefaultModel.currentSelection();
-    if (++assemblies > 64 || JSON.stringify(schemas) !== '["workbench"]'
-        || assembly.contexts.some(c => c.text) || JSON.stringify(currentModel) !== JSON.stringify(model)) {
-      record({ type: 'blocked', code: 'assembly_boundary_failed', schemas, assemblies });
-      throw new Error('assembly_boundary_failed');
-    }
-    record({ type: 'assembly', schemas, contexts: assembly.contexts, model,
-      public_system_sha256: sha(PUBLIC_SYSTEM), number: assemblies });
-    return assembly;
-  });
+  installPromptBoundary(ctx, record, model, hostResults, config.noModel === true);
   const manifest = JSON.parse(readFileSync(join(config.session, 'session.json')));
   if (manifest.scenario.max_actions !== 32 || manifest.scenario.max_solver_calls !== 6
       || manifest.scenario.solve_timeout_s !== 120) throw new Error('budget_changed');
-  const proof = { protocol: 'comacbench.public-boundary.v1', model,
+  const proof = { protocol: 'comacbench.public-boundary.v2', model,
+    contract_version: CONTRACT.version, contract_sha256: CONTRACT_SHA256, runtime: CONTRACT.runtime,
+    public_user_entry: CONTRACT.user_entry,
     session_manifest_sha256: manifest.manifest_sha256,
     engine_sha256: manifest.engine_sha256,
     plugin_sha256: sha(readFileSync(fileURLToPath(import.meta.url))),
@@ -157,7 +235,7 @@ export async function apply(ctx, config) {
     if (assembled.sections.length !== 1 || assembled.sections[0].text !== PUBLIC_SYSTEM
         || assembled.contexts.some(c => c.text)) throw new Error('public_prompt_probe_failed');
     record({ type: 'prompt_probe', sections: assembled.sections, contexts: assembled.contexts,
-      schemas: assembled.tools.map(s => s.name) });
+      schemas: assembled.tools.map(s => s.name), tools: assembled.tools });
     if (config.probeOnly) throw new Error('PREFLIGHT_COMPLETE_NO_MODEL');
   });
   // The headless runner must explicitly inject this service. It cannot start

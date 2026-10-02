@@ -22,9 +22,7 @@ DISABLED = ["agent-instructions", "skill-filesystem", "tool-skill", "session-tit
             "tool-bash", "tool-pwsh", "tool-jobs", "tool-fs", "tool-fs-search", "tool-web",
             "tool-subagent", "tool-subagent-fork", "tool-subagent-control", "tool-list-agents",
             "tool-workflow", "tool-todo", "tool-goal", "tool-ralph", "tool-plugin-manager"]
-PROMPT = ("完成工具绑定的公开固定梁工作包。首先调用 workbench 的 observe，按其公开合同、当前输入和错误反馈操作。"
-          "根据实际结果形成并检查 review，完成后提交。只使用该工具；失败保留并如实说明。"
-          "这是同题已公开的一次受限开发复测，不是未见题、隐藏测试或泛化成绩。")
+PROMPT = json.loads((ROOT / 'comacbench/public_input_v2.json').read_text())['user_entry']
 
 
 def main():
@@ -54,16 +52,16 @@ def main():
     patch += '- id: tools\n  config:\n    mode: native\n'
     patch += '- id: headless-runner\n  inject: [headlessStartup, comacbenchBoundary]\n'
     plugin_config = {"python": sys.executable, "source": str(ROOT), "session": str(session),
-                     "auditDir": str(audit), "probeOnly": args.preflight}
+                     "auditDir": str(audit), "noModel": args.preflight}
     patch += '- insert:\n  - id: comacbench-public-boundary\n    name: ' + json.dumps(str(ROOT / 'scripts/dsh_public_boundary.mjs')) + '\n'
     patch += '    config: ' + json.dumps(plugin_config) + '\n'
     overlay = out / "boundary-overlay.yml"; overlay.write_text(patch)
-    (out / "prompt.txt").write_text(PROMPT + '\n')
+    (out / "prompt.txt").write_text(PROMPT)
     metadata = {"started_at": started, "source_commit": revision, "initial_status": status,
                 "preflight_only": args.preflight, "attempt_count": 1,
                 "model_or_tool_overrides": "boundary_only", "model_selection": "existing profile, asserted at runtime",
                 "no_config_or_credentials_read": True, "budget": {"actions": 32, "solves": 6, "per_solve_s": 120},
-                "prompt_sha256": hashlib.sha256((PROMPT + '\n').encode()).hexdigest()}
+                "prompt_sha256": hashlib.sha256(PROMPT.encode()).hexdigest()}
     (out / "launch.json").write_text(json.dumps(metadata, indent=2) + '\n')
     env = os.environ.copy()
     env["COMACBENCH_DSH_ROOT"] = str(args.dsh_root.resolve())
@@ -72,7 +70,7 @@ def main():
     with (out / "dsh-events.jsonl").open('xb') as stdout, (out / "dsh-stderr.log").open('xb') as stderr:
         process = subprocess.Popen(command, cwd=public, env=env, stdin=subprocess.PIPE, stdout=stdout, stderr=stderr, start_new_session=True)
         try:
-            process.communicate((PROMPT + '\n').encode(), timeout=1800)
+            process.communicate(PROMPT.encode(), timeout=1800)
             exit_code = process.returncode
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGTERM)
