@@ -1,5 +1,7 @@
 # 原生校准桥接增量：开发环境实测记录
 
+> 维护者材料：含参考流程或验收期望，不提供给受试 Agent。受试入口见 [公开操作合同](public-workbench-contract.md)；权限边界见 [受限试验说明](restricted-public-trial.md)。
+
 2026-10-02；Linux / Python 3.13.5。
 
 ## 源码来源

@@ -11,6 +11,7 @@ from typing import Any
 from .workbench import WorkbenchError, canonical, digest, snapshot
 from . import workbench_structures as structures
 from . import workbench_ccx as ccx
+from .workbench_admission import audit_trial, unknown_admission
 
 
 LABELS = {"verified": "已验证", "stale": "已失效", "missing": "未提交",
@@ -26,6 +27,14 @@ def render(data: dict[str, Any]) -> str:
     native = structures.is_native(scenario)
     done = observation["complete"]
     status = "工作包检查完成" if done else "尚未完成工作包"
+    admission = {**unknown_admission(observation["subject"]["kind"]),
+                 **{key: data[key] for key in ("protocol_conformance", "reference_exposure", "score_admissible", "deviation_reasons") if key in data}}
+    admission_panel = ('<section class="card" id="score-admission"><h2 style="margin-top:0">成绩准入 · 公开开发记录</h2>'
+        f'<p>protocol_conformance: <strong>{escape(admission["protocol_conformance"])}</strong> · '
+        f'reference_exposure: <strong>{escape(admission["reference_exposure"])}</strong> · '
+        f'score_admissible: <strong>{str(admission["score_admissible"]).lower()}</strong></p>'
+        f'<p>{escape("；".join(admission["deviation_reasons"]) or "主机控制与工具记录核对通过；准入仅限同题公开开发复测。")}</p>'
+        '<p>同题已公开；不代表未见题、隐藏测试、泛化能力或工程批准。未知状态不计为合规；不修改历史分数。</p></section>')
     handoff = "当前报告尚未通过有效版本检查，不能据旧报告作出交接结论。"
     if observation["statuses"].get("review") == "verified":
         reviewed = observation["artifacts"]["review"]["payload"]
@@ -39,15 +48,20 @@ def render(data: dict[str, Any]) -> str:
         else:
             handoff = "输入工作包可交给执行环节；尚未执行任何工程计算。"
     scope = ("原生校准桥接：复读 CalculiX 输入、日志与位移/反力数据；本报告不重新求解。"
-             "仅限固定线性静力梁，未验证应力、疲劳、连接或完整支架设计。数值容差仍待目标机与专家核验。"
+             "仅限固定线性静力梁；本机执行与校准状态以归档检查项为准。其他平台部署及应力、疲劳、连接、完整支架设计未验证；不构成工程批准。"
              if native else "本报告只检查输入工作包与变更证据。未运行工程求解器，不代表工程性能合格或设计放行。")
     native_summary = (f"<p>本工具受理求解尝试：{observation['counts'].get('solver_calls', 0)} / "
                       f"{scenario['max_solver_calls']}；原生进程启动：{observation['counts'].get('native_processes_started', 0)}；"
                       f"累计进程墙钟：{observation['counts'].get('native_wall_s', 0):.3f} 秒。</p>"
                       if native else "")
     artifact_rows = "".join(
-        f'<tr><td>{escape(node)}</td><td>{escape(LABELS[value])}</td></tr>'
+        f'<tr><td>{escape(node)}</td><td>{escape(LABELS[value])}</td><td>'
+        + (f'<a href="artifacts/{escape(node)}.json">产物 JSON</a>' if node in observation["artifacts"] else '尚无产物') + '</td></tr>'
         for node, value in observation["statuses"].items())
+    native_links = ''.join(f'<li>{escape(job)} · ' + ' · '.join(
+        f'<a href="native/{escape(job)}/{escape(name)}">{escape(name)}</a>'
+        for name in [*receipt["files"], "receipt.json"]) + '</li>'
+        for job, receipt in data.get("native_receipts", {}).items())
     changes = []
     failures = []
     history = []
@@ -76,13 +90,15 @@ p,li,summary{{overflow-wrap:anywhere}}summary{{cursor:pointer;font-weight:650}}a
 </style></head><body><main>
 <p class="label">COMACBench / 工程变更工作包</p>
 <h1>{escape(scenario["title"])}</h1><p>{escape(KINDS[observation["subject"]["kind"]])}</p>
+{admission_panel}
 <section class="card"><h2 style="margin-top:0">{status}</h2>
-<p>{escape(scenario["description"])}</p><p><strong>交接结论：</strong>{escape(handoff)}</p><p><strong>{escape(scope)}</strong></p>{native_summary}</section>
+<details><summary>冻结场景原始说明（保留原文，不代表当前验收状态）</summary><p>{escape(scenario["description"])}</p></details><p><strong>交接结论：</strong>{escape(handoff)}</p><p><strong>{escape(scope)}</strong></p>{native_summary}</section>
 <div class="metrics"><div class="card"><div class="number">{observation["actions_used"]} / {scenario["max_actions"]}</div>已消耗 / 总行动预算</div>
 <div class="card"><div class="number">{sum(v == "verified" for v in observation["statuses"].values())} / {len(observation["statuses"])}</div>当前已验证 / 必需交付物</div>
 <div class="card"><div class="number">{observation["counts"].get("rejected", 0)}</div>被拒绝的行动（仍计入预算）</div></div>
 <h2>变更影响：重验什么，保留什么</h2>{''.join(changes) or '<p>尚未推进到变更阶段。</p>'}
-<h2>当前交付状态</h2><table><thead><tr><th>交付物</th><th>状态</th></tr></thead><tbody>{artifact_rows}</tbody></table>
+<h2>当前交付状态</h2><table><thead><tr><th>交付物</th><th>状态</th><th>原始产物</th></tr></thead><tbody>{artifact_rows}</tbody></table>
+{'<details class="card"><summary>原生求解原始文件</summary><ul>' + native_links + '</ul></details>' if native_links else ''}
 <h2>失败与恢复记录</h2>{'<ul>' + ''.join(failures) + '</ul>' if failures else '<p>没有已记录的拒绝行动；这不证明会话外没有失败或人工介入。</p>'}
 <details class="card"><summary>展开全部行动（成功与失败均保留）</summary><table><thead><tr><th>序号</th><th>行动</th><th>反馈</th></tr></thead><tbody>{''.join(history)}</tbody></table></details>
 <h2>复查范围</h2><p class="muted">此报告从冻结场景和原始行动重新执行状态推进与内容检查。摘要链用于可信本地归档核对，不是签名、可信执行或对抗管理员的防篡改证明。身份为声明信息；预算仅统计本工具受理的行动，不统计模型 token、人工时间或会话外工具调用。</p>
@@ -90,12 +106,14 @@ p,li,summary{{overflow-wrap:anywhere}}summary{{cursor:pointer;font-weight:650}}a
 <p><a href="report.json">完整机器可读记录</a> · <a href="artifacts/manifest.json">交付物与状态清单</a></p></main></body></html>'''
 
 
-def export_report(session: Path, out: Path) -> dict[str, Any]:
+def export_report(session: Path, out: Path, *, admission_evidence: Path | None = None) -> dict[str, Any]:
     source = session.resolve()
     destination = out.resolve()
     if destination == source or source in destination.parents or destination in source.parents:
         raise WorkbenchError("report_must_be_outside_session")
     data = snapshot(session)
+    data.update(audit_trial(data, admission_evidence) if admission_evidence is not None
+                else unknown_admission(data["manifest"]["subject"]["kind"]))
     out.mkdir(parents=True, exist_ok=False)
     artifact_dir = out / "artifacts"
     artifact_dir.mkdir()

@@ -1,5 +1,7 @@
 # 原生结构变更校准：本地接手规格
 
+> 维护者材料：含参考流程或验收期望，不提供给受试 Agent。受试入口见 [公开操作合同](public-workbench-contract.md)；权限边界见 [受限试验说明](restricted-public-trial.md)。
+
 状态：**代码与非物理控制测试已交付；CalculiX 原生验收待本地执行。**
 
 基线为 PR #7 `59f3dbe659b750964f5a81c99eb619352657c2ae`，分支
