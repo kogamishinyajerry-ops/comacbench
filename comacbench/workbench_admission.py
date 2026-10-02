@@ -94,6 +94,23 @@ def _index(rows, field, label):
     return result
 
 
+def _schema_accepts(value, schema):
+    """Validate the frozen JSON tool schema at the broker-entry boundary."""
+    kind = schema.get('type')
+    types = {'object': (dict,), 'array': (list,), 'string': (str,),
+             'boolean': (bool,), 'number': (int, float)}
+    if kind in types and type(value) not in types[kind]:
+        return False
+    if 'enum' in schema and value not in schema['enum']:
+        return False
+    if kind == 'object':
+        properties = schema.get('properties', {})
+        return (set(schema.get('required', [])) <= value.keys()
+                and (schema.get('additionalProperties') is not False or value.keys() <= properties.keys())
+                and all(_schema_accepts(v, properties[k]) for k, v in value.items() if k in properties))
+    return kind != 'array' or all(_schema_accepts(v, schema['items']) for v in value)
+
+
 def _text_result(row):
     content = row['content']
     if (type(row['is_error']) is not bool or type(content) is not list or len(content) != 1
@@ -297,6 +314,7 @@ def audit_trial(data: dict, directory: Path, *, session: Path | None = None) -> 
         checks['only_public_tool'] = all(c['tool'] == 'workbench' for c in calls)
         checks['call_arguments_match'] = all(c['tool'] == hm[c['callId']]['name'] and c['input'] == hm[c['callId']]['arguments'] for c in calls)
         positions = {id(r): i for i,r in enumerate(stream)}
+        request_schema = _read(source / 'comacbench/public_input_v2.json')['tools'][0]['parameters']
         responses = ResponseAudit(data, session)
         paths = []
         checks["broker_payload_parseable"] = True
@@ -319,6 +337,8 @@ def audit_trial(data: dict, directory: Path, *, session: Path | None = None) -> 
                     raise ValueError('missing broker without a recognized pre-gateway denial: ' + key)
                 paths.append({'call_id':key, 'path':'pre_gateway_denial'})
                 continue
+            if not _schema_accepts(c['input'], request_schema):
+                raise ValueError('broker reached with schema-rejected arguments: ' + key)
             if broker['seq'] >= h['seq'] or broker['request'] != c['input']['request'] or h['is_error']:
                 raise ValueError('broker association/order/outcome: ' + key)
             exit_code = broker['exit_code']

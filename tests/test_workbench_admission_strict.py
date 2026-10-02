@@ -92,7 +92,7 @@ class StrictAdmissionTests(unittest.TestCase):
         self.result()
 
     def test_gateway_denial_does_not_consume_action(self):
-        self.append({'op':'observe','path':'../session.json'})
+        self.append({'op':'observe','target':'review'})
         self.result(True);self.assertEqual(self.data['events'],[])
 
     def test_broker_failure_with_real_receipt_is_classified(self):
@@ -170,3 +170,8 @@ class StrictAdmissionTests(unittest.TestCase):
         a.check(request,value)
         value['result']['text']+='extra'
         with self.assertRaisesRegex(ValueError,'archive mismatch'):a.check(request,value)
+
+    def test_schema_denial_cannot_be_misreported_as_broker_entry(self):
+        self.append('not-an-object',{'result':{'ok':False,'code':'public_request_denied'}})
+        r=self.result()
+        self.assertIn('schema-rejected arguments',' '.join(r['deviation_reasons']))
