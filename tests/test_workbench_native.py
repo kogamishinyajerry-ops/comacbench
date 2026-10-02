@@ -147,6 +147,17 @@ class NativeBridgeTests(unittest.TestCase):
         self.assertEqual(self.process.call_count, 0)
         self.assertEqual(wb.observe(self.session)['actions_used'], 4)
 
+    def test_public_observation_supplies_accepted_action_format(self):
+        obs=self.start()
+        contract=obs['contract']['action_format']
+        example=contract['solve_example']
+        self.assertEqual(set(example),set(contract['required_fields']['solve']))
+        self.assertEqual(example[contract['selector']],'solve')
+        result=self.act(example)
+        self.assertTrue(result['result']['ok'])
+        checked=self.act({contract['selector']:'check','target':example['target']})
+        self.assertTrue(checked['result']['ok'])
+
     def test_call_budget_includes_failed_attempts(self):
         self.scenario['max_solver_calls'] = 1
         self.start()

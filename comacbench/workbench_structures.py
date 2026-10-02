@@ -121,6 +121,17 @@ def review(scenario: dict, state: dict, target: str, payload: Any) -> list[dict]
 def public_contract(scenario: dict) -> dict:
     return {'family': FAMILY, 'graph': graph(scenario),
             'actions': 'solve(target) creates a broker-owned solution; check; put review; advance; submit',
+            'action_format': {
+                'selector': 'op',
+                'required_fields': {'solve': ['op','target'], 'check': ['op','target'],
+                                    'put': ['op','target','basis','payload'],
+                                    'advance': ['op'], 'submit': ['op','claim']},
+                'solve_example': {'op': 'solve', 'target': 'solution_limit'},
+                'put_target': 'review',
+                'put_basis': 'Copy the current observe.dependencies.review object unchanged.',
+                'put_payload': 'Build review_fields and case_fields from observed native measurements and the current requirement.',
+                'submit_claim': 'Use the claim in the verified review payload.',
+                'cli_session_argument': 'Pass the session directory path, not the session_id.'},
             'review_fields': ['cases','claim','requirement_revision'],
             'case_fields': ['point','uy_mm','rfy_n','meets_requirement'],
             'claim': 'requirements_met if all abs(uy_mm) <= current max_tip_mm; else needs_review',
