@@ -520,4 +520,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # Helpers import comacbench.workbench. Dispatch through that same module so
+    # their WorkbenchError is caught even when invoked with python -m.
+    from .workbench import main as run_cli
+    raise SystemExit(run_cli())

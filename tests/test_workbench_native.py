@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -250,6 +251,19 @@ class NativeBridgeTests(unittest.TestCase):
         text = (self.root/'report/report.html').read_text()
         self.assertIn('limit', text)
         self.assertNotIn('未运行工程求解器', text)
+
+    def test_module_cli_reports_tampering_as_structured_failure(self):
+        self.complete()
+        dat=next((self.session/'native').glob('*/model.dat'))
+        with dat.open('a') as f: f.write('\nINTENTIONAL_TEST_TAMPER\n')
+        for command in (['observe',str(self.session)],
+                        ['report',str(self.session),'--out',str(self.root/'bad-report')]):
+            p=subprocess.run([sys.executable,'-m','comacbench.workbench',*command],
+                             cwd=ROOT,capture_output=True,text=True,timeout=30)
+            self.assertEqual(p.returncode,2,p.stderr)
+            self.assertEqual(json.loads(p.stderr),{'error':'native_archive_changed'})
+            self.assertNotIn('Traceback',p.stderr)
+        self.assertFalse((self.root/'bad-report').exists())
 
     def test_copy_session_can_be_reverified_without_binary_present(self):
         self.complete()
