@@ -210,7 +210,7 @@ class ResponseAudit:
                 raise ValueError('error result marked successful')
 
 
-def _prompt_checks(control, rows, host, source):
+def _prompt_checks(control, rows, host, source, stream):
     contract_path = source / 'comacbench/public_input_v2.json'
     if _contract_sha(contract_path) != CONTRACT_SHA256:
         raise ValueError('audit public contract source changed')
@@ -230,6 +230,20 @@ def _prompt_checks(control, rows, host, source):
             and r['model'] == control['model'] and r['input_sha256'] == _digest(actual)
             and r['public_system_sha256'] == hashlib.sha256('\n\n'.join(s['text'] for s in r['sections']).encode()).hexdigest())
     checks['actual_model_inputs'] = all(type(r['number']) is int and type(r['assembly_number']) is int for r in inputs) and bool(inputs) and len(inputs) <= 64 and [r['number'] for r in inputs] == list(range(1,len(inputs)+1))
+    # One startup probe plus one assembly per real Agent step; retries may
+    # dispatch the same assembly more than once. Every runtime assembly needs
+    # its own actual model-input record, not just one surviving clean sample.
+    steps = [r for r in stream if r['type'] == 'status' and r.get('phase') == 'step_start']
+    prompts = [r for r in rows if r['type'] == 'prompt_probe']
+    step_ids = [(r['turn'], r['step']) for r in steps]
+    first_call = next((i for i, r in enumerate(stream) if r['type'] == 'tool_call'), -1)
+    first_step = next((i for i, r in enumerate(stream) if r in steps), -1)
+    checks['complete_step_input_coverage'] = (bool(steps)
+        and all(type(n) is int and n > 0 for pair in step_ids for n in pair)
+        and len(set(step_ids)) == len(step_ids) and len(assemblies) == len(steps) + 1
+        and {r['assembly_number'] for r in inputs} == set(range(2, len(assemblies) + 1))
+        and len(prompts) == 1 and assemblies[0]['seq'] < prompts[0]['seq'] < assemblies[1]['seq']
+        and 0 <= first_step < first_call)
     for r in inputs:
         if not 1 <= r['assembly_number'] <= len(assemblies) or assemblies[r['assembly_number']-1]['seq'] >= r['seq']:
             raise ValueError('model input assembly association')
@@ -365,7 +379,7 @@ def audit_trial(data: dict, directory: Path, *, session: Path | None = None) -> 
         checks['actions_match_environment'] = responses.index == len(data['events'])
         checks['per_call_receipts_and_projection'] = True
         admission['call_paths'] = paths
-        checks.update(_prompt_checks(control, rows, hm, source))
+        checks.update(_prompt_checks(control, rows, hm, source, stream))
         issues = [key for key, passed in checks.items() if not passed]
         admission["audit_checks"] = checks
         admission["tool_calls"] = len(calls)

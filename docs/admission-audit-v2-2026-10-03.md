@@ -22,7 +22,7 @@
 
 ## 验收范围与旧记录
 
-- Python 原有 124 项专项保留；加 reviewer 7 项和补充 18 项，共 149 项，148 通过、1 native opt-in 跳过。另 4 项 campaign 源码导出通过。
+- Python 原有 124 项专项保留；加 reviewer 7 项和补充 19 项，共 150 项，149 通过、1 native opt-in 跳过。另 4 项 campaign 源码导出通过。
 - JS 服务替身：五项提示词回调控制通过；仅是服务替身。
 - 安装 DSH 服务：真实 SystemPrompt、Cordis、Tools 与 LlmRuntime；11 种正常/后续 section/context/schema/最终请求变更情形通过，非法路径到达终端 adapter 次数为 0。终端 adapter 与任务 body 为无网络测试替身；不能算模型运行或原生物理证据。另保留既有九项权限拒绝及工具预算专项。
 - 实际 DSH headless：第一次发现公开用户入口多余换行，被拒绝并保留；修复输入字节后第二次在最终派发处按预期停止。跨平台修复后又在新目录验证最终插件。全部 0 模型调用、0 环境行动、0 原生 job。
@@ -43,3 +43,5 @@
 首次推送 `366764872d5a917daf4b07a49538db5cd51f81b8` 的 Ubuntu 两项通过，Windows 两项失败，原始日志保留。Git 的 CRLF 源码导出改变了 JSON 合同的传输换行；Python read_native 文本读取则会规范化 CRLF，不能将返回字符串再编码后冒充原始 DAT 字节。合同 SHA256 现明确定义为 UTF-8/LF 内容摘要，只归一化 JSON 传输 CRLF，不改变字符串转义或正文。原生文本审计通过 session 参数读取当前归档文件，先按原字节核对 receipt，再用与网关相同的换行/UTF-8 replacement 规则比较返回值；缺原始 session 路径保持 unknown。新增 CRLF 合同变更负例和原始文本解码测试，未放宽物理阈值。
 
 补充按冻结完整工具 schema 核对 broker 入口参数，拒绝将应在参数校验层终止的请求伪装成已进入 broker；网关自身的合法字段组合拒绝仍保留为 gateway response。
+
+逐轮覆盖还按 DSH step_start、一次 startup assembly 和每次运行 assembly 对齐；每个运行 assembly 都必须有实际 model_input，不能删掉后续输入记录后只凭第一份干净正文准入。重试可对应同一 assembly 的多个输入记录。

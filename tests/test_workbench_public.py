@@ -104,13 +104,16 @@ class PublicBoundaryTests(unittest.TestCase):
         rows = [{"type": "ready"}, {"type": "assembly", "schemas": ["workbench"], **assembled, "model": model,
                 "number":1, "contract_version":contract['version'], "contract_sha256":CONTRACT_SHA256,
                 "input_sha256":_digest(assembled), "public_system_sha256":hashlib.sha256(contract['sections'][0]['text'].encode()).hexdigest()},
-            {"type":"model_input", "number":1, "assembly_number":1, "model":model, **actual,
+            {"type": "prompt_probe", **deepcopy(assembled), "schemas": ["workbench"]},
+            {"type": "assembly", "schemas": ["workbench"], **deepcopy(assembled), "model": model,
+                "number":2, "contract_version":contract['version'], "contract_sha256":CONTRACT_SHA256,
+                "input_sha256":_digest(assembled), "public_system_sha256":hashlib.sha256(contract['sections'][0]['text'].encode()).hexdigest()},
+            {"type":"model_input", "number":1, "assembly_number":2, "model":model, **actual,
              "contract_version":contract['version'], "contract_sha256":CONTRACT_SHA256, "input_sha256":_digest(actual)},
-            {"type": "prompt_probe", **assembled, "schemas": ["workbench"]},
             {"type": "broker", "call_id": "call-1", "request": request, "exit_code": 0, "stdout": output},
             {"type": "tool_result", "call_id": "call-1", "name": "workbench", "arguments": args,
              "is_error": False, "content": [{"type": "text", "text": output}]}]
-        stream = [{"type": "session", "sessionId": "test"}, {"type": "tool_call", "callId": "call-1", "tool": "workbench", "input": args},
+        stream = [{"type": "session", "sessionId": "test"}, {"type":"status", "phase":"step_start", "turn":1, "step":1}, {"type": "tool_call", "callId": "call-1", "tool": "workbench", "input": args},
             {"type": "tool_result", "callId": "call-1", "result": output},
             {"type": "status", "phase": "turn_end", "reason": {"kind": "completed"}}, {"type": "final", "text": "self claim ignored"}]
         (audit / "control.json").write_text(json.dumps(control))

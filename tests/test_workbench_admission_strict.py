@@ -175,3 +175,13 @@ class StrictAdmissionTests(unittest.TestCase):
         self.append('not-an-object',{'result':{'ok':False,'code':'public_request_denied'}})
         r=self.result()
         self.assertIn('schema-rejected arguments',' '.join(r['deviation_reasons']))
+
+    def test_missing_later_actual_input_cannot_hide_behind_first_clean_input(self):
+        a=deepcopy(next(r for r in self.rows if r['type']=='assembly'));a['number']=3
+        inp=deepcopy(next(r for r in self.rows if r['type']=='model_input'));inp.update(number=2,assembly_number=3)
+        self.rows += [a,inp]
+        self.stream[-2:-2]=[{'type':'status','phase':'step_start','turn':1,'step':2}]
+        self.result(True)
+        self.rows.pop()
+        r=self.result()
+        self.assertFalse(r['audit_checks']['complete_step_input_coverage'])
