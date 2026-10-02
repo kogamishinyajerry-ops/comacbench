@@ -22,10 +22,10 @@
 
 ## 验收范围与旧记录
 
-- Python 原有 124 项专项保留；加 reviewer 7 项和补充 15 项，共 146 项，145 通过、1 native opt-in 跳过。另 4 项 campaign 源码导出通过。
+- Python 原有 124 项专项保留；加 reviewer 7 项和补充 17 项，共 148 项，147 通过、1 native opt-in 跳过。另 4 项 campaign 源码导出通过。
 - JS 服务替身：五项提示词回调控制通过；仅是服务替身。
 - 安装 DSH 服务：真实 SystemPrompt、Cordis、Tools 与 LlmRuntime；11 种正常/后续 section/context/schema/最终请求变更情形通过，非法路径到达终端 adapter 次数为 0。终端 adapter 与任务 body 为无网络测试替身；不能算模型运行或原生物理证据。另保留既有九项权限拒绝及工具预算专项。
-- 实际 DSH headless：第一次发现公开用户入口多余换行，被拒绝并保留；修复输入字节后第二次在最终派发处按预期停止。两次 0 模型调用、0 环境行动、0 原生 job。
+- 实际 DSH headless：第一次发现公开用户入口多余换行，被拒绝并保留；修复输入字节后第二次在最终派发处按预期停止。跨平台修复后又在新目录验证最终插件。全部 0 模型调用、0 环境行动、0 原生 job。
 - 旧 restricted-trial-01 与 02 在各自原源码、原 plugin/gateway 摘要下复读。第一次旧审计对字符串请求抛 AttributeError，保留失败；新附录明确 unknown。第二次仍为 19 工具调用、17 行动、3 个历史 job、complete=true / needs_review；旧审计曾给出 true，新附录为 unknown / unknown / false，原因是 v1 没有逐轮实际模型输入。没有改写旧报告或替换其 hash。
 - 更早公开开发记录的已确认协议偏差与参考暴露仍有效，不将其提升为合规。
 - 首屏保留准入字段，unknown 或冲突不得显示核对通过。任务完成与成绩准入独立。
@@ -37,3 +37,7 @@
 本机 Chrome 的 file:// 打开被工具安全策略拒绝，已停止。没有换 HTTP、alternate surface 或 set_content；报告 JSON/INP/DAT/日志的实际点击仍 BLOCKED。Windows 浏览器/原生、完整仓库、wheel、内网部署及工程批准未验证。
 
 新交付 ZIP 内包含上轮 `COMACBench-PR8-Closeout-Evidence-2026-10-02.zip` 原件（SHA256 `7b6446e447d01c6676dbfb8806aa60b899b4bbfcc9611c2fec82c240ffeb7fe3`），以及本轮复现、无模型专项、失败现场、复读附录、源码和差异。旧 Native-Acceptance 包不是该原件的替代品。
+
+## Windows CI 修复补充
+
+首次推送 `366764872d5a917daf4b07a49538db5cd51f81b8` 的 Ubuntu 两项通过，Windows 两项失败，原始日志保留。Git 的 CRLF 源码导出改变了 JSON 合同的传输换行；Python read_native 文本读取则会规范化 CRLF，不能将返回字符串再编码后冒充原始 DAT 字节。合同 SHA256 现明确定义为 UTF-8/LF 内容摘要，只归一化 JSON 传输 CRLF，不改变字符串转义或正文。原生文本审计通过 session 参数读取当前归档文件，先按原字节核对 receipt，再用与网关相同的换行/UTF-8 replacement 规则比较返回值；缺原始 session 路径保持 unknown。新增 CRLF 合同变更负例和原始文本解码测试，未放宽物理阈值。

@@ -13,7 +13,8 @@ export const inject = ['tools', 'systemPrompt', 'agentDefaultModel', 'llm'];
 export const provide = ['comacbenchBoundary'];
 const sha = value => createHash('sha256').update(value).digest('hex');
 export const CONTRACT_SHA256 = 'd6b1d694ed9c92093b9b022b1dcc208b5bf046b2608cdbaee0319052008b9271';
-const contractBytes = readFileSync(new URL('../comacbench/public_input_v2.json', import.meta.url));
+// Git's CRLF transport conversion is not a change to JSON string content.
+const contractBytes = Buffer.from(readFileSync(new URL('../comacbench/public_input_v2.json', import.meta.url), 'utf8').replace(/\r\n/g, '\n'));
 if (sha(contractBytes) !== CONTRACT_SHA256) throw new Error('public_contract_version_mismatch');
 export const CONTRACT = JSON.parse(contractBytes);
 export const PUBLIC_SYSTEM = CONTRACT.sections[0].text;

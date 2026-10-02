@@ -73,6 +73,12 @@ def _sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _contract_sha(path):
+    # Git for Windows may export CRLF. Freeze UTF-8 contract content with LF
+    # transport newlines; JSON string escapes and every other byte remain locked.
+    return hashlib.sha256(path.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+
+
 def _digest(value):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
                                     separators=(',', ':'), allow_nan=False).encode()).hexdigest()
@@ -118,9 +124,9 @@ class ResponseAudit:
     Uses only recorded native payloads, never executes a solver. The caller's
     snapshot has already re-read the physical archive under its original engine.
     """
-    def __init__(self, data):
+    def __init__(self, data, session=None):
         from . import workbench as wb
-        self.wb, self.data = wb, data
+        self.wb, self.data, self.session = wb, data, session
         self.manifest = data['manifest']
         self.scenario = self.manifest['scenario']
         self.state = wb._initial(self.scenario)
@@ -159,11 +165,20 @@ class ResponseAudit:
             if (op != 'read_native' or set(result) != {'ok', 'code', 'target', 'name', 'text'}
                     or result['ok'] is not True or result['target'] != request['target']
                     or result['name'] != request['name'] or result['name'] not in NATIVE_FILES
-                    or type(result['text']) is not str or len(result['text'].encode()) > 1_000_000):
+                    or type(result['text']) is not str or len(result['text'].encode()) > 3_000_000):
                 raise ValueError('native text contract')
             job = self.state['artifacts'][result['target']]['payload']['job_id']
-            if hashlib.sha256(result['text'].encode()).hexdigest() != self.data['native_receipts'][job]['files'][result['name']]:
+            if self.session is None:
+                raise ValueError('native text audit requires the original session path')
+            root = self.session / 'native' / job
+            for directory in (self.session, self.session / 'native', root):
+                self.wb._ordinary(directory, directory=True)
+            path = root / result['name']
+            self.wb._ordinary(path)
+            if (path.stat().st_size > 1_000_000 or _sha(path) != self.data['native_receipts'][job]['files'][result['name']]
+                    or path.read_text(encoding='utf-8', errors='replace') != result['text']):
                 raise ValueError('native text archive mismatch')
+
         else:
             common = {'public_request_denied', 'public_target_denied', 'public_json_denied', 'host_io_error',
                       'broker_process_failed', 'broker_invalid_json'}
@@ -180,7 +195,7 @@ class ResponseAudit:
 
 def _prompt_checks(control, rows, host, source):
     contract_path = source / 'comacbench/public_input_v2.json'
-    if _sha(contract_path) != CONTRACT_SHA256:
+    if _contract_sha(contract_path) != CONTRACT_SHA256:
         raise ValueError('audit public contract source changed')
     contract = _read(contract_path)
     if (control.get('protocol') != 'comacbench.public-boundary.v2'
@@ -219,7 +234,7 @@ def _prompt_checks(control, rows, host, source):
     return checks
 
 
-def audit_trial(data: dict, directory: Path) -> dict:
+def audit_trial(data: dict, directory: Path, *, session: Path | None = None) -> dict:
     admission = unknown_admission(data["manifest"]["subject"]["kind"])
     if data["manifest"]["subject"]["kind"] != "user_agent":
         return admission
@@ -282,7 +297,7 @@ def audit_trial(data: dict, directory: Path) -> dict:
         checks['only_public_tool'] = all(c['tool'] == 'workbench' for c in calls)
         checks['call_arguments_match'] = all(c['tool'] == hm[c['callId']]['name'] and c['input'] == hm[c['callId']]['arguments'] for c in calls)
         positions = {id(r): i for i,r in enumerate(stream)}
-        responses = ResponseAudit(data)
+        responses = ResponseAudit(data, session)
         paths = []
         checks["broker_payload_parseable"] = True
         # Host order binds environment actions, including legal rejected actions.

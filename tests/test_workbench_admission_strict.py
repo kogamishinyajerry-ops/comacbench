@@ -27,7 +27,7 @@ class StrictAdmissionTests(unittest.TestCase):
             (self.audit/name).write_text(''.join(json.dumps({**r,**({'seq':i+1} if name=='boundary.jsonl' else {})})+'\n' for i,r in enumerate(rows)))
 
     def result(self, expected=False):
-        self.save(); result=audit_trial(self.data,self.audit)
+        self.save(); result=audit_trial(self.data,self.audit,session=self.fixture.session)
         self.assertEqual(result['score_admissible'],expected,result)
         return result
 
@@ -60,7 +60,7 @@ class StrictAdmissionTests(unittest.TestCase):
         p=self.audit/'execution.json'; original=p.read_text()
         for raw in ('{"exit_code":1,"exit_code":0}', '{"value":NaN}', '{"value":Infinity}', '{"value":1e999}', '[]', '{', '{"x":"'+'x'*(MAX_RECORD+1)+'"}'):
             with self.subTest(prefix=raw[:60]):
-                p.write_text(raw); result=audit_trial(self.data,self.audit)
+                p.write_text(raw); result=audit_trial(self.data,self.audit,session=self.fixture.session)
                 self.assertFalse(result['score_admissible']);self.assertTrue(result['deviation_reasons'])
         p.write_text(original)
         p=self.audit/'boundary.jsonl'; original=p.read_text()
@@ -148,3 +148,25 @@ class StrictAdmissionTests(unittest.TestCase):
             html=render(data)
             self.assertIn('score_admissible: <strong>false</strong>',html)
             self.assertNotIn('主机控制与工具记录核对通过',html)
+
+    def test_contract_transport_crlf_and_mutation(self):
+        from comacbench.workbench_admission import _contract_sha, CONTRACT_SHA256
+        raw=(Path(__file__).resolve().parents[1]/'comacbench/public_input_v2.json').read_bytes().replace(b'\r\n',b'\n')
+        p=self.fixture.root/'contract.json';p.write_bytes(raw.replace(b'\n',b'\r\n'))
+        self.assertEqual(_contract_sha(p),CONTRACT_SHA256)
+        p.write_bytes(raw.replace(b'workbench',b'changed-tool',1))
+        self.assertNotEqual(_contract_sha(p),CONTRACT_SHA256)
+
+    def test_native_text_uses_gateway_decoding_with_original_byte_identity(self):
+        from comacbench.workbench_admission import ResponseAudit
+        import hashlib
+        p=self.fixture.session/'native/000001';p.mkdir()
+        raw=b'raw output\r\nnon-UTF8: \xff\r\n';(p/'model.solver.log').write_bytes(raw)
+        self.data['native_receipts']={'000001':{'files':{'model.solver.log':hashlib.sha256(raw).hexdigest()}}}
+        a=ResponseAudit(self.data,self.fixture.session)
+        a.state['artifacts']['solution_limit']={'payload':{'job_id':'000001'}}
+        request={'op':'read_native','target':'solution_limit','name':'model.solver.log'}
+        value={'result':{'ok':True,'code':'native_text','target':'solution_limit','name':'model.solver.log','text':(p/'model.solver.log').read_text(encoding='utf-8',errors='replace')}}
+        a.check(request,value)
+        value['result']['text']+='extra'
+        with self.assertRaisesRegex(ValueError,'archive mismatch'):a.check(request,value)

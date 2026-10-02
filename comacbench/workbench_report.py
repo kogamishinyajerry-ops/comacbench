@@ -120,7 +120,7 @@ def export_report(session: Path, out: Path, *, admission_evidence: Path | None =
     if destination == source or source in destination.parents or destination in source.parents:
         raise WorkbenchError("report_must_be_outside_session")
     data = snapshot(session)
-    data.update(audit_trial(data, admission_evidence) if admission_evidence is not None
+    data.update(audit_trial(data, admission_evidence, session=session) if admission_evidence is not None
                 else unknown_admission(data["manifest"]["subject"]["kind"]))
     out.mkdir(parents=True, exist_ok=False)
     artifact_dir = out / "artifacts"
