@@ -4,10 +4,13 @@ from __future__ import annotations
 import html
 import hashlib
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
 from .workbench import WorkbenchError, canonical, digest, snapshot
+from . import workbench_structures as structures
+from . import workbench_ccx as ccx
 
 
 LABELS = {"verified": "已验证", "stale": "已失效", "missing": "未提交",
@@ -20,16 +23,28 @@ def render(data: dict[str, Any]) -> str:
     observation = data["observation"]
     scenario = data["manifest"]["scenario"]
     escape = lambda value: html.escape(str(value), quote=True)
+    native = structures.is_native(scenario)
     done = observation["complete"]
     status = "工作包检查完成" if done else "尚未完成工作包"
     handoff = "当前报告尚未通过有效版本检查，不能据旧报告作出交接结论。"
     if observation["statuses"].get("review") == "verified":
         reviewed = observation["artifacts"]["review"]["payload"]
-        if reviewed["claim"] == "needs_review":
+        if native:
+            failed = [row["point"] for row in reviewed["cases"] if not row["meets_requirement"]]
+            handoff = ("固定校准梁的原始数据已复查；当前位移限值未满足：" + ", ".join(failed)
+                       if failed else "固定校准梁在本任务的位移限值内；不构成工程设计批准。")
+        elif reviewed["claim"] == "needs_review":
             points = ", ".join(f'{row["point"]} ({row["reason_code"]})' for row in reviewed["review_points"])
             handoff = f"工作包记录已核对，仍需澄清或审查：{points}。这些工况未进入运行清单。"
         else:
             handoff = "输入工作包可交给执行环节；尚未执行任何工程计算。"
+    scope = ("原生校准桥接：复读 CalculiX 输入、日志与位移/反力数据；本报告不重新求解。"
+             "仅限固定线性静力梁，未验证应力、疲劳、连接或完整支架设计。数值容差仍待目标机与专家核验。"
+             if native else "本报告只检查输入工作包与变更证据。未运行工程求解器，不代表工程性能合格或设计放行。")
+    native_summary = (f"<p>本工具受理求解尝试：{observation['counts'].get('solver_calls', 0)} / "
+                      f"{scenario['max_solver_calls']}；原生进程启动：{observation['counts'].get('native_processes_started', 0)}；"
+                      f"累计进程墙钟：{observation['counts'].get('native_wall_s', 0):.3f} 秒。</p>"
+                      if native else "")
     artifact_rows = "".join(
         f'<tr><td>{escape(node)}</td><td>{escape(LABELS[value])}</td></tr>'
         for node, value in observation["statuses"].items())
@@ -62,7 +77,7 @@ p,li,summary{{overflow-wrap:anywhere}}summary{{cursor:pointer;font-weight:650}}a
 <p class="label">COMACBench / 工程变更工作包</p>
 <h1>{escape(scenario["title"])}</h1><p>{escape(KINDS[observation["subject"]["kind"]])}</p>
 <section class="card"><h2 style="margin-top:0">{status}</h2>
-<p>{escape(scenario["description"])}</p><p><strong>交接结论：</strong>{escape(handoff)}</p><p><strong>本报告只检查输入工作包与变更证据。未运行工程求解器，不代表工程性能合格或设计放行。</strong></p></section>
+<p>{escape(scenario["description"])}</p><p><strong>交接结论：</strong>{escape(handoff)}</p><p><strong>{escape(scope)}</strong></p>{native_summary}</section>
 <div class="metrics"><div class="card"><div class="number">{observation["actions_used"]} / {scenario["max_actions"]}</div>已消耗 / 总行动预算</div>
 <div class="card"><div class="number">{sum(v == "verified" for v in observation["statuses"].values())} / {len(observation["statuses"])}</div>当前已验证 / 必需交付物</div>
 <div class="card"><div class="number">{observation["counts"].get("rejected", 0)}</div>被拒绝的行动（仍计入预算）</div></div>
@@ -98,9 +113,23 @@ def export_report(session: Path, out: Path) -> dict[str, Any]:
                 "session_manifest_sha256": data["manifest"]["manifest_sha256"],
                 "scenario_sha256": data["manifest"]["scenario_sha256"],
                 "phase": observation["phase"], "complete": observation["complete"],
-                "artifacts": roster, "solver_execution": "not_performed"}
+                "artifacts": roster, "solver_execution": observation["limitations"]["solver_execution"]}
+    if "native_receipts" in data:
+        native_dir = out / "native"
+        native_dir.mkdir()
+        for job_id, receipt in data["native_receipts"].items():
+            src, dst = session / "native" / job_id, native_dir / job_id
+            if ccx._inventory(src) != receipt["files"]:
+                raise WorkbenchError("native_archive_changed_during_export")
+            dst.mkdir()
+            for name in receipt["files"]:
+                shutil.copyfile(src / name, dst / name)
+            (dst / "receipt.json").write_bytes(canonical(receipt))
+            if ccx._inventory(dst) != receipt["files"]:
+                raise WorkbenchError("native_copy_changed")
+        manifest["native_receipts"] = data["native_receipts"]
     (artifact_dir / "manifest.json").write_bytes(canonical(manifest))
     (out / "report.json").write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     (out / "report.html").write_text(render(data), encoding="utf-8")
     return {"report": str(out / "report.html"), "complete": data["observation"]["complete"],
-            "publishable": False, "solver_execution": "not_performed"}
+            "publishable": False, "solver_execution": observation["limitations"]["solver_execution"]}

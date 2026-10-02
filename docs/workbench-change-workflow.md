@@ -95,3 +95,10 @@ CLI 退出码：`0` 为命令正常完成；`act` 的可记录拒绝返回 `1`�
 新源码会改变既有 pack 全局 engine identity。升级后新实验使用新输出目录，不能对旧 pack 运行强行 resume。WorkBench 自身冻结状态引擎和独立检查器的摘要；检查逻辑改变后也要新建会话。
 
 下一条工程开发线应为此协议接入一个已有原生求解后端和经过专家确认的工作包，再补充固定配置的真实 Agent 实验。独立隐藏实例、求解器预算与跨软件等价性需分别验收，不能从本轮合成数据自检推出。
+
+## 原生结构校准增量（待目标机验收）
+
+同一 CLI 新增 `structures-change-v1` 与 broker-owned `solve` 节点。此族读取原生
+CalculiX 结果；原有 workload-change 仍不执行 solver。接手流程、三阶段行为和
+证据边界见 [原生校准交接](native-calibration-handoff.md)。新增源码会改变 engine
+identity；保留旧源码与旧会话，新实验使用新目录，不修改旧摘要来强行恢复。

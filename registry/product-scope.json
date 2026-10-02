@@ -3,18 +3,133 @@
   "revision": "2026-10-02",
   "default_benchmark_role": "research",
   "entries": [
-    {"id": "aviation-workload-starter-v1", "kind": "pack", "role": "pilot", "path": "packs/aviation-workload-starter-v1/pack.yaml", "title": "文件级工程输入工作包", "purpose": "工况规范化、冲突与缺单位处理、运行清单及旧结果对账", "requires": "已有源码环境与 Python 依赖", "limits": "公开合成数据；不执行真实性能程序或工程求解器。"},
-    {"id": "workload-change-v1", "kind": "workbench", "role": "experimental", "path": "examples/workbench/workload-change-v1.json", "title": "交互式变更工作包", "purpose": "变更影响、局部证据失效、选择性重验和完整行动记录", "requires": "Python 3.11+；本模块只用标准库；完整源码路径", "limits": "新 workbench 协议；非既有 pack；不计入 Campaign 成绩；无真实求解或隔离迁移证据。"},
-    {"id": "aviation-data-starter-v1", "kind": "pack", "role": "onboarding", "path": "packs/aviation-data-starter-v1/pack.yaml", "title": "首次接入与接口自检", "purpose": "先看懂 validate / calibrate / run / report 的区别", "requires": "已有源码环境与 Python 依赖", "limits": "复用 core 两项函数级任务，不是两个新增工程场景。"},
-    {"id": "aviation-structures-v2", "kind": "pack", "role": "calibration", "path": "packs/aviation-structures-v2/pack.yaml", "title": "结构求解与证据锚点", "purpose": "C3D20 静力梁输入、实际求解、反力与位移核对", "requires": "已验证版本的 CalculiX 与 Python 依赖", "limits": "用于求解链路和检查器校准，不代表完整支架设计能力。"},
-    {"id": "aviation-cfd-step-v1", "kind": "pack", "role": "calibration", "path": "packs/aviation-cfd-step-v1/pack.yaml", "title": "CFD 原生证据锚点", "purpose": "Re=100 后向台阶的输入与原生求解证据", "requires": "固定 OpenFOAM 10 Docker 环境", "limits": "演示容差与受限工况；不代表飞机 CFD 或跨求解器能力。"},
-    {"id": "aviation-core-v1", "kind": "pack", "role": "legacy", "path": "packs/aviation-core-v1/pack.yaml", "title": "历史混合冒烟包", "purpose": "兼容原有贡献与回归路径", "requires": "CalculiX 与 Python 依赖", "limits": "不作为首次接入默认推荐；既有命令保持可用。"}
+    {
+      "id": "aviation-workload-starter-v1",
+      "kind": "pack",
+      "role": "pilot",
+      "path": "packs/aviation-workload-starter-v1/pack.yaml",
+      "title": "文件级工程输入工作包",
+      "purpose": "工况规范化、冲突与缺单位处理、运行清单及旧结果对账",
+      "requires": "已有源码环境与 Python 依赖",
+      "limits": "公开合成数据；不执行真实性能程序或工程求解器。"
+    },
+    {
+      "id": "workload-change-v1",
+      "kind": "workbench",
+      "role": "experimental",
+      "path": "examples/workbench/workload-change-v1.json",
+      "title": "交互式变更工作包",
+      "purpose": "变更影响、局部证据失效、选择性重验和完整行动记录",
+      "requires": "Python 3.11+；本模块只用标准库；完整源码路径",
+      "limits": "新 workbench 协议；非既有 pack；不计入 Campaign 成绩；无真实求解或隔离迁移证据。"
+    },
+    {
+      "id": "structures-change-v1",
+      "kind": "workbench",
+      "role": "experimental",
+      "path": "examples/workbench/structures-change-v1.json",
+      "title": "原生结构变更校准（待目标机验证）",
+      "purpose": "载荷变更后选择性求解；验收限值变化后复用原始数据",
+      "requires": "Python 3.11+ 与经操作者确认的 CalculiX 2.23 本机二进制",
+      "limits": "原生适配器已实现，真实求解未在交付环境执行；非既有 pack；不计入 Campaign；固定校准梁，不代表支架设计。"
+    },
+    {
+      "id": "aviation-data-starter-v1",
+      "kind": "pack",
+      "role": "onboarding",
+      "path": "packs/aviation-data-starter-v1/pack.yaml",
+      "title": "首次接入与接口自检",
+      "purpose": "先看懂 validate / calibrate / run / report 的区别",
+      "requires": "已有源码环境与 Python 依赖",
+      "limits": "复用 core 两项函数级任务，不是两个新增工程场景。"
+    },
+    {
+      "id": "aviation-structures-v2",
+      "kind": "pack",
+      "role": "calibration",
+      "path": "packs/aviation-structures-v2/pack.yaml",
+      "title": "结构求解与证据锚点",
+      "purpose": "C3D20 静力梁输入、实际求解、反力与位移核对",
+      "requires": "已验证版本的 CalculiX 与 Python 依赖",
+      "limits": "用于求解链路和检查器校准，不代表完整支架设计能力。"
+    },
+    {
+      "id": "aviation-cfd-step-v1",
+      "kind": "pack",
+      "role": "calibration",
+      "path": "packs/aviation-cfd-step-v1/pack.yaml",
+      "title": "CFD 原生证据锚点",
+      "purpose": "Re=100 后向台阶的输入与原生求解证据",
+      "requires": "固定 OpenFOAM 10 Docker 环境",
+      "limits": "演示容差与受限工况；不代表飞机 CFD 或跨求解器能力。"
+    },
+    {
+      "id": "aviation-core-v1",
+      "kind": "pack",
+      "role": "legacy",
+      "path": "packs/aviation-core-v1/pack.yaml",
+      "title": "历史混合冒烟包",
+      "purpose": "兼容原有贡献与回归路径",
+      "requires": "CalculiX 与 Python 依赖",
+      "limits": "不作为首次接入默认推荐；既有命令保持可用。"
+    }
   ],
   "benchmark_groups": [
-    {"id": "general-diagnostics", "role": "diagnostic", "registry_ids": ["gsm8k.math_reasoning", "math500.math_reasoning", "humaneval.python", "humaneval.python_plus", "mbpp.sanitized", "mbpp.sanitized_plus"], "decision": "退出工程主线；保留通用能力及接口诊断，不继续扩充同类题库。"},
-    {"id": "knowledge-diagnostics", "role": "diagnostic", "registry_ids": ["cfdllm.cfdquery", "aeroengqa.gold", "cfdagent.litbench", "awext.clause_extract"], "decision": "用于知识和证据定位诊断；逐步将有用检查嵌入完整工作包。"},
-    {"id": "solver-anchors", "role": "calibration", "registry_ids": ["calculix.fea_basic", "cfdb.verification", "cfdb.validation"], "decision": "保留可靠的求解与检查锚点；不以简单参数扩题宣称新增能力。"},
-    {"id": "artifact-components", "role": "component", "registry_ids": ["cadgen.local_validity", "cadbench_seldon.sketch_lite", "engtable.office_basic", "awdoc.office_docs", "spreadsheetbench.verified_subset"], "decision": "保留几何、表格和文档检查器，优先复用于端到端变更与交付。"},
-    {"id": "physics-model-research", "role": "research", "registry_ids": ["superwing.coeff_lite", "hilift_aeroml.lite", "pinnacle.suite"], "decision": "独立物理预测研究赛道；取消通用 LLM 裸猜系数的产品主线定位。"}
+    {
+      "id": "general-diagnostics",
+      "role": "diagnostic",
+      "registry_ids": [
+        "gsm8k.math_reasoning",
+        "math500.math_reasoning",
+        "humaneval.python",
+        "humaneval.python_plus",
+        "mbpp.sanitized",
+        "mbpp.sanitized_plus"
+      ],
+      "decision": "退出工程主线；保留通用能力及接口诊断，不继续扩充同类题库。"
+    },
+    {
+      "id": "knowledge-diagnostics",
+      "role": "diagnostic",
+      "registry_ids": [
+        "cfdllm.cfdquery",
+        "aeroengqa.gold",
+        "cfdagent.litbench",
+        "awext.clause_extract"
+      ],
+      "decision": "用于知识和证据定位诊断；逐步将有用检查嵌入完整工作包。"
+    },
+    {
+      "id": "solver-anchors",
+      "role": "calibration",
+      "registry_ids": [
+        "calculix.fea_basic",
+        "cfdb.verification",
+        "cfdb.validation"
+      ],
+      "decision": "保留可靠的求解与检查锚点；不以简单参数扩题宣称新增能力。"
+    },
+    {
+      "id": "artifact-components",
+      "role": "component",
+      "registry_ids": [
+        "cadgen.local_validity",
+        "cadbench_seldon.sketch_lite",
+        "engtable.office_basic",
+        "awdoc.office_docs",
+        "spreadsheetbench.verified_subset"
+      ],
+      "decision": "保留几何、表格和文档检查器，优先复用于端到端变更与交付。"
+    },
+    {
+      "id": "physics-model-research",
+      "role": "research",
+      "registry_ids": [
+        "superwing.coeff_lite",
+        "hilift_aeroml.lite",
+        "pinnacle.suite"
+      ],
+      "decision": "独立物理预测研究赛道；取消通用 LLM 裸猜系数的产品主线定位。"
+    }
   ]
 }

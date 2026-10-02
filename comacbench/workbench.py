@@ -21,6 +21,12 @@ from typing import Any, Iterator
 import uuid
 
 from . import workbench_review as evaluator
+from . import workbench_structures as structures
+from . import workbench_ccx as ccx
+
+
+def _family(scenario):
+    return structures if structures.is_native(scenario) else evaluator
 
 PROTOCOL = "comacbench.workbench.v1"
 MAX_BYTES = 262144
@@ -103,7 +109,8 @@ def _write_new(path: Path, value: Any) -> None:
 def engine_identity() -> str:
     root = Path(__file__).parent
     return digest({name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-                   for name in ("workbench.py", "workbench_review.py")})
+                   for name in ("workbench.py", "workbench_review.py",
+                                "workbench_structures.py", "workbench_ccx.py")})
 
 
 def _text(value: Any) -> bool:
@@ -124,6 +131,8 @@ def _source_valid(key: str, value: Any) -> bool:
 
 
 def validate_scenario(scenario: Any) -> dict[str, Any]:
+    if structures.is_native(scenario):
+        return structures.validate(scenario)
     required = {"protocol", "id", "revision", "title", "description", "license",
                 "max_actions", "conditions", "program", "note", "phases"}
     if not isinstance(scenario, dict) or set(scenario) != required:
@@ -166,8 +175,11 @@ def validate_scenario(scenario: Any) -> dict[str, Any]:
 
 
 def _initial(scenario: dict[str, Any]) -> dict[str, Any]:
-    sources = {f"condition_{key}": deepcopy(value) for key, value in scenario["conditions"].items()}
-    sources.update(program=deepcopy(scenario["program"]), note=deepcopy(scenario["note"]))
+    if structures.is_native(scenario):
+        sources = structures.sources(scenario)
+    else:
+        sources = {f"condition_{key}": deepcopy(value) for key, value in scenario["conditions"].items()}
+        sources.update(program=deepcopy(scenario["program"]), note=deepcopy(scenario["note"]))
     return {"phase": 0, "sources": sources, "artifacts": {}, "checks": {},
             "actions_used": 0, "complete": False, "counts": {}}
 
@@ -185,7 +197,7 @@ def _basis(state: dict[str, Any], dependencies: dict[str, list[str]], node: str)
 
 def _statuses(scenario: dict[str, Any], state: dict[str, Any]) -> dict[str, str]:
     result: dict[str, str] = {}
-    dependencies = evaluator.graph(scenario)
+    dependencies = _family(scenario).graph(scenario)
     for node, parents in dependencies.items():
         artifact = state["artifacts"].get(node)
         if artifact is None:
@@ -202,33 +214,57 @@ def _statuses(scenario: dict[str, Any], state: dict[str, Any]) -> dict[str, str]
     return result
 
 
-def _transition(scenario: dict[str, Any], state: dict[str, Any], action: Any) -> dict[str, Any]:
+def _transition(scenario: dict[str, Any], state: dict[str, Any], action: Any,
+                native_evidence: dict | None = None) -> dict[str, Any]:
     """Pure deterministic transition. Both execution and archive replay use this."""
     if state["complete"]:
         raise WorkbenchError("session_already_complete")
     if state["actions_used"] >= scenario["max_actions"]:
         raise WorkbenchError("action_budget_exhausted")
+    native = structures.is_native(scenario)
+    native_request = structures.request(scenario, state, action) if native else None
     state["actions_used"] += 1
     operation = action.get("op") if isinstance(action, dict) else None
-    counter = operation if isinstance(operation, str) and operation in {"put", "check", "advance", "submit"} else "invalid"
+    supported = {"put", "check", "advance", "submit"} | ({"solve"} if native else set())
+    counter = operation if isinstance(operation, str) and operation in supported else "invalid"
     state["counts"][counter] = state["counts"].get(counter, 0) + 1
 
     def fail(code: str, **details: Any) -> dict[str, Any]:
         state["counts"]["rejected"] = state["counts"].get("rejected", 0) + 1
         return {"ok": False, "code": code, **details}
 
-    dependencies = evaluator.graph(scenario)
+    dependencies = _family(scenario).graph(scenario)
     if not isinstance(action, dict):
         return fail("action_object_required")
     fields = {"put": {"op", "target", "basis", "payload"}, "check": {"op", "target"},
               "advance": {"op"}, "submit": {"op", "claim"}}
+    if native:
+        fields["solve"] = {"op", "target"}
     if not isinstance(operation, str) or operation not in fields or set(action) != fields[operation]:
         return fail("action_contract")
+    if operation == "solve":
+        if native_request is None:
+            return fail("native_solve_target_or_budget")
+        if native_evidence is None:
+            raise WorkbenchError("native_evidence_missing")
+        target = action["target"]
+        state["counts"]["solver_calls"] = state["counts"].get("solver_calls", 0) + 1
+        state["counts"]["native_processes_started"] = state["counts"].get("native_processes_started", 0) + int(native_evidence["process_started"])
+        state["counts"]["native_wall_s"] = round(state["counts"].get("native_wall_s", 0) + native_evidence["duration_s"], 6)
+        state["artifacts"][target] = {"basis": _basis(state, dependencies, target),
+                                    "payload": deepcopy(native_evidence)}
+        state["checks"].pop(target, None)
+        if not native_evidence["valid"]:
+            return fail("native_solve_failed", target=target, checks=native_evidence["checks"])
+        return {"ok": True, "code": "native_evidence_recorded", "target": target,
+                "receipt_sha256": native_evidence["receipt_sha256"]}
     if operation in {"put", "check"}:
         target = action["target"]
         if not isinstance(target, str) or target not in dependencies:
             return fail("unknown_target")
         if operation == "put":
+            if native and target != "review":
+                return fail("native_artifact_is_broker_owned", target=target)
             basis = action["basis"]
             if (not isinstance(basis, dict) or set(basis) != set(dependencies[target])
                     or any(value is not None and (not isinstance(value, str) or not SHA.fullmatch(value))
@@ -242,8 +278,9 @@ def _transition(scenario: dict[str, Any], state: dict[str, Any], action: Any) ->
         statuses = _statuses(scenario, state)
         if statuses[target] in {"missing", "stale"}:
             return fail("missing_or_stale_evidence", target=target, status=statuses[target])
-        checks = evaluator.review(scenario, state["sources"], target,
-                                  state["artifacts"][target]["payload"])
+        checks = (structures.review(scenario, state, target, state["artifacts"][target]["payload"])
+                  if native else evaluator.review(scenario, state["sources"], target,
+                                                  state["artifacts"][target]["payload"]))
         passed = all(item["passed"] for item in checks)
         state["checks"][target] = {"artifact_sha256": _node_digest(state, target), "passed": passed}
         if not passed:
@@ -274,7 +311,8 @@ def _transition(scenario: dict[str, Any], state: dict[str, Any], action: Any) ->
         return fail("false_completion_claim", required_claim=required_claim)
     state["complete"] = True
     return {"ok": True, "code": "work_package_complete", "claim": required_claim,
-            "solver_execution": "not_performed", "engineering_approval": False}
+            "solver_execution": structures.limitations(state)["solver_execution"] if native else "not_performed",
+            "engineering_approval": False}
 
 
 @contextmanager
@@ -295,9 +333,13 @@ def _locked(root: Path) -> Iterator[None]:
 
 def _load(root: Path) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
     manifest = read_json(root / "session.json")
+    native = isinstance(manifest, dict) and structures.is_native(manifest.get("scenario"))
+    expected_fields = {"protocol", "session_id", "created_at", "scenario", "scenario_sha256",
+                       "engine_sha256", "subject", "manifest_sha256"}
+    if native:
+        expected_fields.add("executor")
     if (not isinstance(manifest, dict) or manifest.get("protocol") != PROTOCOL
-            or set(manifest) != {"protocol", "session_id", "created_at", "scenario", "scenario_sha256",
-                                 "engine_sha256", "subject", "manifest_sha256"}):
+            or set(manifest) != expected_fields):
         raise WorkbenchError("session_manifest_contract")
     envelope = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
     if digest(envelope) != manifest["manifest_sha256"]:
@@ -308,6 +350,8 @@ def _load(root: Path) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, An
     if engine_identity() != manifest["engine_sha256"]:
         raise WorkbenchError("engine_changed; keep the archive and start a new session")
     _validate_subject(manifest["subject"])
+    if native:
+        ccx.validate_executor(manifest["executor"])
     state = _initial(scenario)
     directory = root / "events"
     _ordinary(directory, directory=True)
@@ -317,6 +361,7 @@ def _load(root: Path) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, An
     files.sort(key=lambda item: item.name)
     events = []
     previous = manifest["manifest_sha256"]
+    native_jobs = set()
     for index, path in enumerate(files, 1):
         if path.name != f"{index:06d}.json":
             raise WorkbenchError("event_gap_or_unregistered_file")
@@ -325,11 +370,21 @@ def _load(root: Path) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, An
             raise WorkbenchError("event_contract")
         if type(event["seq"]) is not int or event["seq"] != index or event["previous_sha256"] != previous:
             raise WorkbenchError("event_chain_mismatch")
-        result = _transition(scenario, state, event["action"])
+        evidence = None
+        request = structures.request(scenario, state, event["action"]) if native else None
+        if request is not None:
+            job_id = f"{index:06d}"
+            native_jobs.add(job_id)
+            evidence = ccx.review_job(root / "native" / job_id, request, manifest["executor"])
+        result = _transition(scenario, state, event["action"], evidence)
         if canonical(result) != canonical(event["result"]):
             raise WorkbenchError("event_result_mismatch")
         events.append(event)
         previous = digest(event)
+    if native:
+        _ordinary(root / "native", directory=True)
+        if {p.name for p in (root / "native").iterdir()} != native_jobs:
+            raise WorkbenchError("unregistered_or_interrupted_native_job; preserve archive, do not delete attempts")
     return manifest, state, events
 
 
@@ -341,23 +396,30 @@ def _validate_subject(subject: Any) -> None:
         raise WorkbenchError("subject_contract")
 
 
-def start(root: Path, scenario: dict[str, Any], subject: dict[str, str]) -> dict[str, Any]:
+def start(root: Path, scenario: dict[str, Any], subject: dict[str, str], *,
+          ccx_path: str | None = None) -> dict[str, Any]:
     scenario = validate_scenario(scenario)
     _validate_subject(subject)
     manifest = {"protocol": PROTOCOL, "session_id": uuid.uuid4().hex,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "scenario": scenario, "scenario_sha256": digest(scenario),
                 "engine_sha256": engine_identity(), "subject": deepcopy(subject)}
+    if structures.is_native(scenario):
+        manifest["executor"] = ccx.executor(ccx_path)
+    elif ccx_path is not None:
+        raise WorkbenchError("ccx_argument_requires_native_family")
     manifest["manifest_sha256"] = digest(manifest)
     root.mkdir(parents=True, exist_ok=False)
     (root / "events").mkdir()
+    if structures.is_native(scenario):
+        (root / "native").mkdir()
     _write_new(root / "session.json", manifest)
     return observe(root)
 
 
 def _observation(manifest: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
     scenario = manifest["scenario"]
-    dependencies = evaluator.graph(scenario)
+    dependencies = _family(scenario).graph(scenario)
     return {"protocol": PROTOCOL, "scenario_id": scenario["id"], "scenario_sha256": manifest["scenario_sha256"],
             "subject": manifest["subject"], "phase_index": state["phase"],
             "phase": scenario["phases"][state["phase"]]["id"],
@@ -368,8 +430,8 @@ def _observation(manifest: dict[str, Any], state: dict[str, Any]) -> dict[str, A
             "artifacts": deepcopy(state["artifacts"]),
             "complete": state["complete"], "actions_used": state["actions_used"],
             "actions_remaining": scenario["max_actions"] - state["actions_used"],
-            "counts": deepcopy(state["counts"]), "contract": evaluator.public_contract(scenario),
-            "limitations": {"public_regression_only": True, "publishable": False,
+            "counts": deepcopy(state["counts"]), "contract": _family(scenario).public_contract(scenario),
+            "limitations": structures.limitations(state) if structures.is_native(scenario) else {"public_regression_only": True, "publishable": False,
                             "isolated_transfer_verified": False, "solver_execution": "not_performed",
                             "identity_scope": "declared_subject_only", "sandboxed": False,
                             "budget_scope": "brokered_actions_only"}}
@@ -389,7 +451,16 @@ def act(root: Path, action: Any) -> dict[str, Any]:
     action = loads(raw.decode("utf-8"))
     with _locked(root):
         manifest, state, events = _load(root)
-        result = _transition(manifest["scenario"], state, action)
+        evidence = None
+        scenario = manifest["scenario"]
+        request = structures.request(scenario, state, action) if structures.is_native(scenario) else None
+        if request is not None:
+            job = root / "native" / f"{len(events) + 1:06d}"
+            # Directory reservation precedes the external side effect. A crash leaves
+            # an explicit interrupted job and blocks silent retries / budget reset.
+            ccx.run_job(job, request, manifest["executor"])
+            evidence = ccx.review_job(job, request, manifest["executor"])
+        result = _transition(scenario, state, action, evidence)
         event = {"seq": len(events) + 1,
                  "previous_sha256": digest(events[-1]) if events else manifest["manifest_sha256"],
                  "action": action, "result": result}
@@ -402,8 +473,12 @@ def snapshot(root: Path) -> dict[str, Any]:
     """Recompute the report from every original action, not cached success flags."""
     with _locked(root):
         manifest, state, events = _load(root)
-        return {"protocol": PROTOCOL, "manifest": manifest,
-                "observation": _observation(manifest, state), "events": events}
+        result = {"protocol": PROTOCOL, "manifest": manifest,
+                  "observation": _observation(manifest, state), "events": events}
+        if structures.is_native(manifest["scenario"]):
+            result["native_receipts"] = {p.name: read_json(p / "receipt.json")
+                                         for p in sorted((root / "native").iterdir())}
+        return result
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -412,6 +487,7 @@ def main(argv: list[str] | None = None) -> int:
     begin = commands.add_parser("start", help="Create a fresh public-regression session")
     begin.add_argument("scenario", type=Path)
     begin.add_argument("--out", type=Path, required=True)
+    begin.add_argument("--ccx", help="Explicit existing CalculiX 2.23 binary; native family only")
     begin.add_argument("--subject", required=True)
     begin.add_argument("--revision", required=True)
     begin.add_argument("--kind", choices=("user_agent", "reference", "negative_control"), default="user_agent")
@@ -427,7 +503,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "start":
             value = start(args.out, read_json(args.scenario),
-                          {"name": args.subject, "revision": args.revision, "kind": args.kind})
+                          {"name": args.subject, "revision": args.revision, "kind": args.kind},
+                          ccx_path=args.ccx)
         elif args.command == "observe":
             value = observe(args.session)
         elif args.command == "act":
