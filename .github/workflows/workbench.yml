@@ -1,19 +1,25 @@
-name: Campaign archive audit
+name: Workbench and product scope
 
 "on":
   pull_request:
     paths:
       - 'comacbench/**'
-      - 'tests/test_campaign*.py'
+      - 'tests/test_workbench*.py'
+      - 'tests/test_campaign_checkout.py'
+      - 'examples/workbench/**'
+      - 'registry/product-scope.json'
+      - 'registry/registry.yaml'
+      - 'packs/**'
       - '.github/workflows/campaign-audit.yml'
+      - '.github/workflows/workbench.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  campaign:
-    name: Campaign / ${{ matrix.os }} / Python ${{ matrix.python }}
+  workbench:
+    name: Workbench / ${{ matrix.os }} / Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -46,7 +52,7 @@ jobs:
               raise ValueError('expected exact source commit')
           workspace = Path(os.environ['GITHUB_WORKSPACE']).resolve()
           workspace.mkdir(parents=True, exist_ok=True)
-          selected = ('comacbench', 'tests', '.github/workflows')
+          selected = ('comacbench', 'tests', '.github/workflows', 'examples/workbench', 'registry', 'packs')
           with tempfile.TemporaryDirectory(dir=os.environ['RUNNER_TEMP']) as temp:
               bare = Path(temp)/'source.git'
               def git(*args):
@@ -84,12 +90,21 @@ jobs:
                   # Validate all selected trees before materializing any source.
                   for archive, members in exports:
                       archive.extractall(workspace, members=members, filter='data')
-          for required in ('comacbench/campaign.py', 'tests/test_campaign.py'):
+          for required in ('comacbench/workbench.py', 'tests/test_workbench.py', 'registry/product-scope.json', 'examples/workbench/workload-change-v1.json'):
               if not (workspace/required).is_file():
                   raise ValueError('required source missing: ' + required)
-          print('Campaign source snapshot:', sha)
+          print('Workbench source snapshot:', sha)
           # END_SOURCE_EXPORT
-      - name: Test campaign guards and paired comparisons (standard library only)
-        run: python -m unittest discover -s tests -p "test_campaign*.py" -v
-      - name: Compile campaign sources
+      - name: Install existing YAML dependency for catalog checks
+        run: python -m pip install "PyYAML==6.0.2"
+      - name: Test environment, independent review, source export and catalog
+        run: python -m unittest discover -s tests -p "test_workbench*.py" -v
+      - name: Validate actual product paths and registry IDs
+        run: python -m comacbench.catalog --check
+      - name: Run complete public reference and two negative controls
+        run: |
+          python examples/workbench/reference_policy.py --out ./workbench-reference
+          python examples/workbench/reference_policy.py --negative stale --out ./workbench-stale
+          python examples/workbench/reference_policy.py --negative false-ready --out ./workbench-false-ready
+      - name: Compile source modules
         run: python -m compileall -q comacbench

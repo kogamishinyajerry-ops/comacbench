@@ -2,14 +2,26 @@
 
 **用可复查的任务，检查工程 Agent 交付的东西是否可靠。**
 
-An engineering-agent benchmark harness with native solver evidence.
+Engineering task environments, independent review, and controlled comparisons.
 
 Agent 提交脚本或算例输入；平台执行检查或真实求解器，从原始产物复算指标，说明哪里通过、哪里失败、哪些能力没有被测到。
 
 ## 第一次来，先选一个目的
 
+首发入口聚焦文件级工程工作包；简单题保留作接入或校准，通用数学／编程题转到诊断视图。角色清单由 [product-scope.json](registry/product-scope.json) 管理，不改变研究目录里的集成状态、许可证或历史分数。
+
+```bash
+python -m comacbench.catalog                  # 默认只列工作包 pilot
+python -m comacbench.catalog --role all       # 另看接入、校准、实验与兼容入口
+python -m comacbench.catalog --research-policy
+```
+
+目录只说明材料与用途，不证明运行环境已就绪。完整取舍见[产品范围](docs/product-scope.md)。
+
 | 你的目的 | 从哪里开始 | 能说明什么 |
 | --- | --- | --- |
+| 做文件级工况工作包 | `aviation-workload-starter-v1` | 单位、冲突、清单与旧结果对账；不执行求解器 |
+| 试验变更后的影响与重验 | [交互工作包指南](docs/workbench-change-workflow.md) | 一个三阶段公开合成场景；独立于 pack/Campaign 协议 |
 | 先看懂一次评测怎样完成 | [初次接入指南](docs/first-run.zh-CN.md)；`aviation-data-starter-v1` | 理解材料检查、校准、接口自检和真实 Agent 评测的区别 |
 | 检查结构建模脚本 | `aviation-structures-v2`；先准备 CalculiX | 一个静力梁任务的输入契约、实际求解和数值核对 |
 | 研究 CFD 原生证据检查 | `aviation-cfd-step-v1`；需固定 OpenFOAM 10 Docker 环境 | 受限 Re=100 后向台阶；当前不能代表飞机 CFD 能力 |
@@ -17,6 +29,18 @@ Agent 提交脚本或算例输入；平台执行检查或真实求解器，从�
 | 接入自己的任务或研究模型差异 | [开发者协议](docs/aviation-quickstart.md)、[研究目录](registry/registry.yaml) | 按任务契约和既有评测边界扩展 |
 
 **当前用于受控开发与试测，不是飞机设计放行工具。** 示例满分不证明真实工程迁移；参考程序满分不属于模型成绩；材料检查通过不代表这台机器已经能运行。
+
+## 可运行试验：已有结果经受一次变更
+
+```bash
+python examples/workbench/reference_policy.py --out ./change-reference-01
+python examples/workbench/reference_policy.py --negative stale --out ./change-stale-01
+python examples/workbench/reference_policy.py --negative false-ready --out ./change-false-ready-01
+```
+
+打开各目录的 `report/report.html`：查看哪些证据因变更失效、哪些得以保留，以及拒绝与修复记录。`artifacts/` 中可检查独立 JSON 交付物、来源摘要与当前状态。参考流程不调用模型；两个负例应被拦截，不计为模型成绩。
+
+新 `python -m comacbench.workbench` 提供 `start / observe / act / report`；Agent 用已有宿主调用即可，不新增 Agent 平台。`put → check → advance → submit` 保留每次尝试并限制本工具行动数。当前只检查输入工作包，不执行工程仿真；身份仍是声明信息，不限制会话外计算。详细规则和已有协议边界见[指南](docs/workbench-change-workflow.md)。
 
 ## 先完成一个不需要工程求解器的例子
 
@@ -55,6 +79,7 @@ python -m comacbench run packs/aviation-data-starter-v1 --agent ./my-agent.json 
 
 | 评测包 | 任务条目 | 用途与限制 |
 | --- | ---: | --- |
+| `aviation-workload-starter-v1` | 4 | 首发试测工作包；公开合成工况到输入文件、运行清单与异常对账，无真实求解 |
 | `aviation-data-starter-v1` | 2 | 首次接入；复用 core-v1 两个函数级规则任务，无工程求解器 |
 | `aviation-structures-v2` | 1 | C3D20 静力梁；六项输入契约检查、CalculiX 求解及反力／位移核对 |
 | `aviation-core-v1` | 3 | 混合冒烟包，包含结构求解，因此整包仍需 CalculiX |
@@ -62,7 +87,7 @@ python -m comacbench run packs/aviation-data-starter-v1 --agent ./my-agent.json 
 
 这些包共用部分任务，不能把条目相加当作独立场景覆盖。Re=100/200/300 的 48 组研究组合经 `comacbench.admission` 接入，为研究证据，不是 48 个新增计分任务；部分历史原始场已清理，复核边界见报告。
 
-研究目录声明 31 项 integrated benchmark、约 2.7k 个任务，涉及知识、代码、CAD、CFD、结构、动力、飞控、总体设计、办公与适航等方向。这一层用于研究、基线和判分资产积累，不等于全部已成为可直接交给工程师使用的产品包。
+研究目录中的 integrated 表示其既有接入状态，不自动赋予产品主线资格。通用数学／编程与孤立知识问答转为诊断；几何、表格、文档检查器保留为组件；物理系数预测保留为独立研究。历史任务和分数不删除，也不通过改角色改变评分。新增内容优先服务变更、重验和完整交付，不追求题目数量。
 
 事实清单：[registry/registry.yaml](registry/registry.yaml)；许可记录：[registry/license-notes.md](registry/license-notes.md)；历史架构与数量说明：[2026-09-11 评估](report/2026-09-11-dev-status-and-beta-readiness.md)。
 
@@ -74,7 +99,9 @@ python -m comacbench run packs/aviation-data-starter-v1 --agent ./my-agent.json 
 
 ## 当前版本与部署边界
 
-Python 包版本为 0.3.1。较新的落地记录见 [2026-09-20 Windows 报告](report/2026-09-20-windows-handoff-landing.md)：142 项测试的记录为 **8 errors、17 skipped、0 failures**，不能概括为完整通过；CalculiX 已有实机验证记录，StarCCM+ 安装在位不等于商业 CFD benchmark 闭环已通过。
+Python 包版本为 0.3.1。历史落地记录见 [2026-09-20 Windows 报告](report/2026-09-20-windows-handoff-landing.md)：142 项测试的记录为 **8 errors、17 skipped、0 failures**，不能概括为完整通过；CalculiX 已有实机验证记录，StarCCM+ 安装在位不等于商业 CFD benchmark 闭环已通过。
+
+本轮交互工作包的专项验证见[验收记录](docs/workbench-acceptance-2026-10-02.md)，与历史全仓库／求解器验证分开阅读。
 
 首发范围、工程任务迁移和后续 PR 建议见[内网首发审查](docs/intranet-launch-review-2026-09-21.md)。源码及资料已提交不等于离线交付依赖齐全；应另行核对 Windows 文件名、LFS 资产、目标平台依赖、许可证和干净机器上的断网运行。
 
@@ -96,7 +123,7 @@ Agent 协议是每题一个受信任本地进程：stdin 接收一个 JSON 请�
 报告是离线 HTML，不依赖 CDN、外部字体或遥测。CLI 退出码：`0` 表示对应操作正常完成，**不保证真实 Agent 满分**；`2` 表示材料、身份或运行错误；`3` 表示校准失败。
 
 ```text
-comacbench/       pack CLI、预检、运行、校准、证据和离线报告
+comacbench/       pack、catalog、workbench、校准、证据和离线报告
 packs/            可移植评测包与轻量首跑视图
 runners/          研究运行器、solver 后端与判分基础
 registry/         研究目录和许可记录
