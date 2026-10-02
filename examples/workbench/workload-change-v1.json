@@ -1,0 +1,27 @@
+{
+  "protocol": "comacbench.workload-change.v1",
+  "id": "workload-change-v1",
+  "revision": "1.0.0",
+  "title": "工况工作包：版本变更、影响传播与重新验收",
+  "description": "公开合成工作包。先整理基线工况；工况升版后只更新受影响记录；程序升版后更新运行清单及报告。资料缺单位时必须列入需审查清单。不会运行性能程序或任何工程求解器。",
+  "license": "CC0-1.0 (self-built synthetic scenario data only)",
+  "max_actions": 48,
+  "conditions": {
+    "ground": {"case_id": "SYNTH-01", "revision": "A", "rows": [{"altitude": {"value": 0, "unit": "m"}, "mass_flow": {"value": 1.2, "unit": "kg/s"}}]},
+    "cruise": {"case_id": "SYNTH-01", "revision": "A", "rows": [{"altitude": {"value": 10000, "unit": "ft"}, "mass_flow": {"value": 2, "unit": "lb/s"}}]},
+    "reserve": {"case_id": "SYNTH-01", "revision": "A", "rows": [{"altitude": {"value": 5000, "unit": "m"}, "mass_flow": {"value": 0.9, "unit": "kg/s"}}]}
+  },
+  "program": {"name": "synthetic-input-consumer", "revision": "1.0"},
+  "note": {"text": "Only public synthetic records; no aircraft parameters."},
+  "phases": [
+    {"id": "baseline", "instruction": "完成基线工作包。检查每个工况、运行清单和报告，然后 advance。", "changes": {}},
+    {"id": "conditions-b", "instruction": "cruise 的工况已更改；reserve 的新资料缺失高度单位，不能猜测。ground 没有变化，应保留其有效证据。", "changes": {
+      "condition_cruise": {"case_id": "SYNTH-01", "revision": "B", "rows": [{"altitude": {"value": 12000, "unit": "ft"}, "mass_flow": {"value": 2.2, "unit": "lb/s"}}]},
+      "condition_reserve": {"case_id": "SYNTH-01", "revision": "B", "rows": [{"altitude": {"value": 6000}, "mass_flow": {"value": 0.9, "unit": "kg/s"}}]},
+      "note": {"text": "A release note changed too; this is not an engineering dependency."}
+    }},
+    {"id": "program-2", "instruction": "程序版本更新到 2.0。输入工况没有变化。重新核对运行清单及报告，不得将未执行的程序写成已执行。完成后 submit，claim 应与实际需审查状态一致。", "changes": {
+      "program": {"name": "synthetic-input-consumer", "revision": "2.0"}
+    }}
+  ]
+}
