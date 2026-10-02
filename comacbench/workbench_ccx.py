@@ -116,12 +116,18 @@ def executor(path: str | None = None) -> dict[str, Any]:
         result = _process([str(binary), '-v'], root, root / 'version.log', 5)
         text = (root / 'version.log').read_bytes()[:8192].decode('utf-8', errors='replace')
     versions = re.findall(r'\bVersion\s+(\d+\.\d+)\b', text, re.I)
-    if result['exit_code'] != 0 or result['timed_out'] or versions != [VERSION]:
-        raise api.WorkbenchError(f'ccx_version_unverified: expected {VERSION}; observed {versions}')
+    # Upstream CalculiX.c handles -v through stop.f, which calls exit(201).
+    # Permit that status only for the exact version banner, never for a solve.
+    # https://github.com/Dhondtguido/CalculiX/blob/master/src/stop.f
+    if (result['exit_code'] not in (0, 201) or result['timed_out']
+            or result['output_limit'] or result['launch_error'] is not None
+            or not result['process_started']
+            or not re.fullmatch(r'\s*This is Version 2\.23\s*', text)):
+        raise api.WorkbenchError(f"ccx_version_unverified: expected {VERSION}; observed {versions}; exit={result['exit_code']}")
     if sha(binary) != before:
         raise api.WorkbenchError('ccx_changed_during_probe')
     return {'path': str(binary), 'sha256': before, 'version': VERSION,
-            'version_output': text, 'os': os.name,
+            'version_output': text, 'version_exit_code': result['exit_code'], 'os': os.name,
             'trust_scope': 'operator_supplied_local_binary_not_attestation',
             'library_env_sha256': api.digest({k: os.environ.get(k) for k in
                                             ('LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH')})}
@@ -129,13 +135,14 @@ def executor(path: str | None = None) -> dict[str, Any]:
 
 def validate_executor(value: Any) -> None:
     api = _api()
-    keys = {'path', 'sha256', 'version', 'version_output', 'os', 'trust_scope', 'library_env_sha256'}
+    keys = {'path', 'sha256', 'version', 'version_output', 'version_exit_code', 'os', 'trust_scope', 'library_env_sha256'}
     if (not isinstance(value, dict) or set(value) != keys
             or not isinstance(value['path'], str) or not Path(value['path']).is_absolute()
             or not isinstance(value['sha256'], str) or not api.SHA.fullmatch(value['sha256'])
             or not isinstance(value['library_env_sha256'], str)
             or not api.SHA.fullmatch(value['library_env_sha256'])
             or value['version'] != VERSION or value['os'] not in ('posix', 'nt')
+            or type(value['version_exit_code']) is not int or value['version_exit_code'] not in (0, 201)
             or value['trust_scope'] != 'operator_supplied_local_binary_not_attestation'
             or not isinstance(value['version_output'], str) or len(value['version_output']) > 8192):
         raise api.WorkbenchError('native_executor_contract')

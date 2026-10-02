@@ -36,6 +36,9 @@ def git(repo, *args):
 
 
 def source_identity(repo: Path, expected: str | None = None) -> dict:
+    # Canonicalize OS aliases such as macOS /var -> /private/var, as the CLI does.
+    # Only links inside the source export belong to its no-symlink contract.
+    repo=repo.resolve()
     marker=repo/'SOURCE_SNAPSHOT.json'
     if marker.is_file():
         data=json.loads(marker.read_text(encoding='utf-8'))
@@ -48,7 +51,8 @@ def source_identity(repo: Path, expected: str | None = None) -> dict:
             if path.is_absolute() or '..' in path.parts or '\\' in name or ':' in name:
                 raise ValueError('snapshot_path')
             f=repo/name
-            if any(p.is_symlink() for p in [f,*f.parents] if p!=repo.parent):raise ValueError('snapshot_link')
+            if any(p.is_symlink() for p in [f,*f.parents] if p.is_relative_to(repo)):
+                raise ValueError('snapshot_link')
             if not f.is_file() or hashed(f)!=digest:raise ValueError('snapshot_file_changed: '+name)
         # Python cache is derived and deliberately not part of source identity.
         actual={p.relative_to(repo).as_posix() for p in repo.rglob('*') if p.is_file()

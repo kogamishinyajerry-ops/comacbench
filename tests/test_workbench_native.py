@@ -50,7 +50,7 @@ class NativeBridgeTests(unittest.TestCase):
         self.session = self.root / 'session'
         binary = Path(sys.executable).resolve()
         self.bound = {'path':str(binary), 'sha256':ccx.sha(binary), 'version':'2.23',
-                      'version_output':'TEST DOUBLE, NOT A SOLVER', 'os':os.name,
+                      'version_output':'TEST DOUBLE, NOT A SOLVER', 'version_exit_code':0, 'os':os.name,
                       'trust_scope':'operator_supplied_local_binary_not_attestation',
                       'library_env_sha256':wb.digest({k:os.environ.get(k) for k in ('LD_LIBRARY_PATH','DYLD_LIBRARY_PATH')})}
         self.probe = mock.patch.object(ccx, 'executor', return_value=self.bound).start()
@@ -160,7 +160,7 @@ class NativeBridgeTests(unittest.TestCase):
 
     def test_process_failure_overrules_correct_looking_dat(self):
         self.start()
-        for code, timeout in ((1,False),(0,True)):
+        for code, timeout in ((1,False),(201,False),(0,True)):
             def broken(*args):
                 r = fake_process(*args); r.update(exit_code=code,timed_out=timeout); return r
             self.process.side_effect = broken
@@ -327,6 +327,34 @@ class NativeParserTests(unittest.TestCase):
 
 
 class RealSubprocessGuardTests(unittest.TestCase):
+    def probe(self, text='\nThis is Version 2.23\n\n', **changes):
+        def process(command, root, log, timeout):
+            self.assertEqual(command[1:], ['-v'])
+            log.write_text(text)
+            return dict(exit_code=201,timed_out=False,output_limit=False,launch_error=None,
+                        duration_s=0.01,process_started=True) | changes
+        with mock.patch.object(ccx,'_process',side_effect=process):
+            return ccx.executor(sys.executable)
+
+    def test_upstream_version_query_stop_status_is_recorded(self):
+        for code in (0,201):
+            bound=self.probe(exit_code=code)
+            self.assertEqual(bound['version_exit_code'],code)
+            ccx.validate_executor(bound)
+
+    def test_version_banner_does_not_hide_process_failures(self):
+        for change in ({'exit_code':1},{'exit_code':-9},{'timed_out':True},
+                       {'output_limit':True},{'launch_error':'OSError'},{'process_started':False}):
+            with self.subTest(change=change),self.assertRaisesRegex(wb.WorkbenchError,'version_unverified'):
+                self.probe(**change)
+
+    def test_version_probe_rejects_wrong_ambiguous_or_error_output(self):
+        for text in ('This is Version 2.22','This is Version 2.230','Version 2.23',
+                     'This is Version 2.23\n*ERROR in loader',
+                     'This is Version 2.23\nThis is Version 2.23'):
+            with self.subTest(text=text),self.assertRaisesRegex(wb.WorkbenchError,'version_unverified'):
+                self.probe(text)
+
     def test_timeout_kills_real_test_process(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d)

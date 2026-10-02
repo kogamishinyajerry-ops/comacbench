@@ -59,5 +59,30 @@ class HandoffTests(unittest.TestCase):
         self.assertNotEqual(self.run_cli().returncode,0)
         self.assertFalse((self.root/'evidence.zip').exists())
 
+    def test_source_under_os_directory_alias_is_accepted(self):
+        alias=self.root/'alias'
+        try: alias.symlink_to(self.root, target_is_directory=True)
+        except OSError as exc: self.skipTest(f'directory symlinks unavailable: {exc}')
+        self.assertEqual(module.source_identity(alias/'export'),module.source_identity(self.repo))
+
+    def test_links_inside_snapshot_are_rejected_even_with_matching_hash(self):
+        original=self.repo/'source.py'
+        external=self.root/'external.py'
+        external.write_bytes(original.read_bytes())
+        original.unlink()
+        try: original.symlink_to(external)
+        except OSError as exc: self.skipTest(f'symlinks unavailable: {exc}')
+        with self.assertRaisesRegex(ValueError,'snapshot_link'):module.source_identity(self.repo)
+
+    def test_linked_subdirectory_inside_snapshot_is_rejected(self):
+        external=self.root/'external';external.mkdir()
+        (external/'source.py').write_text('# outside source')
+        try: (self.repo/'nested').symlink_to(external,target_is_directory=True)
+        except OSError as exc: self.skipTest(f'directory symlinks unavailable: {exc}')
+        data=json.loads((self.repo/'SOURCE_SNAPSHOT.json').read_text())
+        data['files']['nested/source.py']=module.hashed(external/'source.py')
+        (self.repo/'SOURCE_SNAPSHOT.json').write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError,'snapshot_link'):module.source_identity(self.repo)
+
 
 if __name__=='__main__':unittest.main()
