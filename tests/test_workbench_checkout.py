@@ -20,6 +20,7 @@ class WorkbenchExportTests(upstream.SourceExportTests):
             source.append(('link.py', '120000', self.blob('../../outside')))
         tree = self.tree([
             ('comacbench', '40000', self.tree(source)),
+            ('scripts', '40000', self.tree([('dsh_public_boundary.mjs', '100644', content)])),
             ('tests', '40000', self.tree([('test_campaign.py', '100644', content), ('test_workbench.py', '100644', content)])),
             ('data', '40000', self.tree([('strainRateViscosityModel:nu', '100644', content)])),
             ('examples', '40000', self.tree([('workbench', '40000', self.tree([
@@ -38,4 +39,5 @@ class WorkbenchExportTests(upstream.SourceExportTests):
         self.assertTrue((self.workspace / 'examples/workbench/workload-change-v1.json').is_file())
         self.assertTrue((self.workspace / 'registry/product-scope.json').is_file())
         self.assertTrue((self.workspace / 'packs/placeholder.txt').is_file())
+        self.assertTrue((self.workspace / 'scripts/dsh_public_boundary.mjs').is_file())
         self.assertFalse((self.workspace / 'data').exists())

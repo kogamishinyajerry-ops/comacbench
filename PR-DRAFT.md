@@ -16,7 +16,8 @@ PR 保持 Draft，叠在 `review/change-workbench-product-scope-20261002`；不�
 
 ## 实际验证
 
-- 最终受试源码 `8a46c97b812ff09213728747c61af59aa3d743be`；macOS 26.5.2、Python 3.12.13、既有 CalculiX 2.23。后续提交仅更新交付文档。
+- 最终受试源码 `8a46c97b812ff09213728747c61af59aa3d743be`；macOS 26.5.2、Python 3.12.13、既有 CalculiX 2.23。后续提交仅更新 CI 源码导出、导出专项和交付文档；受试运行时代码一致。
+- 修复首次 CI 导出遗漏 wrapper 的问题：补入 scripts 子树、必需文件检查与导出断言；失败日志保留。
 - 124 项工作台专项：123 passed、1 native opt-in skipped。DSH 权限专项通过，禁止工具实现执行次数为零，后加 allow policy 无法覆盖 guard。
 - 10 份历史会话按原引擎复读通过，与原报告完全一致；27 个归档 job，0 新求解、0 版本探测。reference 15/3 complete=true/needs_review；stale 与 false-ready 继续被拒绝。
 - 唯一初次复测失败：7 工具调用、0 行动、0 求解；JSON 字符串被网关拒绝，不能作模型能力成绩。

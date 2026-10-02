@@ -4,6 +4,7 @@ name: Workbench and product scope
   pull_request:
     paths:
       - 'comacbench/**'
+      - 'scripts/**'
       - 'tests/test_workbench*.py'
       - 'tests/test_campaign_checkout.py'
       - 'examples/workbench/**'
@@ -52,7 +53,7 @@ jobs:
               raise ValueError('expected exact source commit')
           workspace = Path(os.environ['GITHUB_WORKSPACE']).resolve()
           workspace.mkdir(parents=True, exist_ok=True)
-          selected = ('comacbench', 'tests', '.github/workflows', 'examples/workbench', 'registry', 'packs')
+          selected = ('comacbench', 'scripts', 'tests', '.github/workflows', 'examples/workbench', 'registry', 'packs')
           with tempfile.TemporaryDirectory(dir=os.environ['RUNNER_TEMP']) as temp:
               bare = Path(temp)/'source.git'
               def git(*args):
@@ -90,7 +91,7 @@ jobs:
                   # Validate all selected trees before materializing any source.
                   for archive, members in exports:
                       archive.extractall(workspace, members=members, filter='data')
-          for required in ('comacbench/workbench.py', 'tests/test_workbench.py', 'registry/product-scope.json', 'examples/workbench/workload-change-v1.json'):
+          for required in ('comacbench/workbench.py', 'scripts/dsh_public_boundary.mjs', 'tests/test_workbench.py', 'registry/product-scope.json', 'examples/workbench/workload-change-v1.json'):
               if not (workspace/required).is_file():
                   raise ValueError('required source missing: ' + required)
           print('Workbench source snapshot:', sha)

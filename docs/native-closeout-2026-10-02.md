@@ -1,7 +1,7 @@
 # PR #8 收口实测记录
 
 本轮按独立审阅 `5392352453` 收口。起点 `ee6872ea26c9cc3e7605481b8f422a0c6bc6ad1a`，仍在 `codex/native-calibration-local-20261002`，没有合并或切换默认分支。
-受限复测最终源码 `8a46c97b812ff09213728747c61af59aa3d743be`；其后的交付提交只更新本记录与 PR 文案。
+受限复测最终源码 `8a46c97b812ff09213728747c61af59aa3d743be`；其后的提交只更新 CI 源码导出、导出专项与交付文档，受试入口和物理引擎不变。
 
 ## 实际结果
 
@@ -43,3 +43,7 @@ Windows 原生执行/超时、Windows 浏览器、wheel、离线部署、完整�
 证据目录：`/Users/Zhuanz/Downloads/COMACBench-Closeout-2026-10-02`。
 交付 ZIP：`/Users/Zhuanz/Downloads/COMACBench-PR8-Closeout-Evidence-2026-10-02.zip`。
 包含两次受试轨迹、修复前后源码、权限探测、原始专项日志、全部相关求解产物、历史原引擎复读、旧记录独立审阅附录、浏览器受阻及授权记录。原 ZIP 与旧现场保持不变。
+
+## CI 导出修复
+
+首次推送的 Workbench 四个矩阵 job 因源码导出遗漏 scripts/dsh_public_boundary.mjs 而失败；原始 CI 日志已保留。补入 scripts 子树及必需文件检查，扩展既有导出专项验证 wrapper 存在，继续排除 Windows 受阻的研究资产。此修复不改运行时、物理逻辑或模型试验；无需新增原生/模型运行。最终线上结论见证据包 ci-final.json。
