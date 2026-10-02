@@ -90,7 +90,7 @@ class PublicBoundaryTests(unittest.TestCase):
             "gateway_sha256": sha(ROOT / "comacbench/workbench_public.py"),
             "budget": {"actions": 32, "solver_calls": 6, "solve_timeout_s": 120, "tool_calls": 96, "model_assemblies": 64},
             "model": model, "fresh_headless_session": True, "creation_source": "startup", "runtime_context_suppressed": True,
-            "mode": "native", "task_scope": "same_public_task_development_repeat", "prior_public_task_exposure": True,
+            "mode": "native", "task_scope": "same_public_task_development_repeat", "prior_public_task_exposure": True, "public_observe_success": True,
             "probe": {"all_denied": True, "schemas": ["workbench"], "probes": [{"is_error": True}] * 9}, "agent_id": "test", "complete_public_system": "fixture"}
         request = {"op": "observe"}; args = {"request": request}
         output = json.dumps(dispatch(self.session, request))
@@ -134,6 +134,27 @@ class PublicBoundaryTests(unittest.TestCase):
         self.start(); data = wb.snapshot(self.session)
         data.update(unknown_admission(reason='<script>alert(1)</script>'))
         self.assertNotIn('<script>', render(data))
+
+    def test_string_request_trace_fails_closed_without_crashing(self):
+        data, audit = self.audit_fixture()
+        control = json.loads((audit / "control.json").read_text())
+        control.pop("public_observe_success")
+        (audit / "control.json").write_text(json.dumps(control))
+        rows = [json.loads(x) for x in (audit / "boundary.jsonl").read_text().splitlines()]
+        stream = [json.loads(x) for x in (audit / "dsh-events.jsonl").read_text().splitlines()]
+        request = '{"op":"observe"}'
+        output = json.dumps({"result": {"ok": False, "code": "public_request_denied"}})
+        for row in rows:
+            if row["type"] == "broker": row.update(request=request, stdout=output)
+            if row["type"] == "tool_result": row.update(arguments={"request": request}, content=[{"type": "text", "text": output}])
+        for row in stream:
+            if row["type"] == "tool_call": row["input"] = {"request": request}
+            if row["type"] == "tool_result": row["result"] = output
+        (audit / "boundary.jsonl").write_text(''.join(json.dumps(r) + '\n' for r in rows))
+        (audit / "dsh-events.jsonl").write_text(''.join(json.dumps(r) + '\n' for r in stream))
+        result = audit_trial(data, audit)
+        self.assertFalse(result["score_admissible"])
+        self.assertFalse(result["audit_checks"]["entry_contract_probed"])
 
 
 if __name__ == '__main__':

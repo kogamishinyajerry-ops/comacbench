@@ -56,6 +56,7 @@ def audit_trial(data: dict, directory: Path) -> dict:
             "existing_model": control["model"]["provider"] == "zai-coding-cn" and control["model"]["model"] == "glm-4.7",
             "fresh_context": control["fresh_headless_session"] is True and control["creation_source"] == "startup",
             "context_boundary": control["runtime_context_suppressed"] is True and control["mode"] == "native",
+            "entry_contract_probed": control.get("public_observe_success") is True,
             "scope": control["task_scope"] == "same_public_task_development_repeat" and control["prior_public_task_exposure"] is True,
             "live_denials": control["probe"]["all_denied"] is True and control["probe"]["schemas"] == ["workbench"]
                             and len(control["probe"]["probes"]) == 9 and all(p["is_error"] is True for p in control["probe"]["probes"]),
@@ -81,7 +82,7 @@ def audit_trial(data: dict, directory: Path) -> dict:
         calls = [r for r in stream if r["type"] == "tool_call"]
         results = [r for r in stream if r["type"] == "tool_result"]
         host_results = [r for r in rows if r["type"] == "tool_result" and not r["call_id"].startswith("boundary-probe-")]
-        broker = [r for r in rows if r["type"] == "broker"]
+        broker = [r for r in rows if r["type"] == "broker" and not r["call_id"].startswith("boundary-probe-")]
         checks["all_calls_captured"] = (0 < len(calls) <= 96 and len(calls) == len(host_results) == len(results)
             and len({r["callId"] for r in calls}) == len(calls)
             and {r["callId"] for r in calls} == {r["callId"] for r in results} == {r["call_id"] for r in host_results})
@@ -93,8 +94,8 @@ def audit_trial(data: dict, directory: Path) -> dict:
         checks["results_match"] = all(r["result"] == projected[r["callId"]] for r in results)
         checks["brokers_match"] = all(r["call_id"] in captured and r["request"] == captured[r["call_id"]]["arguments"]["request"]
             and r["exit_code"] == 0 and json.loads(r["stdout"]) == json.loads(projected[r["call_id"]]) for r in broker)
-        accepted = [r["request"] for r in broker if r["request"].get("op") not in {"observe", "read_native"}
-                    and "observation" in json.loads(r["stdout"])]
+        accepted = [r["request"] for r in broker if "observation" in json.loads(r["stdout"])
+                    and isinstance(r["request"], dict) and r["request"].get("op") not in {"observe", "read_native"}]
         checks["actions_match_environment"] = accepted == [e["action"] for e in data["events"]]
         checks["no_unlogged_host_tool"] = len(broker) == sum(not r["is_error"] for r in host_results)
         checks["public_projection_only"] = all("remaining_phases" not in json.loads(r["stdout"]).get("observation", {})
@@ -108,7 +109,7 @@ def audit_trial(data: dict, directory: Path) -> dict:
                              score_admissible=True, deviation_reasons=[])
         else:
             admission["deviation_reasons"] = ["Host audit did not establish conformance: " + ", ".join(issues)]
-    except (OSError, ValueError, KeyError, TypeError, StopIteration, IndexError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, StopIteration, IndexError) as exc:
         admission["deviation_reasons"] = ["Incomplete or inconsistent host audit: " + type(exc).__name__]
     return admission
 

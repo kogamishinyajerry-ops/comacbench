@@ -22,7 +22,22 @@ export function installBoundary(ctx, invoke, record, maxToolCalls = 96) {
   let calls = 0;
   ctx.tools.register(defineTool({
     name: 'workbench', description: 'Operate one host-bound public calibration session. observe returns the self-contained contract and current inputs. No filesystem paths, shell, code, arbitrary deck, or other sessions are accepted.',
-    parameters: { request: { type: 'json', required: true, description: 'JSON object with selector op. Start with {"op":"observe"}.' } },
+    parameters: { request: { type: 'object', required: true, additionalProperties: false,
+      description: 'An object, not a JSON-encoded string. Start with {"op":"observe"}.',
+      properties: {
+        op: { type: 'string', required: true, enum: ['observe', 'solve', 'check', 'put', 'advance', 'submit', 'read_native'] },
+        target: { type: 'string' }, name: { type: 'string' },
+        claim: { type: 'string', enum: ['requirements_met', 'needs_review'] },
+        basis: { type: 'object', additionalProperties: true, properties: {} },
+        payload: { type: 'object', additionalProperties: false, properties: {
+          requirement_revision: { type: 'string', required: true },
+          claim: { type: 'string', required: true, enum: ['requirements_met', 'needs_review'] },
+          cases: { type: 'array', required: true, items: { type: 'object', additionalProperties: false, properties: {
+            point: { type: 'string', required: true }, uy_mm: { type: 'number', required: true },
+            rfy_n: { type: 'number', required: true }, meets_requirement: { type: 'boolean', required: true },
+          } } },
+        } },
+      } } },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     async execute(args, exec) {
       return await invoke(args.request, exec.signal, exec.callId);
@@ -130,8 +145,12 @@ export async function apply(ctx, config) {
     agentSeen = true;
     restrictAgent(agent);
     const probe = await probeBoundary(ctx, agent);
+    const observationProbe = await ctx.tools.execute({ callId: 'boundary-probe-observe', name: 'workbench',
+      arguments: { request: { op: 'observe' } }, agent, signal: new AbortController().signal });
+    if (observationProbe.isError || observationProbe.value?.result?.code !== 'observed'
+        || observationProbe.value?.observation?.actions_used !== 0) throw new Error('public_observe_probe_failed');
     const completed = { ...proof, probe, agent_id: agent.id, creation_source: source,
-      fresh_headless_session: true };
+      fresh_headless_session: true, public_observe_success: true };
     writeFileSync(join(auditDir, 'control.json'), JSON.stringify(completed, null, 2) + '\n', { flag: 'wx' });
     record({ type: 'ready', agent_id: agent.id, session_manifest_sha256: manifest.manifest_sha256 });
     const assembled = await ctx.systemPrompt.assemble({ scope: agent, agent });
