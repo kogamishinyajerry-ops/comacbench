@@ -1,0 +1,27 @@
+{
+  "protocol": "comacbench.structures-change.v1",
+  "id": "structures-change-v1",
+  "revision": "0.1.0-experimental",
+  "title": "原生结构校准工作包：载荷变更与选择性重验",
+  "description": "固定 C3D20 校准梁；两组载荷独立求解。更改一组载荷后只重算受影响工况，再收紧位移验收限值而不重复求解。待目标机验证；不代表支架设计、隐藏迁移或工程放行。",
+  "license": "Self-built synthetic scenario data, CC0-1.0; repository code license unchanged",
+  "max_actions": 32,
+  "max_solver_calls": 6,
+  "solve_timeout_s": 120,
+  "loads": {
+    "service": {"force_y_n": -100.0, "revision": "A"},
+    "limit": {"force_y_n": -120.0, "revision": "A"}
+  },
+  "requirement": {"max_tip_mm": 0.6, "revision": "A"},
+  "note": {"text": "100 x 10 x 5 mm, steel E=210000 MPa, nu=0.3, C3D20 20x4x2; fixed calibration only."},
+  "phases": [
+    {"id": "baseline", "instruction": "solve 两个 solution 节点，check 原生证据，提交并 check review 后 advance。", "changes": {}},
+    {"id": "load-b", "instruction": "limit 载荷变化，service 未变。只补充必要的求解，更新 review。说明文字变化不影响物理证据。", "changes": {
+      "load_limit": {"force_y_n": -140.0, "revision": "B"},
+      "note": {"text": "Load revision B; unchanged service evidence should be retained."}
+    }},
+    {"id": "requirement-b", "instruction": "只收紧位移验收限值到 0.45 mm。两组原始计算仍有效；重新判断符合性，不能虚报全部满足。submit 的 claim 必须与证据一致。", "changes": {
+      "requirement": {"max_tip_mm": 0.45, "revision": "B"}
+    }}
+  ]
+}

@@ -42,15 +42,15 @@ class CatalogTests(unittest.TestCase):
 
     def test_change_workbench_is_explicitly_experimental_and_not_a_pack(self):
         rows = catalog.selected(self.root, "experimental")
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0]["kind"], "workbench")
+        self.assertEqual({r["id"] for r in rows}, {"workload-change-v1", "structures-change-v1"})
+        self.assertTrue(all(r["kind"] == "workbench" for r in rows))
         self.assertIn("非既有 pack", rows[0]["limits"])
 
     def test_onboarding_and_calibration_are_available_but_not_pilot_scores(self):
         self.assertEqual(len(catalog.selected(self.root, "onboarding")), 1)
         self.assertEqual(len(catalog.selected(self.root, "calibration")), 2)
         self.assertEqual(len(catalog.selected(self.root, "legacy")), 1)
-        self.assertEqual(len(catalog.selected(self.root, "all")), 6)
+        self.assertEqual(len(catalog.selected(self.root, "all")), 7)
 
     def test_generic_benchmarks_are_diagnostic_even_when_integrated(self):
         self.material()
