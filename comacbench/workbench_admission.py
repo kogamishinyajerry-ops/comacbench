@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 
 
@@ -82,6 +83,31 @@ def _contract_sha(path):
 def _digest(value):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
                                     separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+
+
+
+def _json_value_equal(left, right):
+    """Exact JSON-value equality across Python/JavaScript number encodings.
+
+    JSON.stringify turns -100.0 into -100.  Treat these as the same numeric
+    value, while keeping booleans, strings, keys and array order strict.  No
+    tolerance or float coercion: changed values, even adjacent floats, fail.
+    This is only for response semantics; archive hashes and recorded input
+    hashes remain byte/content identities and still use their original checks.
+    """
+    if type(left) in (int, float) and type(right) in (int, float):
+        return (not (type(left) is float and not math.isfinite(left))
+                and not (type(right) is float and not math.isfinite(right))
+                and left == right)
+    if type(left) is not type(right):
+        return False
+    if type(left) is dict:
+        return (left.keys() == right.keys()
+                and all(_json_value_equal(left[key], right[key]) for key in left))
+    if type(left) is list:
+        return (len(left) == len(right)
+                and all(_json_value_equal(a, b) for a, b in zip(left, right)))
+    return type(left) in (str, bool, type(None)) and left == right
 
 
 def _index(rows, field, label):
@@ -176,7 +202,8 @@ class ResponseAudit:
                 self.index += 1
             else:
                 raise ValueError('observation not allowed for operation')
-            if _digest(result) != _digest(expected) or _digest(value['observation']) != _digest(public_observation(self.wb._observation(self.manifest, self.state))):
+            if (not _json_value_equal(result, expected)
+                    or not _json_value_equal(value['observation'], public_observation(self.wb._observation(self.manifest, self.state)))):
                 raise ValueError('response differs from positive current projection')
         elif result['code'] == 'native_text':
             if (op != 'read_native' or set(result) != {'ok', 'code', 'target', 'name', 'text'}
@@ -370,7 +397,7 @@ def audit_trial(data: dict, directory: Path, *, session: Path | None = None) -> 
                     checks['broker_payload_parseable'] = False
                     expected = {'result': {'ok':False, 'code':'broker_invalid_json'}}
                     path = 'broker_failure'
-            if _digest(value) != _digest(expected):
+            if not _json_value_equal(value, expected):
                 raise ValueError('broker/model response mismatch: ' + key)
             responses.check(c['input']['request'], value)
             if 'observation' in value and c['input']['request']['op'] != 'observe':
