@@ -1,0 +1,158 @@
+name: Offline benchmark image payloads
+on:
+  push:
+    branches: [build/offline-benchmarks-20261023]
+    paths: [.github/workflows/offline-benchmark-images.yml]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [simulcost, engibench, tbscience]
+    steps:
+      - name: Build public CPU payload and exercise without network
+        env:
+          PROJECT: ${{ matrix.project }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u - <<'PY'
+          import os,sys,pathlib,subprocess,tarfile,json,hashlib,shutil,time
+          P=os.environ['PROJECT']; ROOT=pathlib.Path.cwd(); B=ROOT/'payload';B.mkdir()
+          (B/'evidence').mkdir(); (B/'sources').mkdir(); C=ROOT/'context';C.mkdir()
+          source_records=[]; image_records=[]; tests=[]
+          def cmd(args,**kw):
+            print('+', ' '.join(map(str,args)),flush=True)
+            return subprocess.run(list(map(str,args)),check=True,**kw)
+          def output(args):return subprocess.check_output(list(map(str,args)),text=True).strip()
+          def export(repo,sha,dest,paths=()):
+            bare=ROOT/(dest.name+'.git');cmd(['git','init','--bare',bare]);
+            cmd(['git','-C',bare,'fetch','--depth=1','--filter=blob:none','--no-tags','https://github.com/'+repo+'.git',sha])
+            assert output(['git','-C',bare,'rev-parse','FETCH_HEAD'])==sha
+            archive=B/'sources'/(dest.name+'.tar')
+            cmd(['git','-C',bare,'archive','--format=tar','--output='+str(archive),sha,*paths])
+            dest.mkdir(parents=True)
+            with tarfile.open(archive) as t:t.extractall(dest,filter='data')
+            source_records.append({'repo':repo,'commit':sha,'file':archive.name,'sha256':hashlib.sha256(archive.read_bytes()).hexdigest()})
+          def base(tag):
+            cmd(['docker','pull',tag]);return json.loads(output(['docker','image','inspect',tag]))[0]['RepoDigests'][0]
+          def build(tag,context):
+            cmd(['docker','build','--network=default','-t',tag,context])
+            info=json.loads(output(['docker','image','inspect',tag]))[0]
+            image_records.append({'tag':tag,'id':info['Id'],'architecture':info['Architecture'],'os':info['Os'],'size':info['Size']})
+            with (B/'evidence'/(tag.split(':')[0].split('/')[-1]+'-pip-freeze.txt')).open('w') as f:
+              cmd(['docker','run','--rm','--network=none',tag,'python','-m','pip','freeze'],stdout=f)
+          def run_test(name,args,timeout=240):
+            start=time.time();log=B/'evidence'/(name+'.log')
+            with log.open('w') as f:
+              try:
+                r=subprocess.run(list(map(str,args)),stdout=f,stderr=subprocess.STDOUT,timeout=timeout)
+                status='PASS' if r.returncode==0 else 'FAIL';rc=r.returncode
+              except subprocess.TimeoutExpired:status='TIMEOUT';rc=124
+            tests.append({'name':name,'status':status,'returncode':rc,'seconds':time.time()-start,'network':'none','model_calls':0})
+            print(name,status,flush=True)
+            return status=='PASS'
+          fonts="find /usr/local/lib /usr/share/fonts -type f \\( -iname '*.ttf' -o -iname '*.otf' -o -iname '*.woff' -o -iname '*.woff2' \\) -delete 2>/dev/null || true"
+          env='ENV MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 WANDB_MODE=disabled LANGCHAIN_TRACING_V2=false PYTHONDONTWRITEBYTECODE=1\n'
+          if P=='simulcost':
+            export('Rose-STL-Lab/SimulCost-Bench','72c7c4a8405b767b1901eda988aa4a02b68f917c',C/'SimulCost-Bench')
+            export('Eydcao/simulcost-tools','9fd8ecf788164010c5c3b8e25c463134bb6f9f71',C/'tools')
+            sub=C/'SimulCost-Bench/costsci_tools';sub.mkdir(exist_ok=True)
+            shutil.copytree(C/'tools',sub,dirs_exist_ok=True)
+            deps='numpy==1.26.4 scipy==1.15.2 h5py==3.13.0 pandas==2.2.3 matplotlib==3.10.1 hydra-core==1.3.2 python-dotenv==1.1.1 tqdm==4.67.1 pyarrow==21.0.0 seaborn==0.13.2 openpyxl==3.1.5 xlsxwriter==3.2.5 "langchain>=0.3.19,<0.4" "langchain-openai>=0.3.7,<0.4" "langchain-google-genai>=2.0.11,<3" "langchain-aws>=0.2.28,<0.3" "urllib3<2"'
+            (C/'sitecustomize.py').write_text("import os\nif os.environ.get('COMAC_NUMERIC_ONLY')=='1':\n import matplotlib.pyplot as plt\n plt.savefig=lambda *a,**k: None\n")
+            smoke='''import json,pathlib,subprocess,sys,os
+          import h5py,numpy as np
+          out=pathlib.Path('/work');out.mkdir(exist_ok=True)
+          results=[]
+          for family in ['heat_1d','burgers_1d','diff_react_1d']:
+              args=[sys.executable,'costsci_tools/runners/'+family+'.py','--config-name=p1','n_space=64','cfl=0.25','dump_dir=/work/'+family,'+max_wall_time=90']
+              subprocess.run(args,check=True,timeout=120)
+              dirs=list(out.glob(family+'*'));files=[p for d in dirs for p in d.glob('*.h5')]
+              assert len(files)>1,(family,files)
+              for f in files:
+                  with h5py.File(f) as h:
+                      for k in h: assert np.isfinite(h[k][...]).all(),(f,k)
+              metas=[json.loads(p.read_text()) for d in dirs for p in d.glob('meta.json')]
+              assert metas and all(m['cost']>0 for m in metas)
+              results.append({'family':family,'frames':len(files),'meta':metas,'role':'installation smoke, not model score'})
+          (out/'smoke.json').write_text(json.dumps(results,indent=2))
+          print(json.dumps(results))
+          '''
+            (C/'smoke.py').write_text(smoke)
+            df='FROM '+base('python:3.11-slim-bookworm')+'\n'+env+'ENV COMAC_NUMERIC_ONLY=1 PYTHONPATH=/opt/offline:/app\n'
+            df+='RUN pip install --no-cache-dir '+deps+' && ('+fonts+')\nCOPY SimulCost-Bench /app\nCOPY sitecustomize.py smoke.py /opt/offline/\nWORKDIR /app\n'
+            df+='RUN python qs_gen/1D_heat_transfer.py && python qs_gen/1D_burgers.py && python qs_gen/1D_diff_react.py && python dataset_gen/oneD_heat_transfer.py && python dataset_gen/oneD_burgers.py && python dataset_gen/oneD_diff_react.py\nCMD ["python", "/opt/offline/smoke.py"]\n'
+            (C/'Dockerfile').write_text(df);tag='comac-offline/simulcost:72c7c4a-cpu1';build(tag,C)
+            d=B/'evidence/smoke-output';d.mkdir()
+            run_test('simulcost-3-solvers',['docker','run','--rm','--network=none','--memory=4g','--cpus=2','-v',str(d)+':/work',tag,'python','/opt/offline/smoke.py'],400)
+            run_test('simulcost-inference-import',['docker','run','--rm','--network=none',tag,'python','-c','import inference; import h5py; print("IMPORT_OK")'])
+            cid=output(['docker','create',tag]);cmd(['docker','cp',cid+':/app/data',B/'generated-data']);cmd(['docker','rm',cid])
+          elif P=='engibench':
+            export('IDEALLab/EngiBench','0173289472fb90d77a514b208d4e1e55a6a96bd1',C/'EngiBench')
+            smoke='''import json,pathlib,numpy as np
+          from engibench.problems.beams2d.v1 import Beams2D
+          out=pathlib.Path('/work');out.mkdir(exist_ok=True)
+          config={'nelx':32,'nely':16,'max_iter':12,'volfrac':0.35,'rmin':2.0}
+          p=Beams2D(seed=0,config=config); initial=np.full(p.design_space.shape,0.35)
+          baseline=p.simulate(initial);p.reset(seed=0)
+          design,history=p.optimize(starting_point=initial)
+          assert history and np.isfinite(design).all()
+          p.reset(seed=0);final=p.simulate(design)
+          assert np.isfinite(final).all();assert np.max(final)<np.max(baseline)
+          np.save(out/'design.npy',design)
+          r={'status':'PASS','family':'Beams2D-v1','config':config,'baseline':np.asarray(baseline).tolist(),'optimized':np.asarray(final).tolist(),'history_steps':len(history),'volume_fraction':float(design.mean()),'constraints':str(p.check_constraints(design,{})),'model_calls':0,'dataset_downloads':0,'scope':'optimizer installation smoke, not Agent score'}
+          (out/'smoke.json').write_text(json.dumps(r,indent=2));print(json.dumps(r))
+          '''
+            (C/'smoke.py').write_text(smoke)
+            df='FROM '+base('python:3.11-slim-bookworm')+'\n'+env+'WORKDIR /opt/EngiBench\nCOPY EngiBench /opt/EngiBench\n'
+            df+='RUN pip install --no-cache-dir "numpy==1.26.4" "scipy==1.15.2" "matplotlib==3.10.1" "pandas==2.2.3" "pyarrow==21.0.0" "datasets[vision]==3.6.0" "cvxopt==1.3.2" "gymnasium==1.2.2" "seaborn==0.13.2" ".[beams2d]" && ('+fonts+')\nCOPY smoke.py /opt/offline/smoke.py\nCMD ["python","/opt/offline/smoke.py"]\n'
+            (C/'Dockerfile').write_text(df);tag='comac-offline/engibench:0173289-beams2d';build(tag,C)
+            d=B/'evidence/smoke-output';d.mkdir()
+            run_test('engibench-beams2d-optimization',['docker','run','--rm','--network=none','--memory=4g','--cpus=2','-v',str(d)+':/work',tag,'python','/opt/offline/smoke.py'],240)
+          else:
+            taskroot='tasks/engineering-sciences/mechanical-engineering/'
+            names=['baseline-free-localization','guided-wave-localization','inelastic-constitutive-discovery']
+            export('harbor-framework/terminal-bench-science','f81afac4f11048e77a15dfc8fb1dbfb897fea0ce',C/'tbscience', ['README.md','LICENSE','CITATION.cff']+[taskroot+n for n in names])
+            for n in names:
+              task=C/'tbscience'/taskroot/n
+              for kind,folder in [('agent','environment'),('verifier','tests')]:
+                context=task/folder; p=context/'Dockerfile';text=p.read_text();old=text.splitlines()[1] if False else next(x for x in text.splitlines() if x.startswith('FROM '))
+                tagbase=old.split()[1];text=text.replace(old,'FROM '+base(tagbase),1)
+                # python3 exists in the Ubuntu-based upstream images but python may not.
+                if tagbase.startswith('ubuntu:'):text+='\nRUN ln -sf /usr/bin/python3 /usr/local/bin/python\n'
+                text+='\nENV OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1\n'
+                p.write_text(text);tag='comac-offline/tbs-'+n+':v0.1-'+kind;build(tag,context)
+              agent='comac-offline/tbs-'+n+':v0.1-agent';verifier='comac-offline/tbs-'+n+':v0.1-verifier'
+              work=B/'evidence'/n;work.mkdir();app=work/'app';logs=work/'verifier';logs.mkdir()
+              cid=output(['docker','create',agent]);cmd(['docker','cp',cid+':/app',app]);cmd(['docker','rm',cid]);cmd(['chmod','-R','a+rX',app])
+              run_test(n+'-oracle',['docker','run','--rm','--network=none','--memory=6g','--cpus=2','-v',str(app)+':/app','-v',str(task/'solution')+':/solution:ro',agent,'bash','/solution/solve.sh'],600)
+              run_test(n+'-verify',['docker','run','--rm','--network=none','--memory=6g','--cpus=2','-v',str(app)+':/app:ro','-v',str(logs)+':/logs/verifier',verifier,'bash','/tests/test.sh'],600)
+              reward=logs/'reward.txt';value=reward.read_text().strip() if reward.exists() else None
+              tests.append({'name':n+'-reward','status':'PASS' if value in ('1','1.0') else 'FAIL','reward':value,'model_calls':0,'network':'none'})
+          (B/'evidence/build-config.json').write_text(json.dumps({'project':P,'sources':source_records,'images':image_records,'tests':tests,'runner':'ubuntu-24.04/x86_64','model_calls':0,'scope':'CPU selected tasks only; not full upstream suite'},indent=2))
+          (B/'images.tsv').write_text(''.join(r['tag']+'\t'+r['id']+'\n' for r in image_records))
+          shutil.copytree(C,B/'build-context',dirs_exist_ok=True)
+          # Never package font files, credentials, or repository metadata.
+          for p in list(B.rglob('*')):
+            if p.is_file() and p.suffix.lower() in ('.ttf','.otf','.woff','.woff2'):p.unlink()
+          with (B/'images.tar.gz').open('wb') as f:
+            save=subprocess.Popen(['docker','save',*[r['tag'] for r in image_records]],stdout=subprocess.PIPE)
+            gz=subprocess.run(['gzip','-1'],stdin=save.stdout,stdout=f);save.stdout.close()
+            assert save.wait()==0 and gz.returncode==0
+          (B/'payload-status.json').write_text(json.dumps({'project':P,'packaged':True,'tests_pass':all(t['status']=='PASS' for t in tests),'model_calls':0},indent=2))
+          print((B/'payload-status.json').read_text())
+          PY
+      - name: Upload self-contained image payload
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: offline-${{ matrix.project }}-payload
+          path: payload/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
