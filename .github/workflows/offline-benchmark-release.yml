@@ -1,0 +1,56 @@
+name: Offline benchmark release packages
+on:
+  push:
+    branches: [build/offline-benchmarks-20261023]
+    paths: [.github/workflows/offline-benchmark-release.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [simulcost, engibench, tbscience]
+    steps:
+      - name: Fetch pinned packaging script
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request,pathlib,hashlib
+          url='https://raw.githubusercontent.com/kogamishinyajerry-ops/comacbench/b92928721297a33e37215f6bc139f0707025cb61/tools/package_offline_release.py'
+          with urllib.request.urlopen(url,timeout=60) as r:raw=r.read()
+          pathlib.Path('package_offline_release.py').write_bytes(raw)
+          print('Packaging script SHA256:',hashlib.sha256(raw).hexdigest())
+          compile(raw,'package_offline_release.py','exec')
+          PY
+      - name: Load, validate and package
+        env:
+          PROJECT: ${{ matrix.project }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -u package_offline_release.py
+      - name: Upload final independent installer
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: COMAC-${{ matrix.project }}-offline-installer
+          path: release/
+          compression-level: 0
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Upload concise inspection evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: inspect-${{ matrix.project }}-release
+          path: |
+            release/DELIVERY.json
+            COMAC-${{ matrix.project }}-offline-linux-amd64/release-status.json
+            COMAC-${{ matrix.project }}-offline-linux-amd64/payload-status.json
+            COMAC-${{ matrix.project }}-offline-linux-amd64/evidence/*.json
+            COMAC-${{ matrix.project }}-offline-linux-amd64/evidence/*.log
+          compression-level: 6
+          retention-days: 30
+          if-no-files-found: warn
