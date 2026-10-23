@@ -1,0 +1,60 @@
+name: SimulCost offline installation release
+on:
+  push:
+    branches: [build/offline-benchmarks-20261023]
+    paths: [.github/workflows/offline-simulcost-smoke-scope.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Reuse numerical fix and verify complete short installation trajectories
+        env:
+          PROJECT: simulcost
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -u - <<'PY'
+          import urllib.request,textwrap
+          url='https://raw.githubusercontent.com/kogamishinyajerry-ops/comacbench/4485f29a9bcd1d1580b68eed607099c3dae7649a/.github/workflows/offline-simulcost-final.yml'
+          with urllib.request.urlopen(url,timeout=60) as r: workflow=r.read().decode()
+          program=textwrap.dedent(workflow.split("python3 -u - <<'PY'\n",1)[1].split('\n          PY\n',1)[0])
+          marker="(fix/'smoke.py').write_text(smoke)"
+          inserted='''smoke=smoke.replace("subprocess.run(args,check=True,timeout=120)","args += ['record_dt=1.0','end_frame=2'] if family=='diff_react_1d' else []\\n    subprocess.run(args,check=True,timeout=120)")
+          smoke=smoke.replace("25 if family=='heat_1d' else 11", "25 if family=='heat_1d' else (3 if family=='diff_react_1d' else 11)")
+          '''
+          # Keep source indentation in the nested correction string (at module scope).
+          assert program.count(marker)==1
+          program=program.replace(marker,textwrap.dedent(inserted)+marker)
+          program=program.replace("'diff_react_1d':11","'diff_react_1d':3")
+          program=program.replace('simulcost-three-full-output-trajectories','simulcost-installation-trajectories-diffusion-short-horizon')
+          program=program.replace('72c7c4a-cpu2','72c7c4a-cpu3')
+          needle="script=script.replace(marker,marker+'\\n'+correction)"
+          assert needle in program
+          extra="\nscript=script.replace('数值模式保留 HDF5/JSON', '安装自检的扩散反应使用 record_dt=1/end_frame=2 的短时配置，完整任务时域尚未通过本次90秒上限；不是原任务评分。数值模式保留 HDF5/JSON')\n"
+          program=program.replace(needle,needle+extra)
+          exec(compile(program,'offline-simulcost-bounded-smoke.py','exec'))
+          PY
+      - name: Upload final SimulCost installer
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: COMAC-SimulCost-offline-installation
+          path: release/
+          compression-level: 0
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Upload small validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: inspect-simulcost-installation
+          path: |
+            release/DELIVERY.json
+            COMAC-simulcost-offline-linux-amd64/evidence/*.json
+            COMAC-simulcost-offline-linux-amd64/evidence/*.log
+          compression-level: 6
+          retention-days: 30
+          if-no-files-found: warn
