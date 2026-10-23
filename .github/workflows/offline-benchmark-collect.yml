@@ -1,0 +1,60 @@
+name: Offline benchmark source collection
+on:
+  push:
+    branches: [build/offline-benchmarks-20261023]
+    paths: [.github/workflows/offline-benchmark-collect.yml]
+permissions:
+  contents: read
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Export pinned upstream source, no model calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p collected
+          python3 - <<'PY'
+          import subprocess, pathlib, tarfile, json, urllib.request, hashlib
+          root=pathlib.Path.cwd(); out=root/'collected'
+          specs=[
+            ('simulcost','Rose-STL-Lab/SimulCost-Bench','72c7c4a8405b767b1901eda988aa4a02b68f917c',None),
+            ('engibench','IDEALLab/EngiBench','0173289472fb90d77a514b208d4e1e55a6a96bd1',None),
+            ('tbscience','harbor-framework/terminal-bench-science','f81afac4f11048e77a15dfc8fb1dbfb897fea0ce',['README.md','LICENSE','CITATION.cff','tasks/engineering-sciences/mechanical-engineering/guided-wave-localization','tasks/engineering-sciences/mechanical-engineering/baseline-free-localization','tasks/engineering-sciences/mechanical-engineering/inelastic-constitutive-discovery']),
+          ]
+          records=[]
+          def export(name,repo,sha,paths=None):
+            bare=root/(name+'.git')
+            def git(*a): return subprocess.check_output(['git','-C',str(bare),*a],text=True).strip()
+            subprocess.run(['git','init','--bare',str(bare)],check=True)
+            git('remote','add','origin','https://github.com/'+repo+'.git')
+            git('fetch','--depth=1','--filter=blob:none','--no-tags','origin',sha)
+            assert git('rev-parse','FETCH_HEAD')==sha
+            dest=out/(name+'.tar')
+            git('archive','--format=tar','--output='+str(dest),sha,*(paths or []))
+            assert dest.stat().st_size<300*1024*1024
+            records.append({'name':name,'repository':repo,'commit':sha,'archive':dest.name,'sha256':hashlib.sha256(dest.read_bytes()).hexdigest()})
+            return bare,dest
+          for name,repo,sha,paths in specs:
+            bare,archive=export(name,repo,sha,paths)
+            if name=='simulcost':
+              with tarfile.open(archive) as t:
+                (out/'simulcost-gitmodules.txt').write_bytes(t.extractfile('.gitmodules').read())
+              line=subprocess.check_output(['git','-C',str(bare),'ls-tree',sha,'costsci_tools'],text=True)
+              subsha=line.split()[2]
+              export('simulcost-tools','Eydcao/simulcost-tools',subsha)
+          (out/'source-lock.json').write_text(json.dumps(records,indent=2)+'\n')
+          for repo,name in [('astral-sh/python-build-standalone','python-release'),('harbor-framework/harbor','harbor-repo')]:
+            url='https://api.github.com/repos/'+repo+('/releases/latest' if name=='python-release' else '')
+            req=urllib.request.Request(url,headers={'User-Agent':'offline-benchmark-builder'})
+            with urllib.request.urlopen(req,timeout=60) as r: (out/(name+'.json')).write_bytes(r.read())
+          PY
+      - name: Upload source material
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: offline-benchmark-source-material
+          path: collected/
+          compression-level: 6
+          retention-days: 7
+          if-no-files-found: error
